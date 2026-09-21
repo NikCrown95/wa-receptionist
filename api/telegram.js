@@ -1,11 +1,33 @@
 // api/telegram.js  (Lia v5: canale Telegram)
-// Variabile su Vercel: TELEGRAM_WEBHOOK_SECRET (una parola segreta scelta da te).
+// Variabili su Vercel: TELEGRAM_WEBHOOK_SECRET (parola segreta) e TELEGRAM_BOT_TOKEN (il token di BotFather).
 // Link per i clienti: https://t.me/NOME_DEL_BOT?start=SLUG_DELL_ATTIVITA
 
 const { handleMessage, getBusiness, sb } = require("../lib/lia.js");
 
 module.exports = async (req, res) => {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
+
+  // Collegamento automatico con Telegram: si apre UNA volta questo link
+  //   https://TUO-SITO.vercel.app/api/telegram?setup=LA_PAROLA_SEGRETA
+  if (req.method === "GET") {
+    const q = req.query || {};
+    if (!secret || q.setup !== secret) return res.status(401).send("no");
+    const token = process.env.TELEGRAM_BOT_TOKEN || "";
+    if (!token) return res.status(500).send("Manca TELEGRAM_BOT_TOKEN su Vercel.");
+    const host = req.headers["x-forwarded-host"] || req.headers.host;
+    try {
+      const r = await fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: "https://" + host + "/api/telegram", secret_token: secret, allowed_updates: ["message"] }),
+      });
+      const d = await r.json();
+      return res.status(200).send(d.ok ? "Fatto: Telegram è collegato." : "Errore di Telegram: " + (d.description || "sconosciuto"));
+    } catch (e) {
+      return res.status(500).send("Errore di collegamento con Telegram.");
+    }
+  }
+
   if (!secret || req.headers["x-telegram-bot-api-secret-token"] !== secret) {
     return res.status(401).send("no");
   }
