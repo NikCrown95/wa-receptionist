@@ -1,8 +1,9 @@
-// api/telegram.js  (Lia v5: canale Telegram)
+// api/telegram.js  (Lia v6: canale Telegram per i clienti e per il titolare)
 // Variabili su Vercel: TELEGRAM_WEBHOOK_SECRET (parola segreta) e TELEGRAM_BOT_TOKEN (il token di BotFather).
 // Link per i clienti: https://t.me/NOME_DEL_BOT?start=SLUG_DELL_ATTIVITA
 
-const { handleMessage, getBusiness, sb } = require("../lib/lia.js");
+const { handleMessage, getBusiness } = require("../lib/lia.js");
+const { sb, agendaText } = require("../lib/owner.js");
 
 module.exports = async (req, res) => {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
@@ -42,6 +43,29 @@ module.exports = async (req, res) => {
   try {
     if (typeof msg.text !== "string") return reply("Per ora capisco solo i messaggi scritti. Scrivimi pure cosa ti serve.");
     const text = msg.text.trim();
+
+    // Il titolare collega la sua chat: "/start owner_CODICE"
+    const own = text.match(/^\/start(?:@\w+)?\s+owner_([a-f0-9]{8,32})$/i);
+    if (own) {
+      const b = await sb("GET", "businesses?owner_code=eq." + own[1].toLowerCase() + "&active=eq.true&select=id,name");
+      if (!b.ok || !Array.isArray(b.data) || !b.data.length) return reply("Questo codice non è valido.");
+      await sb("PATCH", "businesses?id=eq." + b.data[0].id, { owner_telegram_chat_id: chatId });
+      return reply("Fatto! Da ora ricevi qui l'agenda di " + b.data[0].name + " ogni mattina.\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
+    }
+
+    // Questa chat è del titolare di un'attività?
+    const ow = await sb("GET", "businesses?owner_telegram_chat_id=eq." + chatId + "&active=eq.true&select=id,name,timezone");
+    if (ow.ok && Array.isArray(ow.data) && ow.data.length) {
+      const biz = ow.data[0];
+      const cmd = text.toLowerCase().split(/[\s@]/)[0];
+      if (cmd === "/oggi") return reply(await agendaText(biz, 0));
+      if (cmd === "/domani") return reply(await agendaText(biz, 1));
+      if (cmd === "/scollega") {
+        await sb("PATCH", "businesses?id=eq." + biz.id, { owner_telegram_chat_id: null });
+        return reply("Ok, non riceverai più qui l'agenda. Per ricollegarti usa di nuovo il tuo codice.");
+      }
+      return reply("Sono la tua segretaria virtuale. Ogni mattina ti mando l'agenda di " + biz.name + ".\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
+    }
 
     // Il cliente arriva dal link/QR di un'attività: "/start slug"
     const m = text.match(/^\/start(?:@\w+)?(?:\s+([a-zA-Z0-9-]{1,60}))?$/);
