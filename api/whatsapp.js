@@ -1,154 +1,494 @@
-// api/whatsapp.js
-// Riceve un messaggio WhatsApp da Twilio, lo passa a Claude e risponde.
-// Passo A: nessun calendario collegato, orari e servizi sono finti (qui sotto).
-
-// ====== CONFIGURAZIONE DEL NEGOZIO DI PROVA (modificala quando vuoi) ======
-const SHOP = {
-  nome: "Barbiere Mario",
-  orari: "Lunedi-Sabato 9:00-13:00 e 15:00-19:30. Domenica chiuso.",
-  servizi: [
-    { nome: "Capelli", durata: 30, prezzo: 18 },
-    { nome: "Barba", durata: 20, prezzo: 10 },
-    { nome: "Capelli + Barba", durata: 45, prezzo: 26 },
-  ],
-};
+// api/whatsapp.js  (Lia v2: agenda vera su Supabase)
+// Sostituisce completamente la versione precedente.
+//
+// Variabili su Vercel: ANTHROPIC_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
+// SUPABASE_URL, SUPABASE_SECRET_KEY. Opzionali: BUSINESS_SLUG, CLAUDE_MODEL.
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001";
+const DEFAULT_SLUG = process.env.BUSINESS_SLUG || "barbiere-mario";
+const SLOT_STEP_MIN = 30; // gli orari proposti sono ogni 30 minuti
+const MIN_LEAD_MIN = 15; // non si prenota a meno di 15 minuti da adesso
+const MAX_DAYS_AHEAD = 60;
 
-// ====== ISTRUZIONI PER L'AI ======
-function systemPrompt() {
-  const adesso = new Intl.DateTimeFormat("it-IT", {
-    dateStyle: "full",
-    timeStyle: "short",
-    timeZone: "Europe/Rome",
-  }).format(new Date());
-
-  const servizi = SHOP.servizi
-    .map((s) => `- ${s.nome}: ${s.durata} min, ${s.prezzo} euro`)
-    .join("\n");
-
-  return `Sei la segretaria virtuale di "${SHOP.nome}" e rispondi ai clienti su WhatsApp.
-
-Data e ora attuali: ${adesso} (Italia).
-
-Orari di apertura: ${SHOP.orari}
-
-Servizi:
-${servizi}
-
-Come lavori:
-- Scrivi in italiano, messaggi brevi e cordiali, come in una chat WhatsApp (2-3 righe al massimo, niente elenchi lunghi).
-- Il tuo compito e' prendere appuntamenti. Ti servono: servizio, giorno, ora e nome del cliente. Chiedi una cosa alla volta.
-- Se il cliente chiede un orario fuori dall'apertura, proponi l'orario libero piu' vicino dentro gli orari.
-- Quando hai tutti i dati, fai un riepilogo breve e chiedi conferma. Dopo la conferma scrivi che l'appuntamento e' registrato.
-- Se chiedono cose che non sai (prezzi non in lista, offerte, ecc.), di' che passi la richiesta al titolare.
-- Non inventare informazioni sul negozio.
-
-MODALITA' TEST: il calendario non e' ancora collegato, quindi non puoi controllare la disponibilita' reale. Considera libero ogni orario dentro l'apertura. Alla conferma finale aggiungi "(prenotazione di prova)".`;
+// ====================== SUPABASE (via REST) ======================
+function sbHeaders(extra) {
+  const key = process.env.SUPABASE_SECRET_KEY || "";
+  const h = { apikey: key, "Content-Type": "application/json" };
+  if (key.startsWith("eyJ")) h.Authorization = "Bearer " + key; // solo per chiavi vecchie
+  return Object.assign(h, extra || {});
 }
 
-// ====== STORICO DELLA CONVERSAZIONE (letto da Twilio) ======
+async function sb(method, path, body, prefer) {
+  const res = await fetch(process.env.SUPABASE_URL + "/rest/v1/" + path, {
+    method: method,
+    headers: sbHeaders(prefer ? { Prefer: prefer } : {}),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (e) {
+    data = text;
+  }
+  return { ok: res.ok, status: res.status, data: data };
+}
+
+async function getBusiness(slug) {
+  const r = await sb(
+    "GET",
+    "businesses?slug=eq." + encodeURIComponent(slug) +
+      "&active=eq.true&select=*,services(*),resources(*,opening_hours(*))"
+  );
+  if (!r.ok || !Array.isArray(r.data) || !r.data.length) return null;
+  const b = r.data[0];
+  b.services = (b.services || []).filter((s) => s.active);
+  b.resources = (b.resources || []).filter((x) => x.active);
+  return b;
+}
+
+// ====================== DATE E ORARI ======================
+function tzOffsetMs(utcMs, tz) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(utcMs));
+  const get = (t) => Number(parts.find((p) => p.type === t).value);
+  const asUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  return asUtc - utcMs;
+}
+
+// "2026-09-24" + "17:30" nel fuso dell'attività -> Date in UTC
+function zonedTimeToUtc(dateStr, timeStr, tz) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const guess = Date.UTC(y, m - 1, d, hh, mm);
+  const off1 = tzOffsetMs(guess, tz);
+  let utc = guess - off1;
+  const off2 = tzOffsetMs(utc, tz);
+  if (off2 !== off1) utc = guess - off2;
+  return new Date(utc);
+}
+
+function todayStr(tz) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+}
+
+function addDays(dateStr, n) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+}
+
+function weekdayOf(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return dow === 0 ? 7 : dow; // 1 = lunedì ... 7 = domenica
+}
+
+function italianDay(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Intl.DateTimeFormat("it-IT", { weekday: "long", timeZone: "UTC" })
+    .format(new Date(Date.UTC(y, m - 1, d)));
+}
+
+function hmToMin(hm) {
+  const [h, m] = hm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function minToHm(min) {
+  const h = String(Math.floor(min / 60)).padStart(2, "0");
+  const m = String(min % 60).padStart(2, "0");
+  return h + ":" + m;
+}
+
+function formatLocal(iso, tz) {
+  return new Intl.DateTimeFormat("it-IT", {
+    weekday: "long", day: "numeric", month: "long",
+    hour: "2-digit", minute: "2-digit", timeZone: tz,
+  }).format(new Date(iso));
+}
+
+// ====================== ORARI LIBERI ======================
+async function freeSlots(biz, service, dateStr) {
+  const tz = biz.timezone;
+  const dayStart = zonedTimeToUtc(dateStr, "00:00", tz);
+  const dayEnd = zonedTimeToUtc(addDays(dateStr, 1), "00:00", tz);
+  const wd = weekdayOf(dateStr);
+  const ids = biz.resources.map((r) => r.id);
+  if (!ids.length) return [];
+
+  const q =
+    "appointments?resource_id=in.(" + ids.join(",") + ")" +
+    "&status=eq.confirmed" +
+    "&starts_at=lt." + encodeURIComponent(dayEnd.toISOString()) +
+    "&blocked_until=gt." + encodeURIComponent(dayStart.toISOString()) +
+    "&select=resource_id,starts_at,blocked_until";
+  const r = await sb("GET", q);
+  if (!r.ok || !Array.isArray(r.data)) throw new Error("Errore lettura appuntamenti");
+
+  const nowMs = Date.now() + MIN_LEAD_MIN * 60000;
+  const out = [];
+
+  for (const res of biz.resources) {
+    const intervals = (res.opening_hours || [])
+      .filter((h) => h.weekday === wd)
+      .sort((a, b) => (a.opens < b.opens ? -1 : 1));
+    const busy = r.data
+      .filter((b) => b.resource_id === res.id)
+      .map((b) => [Date.parse(b.starts_at), Date.parse(b.blocked_until)]);
+
+    for (const h of intervals) {
+      let t = hmToMin(h.opens.slice(0, 5));
+      const tEnd = hmToMin(h.closes.slice(0, 5));
+      while (t + service.duration_min <= tEnd) {
+        const label = minToHm(t);
+        const startMs = zonedTimeToUtc(dateStr, label, tz).getTime();
+        const endMs = startMs + service.duration_min * 60000;
+        const blockedMs = endMs + (service.buffer_min || 0) * 60000;
+        const free = startMs >= nowMs && !busy.some((b) => startMs < b[1] && blockedMs > b[0]);
+        if (free) out.push({ time: label, resource_id: res.id });
+        t += SLOT_STEP_MIN;
+      }
+    }
+  }
+  return out;
+}
+
+function findService(biz, name) {
+  const n = String(name || "").toLowerCase().trim();
+  if (!n) return null;
+  return (
+    biz.services.find((s) => s.name.toLowerCase() === n) ||
+    biz.services.find((s) => s.name.toLowerCase().includes(n) || n.includes(s.name.toLowerCase())) ||
+    null
+  );
+}
+
+function checkDate(biz, dateStr) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ""))) return "Data non valida: usa il formato AAAA-MM-GG.";
+  const today = todayStr(biz.timezone);
+  if (dateStr < today) return "Quella data è già passata.";
+  if (dateStr > addDays(today, MAX_DAYS_AHEAD)) return "Si prenota al massimo con " + MAX_DAYS_AHEAD + " giorni di anticipo.";
+  return null;
+}
+
+// ====================== STRUMENTI PER CLAUDE ======================
+const TOOLS = [
+  {
+    name: "check_availability",
+    description: "Controlla gli orari liberi per un servizio in un giorno preciso. Usalo SEMPRE prima di proporre orari.",
+    input_schema: {
+      type: "object",
+      properties: {
+        service_name: { type: "string", description: "Nome del servizio richiesto" },
+        date: { type: "string", description: "Giorno nel formato AAAA-MM-GG" },
+        part_of_day: { type: "string", enum: ["mattina", "pomeriggio", "tutto"], description: "Fascia della giornata richiesta" },
+      },
+      required: ["service_name", "date"],
+    },
+  },
+  {
+    name: "book_appointment",
+    description: "Registra un appuntamento sull'agenda. Usalo solo quando il cliente ha scelto un orario e ti ha detto il suo nome.",
+    input_schema: {
+      type: "object",
+      properties: {
+        service_name: { type: "string" },
+        date: { type: "string", description: "AAAA-MM-GG" },
+        time: { type: "string", description: "Orario di inizio HH:MM, uno di quelli restituiti da check_availability" },
+        customer_name: { type: "string" },
+        address: { type: "string", description: "Indirizzo del cliente, solo per i servizi a domicilio" },
+        notes: { type: "string", description: "Note utili del cliente, se ce ne sono" },
+      },
+      required: ["service_name", "date", "time", "customer_name"],
+    },
+  },
+  {
+    name: "list_my_appointments",
+    description: "Elenca i prossimi appuntamenti confermati di questo cliente.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "cancel_appointment",
+    description: "Annulla un appuntamento di questo cliente, dopo che ha confermato di volerlo annullare.",
+    input_schema: {
+      type: "object",
+      properties: { appointment_id: { type: "string", description: "Id preso da list_my_appointments" } },
+      required: ["appointment_id"],
+    },
+  },
+];
+
+async function runTool(name, input, ctx) {
+  const biz = ctx.biz;
+  try {
+    if (name === "check_availability") {
+      const service = findService(biz, input.service_name);
+      if (!service) return { error: "Servizio non trovato. Servizi disponibili: " + biz.services.map((s) => s.name).join(", ") };
+      const bad = checkDate(biz, input.date);
+      if (bad) return { error: bad };
+      const slots = await freeSlots(biz, service, input.date);
+      let times = Array.from(new Set(slots.map((s) => s.time))).sort();
+      if (input.part_of_day === "mattina") times = times.filter((t) => t < "13:00");
+      if (input.part_of_day === "pomeriggio") times = times.filter((t) => t >= "13:00");
+      return {
+        date: input.date,
+        weekday: italianDay(input.date),
+        service: service.name,
+        duration_min: service.duration_min,
+        price_eur: service.price_eur,
+        available_times: times.slice(0, 12),
+        note: times.length ? undefined : "Nessun orario libero (chiuso o tutto occupato).",
+      };
+    }
+
+    if (name === "book_appointment") {
+      const service = findService(biz, input.service_name);
+      if (!service) return { error: "Servizio non trovato." };
+      const bad = checkDate(biz, input.date);
+      if (bad) return { error: bad };
+      if (!/^\d{2}:\d{2}$/.test(String(input.time || ""))) return { error: "Orario non valido: usa HH:MM." };
+      if (!String(input.customer_name || "").trim()) return { error: "Serve il nome del cliente." };
+      if (service.at_customer_place && !String(input.address || "").trim()) {
+        return { error: "Questo servizio è a domicilio: chiedi l'indirizzo al cliente." };
+      }
+
+      const slots = await freeSlots(biz, service, input.date);
+      const candidates = slots.filter((s) => s.time === input.time);
+      if (!candidates.length) return { error: "Quell'orario non è disponibile. Richiama check_availability e proponi altri orari." };
+
+      const start = zonedTimeToUtc(input.date, input.time, biz.timezone);
+      const end = new Date(start.getTime() + service.duration_min * 60000);
+      const blocked = new Date(end.getTime() + (service.buffer_min || 0) * 60000);
+
+      for (const c of candidates) {
+        const r = await sb("POST", "appointments", {
+          business_id: biz.id,
+          resource_id: c.resource_id,
+          service_id: service.id,
+          customer_name: String(input.customer_name).trim(),
+          customer_phone: ctx.phone,
+          customer_address: input.address || null,
+          notes: input.notes || null,
+          starts_at: start.toISOString(),
+          ends_at: end.toISOString(),
+          blocked_until: blocked.toISOString(),
+        }, "return=representation");
+        if (r.ok) {
+          return {
+            ok: true,
+            when: formatLocal(start.toISOString(), biz.timezone),
+            service: service.name,
+            customer_name: input.customer_name,
+          };
+        }
+        if (r.status !== 409) return { error: "Errore nel salvataggio dell'appuntamento." };
+      }
+      return { error: "Quell'orario è appena stato preso. Richiama check_availability e proponi altri orari." };
+    }
+
+    if (name === "list_my_appointments") {
+      const r = await sb(
+        "GET",
+        "appointments?business_id=eq." + biz.id +
+          "&customer_phone=eq." + encodeURIComponent(ctx.phone) +
+          "&status=eq.confirmed&starts_at=gt." + encodeURIComponent(new Date().toISOString()) +
+          "&order=starts_at.asc&select=id,starts_at,services(name)"
+      );
+      if (!r.ok) return { error: "Errore nella lettura degli appuntamenti." };
+      return {
+        appointments: r.data.map((a) => ({
+          id: a.id,
+          when: formatLocal(a.starts_at, biz.timezone),
+          service: a.services ? a.services.name : null,
+        })),
+      };
+    }
+
+    if (name === "cancel_appointment") {
+      const r = await sb(
+        "PATCH",
+        "appointments?id=eq." + encodeURIComponent(input.appointment_id) +
+          "&customer_phone=eq." + encodeURIComponent(ctx.phone) +
+          "&status=eq.confirmed",
+        { status: "cancelled" },
+        "return=representation"
+      );
+      if (!r.ok || !Array.isArray(r.data) || !r.data.length) return { error: "Appuntamento non trovato." };
+      return { ok: true };
+    }
+
+    return { error: "Strumento sconosciuto." };
+  } catch (e) {
+    console.error("Errore strumento", name, e);
+    return { error: "Problema tecnico temporaneo." };
+  }
+}
+
+// ====================== ISTRUZIONI PER L'AI ======================
+function hoursSummary(biz) {
+  const res = biz.resources[0];
+  if (!res) return "non disponibili";
+  const names = ["", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
+  const lines = [];
+  for (let wd = 1; wd <= 7; wd++) {
+    const iv = (res.opening_hours || [])
+      .filter((h) => h.weekday === wd)
+      .sort((a, b) => (a.opens < b.opens ? -1 : 1))
+      .map((h) => h.opens.slice(0, 5) + "-" + h.closes.slice(0, 5));
+    lines.push(names[wd] + ": " + (iv.length ? iv.join(" e ") : "chiuso"));
+  }
+  return lines.join("; ");
+}
+
+function systemPrompt(biz) {
+  const tz = biz.timezone;
+  const now = new Intl.DateTimeFormat("it-IT", { dateStyle: "full", timeStyle: "short", timeZone: tz }).format(new Date());
+  const today = todayStr(tz);
+  const days = [];
+  for (let i = 0; i < 15; i++) {
+    const d = addDays(today, i);
+    days.push(italianDay(d) + " " + d);
+  }
+  const services = biz.services
+    .map((s) => "- " + s.name + ": " + s.duration_min + " min, " + s.price_eur + " euro" +
+      (s.at_customer_place ? " (a domicilio: serve l'indirizzo)" : ""))
+    .join("\n");
+
+  return `Sei la segretaria virtuale di "${biz.name}"${biz.business_type ? " (" + biz.business_type + ")" : ""} e rispondi ai clienti su WhatsApp.
+
+Adesso: ${now} (Italia).
+Calendario dei prossimi giorni (usa SOLO questo per convertire "giovedì", "domani", ecc. in una data):
+${days.join("\n")}
+
+Servizi:
+${services}
+
+Orari di apertura: ${hoursSummary(biz)}
+${biz.assistant_notes ? "\nIstruzioni del titolare: " + biz.assistant_notes + "\n" : ""}
+Come lavori:
+- Scrivi in italiano, messaggi brevi e cordiali, da chat WhatsApp (2-3 righe, niente elenchi lunghi).
+- NON inventare mai la disponibilità: per proporre orari usa SEMPRE check_availability. Proponi 2 o 3 orari, non tutti.
+- Per prenotare servono servizio, giorno, ora e nome del cliente. Chiedi una cosa alla volta.
+- Prenota con book_appointment appena il cliente ha scelto un orario e ti ha detto il nome.
+- Di' che l'appuntamento è confermato SOLO dopo che book_appointment ha risposto ok. Se risponde con un errore, spiega e proponi altri orari.
+- Per annullare: usa list_my_appointments, chiedi conferma, poi cancel_appointment.
+- Se la richiesta esce da quello che sai fare (sconti, preventivi, urgenze, domande strane), di' che passi la richiesta a ${biz.name}.
+- Non inventare informazioni sull'attività.`;
+}
+
+// ====================== STORICO DELLA CONVERSAZIONE ======================
 async function getHistory(userNumber, shopNumber, currentSid) {
   try {
     const sid = process.env.TWILIO_ACCOUNT_SID;
     const token = process.env.TWILIO_AUTH_TOKEN;
-    const auth = "Basic " + Buffer.from(`${sid}:${token}`).toString("base64");
-    const base = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
-
+    const auth = "Basic " + Buffer.from(sid + ":" + token).toString("base64");
+    const base = "https://api.twilio.com/2010-04-01/Accounts/" + sid + "/Messages.json";
     const get = async (from, to) => {
-      const url = `${base}?From=${encodeURIComponent(from)}&To=${encodeURIComponent(to)}&PageSize=10`;
+      const url = base + "?From=" + encodeURIComponent(from) + "&To=" + encodeURIComponent(to) + "&PageSize=10";
       const r = await fetch(url, { headers: { Authorization: auth } });
       const j = await r.json();
       return j.messages || [];
     };
-
-    const [dalCliente, alCliente] = await Promise.all([
-      get(userNumber, shopNumber),
-      get(shopNumber, userNumber),
-    ]);
-
+    const [dalCliente, alCliente] = await Promise.all([get(userNumber, shopNumber), get(shopNumber, userNumber)]);
     return [...dalCliente, ...alCliente]
       .filter((m) => m.sid !== currentSid && m.body)
       .sort((a, b) => Date.parse(a.date_created) - Date.parse(b.date_created))
       .slice(-12)
-      .map((m) => ({
-        role: m.from === userNumber ? "user" : "assistant",
-        content: m.body,
-      }));
+      .map((m) => ({ role: m.from === userNumber ? "user" : "assistant", content: m.body }));
   } catch (e) {
     console.error("Errore storico:", e);
     return [];
   }
 }
 
-// Claude vuole messaggi che alternano user/assistant e iniziano da user
 function normalizza(messaggi) {
   const out = [];
   for (const m of messaggi) {
     const ultimo = out[out.length - 1];
-    if (ultimo && ultimo.role === m.role) {
-      ultimo.content += "\n" + m.content;
-    } else {
-      out.push({ role: m.role, content: m.content });
-    }
+    if (ultimo && ultimo.role === m.role) ultimo.content += "\n" + m.content;
+    else out.push({ role: m.role, content: m.content });
   }
   while (out.length && out[0].role !== "user") out.shift();
   return out;
 }
 
+// ====================== CLAUDE ======================
+async function callClaude(system, messages) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": process.env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({ model: MODEL, max_tokens: 500, system: system, tools: TOOLS, messages: messages }),
+  });
+  const data = await r.json();
+  if (!r.ok) {
+    console.error("Errore Anthropic:", JSON.stringify(data));
+    throw new Error("anthropic");
+  }
+  return data;
+}
+
+async function conversa(biz, phone, messages) {
+  const system = systemPrompt(biz);
+  const msgs = messages.slice();
+  for (let i = 0; i < 6; i++) {
+    const data = await callClaude(system, msgs);
+    if (data.stop_reason !== "tool_use") {
+      return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+    }
+    msgs.push({ role: "assistant", content: data.content });
+    const results = [];
+    for (const block of data.content) {
+      if (block.type !== "tool_use") continue;
+      const out = await runTool(block.name, block.input || {}, { biz: biz, phone: phone });
+      results.push({
+        type: "tool_result",
+        tool_use_id: block.id,
+        content: JSON.stringify(out),
+        is_error: !!out.error,
+      });
+    }
+    msgs.push({ role: "user", content: results });
+  }
+  return "";
+}
+
+// ====================== RISPOSTA A TWILIO ======================
 function escapeXml(s) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function rispondi(res, testo) {
   res.setHeader("Content-Type", "text/xml");
-  res
-    .status(200)
-    .send(
-      `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(testo)}</Message></Response>`
-    );
+  res.status(200).send(
+    '<?xml version="1.0" encoding="UTF-8"?><Response><Message>' + escapeXml(testo) + "</Message></Response>"
+  );
 }
 
-// ====== FUNZIONE PRINCIPALE ======
 module.exports = async (req, res) => {
   const ERRORE = "Scusa, ho avuto un problema. Riprova tra un attimo.";
   try {
-    const { Body, From, To, MessageSid } = req.body || {};
+    const body = req.body || {};
+    const Body = body.Body, From = body.From, To = body.To, MessageSid = body.MessageSid;
     if (!Body) return rispondi(res, "Non ho ricevuto nessun testo.");
 
-    const storico = await getHistory(From, To, MessageSid);
-    const messages = normalizza([...storico, { role: "user", content: Body }]);
-
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 400,
-        system: systemPrompt(),
-        messages,
-      }),
-    });
-
-    const data = await r.json();
-    if (!r.ok) {
-      console.error("Errore Anthropic:", JSON.stringify(data));
+    const biz = await getBusiness(DEFAULT_SLUG);
+    if (!biz) {
+      console.error("Attività non trovata:", DEFAULT_SLUG);
       return rispondi(res, ERRORE);
     }
 
-    const testo = (data.content || [])
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("\n")
-      .trim();
+    const phone = String(From || "").replace("whatsapp:", "");
+    const storico = await getHistory(From, To, MessageSid);
+    const messages = normalizza([...storico, { role: "user", content: Body }]);
 
+    const testo = await conversa(biz, phone, messages);
     return rispondi(res, testo || ERRORE);
   } catch (e) {
     console.error(e);
