@@ -1,8 +1,7 @@
-// api/whatsapp.js  (Lia v2: agenda vera su Supabase)
+// api/whatsapp.js  (Lia v3: agenda vera + memoria delle chat su Supabase)
 // Sostituisce completamente la versione precedente.
 //
-// Variabili su Vercel: ANTHROPIC_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
-// SUPABASE_URL, SUPABASE_SECRET_KEY. Opzionali: BUSINESS_SLUG, CLAUDE_MODEL.
+// Variabili su Vercel: ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SECRET_KEY. Opzionali: BUSINESS_SLUG, CLAUDE_MODEL.
 
 const MODEL = process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001";
 const DEFAULT_SLUG = process.env.BUSINESS_SLUG || "barbiere-mario";
@@ -376,31 +375,35 @@ Come lavori:
 - Di' che l'appuntamento è confermato SOLO dopo che book_appointment ha risposto ok. Se risponde con un errore, spiega e proponi altri orari.
 - Per annullare: usa list_my_appointments, chiedi conferma, poi cancel_appointment.
 - Se la richiesta esce da quello che sai fare (sconti, preventivi, urgenze, domande strane), di' che passi la richiesta a ${biz.name}.
+- Se la conversazione è già iniziata, NON ripetere il saluto e non ripartire da capo: continua da dove eravate, ricordando servizio, giorno e orario già detti. Non usare emoji, salvo al massimo una.
+- Se il cliente risponde solo con un numero (es. "15") dopo che hai proposto degli orari, intendi quell'orario.
 - Non inventare informazioni sull'attività.`;
 }
 
-// ====================== STORICO DELLA CONVERSAZIONE ======================
-async function getHistory(userNumber, shopNumber, currentSid) {
+// ====================== STORICO DELLA CONVERSAZIONE (su Supabase) ======================
+async function loadHistory(bizId, phone) {
   try {
-    const sid = process.env.TWILIO_ACCOUNT_SID;
-    const token = process.env.TWILIO_AUTH_TOKEN;
-    const auth = "Basic " + Buffer.from(sid + ":" + token).toString("base64");
-    const base = "https://api.twilio.com/2010-04-01/Accounts/" + sid + "/Messages.json";
-    const get = async (from, to) => {
-      const url = base + "?From=" + encodeURIComponent(from) + "&To=" + encodeURIComponent(to) + "&PageSize=10";
-      const r = await fetch(url, { headers: { Authorization: auth } });
-      const j = await r.json();
-      return j.messages || [];
-    };
-    const [dalCliente, alCliente] = await Promise.all([get(userNumber, shopNumber), get(shopNumber, userNumber)]);
-    return [...dalCliente, ...alCliente]
-      .filter((m) => m.sid !== currentSid && m.body)
-      .sort((a, b) => Date.parse(a.date_created) - Date.parse(b.date_created))
-      .slice(-12)
-      .map((m) => ({ role: m.from === userNumber ? "user" : "assistant", content: m.body }));
+    const since = new Date(Date.now() - 12 * 3600 * 1000).toISOString();
+    const r = await sb(
+      "GET",
+      "chat_messages?business_id=eq." + bizId +
+        "&customer_phone=eq." + encodeURIComponent(phone) +
+        "&created_at=gt." + encodeURIComponent(since) +
+        "&order=created_at.desc&limit=14&select=role,content"
+    );
+    if (!r.ok || !Array.isArray(r.data)) return [];
+    return r.data.reverse().map((m) => ({ role: m.role, content: m.content }));
   } catch (e) {
     console.error("Errore storico:", e);
     return [];
+  }
+}
+
+async function saveMessage(bizId, phone, role, content) {
+  try {
+    await sb("POST", "chat_messages", { business_id: bizId, customer_phone: phone, role: role, content: content });
+  } catch (e) {
+    console.error("Errore salvataggio messaggio:", e);
   }
 }
 
@@ -475,7 +478,7 @@ module.exports = async (req, res) => {
   const ERRORE = "Scusa, ho avuto un problema. Riprova tra un attimo.";
   try {
     const body = req.body || {};
-    const Body = body.Body, From = body.From, To = body.To, MessageSid = body.MessageSid;
+    const Body = body.Body, From = body.From;
     if (!Body) return rispondi(res, "Non ho ricevuto nessun testo.");
 
     const biz = await getBusiness(DEFAULT_SLUG);
@@ -485,10 +488,12 @@ module.exports = async (req, res) => {
     }
 
     const phone = String(From || "").replace("whatsapp:", "");
-    const storico = await getHistory(From, To, MessageSid);
+    const storico = await loadHistory(biz.id, phone);
+    await saveMessage(biz.id, phone, "user", Body);
     const messages = normalizza([...storico, { role: "user", content: Body }]);
 
     const testo = await conversa(biz, phone, messages);
+    if (testo) await saveMessage(biz.id, phone, "assistant", testo);
     return rispondi(res, testo || ERRORE);
   } catch (e) {
     console.error(e);
