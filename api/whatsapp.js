@@ -1,4 +1,4 @@
-// api/whatsapp.js  (Lia v3: agenda vera + memoria delle chat su Supabase)
+// api/whatsapp.js  (Lia v4: agenda vera + memoria delle chat + controllo del nome)
 // Sostituisce completamente la versione precedente.
 //
 // Variabili su Vercel: ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SECRET_KEY. Opzionali: BUSINESS_SLUG, CLAUDE_MODEL.
@@ -165,6 +165,13 @@ function findService(biz, name) {
   );
 }
 
+// Il nome usato per prenotare deve essere stato scritto dal cliente in questa conversazione
+function nameIsFromCustomer(name, userTexts) {
+  const words = String(name || "").toLowerCase().split(/\s+/).filter((w) => w.length >= 2);
+  if (!words.length) return false;
+  return userTexts.some((t) => t.includes(words[0]));
+}
+
 function checkDate(biz, dateStr) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ""))) return "Data non valida: usa il formato AAAA-MM-GG.";
   const today = todayStr(biz.timezone);
@@ -250,6 +257,9 @@ async function runTool(name, input, ctx) {
       if (bad) return { error: bad };
       if (!/^\d{2}:\d{2}$/.test(String(input.time || ""))) return { error: "Orario non valido: usa HH:MM." };
       if (!String(input.customer_name || "").trim()) return { error: "Serve il nome del cliente." };
+      if (!nameIsFromCustomer(input.customer_name, ctx.userTexts || [])) {
+        return { error: "Il cliente non ti ha ancora scritto questo nome. Chiedigli: 'A che nome prenoto?' e usa il nome che scrive lui." };
+      }
       if (service.at_customer_place && !String(input.address || "").trim()) {
         return { error: "Questo servizio è a domicilio: chiedi l'indirizzo al cliente." };
       }
@@ -371,11 +381,12 @@ Come lavori:
 - Scrivi in italiano, messaggi brevi e cordiali, da chat WhatsApp (2-3 righe, niente elenchi lunghi).
 - NON inventare mai la disponibilità: per proporre orari usa SEMPRE check_availability. Proponi 2 o 3 orari, non tutti.
 - Per prenotare servono servizio, giorno, ora e nome del cliente. Chiedi una cosa alla volta.
-- Prenota con book_appointment appena il cliente ha scelto un orario e ti ha detto il nome.
+- Il nome: se il cliente non ti ha ancora detto come si chiama in questa conversazione, chiedilo ("A che nome prenoto?"). Se te l'ha già detto, chiedi conferma prima di prenotare ("A nome di Nico, giusto?"), perché potrebbe prenotare per un'altra persona. Non usare mai un nome che il cliente non ha scritto.
+- Prenota con book_appointment solo dopo che il cliente ha scelto un orario e ha confermato il nome.
 - Di' che l'appuntamento è confermato SOLO dopo che book_appointment ha risposto ok. Se risponde con un errore, spiega e proponi altri orari.
 - Per annullare: usa list_my_appointments, chiedi conferma, poi cancel_appointment.
 - Se la richiesta esce da quello che sai fare (sconti, preventivi, urgenze, domande strane), di' che passi la richiesta a ${biz.name}.
-- Se la conversazione è già iniziata, NON ripetere il saluto e non ripartire da capo: continua da dove eravate, ricordando servizio, giorno e orario già detti. Non usare emoji, salvo al massimo una.
+- Se la conversazione è già iniziata, NON ripetere il saluto e non ripartire da capo: continua da dove eravate, ricordando servizio, giorno e orario già detti. Non usare emoji. Se devi scusarti scrivi semplicemente "scusa" o "mi dispiace" (mai "mi scusa").
 - Se il cliente risponde solo con un numero (es. "15") dopo che hai proposto degli orari, intendi quell'orario.
 - Non inventare informazioni sull'attività.`;
 }
@@ -440,6 +451,7 @@ async function callClaude(system, messages) {
 async function conversa(biz, phone, messages) {
   const system = systemPrompt(biz);
   const msgs = messages.slice();
+  const userTexts = messages.filter((m) => m.role === "user" && typeof m.content === "string").map((m) => m.content.toLowerCase());
   for (let i = 0; i < 6; i++) {
     const data = await callClaude(system, msgs);
     if (data.stop_reason !== "tool_use") {
@@ -449,7 +461,7 @@ async function conversa(biz, phone, messages) {
     const results = [];
     for (const block of data.content) {
       if (block.type !== "tool_use") continue;
-      const out = await runTool(block.name, block.input || {}, { biz: biz, phone: phone });
+      const out = await runTool(block.name, block.input || {}, { biz: biz, phone: phone, userTexts: userTexts });
       results.push({
         type: "tool_result",
         tool_use_id: block.id,
