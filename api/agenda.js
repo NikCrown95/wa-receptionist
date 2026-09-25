@@ -251,8 +251,8 @@ module.exports = async (req, res) => {
         if(clean.length){
           const ins=await sb("POST","opening_hours",clean,"return=representation");
           if(!ins.ok){
-            if(previous.length) await sb("POST","opening_hours",previous,"return=minimal");
-            return res.status(500).json({error:"Errore salvataggio orari: configurazione precedente ripristinata"});
+            const rollback=previous.length?await sb("POST","opening_hours",previous,"return=minimal"):{ok:true};
+            return res.status(500).json({error:rollback.ok?"Errore salvataggio orari: configurazione precedente ripristinata":"Errore salvataggio orari e ripristino automatico fallito. Ricarica le impostazioni prima di modificarle di nuovo."});
           }
         }
         return res.status(200).json({ok:true});
