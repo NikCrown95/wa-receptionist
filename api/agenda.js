@@ -311,7 +311,7 @@ module.exports = async (req, res) => {
               resource_id: c.resource_id,
               service_id: service.id,
               customer_name: name,
-              customer_phone: String(body.customer_phone || "").trim() || null,
+              customer_phone: String(body.customer_phone || "").trim(),
               customer_address: body.address || null,
               notes: body.notes || null,
               channel: "manuale",
