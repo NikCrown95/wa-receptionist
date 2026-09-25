@@ -358,8 +358,10 @@ module.exports = async (req, res) => {
     }
 
     // Leggere l'agenda
-    const offset = Math.min(Math.max(parseInt(q.offset || "0", 10) || 0, -395), 60);
-    const days = Math.min(Math.max(parseInt(q.days || "1", 10) || 1, 1), 42);
+    const rawOffset = parseInt(q.offset || "0", 10);
+    const offset = Number.isFinite(rawOffset) ? Math.min(Math.max(rawOffset, -395), 60) : 0;
+    const rawDays = parseInt(q.days || "1", 10);
+    const days = Number.isFinite(rawDays) ? Math.min(Math.max(rawDays, 1), 42) : 1;
     const date = addDays(today, offset);
     const start = zonedTimeToUtc(date, "00:00", tz);
     const end = zonedTimeToUtc(addDays(date, days), "00:00", tz);
