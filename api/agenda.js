@@ -252,8 +252,6 @@ module.exports = async (req, res) => {
           if(!Number.isInteger(weekday)||weekday<1||weekday>7||!/^\d{2}:\d{2}$/.test(opens)||!/^\d{2}:\d{2}$/.test(closes)||opens>=closes) return res.status(400).json({error:"Orari non validi"});
           clean.push({resource_id:resource.id,weekday,opens,closes});
         }
-        // Mantieni una copia per poter ripristinare gli orari se il nuovo inserimento fallisce.
-        const previous=(resource.opening_hours||[]).map(h=>({resource_id:resource.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}));
         // Conserva una copia degli orari correnti: se il nuovo inserimento fallisce,
         // ripristina automaticamente la configurazione precedente.
         const previous=(resource.opening_hours||[]).map(h=>({resource_id:resource.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}));
