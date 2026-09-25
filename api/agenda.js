@@ -164,6 +164,11 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Diagnostica esplicita: una Preview Vercel può avere variabili ambiente diverse dalla Produzione.
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
+      return res.status(503).json({ error: "Preview Vercel senza configurazione Supabase" });
+    }
+
     // 2) I dati: serve il codice segreto
     // Le richieste che servono all'appuntamento manuale hanno bisogno anche di servizi/orari dell'attività
     const needsFull = true; // ora serve sempre: gli orari di apertura servono anche per gli spazi liberi in agenda
