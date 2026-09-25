@@ -215,6 +215,7 @@ module.exports = async (req, res) => {
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
           blocks: await (async function(){
             const br=await sb("GET","business_blocks?business_id=eq."+biz.id+"&date=gte."+todayStr(tz)+"&order=date.asc&select=id,date,starts_at,ends_at");
+            if(br.status===404) return [];
             if(!br.ok||!Array.isArray(br.data)) throw new Error("Errore lettura chiusure");
             return br.data.map(b=>({id:b.id,date:b.date,starts_at:b.starts_at,ends_at:b.ends_at,from:formatHmInTz(b.starts_at,tz),to:isFullDayBlock(b,tz)?null:formatHmInTz(b.ends_at,tz),full_day:isFullDayBlock(b,tz)}));
           })()
