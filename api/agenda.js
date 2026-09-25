@@ -202,7 +202,8 @@ module.exports = async (req, res) => {
   // 1) La pagina
   if (!wantsData) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    if (typeof PAGE !== "string") return res.status(500).send("Agenda page unavailable");\n    return res.status(200).send(PAGE);
+    res.setHeader("Content-Length", Buffer.byteLength(PAGE, "utf8"));
+    return res.status(200).end(PAGE);
   }
 
   try {
