@@ -1,6 +1,5 @@
 // api/agenda.js  (Lia: agenda del titolare)
-// Un solo file: serve sia la pagina (HTML) sia i dati (JSON).
-// Preview V3: redeploy verificato dopo controllo sintassi server.
+// Un solo file: serve sia la pagina (HTML) sia i dati (JSON).\n// Preview V3: redeploy verificato dopo controllo sintassi server.
 // Link di accesso: https://TUO-SITO.vercel.app/api/agenda?t=CODICE_SEGRETO
 // Variabili su Vercel: SUPABASE_URL, SUPABASE_SECRET_KEY.
 
@@ -203,8 +202,7 @@ module.exports = async (req, res) => {
   // 1) La pagina
   if (!wantsData) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Content-Length", Buffer.byteLength(PAGE, "utf8"));
-    return res.status(200).end(PAGE);
+    return res.status(200).send(PAGE);
   }
 
   try {
