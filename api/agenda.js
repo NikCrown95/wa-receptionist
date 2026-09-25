@@ -204,7 +204,8 @@ module.exports = async (req, res) => {
         return res.status(200).json({
           business: { name: biz.name, timezone: tz },
           services: biz.services.map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place })),
-          hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) }))
+          hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
+          blocks: (await sb("GET","business_blocks?business_id=eq."+biz.id+"&date=gte."+todayStr(tz)+"&order=date.asc&select=id,date,starts_at,ends_at")).data || []
         });
       }
 
@@ -240,6 +241,23 @@ module.exports = async (req, res) => {
         if(!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({error:"Servizio non valido"});
         const r=await sb("PATCH","services?id=eq."+id+"&business_id=eq."+biz.id,{active:false},"return=representation");
         if(!r.ok||!Array.isArray(r.data)||!r.data.length) return res.status(404).json({error:"Servizio non trovato"});
+        return res.status(200).json({ok:true});
+      }
+
+      if (action === "block_create") {
+        const date=String(body.date||""), from=body.from?String(body.from):"", to=body.to?String(body.to):"";
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||(from&&!/^\d{2}:\d{2}$/.test(from))||(to&&!/^\d{2}:\d{2}$/.test(to))||Boolean(from)!==Boolean(to)|| (from&&from>=to)) return res.status(400).json({error:"Chiusura non valida"});
+        const starts_at=zonedTimeToUtc(date,from||"00:00",tz).toISOString(), ends_at=zonedTimeToUtc(from?date:addDays(date,1),to||"00:00",tz).toISOString();
+        const r=await sb("POST","business_blocks",{business_id:biz.id,date,starts_at,ends_at},"return=representation");
+        if(!r.ok) return res.status(500).json({error:"Errore nel salvataggio della chiusura"});
+        return res.status(200).json({ok:true});
+      }
+
+      if (action === "block_delete") {
+        const id=String(body.id||"");
+        if(!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({error:"Chiusura non valida"});
+        const r=await sb("DELETE","business_blocks?id=eq."+id+"&business_id=eq."+biz.id,null,"return=representation");
+        if(!r.ok||!Array.isArray(r.data)||!r.data.length) return res.status(404).json({error:"Chiusura non trovata"});
         return res.status(200).json({ok:true});
       }
 
