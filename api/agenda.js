@@ -67,13 +67,19 @@ async function getBusinessByToken(token) {
 
 // Come getBusinessByToken, ma con anche servizi, risorse e orari (serve per calcolare gli orari liberi)
 async function getBusinessFullByToken(token) {
-  if (!/^[a-f0-9]{32,128}$/.test(token)) return null;
+  if (!/^[a-f0-9]{32,128}$/.test(token)) return { __agendaError: "Token agenda non valido" };
   const r = await sb(
     "GET",
     "businesses?agenda_token=eq." + token +
       "&active=eq.true&select=id,name,timezone,services(*),resources(*,opening_hours(*))"
   );
-  if (!r.ok || !Array.isArray(r.data) || !r.data.length) return null;
+  if (!r.ok) {
+    const detail = r.data && typeof r.data === "object"
+      ? (r.data.message || r.data.hint || r.data.code || "")
+      : String(r.data || "");
+    return { __agendaError: "Supabase " + r.status + (detail ? " — " + detail : "") };
+  }
+  if (!Array.isArray(r.data) || !r.data.length) return null;
   const b = r.data[0];
   b.services = (b.services || []).filter((x) => x.active);
   b.resources = (b.resources || []).filter((x) => x.active);
@@ -176,6 +182,7 @@ module.exports = async (req, res) => {
       ? await getBusinessFullByToken(String(q.t || ""))
       : await getBusinessByToken(String(q.t || ""));
     if (!biz) return res.status(404).json({ error: "Link non valido" });
+    if (biz.__agendaError) return res.status(502).json({ error: biz.__agendaError });
     const tz = biz.timezone || "Europe/Rome";
 
     // Impostazioni reali della dashboard: servizi e orari condivisi con Lia.
