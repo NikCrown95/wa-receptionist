@@ -254,6 +254,9 @@ module.exports = async (req, res) => {
         }
         // Mantieni una copia per poter ripristinare gli orari se il nuovo inserimento fallisce.
         const previous=(resource.opening_hours||[]).map(h=>({resource_id:resource.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}));
+        // Conserva una copia degli orari correnti: se il nuovo inserimento fallisce,
+        // ripristina automaticamente la configurazione precedente.
+        const previous=(resource.opening_hours||[]).map(h=>({resource_id:resource.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}));
         const del=await sb("DELETE","opening_hours?resource_id=eq."+resource.id,null,"return=minimal");
         if(!del.ok) return res.status(500).json({error:"Errore aggiornamento orari"});
         if(clean.length){
