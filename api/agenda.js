@@ -202,7 +202,9 @@ module.exports = async (req, res) => {
   // 1) La pagina
   if (!wantsData) {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    return res.status(200).send(PAGE);
+    res.setHeader("Content-Length", Buffer.byteLength(PAGE, "utf8"));
+    res.statusCode = 200;
+    return res.end(PAGE);
   }
 
   try {
