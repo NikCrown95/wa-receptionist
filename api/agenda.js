@@ -111,6 +111,13 @@ function findService(biz, name) {
 // (Stessa logica usata dal cervello di Lia in lib/lia.js: il vincolo vero è nel database, questo è solo il calcolo per proporre gli orari.)
 const SLOT_STEP_MIN = 15;
 const MIN_LEAD_MIN = 15;
+async function getBusinessBlocks(businessId, dateStr) {
+  const r = await sb("GET", "business_blocks?business_id=eq." + businessId + "&date=eq." + dateStr + "&select=starts_at,ends_at");
+  if (r.status === 404) return [];
+  if (!r.ok || !Array.isArray(r.data)) throw new Error("Errore lettura chiusure");
+  return r.data;
+}
+
 async function freeSlotsFor(biz, service, dateStr) {
   const tz = biz.timezone;
   const dayStart = zonedTimeToUtc(dateStr, "00:00", tz);
@@ -128,6 +135,8 @@ async function freeSlotsFor(biz, service, dateStr) {
       "&select=resource_id,starts_at,blocked_until"
   );
   if (!r.ok || !Array.isArray(r.data)) throw new Error("Errore lettura appuntamenti");
+  const blocks = await getBusinessBlocks(biz.id, dateStr);
+  const blockedRanges = blocks.map((b) => [Date.parse(b.starts_at), Date.parse(b.ends_at)]).filter((b) => Number.isFinite(b[0]) && Number.isFinite(b[1]));
 
   const nowMs = Date.now() + MIN_LEAD_MIN * 60000;
   const out = [];
@@ -146,7 +155,7 @@ async function freeSlotsFor(biz, service, dateStr) {
         const startMs = zonedTimeToUtc(dateStr, label, tz).getTime();
         const endMs = startMs + service.duration_min * 60000;
         const blockedMs = endMs + (service.buffer_min || 0) * 60000;
-        const free = startMs >= nowMs && !busy.some((b) => startMs < b[1] && blockedMs > b[0]);
+        const free = startMs >= nowMs && !busy.some((b) => startMs < b[1] && blockedMs > b[0]) && !blockedRanges.some((b) => startMs < b[1] && blockedMs > b[0]);
         if (free) out.push({ time: label, resource_id: res.id });
         t += SLOT_STEP_MIN;
       }
