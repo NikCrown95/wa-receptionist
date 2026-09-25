@@ -252,11 +252,16 @@ module.exports = async (req, res) => {
           if(!Number.isInteger(weekday)||weekday<1||weekday>7||!/^\d{2}:\d{2}$/.test(opens)||!/^\d{2}:\d{2}$/.test(closes)||opens>=closes) return res.status(400).json({error:"Orari non validi"});
           clean.push({resource_id:resource.id,weekday,opens,closes});
         }
+        // Mantieni una copia per poter ripristinare gli orari se il nuovo inserimento fallisce.
+        const previous=(resource.opening_hours||[]).map(h=>({resource_id:resource.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}));
         const del=await sb("DELETE","opening_hours?resource_id=eq."+resource.id,null,"return=minimal");
         if(!del.ok) return res.status(500).json({error:"Errore aggiornamento orari"});
         if(clean.length){
           const ins=await sb("POST","opening_hours",clean,"return=representation");
-          if(!ins.ok) return res.status(500).json({error:"Errore salvataggio orari"});
+          if(!ins.ok){
+            if(previous.length) await sb("POST","opening_hours",previous,"return=minimal");
+            return res.status(500).json({error:"Errore salvataggio orari: configurazione precedente ripristinata"});
+          }
         }
         return res.status(200).json({ok:true});
       }
