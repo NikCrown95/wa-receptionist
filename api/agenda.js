@@ -1,4 +1,5 @@
 // api/agenda.js  (Lia: agenda del titolare)
+// Redeploy trigger: verified stable agenda source, 2026-09-26
 // Un solo file: serve sia la pagina (HTML) sia i dati (JSON).\n// Preview V3: redeploy verificato dopo controllo sintassi server.
 // Link di accesso: https://TUO-SITO.vercel.app/api/agenda?t=CODICE_SEGRETO
 // Variabili su Vercel: SUPABASE_URL, SUPABASE_SECRET_KEY.
