@@ -422,7 +422,8 @@ module.exports = async (req, res) => {
     const offset = Number.isFinite(rawOffset) ? Math.min(Math.max(rawOffset, -395), 60) : 0;
     const rawDays = parseInt(q.days || "1", 10);
     const days = Number.isFinite(rawDays) ? Math.min(Math.max(rawDays, 1), 42) : 1;
-    const fromParam = typeof q.from === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(q.from) ? q.from : null;\n    const date = fromParam || addDays(today, offset);
+    const fromParam = typeof q.from === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(q.from) ? q.from : null;
+    const date = fromParam || addDays(today, offset);
     const start = zonedTimeToUtc(date, "00:00", tz);
     const end = zonedTimeToUtc(addDays(date, days), "00:00", tz);
 
