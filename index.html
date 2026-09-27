@@ -238,6 +238,19 @@ a{color:inherit;}
 .role-q{max-width:none;}
 .role-q-lead{display:block;}
 .role-q-badge{display:block;margin-top:.14em;white-space:nowrap;word-break:keep-all;font-size:clamp(1.15rem,6vw,2.6rem);}
+@media (min-width:860px){
+  .role-q{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.32em;row-gap:.1em;}
+  .role-q-lead{display:inline;}
+  .role-q-badge{display:inline-flex;margin-top:0;font-size:1em;}
+}
+
+/* "come funziona": su desktop/tablet, testo e diagramma in un'unica fascia */
+.cf-wrap{display:block;}
+@media (min-width:980px){
+  .cf-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center;}
+  .cf-wrap .flow-scroll{margin-top:0;}
+  .cf-wrap .flowx{max-width:640px;min-width:0;}
+}
 .role-pill{position:relative;display:inline-flex;align-items:center;gap:.32em;padding:.16em .5em .16em .16em;border-radius:999px;background:var(--card2);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));animation:pill-glow 1s ease-in-out infinite;perspective:8em;}
 @keyframes pill-glow{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 0%,transparent);}50%{box-shadow:0 0 .5em .05em color-mix(in srgb,var(--accent) 45%,transparent);}}
 .role-flip{display:inline-flex;align-items:center;gap:.32em;transform-origin:50% 50%;}
@@ -338,7 +351,8 @@ a{color:inherit;}
 </section>
 
 <section class="sec alt glow-a" id="come-funziona" aria-labelledby="t-come">
-  <div class="wrap">
+  <div class="wrap cf-wrap">
+   <div class="cf-head">
     <h2 class="h2 role-q reveal" id="t-come">
       <span class="role-q-lead">Sei un</span>
       <span class="role-q-badge"><span class="role-badge">
@@ -349,11 +363,13 @@ a{color:inherit;}
           </span>
         </span>
       </span>?</span>
-      <span class="sr-only">Sei un parrucchiere, un dentista, un estetista, un idraulico, un elettricista, un personal trainer, un fisioterapista, un tatuatore o un veterinario? Lia funziona per te.</span>
+      <span class="sr-only">Sei un parrucchiere, un dentista, un medico, un estetista, un idraulico, un elettricista, un personal trainer, un fisioterapista, un tatuatore o un veterinario? Lia funziona per qualsiasi attività che lavora su appuntamento.</span>
     </h2>
     <p class="lead2 reveal" style="--rd:.08s">Che scriva un messaggio o prenoti da solo, per il cliente è un attimo. Per te, è già tutto al suo posto.</p>
+    <p class="hero-note reveal" style="--rd:.12s">Pensato per ogni attività che lavora su appuntamento: parrucchieri, dentisti, medici, estetisti, idraulici, elettricisti, personal trainer e molti altri.</p>
+   </div>
 
-    <div class="flow-scroll reveal" style="--rd:.16s">
+    <div class="flow-scroll reveal" style="--rd:.18s">
       <svg class="flowx" viewBox="0 0 660 264" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
         <path class="fx-line" d="M67,125 C140,125 150,60 198,55"></path>
         <path class="fx-line" d="M67,125 C140,125 150,190 198,195"></path>
@@ -633,6 +649,7 @@ a{color:inherit;}
   var roles = [
     {label:'Parrucchiere', icon:'<circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>'},
     {label:'Dentista', icon:'<path d="M12 3.2c2.8 0 4.8 1.9 4.8 4.6 0 1.3-.3 2.4-.7 3.6-.5 1.6-.9 3.4-1.1 5.4-.2 1.6-.6 2.6-1.5 2.6-1 0-1.2-1.4-1.4-2.9-.1-1-.3-2.1-1.1-2.1s-1 1.1-1.1 2.1c-.2 1.5-.4 2.9-1.4 2.9-.9 0-1.3-1-1.5-2.6-.2-2-.6-3.8-1.1-5.4-.4-1.2-.7-2.3-.7-3.6 0-2.7 2-4.6 4.8-4.6z"></path>'},
+    {label:'Medico', icon:'<path d="M12 21c-4.4-2.8-8-6-8-9.6C4 8.4 6.2 6 9 6c1.4 0 2.6.6 3 1.7C12.4 6.6 13.6 6 15 6c2.8 0 5 2.4 5 5.4 0 3.6-3.6 6.8-8 9.6z"></path>'},
     {label:'Estetista', icon:'<circle cx="12" cy="7" r="2.2"></circle><circle cx="17" cy="12" r="2.2"></circle><circle cx="12" cy="17" r="2.2"></circle><circle cx="7" cy="12" r="2.2"></circle><circle cx="12" cy="12" r="2"></circle>'},
     {label:'Idraulico', icon:'<path d="M14.7 6.3a4 4 0 1 1-5.66 5.66L4 17v3h3l5.04-5.04A4 4 0 1 1 14.7 6.3z"></path>'},
     {label:'Elettricista', icon:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>'},
