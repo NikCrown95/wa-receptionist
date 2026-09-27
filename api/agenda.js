@@ -446,7 +446,7 @@ module.exports = async (req, res) => {
       const wd = weekdayOf(d);
       const res0 = biz.resources[0];
       const iv = (res0 && res0.opening_hours || [])
-        .filter((h) => h.weekday === wd)
+        .filter((h) => Number(h.weekday) === wd)
         .sort((a, b) => (a.opens < b.opens ? -1 : 1))
         .map((h) => ({
           start: zonedTimeToUtc(d, h.opens.slice(0, 5), tz).toISOString(),
