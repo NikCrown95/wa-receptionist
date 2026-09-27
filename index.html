@@ -250,13 +250,16 @@ a{color:inherit;}
   .cf-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center;}
   .cf-wrap .flow-scroll{margin-top:0;}
   .cf-wrap .flowx{max-width:640px;min-width:0;}
+  .cf-wrap .h2.role-q{font-size:1.3rem;max-width:none;}
 }
+.cf-lead-card{margin-top:24px;max-width:46ch;padding:18px 22px;border-radius:18px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);}
+.cf-lead-card p{margin:0;color:var(--ink);font-size:1.02rem;line-height:1.5;}
 .role-pill{position:relative;display:inline-flex;align-items:center;gap:.32em;padding:.16em .5em .16em .16em;border-radius:999px;background:var(--card2);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));animation:pill-glow 1s ease-in-out infinite;perspective:8em;}
 @keyframes pill-glow{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 0%,transparent);}50%{box-shadow:0 0 .5em .05em color-mix(in srgb,var(--accent) 45%,transparent);}}
 .role-flip{display:inline-flex;align-items:center;gap:.32em;transform-origin:50% 50%;}
 .role-pill-ic{flex:none;width:1.15em;height:1.15em;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;}
 .role-pill-ic svg{width:62%;height:62%;}
-.role-pill-word{font-weight:800;letter-spacing:-0.02em;color:var(--ink);white-space:nowrap;}
+.role-pill-word{display:inline-block;width:15.5ch;font-weight:800;letter-spacing:-0.02em;color:var(--ink);white-space:nowrap;overflow:hidden;}
 @media (prefers-reduced-motion: reduce){.role-pill{animation:none;}}
 
 /* "come funziona": diagramma ramificato (cliente -> chat/calendario -> Lia -> agenda) */
@@ -365,8 +368,9 @@ a{color:inherit;}
       </span>?</span>
       <span class="sr-only">Sei un parrucchiere, un dentista, un medico, un estetista, un idraulico, un elettricista, un personal trainer, un fisioterapista, un tatuatore o un veterinario? Lia funziona per qualsiasi attività che lavora su appuntamento.</span>
     </h2>
-    <p class="lead2 reveal" style="--rd:.08s">Che scriva un messaggio o prenoti da solo, per il cliente è un attimo. Per te, è già tutto al suo posto.</p>
-    <p class="hero-note reveal" style="--rd:.12s">Pensato per ogni attività che lavora su appuntamento: parrucchieri, dentisti, medici, estetisti, idraulici, elettricisti, personal trainer e molti altri.</p>
+    <div class="cf-lead-card reveal" style="--rd:.08s">
+      <p>Che scriva un messaggio o prenoti da solo, per il cliente è un attimo. Per te, è già tutto al suo posto.</p>
+    </div>
    </div>
 
     <div class="flow-scroll reveal" style="--rd:.18s">
