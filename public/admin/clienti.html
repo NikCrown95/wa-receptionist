@@ -52,7 +52,7 @@ button{font-family:inherit;}
 .btn:hover{filter:brightness(1.08);}
 
 .tablewrap{margin-top:18px;border-radius:22px;border:1px solid var(--line);background:var(--card);overflow-x:auto;}
-table{border-collapse:collapse;width:100%;min-width:920px;}
+table{border-collapse:collapse;width:100%;min-width:1240px;}
 th{text-align:left;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;padding:14px 18px;border-bottom:1px solid var(--line);white-space:nowrap;}
 td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
@@ -92,6 +92,13 @@ tr:last-child td{border-bottom:none;}
 nav{display:flex;gap:4px;}
 nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
 nav a.on{background:var(--card2);color:var(--ink);}
+.pill.na{background:var(--card2);color:var(--muted);}
+.health-reasons{display:block;font-size:.78rem;color:var(--muted);margin-top:5px;max-width:240px;white-space:normal;line-height:1.35;}
+.health-up{margin-top:6px;}
+.svc-sub{display:block;font-size:.78rem;color:var(--muted);margin-top:5px;white-space:normal;max-width:190px;line-height:1.35;}
+.btn.small{min-height:36px;padding:0 14px;font-size:.86rem;border-radius:11px;}
+.btn.danger{background:transparent;color:#FF8A8A;box-shadow:inset 0 0 0 1.5px #5A2A2A;}
+.act-btn{justify-content:center;width:100%;}
 </style>
 </head>
 <body>
@@ -126,6 +133,19 @@ nav a.on{background:var(--card2);color:var(--ink);}
       <option value="past_due">Scaduto</option>
       <option value="cancelled">Annullato</option>
     </select>
+    <select class="filter" id="filterService">
+      <option value="">Tutti i servizi</option>
+      <option value="active">Servizio attivo</option>
+      <option value="grace">In tolleranza</option>
+      <option value="suspended">Sospeso</option>
+    </select>
+    <select class="filter" id="filterHealth">
+      <option value="">Tutte le salute</option>
+      <option value="red">A rischio</option>
+      <option value="yellow">Da controllare</option>
+      <option value="green">In salute</option>
+      <option value="upgrade">Candidati Lia</option>
+    </select>
     <button class="btn" id="addBtn" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
       Nuovo cliente
@@ -135,13 +155,21 @@ nav a.on{background:var(--card2);color:var(--ink);}
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th>Attività</th><th>Piano e stato</th><th>Rinnovo</th><th>Incasso</th><th>Appuntamenti (30gg)</th><th>Contatti</th>
+        <th>Attività</th><th>Piano e stato</th><th>Rinnovo</th><th>Servizio</th><th>Incasso</th><th>Appuntamenti (30gg)</th><th>Salute</th><th>Contatti</th><th>Azioni</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
 </div>
 
+<div class="sheet-bg" id="actBg"></div>
+<div class="sheet" id="actSheet" role="dialog" aria-modal="true" aria-labelledby="actTitle" tabindex="-1">
+  <div class="grabber" aria-hidden="true"></div>
+  <h2 id="actTitle"></h2>
+  <p id="actSub" style="margin:6px 0 0;color:var(--muted);font-size:.92rem;line-height:1.45;"></p>
+  <div class="sheet-actions" id="actBtns" style="flex-direction:column;"></div>
+  <div class="sheet-actions" style="margin-top:10px;"><button class="btn ghost" id="actClose" type="button" style="flex:1;justify-content:center;">Chiudi</button></div>
+</div>
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">
   <div class="grabber" aria-hidden="true"></div>
@@ -210,15 +238,16 @@ window.startClients = function(){
 
   function renderKpis(){
     var active = CLIENTS.filter(function(c){ return c.status === 'active'; });
-    var mrr = active.reduce(function(s,c){ return s + (PLAN_PRICE[c.plan] || 0); }, 0);
+    var paying = active.filter(function(c){ return !(c.service && c.service.state === 'suspended'); });
+    var mrr = paying.reduce(function(s,c){ return s + (PLAN_PRICE[c.plan] || 0); }, 0);
     var soon = CLIENTS.filter(function(c){ return (c.status === 'active') && daysUntil(c.renew) >= 0 && daysUntil(c.renew) <= 7; }).length;
     var cancelled = CLIENTS.filter(function(c){ return c.status === 'cancelled'; }).length;
     var totalEver = CLIENTS.length;
     var churn = totalEver ? Math.round(cancelled / totalEver * 100) : 0;
 
     var cards = [
-      { lbl:'Incasso mensile (MRR)', val: eur.format(mrr), sub: active.length + ' clienti attivi' },
-      { lbl:'Clienti attivi', val: String(active.length), sub: CLIENTS.filter(function(c){return c.status==='trial';}).length + ' in prova' },
+      { lbl:'Incasso mensile (MRR)', val: eur.format(mrr), sub: paying.length + ' clienti che pagano' },
+      { lbl:'Clienti attivi', val: String(active.length), sub: CLIENTS.filter(function(c){return c.status==='trial';}).length + ' in prova · ' + CLIENTS.filter(function(c){ return c.health && c.health.level === 'red'; }).length + ' a rischio' },
       { lbl:'In scadenza entro 7 giorni', val: String(soon), cls: soon ? 'warn' : '', sub: 'Da ricontattare' },
       { lbl:'Tasso di abbandono', val: churn + '%', cls: churn ? 'bad' : '', sub: cancelled + ' annullati in totale' }
     ];
@@ -238,6 +267,8 @@ window.startClients = function(){
     var q = document.getElementById('search').value.trim().toLowerCase();
     var fp = document.getElementById('filterPlan').value;
     var fs = document.getElementById('filterStatus').value;
+    var fh = document.getElementById('filterHealth').value;
+    var fsv = document.getElementById('filterService').value;
     var tbody = document.getElementById('rows');
     tbody.innerHTML = '';
 
@@ -245,11 +276,14 @@ window.startClients = function(){
       if (q && c.name.toLowerCase().indexOf(q) === -1) return false;
       if (fp && c.plan !== fp) return false;
       if (fs && c.status !== fs) return false;
+      if (fsv && !(c.service && c.service.state === fsv)) return false;
+      if (fh === 'upgrade') { if (!(c.health && c.health.upgrade)) return false; }
+      else if (fh && !(c.health && c.health.level === fh)) return false;
       return true;
     });
 
     if (!list.length){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nessun cliente trovato.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="9">Nessun cliente trovato.</td></tr>';
       return;
     }
 
@@ -260,9 +294,12 @@ window.startClients = function(){
         '<td><div class="who"><span class="avatar"></span><div><b></b><span class="type"></span></div></div></td>' +
         '<td><span class="pill"></span><div class="plan-name"></div></td>' +
         '<td><div class="renew"></div></td>' +
+        '<td class="svc"></td>' +
         '<td class="mrr"></td>' +
         '<td class="appts"></td>' +
-        '<td class="contact"></td>';
+        '<td class="health"></td>' +
+        '<td class="contact"></td>' +
+        '<td class="act"></td>';
 
       tr.querySelector('.avatar').textContent = initials(c.name);
       tr.querySelector('.who b').textContent = c.name;
@@ -281,6 +318,44 @@ window.startClients = function(){
       tr.querySelector('.mrr').textContent = (c.status === 'cancelled' || !c.plan) ? '—' : eur.format(PLAN_PRICE[c.plan]) + '/mese';
       tr.querySelector('.appts').textContent = c.appts;
 
+      // ----- servizio (regola unica del database)
+      var sc = tr.querySelector('.svc');
+      var sv = c.service;
+      if (!sv) { sc.textContent = '—'; }
+      else {
+        var SVC = { active: ['Attivo', 'active'], grace: ['In tolleranza', 'warn'], suspended: ['Sospeso', 'bad'], cancelled: ['Annullato', 'na'], unmanaged: ['Non gestito', 'na'] };
+        var sm = SVC[sv.state] || [sv.state, 'na'];
+        var sp = document.createElement('span'); sp.className = 'pill ' + sm[1]; sp.textContent = sm[0]; sc.appendChild(sp);
+        var note = '';
+        var pu = sv.paid_until ? new Date(sv.paid_until) : null;
+        if (sv.state === 'active' && pu) note = (c.status === 'trial' ? 'prova fino al ' : 'pagato fino al ') + fmtDate(pu);
+        else if (sv.state === 'grace' && sv.grace_ends) note = 'scaduto: tolleranza fino al ' + fmtDate(new Date(sv.grace_ends));
+        else if (sv.state === 'suspended') note = (pu && pu > new Date()) ? 'sospeso a mano' : (pu ? 'scaduto il ' + fmtDate(pu) : 'sospeso');
+        else if (sv.state === 'unmanaged') note = 'nessun abbonamento: sempre attivo';
+        if (note) { var sn = document.createElement('span'); sn.className = 'svc-sub'; sn.textContent = note; sc.appendChild(sn); }
+      }
+
+      var ac = tr.querySelector('.act');
+      var ab = document.createElement('button'); ab.type = 'button'; ab.className = 'btn ghost small'; ab.textContent = 'Azioni';
+      ab.addEventListener('click', function(){ openActions(c); });
+      ac.appendChild(ab);
+
+      var hc = tr.querySelector('.health');
+      var hh = c.health || { level: 'na', label: '—', reasons: [], upgrade: false };
+      var hp = document.createElement('span');
+      hp.className = 'pill ' + (hh.level === 'green' ? 'active' : hh.level === 'yellow' ? 'warn' : hh.level === 'red' ? 'bad' : 'na');
+      hp.textContent = hh.label;
+      hc.appendChild(hp);
+      if (hh.reasons && hh.reasons.length) {
+        var hr = document.createElement('span'); hr.className = 'health-reasons'; hr.textContent = hh.reasons.join(' · ');
+        hc.appendChild(hr);
+      }
+      if (hh.upgrade) {
+        var hu = document.createElement('div'); hu.className = 'health-up';
+        var hup = document.createElement('span'); hup.className = 'pill trial'; hup.textContent = 'Candidato Lia';
+        hu.appendChild(hup); hc.appendChild(hu);
+      }
+
       var contact = tr.querySelector('.contact');
       if (c.phone) { var telLink = document.createElement('a'); telLink.href = 'tel:' + c.phone.replace(/\s+/g,''); telLink.textContent = c.phone; contact.appendChild(telLink); } else { contact.textContent = '—'; }
       if (c.email){ var mailLink = document.createElement('a'); mailLink.href = 'mailto:' + c.email; mailLink.textContent = c.email; contact.appendChild(mailLink); }
@@ -295,6 +370,8 @@ window.startClients = function(){
   document.getElementById('search').addEventListener('input', renderRows);
   document.getElementById('filterPlan').addEventListener('change', renderRows);
   document.getElementById('filterStatus').addEventListener('change', renderRows);
+  document.getElementById('filterHealth').addEventListener('change', renderRows);
+  document.getElementById('filterService').addEventListener('change', renderRows);
 
   var sheetBg = document.getElementById('sheetBg');
   var sheet = document.getElementById('sheet');
@@ -317,6 +394,54 @@ window.startClients = function(){
       .catch(function(e){ alert('Non sono riuscito a salvare: ' + e.message); })
       .then(function(){ if (btn) btn.disabled = false; });
   });
+
+  // ===== pannello azioni (pagamenti, proroghe, sospensione, piano)
+  var actBg = document.getElementById('actBg'), actSheet = document.getElementById('actSheet');
+  function closeActions(){ actBg.classList.remove('on'); actSheet.classList.remove('on'); }
+  document.getElementById('actClose').addEventListener('click', closeActions);
+  actBg.addEventListener('click', closeActions);
+
+  function runAction(c, payload, confirmText, btn){
+    if (confirmText && !window.confirm(confirmText)) return;
+    var all = document.querySelectorAll('#actBtns button'); all.forEach(function(b){ b.disabled = true; });
+    payload.id = c.id;
+    window.liaApi('/api/admin/clients', { method: 'POST', body: JSON.stringify(payload) })
+      .then(function(res){ closeActions(); window.liaReload().then(function(){ if (res && res.note) alert(res.note); }); })
+      .catch(function(e){ all.forEach(function(b){ b.disabled = false; }); alert('Non riuscito: ' + e.message); });
+  }
+
+  function openActions(c){
+    var box = document.getElementById('actBtns'); box.innerHTML = '';
+    document.getElementById('actTitle').textContent = c.name;
+    var sv = c.service, st = sv ? sv.state : null;
+    var planTxt = c.plan ? PLAN_LABEL[c.plan] : 'nessun piano';
+    document.getElementById('actSub').textContent = planTxt + ' · ' + (STATUS_LABEL[c.status] || '') + (sv && sv.paid_until && c.status !== 'cancelled' ? ' · pagato fino al ' + fmtDate(new Date(sv.paid_until)) : '');
+
+    function add(label, cls, payload, confirmText){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'btn act-btn ' + (cls || 'ghost'); b.textContent = label;
+      b.addEventListener('click', function(){ runAction(c, payload, confirmText, b); });
+      box.appendChild(b);
+    }
+
+    if (c.status === 'none') {
+      add('Assegna piano Base (39,99 €/mese)', 'ghost', { action: 'assign_plan', plan: 'base' });
+      add('Assegna piano Base + Lia (79,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
+      add('Base + Lia in prova per 30 giorni', 'ghost', { action: 'assign_plan', plan: 'ai', status: 'trial' });
+    } else if (c.status === 'cancelled') {
+      add('Riattiva (1 mese da oggi)', '', { action: 'reactivate' }, 'Riattivare ' + c.name + ' per 1 mese a partire da oggi?');
+    } else {
+      add('Segna come pagato (+1 mese)', '', { action: 'mark_paid', months: 1 });
+      add('Proroga di 7 giorni', 'ghost', { action: 'extend', days: 7 });
+      add('Proroga di 30 giorni', 'ghost', { action: 'extend', days: 30 });
+      var manual = st === 'suspended' && sv && sv.paid_until && new Date(sv.paid_until) > new Date();
+      if (st === 'suspended') add(manual ? 'Riattiva (toglie la sospensione)' : 'Riattiva (se scaduto serve pagamento o proroga)', 'ghost', { action: 'reactivate' });
+      else add('Sospendi ora', 'danger', { action: 'suspend' }, 'Sospendere ' + c.name + ' adesso? Lia e le prenotazioni online smettono di funzionare.');
+      if (c.plan === 'base') add('Passa a Base + Lia', 'ghost', { action: 'assign_plan', plan: 'ai' }, 'Passare ' + c.name + ' a Base + Lia?');
+      if (c.plan === 'ai') add('Passa a Base (spegne Lia)', 'ghost', { action: 'assign_plan', plan: 'base' }, 'Passare ' + c.name + ' a Base? Lia smette di rispondere.');
+      add('Annulla abbonamento', 'danger', { action: 'cancel' }, 'Annullare l\'abbonamento di ' + c.name + '? Il servizio si ferma subito.');
+    }
+    actBg.classList.add('on'); actSheet.classList.add('on');
+  }
 
   window.setClients = function(list){
     CLIENTS = list.map(function(x){ var o = {}; for (var k in x) o[k] = x[k]; o.renew = x.renew ? new Date(x.renew) : null; return o; });
