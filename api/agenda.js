@@ -206,7 +206,7 @@ module.exports = async (req, res) => {
 
     // Impostazioni reali della dashboard: servizi e orari condivisi con Lia.
     if (q.settings === "1") {
-      const resource = biz.resources[0];
+      const resource = biz.resources.find(r => Array.isArray(r.opening_hours) && r.opening_hours.length) || biz.resources[0];
       if (!resource) return res.status(400).json({ error: "Nessuna risorsa attiva configurata" });
 
       if (req.method === "GET") {
