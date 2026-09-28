@@ -5,6 +5,7 @@
 //
 //   GET  /api/admin/clients                -> { clients: [...] }
 //   GET  /api/admin/clients?view=overview  -> { history, byType, planSplit } (pagina Andamento)
+//   GET  /api/admin/clients?view=money                   -> soldi: MRR, movimento, rinnovi, incasso a rischio
 //   GET  /api/admin/clients?view=lia                     -> uso di Lia su tutte le attivita'
 //   GET  /api/admin/clients?view=detail&id=UUID          -> scheda singola attivita'
 //   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
@@ -517,6 +518,188 @@ async function liaOverview() {
   };
 }
 
+
+// ============================ SOLDI ============================
+// Movimento dell'incasso mensile ricostruito da eventi: nuovi, upgrade, downgrade, persi, riattivati.
+// Le date/importi storici vengono dalle colonne dell'abbonamento; dal momento in cui si usano i pulsanti
+// (cambio piano, annulla, riattiva) ogni evento e' registrato con i prezzi e conta con precisione.
+function buildMrrEvents(subs, logs) {
+  const evByBiz = {};
+  (logs || []).forEach((l) => { (evByBiz[l.business_id] = evByBiz[l.business_id] || []).push(l); });
+  const events = [];
+  (subs || []).forEach((s) => {
+    if (s.status === 'trial') return; // in prova adesso: non e' incasso, qualunque sia lo storico
+    const ev = (evByBiz[s.business_id] || []).slice().sort((a, b) => new Date(a.at) - new Date(b.at));
+    const curPrice = Number((s.plans && s.plans.price_eur) || 0);
+    const d = (l) => l.details || {};
+    const created = ev.find((l) => l.action === 'assign_plan' && d(l).was_new);
+    const changes = ev.filter((l) => l.action === 'assign_plan' && !d(l).was_new && d(l).from_price != null && d(l).to_price != null);
+    const conv = ev.find((l) => l.action === 'mark_paid' && d(l).was_trial);
+    let p = changes.length ? Number(d(changes[0]).from_price) : (created && d(created).to_price != null && !d(created).from_price ? Number(d(created).to_price) : curPrice);
+    if (created && d(created).to_price != null && !changes.length) p = Number(d(created).to_price);
+
+    let startT = new Date(s.started_at);
+    const startedAsTrial = created && d(created).status === 'trial';
+    if (startedAsTrial) {
+      if (conv) startT = new Date(conv.at);
+      else if (s.status === 'trial') startT = null; // ancora in prova: non e' incasso
+    }
+    if (!startT) return;
+    events.push({ t: startT, type: 'new', amount: p });
+
+    const items = [];
+    changes.forEach((l) => items.push({ t: new Date(l.at), kind: 'change', from: Number(d(l).from_price), to: Number(d(l).to_price) }));
+    const cancels = ev.filter((l) => l.action === 'cancel');
+    cancels.forEach((l) => items.push({ t: new Date(l.at), kind: 'cancel', price: d(l).price }));
+    ev.filter((l) => l.action === 'reactivate' && d(l).was_cancelled).forEach((l) => items.push({ t: new Date(l.at), kind: 'react', price: d(l).price }));
+    if (s.status === 'cancelled' && s.cancelled_at) {
+      const ct = new Date(s.cancelled_at).getTime();
+      if (!cancels.some((l) => Math.abs(new Date(l.at).getTime() - ct) < 120000)) items.push({ t: new Date(s.cancelled_at), kind: 'cancel', price: null });
+    }
+    items.sort((a, b) => a.t - b.t);
+    let active = true;
+    items.forEach((it) => {
+      if (it.t < startT) return;
+      if (it.kind === 'change') {
+        if (active) { const delta = it.to - it.from; if (delta > 0) events.push({ t: it.t, type: 'expansion', amount: delta }); else if (delta < 0) events.push({ t: it.t, type: 'contraction', amount: -delta }); }
+        p = it.to;
+      } else if (it.kind === 'cancel') {
+        if (active) { events.push({ t: it.t, type: 'churn', amount: it.price != null ? Number(it.price) : p }); active = false; }
+      } else if (it.kind === 'react') {
+        if (!active) { events.push({ t: it.t, type: 'reactivation', amount: it.price != null ? Number(it.price) : p }); active = true; }
+      }
+    });
+  });
+  return events;
+}
+
+function monthlyMovement(events, now, months) {
+  const key = (t) => `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, '0')}`;
+  const mesi = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+  const keys = [];
+  let cur = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1), 1));
+  for (let i = 0; i < months; i++) { keys.push(key(cur)); cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth() + 1, 1)); }
+  const firstKey = keys[0];
+  const rows = {};
+  keys.forEach((k) => { rows[k] = { new: 0, expansion: 0, contraction: 0, churn: 0, reactivation: 0, new_n: 0, churn_n: 0, react_n: 0 }; });
+  let base = 0, baseN = 0;
+  events.slice().sort((a, b) => a.t - b.t).forEach((e) => {
+    const k = key(e.t);
+    if (k < firstKey) {
+      if (e.type === 'new' || e.type === 'expansion' || e.type === 'reactivation') base += e.amount; else base -= e.amount;
+      if (e.type === 'new' || e.type === 'reactivation') baseN += 1; else if (e.type === 'churn') baseN -= 1;
+    } else if (rows[k]) {
+      rows[k][e.type] += e.amount;
+      if (e.type === 'new') rows[k].new_n += 1; else if (e.type === 'churn') rows[k].churn_n += 1; else if (e.type === 'reactivation') rows[k].react_n += 1;
+    }
+  });
+  let run = base, runN = baseN;
+  return keys.map((k) => {
+    const r = rows[k];
+    const start = run, startN = runN;
+    run = start + r.new + r.expansion + r.reactivation - r.contraction - r.churn;
+    runN = startN + r.new_n + r.react_n - r.churn_n;
+    const round = (x) => Math.round(x * 100) / 100;
+    const [y, m] = k.split('-').map(Number);
+    return { m: `${mesi[m - 1]} ${String(y).slice(2)}`, key: k, start: round(start), new: round(r.new), expansion: round(r.expansion), contraction: round(r.contraction), churn: round(r.churn), reactivation: round(r.reactivation), end: round(run), start_n: startN, new_n: r.new_n, churn_n: r.churn_n, end_n: runN };
+  });
+}
+
+async function moneyOverview() {
+  const now = new Date();
+  const warnings = [];
+  const soft = async (label, p, fallback) => {
+    try { return await p; } catch (e) { warnings.push(label); console.error('money:' + label, e && e.message); return fallback; }
+  };
+  const [clients, subs, plans, logs] = await Promise.all([
+    listClients(),
+    sbAll('subscriptions?select=id,business_id,status,started_at,cancelled_at,plans(name,price_eur)&order=id.asc'),
+    sb('plans?select=name,price_eur'),
+    soft('storico azioni', sbAll('audit_logs?select=at,action,business_id,details&action=in.(assign_plan,cancel,reactivate,mark_paid)&order=at.asc,id.asc'), []),
+  ]);
+  const priceByKey = { base: 0, ai: 0 };
+  (plans || []).forEach((p) => { if (p.name === 'Base') priceByKey.base = Number(p.price_eur); if (p.name === 'Base+Lia') priceByKey.ai = Number(p.price_eur); });
+  const round = (x) => Math.round(x * 100) / 100;
+  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 1000) / 10 : null);
+
+  // ---- chi paga adesso
+  const price = (c) => (c.plan ? priceByKey[c.plan] || 0 : 0);
+  const paying = clients.filter((c) => c.status === 'active' && c.plan && (!c.service || c.service.state === 'active' || c.service.state === 'grace'));
+  const mrr = paying.reduce((s, c) => s + price(c), 0);
+  const mrrBase = paying.filter((c) => c.plan === 'base').reduce((s, c) => s + price(c), 0);
+  const mrrAi = paying.filter((c) => c.plan === 'ai').reduce((s, c) => s + price(c), 0);
+  const byType = {};
+  paying.forEach((c) => { byType[c.type] = round((byType[c.type] || 0) + price(c)); });
+
+  // ---- movimento mensile (12 mesi)
+  const events = buildMrrEvents(subs, logs);
+  const movement = monthlyMovement(events, now, 12);
+  const last = movement[movement.length - 1];
+  const prevFull = movement.length > 1 ? movement[movement.length - 2] : null;
+  const subsActiveSum = (subs || []).filter((s) => s.status === 'active').reduce((sum, s) => sum + Number((s.plans && s.plans.price_eur) || 0), 0);
+  const reconciles = Math.abs(last.end - subsActiveSum) < 0.01;
+  if (!reconciles) warnings.push('movimento non quadra con gli abbonamenti attivi');
+  const win6 = movement.slice(-7, -1); // ultimi 6 mesi completi
+  const churnN6 = win6.reduce((s, r) => s + r.churn_n, 0);
+  const startN6 = win6.reduce((s, r) => s + r.start_n, 0);
+  const churnLogo6 = startN6 > 0 ? churnN6 / startN6 : null;
+  const arpa = paying.length ? mrr / paying.length : 0;
+
+  // ---- rinnovi
+  const t7 = now.getTime() + 7 * 86400000, t30 = now.getTime() + 30 * 86400000, t45 = now.getTime() + 45 * 86400000;
+  const items = clients
+    .filter((c) => c.plan && (c.status === 'active' || c.status === 'trial') && c.renew)
+    .map((c) => ({ date: c.renew, id: c.id, name: c.name, plan: c.plan, amount: price(c), state: c.service ? c.service.state : null, kind: c.status === 'trial' ? 'conversione' : 'rinnovo' }));
+  const overdue = items.filter((i) => new Date(i.date).getTime() < now.getTime() && (i.state === 'grace' || i.state === 'suspended')).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const upcoming = items.filter((i) => { const t = new Date(i.date).getTime(); return t >= now.getTime() && t <= t45; }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sum = (arr, f) => arr.filter(f).reduce((s, i) => s + i.amount, 0);
+  const cnt = (arr, f) => arr.filter(f).length;
+  // "prossimi giorni" = da adesso in avanti: gli scaduti stanno a parte (overdue)
+  const inRange = (i, end) => { const t = new Date(i.date).getTime(); return t >= now.getTime() && t <= end; };
+  const renew7 = (i) => i.kind === 'rinnovo' && inRange(i, t7);
+  const renew30 = (i) => i.kind === 'rinnovo' && inRange(i, t30);
+  const conv14 = (i) => i.kind === 'conversione' && inRange(i, now.getTime() + 14 * 86400000);
+
+  // ---- incasso a rischio
+  const graceList = paying.filter((c) => c.service && c.service.state === 'grace');
+  const redList = paying.filter((c) => c.health && c.health.level === 'red');
+  const atRiskMap = {};
+  graceList.forEach((c) => { atRiskMap[c.id] = { id: c.id, name: c.name, amount: price(c), reasons: ['Abbonamento scaduto: in tolleranza'] }; });
+  redList.forEach((c) => { const e = atRiskMap[c.id] || (atRiskMap[c.id] = { id: c.id, name: c.name, amount: price(c), reasons: [] }); (c.health.reasons || []).forEach((r) => { if (!e.reasons.includes(r)) e.reasons.push(r); }); });
+  const atRisk = Object.keys(atRiskMap).map((k) => atRiskMap[k]).sort((a, b) => b.amount - a.amount);
+  const suspended = clients.filter((c) => c.status === 'active' && c.plan && c.service && c.service.state === 'suspended');
+
+  return {
+    kpis: {
+      mrr: round(mrr), arr: round(mrr * 12), paying: paying.length, arpa: round(arpa),
+      mrr_base: round(mrrBase), mrr_ai: round(mrrAi), ai_share_pct: mrr ? Math.round((mrrAi / mrr) * 100) : 0,
+      growth_pct: prevFull && prevFull.end > 0 ? pct(last.end - prevFull.end, prevFull.end) : null,
+      churn_rev_pct: prevFull ? pct(prevFull.churn, prevFull.start) : null,
+      churn_logo_pct: prevFull ? pct(prevFull.churn_n, prevFull.start_n) : null,
+      nrr_pct: prevFull && prevFull.start > 0 ? pct(prevFull.start + prevFull.expansion - prevFull.contraction - prevFull.churn, prevFull.start) : null,
+      ltv_estimate: churnLogo6 && churnLogo6 > 0 ? Math.round(arpa / churnLogo6) : null,
+      prev_month_label: prevFull ? prevFull.m : null,
+    },
+    movement,
+    reconciles,
+    by_type: byType,
+    renewals: {
+      next7: { count: cnt(items, renew7), amount: round(sum(items, renew7)) },
+      next30: { count: cnt(items, renew30), amount: round(sum(items, renew30)) },
+      trials14: { count: cnt(items, conv14), amount: round(sum(items, conv14)) },
+      overdue, upcoming,
+    },
+    at_risk: {
+      grace: { count: graceList.length, amount: round(graceList.reduce((s, c) => s + price(c), 0)) },
+      unhealthy: { count: redList.length, amount: round(redList.reduce((s, c) => s + price(c), 0)) },
+      total: { count: atRisk.length, amount: round(atRisk.reduce((s, e) => s + e.amount, 0)) },
+      suspended: { count: suspended.length, amount: round(suspended.reduce((s, c) => s + price(c), 0)) },
+      list: atRisk.slice(0, 10),
+    },
+    warnings,
+  };
+}
+
 // ============================ AZIONI ADMIN ============================
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -533,7 +716,7 @@ function addMonths(date, n) {
 const fail = (msg) => { const e = new Error(msg); e.validation = true; return e; };
 
 async function latestSub(businessId) {
-  const rows = await sb(`subscriptions?business_id=eq.${businessId}&select=*&order=started_at.desc&limit=1`);
+  const rows = await sb(`subscriptions?business_id=eq.${businessId}&select=*,plans(name,price_eur)&order=started_at.desc&limit=1`);
   return rows && rows[0] ? rows[0] : null;
 }
 
@@ -554,12 +737,13 @@ async function patchSub(subId, fields) {
   await sb(`subscriptions?id=eq.${subId}`, { method: 'PATCH', body: fields });
 }
 
-async function planId(planKey) {
-  const plans = await sb('plans?select=id,name');
+async function planInfo(planKey) {
+  const plans = await sb('plans?select=id,name,price_eur');
   const p = (plans || []).find((x) => x.name === (planKey === 'ai' ? 'Base+Lia' : 'Base'));
   if (!p) throw new Error('Piano non trovato nella tabella plans.');
-  return p.id;
+  return { id: p.id, name: p.name, price: Number(p.price_eur) };
 }
+const subPrice = (sub) => Number((sub && sub.plans && sub.plans.price_eur) || 0);
 
 async function runAction(body) {
   const action = String(body.action || '');
@@ -571,7 +755,8 @@ async function runAction(body) {
   if (action === 'assign_plan') {
     const planKey = body.plan === 'ai' ? 'ai' : body.plan === 'base' ? 'base' : null;
     if (!planKey) throw fail('Scegli un piano (Base o Base + Lia).');
-    const pid = await planId(planKey);
+    const plan = await planInfo(planKey);
+    const pid = plan.id;
     if (!sub) {
       const trial = body.status === 'trial';
       await sb('subscriptions', {
@@ -586,7 +771,11 @@ async function runAction(body) {
       if (sub.status === 'cancelled') throw fail('Abbonamento annullato: usa prima "Riattiva".');
       await patchSub(sub.id, { plan_id: pid });
     }
-    await audit('assign_plan', id, { plan: planKey, status: body.status || 'active' });
+    await audit('assign_plan', id, {
+      plan: planKey, status: body.status || 'active', was_new: !sub,
+      from_plan: sub && sub.plans ? sub.plans.name : null, from_price: sub ? subPrice(sub) : null,
+      to_plan: plan.name, to_price: plan.price,
+    });
     return { ok: true, state: (await accessRow(id) || {}).state };
   }
 
@@ -601,7 +790,7 @@ async function runAction(body) {
     const base = sub.status !== 'trial' && paid && paid > now ? paid : now;
     const end = addMonths(base, months);
     await patchSub(sub.id, { status: 'active', current_period_end: end.toISOString(), courtesy_until: null, suspended_manually: false, suspended_at: null });
-    await audit('mark_paid', id, { months, paid_until: end.toISOString() });
+    await audit('mark_paid', id, { months, paid_until: end.toISOString(), was_trial: sub.status === 'trial', price: subPrice(sub) });
     return { ok: true, state: (await accessRow(id) || {}).state, paid_until: end.toISOString() };
   }
 
@@ -632,7 +821,7 @@ async function runAction(body) {
     } else {
       await patchSub(sub.id, { suspended_manually: false, suspended_at: null });
     }
-    await audit('reactivate', id, { was_cancelled: sub.status === 'cancelled' });
+    await audit('reactivate', id, { was_cancelled: sub.status === 'cancelled', price: subPrice(sub) });
     const state = (await accessRow(id) || {}).state;
     return { ok: true, state, note: state === 'suspended' ? 'Ancora scaduto: segna come pagato o concedi una proroga.' : undefined };
   }
@@ -640,7 +829,7 @@ async function runAction(body) {
   if (action === 'cancel') {
     if (sub.status === 'cancelled') throw fail('Abbonamento gia\' annullato.');
     await patchSub(sub.id, { status: 'cancelled', cancelled_at: now.toISOString() });
-    await audit('cancel', id, {});
+    await audit('cancel', id, { price: subPrice(sub) });
     return { ok: true, state: (await accessRow(id) || {}).state };
   }
 
@@ -780,6 +969,10 @@ module.exports = async function handler(req, res) {
         res.status(200).json(await overviewData());
         return;
       }
+      if (req.query && req.query.view === 'money') {
+        res.status(200).json(await moneyOverview());
+        return;
+      }
       if (req.query && req.query.view === 'lia') {
         res.status(200).json(await liaOverview());
         return;
@@ -816,3 +1009,6 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.computeHealth = computeHealth;
+
+module.exports.buildMrrEvents = buildMrrEvents;
+module.exports.monthlyMovement = monthlyMovement;
