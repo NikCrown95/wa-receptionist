@@ -210,7 +210,9 @@ module.exports = async (req, res) => {
       if (!resource) return res.status(400).json({ error: "Nessuna risorsa attiva configurata" });
 
       if (req.method === "GET") {
-        const hours = (resource.opening_hours || []).slice().sort((a,b) => a.weekday - b.weekday || String(a.opens).localeCompare(String(b.opens)));
+        const hr=await sb("GET","opening_hours?resource_id=eq."+resource.id+"&select=id,weekday,opens,closes&order=weekday.asc,opens.asc");
+        if(!hr.ok||!Array.isArray(hr.data)) return res.status(500).json({error:"Errore lettura orari di apertura"});
+        const hours=hr.data;
         return res.status(200).json({
           business: { name: biz.name, timezone: tz },
           services: biz.services.map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place })),
