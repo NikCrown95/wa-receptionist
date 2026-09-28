@@ -213,7 +213,7 @@ module.exports = async (req, res) => {
         if(!hr.ok||!Array.isArray(hr.data)) return res.status(500).json({error:"Errore lettura orari di apertura"});
         const hours=hr.data;
         return res.status(200).json({
-          business: { name: biz.name, timezone: tz, address: biz.address || null, public_link: biz.public_link || biz.booking_url || null, telegram: biz.telegram || biz.telegram_username || null },
+          business: { name: biz.name, timezone: tz, address: biz.address || null, public_link: biz.public_link || biz.booking_url || ((req.headers["x-forwarded-proto"] || "https").split(",")[0] + "://" + (req.headers["x-forwarded-host"] || req.headers.host) + "/api/chat?b=" + encodeURIComponent(biz.slug)), telegram: biz.telegram || biz.telegram_username || (process.env.TELEGRAM_BOT_USERNAME ? "https://t.me/" + String(process.env.TELEGRAM_BOT_USERNAME).replace(/^@/,"") + "?start=" + encodeURIComponent(biz.slug) : null) },
           services: biz.services.map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place })),
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
           blocks: await (async function(){
