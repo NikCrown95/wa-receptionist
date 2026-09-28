@@ -44,6 +44,19 @@ module.exports = async (req, res) => {
     if (typeof msg.text !== "string") return reply("Per ora capisco solo i messaggi scritti. Scrivimi pure cosa ti serve.");
     const text = msg.text.trim();
 
+    // Tu (proprietario di LIA) colleghi la tua chat per ricevere gli allarmi: "/start admin_PAROLA_SEGRETA"
+    const adminCode = process.env.ADMIN_TELEGRAM_CODE || "";
+    const adm = text.match(/^\/start(?:@\w+)?\s+admin_(.+)$/i);
+    if (adm) {
+      if (!adminCode || adm[1] !== adminCode) return reply("Codice non valido.");
+      await sb("POST", "admin_alert_chats", { channel: "telegram", chat_id: String(chatId), label: "Telegram", active: true }, "resolution=merge-duplicates");
+      return reply("Fatto! Da qui in poi ricevi qui gli allarmi della Super Dashboard (clienti sospesi, rinnovi in scadenza, costi AI anomali).\n\nPer smettere: /admin_scollega");
+    }
+    if (/^\/admin_scollega$/i.test(text)) {
+      await sb("PATCH", "admin_alert_chats?chat_id=eq." + encodeURIComponent(String(chatId)), { active: false });
+      return reply("Ok, non ricevi più gli allarmi della Super Dashboard qui.");
+    }
+
     // Il titolare collega la sua chat: "/start owner_CODICE"
     const own = text.match(/^\/start(?:@\w+)?\s+owner_([a-f0-9]{8,32})$/i);
     if (own) {
