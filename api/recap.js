@@ -6,6 +6,7 @@
 // TWILIO_WHATSAPP_FROM e, se usi un modello approvato, TWILIO_RECAP_TEMPLATE_SID.
 
 const { sb, agendaBundle, sendTelegram, sendWhatsAppRecap } = require("../lib/owner.js");
+const { getAccess } = require("../lib/access.js");
 
 module.exports = async (req, res) => {
   const secret = process.env.CRON_SECRET || "";
@@ -24,9 +25,11 @@ module.exports = async (req, res) => {
     );
     if (!r.ok || !Array.isArray(r.data)) return res.status(500).json({ error: "Errore lettura attività" });
 
-    const out = { telegram: 0, whatsapp: 0, failed: 0 };
+    const out = { telegram: 0, whatsapp: 0, failed: 0, skipped: 0 };
     for (const biz of r.data) {
       try {
+        const acc = await getAccess(biz.id);
+        if (!acc.allowed) { out.skipped++; continue; } // abbonamento scaduto: niente riepilogo
         const bundle = await agendaBundle(biz, 0, { greeting: true });
         if (biz.owner_telegram_chat_id) {
           if (await sendTelegram(biz.owner_telegram_chat_id, bundle.text)) out.telegram++;
