@@ -5,6 +5,7 @@
 //
 //   GET  /api/admin/clients                -> { clients: [...] }
 //   GET  /api/admin/clients?view=overview  -> { history, byType, planSplit } (pagina Andamento)
+//   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan
 //   POST /api/admin/clients  -> crea attività + abbonamento
 //        body: { name, type, plan: 'base'|'ai', status: 'active'|'trial', phone }
 //
@@ -108,24 +109,88 @@ function slugify(name) {
     .replace(/^-+|-+$/g, '') || 'attivita';
 }
 
+// Salute di un cliente: verde / giallo / rosso (na = non applicabile).
+// Regole semplici e spiegabili: ogni giudizio porta con se' il motivo.
+function computeHealth(x) {
+  const reasons = [];
+  if (x.status === 'cancelled') return { level: 'na', label: 'Annullato', reasons, upgrade: false };
+  if (x.status === 'none') return { level: 'na', label: 'Senza piano', reasons, upgrade: false };
+
+  let red = false;
+  let yellow = false;
+  const age = x.ageDays;
+
+  if (x.status === 'past_due') { red = true; reasons.push('Pagamento in ritardo'); }
+  if (x.serviceState === 'suspended') { red = true; reasons.push('Servizio sospeso'); }
+  else if (x.serviceState === 'grace') { yellow = true; reasons.push('Abbonamento scaduto: in tolleranza'); }
+
+  if (x.status === 'active' && age > 14) {
+    if (x.lastDays === null) { red = true; reasons.push('Nessun appuntamento negli ultimi 30 giorni'); }
+    else if (x.lastDays > 14) { red = true; reasons.push(`Nessun appuntamento da ${x.lastDays} giorni`); }
+    else if (x.lastDays >= 8) { yellow = true; reasons.push(`Ultimo appuntamento ${x.lastDays} giorni fa`); }
+  }
+  if (x.status === 'trial') {
+    if (x.appts30 === 0 && age > 7) { red = true; reasons.push('In prova da giorni, nessun appuntamento'); }
+    if (x.trialDaysLeft !== null && x.trialDaysLeft <= 3 && x.trialDaysLeft >= 0) { yellow = true; reasons.push(`Prova in scadenza tra ${x.trialDaysLeft} giorni`); }
+  }
+  if (x.prev14 >= 6 && x.last14 <= x.prev14 * 0.5) {
+    yellow = true;
+    reasons.push(`Appuntamenti in calo (-${Math.round((1 - x.last14 / x.prev14) * 100)}%)`);
+  }
+  const missing = [];
+  if (!x.hasServices) missing.push('servizi');
+  if (!x.hasResource) missing.push('operatore');
+  else if (!x.hasHours) missing.push('orari');
+  if (x.plan === 'ai' && !x.hasWhatsapp) missing.push('WhatsApp collegato');
+  if (missing.length) { yellow = true; reasons.push('Manca: ' + missing.join(', ')); }
+
+  const level = red ? 'red' : yellow ? 'yellow' : 'green';
+  const label = red ? 'A rischio' : yellow ? 'Da controllare' : 'In salute';
+  const upgrade = x.plan === 'base' && x.status === 'active' && x.appts30 >= 20;
+  return { level, label, reasons, upgrade };
+}
+
 async function listClients() {
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const since = new Date(now.getTime() - 30 * 86400000).toISOString();
 
   const businesses = await sbAll(
-    'businesses?select=id,name,business_type,owner_phone,created_at,' +
-      'subscriptions(status,started_at,cancelled_at,plans(name,price_eur))' +
+    'businesses?select=id,name,business_type,owner_phone,owner_whatsapp,created_at,' +
+      'subscriptions(status,started_at,cancelled_at,plans(name,price_eur)),' +
+      'services(id),resources(id,active,opening_hours(id))' +
       '&order=created_at.desc,id.asc'
   );
 
+  // Stato del servizio: la regola vera e' nella vista service_access_v del database.
+  // Se la lettura fallisce la lista funziona lo stesso (colonna vuota), senza errori.
+  const access = {};
+  try {
+    const rows = await sbAll('service_access_v?select=business_id,state,allowed,lia_allowed,paid_until,grace_ends&order=business_id.asc');
+    rows.forEach((r) => { access[r.business_id] = r; });
+  } catch (e) {
+    console.error('service_access_v non leggibile:', e && e.message);
+  }
+
   const appts = await sbAll(
-    'appointments?select=business_id&status=neq.cancelled' +
+    'appointments?select=business_id,starts_at&status=neq.cancelled' +
       `&starts_at=gte.${encodeURIComponent(since)}&starts_at=lte.${encodeURIComponent(now.toISOString())}` +
       '&order=id.asc'
   );
   const counts = {};
-  (appts || []).forEach((a) => { counts[a.business_id] = (counts[a.business_id] || 0) + 1; });
+  const last14 = {};
+  const prev14 = {};
+  const lastAt = {};
+  const t14 = now.getTime() - 14 * 86400000;
+  const t28 = now.getTime() - 28 * 86400000;
+  (appts || []).forEach((a) => {
+    const id = a.business_id;
+    const t = new Date(a.starts_at).getTime();
+    counts[id] = (counts[id] || 0) + 1;
+    if (t >= t14) last14[id] = (last14[id] || 0) + 1;
+    else if (t >= t28) prev14[id] = (prev14[id] || 0) + 1;
+    if (!lastAt[id] || t > lastAt[id]) lastAt[id] = t;
+  });
 
   const clients = (businesses || []).map((b) => {
     const subs = (b.subscriptions || []).slice().sort((x, y) => new Date(y.started_at) - new Date(x.started_at));
@@ -139,7 +204,26 @@ async function listClients() {
       if (status === 'cancelled') renew = new Date(sub.cancelled_at || sub.started_at);
       else if (status === 'trial') renew = new Date(new Date(sub.started_at).getTime() + 30 * 86400000);
       else renew = nextMonthlyRenewal(sub.started_at, today);
+      const av = access[b.id];
+      if (av && av.paid_until && status !== 'cancelled') renew = new Date(av.paid_until); // data reale salvata
     }
+    const acc = access[b.id] || null;
+    const activeRes = (b.resources || []).filter((r) => r.active !== false);
+    const health = computeHealth({
+      status,
+      plan,
+      serviceState: acc ? acc.state : null,
+      appts30: counts[b.id] || 0,
+      last14: last14[b.id] || 0,
+      prev14: prev14[b.id] || 0,
+      lastDays: lastAt[b.id] ? Math.floor((now.getTime() - lastAt[b.id]) / 86400000) : null,
+      ageDays: sub ? Math.floor((now.getTime() - new Date(sub.started_at).getTime()) / 86400000) : 0,
+      trialDaysLeft: status === 'trial' && renew ? Math.ceil((renew.getTime() - now.getTime()) / 86400000) : null,
+      hasServices: (b.services || []).length > 0,
+      hasResource: activeRes.length > 0,
+      hasHours: activeRes.some((r) => (r.opening_hours || []).length > 0),
+      hasWhatsapp: Boolean(b.owner_whatsapp),
+    });
     return {
       id: b.id,
       name: b.name,
@@ -150,9 +234,142 @@ async function listClients() {
       appts: counts[b.id] || 0,
       phone: b.owner_phone || '',
       email: '',
+      health,
+      service: acc ? { state: acc.state, allowed: acc.allowed, paid_until: acc.paid_until, grace_ends: acc.grace_ends } : null,
     };
   });
   return clients;
+}
+
+
+// ============================ AZIONI ADMIN ============================
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function addMonths(date, n) {
+  const d = new Date(date);
+  const day = d.getUTCDate();
+  d.setUTCDate(1);
+  d.setUTCMonth(d.getUTCMonth() + n);
+  const dim = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(day, dim));
+  return d;
+}
+
+const fail = (msg) => { const e = new Error(msg); e.validation = true; return e; };
+
+async function latestSub(businessId) {
+  const rows = await sb(`subscriptions?business_id=eq.${businessId}&select=*&order=started_at.desc&limit=1`);
+  return rows && rows[0] ? rows[0] : null;
+}
+
+async function accessRow(businessId) {
+  const rows = await sb(`service_access_v?business_id=eq.${businessId}&select=state,allowed,lia_allowed,paid_until,grace_ends&limit=1`);
+  return rows && rows[0] ? rows[0] : null;
+}
+
+async function audit(action, businessId, details) {
+  try {
+    await sb('audit_logs', { method: 'POST', body: { actor: 'admin', action, business_id: businessId, details } });
+  } catch (e) {
+    console.error('audit_logs non scritto:', e && e.message); // non deve mai bloccare l'azione
+  }
+}
+
+async function patchSub(subId, fields) {
+  await sb(`subscriptions?id=eq.${subId}`, { method: 'PATCH', body: fields });
+}
+
+async function planId(planKey) {
+  const plans = await sb('plans?select=id,name');
+  const p = (plans || []).find((x) => x.name === (planKey === 'ai' ? 'Base+Lia' : 'Base'));
+  if (!p) throw new Error('Piano non trovato nella tabella plans.');
+  return p.id;
+}
+
+async function runAction(body) {
+  const action = String(body.action || '');
+  const id = String(body.id || '');
+  if (!UUID.test(id)) throw fail('Attivita\' non valida.');
+  const now = new Date();
+  const sub = await latestSub(id);
+
+  if (action === 'assign_plan') {
+    const planKey = body.plan === 'ai' ? 'ai' : body.plan === 'base' ? 'base' : null;
+    if (!planKey) throw fail('Scegli un piano (Base o Base + Lia).');
+    const pid = await planId(planKey);
+    if (!sub) {
+      const trial = body.status === 'trial';
+      await sb('subscriptions', {
+        method: 'POST',
+        body: {
+          business_id: id, plan_id: pid, status: trial ? 'trial' : 'active', started_at: now.toISOString(),
+          current_period_end: trial ? null : addMonths(now, 1).toISOString(),
+          trial_ends_at: trial ? new Date(now.getTime() + 30 * 86400000).toISOString() : null,
+        },
+      });
+    } else {
+      if (sub.status === 'cancelled') throw fail('Abbonamento annullato: usa prima "Riattiva".');
+      await patchSub(sub.id, { plan_id: pid });
+    }
+    await audit('assign_plan', id, { plan: planKey, status: body.status || 'active' });
+    return { ok: true, state: (await accessRow(id) || {}).state };
+  }
+
+  if (!sub) throw fail('Questa attivita\' non ha un abbonamento: assegna prima un piano.');
+
+  if (action === 'mark_paid') {
+    if (sub.status === 'cancelled') throw fail('Abbonamento annullato: usa "Riattiva".');
+    const months = Math.min(12, Math.max(1, parseInt(body.months, 10) || 1));
+    const row = await accessRow(id);
+    const paid = row && row.paid_until ? new Date(row.paid_until) : null;
+    // in prova o gia' scaduto: il nuovo periodo parte da oggi; se e' ancora coperto, si aggiunge in coda
+    const base = sub.status !== 'trial' && paid && paid > now ? paid : now;
+    const end = addMonths(base, months);
+    await patchSub(sub.id, { status: 'active', current_period_end: end.toISOString(), courtesy_until: null, suspended_manually: false, suspended_at: null });
+    await audit('mark_paid', id, { months, paid_until: end.toISOString() });
+    return { ok: true, state: (await accessRow(id) || {}).state, paid_until: end.toISOString() };
+  }
+
+  if (action === 'extend') {
+    if (sub.status === 'cancelled') throw fail('Abbonamento annullato: usa "Riattiva".');
+    const days = parseInt(body.days, 10);
+    if (!days || days < 1 || days > 60) throw fail('La proroga deve essere tra 1 e 60 giorni.');
+    const row = await accessRow(id);
+    const times = [now.getTime()];
+    if (row && row.paid_until) times.push(new Date(row.paid_until).getTime());
+    if (sub.courtesy_until) times.push(new Date(sub.courtesy_until).getTime());
+    const until = new Date(Math.max.apply(null, times) + days * 86400000);
+    await patchSub(sub.id, { courtesy_until: until.toISOString() });
+    await audit('extend', id, { days, courtesy_until: until.toISOString() });
+    return { ok: true, state: (await accessRow(id) || {}).state, courtesy_until: until.toISOString() };
+  }
+
+  if (action === 'suspend') {
+    if (sub.status === 'cancelled') throw fail('Abbonamento gia\' annullato.');
+    await patchSub(sub.id, { suspended_manually: true, suspended_at: now.toISOString() });
+    await audit('suspend', id, {});
+    return { ok: true, state: (await accessRow(id) || {}).state };
+  }
+
+  if (action === 'reactivate') {
+    if (sub.status === 'cancelled') {
+      await patchSub(sub.id, { status: 'active', cancelled_at: null, current_period_end: addMonths(now, 1).toISOString(), courtesy_until: null, suspended_manually: false, suspended_at: null });
+    } else {
+      await patchSub(sub.id, { suspended_manually: false, suspended_at: null });
+    }
+    await audit('reactivate', id, { was_cancelled: sub.status === 'cancelled' });
+    const state = (await accessRow(id) || {}).state;
+    return { ok: true, state, note: state === 'suspended' ? 'Ancora scaduto: segna come pagato o concedi una proroga.' : undefined };
+  }
+
+  if (action === 'cancel') {
+    if (sub.status === 'cancelled') throw fail('Abbonamento gia\' annullato.');
+    await patchSub(sub.id, { status: 'cancelled', cancelled_at: now.toISOString() });
+    await audit('cancel', id, {});
+    return { ok: true, state: (await accessRow(id) || {}).state };
+  }
+
+  throw fail('Azione non riconosciuta.');
 }
 
 async function createClient(body) {
@@ -294,6 +511,10 @@ module.exports = async function handler(req, res) {
     if (req.method === 'POST') {
       let body = req.body;
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
+      if (body && body.action) {
+        res.status(200).json(await runAction(body));
+        return;
+      }
       res.status(201).json(await createClient(body || {}));
       return;
     }
@@ -306,3 +527,5 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+module.exports.computeHealth = computeHealth;
