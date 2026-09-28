@@ -5,6 +5,8 @@
 //
 //   GET  /api/admin/clients                -> { clients: [...] }
 //   GET  /api/admin/clients?view=overview  -> { history, byType, planSplit } (pagina Andamento)
+//   GET  /api/admin/clients?view=margin                  -> costi AI e margine per cliente
+//   POST /api/admin/clients {action:'set_setting'|'set_price', ...} -> cambio, spese fisse, listino
 //   GET  /api/admin/clients?view=money                   -> soldi: MRR, movimento, rinnovi, incasso a rischio
 //   GET  /api/admin/clients?view=lia                     -> uso di Lia su tutte le attivita'
 //   GET  /api/admin/clients?view=detail&id=UUID          -> scheda singola attivita'
@@ -700,6 +702,136 @@ async function moneyOverview() {
   };
 }
 
+
+// ============================ COSTI E MARGINE ============================
+// Margine per cliente = incasso del cliente - costo AI (30 giorni) - costo messaggi.
+// Le spese fisse (Vercel, Supabase...) pesano sull'azienda, non sul singolo cliente.
+async function marginOverview() {
+  const now = new Date();
+  const warnings = [];
+  const soft = async (label, p, fallback) => {
+    try { return await p; } catch (e) { warnings.push(label); console.error('margin:' + label, e && e.message); return fallback; }
+  };
+  const [clients, plans, costRows, daily, models, msgRows, settings, prices, first] = await Promise.all([
+    listClients(),
+    sb('plans?select=name,price_eur'),
+    soft('costi AI per attivita', sbAll('ai_cost_business_v?select=*&order=business_id.asc'), []),
+    soft('costi AI al giorno', sbAll('ai_cost_daily_v?select=*&order=day.asc'), []),
+    soft('costi AI per modello', sbAll('ai_cost_model_v?select=*&order=model.asc'), []),
+    soft('messaggi per canale', sbAll('lia_msgs_channel_v?select=*&order=business_id.asc,channel.asc'), []),
+    soft('impostazioni costi', sb('cost_settings?select=key,label,value,updated_at,set_by_user&order=key.asc'), []),
+    soft('listino prezzi', sb('ai_prices?select=*&order=model.asc'), []),
+    soft('primo utilizzo', sb('ai_usage?select=at&order=at.asc&limit=1'), []),
+  ]);
+  const round = (x, d = 2) => { const f = Math.pow(10, d); return Math.round(x * f) / f; };
+  const pct = (a, b) => (b > 0 ? Math.round((a / b) * 1000) / 10 : null);
+  const priceByKey = { base: 0, ai: 0 };
+  (plans || []).forEach((p) => { if (p.name === 'Base') priceByKey.base = Number(p.price_eur); if (p.name === 'Base+Lia') priceByKey.ai = Number(p.price_eur); });
+  const set = {}; (settings || []).forEach((s) => { set[s.key] = s; });
+  const val = (k) => (set[k] ? Number(set[k].value) : 0);
+
+  const aiBy = {}; (costRows || []).forEach((r) => { aiBy[r.business_id] = r; });
+  const msgCost = {}; const msgCount = {};
+  let waMsgs = 0, userMsgs = 0;
+  (msgRows || []).forEach((r) => {
+    const n = (Number(r.user_msgs) || 0) + (Number(r.lia_msgs) || 0);
+    msgCount[r.business_id] = (msgCount[r.business_id] || 0) + n;
+    msgCost[r.business_id] = (msgCost[r.business_id] || 0) + n * val('msg_eur_' + r.channel);
+    userMsgs += Number(r.user_msgs) || 0;
+    if (r.channel === 'whatsapp') waMsgs += n;
+  });
+
+  const rows = [];
+  let mrr = 0, aiTotal = 0, msgTotal = 0, calls = 0;
+  (costRows || []).forEach((r) => { aiTotal += Number(r.cost_eur) || 0; calls += Number(r.calls) || 0; });
+  Object.keys(msgCost).forEach((k) => { msgTotal += msgCost[k]; });
+  clients.forEach((c) => {
+    const paying = c.status === 'active' && c.plan && (!c.service || c.service.state === 'active' || c.service.state === 'grace');
+    const revenue = paying ? priceByKey[c.plan] || 0 : 0;
+    mrr += revenue;
+    const ai = aiBy[c.id] ? Number(aiBy[c.id].cost_eur) || 0 : 0;
+    const msg = msgCost[c.id] || 0;
+    if (!revenue && !ai && !msg) return;
+    const cost = ai + msg;
+    rows.push({
+      id: c.id, name: c.name, type: c.type, plan: c.plan, paying: !!paying, revenue: round(revenue),
+      ai_cost: round(ai, 4), msg_cost: round(msg, 4), cost: round(cost, 4), margin: round(revenue - cost),
+      margin_pct: revenue > 0 ? pct(revenue - cost, revenue) : null,
+      calls: aiBy[c.id] ? Number(aiBy[c.id].calls) || 0 : 0, messages: msgCount[c.id] || 0,
+    });
+  });
+  rows.sort((a, b) => a.margin - b.margin || a.name.localeCompare(b.name));
+
+  const fixedKeys = ['fixed_vercel', 'fixed_supabase', 'fixed_twilio', 'fixed_other'];
+  const fixed = fixedKeys.reduce((s, k) => s + val(k), 0);
+  const variable = aiTotal + msgTotal;
+  const liaPaying = rows.filter((r) => r.paying && r.plan === 'ai');
+  const liaAvgCost = liaPaying.length ? liaPaying.reduce((s, r) => s + r.cost, 0) / liaPaying.length : null;
+
+  const unpricedModels = (models || []).filter((m) => m.priced === false).map((m) => ({ model: m.model, calls: Number(m.calls) || 0 }));
+  const firstAt = first && first[0] ? first[0].at : null;
+  const todo = [];
+  if (!firstAt) todo.push('Nessun costo AI registrato finora: il conteggio parte da quando carichi la modifica al backend.');
+  if (unpricedModels.length) todo.push('Manca il prezzo di questi modelli: ' + unpricedModels.map((m) => m.model).join(', ') + '.');
+  if (waMsgs > 0 && val('msg_eur_whatsapp') === 0) todo.push('Imposta quanto costa un messaggio WhatsApp: ora è contato a zero.');
+  if (set.usd_eur && !set.usd_eur.set_by_user) todo.push('Controlla il cambio dollaro/euro: è un valore di partenza.');
+  if (set.fixed_supabase && Number(set.fixed_supabase.value) === 0) todo.push('Inserisci quanto paghi Supabase al mese (0 se è gratis).');
+
+  return {
+    totals: {
+      mrr: round(mrr), ai_cost: round(aiTotal, 4), msg_cost: round(msgTotal, 4), variable_cost: round(variable, 4), fixed_cost: round(fixed),
+      net: round(mrr - variable - fixed), net_margin_pct: pct(mrr - variable - fixed, mrr), variable_margin_pct: pct(mrr - variable, mrr),
+      calls, user_msgs: userMsgs, ai_cost_per_msg: userMsgs > 0 ? round(aiTotal / userMsgs, 5) : null,
+      lia_clients: liaPaying.length, lia_avg_cost: liaAvgCost != null ? round(liaAvgCost, 4) : null,
+      lia_avg_margin: liaAvgCost != null ? round(priceByKey.ai - liaAvgCost) : null, lia_price: priceByKey.ai,
+      losing: rows.filter((r) => r.margin < 0).length,
+    },
+    clients: rows.slice(0, 20),
+    clients_total: rows.length,
+    per_day: (daily || []).map((d) => ({ d: String(d.day).slice(0, 10), cost: round(Number(d.cost_eur) || 0, 4), calls: Number(d.calls) || 0 })),
+    by_model: (models || []).map((m) => ({ model: m.model, priced: m.priced !== false, calls: Number(m.calls) || 0, cost: round(Number(m.cost_eur) || 0, 4), tokens_in: Number(m.tokens_in) || 0, tokens_out: Number(m.tokens_out) || 0 })),
+    settings: (settings || []).map((s) => ({ key: s.key, label: s.label, value: Number(s.value), updated_at: s.updated_at, set_by_user: !!s.set_by_user })),
+    prices: (prices || []).map((p) => ({ model: p.model, input: Number(p.input_per_mtok), output: Number(p.output_per_mtok), cache_write: Number(p.cache_write_per_mtok), cache_read: Number(p.cache_read_per_mtok) })),
+    tracking: { started_at: firstAt, has_data: !!firstAt },
+    todo, warnings,
+  };
+}
+
+// Modifica di cambio, costi fissi, costo messaggi e listino prezzi (con registro delle modifiche)
+async function runSettingsAction(body) {
+  const action = String(body.action);
+  const num = (v, label, max) => {
+    const n = Number(String(v).replace(',', '.'));
+    if (!Number.isFinite(n) || n < 0 || n > max) throw fail(label + ' non è valido (serve un numero tra 0 e ' + max + ').');
+    return n;
+  };
+  if (action === 'set_setting') {
+    const key = String(body.key || '');
+    if (!/^[a-z_]{3,40}$/.test(key)) throw fail('Impostazione non valida.');
+    const cur = await sb(`cost_settings?key=eq.${encodeURIComponent(key)}&select=key,value`);
+    if (!cur || !cur.length) throw fail('Impostazione sconosciuta.');
+    const value = num(body.value, 'Il valore', key === 'usd_eur' ? 10 : 100000);
+    if (key === 'usd_eur' && value === 0) throw fail('Il cambio non può essere zero.');
+    await sb(`cost_settings?key=eq.${encodeURIComponent(key)}`, { method: 'PATCH', body: { value, updated_at: new Date().toISOString(), set_by_user: true } });
+    await audit('set_setting', null, { key, from: Number(cur[0].value), to: value });
+    return { ok: true };
+  }
+  if (action === 'set_price') {
+    const model = String(body.model || '').trim();
+    if (!/^[A-Za-z0-9._-]{3,80}$/.test(model)) throw fail('Nome del modello non valido.');
+    const row = {
+      model, updated_at: new Date().toISOString(),
+      input_per_mtok: num(body.input, 'Il prezzo di input', 1000), output_per_mtok: num(body.output, 'Il prezzo di output', 1000),
+      cache_write_per_mtok: num(body.cache_write == null ? 0 : body.cache_write, 'Il prezzo di scrittura cache', 1000),
+      cache_read_per_mtok: num(body.cache_read == null ? 0 : body.cache_read, 'Il prezzo di lettura cache', 1000),
+    };
+    await sb('ai_prices?on_conflict=model', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: row });
+    await audit('set_price', null, { model, input: row.input_per_mtok, output: row.output_per_mtok });
+    return { ok: true };
+  }
+  throw fail('Azione non riconosciuta.');
+}
+
 // ============================ AZIONI ADMIN ============================
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -969,6 +1101,10 @@ module.exports = async function handler(req, res) {
         res.status(200).json(await overviewData());
         return;
       }
+      if (req.query && req.query.view === 'margin') {
+        res.status(200).json(await marginOverview());
+        return;
+      }
       if (req.query && req.query.view === 'money') {
         res.status(200).json(await moneyOverview());
         return;
@@ -991,6 +1127,10 @@ module.exports = async function handler(req, res) {
     if (req.method === 'POST') {
       let body = req.body;
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
+      if (body && (body.action === 'set_setting' || body.action === 'set_price')) {
+        res.status(200).json(await runSettingsAction(body));
+        return;
+      }
       if (body && body.action) {
         res.status(200).json(await runAction(body));
         return;
