@@ -5,6 +5,8 @@
 //
 //   GET  /api/admin/clients                -> { clients: [...] }
 //   GET  /api/admin/clients?view=overview  -> { history, byType, planSplit } (pagina Andamento)
+//   GET  /api/admin/clients?view=detail&id=UUID          -> scheda singola attivita'
+//   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
 //   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan
 //   POST /api/admin/clients  -> crea attività + abbonamento
 //        body: { name, type, plan: 'base'|'ai', status: 'active'|'trial', phone }
@@ -241,6 +243,186 @@ async function listClients() {
   return clients;
 }
 
+
+
+// ============================ SCHEDA SINGOLA ATTIVITA' ============================
+const LIA_CHANNELS = ['whatsapp', 'telegram', 'web'];
+
+function channelOfContact(c) {
+  if (/^tg:/.test(c)) return 'telegram';
+  if (/^web:/.test(c)) return 'web';
+  return 'whatsapp';
+}
+
+// I contatti dei clienti finali si mostrano sempre mascherati.
+function maskContact(c) {
+  c = String(c || '');
+  if (/^tg:/.test(c)) return 'Telegram ••' + c.slice(-3);
+  if (/^web:/.test(c)) return 'Sito ••' + c.slice(-4);
+  const digits = c.replace(/\D/g, '');
+  return (c.startsWith('+') ? '+' : '') + '•••• ' + digits.slice(-3);
+}
+
+const notFound = (msg) => { const e = new Error(msg); e.notFound = true; return e; };
+
+async function businessDetail(id) {
+  if (!UUID.test(id)) throw fail('Attivita\' non valida.');
+  const now = new Date();
+  const since30 = new Date(now.getTime() - 30 * 86400000).toISOString();
+  const nowIso = now.toISOString();
+  const warnings = [];
+  // le parti non essenziali non devono mai far cadere l'intera scheda
+  const soft = async (label, p, fallback) => {
+    try { return await p; } catch (e) { warnings.push(label); console.error('detail:' + label, e && e.message); return fallback; }
+  };
+  const enc = encodeURIComponent;
+  const apptSel = 'starts_at,status,channel,customer_name,customer_phone,services(name,price_eur)';
+
+  const bizRows = await sb(
+    `businesses?id=eq.${id}&select=id,name,slug,business_type,owner_phone,owner_whatsapp,owner_telegram_chat_id,` +
+      'recap_enabled,recap_whatsapp,created_at,active,' +
+      'services(id,name,duration_min,price_eur,active,at_customer_place),resources(id,name,active,opening_hours(weekday,opens,closes))'
+  );
+  if (!bizRows || !bizRows.length) throw notFound('Attivita\' non trovata.');
+  const b = bizRows[0];
+
+  const [subRows, acc, appts, upcoming, recent, msgs, logs] = await Promise.all([
+    soft('abbonamento', sb(`subscriptions?business_id=eq.${id}&select=status,started_at,cancelled_at,trial_ends_at,courtesy_until,suspended_manually,grace_days,plans(name,price_eur)&order=started_at.desc&limit=1`), []),
+    soft('stato servizio', accessRow(id), null),
+    soft('appuntamenti', sbAll(`appointments?business_id=eq.${id}&starts_at=gte.${enc(since30)}&starts_at=lte.${enc(nowIso)}&select=${enc('starts_at,status,channel,services(name,price_eur)')}&order=id.asc`), []),
+    soft('prossimi appuntamenti', sb(`appointments?business_id=eq.${id}&starts_at=gt.${enc(nowIso)}&status=neq.cancelled&select=${enc(apptSel)}&order=starts_at.asc&limit=8`), []),
+    soft('ultimi appuntamenti', sb(`appointments?business_id=eq.${id}&starts_at=lte.${enc(nowIso)}&select=${enc(apptSel)}&order=starts_at.desc&limit=8`), []),
+    soft('messaggi', sbAll(`chat_messages?business_id=eq.${id}&created_at=gte.${enc(since30)}&select=customer_phone,role,created_at&order=created_at.asc,id.asc`), []),
+    soft('storico azioni', sb(`audit_logs?business_id=eq.${id}&select=at,actor,action,details&order=at.desc&limit=15`), []),
+  ]);
+
+  const sub = (subRows || [])[0] || null;
+  const price = (a) => Number((a.services && a.services.price_eur) || 0);
+
+  // ---- appuntamenti ultimi 30 giorni
+  const confirmed = (appts || []).filter((a) => a.status !== 'cancelled');
+  const cancelled = (appts || []).length - confirmed.length;
+  const byChannel = {};
+  let revenue = 0;
+  let liaCount = 0;
+  let liaRevenue = 0;
+  confirmed.forEach((a) => {
+    const ch = a.channel || 'altro';
+    byChannel[ch] = (byChannel[ch] || 0) + 1;
+    revenue += price(a);
+    if (LIA_CHANNELS.includes(ch)) { liaCount += 1; liaRevenue += price(a); }
+  });
+
+  // ---- uso di Lia (messaggi)
+  const perDay = {};
+  for (let i = 29; i >= 0; i--) perDay[new Date(now.getTime() - i * 86400000).toISOString().slice(0, 10)] = 0;
+  const contacts = {};
+  let fromCustomers = 0;
+  let fromLia = 0;
+  let lastMessageAt = null;
+  (msgs || []).forEach((m) => {
+    if (m.role === 'user') {
+      fromCustomers += 1;
+      const day = String(m.created_at).slice(0, 10);
+      if (day in perDay) perDay[day] += 1;
+    } else {
+      fromLia += 1;
+    }
+    const k = m.customer_phone;
+    if (!contacts[k]) contacts[k] = { count: 0, last: m.created_at, channel: channelOfContact(k) };
+    contacts[k].count += 1;
+    if (m.created_at > contacts[k].last) contacts[k].last = m.created_at;
+    if (!lastMessageAt || m.created_at > lastMessageAt) lastMessageAt = m.created_at;
+  });
+  const contactKeys = Object.keys(contacts);
+  const contactsByChannel = {};
+  contactKeys.forEach((k) => { const ch = contacts[k].channel; contactsByChannel[ch] = (contactsByChannel[ch] || 0) + 1; });
+  const conversations = contactKeys
+    .map((k) => ({ ref: Buffer.from(k, 'utf8').toString('base64url'), label: maskContact(k), channel: contacts[k].channel, messages: contacts[k].count, last: contacts[k].last }))
+    .sort((x, y) => (x.last < y.last ? 1 : -1))
+    .slice(0, 30);
+
+  // ---- configurazione
+  const services = (b.services || []).filter((s) => s.active);
+  const activeRes = (b.resources || []).filter((r) => r.active !== false);
+  const hoursByDay = {};
+  activeRes.forEach((r) => (r.opening_hours || []).forEach((h) => {
+    (hoursByDay[h.weekday] = hoursByDay[h.weekday] || []).push(String(h.opens).slice(0, 5) + '–' + String(h.closes).slice(0, 5));
+  }));
+  const hours = Object.keys(hoursByDay).map(Number).sort((x, y) => x - y).map((d) => ({ weekday: d, ranges: Array.from(new Set(hoursByDay[d])).sort() }));
+
+  const mapAppt = (a) => ({
+    at: a.starts_at,
+    service: (a.services && a.services.name) || '—',
+    price: price(a),
+    channel: a.channel || 'altro',
+    status: a.status,
+    customer: String(a.customer_name || '').split(' ')[0] || '—',
+    phone: a.customer_phone ? maskContact(a.customer_phone) : '',
+  });
+
+  return {
+    business: {
+      id: b.id, name: b.name, slug: b.slug, type: typeLabel(b.business_type), created_at: b.created_at, active: b.active,
+      phone: b.owner_phone || '',
+    },
+    subscription: sub ? {
+      status: sub.status, plan: sub.plans ? sub.plans.name : null, price: sub.plans ? Number(sub.plans.price_eur) : null,
+      started_at: sub.started_at, cancelled_at: sub.cancelled_at, trial_ends_at: sub.trial_ends_at,
+      courtesy_until: sub.courtesy_until, suspended_manually: sub.suspended_manually, grace_days: sub.grace_days,
+    } : null,
+    service: acc ? { state: acc.state, allowed: acc.allowed, lia_allowed: acc.lia_allowed, paid_until: acc.paid_until, grace_ends: acc.grace_ends } : null,
+    appointments30: {
+      total: (appts || []).length, confirmed: confirmed.length, cancelled,
+      cancel_rate: (appts || []).length ? Math.round((cancelled / appts.length) * 100) : 0,
+      revenue: Math.round(revenue * 100) / 100, by_channel: byChannel,
+    },
+    lia30: {
+      messages_from_customers: fromCustomers, messages_from_lia: fromLia, contacts: contactKeys.length,
+      contacts_by_channel: contactsByChannel, bookings: liaCount, bookings_value: Math.round(liaRevenue * 100) / 100,
+      per_day: Object.keys(perDay).map((d) => ({ d, n: perDay[d] })), last_message_at: lastMessageAt,
+    },
+    upcoming: (upcoming || []).map(mapAppt),
+    recent: (recent || []).map(mapAppt),
+    conversations,
+    services: services.map((s) => ({ name: s.name, duration_min: s.duration_min, price: Number(s.price_eur), at_customer_place: !!s.at_customer_place })),
+    hours,
+    setup: {
+      services: services.length > 0,
+      resource: activeRes.length > 0,
+      hours: hours.length > 0,
+      whatsapp: Boolean(b.owner_whatsapp),
+      telegram: Boolean(b.owner_telegram_chat_id),
+      recap: Boolean(b.recap_enabled),
+    },
+    timeline: (logs || []).map((l) => ({ at: l.at, actor: l.actor, action: l.action, details: l.details || null })),
+    warnings,
+  };
+}
+
+// Lettura di una conversazione: dato sensibile dei clienti finali.
+// Ogni apertura viene registrata; se il registro non funziona, NON si mostra nulla.
+async function readConversation(id, ref) {
+  if (!UUID.test(id)) throw fail('Attivita\' non valida.');
+  let contact = '';
+  try { contact = Buffer.from(String(ref || ''), 'base64url').toString('utf8'); } catch (e) { contact = ''; }
+  if (!contact || contact.length > 120 || /[\u0000-\u001f]/.test(contact)) throw fail('Conversazione non valida.');
+  try {
+    await sb('audit_logs', { method: 'POST', body: { actor: 'admin', action: 'view_conversation', business_id: id, details: { contact: maskContact(contact) } } });
+  } catch (e) {
+    const err = new Error('Registro degli accessi non disponibile: per privacy non mostro la conversazione. Riprova tra poco.');
+    throw err;
+  }
+  const rows = await sb(
+    `chat_messages?business_id=eq.${id}&customer_phone=eq.${encodeURIComponent(contact)}&select=role,content,created_at&order=created_at.asc,id.asc`,
+    { range: '0-499' }
+  );
+  return {
+    contact: maskContact(contact),
+    channel: channelOfContact(contact),
+    messages: (rows || []).map((m) => ({ role: m.role, content: m.content, at: m.created_at })),
+  };
+}
 
 // ============================ AZIONI ADMIN ============================
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -505,6 +687,14 @@ module.exports = async function handler(req, res) {
         res.status(200).json(await overviewData());
         return;
       }
+      if (req.query && req.query.view === 'detail') {
+        res.status(200).json(await businessDetail(String(req.query.id || '')));
+        return;
+      }
+      if (req.query && req.query.view === 'conversation') {
+        res.status(200).json(await readConversation(String(req.query.id || ''), String(req.query.contact || '')));
+        return;
+      }
       res.status(200).json({ clients: await listClients() });
       return;
     }
@@ -521,7 +711,7 @@ module.exports = async function handler(req, res) {
     res.status(405).json({ error: 'method_not_allowed' });
   } catch (err) {
     console.error('admin/clients error', err);
-    res.status(err.validation ? 400 : 500).json({
+    res.status(err.validation ? 400 : err.notFound ? 404 : 500).json({
       error: 'clients_error',
       detail: String((err && err.message) || err),
     });
