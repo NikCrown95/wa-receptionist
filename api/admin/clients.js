@@ -16,7 +16,9 @@
 //        body: { name, type, plan: 'base'|'ai', status: 'active'|'trial', phone }
 //
 // Nessuna dipendenza: usa fetch nativo verso l'API REST di Supabase.
-// Protetto dall'header x-admin-key (uguale a ADMIN_API_KEY su Vercel).
+// Accesso: login vero (token di Supabase Auth + elenco admin_users con ruolo owner/support).
+// Fino a quando esiste ADMIN_API_KEY su Vercel, vale anche la vecchia chiave (header x-admin-key):
+// e' l'uscita di emergenza. Per chiuderla basta cancellare la variabile ADMIN_API_KEY.
 //
 // Variabili d'ambiente (se i nomi nel tuo progetto sono diversi, le provo tutte):
 //   SUPABASE_URL | NEXT_PUBLIC_SUPABASE_URL   (in mancanza uso l'URL del progetto "agenda")
@@ -34,6 +36,56 @@ function keyOk(provided) {
   const b = crypto.createHash('sha256').update(expected).digest();
   return crypto.timingSafeEqual(a, b);
 }
+
+
+// ============================ ACCESSO ============================
+const authCache = new Map();
+const AUTH_CACHE_MS = 60 * 1000;
+
+// Restituisce: { actor, role } se puo' entrare; { forbidden, email } se il login e' valido ma l'account
+// non e' autorizzato; { unavailable } se non si riesce a verificare (si nega: mai aprire per errore); null se non valido.
+async function authFromToken(token) {
+  if (!token || token.length > 4000) return null;
+  const hit = authCache.get(token);
+  if (hit && Date.now() - hit.at < AUTH_CACHE_MS) return hit.value;
+  const { url, key } = cfg();
+  if (!key) return { unavailable: true };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  let user;
+  try {
+    const r = await fetch(`${url}/auth/v1/user`, { headers: { apikey: key, Authorization: `Bearer ${token}` }, signal: ctrl.signal });
+    if (r.status === 401 || r.status === 403) return null;
+    if (!r.ok) return { unavailable: true };
+    user = await r.json();
+  } catch (e) {
+    return { unavailable: true };
+  } finally {
+    clearTimeout(timer);
+  }
+  const email = String((user && user.email) || '').toLowerCase();
+  if (!email || !(user.email_confirmed_at || user.confirmed_at)) return null;
+  let rows;
+  try {
+    rows = await sb(`admin_users?email=eq.${encodeURIComponent(email)}&active=eq.true&select=role&limit=1`);
+  } catch (e) {
+    return { unavailable: true };
+  }
+  if (!rows || !rows.length) return { forbidden: true, email };
+  const value = { actor: email, role: rows[0].role === 'owner' ? 'owner' : 'support', via: 'login' };
+  if (authCache.size > 200) authCache.clear();
+  authCache.set(token, { at: Date.now(), value });
+  return value;
+}
+
+async function authenticate(req) {
+  const h = (req && req.headers) || {};
+  const bearer = /^Bearer\s+(.+)$/i.exec(String(h.authorization || ''));
+  if (bearer) return authFromToken(bearer[1].trim());
+  if (keyOk(h['x-admin-key'])) return { actor: 'chiave-admin', role: 'owner', via: 'key' };
+  return null;
+}
+function authCacheClear() { authCache.clear(); }
 
 function cfg() {
   const url = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL).replace(/\/$/, '');
@@ -406,13 +458,13 @@ async function businessDetail(id) {
 
 // Lettura di una conversazione: dato sensibile dei clienti finali.
 // Ogni apertura viene registrata; se il registro non funziona, NON si mostra nulla.
-async function readConversation(id, ref) {
+async function readConversation(id, ref, ctx) {
   if (!UUID.test(id)) throw fail('Attivita\' non valida.');
   let contact = '';
   try { contact = Buffer.from(String(ref || ''), 'base64url').toString('utf8'); } catch (e) { contact = ''; }
   if (!contact || contact.length > 120 || /[\u0000-\u001f]/.test(contact)) throw fail('Conversazione non valida.');
   try {
-    await sb('audit_logs', { method: 'POST', body: { actor: 'admin', action: 'view_conversation', business_id: id, details: { contact: maskContact(contact) } } });
+    await sb('audit_logs', { method: 'POST', body: { actor: (ctx && ctx.actor) || 'admin', action: 'view_conversation', business_id: id, details: { contact: maskContact(contact) } } });
   } catch (e) {
     const err = new Error('Registro degli accessi non disponibile: per privacy non mostro la conversazione. Riprova tra poco.');
     throw err;
@@ -798,7 +850,7 @@ async function marginOverview() {
 }
 
 // Modifica di cambio, costi fissi, costo messaggi e listino prezzi (con registro delle modifiche)
-async function runSettingsAction(body) {
+async function runSettingsAction(body, ctx) {
   const action = String(body.action);
   const num = (v, label, max) => {
     const n = Number(String(v).replace(',', '.'));
@@ -813,7 +865,7 @@ async function runSettingsAction(body) {
     const value = num(body.value, 'Il valore', key === 'usd_eur' ? 10 : 100000);
     if (key === 'usd_eur' && value === 0) throw fail('Il cambio non può essere zero.');
     await sb(`cost_settings?key=eq.${encodeURIComponent(key)}`, { method: 'PATCH', body: { value, updated_at: new Date().toISOString(), set_by_user: true } });
-    await audit('set_setting', null, { key, from: Number(cur[0].value), to: value });
+    await audit('set_setting', null, { key, from: Number(cur[0].value), to: value }, ctx && ctx.actor);
     return { ok: true };
   }
   if (action === 'set_price') {
@@ -826,7 +878,7 @@ async function runSettingsAction(body) {
       cache_read_per_mtok: num(body.cache_read == null ? 0 : body.cache_read, 'Il prezzo di lettura cache', 1000),
     };
     await sb('ai_prices?on_conflict=model', { method: 'POST', prefer: 'resolution=merge-duplicates,return=minimal', body: row });
-    await audit('set_price', null, { model, input: row.input_per_mtok, output: row.output_per_mtok });
+    await audit('set_price', null, { model, input: row.input_per_mtok, output: row.output_per_mtok }, ctx && ctx.actor);
     return { ok: true };
   }
   throw fail('Azione non riconosciuta.');
@@ -857,9 +909,9 @@ async function accessRow(businessId) {
   return rows && rows[0] ? rows[0] : null;
 }
 
-async function audit(action, businessId, details) {
+async function audit(action, businessId, details, actor) {
   try {
-    await sb('audit_logs', { method: 'POST', body: { actor: 'admin', action, business_id: businessId, details } });
+    await sb('audit_logs', { method: 'POST', body: { actor: actor || 'admin', action, business_id: businessId, details } });
   } catch (e) {
     console.error('audit_logs non scritto:', e && e.message); // non deve mai bloccare l'azione
   }
@@ -877,7 +929,7 @@ async function planInfo(planKey) {
 }
 const subPrice = (sub) => Number((sub && sub.plans && sub.plans.price_eur) || 0);
 
-async function runAction(body) {
+async function runAction(body, ctx) {
   const action = String(body.action || '');
   const id = String(body.id || '');
   if (!UUID.test(id)) throw fail('Attivita\' non valida.');
@@ -907,7 +959,7 @@ async function runAction(body) {
       plan: planKey, status: body.status || 'active', was_new: !sub,
       from_plan: sub && sub.plans ? sub.plans.name : null, from_price: sub ? subPrice(sub) : null,
       to_plan: plan.name, to_price: plan.price,
-    });
+    }, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state };
   }
 
@@ -922,7 +974,7 @@ async function runAction(body) {
     const base = sub.status !== 'trial' && paid && paid > now ? paid : now;
     const end = addMonths(base, months);
     await patchSub(sub.id, { status: 'active', current_period_end: end.toISOString(), courtesy_until: null, suspended_manually: false, suspended_at: null });
-    await audit('mark_paid', id, { months, paid_until: end.toISOString(), was_trial: sub.status === 'trial', price: subPrice(sub) });
+    await audit('mark_paid', id, { months, paid_until: end.toISOString(), was_trial: sub.status === 'trial', price: subPrice(sub) }, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state, paid_until: end.toISOString() };
   }
 
@@ -936,14 +988,14 @@ async function runAction(body) {
     if (sub.courtesy_until) times.push(new Date(sub.courtesy_until).getTime());
     const until = new Date(Math.max.apply(null, times) + days * 86400000);
     await patchSub(sub.id, { courtesy_until: until.toISOString() });
-    await audit('extend', id, { days, courtesy_until: until.toISOString() });
+    await audit('extend', id, { days, courtesy_until: until.toISOString() }, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state, courtesy_until: until.toISOString() };
   }
 
   if (action === 'suspend') {
     if (sub.status === 'cancelled') throw fail('Abbonamento gia\' annullato.');
     await patchSub(sub.id, { suspended_manually: true, suspended_at: now.toISOString() });
-    await audit('suspend', id, {});
+    await audit('suspend', id, {}, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state };
   }
 
@@ -953,7 +1005,7 @@ async function runAction(body) {
     } else {
       await patchSub(sub.id, { suspended_manually: false, suspended_at: null });
     }
-    await audit('reactivate', id, { was_cancelled: sub.status === 'cancelled', price: subPrice(sub) });
+    await audit('reactivate', id, { was_cancelled: sub.status === 'cancelled', price: subPrice(sub) }, ctx && ctx.actor);
     const state = (await accessRow(id) || {}).state;
     return { ok: true, state, note: state === 'suspended' ? 'Ancora scaduto: segna come pagato o concedi una proroga.' : undefined };
   }
@@ -961,14 +1013,14 @@ async function runAction(body) {
   if (action === 'cancel') {
     if (sub.status === 'cancelled') throw fail('Abbonamento gia\' annullato.');
     await patchSub(sub.id, { status: 'cancelled', cancelled_at: now.toISOString() });
-    await audit('cancel', id, { price: subPrice(sub) });
+    await audit('cancel', id, { price: subPrice(sub) }, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state };
   }
 
   throw fail('Azione non riconosciuta.');
 }
 
-async function createClient(body) {
+async function createClient(body, ctx) {
   const name = String((body && body.name) || '').trim();
   const phone = String((body && body.phone) || '').trim();
   const KNOWN = ['parrucchiere', 'barbiere', 'estetista', 'personal trainer', 'idraulico'];
@@ -1016,6 +1068,7 @@ async function createClient(body) {
     try { await sb(`businesses?id=eq.${business.id}`, { method: 'DELETE' }); } catch (e) { /* ignore */ }
     throw err;
   }
+  await audit('create_client', business.id, { name, plan: planKey, status, type }, ctx && ctx.actor);
   return { ok: true, id: business.id };
 }
 
@@ -1081,61 +1134,67 @@ async function overviewData() {
 }
 
 module.exports = async function handler(req, res) {
-  if (!keyOk(req.headers['x-admin-key'])) {
+  if (res.setHeader) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+  }
+
+  const auth = await authenticate(req);
+  if (auth && auth.unavailable) {
+    res.status(503).json({ error: 'auth_unavailable', detail: 'Non riesco a verificare l\'accesso in questo momento. Riprova tra poco.' });
+    return;
+  }
+  if (auth && auth.forbidden) {
+    res.status(403).json({ error: 'forbidden', detail: 'Questo account non è autorizzato ad entrare.' });
+    return;
+  }
+  if (!auth) {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
+  const ctx = { actor: auth.actor, role: auth.role };
+  const owner = ctx.role === 'owner';
 
   const { key } = cfg();
   if (!key) {
     res.status(500).json({
       error: 'missing_env_vars',
-      detail: 'Manca la service key di Supabase tra le variabili d\'ambiente di Vercel (SUPABASE_SERVICE_ROLE_KEY).',
+      detail: 'Manca la service key di Supabase tra le variabili d\'ambiente di Vercel (SUPABASE_SECRET_KEY).',
     });
     return;
   }
 
   try {
     if (req.method === 'GET') {
-      if (req.query && req.query.view === 'overview') {
-        res.status(200).json(await overviewData());
-        return;
-      }
-      if (req.query && req.query.view === 'margin') {
-        res.status(200).json(await marginOverview());
-        return;
-      }
-      if (req.query && req.query.view === 'money') {
-        res.status(200).json(await moneyOverview());
-        return;
-      }
-      if (req.query && req.query.view === 'lia') {
-        res.status(200).json(await liaOverview());
-        return;
-      }
-      if (req.query && req.query.view === 'detail') {
-        res.status(200).json(await businessDetail(String(req.query.id || '')));
-        return;
-      }
-      if (req.query && req.query.view === 'conversation') {
-        res.status(200).json(await readConversation(String(req.query.id || ''), String(req.query.contact || '')));
+      const view = req.query && req.query.view;
+      if (view === 'me') { res.status(200).json({ email: ctx.actor, role: ctx.role, via: auth.via }); return; }
+      if (view === 'overview') { res.status(200).json(await overviewData()); return; }
+      if (view === 'margin') { res.status(200).json(await marginOverview()); return; }
+      if (view === 'money') { res.status(200).json(await moneyOverview()); return; }
+      if (view === 'lia') { res.status(200).json(await liaOverview()); return; }
+      if (view === 'detail') { res.status(200).json(await businessDetail(String(req.query.id || ''))); return; }
+      if (view === 'conversation') {
+        if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Le conversazioni dei clienti finali sono riservate al titolare.' }); return; }
+        res.status(200).json(await readConversation(String(req.query.id || ''), String(req.query.contact || ''), ctx));
         return;
       }
       res.status(200).json({ clients: await listClients() });
       return;
     }
     if (req.method === 'POST') {
+      if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Il tuo account può solo consultare, non modificare.' }); return; }
       let body = req.body;
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
       if (body && (body.action === 'set_setting' || body.action === 'set_price')) {
-        res.status(200).json(await runSettingsAction(body));
+        res.status(200).json(await runSettingsAction(body, ctx));
         return;
       }
       if (body && body.action) {
-        res.status(200).json(await runAction(body));
+        res.status(200).json(await runAction(body, ctx));
         return;
       }
-      res.status(201).json(await createClient(body || {}));
+      res.status(201).json(await createClient(body || {}, ctx));
       return;
     }
     res.status(405).json({ error: 'method_not_allowed' });
@@ -1152,3 +1211,5 @@ module.exports.computeHealth = computeHealth;
 
 module.exports.buildMrrEvents = buildMrrEvents;
 module.exports.monthlyMovement = monthlyMovement;
+
+module.exports.authCacheClear = authCacheClear;
