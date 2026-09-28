@@ -4,24 +4,19 @@
 // Legge dati REALI da Supabase (businesses, subscriptions, plans) e
 // restituisce numeri gia' aggregati, pronti per KPI e grafici.
 //
+// NON usa il pacchetto @supabase/supabase-js (non era tra le dipendenze
+// del progetto) - parla direttamente con l'API REST di Supabase (PostgREST)
+// usando fetch nativo, gia' disponibile in Node su Vercel. Nessuna
+// installazione necessaria.
+//
 // SICUREZZA: usa la SERVICE ROLE KEY di Supabase (bypassa la RLS), quindi
 // va chiamato SOLO dal tuo backend/dashboard con una chiave admin nota
 // solo a te. Non esporre mai la service key nel browser.
 //
-// Variabili d'ambiente richieste (probabilmente gia' presenti nel progetto
-// Vercel, visto che /api/recap usa gia' Supabase - controlla i nomi esatti
-// nel tuo altro file api/ e allinea qui se sono diversi):
-//   SUPABASE_URL
-//   SUPABASE_SERVICE_ROLE_KEY
-//   ADMIN_API_KEY   <- nuova: scegli tu una stringa lunga e segreta,
-//                      da aggiungere nelle Env Vars di Vercel
-
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Variabili d'ambiente richieste su Vercel:
+//   SUPABASE_URL (o NEXT_PUBLIC_SUPABASE_URL)
+//   SUPABASE_SERVICE_ROLE_KEY (o SUPABASE_SERVICE_KEY)
+//   ADMIN_API_KEY   <- stringa segreta scelta da te
 
 module.exports = async function handler(req, res) {
   // --- auth minima con header segreto ---
@@ -31,19 +26,40 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  try {
-    const { data: rows, error } = await supabase
-      .from('subscriptions')
-      .select(`
-        id,
-        status,
-        started_at,
-        cancelled_at,
-        plans ( name, price_eur ),
-        businesses ( name, business_type, active )
-      `);
+  const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
-    if (error) throw error;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    res.status(500).json({
+      error: 'missing_env_vars',
+      detail: 'Mancano le variabili SUPABASE_URL e/o SUPABASE_SERVICE_ROLE_KEY su Vercel.',
+      have: {
+        SUPABASE_URL: Boolean(SUPABASE_URL),
+        SUPABASE_SERVICE_ROLE_KEY: Boolean(SUPABASE_KEY),
+      },
+    });
+    return;
+  }
+
+  try {
+    // select con espansione delle relazioni (sintassi PostgREST, come fa supabase-js)
+    const query = 'select=id,status,started_at,cancelled_at,plans(name,price_eur),businesses(name,business_type,active)';
+    const restUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/subscriptions?${query}`;
+
+    const resp = await fetch(restUrl, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+      },
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      res.status(500).json({ error: 'supabase_rest_error', status: resp.status, detail: text });
+      return;
+    }
+
+    const rows = await resp.json();
 
     // --- costruzione della serie mensile (da primo mese con dati a mese corrente) ---
     const monthKey = (d) => {
@@ -70,21 +86,20 @@ module.exports = async function handler(req, res) {
 
     const history = months.map((key) => {
       const [y, m] = key.split('-').map(Number);
-      const monthEnd = new Date(Date.UTC(y, m, 1)); // primo giorno del mese successivo
+      const monthEnd = new Date(Date.UTC(y, m, 1));
 
       const newThisMonth = rows.filter((r) => monthKey(r.started_at) === key).length;
       const lostThisMonth = rows.filter((r) => r.cancelled_at && monthKey(r.cancelled_at) === key).length;
 
-      // "attivo alla fine del mese": iniziato prima della fine mese e non ancora cancellato (o cancellato dopo)
       const activeAtEnd = rows.filter((r) => {
         const started = new Date(r.started_at);
         const cancelled = r.cancelled_at ? new Date(r.cancelled_at) : null;
         return started < monthEnd && (!cancelled || cancelled >= monthEnd) && r.status !== 'trial';
       });
 
-      const mrr = activeAtEnd.reduce((sum, r) => sum + Number(r.plans?.price_eur || 0), 0);
-      const base = activeAtEnd.filter((r) => r.plans?.name === 'Base').length;
-      const ai = activeAtEnd.filter((r) => r.plans?.name === 'Base+Lia').length;
+      const mrr = activeAtEnd.reduce((sum, r) => sum + Number((r.plans && r.plans.price_eur) || 0), 0);
+      const base = activeAtEnd.filter((r) => r.plans && r.plans.name === 'Base').length;
+      const ai = activeAtEnd.filter((r) => r.plans && r.plans.name === 'Base+Lia').length;
 
       return {
         m: monthLabelIt(key),
@@ -97,31 +112,30 @@ module.exports = async function handler(req, res) {
       };
     });
 
-    // --- stato attuale (per KPI e breakdown) ---
     const activeNow = rows.filter((r) => r.status === 'active');
     const trialNow = rows.filter((r) => r.status === 'trial');
 
     const byType = {};
     activeNow.forEach((r) => {
-      const t = r.businesses?.business_type || 'altro';
+      const t = (r.businesses && r.businesses.business_type) || 'altro';
       byType[t] = (byType[t] || 0) + 1;
     });
 
     const planSplit = {
-      base: activeNow.filter((r) => r.plans?.name === 'Base').length,
-      ai: activeNow.filter((r) => r.plans?.name === 'Base+Lia').length,
+      base: activeNow.filter((r) => r.plans && r.plans.name === 'Base').length,
+      ai: activeNow.filter((r) => r.plans && r.plans.name === 'Base+Lia').length,
     };
 
     res.status(200).json({
       generated_at: new Date().toISOString(),
       history,
-      byType, // es. { parrucchiere: 6, barbiere: 5, ... }
-      planSplit, // { base: n, ai: n }
+      byType,
+      planSplit,
       trialCount: trialNow.length,
       totalBusinesses: rows.length,
     });
   } catch (err) {
     console.error('admin/overview error', err);
-    res.status(500).json({ error: 'internal_error' });
+    res.status(500).json({ error: 'internal_error', detail: String((err && err.message) || err) });
   }
 };
