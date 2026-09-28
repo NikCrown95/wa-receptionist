@@ -74,10 +74,25 @@ async function getBusinessByToken(token) {
 
 async function getBusinessProfileByToken(token) {
   if (!/^[a-f0-9]{32,128}$/.test(token)) return { __agendaError: "Token agenda non valido" };
-  const r=await sb("GET","businesses?agenda_token=eq."+token+"&active=eq.true&select=id,name,slug,timezone,address,public_link,booking_url,telegram,telegram_username,services(id,name,duration_min,buffer_min,price_eur,at_customer_place,active),resources(id,active,opening_hours(id,weekday,opens,closes))");
-  if(!r.ok){const detail=r.data&&typeof r.data==="object"?(r.data.message||r.data.hint||r.data.code||""):String(r.data||"");return {__agendaError:"Supabase "+r.status+(detail?" — "+detail:"")};}
-  if(!Array.isArray(r.data)||!r.data.length)return null;
-  const b=r.data[0];b.services=(b.services||[]).filter(x=>x.active);b.resources=(b.resources||[]).filter(x=>x.active);return b;
+  const br=await sb("GET","businesses?agenda_token=eq."+token+"&active=eq.true&select=*");
+  if(!br.ok){const detail=br.data&&typeof br.data==="object"?(br.data.message||br.data.hint||br.data.code||""):String(br.data||"");return {__agendaError:"Supabase "+br.status+(detail?" — "+detail:"")};}
+  if(!Array.isArray(br.data)||!br.data.length)return null;
+  const biz=br.data[0];
+  const results=await Promise.all([
+    sb("GET","services?business_id=eq."+biz.id+"&active=eq.true&select=id,name,duration_min,buffer_min,price_eur,at_customer_place"),
+    sb("GET","resources?business_id=eq."+biz.id+"&active=eq.true&select=id&limit=1"),
+    sb("GET","subscriptions?business_id=eq."+biz.id+"&select=status,started_at,cancelled_at,plans(name)&order=started_at.desc&limit=1")
+  ]);
+  const sr=results[0],rr=results[1],pr=results[2];
+  if(!sr.ok||!Array.isArray(sr.data))return {__agendaError:"Errore lettura servizi"};
+  const resource=rr.ok&&Array.isArray(rr.data)&&rr.data.length?rr.data[0]:null;
+  if(!resource)return {__agendaError:"Nessuna risorsa attiva configurata"};
+  const hr=await sb("GET","opening_hours?resource_id=eq."+resource.id+"&select=id,weekday,opens,closes&order=weekday.asc,opens.asc");
+  if(!hr.ok||!Array.isArray(hr.data))return {__agendaError:"Errore lettura orari di apertura"};
+  biz.services=sr.data;
+  biz.resources=[{id:resource.id,active:true,opening_hours:hr.data}];
+  biz.__planName=pr.ok&&Array.isArray(pr.data)&&pr.data.length&&pr.data[0].plans?pr.data[0].plans.name:null;
+  return biz;
 }
 
 // Come getBusinessByToken, ma con anche servizi, risorse e orari (serve per calcolare gli orari liberi)
@@ -215,8 +230,7 @@ module.exports = async (req, res) => {
     if (q.profile === "1" && req.method === "GET") {
       const resource = biz.resources.find(r => Array.isArray(r.opening_hours) && r.opening_hours.length) || biz.resources[0];
       if (!resource) return res.status(400).json({ error: "Nessuna risorsa attiva configurata" });
-      const sr=await sb("GET","subscriptions?business_id=eq."+biz.id+"&select=status,started_at,cancelled_at,plans(name)&order=started_at.desc&limit=1");
-      const planName=sr.ok&&Array.isArray(sr.data)&&sr.data.length&&sr.data[0].plans?sr.data[0].plans.name:null;
+      const planName=biz.__planName||null;
       const hours=(resource.opening_hours||[]).slice().sort((a,b)=>Number(a.weekday)-Number(b.weekday)||String(a.opens).localeCompare(String(b.opens)));
       return res.status(200).json({business:{name:biz.name,timezone:tz,address:biz.address||null,plan_name:planName,public_link:biz.public_link||biz.booking_url||((req.headers["x-forwarded-proto"]||"https").split(",")[0]+"://"+(req.headers["x-forwarded-host"]||req.headers.host)+"/api/chat?b="+encodeURIComponent(biz.slug)),telegram:biz.telegram||biz.telegram_username||"https://t.me/liaprenotabot?start="+encodeURIComponent(biz.slug)},services:biz.services.map(s=>({id:s.id,name:s.name,duration_min:s.duration_min,buffer_min:s.buffer_min||0,price_eur:s.price_eur,at_customer_place:!!s.at_customer_place})),hours:hours.map(h=>({id:h.id,weekday:h.weekday,opens:String(h.opens).slice(0,5),closes:String(h.closes).slice(0,5)}))});
     }
