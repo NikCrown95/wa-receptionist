@@ -154,8 +154,10 @@ var MOCK_PLAN_SPLIT = { "base": 6, "ai": 10 };
 
 (function () {
   function boot(history, byType, planSplit) {
-    window.HISTORY = (history && history.length) ? history : MOCK_HISTORY;
-    window.renderDashboard(byType || MOCK_BY_TYPE, planSplit || MOCK_PLAN_SPLIT);
+    setTimeout(function () {
+      window.HISTORY = (history && history.length) ? history : MOCK_HISTORY;
+      window.renderDashboard(byType || MOCK_BY_TYPE, planSplit || MOCK_PLAN_SPLIT);
+    }, 0);
   }
 
   (async function () {
