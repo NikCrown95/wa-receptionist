@@ -5,6 +5,7 @@
 //
 //   GET  /api/admin/clients                -> { clients: [...] }
 //   GET  /api/admin/clients?view=overview  -> { history, byType, planSplit } (pagina Andamento)
+//   GET  /api/admin/clients?view=lia                     -> uso di Lia su tutte le attivita'
 //   GET  /api/admin/clients?view=detail&id=UUID          -> scheda singola attivita'
 //   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
 //   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan
@@ -424,6 +425,98 @@ async function readConversation(id, ref) {
   };
 }
 
+
+// ============================ USO DI LIA (tutte le attivita') ============================
+// I conteggi pesanti li fa il database (viste lia_*_v): qui arrivano righe gia' aggregate.
+async function liaOverview() {
+  const now = new Date();
+  const warnings = [];
+  const soft = async (label, p, fallback) => {
+    try { return await p; } catch (e) { warnings.push(label); console.error('lia:' + label, e && e.message); return fallback; }
+  };
+  const [biz, access, usage, daily, heat, bookings] = await Promise.all([
+    sbAll('businesses?select=id,name,business_type,subscriptions(status,started_at,plans(name))&order=id.asc'),
+    soft('stato servizio', sbAll('service_access_v?select=business_id,state,allowed,lia_allowed,plan_name&order=business_id.asc'), []),
+    soft('uso per attivita', sbAll('lia_usage_v?select=*&order=business_id.asc'), []),
+    soft('messaggi al giorno', sbAll('lia_daily_v?select=*&order=day.asc,channel.asc'), []),
+    soft('orari di punta', sbAll('lia_heat_v?select=*&order=dow.asc,hour.asc'), []),
+    soft('prenotazioni', sbAll('lia_bookings_v?select=*&order=business_id.asc,channel.asc'), []),
+  ]);
+
+  const accMap = {}; (access || []).forEach((a) => { accMap[a.business_id] = a; });
+  const useMap = {}; (usage || []).forEach((u) => { useMap[u.business_id] = u; });
+  const bk = {}; // per attivita': { lia: {n, v, nPrev, vPrev}, all: {...} }
+  const byChannelBookings = {};
+  let allN = 0, allV = 0, liaN = 0, liaV = 0, liaNPrev = 0, liaVPrev = 0;
+  (bookings || []).forEach((r) => {
+    const n = Number(r.bookings) || 0, v = Number(r.value) || 0, np = Number(r.bookings_prev) || 0, vp = Number(r.value_prev) || 0;
+    const e = (bk[r.business_id] = bk[r.business_id] || { lia_n: 0, lia_v: 0, lia_np: 0, lia_vp: 0 });
+    byChannelBookings[r.channel] = (byChannelBookings[r.channel] || 0) + n;
+    allN += n; allV += v;
+    if (LIA_CHANNELS.includes(r.channel)) { e.lia_n += n; e.lia_v += v; e.lia_np += np; e.lia_vp += vp; liaN += n; liaV += v; liaNPrev += np; liaVPrev += vp; }
+  });
+
+  // messaggi per giorno e canale (30 giorni sempre presenti)
+  const dayMap = {};
+  for (let i = 29; i >= 0; i--) dayMap[new Date(now.getTime() - i * 86400000).toISOString().slice(0, 10)] = { whatsapp: 0, telegram: 0, web: 0 };
+  const msgByChannel = { whatsapp: 0, telegram: 0, web: 0 };
+  (daily || []).forEach((r) => {
+    const d = String(r.day).slice(0, 10);
+    const n = Number(r.user_msgs) || 0;
+    if (!dayMap[d] || dayMap[d][r.channel] === undefined) return; // fuori dai 30 giorni: ignorato ovunque
+    dayMap[d][r.channel] += n;
+    msgByChannel[r.channel] += n;
+  });
+  const per_day = Object.keys(dayMap).map((d) => ({ d, whatsapp: dayMap[d].whatsapp, telegram: dayMap[d].telegram, web: dayMap[d].web }));
+
+  // mappa di calore 7 giorni x 24 ore
+  const matrix = Array.from({ length: 7 }, () => Array(24).fill(0));
+  (heat || []).forEach((r) => {
+    const d = Number(r.dow) - 1, h = Number(r.hour);
+    if (d >= 0 && d < 7 && h >= 0 && h < 24) matrix[d][h] += Number(r.n) || 0;
+  });
+
+  // classifica e "pagano Lia ma non la usano"
+  let msgs = 0, msgsPrev = 0, msgsLia = 0, contacts = 0;
+  const rows = [];
+  const idle = [];
+  let withLia = 0, usingLia = 0;
+  (biz || []).forEach((b) => {
+    const subs = (b.subscriptions || []).slice().sort((x, y) => new Date(y.started_at) - new Date(x.started_at));
+    const sub = subs[0];
+    const planName = sub && sub.plans ? sub.plans.name : null;
+    const acc = accMap[b.id] || null;
+    const u = useMap[b.id] || { user_msgs: 0, lia_msgs: 0, contacts: 0, user_msgs_prev: 0 };
+    const um = Number(u.user_msgs) || 0, up = Number(u.user_msgs_prev) || 0;
+    msgs += um; msgsPrev += up; msgsLia += Number(u.lia_msgs) || 0; contacts += Number(u.contacts) || 0;
+    const e = bk[b.id] || { lia_n: 0, lia_v: 0 };
+    const hasLiaPlan = planName === 'Base+Lia' && sub && sub.status !== 'cancelled' && (!acc || acc.lia_allowed !== false);
+    if (hasLiaPlan) { withLia += 1; if (um > 0) usingLia += 1; else idle.push({ id: b.id, name: b.name, type: typeLabel(b.business_type), state: acc ? acc.state : null }); }
+    if (um > 0 || e.lia_n > 0) {
+      rows.push({
+        id: b.id, name: b.name, type: typeLabel(b.business_type),
+        plan: planName === 'Base+Lia' ? 'ai' : planName === 'Base' ? 'base' : null,
+        messages: um, contacts: Number(u.contacts) || 0, bookings: e.lia_n, value: Math.round(e.lia_v * 100) / 100,
+        trend: up > 0 ? Math.round(((um - up) / up) * 100) : null,
+      });
+    }
+  });
+  rows.sort((x, y) => y.messages - x.messages || y.bookings - x.bookings);
+
+  const pct = (cur, prev) => (prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null);
+  return {
+    totals: {
+      messages: msgs, messages_prev: msgsPrev, messages_trend: pct(msgs, msgsPrev), lia_replies: msgsLia, contacts,
+      bookings: liaN, bookings_value: Math.round(liaV * 100) / 100, bookings_trend: pct(liaN, liaNPrev), value_trend: pct(liaV, liaVPrev),
+      all_bookings: allN, all_value: Math.round(allV * 100) / 100,
+      share_pct: allN ? Math.round((liaN / allN) * 100) : 0,
+      businesses_with_lia: withLia, businesses_using_lia: usingLia,
+    },
+    per_day, messages_by_channel: msgByChannel, bookings_by_channel: byChannelBookings, heat: matrix,
+    ranking: rows.slice(0, 10), idle, warnings,
+  };
+}
+
 // ============================ AZIONI ADMIN ============================
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -685,6 +778,10 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       if (req.query && req.query.view === 'overview') {
         res.status(200).json(await overviewData());
+        return;
+      }
+      if (req.query && req.query.view === 'lia') {
+        res.status(200).json(await liaOverview());
         return;
       }
       if (req.query && req.query.view === 'detail') {
