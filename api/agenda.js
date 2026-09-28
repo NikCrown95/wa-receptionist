@@ -72,6 +72,14 @@ async function getBusinessByToken(token) {
   return r.data[0];
 }
 
+async function getBusinessProfileByToken(token) {
+  if (!/^[a-f0-9]{32,128}$/.test(token)) return { __agendaError: "Token agenda non valido" };
+  const r=await sb("GET","businesses?agenda_token=eq."+token+"&active=eq.true&select=id,name,slug,timezone,address,public_link,booking_url,telegram,telegram_username,services(id,name,duration_min,buffer_min,price_eur,at_customer_place,active),resources(id,active,opening_hours(id,weekday,opens,closes))");
+  if(!r.ok){const detail=r.data&&typeof r.data==="object"?(r.data.message||r.data.hint||r.data.code||""):String(r.data||"");return {__agendaError:"Supabase "+r.status+(detail?" — "+detail:"")};}
+  if(!Array.isArray(r.data)||!r.data.length)return null;
+  const b=r.data[0];b.services=(b.services||[]).filter(x=>x.active);b.resources=(b.resources||[]).filter(x=>x.active);return b;
+}
+
 // Come getBusinessByToken, ma con anche servizi, risorse e orari (serve per calcolare gli orari liberi)
 async function getBusinessFullByToken(token) {
   if (!/^[a-f0-9]{32,128}$/.test(token)) return { __agendaError: "Token agenda non valido" };
@@ -195,10 +203,10 @@ module.exports = async (req, res) => {
 
     // 2) I dati: serve il codice segreto
     // Le richieste che servono all'appuntamento manuale hanno bisogno anche di servizi/orari dell'attività
-    const needsFull = true; // ora serve sempre: gli orari di apertura servono anche per gli spazi liberi in agenda
-    const biz = needsFull
-      ? await getBusinessFullByToken(String(q.t || "").trim())
-      : await getBusinessByToken(String(q.t || "").trim());
+    const token=String(q.t || "").trim();
+    const biz = q.profile === "1" && req.method === "GET"
+      ? await getBusinessProfileByToken(token)
+      : await getBusinessFullByToken(token);
     if (!biz) return res.status(404).json({ error: "Link non valido" });
     if (biz.__agendaError) return res.status(502).json({ error: biz.__agendaError });
     const tz = biz.timezone || "Europe/Rome";
