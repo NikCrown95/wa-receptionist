@@ -346,7 +346,7 @@ module.exports = async (req, res) => {
         if (!biz.services.length) return res.status(200).json({ services: svcList, times: [] });
         const firstService = biz.services[0];
         const today = todayStr(tz);
-        if (q.date < today) return res.status(400).json({ error: "Quella data è già passata" });
+        if (q.date < today) return res.status(200).json({ services: svcList, times: [], default_service: firstService.name });
         const firstSlots = await freeSlotsFor(biz, firstService, String(q.date));
         const firstTimes = Array.from(new Set(firstSlots.map((s) => s.time))).sort();
         return res.status(200).json({ services: svcList, times: firstTimes, default_service: firstService.name });
