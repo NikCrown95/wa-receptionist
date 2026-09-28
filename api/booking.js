@@ -163,7 +163,8 @@ module.exports = async (req, res) => {
       return res.status(200).json({
         name: biz.name,
         type: biz.business_type,
-        timezone: biz.timezone,\n        address: biz.address || "",
+        timezone: biz.timezone,
+        address: biz.address || "",
         services: biz.services.map((s) => ({
           id: s.id, name: s.name, duration_min: s.duration_min, price_eur: s.price_eur, at_customer_place: s.at_customer_place,
         })),
