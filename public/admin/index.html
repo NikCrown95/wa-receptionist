@@ -147,35 +147,49 @@ h1,h2,p{margin:0;}
 </div>
 
 <script>
-var MOCK_HISTORY = [{"m": "ott 25", "new": 1, "lost": 0, "active": 2, "mrr": 108, "base": 1, "ai": 1}, {"m": "nov 25", "new": 1, "lost": 0, "active": 3, "mrr": 147, "base": 2, "ai": 1}, {"m": "dic 25", "new": 2, "lost": 0, "active": 5, "mrr": 255, "base": 3, "ai": 2}, {"m": "gen 26", "new": 1, "lost": 0, "active": 6, "mrr": 294, "base": 4, "ai": 2}, {"m": "feb 26", "new": 1, "lost": 0, "active": 7, "mrr": 363, "base": 4, "ai": 3}, {"m": "mar 26", "new": 2, "lost": 1, "active": 8, "mrr": 432, "base": 4, "ai": 4}, {"m": "apr 26", "new": 2, "lost": 0, "active": 10, "mrr": 540, "base": 5, "ai": 5}, {"m": "mag 26", "new": 1, "lost": 0, "active": 11, "mrr": 609, "base": 5, "ai": 6}, {"m": "giu 26", "new": 1, "lost": 0, "active": 12, "mrr": 648, "base": 6, "ai": 6}, {"m": "lug 26", "new": 2, "lost": 1, "active": 13, "mrr": 717, "base": 6, "ai": 7}, {"m": "ago 26", "new": 1, "lost": 0, "active": 14, "mrr": 786, "base": 6, "ai": 8}, {"m": "set 26", "new": 2, "lost": 0, "active": 16, "mrr": 924, "base": 6, "ai": 10}];
-var EMBEDDED = {"history": [{"m": "ott 25", "new": 4, "lost": 0, "active": 0, "mrr": 0, "base": 0, "ai": 0}, {"m": "nov 25", "new": 2, "lost": 0, "active": 4, "mrr": 279.96, "base": 1, "ai": 3}, {"m": "dic 25", "new": 3, "lost": 0, "active": 6, "mrr": 399.94, "base": 2, "ai": 4}, {"m": "gen 26", "new": 2, "lost": 0, "active": 9, "mrr": 599.91, "base": 3, "ai": 6}, {"m": "feb 26", "new": 2, "lost": 0, "active": 11, "mrr": 679.89, "base": 5, "ai": 6}, {"m": "mar 26", "new": 2, "lost": 0, "active": 13, "mrr": 799.87, "base": 6, "ai": 7}, {"m": "apr 26", "new": 1, "lost": 1, "active": 15, "mrr": 919.85, "base": 7, "ai": 8}, {"m": "mag 26", "new": 1, "lost": 0, "active": 15, "mrr": 959.85, "base": 6, "ai": 9}, {"m": "giu 26", "new": 1, "lost": 0, "active": 16, "mrr": 999.84, "base": 7, "ai": 9}, {"m": "lug 26", "new": 1, "lost": 1, "active": 17, "mrr": 1079.83, "base": 7, "ai": 10}, {"m": "ago 26", "new": 0, "lost": 0, "active": 17, "mrr": 1119.83, "base": 6, "ai": 11}, {"m": "set 26", "new": 1, "lost": 0, "active": 17, "mrr": 1119.83, "base": 6, "ai": 11}], "byType": {"parrucchiere": 5, "barbiere": 4, "estetista": 4, "personal trainer": 3, "idraulico": 1}, "planSplit": {"base": 6, "ai": 11}};
+var MOCK_HISTORY = [];
 var MOCK_BY_TYPE = { "parrucchiere": 5, "barbiere": 4, "estetista": 3, "idraulico": 2, "personal trainer": 2 };
 var MOCK_PLAN_SPLIT = { "base": 6, "ai": 10 };
 
 (function () {
-  function boot(history, byType, planSplit) {
-    setTimeout(function () {
-      window.HISTORY = (history && history.length) ? history : MOCK_HISTORY;
-      window.renderDashboard(byType || MOCK_BY_TYPE, planSplit || MOCK_PLAN_SPLIT);
-    }, 0);
-  }
 
-  (async function () {
-    try {
-      if (!window.claude || !window.claude.use) { boot(EMBEDDED.history, EMBEDDED.byType, EMBEDDED.planSplit); return; }
-      var db = await window.claude.use('db');
-      if (!db) { boot(MOCK_HISTORY, MOCK_BY_TYPE, MOCK_PLAN_SPLIT); return; }
-      var snap = await db.doc('overview/latest').get();
-      if (snap.exists) {
-        var data = snap.data();
-        boot(data.history, data.byType, data.planSplit);
-      } else {
-        boot(MOCK_HISTORY, MOCK_BY_TYPE, MOCK_PLAN_SPLIT);
+window.liaApi = function(path, opts, retry){
+  var key = retry ? null : localStorage.getItem('lia_admin_key');
+  if (!key) {
+    key = window.prompt('Chiave admin Lia');
+    if (!key) return Promise.reject(new Error('Chiave admin mancante'));
+    localStorage.setItem('lia_admin_key', key);
+  }
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers || {}, { 'x-admin-key': key, 'Content-Type': 'application/json' });
+  return fetch(path, opts).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(j){
+      if (r.status === 401) {
+        localStorage.removeItem('lia_admin_key');
+        if (!retry) return window.liaApi(path, opts, true);
+        throw new Error('Chiave non valida');
       }
-    } catch (e) {
-      boot(MOCK_HISTORY, MOCK_BY_TYPE, MOCK_PLAN_SPLIT);
-    }
-  })();
+      if (!r.ok) throw new Error((j.error || r.status) + (j.detail ? ' – ' + j.detail : ''));
+      return j;
+    });
+  });
+};
+window.liaBanner = function(msg){
+  var el = document.getElementById('liaBanner');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'liaBanner';
+    el.style.cssText = 'background:#3a1c1c;color:#ffb4b4;padding:12px 16px;border-radius:12px;margin:0 0 14px;font-size:.92rem;line-height:1.45;';
+    var wrap = document.querySelector('.wrap'); wrap.insertBefore(el, wrap.firstChild);
+  }
+  el.textContent = msg;
+};
+
+  setTimeout(function(){
+    window.liaApi('/api/admin/clients?view=overview').then(function(j){
+      window.HISTORY = j.history;
+      window.renderDashboard(j.byType, j.planSplit);
+    }).catch(function(e){ window.liaBanner('Non riesco a caricare i dati: ' + e.message); });
+  }, 0);
 })();
 </script>
 <script>
