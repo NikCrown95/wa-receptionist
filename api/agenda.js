@@ -199,7 +199,7 @@ module.exports = async (req, res) => {
   res.setHeader("X-Robots-Tag", "noindex");
   res.setHeader("Referrer-Policy", "no-referrer");
 
-  const q = req.query || {};
+  const q = req.query || {};\n  let sessionAgendaToken = \"\";\n  try { const auth = require(\"./business-auth\"); const session = auth.verifyBusinessSession(auth.readBusinessCookie(req, \"lia_business_session\")); if (session) sessionAgendaToken = session.agenda_token || \"\"; } catch (e) {}
   const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1";
 
   // 1) La pagina
