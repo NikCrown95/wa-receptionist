@@ -80,17 +80,15 @@ async function getBusinessProfileByToken(token) {
   const biz=br.data[0];
   const results=await Promise.all([
     sb("GET","services?business_id=eq."+biz.id+"&active=eq.true&select=id,name,duration_min,buffer_min,price_eur,at_customer_place"),
-    sb("GET","resources?business_id=eq."+biz.id+"&active=eq.true&select=id&limit=1"),
+    sb("GET","resources?business_id=eq."+biz.id+"&active=eq.true&select=id,opening_hours(id,weekday,opens,closes)&limit=1"),
     sb("GET","subscriptions?business_id=eq."+biz.id+"&select=status,started_at,cancelled_at,plans(name)&order=started_at.desc&limit=1")
   ]);
   const sr=results[0],rr=results[1],pr=results[2];
   if(!sr.ok||!Array.isArray(sr.data))return {__agendaError:"Errore lettura servizi"};
   const resource=rr.ok&&Array.isArray(rr.data)&&rr.data.length?rr.data[0]:null;
   if(!resource)return {__agendaError:"Nessuna risorsa attiva configurata"};
-  const hr=await sb("GET","opening_hours?resource_id=eq."+resource.id+"&select=id,weekday,opens,closes&order=weekday.asc,opens.asc");
-  if(!hr.ok||!Array.isArray(hr.data))return {__agendaError:"Errore lettura orari di apertura"};
   biz.services=sr.data;
-  biz.resources=[{id:resource.id,active:true,opening_hours:hr.data}];
+  biz.resources=[{id:resource.id,active:true,opening_hours:Array.isArray(resource.opening_hours)?resource.opening_hours:[]}];
   biz.__planName=pr.ok&&Array.isArray(pr.data)&&pr.data.length&&pr.data[0].plans?pr.data[0].plans.name:null;
   return biz;
 }
