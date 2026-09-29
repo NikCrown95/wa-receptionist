@@ -220,10 +220,9 @@ module.exports = async (req, res) => {
     // Le richieste che servono all'appuntamento manuale hanno bisogno anche di servizi/orari dell'attività
     const token=String(q.t || "").trim();
     // Agenda e storico usano il profilo minimo: niente servizi/orari scaricati inutilmente ad ogni navigazione.
-    const needsFullBusiness = req.method === "POST" || q.slots === "1" || q.settings === "1";
     const biz = q.profile === "1" && req.method === "GET"
       ? await getBusinessProfileByToken(token)
-      : (needsFullBusiness ? await getBusinessFullByToken(token) : await getBusinessByToken(token));
+      : await getBusinessFullByToken(token);
     if (!biz) return res.status(404).json({ error: "Link non valido" });
     if (biz.__agendaError) return res.status(502).json({ error: biz.__agendaError });
     const tz = biz.timezone || "Europe/Rome";
