@@ -219,9 +219,10 @@ module.exports = async (req, res) => {
     const token=String(q.t || "").trim();
     // Lo storico serve solo a Clienti/Statistiche: usa il profilo minimo.
     // Agenda, slot e impostazioni mantengono il caricamento completo già stabile.
+    const isFastDay = req.method === "GET" && q.format === "json" && q.days === "1" && q.slots !== "1" && q.settings !== "1";
     const biz = q.profile === "1" && req.method === "GET"
       ? await getBusinessProfileByToken(token)
-      : (q.history === "1" && req.method === "GET" ? await getBusinessByToken(token) : await getBusinessFullByToken(token));
+      : ((q.history === "1" && req.method === "GET") || isFastDay ? await getBusinessByToken(token) : await getBusinessFullByToken(token));
     if (!biz) return res.status(404).json({ error: "Link non valido" });
     if (biz.__agendaError) return res.status(502).json({ error: biz.__agendaError });
     const tz = biz.timezone || "Europe/Rome";
@@ -482,10 +483,15 @@ module.exports = async (req, res) => {
     // Convertiti già in UTC (invece di lasciarli come "09:00" testuale), così il browser del titolare
     // non deve rifare lui la conversione nel fuso dell'attività: userebbe per sbaglio il proprio fuso locale.
     const hoursByDay = {};
+    let agendaResources = biz.resources || [];
+    if (isFastDay) {
+      const rr = await sb("GET","resources?business_id=eq."+biz.id+"&active=eq.true&select=id,opening_hours(weekday,opens,closes)&limit=1");
+      agendaResources = rr.ok && Array.isArray(rr.data) ? rr.data : [];
+    }
     for (let i = 0; i < days; i++) {
       const d = addDays(date, i);
       const wd = weekdayOf(d);
-      const res0 = biz.resources[0];
+      const res0 = agendaResources[0];
       const iv = (res0 && res0.opening_hours || [])
         .filter((h) => Number(h.weekday) === wd)
         .sort((a, b) => (a.opens < b.opens ? -1 : 1))
