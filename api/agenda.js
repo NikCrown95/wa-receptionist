@@ -219,10 +219,11 @@ module.exports = async (req, res) => {
     // 2) I dati: serve il codice segreto
     // Le richieste che servono all'appuntamento manuale hanno bisogno anche di servizi/orari dell'attività
     const token=String(q.t || "").trim();
-    // Agenda e storico usano il profilo minimo: niente servizi/orari scaricati inutilmente ad ogni navigazione.
+    // Lo storico serve solo a Clienti/Statistiche: usa il profilo minimo.
+    // Agenda, slot e impostazioni mantengono il caricamento completo già stabile.
     const biz = q.profile === "1" && req.method === "GET"
       ? await getBusinessProfileByToken(token)
-      : await getBusinessFullByToken(token);
+      : (q.history === "1" && req.method === "GET" ? await getBusinessByToken(token) : await getBusinessFullByToken(token));
     if (!biz) return res.status(404).json({ error: "Link non valido" });
     if (biz.__agendaError) return res.status(502).json({ error: biz.__agendaError });
     const tz = biz.timezone || "Europe/Rome";
