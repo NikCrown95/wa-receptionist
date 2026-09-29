@@ -146,10 +146,10 @@ nav a.on{background:var(--card2);color:var(--ink);}
       <option value="suspended">Sospeso</option>
     </select>
     <select class="filter" id="filterHealth">
-      <option value="">Tutte le salute</option>
+      <option value="">Tutti gli stati</option>
       <option value="red">A rischio</option>
       <option value="yellow">Da controllare</option>
-      <option value="green">In salute</option>
+      <option value="green">Regolare</option>
       <option value="upgrade">Candidati Lia</option>
     </select>
     <button class="btn" id="addBtn" type="button">
@@ -161,7 +161,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th>Attività</th><th>Piano e stato</th><th>Rinnovo</th><th>Servizio</th><th>Incasso</th><th>Appuntamenti (30gg)</th><th>Salute</th><th>Contatti</th><th>Azioni</th>
+        <th>Attività</th><th>Piano e stato</th><th>Rinnovo</th><th>Servizio</th><th>Incasso</th><th>Appuntamenti (30gg)</th><th>Stato</th><th>Contatti</th><th>Azioni</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -359,7 +359,7 @@ window.startClients = function(){
       var hh = c.health || { level: 'na', label: '—', reasons: [], upgrade: false };
       var hp = document.createElement('span');
       hp.className = 'pill ' + (hh.level === 'green' ? 'active' : hh.level === 'yellow' ? 'warn' : hh.level === 'red' ? 'bad' : 'na');
-      hp.textContent = hh.label;
+      hp.textContent = hh.level === 'green' ? 'Regolare' : hh.label;
       hc.appendChild(hp);
       if (hh.reasons && hh.reasons.length) {
         var hr = document.createElement('span'); hr.className = 'health-reasons'; hr.textContent = hh.reasons.join(' · ');
