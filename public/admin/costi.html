@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="it">
 <head>
+<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
@@ -169,6 +170,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     <div class="spacer"></div>
   </div>
 </header>
+<script src="/admin/auth.js"></script>
 <script src="/admin/nav.js"></script>
 
 <div class="wrap">
@@ -177,36 +179,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
 </div>
 
 <script>
-window.liaApi = function(path, opts, retry){
-  var key = retry ? null : localStorage.getItem('lia_admin_key');
-  if (!key) {
-    key = window.prompt('Chiave admin Lia');
-    if (!key) return Promise.reject(new Error('Chiave admin mancante'));
-    localStorage.setItem('lia_admin_key', key);
-  }
-  opts = opts || {};
-  opts.headers = Object.assign({}, opts.headers || {}, { 'x-admin-key': key, 'Content-Type': 'application/json' });
-  return fetch(path, opts).then(function(r){
-    return r.json().catch(function(){ return {}; }).then(function(j){
-      if (r.status === 401) {
-        localStorage.removeItem('lia_admin_key');
-        if (!retry) return window.liaApi(path, opts, true);
-        throw new Error('Chiave non valida');
-      }
-      if (!r.ok) throw new Error((j.error || r.status) + (j.detail ? ' – ' + j.detail : ''));
-      return j;
-    });
-  });
-};
-window.liaBanner = function(msg){
-  var el = document.getElementById('liaBanner');
-  if (!el) {
-    el = document.createElement('div'); el.id = 'liaBanner';
-    el.style.cssText = 'background:#3a1c1c;color:#ffb4b4;padding:12px 16px;border-radius:12px;margin:0 0 14px;font-size:.92rem;line-height:1.45;';
-    var wrap = document.querySelector('.wrap'); wrap.insertBefore(el, wrap.firstChild);
-  }
-  el.textContent = msg;
-};
 
 
 (function(){
