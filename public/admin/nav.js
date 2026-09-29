@@ -21,4 +21,12 @@
     if (on) a.className = 'on';
     nav.appendChild(a);
   });
+  // pulsante Esci
+  var row = nav.parentNode;
+  if (row && !document.getElementById('liaLogout')) {
+    var b = document.createElement('button');
+    b.id = 'liaLogout'; b.type = 'button'; b.className = 'btn ghost small'; b.textContent = 'Esci';
+    b.addEventListener('click', function () { if (window.liaLogout) window.liaLogout(); else location.href = '/admin/login.html'; });
+    row.appendChild(b);
+  }
 })();
