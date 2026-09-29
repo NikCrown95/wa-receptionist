@@ -5,7 +5,7 @@
     { label: 'I tuoi clienti', href: '/admin/clienti.html', also: ['/admin/attivita.html'] },
     { label: 'Andamento', href: '/admin/', also: ['/admin/index.html'] },
     { label: 'Uso di Lia', href: '/admin/lia.html' },
-    { label: 'Soldi', href: '/admin/soldi.html' },
+    { label: 'Ricavi', href: '/admin/soldi.html' },
     { label: 'Costi', href: '/admin/costi.html' }
   ];
   var nav = document.getElementById('mainNav');
