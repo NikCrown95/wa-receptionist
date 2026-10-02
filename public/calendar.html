@@ -305,7 +305,19 @@ a{color:inherit;}
 @media (min-width:768px) and (max-width:1050px){.lia-calendar-section{padding-inline:14px}.lia-cal-shell{grid-template-columns:minmax(0,1fr) 285px;padding:14px;gap:12px}.lia-cal-head{grid-template-columns:1fr auto;height:70px}.lia-view{display:none}.lia-month-grid .lia-cell{min-height:88px;padding:9px}.lia-cell-meta{left:9px;right:9px;bottom:9px}.lia-appnum{font-size:11px}.lia-daynum{font-size:18px}.lia-day-panel{padding:16px}.lia-ring{width:86px;height:86px}.lia-day-top h3{font-size:21px}.lia-appt{grid-template-columns:12px 43px 1fr 10px;gap:6px;font-size:11px}.lia-weekdays{font-size:12px}}
 
 
-.lia-calendar-section{min-height:100vh}.lia-cal-mobile{display:none!important}.lia-cal-desktop{display:block!important}@media(max-width:767px){.lia-cal-shell{min-width:760px}.lia-calendar-section{overflow-x:auto;padding:16px}}</style></head><body><section class="sec lia-calendar-section" id="calendario" aria-labelledby="t-cal">
+.lia-calendar-section{min-height:100vh}.lia-cal-mobile{display:none!important}.lia-cal-desktop{display:block!important}@media(max-width:767px){.lia-cal-shell{min-width:760px}.lia-calendar-section{overflow-x:auto;padding:16px}}
+/* standalone calendar reset: preserve the mockup layout without landing-page dependencies */
+@media (min-width:768px){
+.lia-calendar-section{display:block!important;padding:28px!important;background:radial-gradient(900px 420px at 10% 0%,rgba(45,210,220,.12),transparent 65%),#05090c!important}
+.lia-cal-desktop{display:block!important;max-width:1460px!important;margin:0 auto!important}
+.lia-cal-shell{display:grid!important;grid-template-columns:minmax(0,1fr) 330px!important;gap:18px!important;padding:20px!important}
+.lia-cal-head{display:grid!important;grid-template-columns:1fr auto 1fr!important;align-items:center!important}
+.lia-weekdays,.lia-month-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important}
+.lia-weekdays span{display:block!important}.lia-cell{display:block!important;width:100%!important;text-align:left!important;border-radius:0!important;color:#f5f7f7!important}
+.lia-day-panel{display:flex!important}.lia-occupancy{display:flex!important}.lia-list-head{display:flex!important}.lia-appt{display:grid!important}.lia-barline{display:flex!important}.lia-track{display:block!important}
+}
+@media (min-width:768px) and (max-width:1050px){.lia-cal-shell{grid-template-columns:minmax(0,1fr) 285px!important}.lia-cal-head{grid-template-columns:1fr auto!important}.lia-view{display:none!important}}
+</style></head><body><section class="sec lia-calendar-section" id="calendario" aria-labelledby="t-cal">
   <div class="wrap lia-cal-mobile">
     <h2 class="h2" id="t-cal">Il calendario che si capisce a colpo d'occhio.</h2>
     <p class="lead2">Tocchi un appuntamento e sai chi è, cosa deve fare e come chiamarlo.</p>
