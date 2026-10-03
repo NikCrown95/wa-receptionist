@@ -2,7 +2,7 @@
 // Variabili su Vercel: TELEGRAM_WEBHOOK_SECRET (parola segreta) e TELEGRAM_BOT_TOKEN (il token di BotFather).
 // Link per i clienti: https://t.me/NOME_DEL_BOT?start=SLUG_DELL_ATTIVITA
 
-const { handleMessage, getBusiness } = require("../lib/lia.js");
+const { handleMessage, getBusiness, welcomeText } = require("../lib/lia.js");
 const { sb, agendaText } = require("../lib/owner.js");
 
 module.exports = async (req, res) => {
@@ -77,7 +77,7 @@ module.exports = async (req, res) => {
         await sb("PATCH", "businesses?id=eq." + biz.id, { owner_telegram_chat_id: null });
         return reply("Ok, non riceverai più qui l'agenda. Per ricollegarti usa di nuovo il tuo codice.");
       }
-      return reply("Sono la tua segretaria virtuale. Ogni mattina ti mando l'agenda di " + biz.name + ".\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
+      return reply("Sono Lia, la tua assistente. Ogni mattina ti mando l'agenda di " + biz.name + ".\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
     }
 
     // Il cliente arriva dal link/QR di un'attività: "/start slug"
@@ -91,8 +91,7 @@ module.exports = async (req, res) => {
       } else {
         biz = await getBusiness(process.env.BUSINESS_SLUG || "barbiere-mario");
       }
-      const nome = biz ? biz.name : "questa attività";
-      return reply("Ciao! Sono la segretaria virtuale di " + nome + ". Come posso aiutarti?");
+      return reply(welcomeText(biz));
     }
 
     // A quale attività appartiene questo cliente?
