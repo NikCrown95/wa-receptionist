@@ -1133,6 +1133,90 @@ async function overviewData() {
   };
 }
 
+// ============================ RICHIESTE DEI CLIENTI ============================
+// Le scrive api/agenda.js (azione support_request) nella tabella support_requests.
+const REQ_KINDS = ['support', 'plan_change', 'subscription_cancel', 'account_delete', 'whatsapp_activation'];
+const REQ_STATUS = ['new', 'in_progress', 'done'];
+
+async function requestCounts() {
+  const rows = (await sb('support_requests?select=status&limit=5000')) || [];
+  const c = { new: 0, in_progress: 0, done: 0 };
+  rows.forEach((r) => { if (c[r.status] !== undefined) c[r.status]++; });
+  return c;
+}
+
+async function listRequests(query) {
+  const status = String((query && query.status) || '');
+  const kind = String((query && query.kind) || '');
+  let path = 'support_requests?select=id,created_at,business_id,business_name,kind,topic,message,contact,meta,status,handled_by,handled_at&order=created_at.desc&limit=300';
+  if (status === 'open') path += '&status=in.(new,in_progress)';
+  else if (REQ_STATUS.includes(status)) path += `&status=eq.${status}`;
+  if (REQ_KINDS.includes(kind)) path += `&kind=eq.${kind}`;
+  let rows, counts;
+  try {
+    rows = (await sb(path)) || [];
+    counts = await requestCounts();
+  } catch (e) {
+    if (e && (e.status === 404 || /support_requests/.test(String(e.message || '')))) {
+      return { setup_needed: true, requests: [], counts: { new: 0, in_progress: 0, done: 0 } };
+    }
+    throw e;
+  }
+  // arricchimento con i dati dell'attivita' (telefono, piano)
+  const ids = Array.from(new Set(rows.map((r) => r.business_id).filter((id) => UUID.test(String(id || '')))));
+  const biz = {};
+  if (ids.length) {
+    try {
+      const bs = (await sb(`businesses?id=in.(${ids.join(',')})&select=id,name,owner_phone,owner_whatsapp,subscriptions(status,started_at,current_period_end,plans(name,price_eur))`)) || [];
+      bs.forEach((b) => {
+        const subs = (b.subscriptions || []).slice().sort((x, y) => new Date(y.started_at) - new Date(x.started_at));
+        const sub = subs[0] || null;
+        biz[b.id] = {
+          id: b.id,
+          name: b.name,
+          phone: b.owner_phone || null,
+          whatsapp: b.owner_whatsapp || null,
+          plan: sub && sub.plans ? (sub.plans.name === 'Base+Lia' ? 'Premium' : 'Base') : null,
+          plan_status: sub ? sub.status : null,
+          renew: sub ? sub.current_period_end || null : null,
+        };
+      });
+    } catch (e) {
+      console.error('richieste: dati attivita non letti:', e && e.message); // la lista funziona lo stesso
+    }
+  }
+  return {
+    counts,
+    requests: rows.map((r) => ({
+      id: r.id,
+      created_at: r.created_at,
+      kind: r.kind,
+      topic: r.topic || null,
+      message: r.message || '',
+      contact: r.contact || null,
+      meta: r.meta || null,
+      status: r.status,
+      handled_by: r.handled_by || null,
+      handled_at: r.handled_at || null,
+      business: biz[r.business_id] || (r.business_id ? { id: r.business_id, name: r.business_name || null } : { id: null, name: r.business_name || null }),
+    })),
+  };
+}
+
+async function setRequestStatus(body, ctx) {
+  const id = String(body.id || '');
+  const status = String(body.status || '');
+  if (!UUID.test(id)) throw fail('Richiesta non valida.');
+  if (!REQ_STATUS.includes(status)) throw fail('Stato non valido.');
+  const fields = status === 'new'
+    ? { status, handled_by: null, handled_at: null }
+    : { status, handled_by: ctx.actor, handled_at: new Date().toISOString() };
+  const rows = await sb(`support_requests?id=eq.${id}`, { method: 'PATCH', body: fields, prefer: 'return=representation' });
+  if (!rows || !rows.length) { const e = new Error('Richiesta non trovata.'); e.notFound = true; throw e; }
+  await audit('request_status', rows[0].business_id || null, { request_id: id, status, kind: rows[0].kind }, ctx.actor);
+  return { ok: true, id, status, handled_by: fields.handled_by, handled_at: fields.handled_at };
+}
+
 module.exports = async function handler(req, res) {
   if (res.setHeader) {
     res.setHeader('Cache-Control', 'no-store');
@@ -1173,6 +1257,13 @@ module.exports = async function handler(req, res) {
       if (view === 'margin') { res.status(200).json(await marginOverview()); return; }
       if (view === 'money') { res.status(200).json(await moneyOverview()); return; }
       if (view === 'lia') { res.status(200).json(await liaOverview()); return; }
+      if (view === 'requests') { res.status(200).json(await listRequests(req.query || {})); return; }
+      if (view === 'requests_count') {
+        let n = 0;
+        try { n = ((await sb('support_requests?status=eq.new&select=id&limit=500')) || []).length; } catch (e) { n = 0; }
+        res.status(200).json({ new: n });
+        return;
+      }
       if (view === 'detail') { res.status(200).json(await businessDetail(String(req.query.id || ''))); return; }
       if (view === 'conversation') {
         if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Le conversazioni dei clienti finali sono riservate al titolare.' }); return; }
@@ -1186,6 +1277,10 @@ module.exports = async function handler(req, res) {
       if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Il tuo account può solo consultare, non modificare.' }); return; }
       let body = req.body;
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
+      if (body && body.action === 'request_status') {
+        res.status(200).json(await setRequestStatus(body, ctx));
+        return;
+      }
       if (body && (body.action === 'set_setting' || body.action === 'set_price')) {
         res.status(200).json(await runSettingsAction(body, ctx));
         return;
@@ -1213,3 +1308,6 @@ module.exports.buildMrrEvents = buildMrrEvents;
 module.exports.monthlyMovement = monthlyMovement;
 
 module.exports.authCacheClear = authCacheClear;
+
+module.exports.listRequests = listRequests;
+module.exports.setRequestStatus = setRequestStatus;
