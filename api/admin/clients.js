@@ -1217,6 +1217,61 @@ async function setRequestStatus(body, ctx) {
   return { ok: true, id, status, handled_by: fields.handled_by, handled_at: fields.handled_at };
 }
 
+// ============================ ORDINI DELLO SHOP ============================
+// Li scrive api/agenda.js (azione order dello Shop) nella tabella shop_orders.
+const ORDER_STATUS = ['new', 'paid', 'shipped', 'cancelled'];
+
+async function orderCounts() {
+  const rows = (await sb('shop_orders?select=status&limit=5000')) || [];
+  const c = { new: 0, paid: 0, shipped: 0, cancelled: 0 };
+  rows.forEach((r) => { if (c[r.status] !== undefined) c[r.status]++; });
+  return c;
+}
+
+async function listOrders(query) {
+  const status = String((query && query.status) || '');
+  let path = 'shop_orders?select=id,number,created_at,business_id,business_name,items,total_eur,shipping,snapshot,status,handled_at&order=created_at.desc&limit=300';
+  if (status === 'open') path += '&status=in.(new,paid)';
+  else if (ORDER_STATUS.includes(status)) path += `&status=eq.${status}`;
+  let rows, counts;
+  try {
+    rows = (await sb(path)) || [];
+    counts = await orderCounts();
+  } catch (e) {
+    if (e && (e.status === 404 || /shop_orders/.test(String(e.message || '')))) {
+      return { setup_needed: true, orders: [], counts: { new: 0, paid: 0, shipped: 0, cancelled: 0 } };
+    }
+    throw e;
+  }
+  return {
+    counts,
+    orders: rows.map((r) => ({
+      id: r.id,
+      code: 'LIA-' + (1000 + Number(r.number)),
+      created_at: r.created_at,
+      business_id: r.business_id,
+      business_name: r.business_name,
+      items: r.items || [],
+      total: Number(r.total_eur),
+      shipping: r.shipping || {},
+      snapshot: r.snapshot || {},
+      status: r.status,
+      handled_at: r.handled_at,
+    })),
+  };
+}
+
+async function setOrderStatus(body, ctx) {
+  const id = String(body.id || '');
+  const status = String(body.status || '');
+  if (!UUID.test(id)) throw fail('Ordine non valido.');
+  if (!ORDER_STATUS.includes(status)) throw fail('Stato non valido.');
+  const rows = await sb(`shop_orders?id=eq.${id}`, { method: 'PATCH', body: { status, handled_at: new Date().toISOString() }, prefer: 'return=representation' });
+  if (!rows || !rows.length) { const e = new Error('Ordine non trovato.'); e.notFound = true; throw e; }
+  await audit('order_status', rows[0].business_id || null, { order_id: id, status }, ctx.actor);
+  return { ok: true, id, status };
+}
+
 module.exports = async function handler(req, res) {
   if (res.setHeader) {
     res.setHeader('Cache-Control', 'no-store');
@@ -1264,6 +1319,13 @@ module.exports = async function handler(req, res) {
         res.status(200).json({ new: n });
         return;
       }
+      if (view === 'orders') { res.status(200).json(await listOrders(req.query || {})); return; }
+      if (view === 'orders_count') {
+        let n = 0;
+        try { n = ((await sb('shop_orders?status=eq.new&select=id&limit=500')) || []).length; } catch (e) { n = 0; }
+        res.status(200).json({ new: n });
+        return;
+      }
       if (view === 'detail') { res.status(200).json(await businessDetail(String(req.query.id || ''))); return; }
       if (view === 'conversation') {
         if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Le conversazioni dei clienti finali sono riservate al titolare.' }); return; }
@@ -1277,6 +1339,10 @@ module.exports = async function handler(req, res) {
       if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Il tuo account può solo consultare, non modificare.' }); return; }
       let body = req.body;
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
+      if (body && body.action === 'order_status') {
+        res.status(200).json(await setOrderStatus(body, ctx));
+        return;
+      }
       if (body && body.action === 'request_status') {
         res.status(200).json(await setRequestStatus(body, ctx));
         return;
