@@ -62,43 +62,43 @@ h2{font-size:1.05rem;margin:0 0 4px}
 ol.st{padding-left:20px;color:var(--muted);font-size:.92rem;line-height:1.5}ol.st b{color:var(--ink)}
 </style>
 <div class="loginbox">
-  <div class="top"><a class="lnk" id="back" href="/login.html">‹ Torna alla dashboard</a></div>
+  <div class="top"><a class="lnk" id="back" href="/login.html">‹ Dashboard</a></div>
   <div class="card">
     <h2>Verifica in due passaggi <span class="badge off" id="badge">…</span></h2>
-    <p class="sub" style="text-align:left">Oltre alla password, per entrare serve un codice a 6 cifre che trovi sul tuo telefono. Anche se qualcuno scoprisse la password, non potrebbe entrare.</p>
+    <p class="sub" style="text-align:left">Un secondo livello di protezione: oltre alla password, serve un codice che trovi sul tuo telefono.</p>
     <div id="off" class="hide">
       <button class="btn" id="start" type="button">Attiva</button>
     </div>
     <div id="setup" class="hide">
       <ol class="st">
-        <li>Ti serve un'app di autenticazione: <b>Password</b> di Apple (iPhone con iOS 18 o più recente), Google Authenticator o Microsoft Authenticator.</li>
-        <li>Se stai usando <b>questo stesso telefono</b>, tocca "Apri nell'app" qui sotto. Se sei al computer, inquadra il QR con il telefono.</li>
-        <li>Se non funziona, copia la chiave e incollala nell'app, scegliendo "inserisci chiave" a mano.</li>
+        <li>Ti serve un'app di autenticazione: <b>Password</b> di Apple (iOS 18 o più recente), Google Authenticator o Microsoft Authenticator.</li>
+        <li>Da questo dispositivo, tocca <b>Apri nell'app</b>. Dal computer, inquadra il QR con il telefono.</li>
+        <li>Se non si apre, copia la chiave e inseriscila nell'app a mano.</li>
       </ol>
       <a class="btn" id="open" href="#" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Apri nell'app</a>
       <div class="qr hide" id="qr"></div>
       <div class="key" id="key"></div>
       <button class="btn sec" id="copykey" type="button">Copia la chiave</button>
       <form id="fe">
-        <label for="c1">Scrivi qui il codice a 6 cifre mostrato dall'app</label>
+        <label for="c1">Codice a 6 cifre mostrato dall'app</label>
         <input class="inp code" id="c1" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
-        <button class="btn" id="goe" type="submit">Conferma e attiva</button>
+        <button class="btn" id="goe" type="submit">Attiva</button>
         <div class="err" id="erre" role="alert"></div>
       </form>
     </div>
     <div id="done" class="hide">
       <h2>Codici di emergenza</h2>
-      <p class="sub" style="text-align:left">Salvali in un posto sicuro (anche una foto o una nota). Ognuno vale <b>una sola volta</b> e ti serve se perdi il telefono. Non ti verranno mostrati di nuovo.</p>
+      <p class="sub" style="text-align:left">Conservali in un posto sicuro. Ognuno vale <b>una sola volta</b> e ti permette di entrare se perdi il telefono. Non verranno mostrati di nuovo.</p>
       <div class="codes" id="codes"></div>
       <button class="btn sec" id="copycodes" type="button">Copia i codici</button>
-      <button class="btn" id="fin" type="button">Li ho salvati</button>
+      <button class="btn" id="fin" type="button">Fatto, li ho conservati</button>
     </div>
     <div id="on" class="hide">
       <p class="hint" id="left" style="text-align:left"></p>
       <form id="fd">
-        <label for="dp">Per disattivarla: la tua password</label>
+        <label for="dp">Per disattivarla, la tua password</label>
         <input class="inp" id="dp" type="password" autocomplete="current-password">
-        <label for="dc">Un codice dell'app (o di emergenza)</label>
+        <label for="dc">Un codice dell'app o di emergenza</label>
         <input class="inp" id="dc" inputmode="numeric" autocomplete="one-time-code" maxlength="12">
         <button class="btn dng" id="god" type="submit">Disattiva</button>
         <div class="err" id="errd" role="alert"></div>
@@ -112,10 +112,10 @@ ol.st{padding-left:20px;color:var(--muted);font-size:.92rem;line-height:1.5}ol.s
       <input class="inp" id="cur" type="password" autocomplete="current-password" required>
       <label for="np">Nuova password</label>
       <input class="inp" id="np" type="password" autocomplete="new-password" required>
-      <ul class="rules" id="rules"><li>Almeno 8 caratteri</li><li>Almeno un numero</li><li>Almeno un carattere speciale (! ? @ # €)</li></ul>
+      <ul class="rules" id="rules"><li>8 caratteri o più</li><li>Un numero</li><li>Un carattere speciale (! ? @ # €)</li></ul>
       <button class="btn" id="gop" type="submit">Salva password</button>
       <div class="err" id="errp" role="alert"></div>
-      <div class="okbox" id="okp" role="status">Password cambiata.</div>
+      <div class="okbox" id="okp" role="status">Password aggiornata.</div>
     </form>
   </div>
 </div>

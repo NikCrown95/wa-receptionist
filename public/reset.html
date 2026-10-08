@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>Prenolia – Recupero password</title>
+<title>Prenolia – Recupera l'accesso</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -49,27 +49,27 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
   <div class="card">
     <span class="logo" role="img" aria-label="Prenolia"></span>
     <section id="ask">
-      <h1>Password dimenticata?</h1>
-      <p class="sub">Scrivi l'email della tua attività: ti mandiamo un link per sceglierne una nuova.</p>
+      <h1>Recupera l'accesso</h1>
+      <p class="sub">Scrivi la tua email: ti inviamo un link per scegliere una nuova password.</p>
       <form id="fa">
         <label for="em">Email</label>
         <input class="inp" id="em" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
         <button class="btn" id="goa" type="submit">Invia il link</button>
         <div class="err" id="erra" role="alert"></div>
-        <div class="okbox" id="oka" role="status">Se l'email è registrata, ti abbiamo appena scritto. Controlla la posta (anche lo spam): il link vale 30 minuti.</div>
+        <div class="okbox" id="oka" role="status">Se l'indirizzo è registrato, il link è in arrivo. Vale 30 minuti: controlla anche lo spam.</div>
       </form>
       <p class="hint"><a class="lnk" href="/login.html">Torna all'accesso</a></p>
     </section>
     <section id="set" class="hide">
       <h1>Nuova password</h1>
-      <p class="sub">Scegli la password per entrare in Prenolia.</p>
+      <p class="sub">Scegline una che solo tu conosci.</p>
       <form id="fs">
         <label for="np">Nuova password</label>
         <input class="inp" id="np" type="password" autocomplete="new-password" required>
-        <ul class="rules" id="rules"><li>Almeno 8 caratteri</li><li>Almeno un numero</li><li>Almeno un carattere speciale (! ? @ # €)</li></ul>
+        <ul class="rules" id="rules"><li>8 caratteri o più</li><li>Un numero</li><li>Un carattere speciale (! ? @ # €)</li></ul>
         <button class="btn" id="gos" type="submit">Salva password</button>
         <div class="err" id="errs" role="alert"></div>
-        <div class="okbox" id="oks" role="status">Password cambiata. Ora puoi accedere.</div>
+        <div class="okbox" id="oks" role="status">Fatto. Ti riportiamo all'accesso.</div>
       </form>
       <p class="hint"><a class="lnk" id="tologin" href="/login.html">Vai all'accesso</a></p>
     </section>
