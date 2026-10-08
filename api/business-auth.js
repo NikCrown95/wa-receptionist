@@ -10,6 +10,13 @@ const SHORT_SESSION_MS = 12 * 3600 * 1000;          // 12 ore
 const LONG_SESSION_MS = 30 * 24 * 3600 * 1000;      // 30 giorni ("rimani connesso")
 const CHALLENGE_MS = 5 * 60 * 1000;                 // tempo per inserire il codice a 6 cifre
 const RESET_MS = 30 * 60 * 1000;                    // validità del link di recupero
+const CONFIRM_MS = 24 * 3600 * 1000;                // validità del link di conferma registrazione
+const SIGNUP_TYPES = ["parrucchiere", "barbiere", "estetista", "personal trainer", "idraulico", "altro"];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function slugify(name) {
+  return String(name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "attivita";
+}
+const esc = (v) => String(v || "").replace(/[<>&"']/g, "");
 const PUBLIC_URL = process.env.PUBLIC_URL || "https://wa-receptionist-sigma.vercel.app";
 
 /* ---------- Supabase ---------- */
@@ -198,6 +205,30 @@ function resetMail(name, link) {
   return { html, text };
 }
 
+function mailShell(inner) {
+  return '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0b1220">' + inner + '<p style="color:#8793a8;font-size:12px;margin-top:28px">Prenolia</p></div>';
+}
+function mailButton(link, label) {
+  return '<p style="margin:24px 0"><a href="' + link + '" style="background:#19b8c8;color:#031016;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;display:inline-block">' + label + '</a></p>';
+}
+function confirmMail(name, link) {
+  const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Benvenuto in Prenolia</h2>'
+    + '<p style="line-height:1.5">Ciao ' + esc(name) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>30 giorni</b> parte subito.</p>'
+    + mailButton(link, "Conferma e inizia")
+    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Il link vale 24 ore. Non sei stato tu? Ignora questa email: non verrà creato nessun account.</p>');
+  const text = "Benvenuto in Prenolia.\nConferma il tuo indirizzo e la prova gratuita di 30 giorni parte subito (il link vale 24 ore):\n" + link + "\n\nNon sei stato tu? Ignora questa email: non verrà creato nessun account.";
+  return { html, text };
+}
+function alreadyMail(name) {
+  const login = PUBLIC_URL + "/login.html", reset = PUBLIC_URL + "/reset.html";
+  const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Hai già un account</h2>'
+    + '<p style="line-height:1.5">Ciao, qualcuno ha provato a registrare ' + esc(name) + ' con questo indirizzo, ma un account Prenolia esiste già.</p>'
+    + mailButton(login, "Accedi")
+    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Non ricordi la password? <a href="' + reset + '" style="color:#0aa6b4">Recuperala qui</a>. Non sei stato tu? Puoi ignorare questa email.</p>');
+  const text = "Esiste già un account Prenolia con questo indirizzo.\nAccedi: " + login + "\nPassword dimenticata: " + reset + "\n\nNon sei stato tu? Ignora questa email.";
+  return { html, text };
+}
+
 /* ---------- handler ---------- */
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -297,6 +328,54 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     }
 
+    /* --- registrazione --- */
+    const signupOpen = process.env.SIGNUP_ENABLED === "1";
+    if (req.method === "GET" && action === "signup-status") return res.status(200).json({ open: signupOpen });
+
+    if (req.method === "POST" && action === "signup") {
+      if (!signupOpen) return res.status(403).json({ error: "Le registrazioni aprono a breve." });
+      if (body.hp) return res.status(200).json({ ok: true }); // campo trappola per i bot
+      const name = String(body.name || "").trim().replace(/\s+/g, " ");
+      const phone = String(body.phone || "").trim();
+      const email = String(body.email || "").trim().toLowerCase();
+      const password = String(body.password || "");
+      const rawType = String(body.type || "").trim().toLowerCase();
+      const type = SIGNUP_TYPES.includes(rawType) ? rawType : "altro";
+      if (name.length < 2 || name.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività (da 2 a 80 caratteri)." });
+      if (!EMAIL_RE.test(email) || email.length > 200) return res.status(400).json({ error: "Controlla l'indirizzo email." });
+      if (!/^[+\d][\d\s().-]{4,29}$/.test(phone)) return res.status(400).json({ error: "Controlla il numero di telefono." });
+      const problem = passwordProblem(password);
+      if (problem) return res.status(400).json({ error: problem });
+      if ((await isLocked("signup-ip:" + ip)) || (await isLocked("signup:" + email))) return res.status(429).json({ error: TOO_MANY });
+      await recordHit("signup-ip:" + ip, 6, 60);
+      await recordHit("signup:" + email, 3, 30);
+      const exists = await sb("GET", "business_users?email=eq." + enc(email) + "&select=business_id&limit=1");
+      if (exists.ok && Array.isArray(exists.data) && exists.data.length) {
+        const m = alreadyMail(name);
+        await sendMail(email, "Hai già un account Prenolia", m.html, m.text);
+        return res.status(200).json({ ok: true });
+      }
+      const raw = crypto.randomBytes(32).toString("hex");
+      const slug = slugify(name) + "-" + crypto.randomBytes(2).toString("hex");
+      const r = await rpc("signup_start", { p_email: email, p_password: password, p_name: name, p_slug: slug, p_type: type, p_phone: phone, p_token_hash: sha(raw), p_expires: new Date(Date.now() + CONFIRM_MS).toISOString() });
+      if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
+      const m = confirmMail(name, PUBLIC_URL + "/conferma.html?token=" + raw);
+      await sendMail(email, "Conferma la tua email per iniziare con Prenolia", m.html, m.text);
+      return res.status(200).json({ ok: true });
+    }
+
+    if (req.method === "POST" && action === "confirm") {
+      const token = String(body.token || "");
+      if (!/^[0-9a-f]{64}$/.test(token)) return res.status(400).json({ error: "Questo link non è valido." });
+      if (await isLocked("confirm-ip:" + ip)) return res.status(429).json({ error: TOO_MANY });
+      const r = await rpc("signup_confirm", { p_token_hash: sha(token) });
+      if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti ad attivare l'account. Riprova." });
+      const row = Array.isArray(r.data) ? r.data[0] : null;
+      if (!row) { await recordHit("confirm-ip:" + ip, 10, 15); return res.status(400).json({ error: "Questo link non è più valido. Se hai già confermato, accedi con la tua email." }); }
+      startSession(res, row, false);
+      return res.status(200).json({ ok: true, business_name: row.business_name, agenda_token: row.agenda_token });
+    }
+
     /* --- da qui in poi serve essere dentro --- */
     const me = verify(cookie(req, COOKIE));
     if (!action || !/^(2fa-|change-password)/.test(action)) {
@@ -364,4 +443,4 @@ module.exports = async (req, res) => {
 module.exports.verifyBusinessSession = verify;
 module.exports.readBusinessCookie = cookie;
 module.exports.passwordProblem = passwordProblem;
-module.exports._test = { b32enc, b32dec, hotp, totpOk, encrypt, decrypt, sign, unsign };
+module.exports._test = { slugify, b32enc, b32dec, hotp, totpOk, encrypt, decrypt, sign, unsign };
