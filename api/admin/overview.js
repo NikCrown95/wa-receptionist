@@ -1,6 +1,6 @@
 // api/admin/overview.js
 //
-// Endpoint per la Super Dashboard LIA Admin.
+// Endpoint per la Super Dashboard Prenolia Admin.
 // Legge dati REALI da Supabase (businesses, subscriptions, plans) e
 // restituisce numeri gia' aggregati, pronti per KPI e grafici.
 //
