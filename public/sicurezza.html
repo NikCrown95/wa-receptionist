@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia – Sicurezza</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,p{margin:0}button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.loginbox{max-width:420px;margin:12vh auto 0;padding:0 20px}
+.card{border-radius:24px;border:1px solid var(--line);background:var(--card);padding:28px 24px}
+.logo{display:block;width:176px;height:42px;margin:0 auto 18px;background:var(--logo) center / contain no-repeat}
+h1{font-size:1.3rem;text-align:center;margin:0 0 4px;letter-spacing:-0.01em}
+.sub{text-align:center;color:var(--muted);font-size:.92rem;margin:0 0 20px}
+label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
+.inp{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{width:100%;min-height:48px;margin-top:20px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.btn:disabled{opacity:.65;cursor:default}
+.err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:.88rem}
+.chk{display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:.9rem;cursor:pointer;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;min-height:44px;display:inline-flex;align-items:center}
+.code{letter-spacing:.35em;text-align:center;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:.85rem;margin-top:10px;text-align:center}
+.hide{display:none}
+@media(max-width:520px){.loginbox{margin-top:9vh}.card{padding:26px 20px}}
+
+.rules{list-style:none;margin:10px 0 0;padding:0;font-size:.84rem;color:var(--muted)}
+.rules li{display:flex;gap:8px;align-items:center;min-height:24px}
+.rules li::before{content:"○";color:var(--line2)}
+.rules li.ok{color:var(--ink)}.rules li.ok::before{content:"✓";color:var(--accent)}
+.okbox{margin-top:14px;background:#10301f;color:#a9f0c4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+</style>
+<link rel="icon" type="image/png" href="/brand/favicon.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+</head>
+<body>
+<style>
+.loginbox{max-width:520px;margin-top:6vh}
+.card+.card{margin-top:16px}
+h2{font-size:1.05rem;margin:0 0 4px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.btn.sec{background:var(--card2);color:var(--ink);border:1px solid var(--line2)}
+.btn.dng{background:#3a1c1c;color:#ffb4b4}
+.qr{background:#fff;border-radius:16px;padding:12px;width:fit-content;margin:14px auto}
+.qr svg,.qr img{display:block;width:200px;height:200px}
+.key{font-family:ui-monospace,Menlo,monospace;letter-spacing:.06em;background:var(--card2);border:1px solid var(--line2);border-radius:12px;padding:12px;word-break:break-all;text-align:center;font-size:.95rem;user-select:all}
+.codes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.codes span{font-family:ui-monospace,Menlo,monospace;background:var(--card2);border:1px solid var(--line2);border-radius:10px;padding:10px;text-align:center;font-size:.95rem;user-select:all}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.78rem;font-weight:700}
+.badge.on{background:#10301f;color:#a9f0c4}.badge.off{background:var(--card2);color:var(--muted)}
+ol.st{padding-left:20px;color:var(--muted);font-size:.92rem;line-height:1.5}ol.st b{color:var(--ink)}
+</style>
+<div class="loginbox">
+  <div class="top"><a class="lnk" id="back" href="/login.html">‹ Torna alla dashboard</a></div>
+  <div class="card">
+    <h2>Verifica in due passaggi <span class="badge off" id="badge">…</span></h2>
+    <p class="sub" style="text-align:left">Oltre alla password, per entrare serve un codice a 6 cifre che trovi sul tuo telefono. Anche se qualcuno scoprisse la password, non potrebbe entrare.</p>
+    <div id="off" class="hide">
+      <button class="btn" id="start" type="button">Attiva</button>
+    </div>
+    <div id="setup" class="hide">
+      <ol class="st">
+        <li>Ti serve un'app di autenticazione: <b>Password</b> di Apple (iPhone con iOS 18 o più recente), Google Authenticator o Microsoft Authenticator.</li>
+        <li>Se stai usando <b>questo stesso telefono</b>, tocca "Apri nell'app" qui sotto. Se sei al computer, inquadra il QR con il telefono.</li>
+        <li>Se non funziona, copia la chiave e incollala nell'app, scegliendo "inserisci chiave" a mano.</li>
+      </ol>
+      <a class="btn" id="open" href="#" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Apri nell'app</a>
+      <div class="qr hide" id="qr"></div>
+      <div class="key" id="key"></div>
+      <button class="btn sec" id="copykey" type="button">Copia la chiave</button>
+      <form id="fe">
+        <label for="c1">Scrivi qui il codice a 6 cifre mostrato dall'app</label>
+        <input class="inp code" id="c1" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+        <button class="btn" id="goe" type="submit">Conferma e attiva</button>
+        <div class="err" id="erre" role="alert"></div>
+      </form>
+    </div>
+    <div id="done" class="hide">
+      <h2>Codici di emergenza</h2>
+      <p class="sub" style="text-align:left">Salvali in un posto sicuro (anche una foto o una nota). Ognuno vale <b>una sola volta</b> e ti serve se perdi il telefono. Non ti verranno mostrati di nuovo.</p>
+      <div class="codes" id="codes"></div>
+      <button class="btn sec" id="copycodes" type="button">Copia i codici</button>
+      <button class="btn" id="fin" type="button">Li ho salvati</button>
+    </div>
+    <div id="on" class="hide">
+      <p class="hint" id="left" style="text-align:left"></p>
+      <form id="fd">
+        <label for="dp">Per disattivarla: la tua password</label>
+        <input class="inp" id="dp" type="password" autocomplete="current-password">
+        <label for="dc">Un codice dell'app (o di emergenza)</label>
+        <input class="inp" id="dc" inputmode="numeric" autocomplete="one-time-code" maxlength="12">
+        <button class="btn dng" id="god" type="submit">Disattiva</button>
+        <div class="err" id="errd" role="alert"></div>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Cambia password</h2>
+    <form id="fp">
+      <label for="cur">Password attuale</label>
+      <input class="inp" id="cur" type="password" autocomplete="current-password" required>
+      <label for="np">Nuova password</label>
+      <input class="inp" id="np" type="password" autocomplete="new-password" required>
+      <ul class="rules" id="rules"><li>Almeno 8 caratteri</li><li>Almeno un numero</li><li>Almeno un carattere speciale (! ? @ # €)</li></ul>
+      <button class="btn" id="gop" type="submit">Salva password</button>
+      <div class="err" id="errp" role="alert"></div>
+      <div class="okbox" id="okp" role="status">Password cambiata.</div>
+    </form>
+  </div>
+</div>
+<script>
+// QR code: libreria "qrcode-generator" (MIT, Kazuhiko Arase), caricata solo se serve.
+(function(){
+var $=function(i){return document.getElementById(i)};
+function show(el,m){el.textContent=m;el.style.display="block"}
+function api(action,data){var o=data?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}:{};return fetch("/api/business-auth?action="+action,o).then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(r.status===401&&j.authenticated===false){location.replace("/login.html");throw new Error("Accedi di nuovo")}if(!r.ok)throw new Error(j.error||"Qualcosa non ha funzionato");return j})})}
+function rulesOf(p){return[p.length>=8,/[0-9]/.test(p),/[^A-Za-z0-9\u00C0-\u00FF\s]/.test(p)]}
+function paint(ul,p){var r=rulesOf(p);for(var i=0;i<r.length;i++)ul.children[i].className=r[i]?"ok":""}
+function view(name){["off","setup","done","on"].forEach(function(k){$(k).classList.toggle("hide",k!==name)})}
+function status(){return api("2fa-status").then(function(j){var b=$("badge");b.textContent=j.enabled?"Attiva":"Non attiva";b.className="badge "+(j.enabled?"on":"off");if(j.enabled){$("left").textContent="Codici di emergenza rimasti: "+j.recovery_left+".";view("on")}else view("off")})}
+fetch("/api/business-auth").then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.agenda_token){location.replace("/login.html");return}$("back").href="/api/agenda?t="+encodeURIComponent(j.agenda_token);return status()}).catch(function(){});
+var plain="";
+$("start").addEventListener("click",function(){var b=$("start");b.disabled=true;api("2fa-setup",{}).then(function(j){plain=j.secret;$("key").textContent=j.secret;$("open").href=j.uri;view("setup");
+var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";s.onload=function(){try{var q=qrcode(0,"M");q.addData(j.uri);q.make();$("qr").innerHTML=q.createSvgTag(5,0,"QR code","QR code");$("qr").classList.remove("hide")}catch(e){}};document.head.appendChild(s)}).catch(function(e){alert(e.message)}).then(function(){b.disabled=false})});
+$("copykey").addEventListener("click",function(){try{navigator.clipboard.writeText(plain.replace(/\s/g,""));$("copykey").textContent="Copiata ✓"}catch(e){}});
+$("fe").addEventListener("submit",function(e){e.preventDefault();$("erre").style.display="none";var b=$("goe");b.disabled=true;api("2fa-enable",{code:$("c1").value}).then(function(j){$("codes").innerHTML="";j.codes.forEach(function(c){var s=document.createElement("span");s.textContent=c;$("codes").appendChild(s)});window._codes=j.codes;$("badge").textContent="Attiva";$("badge").className="badge on";view("done")}).catch(function(x){show($("erre"),x.message)}).then(function(){b.disabled=false})});
+$("copycodes").addEventListener("click",function(){try{navigator.clipboard.writeText((window._codes||[]).join("\n"));$("copycodes").textContent="Copiati ✓"}catch(e){}});
+$("fin").addEventListener("click",function(){window._codes=null;$("codes").innerHTML="";status()});
+$("fd").addEventListener("submit",function(e){e.preventDefault();$("errd").style.display="none";var b=$("god");b.disabled=true;api("2fa-disable",{password:$("dp").value,code:$("dc").value}).then(function(){$("dp").value="";$("dc").value="";return status()}).catch(function(x){show($("errd"),x.message)}).then(function(){b.disabled=false})});
+var np=$("np"),rl=$("rules");np.addEventListener("input",function(){paint(rl,np.value)});
+$("fp").addEventListener("submit",function(e){e.preventDefault();$("errp").style.display="none";$("okp").style.display="none";var b=$("gop");b.disabled=true;api("change-password",{current:$("cur").value,password:np.value}).then(function(){$("okp").style.display="block";$("cur").value="";np.value="";paint(rl,"")}).catch(function(x){show($("errp"),x.message)}).then(function(){b.disabled=false})});
+})();
+</script></body></html>

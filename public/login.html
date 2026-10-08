@@ -25,6 +25,13 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
 .btn{width:100%;min-height:48px;margin-top:20px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
 .btn:disabled{opacity:.65;cursor:default}
 .err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:.88rem}
+.chk{white-space:nowrap;display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:.9rem;cursor:pointer;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;min-height:44px;display:inline-flex;align-items:center}
+.code{letter-spacing:.35em;text-align:center;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:.85rem;margin-top:10px;text-align:center}
+.hide{display:none}
 @media(max-width:520px){.loginbox{margin-top:9vh}.card{padding:26px 20px}}
 </style>
 <link rel="icon" type="image/png" href="/brand/favicon.png">
@@ -41,11 +48,37 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
       <input class="inp" id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
       <label for="pw">Password</label>
       <input class="inp" id="pw" name="password" type="password" autocomplete="current-password" required>
+      <div class="row">
+        <label class="chk" for="rem"><input type="checkbox" id="rem"> Rimani connesso</label>
+        <a class="lnk" href="/reset.html">Password dimenticata?</a>
+      </div>
       <button class="btn" id="go" type="submit">Entra</button>
       <div class="err" id="err" role="alert"></div>
+    </form>
+    <form id="f2" class="hide" autocomplete="off">
+      <label for="code">Codice di verifica</label>
+      <input class="inp code" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="12" required>
+      <p class="hint">Apri l'app di autenticazione e scrivi il codice a 6 cifre di Prenolia. Se hai perso il telefono, usa uno dei tuoi codici di emergenza.</p>
+      <button class="btn" id="go2" type="submit">Conferma</button>
+      <div class="row" style="justify-content:center"><button class="lnk" type="button" id="back">Torna indietro</button></div>
+      <div class="err" id="err2" role="alert"></div>
     </form>
   </div>
 </div>
 <script>
-(function(){var f=document.getElementById("f"),go=document.getElementById("go"),err=document.getElementById("err");function show(m){err.textContent=m;err.style.display="block"}fetch("/api/business-auth").then(function(r){if(r.ok)r.json().then(function(j){if(j.agenda_token)location.replace("/api/agenda?t="+j.agenda_token)})});f.addEventListener("submit",function(e){e.preventDefault();err.style.display="none";go.disabled=true;go.textContent="Controllo…";fetch("/api/business-auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:document.getElementById("email").value,password:document.getElementById("pw").value})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Accesso non riuscito");location.replace("/api/agenda?t="+j.agenda_token)})}).catch(function(e){show(e.message);go.disabled=false;go.textContent="Entra"})})})();
+(function(){
+var f=document.getElementById("f"),f2=document.getElementById("f2"),go=document.getElementById("go"),go2=document.getElementById("go2"),err=document.getElementById("err"),err2=document.getElementById("err2"),sub=document.querySelector(".sub"),challenge="";
+function show(el,m){el.textContent=m;el.style.display="block"}
+function enter(j){location.replace("/api/agenda?t="+j.agenda_token)}
+function post(url,data){return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok){var e=new Error(j.error||"Accesso non riuscito");e.restart=j.restart;throw e}return j})})}
+fetch("/api/business-auth").then(function(r){if(r.ok)r.json().then(function(j){if(j.agenda_token)enter(j)})});
+f.addEventListener("submit",function(e){e.preventDefault();err.style.display="none";go.disabled=true;go.textContent="Controllo…";
+post("/api/business-auth",{email:document.getElementById("email").value,password:document.getElementById("pw").value,remember:document.getElementById("rem").checked}).then(function(j){
+if(j.need_code){challenge=j.challenge;f.classList.add("hide");f2.classList.remove("hide");sub.textContent="Verifica in due passaggi";document.getElementById("code").focus();return}
+enter(j)}).catch(function(e){show(err,e.message)}).then(function(){go.disabled=false;go.textContent="Entra"})});
+f2.addEventListener("submit",function(e){e.preventDefault();err2.style.display="none";go2.disabled=true;go2.textContent="Controllo…";
+post("/api/business-auth?action=verify2fa",{challenge:challenge,code:document.getElementById("code").value}).then(enter).catch(function(e){show(err2,e.message);if(e.restart)setTimeout(back,1800)}).then(function(){go2.disabled=false;go2.textContent="Conferma"})});
+function back(){challenge="";f2.classList.add("hide");f.classList.remove("hide");sub.textContent="Entra con le credenziali della tua attività.";document.getElementById("code").value="";err2.style.display="none"}
+document.getElementById("back").addEventListener("click",back);
+})();
 </script></body></html>

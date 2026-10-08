@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia – Recupero password</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,p{margin:0}button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.loginbox{max-width:420px;margin:12vh auto 0;padding:0 20px}
+.card{border-radius:24px;border:1px solid var(--line);background:var(--card);padding:28px 24px}
+.logo{display:block;width:176px;height:42px;margin:0 auto 18px;background:var(--logo) center / contain no-repeat}
+h1{font-size:1.3rem;text-align:center;margin:0 0 4px;letter-spacing:-0.01em}
+.sub{text-align:center;color:var(--muted);font-size:.92rem;margin:0 0 20px}
+label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
+.inp{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{width:100%;min-height:48px;margin-top:20px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.btn:disabled{opacity:.65;cursor:default}
+.err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:.88rem}
+.chk{display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:.9rem;cursor:pointer;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;min-height:44px;display:inline-flex;align-items:center}
+.code{letter-spacing:.35em;text-align:center;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:.85rem;margin-top:10px;text-align:center}
+.hide{display:none}
+@media(max-width:520px){.loginbox{margin-top:9vh}.card{padding:26px 20px}}
+
+.rules{list-style:none;margin:10px 0 0;padding:0;font-size:.84rem;color:var(--muted)}
+.rules li{display:flex;gap:8px;align-items:center;min-height:24px}
+.rules li::before{content:"○";color:var(--line2)}
+.rules li.ok{color:var(--ink)}.rules li.ok::before{content:"✓";color:var(--accent)}
+.okbox{margin-top:14px;background:#10301f;color:#a9f0c4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+</style>
+<link rel="icon" type="image/png" href="/brand/favicon.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+</head>
+<body>
+<div class="loginbox">
+  <div class="card">
+    <span class="logo" role="img" aria-label="Prenolia"></span>
+    <section id="ask">
+      <h1>Password dimenticata?</h1>
+      <p class="sub">Scrivi l'email della tua attività: ti mandiamo un link per sceglierne una nuova.</p>
+      <form id="fa">
+        <label for="em">Email</label>
+        <input class="inp" id="em" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
+        <button class="btn" id="goa" type="submit">Invia il link</button>
+        <div class="err" id="erra" role="alert"></div>
+        <div class="okbox" id="oka" role="status">Se l'email è registrata, ti abbiamo appena scritto. Controlla la posta (anche lo spam): il link vale 30 minuti.</div>
+      </form>
+      <p class="hint"><a class="lnk" href="/login.html">Torna all'accesso</a></p>
+    </section>
+    <section id="set" class="hide">
+      <h1>Nuova password</h1>
+      <p class="sub">Scegli la password per entrare in Prenolia.</p>
+      <form id="fs">
+        <label for="np">Nuova password</label>
+        <input class="inp" id="np" type="password" autocomplete="new-password" required>
+        <ul class="rules" id="rules"><li>Almeno 8 caratteri</li><li>Almeno un numero</li><li>Almeno un carattere speciale (! ? @ # €)</li></ul>
+        <button class="btn" id="gos" type="submit">Salva password</button>
+        <div class="err" id="errs" role="alert"></div>
+        <div class="okbox" id="oks" role="status">Password cambiata. Ora puoi accedere.</div>
+      </form>
+      <p class="hint"><a class="lnk" id="tologin" href="/login.html">Vai all'accesso</a></p>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+var token=(new URLSearchParams(location.search).get("token")||"").trim();
+function show(el,m){el.textContent=m;el.style.display="block"}
+function post(url,data){return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok)throw new Error(j.error||"Qualcosa non ha funzionato");return j})})}
+function rulesOf(p){return[p.length>=8,/[0-9]/.test(p),/[^A-Za-z0-9\u00C0-\u00FF\s]/.test(p)]}
+function paint(ul,p){var r=rulesOf(p);for(var i=0;i<r.length;i++)ul.children[i].className=r[i]?"ok":""}
+if(token){history.replaceState(null,"","/reset.html");document.getElementById("ask").classList.add("hide");document.getElementById("set").classList.remove("hide")}
+var np=document.getElementById("np"),rl=document.getElementById("rules");np.addEventListener("input",function(){paint(rl,np.value)});
+document.getElementById("fa").addEventListener("submit",function(e){e.preventDefault();var b=document.getElementById("goa"),er=document.getElementById("erra");er.style.display="none";b.disabled=true;
+post("/api/business-auth?action=forgot",{email:document.getElementById("em").value}).then(function(){document.getElementById("oka").style.display="block";b.textContent="Link inviato"}).catch(function(x){show(er,x.message);b.disabled=false})});
+document.getElementById("fs").addEventListener("submit",function(e){e.preventDefault();var b=document.getElementById("gos"),er=document.getElementById("errs");er.style.display="none";b.disabled=true;
+post("/api/business-auth?action=reset",{token:token,password:np.value}).then(function(){document.getElementById("oks").style.display="block";b.style.display="none";setTimeout(function(){location.replace("/login.html")},2500)}).catch(function(x){show(er,x.message);b.disabled=false})});
+})();
+</script></body></html>
