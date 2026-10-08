@@ -73,12 +73,12 @@ function startSession(res, row, remember) {
 const COMMON = ["password", "password1", "password123", "password1!", "qwerty123", "12345678", "123456789", "1234567890", "admin123", "prenolia", "prenolia1", "ciao1234", "benvenuto1"];
 function passwordProblem(pw) {
   pw = String(pw || "");
-  if (pw.length < 8) return "La password deve avere almeno 8 caratteri.";
-  if (!/[0-9]/.test(pw)) return "La password deve contenere almeno un numero.";
-  if (!/[^A-Za-z0-9À-ÿ\s]/.test(pw)) return "La password deve contenere almeno un carattere speciale, ad esempio ! ? @ # €.";
+  if (pw.length < 8) return "Servono almeno 8 caratteri.";
+  if (!/[0-9]/.test(pw)) return "Aggiungi almeno un numero.";
+  if (!/[^A-Za-z0-9À-ÿ\s]/.test(pw)) return "Aggiungi un carattere speciale, ad esempio ! ? @ # €.";
   if (pw.length > 200) return "La password è troppo lunga.";
   const plain = pw.toLowerCase().replace(/[^a-z0-9]/g, "");
-  if (COMMON.some((c) => plain === c.replace(/[^a-z0-9]/g, ""))) return "Questa password è troppo comune, scegline un'altra.";
+  if (COMMON.some((c) => plain === c.replace(/[^a-z0-9]/g, ""))) return "Questa password è troppo prevedibile. Provane un'altra.";
   return "";
 }
 
@@ -189,12 +189,12 @@ async function sendMail(to, subject, html, text) {
 }
 function resetMail(name, link) {
   const html = '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0b1220">'
-    + '<h2 style="margin:0 0 12px">Reimposta la tua password</h2>'
-    + '<p style="line-height:1.5">Ciao' + (name ? " " + String(name).replace(/[<>&"]/g, "") : "") + ', hai chiesto di reimpostare la password di Prenolia. Il link qui sotto vale <b>30 minuti</b> e si può usare una volta sola.</p>'
-    + '<p style="margin:24px 0"><a href="' + link + '" style="background:#19b8c8;color:#031016;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;display:inline-block">Scegli una nuova password</a></p>'
-    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Se non sei stato tu, ignora questa email: la tua password resta quella di prima.</p>'
+    + '<h2 style="margin:0 0 12px;letter-spacing:-.01em">Scegli la tua nuova password</h2>'
+    + '<p style="line-height:1.5">Ciao' + (name ? " " + String(name).replace(/[<>&"]/g, "") : "") + ', hai chiesto di reimpostare la password. Il link vale <b>30 minuti</b> e funziona una sola volta.</p>'
+    + '<p style="margin:24px 0"><a href="' + link + '" style="background:#19b8c8;color:#031016;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;display:inline-block">Scegli la nuova password</a></p>'
+    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Non sei stato tu? Ignora questa email: la tua password non cambia.</p>'
     + '<p style="color:#8793a8;font-size:12px">Prenolia</p></div>';
-  const text = "Hai chiesto di reimpostare la password di Prenolia.\nApri questo link (vale 30 minuti, una sola volta):\n" + link + "\n\nSe non sei stato tu, ignora questa email.";
+  const text = "Hai chiesto di reimpostare la password.\nScegli la nuova password da qui (il link vale 30 minuti e funziona una sola volta):\n" + link + "\n\nNon sei stato tu? Ignora questa email: la tua password non cambia.";
   return { html, text };
 }
 
@@ -244,7 +244,7 @@ module.exports = async (req, res) => {
     /* --- login: secondo passaggio --- */
     if (req.method === "POST" && action === "verify2fa") {
       const c = unsign(body.challenge);
-      if (!c || c.t !== "2fa") return res.status(401).json({ error: "Sessione scaduta. Rifai l'accesso.", restart: true });
+      if (!c || c.t !== "2fa") return res.status(401).json({ error: "Sessione scaduta. Accedi di nuovo.", restart: true });
       const key = "2fa:" + c.business_id;
       if (await isLocked(key)) return res.status(429).json({ error: TOO_MANY });
       const user = await getUser(c.business_id);
@@ -276,7 +276,7 @@ module.exports = async (req, res) => {
       const ins = await sb("POST", "auth_tokens", { business_id: id, kind: "reset", token_hash: sha(raw), expires_at: new Date(Date.now() + RESET_MS).toISOString() }, "return=minimal");
       if (ins.ok) {
         const m = resetMail(b.data[0].name, PUBLIC_URL + "/reset.html?token=" + raw);
-        await sendMail(email, "Reimposta la tua password di Prenolia", m.html, m.text);
+        await sendMail(email, "La tua nuova password per Prenolia", m.html, m.text);
       }
       return res.status(200).json(generic);
     }
@@ -290,9 +290,9 @@ module.exports = async (req, res) => {
       if (problem) return res.status(400).json({ error: problem });
       const t = await sb("GET", "auth_tokens?token_hash=eq." + sha(token) + "&kind=eq.reset&used_at=is.null&expires_at=gt." + enc(new Date().toISOString()) + "&select=id,business_id&limit=1");
       const row = t.ok && Array.isArray(t.data) ? t.data[0] : null;
-      if (!row) { await recordHit("reset-ip:" + ip, 10, 15); return res.status(400).json({ error: "Link non valido o scaduto. Richiedine uno nuovo." }); }
+      if (!row) { await recordHit("reset-ip:" + ip, 10, 15); return res.status(400).json({ error: "Questo link non è più valido. Richiedine uno nuovo." }); }
       const s = await rpc("business_set_password", { p_business: row.business_id, p_password: password });
-      if (!s.ok) return res.status(502).json({ error: "Non è stato possibile cambiare la password. Riprova." });
+      if (!s.ok) return res.status(502).json({ error: "Non siamo riusciti a cambiare la password. Riprova." });
       await sb("PATCH", "auth_tokens?business_id=eq." + enc(row.business_id) + "&kind=eq.reset&used_at=is.null", { used_at: new Date().toISOString() });
       return res.status(200).json({ ok: true });
     }
@@ -351,7 +351,7 @@ module.exports = async (req, res) => {
       const pw = await rpc("business_check_password", { p_business: me.business_id, p_password: String(body.current || "") });
       if (!pw.ok || pw.data !== true) { await recordHit(tfaKey, 5, 10); return res.status(400).json({ error: "La password attuale non è corretta." }); }
       const s = await rpc("business_set_password", { p_business: me.business_id, p_password: String(body.password) });
-      if (!s.ok) return res.status(502).json({ error: "Non è stato possibile cambiare la password. Riprova." });
+      if (!s.ok) return res.status(502).json({ error: "Non siamo riusciti a cambiare la password. Riprova." });
       await clearHits(tfaKey);
       return res.status(200).json({ ok: true });
     }
