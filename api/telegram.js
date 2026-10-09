@@ -32,6 +32,7 @@ module.exports = async (req, res) => {
 
   const qy = req.query || {};
   const hdr = req.headers["x-telegram-bot-api-secret-token"];
+  let fixedRow = null;
   let fixed = null; // bot di una singola attività (se la richiesta arriva dal suo bot)
 
   if (qy.manager) {
@@ -39,7 +40,7 @@ module.exports = async (req, res) => {
     if (!secret || hdr !== tb.secretFor("manager")) return res.status(401).send("no");
     try {
       const mb = (req.body || {}).managed_bot;
-      if (mb && mb.bot) await tb.claimManagedBot(req, mb.bot);
+      if (mb && mb.bot) await tb.claimManagedBot(req, mb.bot, mb.user && mb.user.id);
     } catch (e) { console.error("managed_bot", e); }
     return res.status(200).json({ ok: true });
   }
@@ -51,6 +52,7 @@ module.exports = async (req, res) => {
     const bz = await sb("GET", "businesses?id=eq." + bid + "&active=eq.true&select=id,name,slug,timezone,owner_code");
     if (!row || !row.token || !bz.ok || !Array.isArray(bz.data) || !bz.data.length) return res.status(200).json({ ok: true });
     fixed = bz.data[0];
+    fixedRow = row;
   } else if (!secret || hdr !== secret) {
     return res.status(401).send("no");
   }
@@ -106,6 +108,12 @@ module.exports = async (req, res) => {
 
     // Il cliente arriva dal link/QR di un'attività: "/start slug"
     const m = text.match(/^\/start(?:@\w+)?(?:\s+([a-zA-Z0-9-]{1,60}))?$/);
+    // Chi ha creato il bot è il titolare: al primo "Avvia" lo riconosciamo da solo
+    if (m && fixed && fixedRow && fixedRow.creator_id && !fixedRow.owner_linked && Number(fixedRow.creator_id) === Number((msg.from || {}).id)) {
+      await sb("PATCH", "businesses?id=eq." + fixed.id, { owner_telegram_chat_id: chatId });
+      await sb("PATCH", "business_bots?business_id=eq." + fixed.id, { owner_linked: true });
+      return reply("Fatto! Sei collegato come titolare di " + fixed.name + ".\n\nOgni mattina ti mando qui l'agenda (la puoi spegnere dalle Impostazioni).\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n\nI tuoi clienti useranno lo stesso bot per prenotare: mandagli il link che trovi nella Scheda attività.");
+    }
     if (m && fixed) {
       const fb = await getBusiness(fixed.slug);
       if (!fb) return reply("Questa attività non è al momento raggiungibile.");
