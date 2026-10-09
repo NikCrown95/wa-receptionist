@@ -427,7 +427,7 @@ module.exports = async (req, res) => {
           channel: "selfservice",
           contact_id: phone,
           ...(party ? { players: party.players, members: party.members } : {}),
-          ...(String(body.src || "") === "qr" ? { source: "qr" } : {}), // prenotazione arrivata dal QR in vetrina
+          ...(["qr", "vetrina"].includes(String(body.src || "")) ? { source: String(body.src) } : {}), // QR del link (qr) o QR della locandina in vetrina (vetrina)
         };
         let r = await sb("POST", "appointments", apRow, "return=representation");
         if (!r.ok && r.status === 400 && apRow.source) { delete apRow.source; r = await sb("POST", "appointments", apRow, "return=representation"); } // colonna source non ancora creata: salva comunque la prenotazione
