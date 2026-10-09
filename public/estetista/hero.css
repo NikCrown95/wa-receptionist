@@ -1,0 +1,12 @@
+/* public/estetista/hero.css  (Prenolia: parte alta della scheda attivita' per i centri estetici) */
+:root:root #panelProfile .pf2 .pfHero.est{
+  background:linear-gradient(90deg,rgba(58,32,36,.62) 0%,rgba(58,32,36,.26) 46%,rgba(58,32,36,0) 76%),url(/estetista/banner.jpg) right center/cover no-repeat;
+  border-color:rgba(255,224,205,.38);box-shadow:0 18px 44px -22px rgba(60,28,22,.7)}
+:root:root #panelProfile .pf2 .pfHero.est .pfWm{display:none}
+:root:root #panelProfile .pf2 .pfHero.est .pfKind{color:#FFDCC8;text-shadow:0 1px 8px rgba(40,18,20,.55)}
+:root:root #panelProfile .pf2 .pfHero.est h2{color:#fff;text-shadow:0 2px 16px rgba(40,18,20,.55)}
+:root:root #panelProfile .pf2 .pfHero.est p,:root:root #panelProfile .pf2 .pfHero.est p *{color:rgba(255,255,255,.9);text-shadow:0 1px 8px rgba(40,18,20,.5)}
+:root:root #panelProfile .pf2 .pfHero.est .pfAvatar{background:url(/estetista/logo.png) center/cover no-repeat;border:0;filter:none;color:transparent;
+  box-shadow:0 12px 28px -8px rgba(50,24,14,.6),0 0 0 1px rgba(255,235,222,.45)}
+:root:root #panelProfile .pf2 .pfHero.est .pfAvatar::before{display:none}
+:root:root #panelProfile .pf2 .pfHero.est .pfAvatar>*{display:none}
