@@ -34,13 +34,16 @@
   function build() {
     var bell = document.getElementById("bellBtn");
     if (!bell || !bell.parentNode) return false;
-    btn = document.createElement("button");
-    btn.id = "liaRecapBtn"; btn.type = "button"; btn.hidden = true;
-    btn.setAttribute("aria-haspopup", "dialog"); btn.setAttribute("aria-expanded", "false");
-    btn.setAttribute("aria-label", "Recap di Lia");
-    btn.innerHTML = LOGO + '<span class="liaRDot" hidden></span>';
+    btn = document.getElementById("liaRecapBtn");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.id = "liaRecapBtn"; btn.type = "button"; btn.hidden = true;
+      btn.setAttribute("aria-haspopup", "dialog"); btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "Recap di Lia");
+      btn.innerHTML = LOGO + '<span class="liaRDot" hidden></span>';
+      bell.parentNode.insertBefore(btn, bell);
+    }
     dot = btn.querySelector(".liaRDot");
-    bell.parentNode.insertBefore(btn, bell);
 
     tip = document.createElement("div"); tip.id = "liaRecapTip"; tip.hidden = true; tip.setAttribute("role", "status");
     scrim = document.createElement("div"); scrim.id = "liaRecapScrim"; scrim.hidden = true;
