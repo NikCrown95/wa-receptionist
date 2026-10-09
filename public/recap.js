@@ -8,6 +8,7 @@
 
   var data = null, btn, dot, tip, scrim, panel, busy = false, lastFocus = null;
   var SEEN = "lia:recap:seen:" + token + ":";
+  var VIS = "lia:recap:vis:" + token;
   var TIPK = "lia:recap:tip:" + token;
 
   function ls(op, k, v) {
@@ -47,7 +48,11 @@
     panel.setAttribute("role", "dialog"); panel.setAttribute("aria-modal", "true"); panel.setAttribute("aria-labelledby", "liaRecapTitle");
     document.body.appendChild(tip); document.body.appendChild(scrim); document.body.appendChild(panel);
 
-    btn.addEventListener("click", function () { panel.hidden ? openPanel() : closePanel(); });
+    btn.addEventListener("click", function () {
+      if (!panel.hidden) return closePanel();
+      if (data) return openPanel();
+      busy = false; load(false, true);
+    });
     scrim.addEventListener("click", closePanel);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !panel.hidden) closePanel(); });
     return true;
@@ -57,8 +62,9 @@
   function markSeen() { if (data && data.period) ls("s", SEEN + data.key, "1"); }
 
   function paintBtn() {
-    if (!data) { btn.hidden = true; document.body.classList.remove("liaRecapOn"); return; }
+    if (!data) { btn.hidden = true; ls("s", VIS, "0"); document.body.classList.remove("liaRecapOn"); return; }
     btn.hidden = false;
+    ls("s", VIS, "1");
     document.body.classList.add("liaRecapOn");
     var lit = !!data.period && !isSeen();
     btn.setAttribute("data-lit", lit ? "1" : "0");
@@ -172,7 +178,7 @@
     if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
   }
 
-  function load(refreshOpen) {
+  function load(refreshOpen, thenOpen) {
     if (busy || document.visibilityState === "hidden") return;
     busy = true;
     fetch("/api/agenda?t=" + encodeURIComponent(token) + "&recap=1", { cache: "no-store" })
@@ -181,13 +187,15 @@
         data = d;
         if (refreshOpen && !panel.hidden) render();
         paintBtn();
+        if (thenOpen) openPanel();
       })
-      .catch(function () { if (!data) { btn.hidden = true; } })
+      .catch(function () { if (!data) { btn.hidden = true; document.body.classList.remove("liaRecapOn"); } })
       .then(function () { busy = false; });
   }
 
   function init() {
     if (!build()) { if (init.n++ < 20) setTimeout(init, 400); return; }
+    if (ls("g", VIS) === "1") { btn.hidden = false; document.body.classList.add("liaRecapOn"); }
     load();
     document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") load(true); });
     setInterval(function () { load(true); }, 5 * 60 * 1000);
