@@ -564,10 +564,14 @@ module.exports = async (req, res) => {
           await tgb.ensureManagerHook(req);
           let uname = botRow && botRow.pending_username ? botRow.pending_username : "";
           if (!uname) {
-            for (let k = 0; k < 4 && !uname; k++) {
+            for (let k = 0; k < 6 && !uname; k++) {
               const cand = tgb.suggestUsername(biz.slug, k ? Math.random().toString(36).slice(2, 5) : "");
               const taken = await sb("GET", "business_bots?or=(username.ilike." + cand + ",pending_username.ilike." + cand + ")&select=business_id");
-              if (taken.ok && Array.isArray(taken.data) && taken.data.filter(t => t.business_id !== biz.id).length === 0) uname = cand;
+              if (!(taken.ok && Array.isArray(taken.data) && taken.data.filter(t => t.business_id !== biz.id).length === 0)) continue;
+              // il nome non deve esistere già su Telegram (anche se creato da altri o in una prova precedente)
+              const onTg = await tgb.tgCall(tgb.managerToken(), "getChat", { chat_id: "@" + cand });
+              if (onTg && onTg.ok) continue;
+              uname = cand;
             }
             if (!uname) return res.status(500).json({ error: "Non riesco a preparare il nome del bot. Riprova." });
             const sv = await tgb.saveBotRow(biz.id, { pending_username: uname.toLowerCase() });
