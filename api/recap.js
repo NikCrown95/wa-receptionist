@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       "GET",
       "businesses?active=eq.true&recap_enabled=eq.true" +
         "&or=(owner_telegram_chat_id.not.is.null,owner_whatsapp.not.is.null)" +
-        "&select=id,name,timezone,owner_telegram_chat_id,owner_whatsapp,recap_whatsapp"
+        "&select=id,name,timezone,owner_telegram_chat_id,owner_whatsapp,recap_whatsapp,business_bots(token)"
     );
     if (!r.ok || !Array.isArray(r.data)) return res.status(500).json({ error: "Errore lettura attività" });
 
@@ -32,7 +32,10 @@ module.exports = async (req, res) => {
         if (!acc.allowed) { out.skipped++; continue; } // abbonamento scaduto: niente riepilogo
         const bundle = await agendaBundle(biz, 0, { greeting: true });
         if (biz.owner_telegram_chat_id) {
-          if (await sendTelegram(biz.owner_telegram_chat_id, bundle.text)) out.telegram++;
+          const bb = Array.isArray(biz.business_bots) ? biz.business_bots[0] : biz.business_bots;
+          const own = bb && bb.token ? bb.token : undefined;
+          // prima il bot dell'attività; se non risponde, quello condiviso
+          if ((own && (await sendTelegram(biz.owner_telegram_chat_id, bundle.text, own))) || (await sendTelegram(biz.owner_telegram_chat_id, bundle.text))) out.telegram++;
           else out.failed++;
         }
         if (biz.recap_whatsapp && biz.owner_whatsapp && process.env.TWILIO_WHATSAPP_FROM) {

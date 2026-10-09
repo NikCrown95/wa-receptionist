@@ -4,6 +4,7 @@
 
 const { handleMessage, getBusiness, welcomeText } = require("../lib/lia.js");
 const { sb, agendaText } = require("../lib/owner.js");
+const tb = require("../lib/tgbots.js");
 
 module.exports = async (req, res) => {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
@@ -29,7 +30,28 @@ module.exports = async (req, res) => {
     }
   }
 
-  if (!secret || req.headers["x-telegram-bot-api-secret-token"] !== secret) {
+  const qy = req.query || {};
+  const hdr = req.headers["x-telegram-bot-api-secret-token"];
+  let fixed = null; // bot di una singola attività (se la richiesta arriva dal suo bot)
+
+  if (qy.manager) {
+    // Il bot gestore di Prenolia: avvisa quando un'attività ha creato il suo bot
+    if (!secret || hdr !== tb.secretFor("manager")) return res.status(401).send("no");
+    try {
+      const mb = (req.body || {}).managed_bot;
+      if (mb && mb.bot) await tb.claimManagedBot(req, mb.bot);
+    } catch (e) { console.error("managed_bot", e); }
+    return res.status(200).json({ ok: true });
+  }
+
+  if (qy.b) {
+    const bid = String(qy.b);
+    if (!/^[0-9a-f-]{36}$/i.test(bid) || !secret || hdr !== tb.secretFor(bid)) return res.status(401).send("no");
+    const row = await tb.getBotRow(bid);
+    const bz = await sb("GET", "businesses?id=eq." + bid + "&active=eq.true&select=id,name,slug,timezone,owner_code");
+    if (!row || !row.token || !bz.ok || !Array.isArray(bz.data) || !bz.data.length) return res.status(200).json({ ok: true });
+    fixed = bz.data[0];
+  } else if (!secret || hdr !== secret) {
     return res.status(401).send("no");
   }
 
@@ -46,13 +68,13 @@ module.exports = async (req, res) => {
 
     // Tu (proprietario di LIA) colleghi la tua chat per ricevere gli allarmi: "/start admin_PAROLA_SEGRETA"
     const adminCode = process.env.ADMIN_TELEGRAM_CODE || "";
-    const adm = text.match(/^\/start(?:@\w+)?\s+admin_(.+)$/i);
+    const adm = fixed ? null : text.match(/^\/start(?:@\w+)?\s+admin_(.+)$/i);
     if (adm) {
       if (!adminCode || adm[1] !== adminCode) return reply("Codice non valido.");
       await sb("POST", "admin_alert_chats", { channel: "telegram", chat_id: String(chatId), label: "Telegram", active: true }, "resolution=merge-duplicates");
       return reply("Fatto! Da qui in poi ricevi qui gli allarmi della Super Dashboard (clienti sospesi, rinnovi in scadenza, costi AI anomali).\n\nPer smettere: /admin_scollega");
     }
-    if (/^\/admin_scollega$/i.test(text)) {
+    if (!fixed && /^\/admin_scollega$/i.test(text)) {
       await sb("PATCH", "admin_alert_chats?chat_id=eq." + encodeURIComponent(String(chatId)), { active: false });
       return reply("Ok, non ricevi più gli allarmi della Super Dashboard qui.");
     }
@@ -60,14 +82,15 @@ module.exports = async (req, res) => {
     // Il titolare collega la sua chat: "/start owner_CODICE"
     const own = text.match(/^\/start(?:@\w+)?\s+owner_([a-f0-9]{8,32})$/i);
     if (own) {
-      const b = await sb("GET", "businesses?owner_code=eq." + own[1].toLowerCase() + "&active=eq.true&select=id,name");
+      const b = await sb("GET", "businesses?owner_code=eq." + own[1].toLowerCase() + "&active=eq.true" + (fixed ? "&id=eq." + fixed.id : "") + "&select=id,name");
       if (!b.ok || !Array.isArray(b.data) || !b.data.length) return reply("Questo codice non è valido.");
       await sb("PATCH", "businesses?id=eq." + b.data[0].id, { owner_telegram_chat_id: chatId });
-      return reply("Fatto! Da ora ricevi qui l'agenda di " + b.data[0].name + " ogni mattina.\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
+      if (fixed) await sb("PATCH", "business_bots?business_id=eq." + fixed.id, { owner_linked: true });
+      return reply("Fatto! Da ora ricevi qui l'agenda di " + b.data[0].name + " ogni mattina (puoi spegnerla quando vuoi dalle Impostazioni).\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
     }
 
     // Questa chat è del titolare di un'attività?
-    const ow = await sb("GET", "businesses?owner_telegram_chat_id=eq." + chatId + "&active=eq.true&select=id,name,timezone");
+    const ow = await sb("GET", "businesses?owner_telegram_chat_id=eq." + chatId + "&active=eq.true" + (fixed ? "&id=eq." + fixed.id : "") + "&select=id,name,timezone");
     if (ow.ok && Array.isArray(ow.data) && ow.data.length) {
       const biz = ow.data[0];
       const cmd = text.toLowerCase().split(/[\s@]/)[0];
@@ -75,6 +98,7 @@ module.exports = async (req, res) => {
       if (cmd === "/domani") return reply(await agendaText(biz, 1));
       if (cmd === "/scollega") {
         await sb("PATCH", "businesses?id=eq." + biz.id, { owner_telegram_chat_id: null });
+        if (fixed) await sb("PATCH", "business_bots?business_id=eq." + fixed.id, { owner_linked: false });
         return reply("Ok, non riceverai più qui l'agenda. Per ricollegarti usa di nuovo il tuo codice.");
       }
       return reply("Sono Lia, la tua assistente. Ogni mattina ti mando l'agenda di " + biz.name + ".\n\nComandi:\n/oggi - appuntamenti di oggi\n/domani - appuntamenti di domani\n/scollega - smetti di ricevere qui l'agenda");
@@ -82,6 +106,12 @@ module.exports = async (req, res) => {
 
     // Il cliente arriva dal link/QR di un'attività: "/start slug"
     const m = text.match(/^\/start(?:@\w+)?(?:\s+([a-zA-Z0-9-]{1,60}))?$/);
+    if (m && fixed) {
+      const fb = await getBusiness(fixed.slug);
+      if (!fb) return reply("Questa attività non è al momento raggiungibile.");
+      await sb("POST", "contact_business", { contact_id: contactId, business_id: fb.id, updated_at: new Date().toISOString() }, "resolution=merge-duplicates");
+      return reply(welcomeText(fb));
+    }
     if (m) {
       let biz = null;
       if (m[1]) {
@@ -96,11 +126,12 @@ module.exports = async (req, res) => {
 
     // A quale attività appartiene questo cliente?
     let slug;
-    const mapped = await sb("GET", "contact_business?contact_id=eq." + encodeURIComponent(contactId) + "&select=businesses(slug)");
+    const mapped = fixed ? { ok: false } : await sb("GET", "contact_business?contact_id=eq." + encodeURIComponent(contactId) + "&select=businesses(slug)");
     if (mapped.ok && Array.isArray(mapped.data) && mapped.data.length && mapped.data[0].businesses) {
       slug = mapped.data[0].businesses.slug;
     }
 
+    if (fixed) slug = fixed.slug;
     const out = await handleMessage({ channel: "telegram", contactId: contactId, phone: null, slug: slug, text: text });
     return reply(out.reply || "Scusa, ho avuto un problema. Riprova tra un attimo.");
   } catch (e) {
