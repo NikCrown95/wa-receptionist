@@ -303,6 +303,22 @@ nav a.on{background:var(--card2);color:var(--ink);}
     });
     cv.appendChild(cl2); g.appendChild(cv);
 
+    var rf = card('Referral', 'Da quale link e\' arrivata e chi ha portato lei.');
+    var rfl = el('div','list');
+    var R = d.referral;
+    if (!R || (!R.from && !R.invited)) rfl.appendChild(el('div','empty','Non e\' arrivata da un link e non ha ancora invitato nessuno.'));
+    if (R && R.from){
+      var li1 = el('div','li'); var lf1 = el('div'); lf1.appendChild(document.createTextNode('Registrata tramite il link di ' + R.from.name));
+      lf1.appendChild(el('small', null, (R.from.kind === 'partner' ? 'Persona esterna' : 'Attivita\' Prenolia') + ' \u00b7 il ' + d1(R.from.created_at) + (R.from.status === 'paid' ? ' \u00b7 ha pagato il primo mese' : ' \u00b7 ancora in prova')));
+      li1.appendChild(lf1); li1.appendChild(pill(R.from.status === 'paid' ? 'Ha pagato' : 'In prova', R.from.status === 'paid' ? 'active' : 'trial')); rfl.appendChild(li1);
+    }
+    if (R && R.invited){
+      var li2 = el('div','li'); var lf2 = el('div'); lf2.appendChild(document.createTextNode('Ha invitato ' + R.invited + (R.invited === 1 ? ' attivita\'' : ' attivita\'')));
+      lf2.appendChild(el('small', null, R.paid + ' hanno pagato \u00b7 ' + R.credit_months + (R.credit_months === 1 ? ' mese Premium accumulato' : ' mesi Premium accumulati')));
+      li2.appendChild(lf2); rfl.appendChild(li2);
+    }
+    rf.appendChild(rfl); g.appendChild(rf);
+
     var tl = card('Storico delle azioni'); var tll = el('div','list');
     if (!d.timeline.length) tll.appendChild(el('div','empty','Ancora nessuna azione registrata.'));
     d.timeline.forEach(function(x){ var li = el('div','li'); li.appendChild(el('div',null,(ACTIONS[x.action] || x.action) + (x.details && x.details.months ? ' (+' + x.details.months + ' mese)' : '') + (x.details && x.details.days ? ' (+' + x.details.days + ' giorni)' : ''))); li.appendChild(el('div','r',dt(x.at))); tll.appendChild(li); });

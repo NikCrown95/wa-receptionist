@@ -317,6 +317,7 @@ window.startClients = function(){
         nameEl.appendChild(nameLink);
       } else { nameEl.textContent = c.name; }
       tr.querySelector('.who .type').textContent = c.type;
+      if (c.referred_by && c.referred_by.via) tr.querySelector('.who .type').textContent = c.type + ' \u00b7 registrato tramite il link di ' + c.referred_by.via + (c.referred_by.status === 'paid' ? ' (ha pagato)' : ' (in prova)');
 
       var pill = tr.querySelector('.pill');
       pill.textContent = STATUS_LABEL[c.status];
