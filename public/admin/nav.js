@@ -5,6 +5,7 @@
     { label: 'I tuoi clienti', href: '/admin/clienti.html', also: ['/admin/attivita.html'] },
     { label: 'Richieste', href: '/admin/richieste.html', badge: true },
     { label: 'Ordini', href: '/admin/ordini.html', badge2: true },
+    { label: 'Referral', href: '/admin/referral.html' },
     { label: 'Andamento', href: '/admin/', also: ['/admin/index.html'] },
     { label: 'Uso di Lia', href: '/admin/lia.html' },
     { label: 'Ricavi', href: '/admin/soldi.html' },
