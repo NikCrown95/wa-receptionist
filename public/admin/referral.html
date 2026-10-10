@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – Referral</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --green:#3FE08A; --green-soft:#0F2E20; --amber:#F5C15E; --amber-soft:#3A2E10; --red:#FF8A8A; --red-soft:#3A1616;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+button{font-family:inherit;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1180px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;}
+.spacer{flex:1;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:820px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .val.warn{color:var(--amber);}
+.kpi .val.bad{color:var(--red);}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--muted);}
+
+.toolbar{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.search{flex:1;min-width:200px;position:relative;}
+.search input{width:100%;min-height:46px;padding:0 16px 0 40px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:inherit;font-size:.98rem;}
+.search input:focus{outline:none;border-color:var(--accent);}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.filter{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:inherit;font-size:.94rem;}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 18px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.96rem;font-weight:600;cursor:pointer;}
+.btn:hover{filter:brightness(1.08);}
+
+.tablewrap{margin-top:18px;border-radius:22px;border:1px solid var(--line);background:var(--card);overflow-x:auto;}
+table{border-collapse:collapse;width:100%;min-width:1240px;}
+th{text-align:left;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;padding:14px 18px;border-bottom:1px solid var(--line);white-space:nowrap;}
+td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.who{display:flex;align-items:center;gap:12px;}
+.avatar{flex:none;width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:.85rem;}
+.who b{display:block;font-size:.98rem;font-weight:600;white-space:nowrap;}
+.who span{display:block;font-size:.8rem;color:var(--muted);}
+.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap;}
+.pill.active{background:var(--green-soft);color:var(--green);}
+.pill.trial{background:var(--accent-soft);color:var(--accent-ink);}
+.pill.warn{background:var(--amber-soft);color:var(--amber);}
+.pill.bad{background:var(--red-soft);color:var(--red);}
+.plan-name{font-size:.9rem;color:var(--muted);margin-top:3px;}
+.renew{font-weight:600;font-size:.94rem;}
+.renew.warn{color:var(--amber);} .renew.bad{color:var(--red);}
+.renew small{display:block;font-weight:400;color:var(--muted);font-size:.78rem;margin-top:1px;}
+.mrr{font-weight:700;font-variant-numeric:tabular-nums;}
+.appts{font-variant-numeric:tabular-nums;}
+.contact a{display:block;color:var(--muted);font-size:.86rem;text-decoration:none;}
+.contact a:hover{color:var(--accent-ink);}
+.empty-row td{text-align:center;color:var(--muted);padding:40px 20px;}
+
+/* pannello "nuovo cliente" */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;}
+.sheet-bg.on{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card2);border-radius:26px 26px 0 0;padding:8px 22px calc(26px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);}
+.sheet.on{transform:translateY(0);}
+.grabber{width:36px;height:4px;border-radius:2px;background:var(--line2);margin:10px auto 18px;}
+.sheet h2{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;}
+.field{margin-top:16px;display:grid;gap:7px;}
+.field label{font-size:.88rem;font-weight:500;color:var(--muted);}
+.inp,select.inp{width:100%;min-height:50px;padding:0 16px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:inherit;font-size:1rem;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sheet-actions{margin-top:22px;display:flex;gap:10px;}
+.sheet-actions .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line2);}
+@media (prefers-reduced-motion: reduce){.sheet,.sheet-bg{transition:none;}}
+nav{display:flex;gap:4px;}
+nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+nav a.on{background:var(--card2);color:var(--ink);}
+.pill.na{background:var(--card2);color:var(--muted);}
+.health-reasons{display:block;font-size:.78rem;color:var(--muted);margin-top:5px;max-width:240px;white-space:normal;line-height:1.35;}
+.health-up{margin-top:6px;}
+.svc-sub{display:block;font-size:.78rem;color:var(--muted);margin-top:5px;white-space:normal;max-width:190px;line-height:1.35;}
+.btn.small{min-height:36px;padding:0 14px;font-size:.86rem;border-radius:11px;}
+.btn.danger{background:transparent;color:#FF8A8A;box-shadow:inset 0 0 0 1.5px #5A2A2A;}
+.act-btn{justify-content:center;width:100%;}
+</style>
+<style>
+/* ===== Referral ===== */
+.sec{margin-top:34px}
+.sec h2{font-size:1.2rem;font-weight:700;letter-spacing:-0.02em}
+.sec .lead{margin-top:4px;color:var(--muted);font-size:.9rem;line-height:1.45;max-width:720px}
+.sec-top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;justify-content:space-between}
+table.rt{min-width:760px}
+table.rt td.num,table.rt th.num{text-align:right;white-space:nowrap}
+table.rt td small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+table.rt tr.off td{opacity:.55}
+.nm{font-weight:650}
+.nm a{color:inherit;text-decoration:none}
+.nm a:hover{color:var(--accent-ink)}
+.via{display:inline-flex;align-items:center;gap:8px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.02em;background:var(--card2);color:var(--muted)}
+.tag.partner{background:var(--amber-soft);color:var(--amber)}
+.tag.biz{background:var(--accent-soft);color:var(--accent-ink)}
+.rowbtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.empty-t{padding:34px 20px;text-align:center;color:var(--muted)}
+.empty-t b{display:block;color:var(--ink);margin-bottom:3px}
+.banner.info{background:var(--accent-soft);color:var(--accent-ink)}
+.btn.small{min-height:36px;padding:0 13px;font-size:.86rem;border-radius:11px}
+.hint{margin-top:6px;font-size:.8rem;color:var(--muted);line-height:1.4}
+.chkrow{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:.95rem}
+.chkrow input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav">
+      <a href="/admin/clienti.html">I tuoi clienti</a>
+      <a href="/admin/referral.html" class="on">Referral</a>
+    </nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+
+<div class="wrap">
+  <div class="banner" id="setup" hidden>Il sistema referral non e' ancora attivo nel database. Esegui in Supabase lo script SQL <b>20261010_referral.sql</b> e poi ricarica la pagina.</div>
+  <div class="kpis" id="kpis"></div>
+
+  <section class="sec">
+    <div class="sec-top">
+      <div>
+        <h2>Attività arrivate da un link</h2>
+        <p class="lead">Tutte le attività che si sono registrate dal link di un'attività o di una persona. «In prova» finché non pagano il primo mese; poi «Ha pagato».</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="search" type="text" placeholder="Cerca per attività o per chi l'ha invitata…">
+      </div>
+      <select class="filter" id="filterStatus" aria-label="Stato">
+        <option value="all">Tutte</option>
+        <option value="trial">In prova</option>
+        <option value="paid">Hanno pagato</option>
+      </select>
+      <select class="filter" id="filterKind" aria-label="Chi ha invitato">
+        <option value="all">Attività e persone</option>
+        <option value="business">Solo da attività</option>
+        <option value="partner">Solo da persone</option>
+      </select>
+      <button class="btn ghost" id="reload" type="button">Aggiorna</button>
+    </div>
+    <div class="tablewrap"><table class="rt" id="tReferred"></table></div>
+  </section>
+
+  <section class="sec">
+    <h2>Mesi Premium accumulati dalle attività</h2>
+    <p class="lead">Ogni attività invitata che paga il primo mese vale un mese di piano Premium per chi l'ha invitata. Per ora il credito viene solo conteggiato, non scalato dalla fattura.</p>
+    <div class="tablewrap"><table class="rt" id="tCredits"></table></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-top">
+      <div>
+        <h2>Persone con un link</h2>
+        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro link e paga il primo mese matura un premio in contanti (di base un mese di piano Base).</p>
+      </div>
+      <button class="btn" id="addPerson" type="button">Nuova persona</button>
+    </div>
+    <div class="tablewrap"><table class="rt" id="tPeople"></table></div>
+  </section>
+</div>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">
+  <div class="grabber" aria-hidden="true"></div>
+  <h2 id="sheetTitle">Nuova persona</h2>
+  <form id="pForm">
+    <div class="field"><label for="pName">Nome e cognome</label><input class="inp" id="pName" required maxlength="80" placeholder="Es. Marco Rossi"></div>
+    <div class="field"><label for="pReward">Premio per ogni attività che paga (€)</label><input class="inp" id="pReward" inputmode="decimal" placeholder="16,99"><p class="hint" id="pRewardHint"></p></div>
+    <div class="field"><label for="pNote">Nota (facoltativa)</label><input class="inp" id="pNote" maxlength="300" placeholder="Es. parrucchiere amico, lo conosco da…"></div>
+    <label class="chkrow" id="pActiveRow" hidden><input type="checkbox" id="pActive" checked> Link attivo (se lo disattivi, i nuovi arrivi non vengono più collegati)</label>
+    <div class="sheet-actions">
+      <button type="button" class="btn ghost" id="pCancel">Annulla</button>
+      <button type="submit" class="btn" id="pSave">Crea link</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function(){
+  var MONTHS = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  var state = { data: null, owner: false, editing: null };
+
+  function el(tag, cls, txt){ var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function eur(n){ return Number(n || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20ac'; }
+  function dshort(iso){ if (!iso) return '\u2014'; var d = new Date(iso); return d.getDate() + ' ' + MONTHS[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : ''); }
+  function api(path, opts){ return window.liaApi(path, opts); }
+  function banner(msg){ if (window.liaBanner) window.liaBanner(msg); else alert(msg); }
+  function post(body){ return api('/api/admin/clients', { method: 'POST', body: JSON.stringify(body) }); }
+  function copy(text, btn){
+    var label = btn.textContent;
+    function ok(){ btn.textContent = 'Copiato'; setTimeout(function(){ btn.textContent = label; }, 1400); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, function(){ banner('Non riesco a copiare: selezionalo a mano.'); });
+    else { var ta = el('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { banner('Non riesco a copiare.'); } ta.remove(); }
+  }
+  function th(row, labels){ var tr = el('tr'); labels.forEach(function(l){ var h = el('th', l[1] || '', l[0]); tr.appendChild(h); }); var hd = el('thead'); hd.appendChild(tr); row.appendChild(hd); }
+  function empty(table, cols, title, sub){ var tb = el('tbody'); var tr = el('tr'); var td = el('td', 'empty-t'); td.colSpan = cols; td.appendChild(el('b', null, title)); td.appendChild(document.createTextNode(sub)); tr.appendChild(td); tb.appendChild(tr); table.appendChild(tb); }
+  function pill(text, cls){ return el('span', 'pill ' + cls, text); }
+  function bizLink(name, id){ var s = el('span', 'nm'); if (id){ var a = el('a', null, name); a.href = '/admin/attivita.html?id=' + encodeURIComponent(id); s.appendChild(a); } else s.textContent = name; return s; }
+
+  function kpis(){
+    var box = document.getElementById('kpis'); box.innerHTML = '';
+    var s = state.data && state.data.summary; if (!s) return;
+    [['Registrate da un link', s.registered, 'in totale', ''],
+     ['In prova', s.in_trial, 'non hanno ancora pagato', ''],
+     ['Hanno pagato', s.paid, 'primo mese incassato', s.paid ? '' : ''],
+     ['Mesi Premium', s.credit_months, eur(s.credit_value_eur) + ' di credito', ''],
+     ['Premi da pagare', eur(s.partners_due_eur), 'alle persone esterne', s.partners_due_eur > 0 ? 'warn' : '']
+    ].forEach(function(k){ var d = el('div', 'kpi'); d.appendChild(el('div', 'lbl', k[0])); d.appendChild(el('div', 'val ' + k[3], String(k[1]))); d.appendChild(el('div', 'sub', k[2])); box.appendChild(d); });
+  }
+
+  function renderReferred(){
+    var t = document.getElementById('tReferred'); t.innerHTML = '';
+    var q = document.getElementById('search').value.trim().toLowerCase();
+    var fs = document.getElementById('filterStatus').value, fk = document.getElementById('filterKind').value;
+    var all = (state.data && state.data.referred) || [];
+    var rows = all.filter(function(r){
+      if (fs !== 'all' && r.status !== fs) return false;
+      if (fk !== 'all' && r.via_kind !== fk) return false;
+      if (q && (r.name + ' ' + r.via_name).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    th(t, [['Attività'], ['Arrivata da'], ['Stato'], ['Registrata'], ['Prova / pagamento']]);
+    if (!rows.length){ empty(t, 5, all.length ? 'Nessun risultato con questi filtri' : 'Ancora nessuna registrazione da un link', all.length ? 'Cambia filtro o cerca altro.' : 'Quando qualcuno si registra da un link referral, lo vedi qui.'); return; }
+    var tb = el('tbody');
+    rows.forEach(function(r){
+      var tr = el('tr');
+      var c1 = el('td'); c1.appendChild(bizLink(r.name, r.business_id)); tr.appendChild(c1);
+      var c2 = el('td'); var v = el('span', 'via'); v.appendChild(bizLink(r.via_name, r.via_kind === 'business' ? r.via_id : null)); v.appendChild(el('span', 'tag ' + (r.via_kind === 'partner' ? 'partner' : 'biz'), r.via_kind === 'partner' ? 'Persona' : 'Attività')); c2.appendChild(v); tr.appendChild(c2);
+      var c3 = el('td'); c3.appendChild(r.status === 'paid' ? pill('Ha pagato', 'active') : pill('In prova', 'trial')); tr.appendChild(c3);
+      tr.appendChild(el('td', null, dshort(r.created_at)));
+      var c5 = el('td');
+      if (r.status === 'paid') c5.textContent = 'Pagato il ' + dshort(r.paid_at);
+      else if (r.trial_ends_at) c5.textContent = 'La prova finisce il ' + dshort(r.trial_ends_at);
+      else c5.textContent = r.sub_status === 'cancelled' ? 'Abbonamento annullato' : '\u2014';
+      tr.appendChild(c5);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+  }
+
+  function renderCredits(){
+    var t = document.getElementById('tCredits'); t.innerHTML = '';
+    var rows = (state.data && state.data.credits) || [];
+    th(t, [['Attività'], ['Invitate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Mesi Premium', 'num'], ['Valore', 'num'], ['Link', 'num']]);
+    if (!rows.length){ empty(t, 7, 'Nessuna attività ha ancora invitato qualcuno', 'Ogni attività ha il suo link nella Scheda attività.'); return; }
+    var tb = el('tbody');
+    rows.forEach(function(c){
+      var tr = el('tr');
+      var c1 = el('td'); c1.appendChild(bizLink(c.name, c.business_id)); tr.appendChild(c1);
+      tr.appendChild(el('td', 'num', String(c.invited)));
+      tr.appendChild(el('td', 'num', String(c.in_trial)));
+      tr.appendChild(el('td', 'num', String(c.paid)));
+      var m = el('td', 'num'); m.appendChild(el('b', null, String(c.credit_months))); tr.appendChild(m);
+      tr.appendChild(el('td', 'num', eur(c.credit_value_eur)));
+      var l = el('td', 'num'); if (c.link){ var b = el('button', 'btn ghost small', 'Copia link'); b.type = 'button'; b.addEventListener('click', function(){ copy(c.link, b); }); l.appendChild(b); } tr.appendChild(l);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+  }
+
+  function renderPeople(){
+    var t = document.getElementById('tPeople'); t.innerHTML = '';
+    var rows = (state.data && state.data.partners) || [];
+    th(t, [['Persona'], ['Registrate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Premio cad.', 'num'], ['Maturato', 'num'], ['Da pagare', 'num'], ['', 'num']]);
+    if (!rows.length){ empty(t, 8, 'Nessuna persona inserita', 'Tocca «Nuova persona» per creare un link con il suo nome.'); return; }
+    var tb = el('tbody');
+    rows.forEach(function(p){
+      var tr = el('tr'); if (!p.active) tr.className = 'off';
+      var c1 = el('td'); var n = el('div', 'nm', p.name); c1.appendChild(n);
+      var sm = el('small', null, (p.active ? '' : 'Link disattivato \u00b7 ') + (p.note || 'dal ' + dshort(p.created_at))); c1.appendChild(sm); tr.appendChild(c1);
+      tr.appendChild(el('td', 'num', String(p.registered)));
+      tr.appendChild(el('td', 'num', String(p.in_trial)));
+      tr.appendChild(el('td', 'num', String(p.paid)));
+      tr.appendChild(el('td', 'num', eur(p.reward_eur)));
+      tr.appendChild(el('td', 'num', eur(p.earned_eur)));
+      var due = el('td', 'num'); var db = el('b', null, eur(p.due_eur)); if (p.due_eur > 0) db.style.color = 'var(--amber)'; due.appendChild(db);
+      if (p.settled_eur > 0) due.appendChild(el('small', null, eur(p.settled_eur) + ' gia\' pagati')); tr.appendChild(due);
+      var act = el('td', 'num'); var rb = el('div', 'rowbtns');
+      var cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.addEventListener('click', function(){ copy(p.link, cp); }); rb.appendChild(cp);
+      if (state.owner){
+        if (p.due_eur > 0){ var pay = el('button', 'btn small', 'Premio pagato'); pay.type = 'button'; pay.addEventListener('click', function(){ payout(p, pay); }); rb.appendChild(pay); }
+        var ed = el('button', 'btn ghost small', 'Modifica'); ed.type = 'button'; ed.addEventListener('click', function(){ openSheet(p); }); rb.appendChild(ed);
+      }
+      act.appendChild(rb); tr.appendChild(act);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+  }
+
+  function render(){
+    kpis(); renderReferred(); renderCredits(); renderPeople();
+    document.getElementById('addPerson').hidden = !state.owner;
+  }
+
+  function payout(p, btn){
+    if (!confirm('Segno come pagati ' + eur(p.due_eur) + ' a ' + p.name + '? Fallo dopo avergli dato i contanti.')) return;
+    btn.disabled = true;
+    post({ action: 'partner_payout', id: p.id }).then(function(j){ banner('Segnati come pagati ' + eur(j.paid_eur) + ' a ' + p.name + '.'); return load(); })
+      .catch(function(e){ banner(e.message); btn.disabled = false; });
+  }
+
+  // ---- scheda "Nuova persona / Modifica"
+  var bg = document.getElementById('sheetBg'), sheet = document.getElementById('sheet');
+  function closeSheet(){ bg.classList.remove('on'); sheet.classList.remove('on'); }
+  function openSheet(p){
+    state.editing = p || null;
+    document.getElementById('sheetTitle').textContent = p ? 'Modifica ' + p.name : 'Nuova persona';
+    document.getElementById('pName').value = p ? p.name : '';
+    var base = state.data && state.data.settings ? state.data.settings.base_price : 0;
+    document.getElementById('pReward').value = p ? String(p.reward_eur).replace('.', ',') : String(base).replace('.', ',');
+    document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di piano Base (' + eur(base) + '). Puoi cambiarlo.';
+    document.getElementById('pNote').value = p ? (p.note || '') : '';
+    document.getElementById('pActive').checked = p ? p.active : true;
+    document.getElementById('pActiveRow').hidden = !p;
+    document.getElementById('pSave').textContent = p ? 'Salva' : 'Crea link';
+    bg.classList.add('on'); sheet.classList.add('on');
+    setTimeout(function(){ document.getElementById('pName').focus(); }, 50);
+  }
+  bg.addEventListener('click', closeSheet);
+  document.getElementById('pCancel').addEventListener('click', closeSheet);
+  document.getElementById('addPerson').addEventListener('click', function(){ openSheet(null); });
+  document.getElementById('pForm').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var save = document.getElementById('pSave'); save.disabled = true;
+    var body = { name: document.getElementById('pName').value, reward_eur: document.getElementById('pReward').value, note: document.getElementById('pNote').value };
+    if (state.editing){ body.action = 'partner_update'; body.id = state.editing.id; body.active = document.getElementById('pActive').checked; }
+    else body.action = 'partner_create';
+    post(body).then(function(j){
+      closeSheet();
+      banner(state.editing ? 'Salvato.' : 'Link creato: ' + j.link);
+      return load();
+    }).catch(function(e){ banner(e.message); }).then(function(){ save.disabled = false; });
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeSheet(); });
+
+  function load(){
+    var btn = document.getElementById('reload'); btn.disabled = true;
+    return api('/api/admin/clients?view=referrals').then(function(j){
+      document.getElementById('setup').hidden = !j.setup;
+      if (!j.setup) state.data = j;
+      render();
+    }).catch(function(e){ banner('Non riesco a caricare i referral: ' + e.message); }).then(function(){ btn.disabled = false; });
+  }
+
+  document.getElementById('search').addEventListener('input', renderReferred);
+  document.getElementById('filterStatus').addEventListener('change', renderReferred);
+  document.getElementById('filterKind').addEventListener('change', renderReferred);
+  document.getElementById('reload').addEventListener('click', load);
+  api('/api/admin/clients?view=me').then(function(me){ state.owner = !!(me && me.role === 'owner'); render(); }).catch(function(){});
+  render();
+  load();
+})();
+</script>
+</body>
+</html>
