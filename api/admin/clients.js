@@ -10,6 +10,8 @@
 //   GET  /api/admin/clients?view=money                   -> soldi: MRR, movimento, rinnovi, incasso a rischio
 //   GET  /api/admin/clients?view=lia                     -> uso di Lia su tutte le attivita'
 //   GET  /api/admin/clients?view=detail&id=UUID          -> scheda singola attivita'
+//   GET  /api/admin/clients?view=referrals               -> sezione Referral (attivita' arrivate da un link, crediti, persone esterne)
+//   POST /api/admin/clients {action:'partner_create'|'partner_update'|'partner_payout', ...} -> persone esterne con link referral
 //   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
 //   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan
 //   POST /api/admin/clients  -> crea attività + abbonamento
@@ -26,6 +28,7 @@
 //   ADMIN_API_KEY
 
 const crypto = require('crypto');
+const referral = require('../../lib/referral.js');
 
 const DEFAULT_URL = 'https://trtjbktdvupckyayxqli.supabase.co';
 
@@ -215,7 +218,7 @@ async function listClients() {
 
   const businesses = await sbAll(
     'businesses?select=id,name,business_type,owner_phone,owner_whatsapp,created_at,' +
-      'subscriptions(status,started_at,cancelled_at,plans(name,price_eur)),' +
+      'subscriptions(status,started_at,cancelled_at,trial_ends_at,plans(name,price_eur)),' +
       'services(id),resources(id,active,opening_hours(id))' +
       '&order=created_at.desc,id.asc'
   );
@@ -229,6 +232,10 @@ async function listClients() {
   } catch (e) {
     console.error('service_access_v non leggibile:', e && e.message);
   }
+
+  // da quale link e' arrivata ogni attivita' (se la tabella referral non esiste ancora, la lista funziona lo stesso)
+  let sources = {};
+  try { sources = await referral.sourcesByBusiness(sbAll); } catch (e) { console.error('referral non leggibile:', e && e.message); }
 
   const appts = await sbAll(
     'appointments?select=business_id,starts_at&status=neq.cancelled' +
@@ -260,7 +267,7 @@ async function listClients() {
       plan = sub.plans && sub.plans.name === 'Base+Lia' ? 'ai' : 'base';
       status = sub.status;
       if (status === 'cancelled') renew = new Date(sub.cancelled_at || sub.started_at);
-      else if (status === 'trial') renew = new Date(new Date(sub.started_at).getTime() + 30 * 86400000);
+      else if (status === 'trial') renew = new Date(sub.trial_ends_at ? sub.trial_ends_at : new Date(sub.started_at).getTime() + 30 * 86400000);
       else renew = nextMonthlyRenewal(sub.started_at, today);
       const av = access[b.id];
       if (av && av.paid_until && status !== 'cancelled') renew = new Date(av.paid_until); // data reale salvata
@@ -294,6 +301,7 @@ async function listClients() {
       email: '',
       health,
       service: acc ? { state: acc.state, allowed: acc.allowed, paid_until: acc.paid_until, grace_ends: acc.grace_ends } : null,
+      referred_by: sources[b.id] || null,
     };
   });
   return clients;
@@ -351,6 +359,8 @@ async function businessDetail(id) {
     soft('messaggi', sbAll(`chat_messages?business_id=eq.${id}&created_at=gte.${enc(since30)}&select=customer_phone,role,created_at&order=created_at.asc,id.asc`), []),
     soft('storico azioni', sb(`audit_logs?business_id=eq.${id}&select=at,actor,action,details&order=at.desc&limit=15`), []),
   ]);
+
+  const referralInfo = await soft('referral', referral.businessDetailInfo(id, sbAll), null);
 
   const sub = (subRows || [])[0] || null;
   const price = (a) => Number((a.services && a.services.price_eur) || 0);
@@ -452,6 +462,7 @@ async function businessDetail(id) {
       recap: Boolean(b.recap_enabled),
     },
     timeline: (logs || []).map((l) => ({ at: l.at, actor: l.actor, action: l.action, details: l.details || null })),
+    referral: referralInfo,
     warnings,
   };
 }
@@ -948,7 +959,7 @@ async function runAction(body, ctx) {
         body: {
           business_id: id, plan_id: pid, status: trial ? 'trial' : 'active', started_at: now.toISOString(),
           current_period_end: trial ? null : addMonths(now, 1).toISOString(),
-          trial_ends_at: trial ? new Date(now.getTime() + 30 * 86400000).toISOString() : null,
+          trial_ends_at: trial ? new Date(now.getTime() + (await referral.trialDays(sbAll)) * 86400000).toISOString() : null,
         },
       });
     } else {
@@ -975,7 +986,10 @@ async function runAction(body, ctx) {
     const end = addMonths(base, months);
     await patchSub(sub.id, { status: 'active', current_period_end: end.toISOString(), courtesy_until: null, suspended_manually: false, suspended_at: null });
     await audit('mark_paid', id, { months, paid_until: end.toISOString(), was_trial: sub.status === 'trial', price: subPrice(sub) }, ctx && ctx.actor);
-    return { ok: true, state: (await accessRow(id) || {}).state, paid_until: end.toISOString() };
+    // primo pagamento dopo la prova: se l'attivita' era arrivata da un link referral, matura il credito (o il premio)
+    let referralDone = null;
+    if (sub.status === 'trial') referralDone = await referral.onFirstPayment(id, (method, path, body, prefer) => sb(path, { method, body, prefer }));
+    return { ok: true, state: (await accessRow(id) || {}).state, paid_until: end.toISOString(), referral: referralDone };
   }
 
   if (action === 'extend') {
@@ -1326,6 +1340,14 @@ module.exports = async function handler(req, res) {
         res.status(200).json({ new: n });
         return;
       }
+      if (view === 'referrals') {
+        try { res.status(200).json(await referral.adminOverview(sbAll)); }
+        catch (e) {
+          if (/referr|app_settings|relation|does not exist|schema cache/i.test(String(e && e.message))) { res.status(200).json({ setup: true }); return; }
+          throw e;
+        }
+        return;
+      }
       if (view === 'detail') { res.status(200).json(await businessDetail(String(req.query.id || ''))); return; }
       if (view === 'conversation') {
         if (!owner) { res.status(403).json({ error: 'forbidden', detail: 'Le conversazioni dei clienti finali sono riservate al titolare.' }); return; }
@@ -1341,6 +1363,10 @@ module.exports = async function handler(req, res) {
       if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
       if (body && body.action === 'order_status') {
         res.status(200).json(await setOrderStatus(body, ctx));
+        return;
+      }
+      if (body && /^partner_/.test(String(body.action || ''))) {
+        res.status(200).json(await referral.partnerAction(body, { get: sbAll, send: (method, path, b, prefer) => sb(path, { method, body: b, prefer }) }));
         return;
       }
       if (body && body.action === 'request_status') {
