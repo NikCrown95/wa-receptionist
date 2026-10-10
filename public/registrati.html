@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="no-referrer">
+<title>Prenolia – Registrati</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ABBOZZO: la pagina di registrazione vera la rifiniamo insieme. Serve a far arrivare il codice referral. */
+:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,p{margin:0}button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.box{max-width:440px;margin:8vh auto 40px;padding:0 20px}
+.card{border-radius:24px;border:1px solid var(--line);background:var(--card);padding:28px 24px}
+.logo{display:block;width:176px;height:42px;margin:0 auto 18px;background:var(--logo) center / contain no-repeat}
+h1{font-size:1.3rem;text-align:center;margin:0 0 4px;letter-spacing:-0.01em}
+.sub{text-align:center;color:var(--muted);font-size:.92rem;margin:0 0 6px}
+.invite{margin:14px 0 0;padding:10px 14px;border-radius:12px;background:#0B2C33;color:#A5EDF2;font-size:.9rem;text-align:center}
+label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
+.inp{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{width:100%;min-height:48px;margin-top:22px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.btn:disabled{opacity:.65;cursor:default}
+.err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+.ok{display:none;text-align:center}
+.ok h1{margin-bottom:10px}
+.hint{margin-top:6px;font-size:.8rem;color:var(--muted)}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+.foot{margin-top:18px;text-align:center;font-size:.88rem;color:var(--muted)}
+.foot a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="card">
+    <div class="logo" role="img" aria-label="Prenolia"></div>
+
+    <form id="form" novalidate>
+      <h1>Prova Prenolia</h1>
+      <p class="sub">Registrati e inizia la prova gratuita.</p>
+      <div class="invite" id="invite" hidden>Sei stato invitato: la tua registrazione verrà collegata al link che hai ricevuto.</div>
+
+      <label for="name">Nome della tua attività</label>
+      <input class="inp" id="name" type="text" autocomplete="organization" maxlength="80" required>
+
+      <label for="type">Che attività hai?</label>
+      <select class="inp" id="type">
+        <option value="parrucchiere">Parrucchiere</option>
+        <option value="barbiere">Barbiere</option>
+        <option value="estetista">Estetista</option>
+        <option value="personal trainer">Personal trainer</option>
+        <option value="idraulico">Idraulico</option>
+        <option value="altro">Altro</option>
+      </select>
+
+      <label for="phone">Telefono</label>
+      <input class="inp" id="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+
+      <label for="email">Email</label>
+      <input class="inp" id="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
+
+      <label for="pw">Password</label>
+      <input class="inp" id="pw" type="password" autocomplete="new-password" required>
+      <p class="hint">Almeno 8 caratteri, un numero e un carattere speciale.</p>
+
+      <input class="hp" id="hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <button class="btn" id="go" type="submit">Crea il mio account</button>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+
+    <div class="ok" id="done">
+      <h1>Controlla la tua email</h1>
+      <p class="sub">Ti abbiamo scritto un link per confermare l'indirizzo. Appena lo apri, la prova parte.</p>
+    </div>
+  </div>
+  <p class="foot">Hai già un account? <a href="/login.html">Accedi</a></p>
+</div>
+
+<script>
+(function () {
+  // Il codice referral arriva da ?ref=... e viene ricordato 30 giorni, cosi' non si perde se la persona torna piu' tardi.
+  var KEY = 'prenolia_ref';
+  function clean(v) { return String(v || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40); }
+  function saveRef(code) { try { localStorage.setItem(KEY, JSON.stringify({ c: code, t: Date.now() })); } catch (e) {} }
+  function loadRef() {
+    try {
+      var o = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (o && o.c && Date.now() - o.t < 30 * 86400000) return clean(o.c);
+    } catch (e) {}
+    return '';
+  }
+  var fromUrl = clean(new URLSearchParams(location.search).get('ref'));
+  if (fromUrl) saveRef(fromUrl);
+  var ref = fromUrl || loadRef();
+  if (ref) document.getElementById('invite').hidden = false;
+
+  var form = document.getElementById('form'), err = document.getElementById('err'), go = document.getElementById('go');
+  function show(msg) { err.textContent = msg; err.style.display = 'block'; }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    err.style.display = 'none';
+    go.disabled = true; go.textContent = 'Un attimo…';
+    fetch('/api/business-auth?action=signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('name').value,
+        type: document.getElementById('type').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('pw').value,
+        hp: document.getElementById('hp').value,
+        ref: ref
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+    }).then(function (res) {
+      if (res.ok && res.j && res.j.ok) {
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        form.style.display = 'none';
+        document.getElementById('done').style.display = 'block';
+        return;
+      }
+      show((res.j && res.j.error) || 'Non siamo riusciti a registrarti. Riprova tra poco.');
+    }).catch(function () {
+      show('Connessione assente. Riprova tra poco.');
+    }).then(function () {
+      go.disabled = false; go.textContent = 'Crea il mio account';
+    });
+  });
+})();
+</script>
+</body>
+</html>
