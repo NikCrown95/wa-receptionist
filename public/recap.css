@@ -78,14 +78,32 @@
   .mainTopRow .mainBiz #businessName{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 
-/* Scheda attivita': nome e indirizzo sempre leggibili, con qualsiasi tema o immagine di sfondo.
-   Stanno su una lastra scura semitrasparente (come il "Scade tra N giorni") con testo chiaro. */
-:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx{
-  align-self:center;max-width:100%;padding:9px 16px 10px;border-radius:16px;
-  background:rgba(9,20,26,.60);border:1px solid rgba(255,255,255,.12);
-  -webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1);
-  box-shadow:0 6px 20px -8px rgba(0,0,0,.45)}
-:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx h2{color:#fff!important;text-shadow:none!important}
+/* ===== Scheda attivita': intestazione premium, leggibile con qualsiasi foto e tema =====
+   Sopra lo sfondo (foto o colore) sta una sfumatura scura ricavata dal colore dell'attivita';
+   tutto il testo e' avorio/oro e non dipende dal tema. */
+#panelProfile .pf2 .pfHero{--sc:hsl(var(--h,200) 34% 10%);--ivory:#FFF4EA;--gold:#EBCB9F}
+#panelProfile .pf2 .pfHero.est{--sc:rgb(40,18,24)}
+#panelProfile .pf2 .pfHero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  background:
+   linear-gradient(98deg,color-mix(in srgb,var(--sc) 92%,transparent) 0%,color-mix(in srgb,var(--sc) 82%,transparent) 42%,color-mix(in srgb,var(--sc) 46%,transparent) 72%,color-mix(in srgb,var(--sc) 22%,transparent) 100%),
+   linear-gradient(0deg,color-mix(in srgb,var(--sc) 62%,transparent),transparent 48%),
+   color-mix(in srgb,var(--sc) 30%,transparent)}
+:root:root:root #panelProfile .pf2 .pfHero > .pf2Top,
+:root:root:root #panelProfile .pf2 .pfHero > .pf2Id,
+:root:root:root #panelProfile .pf2 .pfHero > .pfTags,
+:root:root:root #panelProfile .pf2 .pfHero > .pf2Qa{z-index:1}
+@media(max-width:699px){:root:root:root #panelProfile .pf2 .pfHero > .pf2Badge,:root:root:root #panelProfile .pf2 .pfHero .pf2Badge:not([hidden]){position:relative;z-index:1}}
+:root:root:root #panelProfile .pf2 .pfHero .pfKind{color:var(--gold)!important;letter-spacing:.2em;text-shadow:0 1px 8px rgba(20,8,12,.55)}
+:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx{align-items:stretch}
+:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx h2{color:var(--ivory)!important;text-shadow:0 1px 14px rgba(20,8,12,.55)!important}
+:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr{margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--gold) 38%,transparent)}
 :root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr,
-:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr *{color:rgba(255,255,255,.94)!important;text-shadow:none!important}
-:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr::before{background:#8FE6F0!important}
+:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr *{color:rgba(255,244,234,.94)!important;text-shadow:0 1px 8px rgba(20,8,12,.5)!important}
+:root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr::before{background:var(--gold)!important}
+:root:root:root #panelProfile .pf2 .pfHero .pfAvatar{box-shadow:0 8px 22px -8px rgba(0,0,0,.6),0 0 0 1.5px rgba(255,244,234,.55)}
+/* stato e pulsanti in vetro */
+:root:root:root #panelProfile .pf2 .pfHero .pfOpenNow{background:rgba(255,244,234,.10)!important;border:1px solid rgba(255,244,234,.20)!important;color:var(--ivory)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+:root:root:root #panelProfile .pf2 .pfHero .pf2Qb{background:rgba(255,244,234,.12)!important;border:1px solid rgba(255,244,234,.24)!important;color:var(--ivory)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:none}
+:root:root:root #panelProfile .pf2 .pfHero .pf2Qb svg{color:var(--ivory)!important}
+:root:root:root #panelProfile .pf2 .pfHero .pf2Qb.main{background:#1F7D8B!important;border-color:rgba(160,245,255,.40)!important;color:#fff!important}
+:root:root:root #panelProfile .pf2 .pfHero .pf2Qb.main svg{color:#fff!important}
