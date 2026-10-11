@@ -206,3 +206,49 @@
   init.n = 0;
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
+
+/* Smartphone: la data nel calendario e il nome attivita' nelle altre sezioni stanno sempre su una riga.
+   Si parte dalla dimensione normale e si rimpicciolisce solo quanto serve (minimo 15px, poi puntini). */
+(function () {
+  "use strict";
+  var mq = window.matchMedia ? window.matchMedia("(max-width:699px)") : null;
+  var MIN = 15, queued = false, seen = new WeakMap();
+
+  function fit(el, maxPx) {
+    if (!el) return;
+    var key = (el.textContent || "") + "|" + el.clientWidth + "|" + maxPx;
+    if (seen.get(el) === key) return;
+    var s = maxPx;
+    el.style.setProperty("font-size", s + "px", "important");
+    while (el.scrollWidth > el.clientWidth + 0.5 && s > MIN) {
+      s -= 0.5;
+      el.style.setProperty("font-size", s + "px", "important");
+    }
+    seen.set(el, (el.textContent || "") + "|" + el.clientWidth + "|" + maxPx);
+  }
+  function reset(el) { if (el) { el.style.removeProperty("font-size"); seen.delete(el); } }
+
+  function run() {
+    queued = false;
+    var range = document.querySelector("#calSubApp .controls .range");
+    var biz = document.getElementById("businessName");
+    if (!mq || !mq.matches) { reset(range); reset(biz); return; }
+    var inCal = document.body.classList.contains("lia-sec-cal");
+    if (inCal) fit(range, Math.min(32, Math.max(20, window.innerWidth * 0.074)));
+    else reset(range);
+    if (!inCal && biz && biz.offsetParent !== null) fit(biz, 22.4);
+  }
+  function queue() { if (queued) return; queued = true; requestAnimationFrame(run); }
+
+  function start() {
+    queue();
+    try {
+      new MutationObserver(queue).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class"] });
+    } catch (e) {}
+    window.addEventListener("resize", queue);
+    window.addEventListener("orientationchange", queue);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+    setTimeout(queue, 600);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
