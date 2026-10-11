@@ -144,3 +144,7 @@
   :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn small{font-size:.82rem!important}
   :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar{height:4px!important}
 }
+
+/* Campanella: promemoria chiusure/ferie del lunedi' */
+.np-ic.k{background:linear-gradient(145deg,rgba(229,160,40,.30),rgba(229,160,40,.10));color:#E5A028}
+.np-tx em{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-style:normal;font-weight:700;font-size:.78rem;color:var(--accent-ink)}
