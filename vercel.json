@@ -11,6 +11,14 @@
     {
       "path": "/api/weekly-recap",
       "schedule": "0 18 * * 0"
+    },
+    {
+      "path": "/api/closures-reminder",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/closures-reminder",
+      "schedule": "0 7 * * 1"
     }
   ],
   "headers": [
