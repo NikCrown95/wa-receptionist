@@ -69,3 +69,11 @@
 .lr-empty{padding:34px 18px 30px;text-align:center;color:var(--muted)}
 .lr-empty b{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
 .lr-ft{padding:10px 16px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:.72rem;text-align:center}
+
+/* smartphone: data (vista calendario) e nome attivita' (altre sezioni) restano su UNA riga; la dimensione si adatta da recap.js */
+@media(max-width:699px){
+  body.lia-sec-cal #calSubApp .controls .range{position:absolute!important;left:14px!important;right:112px!important;padding:0!important;margin:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:none!important;line-height:1.15!important}
+  body.liaRecapOn.lia-sec-cal #calSubApp .controls .range{right:162px!important;padding:0!important}
+  .mainTopRow .mainBiz{min-width:0}
+  .mainTopRow .mainBiz #businessName{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
