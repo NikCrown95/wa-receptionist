@@ -107,3 +107,16 @@
 :root:root:root #panelProfile .pf2 .pfHero .pf2Qb svg{color:var(--ivory)!important}
 :root:root:root #panelProfile .pf2 .pfHero .pf2Qb.main{background:#1F7D8B!important;border-color:rgba(160,245,255,.40)!important;color:#fff!important}
 :root:root:root #panelProfile .pf2 .pfHero .pf2Qb.main svg{color:#fff!important}
+
+/* ===== Piano e scadenza: carta di vetro con il badge del piano, barra teal-oro ===== */
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn{background:rgba(255,244,234,.10)!important;border:1px solid rgba(255,244,234,.22)!important;border-radius:16px;-webkit-backdrop-filter:blur(12px) saturate(1.1);backdrop-filter:blur(12px) saturate(1.1);box-shadow:0 8px 24px -14px rgba(0,0,0,.6)}
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn small{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;font-family:'Manrope','Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:-.02em;text-shadow:none}
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn:not(.exp):not(.warn) small{color:#FFF4EA!important;-webkit-text-fill-color:#FFF4EA!important}
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar{height:5px;border:0!important;background:rgba(255,244,234,.18)!important;border-radius:9px}
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar i{border-radius:9px}
+:root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn:not(.exp):not(.warn) .pfPlanBar i{background:linear-gradient(90deg,#3FB6C6,#EBCB9F)}
+@media(min-width:700px){
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn{width:218px;align-items:flex-start;gap:9px;padding:11px 14px 12px}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .planImg{height:38px}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar{width:100%}
+}
