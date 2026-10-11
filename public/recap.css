@@ -120,3 +120,27 @@
   :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .planImg{height:38px}
   :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar{width:100%}
 }
+
+/* ===== Scheda attivita' su smartphone: intestazione compatta ===== */
+@media(max-width:699px){
+  :root:root:root #panelProfile .pf2 .pfHero{padding:14px 14px 12px!important;min-height:0!important;border-radius:22px!important}
+  /* l'etichetta del tipo era sotto la sfumatura: la riporto sopra */
+  :root:root:root #panelProfile .pf2 .pfHero .pfKind{position:relative;z-index:1;margin:0 0 8px!important;font-size:.62rem!important;letter-spacing:.18em!important}
+  /* "Chiuso ora" accanto all'etichetta, in alto a destra */
+  :root:root:root #panelProfile .pf2 .pfHero > .pfTags{position:absolute;top:9px;right:12px;margin:0!important;z-index:2}
+  :root:root:root #panelProfile .pf2 .pfHero .pfOpenNow{height:24px;padding:0 9px;font-size:.68rem}
+  :root:root:root #panelProfile .pf2 .pf2Id{gap:11px!important;padding-right:0!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pfAvatar{width:46px!important;height:46px!important;border-radius:15px!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pfHeroTx h2{font-size:1.15rem!important;line-height:1.15!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr{font-size:.78rem!important;margin-top:4px!important;padding-top:4px!important;gap:5px!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pfHeroTx #pfAddr::before{width:14px!important;height:14px!important}
+  :root:root:root #panelProfile .pf2 .pf2Qa{margin-top:10px!important;gap:6px!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pf2Qb{min-height:42px!important;padding:4px 2px!important;gap:2px!important;font-size:.66rem!important;border-radius:12px!important}
+  :root:root:root #panelProfile .pf2 .pfHero .pf2Qb svg{width:16px;height:16px}
+  /* striscia del piano piu' bassa */
+  :root:root:root #panelProfile .pf2 .pf2Badge:not([hidden]){margin-top:8px!important}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn{padding:7px 10px!important;gap:5px 10px!important;border-radius:13px!important}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .planImg{height:24px!important}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn small{font-size:.82rem!important}
+  :root:root:root #panelProfile .pf2 .pf2Badge .pfPlanBtn .pfPlanBar{height:4px!important}
+}
