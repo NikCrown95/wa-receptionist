@@ -149,20 +149,14 @@
 .np-ic.k{background:linear-gradient(145deg,rgba(229,160,40,.30),rgba(229,160,40,.10));color:#E5A028}
 .np-tx em{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-style:normal;font-weight:700;font-size:.78rem;color:var(--accent-ink)}
 
-/* ===== Smartphone, vista calendario: la data e' una card a due righe =====
-   Sopra, in piccolo, il giorno della settimana (Giorno) o l'anno (Settimana, Mese); sotto, in grande, il resto.
-   La card e' alta 52px e centrata rispetto ai pulsanti di destra (campanella, menu, Lia: alti 40px, a 12px dal bordo). */
+/* Smartphone, vista calendario: la data ha la dimensione giusta fin dal primo istante (CSS).
+   La larghezza disponibile e' quella tra il bordo sinistro e i pulsanti; la dimensione e' tarata sulle date normali (circa 18 caratteri); se una data e' piu' lunga recap.js la riduce solo quanto serve. */
 @media(max-width:699px){
-  :root:root:root body.lia-sec-cal #calSubApp .controls{padding-top:calc(68px + env(safe-area-inset-top,0px))!important}
-  :root:root:root body.lia-sec-cal #calSubApp .controls .range{top:calc(6px + env(safe-area-inset-top,0px))!important;height:52px!important;padding:0 14px!important;line-height:1!important;
-    display:flex!important;flex-direction:column!important;justify-content:center!important;
-    background:var(--card);border:1px solid var(--line2,var(--line));border-radius:15px;box-shadow:0 2px 10px -6px rgba(0,0,0,.35)}
-  :root:root:root body.lia-sec-cal #calSubApp .controls .range:empty{visibility:hidden}
-  :root:root:root body.lia-sec-cal #calSubApp .controls .range .rgS,
-  :root:root:root body.lia-sec-cal #calSubApp .controls .range .rangeYear{order:-1;display:block;margin:0 0 4px;font-family:'Plus Jakarta Sans',system-ui,sans-serif!important;font-size:.62rem!important;font-weight:800!important;line-height:1!important;letter-spacing:.16em!important;text-transform:uppercase;color:var(--accent-ink)!important;white-space:nowrap}
-  :root:root:root body.lia-sec-cal #calSubApp .controls .range .rgB{display:block;min-width:0;font-size:clamp(15px,calc((100vw - 154px) / 6.4),26px)!important;font-weight:800;line-height:1.05!important;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  :root:root:root body.liaRecapOn.lia-sec-cal #calSubApp .controls .range .rgB{font-size:clamp(15px,calc((100vw - 204px) / 6.4),26px)!important}
-  /* la settimana ha un testo piu' lungo ("12 Ott \2013  18 Ott") */
-  :root:root:root body.lia-week.lia-sec-cal #calSubApp .controls .range .rgB{font-size:clamp(14px,calc((100vw - 154px) / 8.8),22px)!important}
-  :root:root:root body.liaRecapOn.lia-week.lia-sec-cal #calSubApp .controls .range .rgB{font-size:clamp(14px,calc((100vw - 204px) / 8.8),22px)!important}
+  :root:root:root body.lia-sec-cal #calSubApp .controls .range{font-size:clamp(15px,calc((100vw - 126px) / 9.2),30px)!important}
+  :root:root:root body.liaRecapOn.lia-sec-cal #calSubApp .controls .range{font-size:clamp(15px,calc((100vw - 176px) / 9.2),30px)!important}
+}
+
+/* Smartphone, vista calendario: la data e' centrata in altezza rispetto ai pulsanti (campanella, menu, Lia: alti 40px, a 12px dal bordo) */
+@media(max-width:699px){
+  :root:root:root body.lia-sec-cal #calSubApp .controls .range{top:calc(12px + env(safe-area-inset-top,0px))!important;height:40px!important;line-height:40px!important}
 }
