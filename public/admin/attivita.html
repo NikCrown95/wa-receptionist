@@ -306,6 +306,12 @@ nav a.on{background:var(--card2);color:var(--ink);}
     var rf = card('Referral', 'Da quale link e\' arrivata e chi ha portato lei.');
     var rfl = el('div','list');
     var R = d.referral;
+    if (R && R.code) {
+      var lc = el('div','li'); var lcd = el('div'); lcd.appendChild(document.createTextNode('Codice invito: ' + R.code));
+      lcd.appendChild(el('small', null, R.link || '')); lc.appendChild(lcd);
+      var cb = el('button','btn','Copia'); cb.type = 'button'; cb.addEventListener('click', function(){ try { navigator.clipboard.writeText(R.code); cb.textContent = 'Copiato'; setTimeout(function(){ cb.textContent = 'Copia'; }, 1500); } catch (e) {} });
+      lc.appendChild(cb); rfl.appendChild(lc);
+    }
     if (!R || (!R.from && !R.invited)) rfl.appendChild(el('div','empty','Non e\' arrivata da un link e non ha ancora invitato nessuno.'));
     if (R && R.from){
       var li1 = el('div','li'); var lf1 = el('div'); lf1.appendChild(document.createTextNode('Registrata tramite il link di ' + R.from.name));

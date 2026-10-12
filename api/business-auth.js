@@ -332,6 +332,14 @@ module.exports = async (req, res) => {
     const signupOpen = process.env.SIGNUP_ENABLED === "1";
     if (req.method === "GET" && action === "signup-status") return res.status(200).json({ open: signupOpen });
 
+    // "Hai un codice invito?": dice solo se il codice esiste e chi invita (con un limite di richieste per non provarli a tappeto)
+    if (req.method === "GET" && action === "ref-check") {
+      if (await isLocked("refcheck-ip:" + ip)) return res.status(429).json({ error: TOO_MANY });
+      await recordHit("refcheck-ip:" + ip, 40, 10);
+      const found = await require("../lib/referral.js").lookupCode(String((req.query && req.query.code) || ""), async function (path) { const r = await sb("GET", path); return r.ok && Array.isArray(r.data) ? r.data : []; });
+      return res.status(200).json(found ? { valid: true, name: found.name } : { valid: false });
+    }
+
     if (req.method === "POST" && action === "signup") {
       if (!signupOpen) return res.status(403).json({ error: "Le registrazioni aprono a breve." });
       if (body.hp) return res.status(200).json({ ok: true }); // campo trappola per i bot

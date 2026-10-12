@@ -63,6 +63,10 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
         <option value="altro">Altro</option>
       </select>
 
+      <label for="refcode">Hai un codice invito? (facoltativo)</label>
+      <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <p class="hint" id="refmsg"></p>
+
       <label for="phone">Telefono</label>
       <input class="inp" id="phone" type="tel" autocomplete="tel" inputmode="tel" required>
 
@@ -106,7 +110,24 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
   var fromUrl = clean(new URLSearchParams(location.search).get('ref'));
   if (fromUrl) saveRef(fromUrl);
   var ref = fromUrl || loadRef();
-  if (ref) document.getElementById('invite').hidden = false;
+  var refInp = document.getElementById('refcode'), refMsg = document.getElementById('refmsg'), refTimer = null;
+  function checkRef() {
+    ref = clean(refInp.value);
+    document.getElementById('invite').hidden = !ref;
+    refMsg.textContent = '';
+    if (ref.length < 3) return;
+    clearTimeout(refTimer);
+    refTimer = setTimeout(function () {
+      var asked = ref;
+      fetch('/api/business-auth?action=ref-check&code=' + encodeURIComponent(asked)).then(function (r) { return r.json(); }).then(function (j) {
+        if (asked !== ref) return;
+        refMsg.textContent = j && j.valid ? 'Invitato da ' + j.name + '.' : 'Codice non trovato: puoi comunque registrarti.';
+      }).catch(function () {});
+    }, 350);
+  }
+  refInp.value = ref;
+  refInp.addEventListener('input', function () { saveRef(clean(refInp.value)); checkRef(); });
+  if (ref) { document.getElementById('invite').hidden = false; checkRef(); }
 
   var form = document.getElementById('form'), err = document.getElementById('err'), go = document.getElementById('go');
   function show(msg) { err.textContent = msg; err.style.display = 'block'; }
