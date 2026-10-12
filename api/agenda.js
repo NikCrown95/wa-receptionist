@@ -262,22 +262,21 @@ module.exports = async (req, res) => {
 
   // 1) La pagina
   if (!wantsData) {
-    // Le palestre hanno una pagina tutta loro (iscritti, abbonamenti, corsi): chi arriva da qui ci viene portato.
+    // Le palestre usano la stessa dashboard con le voci adattate (iscritti, abbonamenti, lezioni): si aggiunge solo lo script dedicato.
+    let html = PAGE;
     try {
       const gt = String(q.t || "").trim();
       if (/^[a-f0-9]{32,128}$/.test(gt) && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
         const gr = await sb("GET", "businesses?agenda_token=eq." + gt + "&active=eq.true&select=business_type&limit=1");
         if (gr.ok && Array.isArray(gr.data) && gr.data[0] && gr.data[0].business_type === "palestra") {
-          res.statusCode = 302;
-          res.setHeader("Location", "/api/palestra?t=" + gt);
-          return res.end();
+          html = PAGE.replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=1"><body>').replace("</body>", '<script src="/gym/gym.js?v=1"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Content-Length", Buffer.byteLength(PAGE, "utf8"));
+    res.setHeader("Content-Length", Buffer.byteLength(html, "utf8"));
     res.statusCode = 200;
-    return res.end(PAGE);
+    return res.end(html);
   }
 
   try {
@@ -365,7 +364,7 @@ module.exports = async (req, res) => {
       const snapshot = {
         name: biz.name, type: biz.business_type || null, address: biz.address || null,
         phone: biz.public_phone || null, instagram: biz.public_instagram || null, facebook: biz.public_facebook || null, tagline: biz.public_tagline || null,
-        booking_link: biz.public_link || biz.booking_url || (pubBase + "/api/booking?b=" + encodeURIComponent(biz.slug)),
+        booking_link: biz.public_link || biz.booking_url || (pubBase + (biz.business_type === "palestra" ? "/palestra/" : "/api/booking?b=") + encodeURIComponent(biz.slug)),
         hours: ((hres && hres.opening_hours) || []).map(function (h) { return { weekday: h.weekday, opens: String(h.opens).slice(0, 5), closes: String(h.closes).slice(0, 5) }; }),
       };
       const ins = await sb("POST", "shop_orders", { business_id: biz.id, business_name: biz.name, items: items, total_eur: total, shipping: shipping, snapshot: snapshot }, "return=representation");
@@ -415,7 +414,7 @@ module.exports = async (req, res) => {
           team_mode: biz.team_mode === "team" ? "team" : "solo",
           staff_choice: biz.staff_choice === true,
           capacity_hours: capacityHours(biz),
-          business: { name: biz.name, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: biz.public_link || biz.booking_url || ((req.headers["x-forwarded-proto"] || "https").split(",")[0] + "://" + (req.headers["x-forwarded-host"] || req.headers.host) + "/api/chat?b=" + encodeURIComponent(biz.slug)), telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
+          business: { name: biz.name, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: biz.public_link || biz.booking_url || ((req.headers["x-forwarded-proto"] || "https").split(",")[0] + "://" + (req.headers["x-forwarded-host"] || req.headers.host) + (biz.business_type === "palestra" ? "/palestra/" : "/api/chat?b=") + encodeURIComponent(biz.slug)), telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
           services: biz.services.filter(s => !isPackage(s)).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place })),
           packages: biz.services.filter(isPackage).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, price_eur:s.price_eur, service_ids:s.package_service_ids })),
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),

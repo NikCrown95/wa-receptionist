@@ -1,0 +1,83 @@
+/* Modalità palestra della dashboard di Lia: stessi colori (variabili del tema chiaro/scuro), pannelli sostituiti */
+.gym #fabNew,.gym #liaRecapBtn,.gym #panelCal>:not(.gx),.gym #panelClients>:not(.gx),.gym #panelStats>:not(.gx){display:none!important}
+.gx{flex:1;min-height:0;width:100%;max-width:760px;margin:0 auto;padding:12px 16px calc(110px + env(safe-area-inset-bottom,0px));color:var(--ink);font-family:inherit}
+.gx *{box-sizing:border-box}
+.gxBar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.gxTtl{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.15}
+.gxTtl span{color:var(--teal,var(--accent-ink))}
+.gxSeg{display:flex;padding:3px;border-radius:14px;border:1px solid var(--line2);background:var(--card)}
+.gxSeg button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:.84rem;padding:8px 14px;border-radius:11px;cursor:pointer}
+.gxSeg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent,#fff)}
+.gxNav{display:flex;align-items:center;gap:8px}
+.gxArr{width:38px;height:38px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.gxToday{min-height:38px;padding:0 14px;border-radius:12px;border:1.5px solid var(--accent);background:transparent;color:var(--accent-ink);font:inherit;font-weight:700;font-size:.84rem;cursor:pointer}
+.gxCard{padding:13px;border:1px solid var(--line);border-radius:18px;background:var(--card);margin-bottom:9px}
+.gxCard.tap{cursor:pointer}
+.gxRow{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.gxRow>div{min-width:0}
+.gxCard b{font-size:.98rem}
+.gxM{color:var(--muted);font-size:.82rem}
+.gxChip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.gxChip.ok{background:color-mix(in srgb,var(--live,#22E66B) 18%,transparent);color:var(--live,#22E66B)}
+.gxChip.warn{background:color-mix(in srgb,#F2B84B 20%,transparent);color:#E0A23A}
+.gxChip.bad{background:color-mix(in srgb,var(--danger,#FF6B6B) 18%,transparent);color:var(--danger,#FF6B6B)}
+.gxChip.none{background:var(--card2);color:var(--muted)}
+.gxBar2{height:6px;border-radius:9px;background:var(--track,rgba(255,255,255,.12));margin:9px 0 4px;overflow:hidden}
+.gxBar2 i{display:block;height:100%;background:var(--teal,var(--accent));border-radius:9px}
+.gxBar2 i.f{background:var(--danger,#FF6B6B)}
+.gxAt{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:.9rem}
+.gxAt small{color:var(--muted)}
+.gxActs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.gxBtn{min-height:42px;padding:0 16px;border-radius:13px;border:0;background:var(--accent-grad,var(--accent));color:var(--on-accent,#fff);font:inherit;font-weight:700;cursor:pointer}
+.gxBtn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.gxBtn.danger{background:transparent;color:var(--danger,#FF6B6B);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--danger,#FF6B6B) 45%,transparent)}
+.gxBtn.sm{min-height:36px;padding:0 13px;font-size:.84rem}
+.gxBtn.block{width:100%}
+.gxBtn[disabled]{opacity:.5;cursor:not-allowed}
+.gxFab{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;border:0;background:var(--accent-grad,var(--accent));color:#fff;display:grid;place-items:center;box-shadow:0 10px 26px rgba(0,0,0,.35);z-index:14;cursor:pointer}
+.gxFab[hidden]{display:none}
+.gxLb{margin:16px 0 7px;font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.gxEmpty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:16px}
+.gxFl{display:flex;gap:7px;margin:4px 0 10px;overflow-x:auto;scrollbar-width:none}
+.gxFl::-webkit-scrollbar{display:none}
+.gxCp{flex:none;white-space:nowrap;padding:8px 13px;border-radius:99px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.gxCp[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.gxSearch{width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;font-size:16px;margin-bottom:8px}
+.gxMr{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--line);border-radius:16px;background:var(--card);margin-bottom:7px;cursor:pointer;width:100%;text-align:left;color:inherit;font:inherit}
+.gxAv{flex:none;width:38px;height:38px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-size:.76rem;font-weight:800;color:var(--accent-ink)}
+.gxTx{flex:1;min-width:0}.gxTx b{display:block;font-size:.94rem}.gxTx small{display:block;color:var(--muted);font-size:.8rem}
+.gxTiles{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.gxTile{padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+.gxTile b{display:block;font-size:1.6rem;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}.gxTile span{color:var(--muted);font-size:.8rem}
+.gxHb{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:center;margin-bottom:9px;font-size:.88rem}
+.gxHb .t{height:10px;border-radius:9px;background:var(--track,rgba(255,255,255,.12));overflow:hidden;margin-top:5px}.gxHb .t i{display:block;height:100%;background:var(--teal,var(--accent));border-radius:9px}
+.gxHb em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.gxWk{display:grid;gap:4px;font-size:.66rem;color:var(--muted);overflow-x:auto}
+.gxWk .h{text-align:center;text-transform:uppercase;letter-spacing:.05em;padding-bottom:3px;font-weight:700}
+.gxWk .h.today{color:var(--accent-ink)}
+.gxWk .tm{padding-top:8px;font-variant-numeric:tabular-nums}
+.gxWk .b{border-radius:9px;padding:6px 3px;text-align:center;font-weight:700;font-size:.62rem;line-height:1.2;color:#04141A;cursor:pointer;border:0;font-family:inherit;min-height:42px}
+.gxWk .b.x{opacity:.4;text-decoration:line-through}
+.gxWk .b.c-corsi{background:#5CCFD3}.gxWk .b.c-circuiti{background:#F2B84B}.gxWk .b.c-hyrox{background:#A28BFF}.gxWk .b.c-altro{background:#FF9A8A}
+.gxShade{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center}
+.gxSheet{width:100%;max-width:540px;max-height:92%;overflow:auto;background:var(--card2);border-radius:26px 26px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 60px rgba(0,0,0,.4);color:var(--ink)}
+.gxSheet h3{margin:0 0 12px;font-size:1.1rem;letter-spacing:-.01em}
+.gxSheet p{color:var(--muted);font-size:.88rem;margin:0 0 12px}
+.gxF{display:block;margin-bottom:11px}
+.gxF>span{display:block;color:var(--muted);font-size:.76rem;margin-bottom:4px}
+.gxF input,.gxF select,.gxF textarea{width:100%;min-height:46px;padding:10px 13px;border:1px solid var(--line2);border-radius:13px;background:var(--bg2);color:var(--ink);font:inherit;font-size:16px}
+.gxF textarea{min-height:72px}
+.gxTwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gxDh{margin:14px 0 6px;font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.gxLs{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:6px}
+.gxWhy{margin-top:9px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--danger,#FF6B6B) 16%,transparent);color:var(--ink);font-size:.86rem;border:1px solid color-mix(in srgb,var(--danger,#FF6B6B) 40%,transparent)}
+.gxChips{display:flex;flex-wrap:wrap;gap:7px}
+.gxToast{position:fixed;left:16px;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));max-width:520px;margin:0 auto;padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line2);box-shadow:0 14px 40px -12px #000;z-index:9100;font-size:.9rem;color:var(--ink)}
+.gxToast.bad{border-color:var(--danger,#FF6B6B)}
+.gxToast.ok{border-color:var(--live,#22E66B)}
+/* righe nelle Impostazioni: stesse del resto, icone a gradiente */
+#panelOther .stIc.gxI{color:#fff}
+
+/* nel Calendario l'intestazione di Lia è compatta: campanella e menu stanno in alto a destra, quindi il titolo lascia loro lo spazio */
+.gxTop{margin:0 0 12px}
+@media(max-width:699px){body.lia-sec-cal .gxTop{padding-right:104px;padding-top:calc(6px + env(safe-area-inset-top,0px));min-height:46px}}
