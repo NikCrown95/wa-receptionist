@@ -31,6 +31,9 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
 .ok{display:none;text-align:center}
 .ok h1{margin-bottom:10px}
 .hint{margin-top:6px;font-size:.8rem;color:var(--muted)}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:.86rem;line-height:1.45;color:var(--muted)}
+.chk input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--accent)}
+.chk a{color:var(--accent)}
 .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
 .foot{margin-top:18px;text-align:center;font-size:.88rem;color:var(--muted)}
 .foot a{color:var(--accent)}
@@ -71,6 +74,8 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
 
       <input class="hp" id="hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
 
+      <label class="chk"><input type="checkbox" id="terms" required><span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">Informativa privacy</a> e accetto i <a href="/termini" target="_blank" rel="noopener">Termini di servizio</a>, compresa la nomina di Prenolia a responsabile del trattamento dei dati dei miei clienti.</span></label>
+
       <button class="btn" id="go" type="submit">Crea il mio account</button>
       <div class="err" id="err" role="alert"></div>
     </form>
@@ -81,6 +86,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
     </div>
   </div>
   <p class="foot">Hai già un account? <a href="/login.html">Accedi</a></p>
+  <p class="foot"><a href="/privacy">Privacy</a> · <a href="/termini">Termini</a></p>
 </div>
 
 <script>
@@ -106,6 +112,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     err.style.display = 'none';
+    if (!document.getElementById('terms').checked) { show("Per continuare devi accettare l'Informativa privacy e i Termini di servizio."); return; }
     go.disabled = true; go.textContent = 'Un attimo…';
     fetch('/api/business-auth?action=signup', {
       method: 'POST',
@@ -117,6 +124,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
         email: document.getElementById('email').value,
         password: document.getElementById('pw').value,
         hp: document.getElementById('hp').value,
+        accept_terms: true,
         ref: ref
       })
     }).then(function (r) {

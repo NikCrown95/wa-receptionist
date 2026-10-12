@@ -60,5 +60,19 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/privacy",
+      "destination": "/api/legal?doc=privacy"
+    },
+    {
+      "source": "/termini",
+      "destination": "/api/legal?doc=termini"
+    },
+    {
+      "source": "/privacy/:slug",
+      "destination": "/api/legal?doc=cliente&b=:slug"
+    }
   ]
 }

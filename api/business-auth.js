@@ -344,6 +344,7 @@ module.exports = async (req, res) => {
       if (name.length < 2 || name.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività (da 2 a 80 caratteri)." });
       if (!EMAIL_RE.test(email) || email.length > 200) return res.status(400).json({ error: "Controlla l'indirizzo email." });
       if (!/^[+\d][\d\s().-]{4,29}$/.test(phone)) return res.status(400).json({ error: "Controlla il numero di telefono." });
+      if (body.accept_terms !== true) return res.status(400).json({ error: "Per registrarti devi accettare l'Informativa privacy e i Termini di servizio." });
       const problem = passwordProblem(password);
       if (problem) return res.status(400).json({ error: problem });
       if ((await isLocked("signup-ip:" + ip)) || (await isLocked("signup:" + email))) return res.status(429).json({ error: TOO_MANY });
@@ -359,6 +360,7 @@ module.exports = async (req, res) => {
       const slug = slugify(name) + "-" + crypto.randomBytes(2).toString("hex");
       const r = await rpc("signup_start", { p_email: email, p_password: password, p_name: name, p_slug: slug, p_type: type, p_phone: phone, p_token_hash: sha(raw), p_expires: new Date(Date.now() + CONFIRM_MS).toISOString(), p_ref: String(body.ref || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || null });
       if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
+      await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch(() => {});
       const m = confirmMail(name, PUBLIC_URL + "/conferma.html?token=" + raw);
       await sendMail(email, "Conferma la tua email per iniziare con Prenolia", m.html, m.text);
       return res.status(200).json({ ok: true });
