@@ -1149,7 +1149,7 @@ async function overviewData() {
 
 // ============================ RICHIESTE DEI CLIENTI ============================
 // Le scrive api/agenda.js (azione support_request) nella tabella support_requests.
-const REQ_KINDS = ['support', 'plan_change', 'subscription_cancel', 'account_delete', 'whatsapp_activation'];
+const REQ_KINDS = ['support', 'plan_change', 'subscription_cancel', 'account_delete', 'whatsapp_activation', 'feedback'];
 const REQ_STATUS = ['new', 'in_progress', 'done'];
 
 async function requestCounts() {

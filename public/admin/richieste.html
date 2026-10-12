@@ -116,6 +116,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 .kind.subscription_cancel{background:var(--amber-soft);color:var(--amber)}
 .kind.account_delete{background:var(--red-soft);color:var(--red)}
 .kind.whatsapp_activation{background:var(--green-soft);color:var(--green)}
+.kind.feedback{background:var(--accent-soft);color:var(--accent-ink)}
 .st{display:inline-block;padding:3px 11px;border-radius:999px;font-size:.8rem;font-weight:600;white-space:nowrap}
 .st.new{background:var(--green-soft);color:var(--green)}
 .st.in_progress{background:var(--amber-soft);color:var(--amber)}
@@ -190,6 +191,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
       <option value="subscription_cancel">Disdetta</option>
       <option value="account_delete">Eliminazione account</option>
       <option value="whatsapp_activation">Attivazione WhatsApp</option>
+      <option value="feedback">Feedback</option>
     </select>
     <button class="btn ghost" id="reload" type="button">Aggiorna</button>
   </div>
@@ -200,10 +202,10 @@ nav a.on{background:var(--card2);color:var(--ink);}
 
 <script>
 (function(){
-  var KIND = { support:'Assistenza', plan_change:'Cambio piano', subscription_cancel:'Disdetta', account_delete:'Eliminazione account', whatsapp_activation:'Attivazione WhatsApp' };
+  var KIND = { support:'Assistenza', plan_change:'Cambio piano', subscription_cancel:'Disdetta', account_delete:'Eliminazione account', whatsapp_activation:'Attivazione WhatsApp', feedback:'Feedback' };
   var STATUS = { new:'Nuova', in_progress:'In lavorazione', done:'Fatta' };
-  var TOPIC = { domanda:'Domanda', problema:'Qualcosa non funziona', fatturazione:'Pagamenti e fatture', suggerimento:'Suggerimento' };
-  var DEFAULT_TEXT = { plan_change:'Chiede di cambiare piano.', subscription_cancel:'Chiede di disdire l\u2019abbonamento.', account_delete:'Chiede di eliminare l\u2019account.', whatsapp_activation:'Chiede l\u2019attivazione di WhatsApp.', support:'(nessun messaggio)' };
+  var TOPIC = { domanda:'Domanda', problema:'Qualcosa non funziona', fatturazione:'Pagamenti e fatture', suggerimento:'Suggerimento', idea:'Un\u2019idea', parere:'Un parere' };
+  var DEFAULT_TEXT = { feedback:'Solo il voto, nessun messaggio.', plan_change:'Chiede di cambiare piano.', subscription_cancel:'Chiede di disdire l\u2019abbonamento.', account_delete:'Chiede di eliminare l\u2019account.', whatsapp_activation:'Chiede l\u2019attivazione di WhatsApp.', support:'(nessun messaggio)' };
   var MONTHS = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
   var state = { all: [], counts: { new:0, in_progress:0, done:0 }, owner: false, loaded: false };
 
@@ -238,6 +240,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     if (r.kind === 'plan_change' && m.from && m.to) t.push((m.from === 'premium' ? 'Premium' : 'Base') + ' \u2192 ' + (m.to === 'premium' ? 'Premium' : 'Base'));
     if (r.kind === 'subscription_cancel' && m.period_end) t.push('Il piano scade il ' + dateShort(m.period_end));
     if (r.kind === 'subscription_cancel' && m.plan) t.push('Piano ' + (m.plan === 'premium' ? 'Premium' : 'Base'));
+    if (r.kind === 'feedback' && m.rating) { var rt = Math.max(1, Math.min(5, Number(m.rating) || 0)); t.push('\u2605'.repeat(rt) + '\u2606'.repeat(5 - rt) + ' ' + rt + '/5'); }
     return t.join(' \u00b7 ');
   }
 
