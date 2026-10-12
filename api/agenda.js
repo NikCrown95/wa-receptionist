@@ -262,6 +262,18 @@ module.exports = async (req, res) => {
 
   // 1) La pagina
   if (!wantsData) {
+    // Le palestre hanno una pagina tutta loro (iscritti, abbonamenti, corsi): chi arriva da qui ci viene portato.
+    try {
+      const gt = String(q.t || "").trim();
+      if (/^[a-f0-9]{32,128}$/.test(gt) && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+        const gr = await sb("GET", "businesses?agenda_token=eq." + gt + "&active=eq.true&select=business_type&limit=1");
+        if (gr.ok && Array.isArray(gr.data) && gr.data[0] && gr.data[0].business_type === "palestra") {
+          res.statusCode = 302;
+          res.setHeader("Location", "/api/palestra?t=" + gt);
+          return res.end();
+        }
+      }
+    } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Content-Length", Buffer.byteLength(PAGE, "utf8"));
     res.statusCode = 200;

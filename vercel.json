@@ -73,6 +73,10 @@
     {
       "source": "/privacy/:slug",
       "destination": "/api/legal?doc=cliente&b=:slug"
+    },
+    {
+      "source": "/palestra/:slug",
+      "destination": "/api/palestra?b=:slug"
     }
   ]
 }
