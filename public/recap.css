@@ -169,3 +169,6 @@
 @media(max-width:699px){
   :root:root:root body.lia-sec-cal #calSubApp .controls .range{white-space:nowrap!important}
 }
+
+/* Pacchetti: solo parrucchieri, barbieri, centri estetici */
+body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-on) #panelOther .stPage[data-st="combos"]{display:none!important}
