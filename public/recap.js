@@ -234,7 +234,9 @@
     var biz = document.getElementById("businessName");
     if (!mq || !mq.matches) { reset(range); reset(biz); return; }
     var inCal = document.body.classList.contains("lia-sec-cal");
-    reset(range); /* la data e' dimensionata solo da CSS (recap.css), cosi' non c'e' nessun salto dopo il caricamento */
+    /* la dimensione di partenza e' quella del CSS (stessa formula); si riduce solo se la data e' troppo lunga */
+    if (inCal) { var rr = document.body.classList.contains("liaRecapOn") ? 176 : 126; fit(range, Math.min(30, Math.max(MIN, (window.innerWidth - rr) / 10))); }
+    else reset(range);
     if (!inCal && biz && biz.offsetParent !== null) fit(biz, 22.4);
   }
   function queue() { if (queued) return; queued = true; requestAnimationFrame(run); }
