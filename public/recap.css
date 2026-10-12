@@ -160,3 +160,12 @@
 @media(max-width:699px){
   :root:root:root body.lia-sec-cal #calSubApp .controls .range{top:calc(12px + env(safe-area-inset-top,0px))!important;height:40px!important;line-height:40px!important}
 }
+
+/* Data del calendario: il giorno della settimana (vista Giorno) e l'anno (Settimana, Mese) in teal, il resto resta bianco */
+:root:root #calSubApp .controls .range .rgW,
+:root:root #calSubApp .controls .range .rangeYear{color:var(--accent-ink)!important}
+
+/* Smartphone, vista calendario: la data sta sempre su una riga (una vecchia regola con !important la mandava a capo e la seconda riga veniva tagliata) */
+@media(max-width:699px){
+  :root:root:root body.lia-sec-cal #calSubApp .controls .range{white-space:nowrap!important}
+}

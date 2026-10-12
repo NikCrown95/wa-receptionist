@@ -212,7 +212,7 @@
 (function () {
   "use strict";
   var mq = window.matchMedia ? window.matchMedia("(max-width:699px)") : null;
-  var MIN = 15, queued = false, seen = new WeakMap();
+  var MIN = 13, queued = false, seen = new WeakMap();
 
   function fit(el, maxPx) {
     if (!el) return;
