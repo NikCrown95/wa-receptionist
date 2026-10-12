@@ -84,17 +84,17 @@
   // ---------- pannelli ----------
   var pCal = document.getElementById('panelCal'), pCli = document.getElementById('panelClients'), pSt = document.getElementById('panelStats');
   var xCal = el('div', 'gx'), xMem = el('div', 'gx'), xStat = el('div', 'gx');
-  if (pCal) pCal.appendChild(xCal); if (pCli) pCli.appendChild(xMem); if (pSt) pSt.appendChild(xStat);
+  if (pCli) pCli.appendChild(xMem); if (pSt) pSt.appendChild(xStat);
   var fab = el('button', 'gxFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Aggiungi'); fab.innerHTML = ic('plus', 26); document.body.appendChild(fab);
-  fab.addEventListener('click', function () { if (S.section === 'cal') addAttPick(); else if (S.section === 'clients') memberForm(); });
+  fab.addEventListener('click', function () { if (S.section === 'clients') memberForm(); });
 
   function showSection(w) {
-    fab.hidden = !(w === 'cal' || w === 'clients');
-    if (w === 'cal') renderCal(); else if (w === 'clients') renderMem(); else if (w === 'stats') renderStat();
+    fab.hidden = w !== 'clients';
+    if (w === 'clients') renderMem(); else if (w === 'stats') renderStat();
     if (S.data && w !== 'cal' && w !== 'clients' && w !== 'stats') return;
     if (!S.data) load().then(function () { renderAll(); }).catch(function (e) { var x = w === 'clients' ? xMem : w === 'stats' ? xStat : xCal; x.textContent = ''; x.appendChild(el('div', 'gxWhy', e.message)); });
   }
-  function renderAll() { if (S.section === 'cal') renderCal(); if (S.section === 'clients') renderMem(); if (S.section === 'stats') renderStat(); }
+  function renderAll() { if (S.section === 'clients') renderMem(); if (S.section === 'stats') renderStat(); }
 
   // ---------- Lezioni ----------
   function renderCal() {
@@ -190,7 +190,7 @@
       if (!opts.length) { w.appendChild(el('div', 'gxEmpty', 'Non ci sono altri iscritti da aggiungere.')); return; }
       var sl = sel(opts); w.appendChild(field('Iscritto', sl));
       var msg = el('div'); w.appendChild(msg);
-      w.appendChild(btn('Aggiungi', 'block', function () { msg.textContent = ''; msg.className = ''; api({ action: 'booking_add', member_id: sl.value, schedule_id: s.schedule_id, date: date }).then(function () { toast('Aggiunto.', 'ok'); close(); S.sessions = null; S.week = null; renderCal(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; }); }));
+      w.appendChild(btn('Aggiungi', 'block', function () { msg.textContent = ''; msg.className = ''; api({ action: 'booking_add', member_id: sl.value, schedule_id: s.schedule_id, date: date }).then(function () { toast('Aggiunto.', 'ok'); close(); refreshCal(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; }); }));
     });
   }
   function addAttPick() {
@@ -211,9 +211,45 @@
     sheet('Annulla ' + s.course.name + ' (' + s.time + ')', function (w, close) {
       w.appendChild(el('p', null, 'Chi è già prenotato viene tolto e gli ingressi tornano disponibili. Avvisa tu le persone: per ora non partono messaggi in automatico.'));
       var r = inp('text', '', 'Motivo (facoltativo)'); w.appendChild(field('Motivo', r));
-      w.appendChild(btn('Annulla la lezione', 'danger block', function () { act({ action: 'session_cancel', schedule_id: s.schedule_id, date: date, reason: r.value }, 'Lezione annullata.').then(function () { close(); S.sessions = null; S.week = null; renderCal(); }); }));
+      w.appendChild(btn('Annulla la lezione', 'danger block', function () { act({ action: 'session_cancel', schedule_id: s.schedule_id, date: date, reason: r.value }, 'Lezione annullata.').then(function () { close(); refreshCal(); }); }));
     });
   }
+
+
+  // ---------- Dettaglio lezione: si apre toccando una lezione nel calendario di Lia ----------
+  function refreshCal() {
+    try { for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && k.indexOf('lia:month:v1:') === 0) localStorage.removeItem(k); } } catch (e) {}
+    location.reload();
+  }
+  window.liaGymOpen = function (e) {
+    var p = String(e.id).split(':'), sid = p[1], date = p[2];
+    var go = function () {
+      api(null, API + '&day=' + date).then(function (j) {
+        var s = (j.sessions || []).filter(function (x) { return x.schedule_id === sid; })[0];
+        if (!s) { toast('Lezione non trovata.', 'bad'); return; }
+        sheet(s.time + ' · ' + s.course.name, function (w, close) {
+          w.appendChild(el('p', null, dlabel(date) + ' · ' + cat(s.course.category) + ' · ' + s.duration_min + ' min'));
+          var top = el('div', 'gxRow'); top.appendChild(el('b', null, s.cancelled ? 'Lezione annullata' : 'Prenotati'));
+          top.appendChild(el('span', 'gxChip ' + (s.cancelled ? 'bad' : s.taken >= s.capacity ? 'warn' : 'ok'), s.taken + ' / ' + s.capacity)); w.appendChild(top);
+          var bar = el('div', 'gxBar2'), i = el('i', s.taken >= s.capacity ? 'f' : ''); i.style.width = Math.min(100, Math.round(s.taken / s.capacity * 100)) + '%'; bar.appendChild(i); w.appendChild(bar);
+          if (s.cancelled && s.cancel_reason) w.appendChild(el('div', 'gxM', s.cancel_reason));
+          if (!s.attendees.length) w.appendChild(el('div', 'gxM', 'Nessuno prenotato.'));
+          s.attendees.forEach(function (a) {
+            var row = el('div', 'gxAt'), nm = el('div'); nm.appendChild(el('span', null, a.name)); nm.appendChild(el('small', null, ' ' + a.phone)); row.appendChild(nm);
+            row.appendChild(btn('Togli', 'ghost sm', function () { confirmBar(w, 'Togliere ' + a.name + ' da questa lezione? Se aveva usato un ingresso, gli torna.', function () { act({ action: 'booking_cancel', booking_id: a.booking_id, member_id: a.member_id }, 'Tolto.').then(function () { refreshCal(); }); }); }));
+            w.appendChild(row);
+          });
+          var ac = el('div', 'gxActs');
+          if (!s.cancelled) {
+            ac.appendChild(btn('Aggiungi iscritto', 'ghost sm', function () { close(); addAtt(s, date); }));
+            ac.appendChild(btn('Annulla lezione', 'danger sm', function () { close(); annulla(s, date); }));
+          } else ac.appendChild(btn('Riattiva lezione', 'ghost sm', function () { act({ action: 'session_restore', schedule_id: s.schedule_id, date: date }, 'Lezione riattivata.').then(function () { refreshCal(); }); }));
+          w.appendChild(ac);
+        });
+      }).catch(function (er) { toast(er.message, 'bad'); });
+    };
+    if (S.data) go(); else load().then(go).catch(function (er) { toast(er.message, 'bad'); });
+  };
 
   // ---------- Iscritti ----------
   function renderMem() {

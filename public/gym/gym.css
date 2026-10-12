@@ -1,5 +1,5 @@
 /* Modalità palestra della dashboard di Lia: stessi colori (variabili del tema chiaro/scuro), pannelli sostituiti */
-.gym #fabNew,.gym #liaRecapBtn,.gym #panelCal>:not(.gx),.gym #panelClients>:not(.gx),.gym #panelStats>:not(.gx){display:none!important}
+.gym #fabNew,.gym #liaRecapBtn,.gym #panelClients>:not(.gx),.gym #panelStats>:not(.gx){display:none!important}
 .gx{flex:1;min-height:0;width:100%;max-width:760px;margin:0 auto;padding:12px 16px calc(110px + env(safe-area-inset-bottom,0px));color:var(--ink);font-family:inherit}
 .gx *{box-sizing:border-box}
 .gxBar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}

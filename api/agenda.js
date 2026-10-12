@@ -74,7 +74,7 @@ function addDays(dateStr, n) {
 
 async function getBusinessByToken(token) {
   if (!/^[a-f0-9]{32,128}$/.test(token)) return null;
-  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,timezone,team_mode,created_at");
+  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,timezone,team_mode,created_at,business_type");
   if (!r.ok || !Array.isArray(r.data) || !r.data.length) return null;
   return r.data[0];
 }
@@ -269,7 +269,7 @@ module.exports = async (req, res) => {
       if (/^[a-f0-9]{32,128}$/.test(gt) && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
         const gr = await sb("GET", "businesses?agenda_token=eq." + gt + "&active=eq.true&select=business_type&limit=1");
         if (gr.ok && Array.isArray(gr.data) && gr.data[0] && gr.data[0].business_type === "palestra") {
-          html = PAGE.replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=1"><body>').replace("</body>", '<script src="/gym/gym.js?v=1"></script></body>');
+          html = PAGE.replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=1"><body>').replace("</body>", '<script src="/gym/gym.js?v=1"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }
@@ -1157,6 +1157,10 @@ module.exports = async (req, res) => {
         "&select=id,starts_at,ends_at,customer_name,customer_phone,customer_address,notes,services(name),resources(name)"
     );
     if (!r.ok || !Array.isArray(r.data)) return res.status(500).json({ error: "Errore nella lettura dell'agenda" });
+    // Palestra: nel calendario compaiono le lezioni al posto degli appuntamenti
+    if (biz.business_type === "palestra") {
+      try { r.data = await require("../lib/palestra.js").calendarAppointments(biz, date, days); } catch (e) { console.error("Lezioni in calendario non lette: " + e.message); r.data = []; }
+    }
 
     // Orari di apertura, un giorno alla volta, per calcolare gli spazi liberi in agenda ("+ Aggiungi")
     // Convertiti già in UTC (invece di lasciarli come "09:00" testuale), così il browser del titolare
