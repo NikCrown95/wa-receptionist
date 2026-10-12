@@ -140,6 +140,7 @@ const TYPE_LABEL = {
   parrucchiere: 'Parrucchiere',
   barbiere: 'Barbiere',
   estetista: 'Estetista',
+  cartomante: 'Cartomanzia e astrologia',
   'personal trainer': 'Personal trainer',
   idraulico: 'Idraulico',
 };
@@ -1037,7 +1038,7 @@ async function runAction(body, ctx) {
 async function createClient(body, ctx) {
   const name = String((body && body.name) || '').trim();
   const phone = String((body && body.phone) || '').trim();
-  const KNOWN = ['parrucchiere', 'barbiere', 'estetista', 'personal trainer', 'idraulico'];
+  const KNOWN = ['parrucchiere', 'barbiere', 'estetista', 'cartomante', 'personal trainer', 'idraulico'];
   const rawType = String((body && body.type) || '').trim().toLowerCase();
   const type = KNOWN.includes(rawType) ? rawType : 'altro';
   const planKey = body && body.plan === 'ai' ? 'ai' : 'base';

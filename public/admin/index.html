@@ -309,7 +309,7 @@ window.renderDashboard = function(byTypeData, planSplitData){
     { label:'Base', value: planSplitData.base || 0, color:'var(--sec)', amt: (planSplitData.base||0) + ' clienti' }
   ]);
 
-  var TYPE_LABELS = { 'parrucchiere':'Parrucchiere', 'barbiere':'Barbiere', 'estetista':'Estetista', 'idraulico':'Idraulico', 'personal trainer':'Personal trainer' };
+  var TYPE_LABELS = { 'parrucchiere':'Parrucchiere', 'barbiere':'Barbiere', 'estetista':'Estetista', 'cartomante':'Cartomanzia e astrologia', 'idraulico':'Idraulico', 'personal trainer':'Personal trainer' };
   var TYPE_COLORS = ['var(--accent)', 'var(--sec)', 'var(--ter,#EFE9DC)', 'var(--muted)', '#6EE7A8', '#F5C15E', '#FF8A8A'];
   var typeEntries = Object.keys(byTypeData || {}).map(function(k){ return { key:k, value: byTypeData[k] }; });
   typeEntries.sort(function(a,b){ return b.value - a.value; });

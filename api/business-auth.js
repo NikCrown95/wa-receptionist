@@ -11,7 +11,7 @@ const LONG_SESSION_MS = 30 * 24 * 3600 * 1000;      // 30 giorni ("rimani connes
 const CHALLENGE_MS = 5 * 60 * 1000;                 // tempo per inserire il codice a 6 cifre
 const RESET_MS = 30 * 60 * 1000;                    // validità del link di recupero
 const CONFIRM_MS = 24 * 3600 * 1000;                // validità del link di conferma registrazione
-const SIGNUP_TYPES = ["parrucchiere", "barbiere", "estetista", "personal trainer", "idraulico", "altro"];
+const SIGNUP_TYPES = ["parrucchiere", "barbiere", "estetista", "cartomante", "personal trainer", "idraulico", "altro"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 function slugify(name) {
   return String(name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "attivita";

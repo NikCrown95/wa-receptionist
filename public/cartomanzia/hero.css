@@ -1,0 +1,12 @@
+/* public/cartomanzia/hero.css  (Prenolia: parte alta della scheda attivita' per cartomanti e astrologi) */
+:root:root #panelProfile .pf2 .pfHero.car{
+  background:linear-gradient(90deg,rgba(8,6,10,.72) 0%,rgba(8,6,10,.38) 46%,rgba(8,6,10,0) 78%),url(/cartomanzia/banner.jpg) center center/cover no-repeat;
+  border-color:rgba(235,203,159,.38);box-shadow:0 18px 44px -22px rgba(0,0,0,.8)}
+:root:root #panelProfile .pf2 .pfHero.car .pfWm{display:none}
+:root:root #panelProfile .pf2 .pfHero.car .pfKind{color:#EBCB9F;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+:root:root #panelProfile .pf2 .pfHero.car h2{color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.6)}
+:root:root #panelProfile .pf2 .pfHero.car p,:root:root #panelProfile .pf2 .pfHero.car p *{color:rgba(255,255,255,.9);text-shadow:0 1px 8px rgba(0,0,0,.55)}
+:root:root #panelProfile .pf2 .pfHero.car .pfAvatar{background:url(/cartomanzia/logo.png) center/cover no-repeat;border:0;filter:none;color:transparent;
+  box-shadow:0 12px 28px -8px rgba(0,0,0,.7),0 0 0 1px rgba(235,203,159,.5)}
+:root:root #panelProfile .pf2 .pfHero.car .pfAvatar::before{display:none}
+:root:root #panelProfile .pf2 .pfHero.car .pfAvatar>*{display:none}
