@@ -179,7 +179,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 
 (function(){
   var MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  var PIANO = { base:'Base', ai:'Base + Lia' };
+  var PIANO = { base:'Base', ai:'Smart' };
   var eur = new Intl.NumberFormat('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2 });
   var root = document.getElementById('root');
 
@@ -228,7 +228,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     k2.appendChild(kpi('Clienti persi', pctTxt(k.churn_logo_pct), k.prev_month_label ? 'in ' + k.prev_month_label + ' · ' + pctTxt(k.churn_rev_pct) + ' dell\'incasso' : 'nessun confronto'));
     k2.appendChild(kpi('Tenuta dell\'incasso', pctTxt(k.nrr_pct), 'quanto incasso resta da un mese all\'altro'));
     k2.appendChild(kpi('Valore di un cliente', k.ltv_estimate ? eur.format(k.ltv_estimate) : '—', k.ltv_estimate ? 'stima: incasso medio ÷ tasso di perdita' : 'servono più mesi di dati'));
-    k2.appendChild(kpi('Incasso da Base + Lia', k.ai_share_pct + '%', eur.format(k.mrr_ai) + ' al mese'));
+    k2.appendChild(kpi('Incasso da Smart', k.ai_share_pct + '%', eur.format(k.mrr_ai) + ' al mese'));
     root.appendChild(k2);
 
     var g = el('div','grid2'); root.appendChild(g);
@@ -292,7 +292,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     rk.appendChild(rl); g.appendChild(rk);
 
     var by = card('Incasso per settore'); by.appendChild(euroBars(d.by_type)); g.appendChild(by);
-    var bp = card('Incasso per piano'); var pm = {}; pm['Base'] = k.mrr_base; pm['Base + Lia'] = k.mrr_ai; bp.appendChild(euroBars(pm)); g.appendChild(bp);
+    var bp = card('Incasso per piano'); var pm = {}; pm['Base'] = k.mrr_base; pm['Smart'] = k.mrr_ai; bp.appendChild(euroBars(pm)); g.appendChild(bp);
   }
 
   window.liaApi('/api/admin/clients?view=money').then(render).catch(function(e){ root.innerHTML = ''; window.liaBanner('Non riesco a caricare i dati: ' + e.message); });

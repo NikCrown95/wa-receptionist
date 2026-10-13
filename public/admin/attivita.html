@@ -234,7 +234,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     document.title = b.name + ' · Prenolia Admin';
 
     var hd = el('div','hd'); hd.appendChild(el('h1', null, b.name));
-    if (s) hd.appendChild(pill(s.plan === 'Base+Lia' ? 'Base + Lia' : (s.plan || 'Base'), 'trial'));
+    if (s) hd.appendChild(pill(s.plan === 'Base+Lia' ? 'Smart' : (s.plan || 'Base'), 'trial'));
     if (sv){
       var SV = { active:['Servizio attivo','active'], grace:['In tolleranza','warn'], suspended:['Sospeso','bad'], cancelled:['Annullato','na'], unmanaged:['Senza abbonamento','na'] };
       var m = SV[sv.state] || [sv.state,'na']; hd.appendChild(pill(m[0], m[1]));
@@ -248,7 +248,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     var k = el('div','kpis'); k.style.marginTop = '16px';
     var planTxt = s && s.price ? eur.format(s.price) + '/mese' : '—';
     var svcSub = sv && sv.paid_until ? (sv.state === 'suspended' ? 'scaduto il ' : 'pagato fino al ') + d1(sv.paid_until) : (sv && sv.state === 'unmanaged' ? 'nessun abbonamento registrato' : '');
-    k.appendChild(kpi('Abbonamento', planTxt, s ? (s.plan === 'Base+Lia' ? 'Base + Lia' : 'Base') : 'nessun piano'));
+    k.appendChild(kpi('Abbonamento', planTxt, s ? (s.plan === 'Base+Lia' ? 'Smart' : 'Base') : 'nessun piano'));
     k.appendChild(kpi('Servizio', sv ? ({active:'Attivo',grace:'Tolleranza',suspended:'Sospeso',cancelled:'Annullato',unmanaged:'Non gestito'}[sv.state] || sv.state) : '—', svcSub, sv && sv.state === 'suspended' ? 'bad' : (sv && sv.state === 'grace' ? 'warn' : '')));
     k.appendChild(kpi('Appuntamenti (30 gg)', String(a.confirmed), a.cancelled + ' annullati (' + a.cancel_rate + '%)'));
     k.appendChild(kpi('Valore prenotato (30 gg)', eur.format(a.revenue), 'somma dei servizi confermati'));

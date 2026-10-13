@@ -185,7 +185,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 
 (function(){
   var MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  var PIANO = { base:'Base', ai:'Base + Lia' };
+  var PIANO = { base:'Base', ai:'Smart' };
   var eur2 = new Intl.NumberFormat('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2 });
   var eur4 = new Intl.NumberFormat('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:4 });
   function eur(v){ if (v == null) return '—'; return Math.abs(v) > 0 && Math.abs(v) < 0.1 ? eur4.format(v) : eur2.format(v); }

@@ -951,7 +951,7 @@ async function runAction(body, ctx) {
 
   if (action === 'assign_plan') {
     const planKey = body.plan === 'ai' ? 'ai' : body.plan === 'base' ? 'base' : null;
-    if (!planKey) throw fail('Scegli un piano (Base o Base + Lia).');
+    if (!planKey) throw fail('Scegli un piano (Base o Smart).');
     const plan = await planInfo(planKey);
     const pid = plan.id;
     if (!sub) {

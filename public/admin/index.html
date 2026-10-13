@@ -124,7 +124,7 @@ h1,h2,p{margin:0;}
 
     <div class="row2">
       <div class="panel">
-        <h2>Base vs Base + Lia</h2>
+        <h2>Base vs Smart</h2>
         <p class="sub">Chi ha scelto cosa, oggi.</p>
         <div class="hbars" id="planSplit"></div>
       </div>
@@ -136,10 +136,10 @@ h1,h2,p{margin:0;}
     </div>
 
     <div class="panel">
-      <h2>Base + Lia nel tempo</h2>
+      <h2>Smart nel tempo</h2>
       <p class="sub">Quanti clienti hanno anche l'assistente AI, mese per mese.</p>
       <svg class="stackbars" id="mixChart" viewBox="0 0 640 190" preserveAspectRatio="none" role="img" aria-label="Composizione dei piani nel tempo"></svg>
-      <div class="legend2"><span><i style="background:var(--sec)"></i>Base</span><span><i style="background:var(--accent)"></i>Base + Lia</span></div>
+      <div class="legend2"><span><i style="background:var(--sec)"></i>Base</span><span><i style="background:var(--accent)"></i>Smart</span></div>
     </div>
 
     <div class="panel">
@@ -277,7 +277,7 @@ window.renderDashboard = function(byTypeData, planSplitData){
       var rBase = svgEl('rect', {class:'b1', x:x, y:yBase, width:bw, height:Math.max(hBase,1), rx:2});
       var rAi = svgEl('rect', {class:'b2', x:x, y:yAi, width:bw, height:Math.max(hAi,1), rx:2});
       var t1=svgEl('title'); t1.textContent=h.m+': '+h.base+' Base'; rBase.appendChild(t1);
-      var t2=svgEl('title'); t2.textContent=h.m+': '+h.ai+' Base + Lia'; rAi.appendChild(t2);
+      var t2=svgEl('title'); t2.textContent=h.m+': '+h.ai+' Smart'; rAi.appendChild(t2);
       svg.appendChild(rBase); svg.appendChild(rAi);
       if (i % 2 === 0 || i === n-1){
         var lab = svgEl('text', {class:'axis', x:x+bw/2, y:H-6, 'text-anchor':'middle'});
@@ -305,7 +305,7 @@ window.renderDashboard = function(byTypeData, planSplitData){
   renderPaceChart();
   renderMixChart();
   renderHBars('planSplit', [
-    { label:'Base + Lia', value: planSplitData.ai || 0, color:'var(--accent)', amt: (planSplitData.ai||0) + ' clienti' },
+    { label:'Smart', value: planSplitData.ai || 0, color:'var(--accent)', amt: (planSplitData.ai||0) + ' clienti' },
     { label:'Base', value: planSplitData.base || 0, color:'var(--sec)', amt: (planSplitData.base||0) + ' clienti' }
   ]);
 
