@@ -262,6 +262,17 @@ function checkDate(biz, dateStr) {
   return null;
 }
 
+const zlib = require("zlib");
+const crypto = require("crypto");
+let pageCached = null;
+function pageVariant() {
+  if (!pageCached) {
+    const raw = Buffer.from(PAGE, "utf8");
+    pageCached = { raw: raw, br: null, gz: null, etag: '"' + crypto.createHash("sha1").update(raw).digest("hex").slice(0, 24) + '"' };
+  }
+  return pageCached;
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   try {
@@ -294,7 +305,26 @@ module.exports = async (req, res) => {
     const wantsData = req.method === "POST" || q.info === "1" || !!q.date || !!q.month;
     if (req.method === "GET" && !wantsData) {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      return res.status(200).send(PAGE);
+      // Pagina uguale per tutti: compressa una volta sola e con ETag, cosi' ai clienti arriva piu' leggera e alle visite successive basta un "304".
+      const pv = pageVariant();
+      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      res.setHeader("ETag", pv.etag);
+      res.setHeader("Vary", "Accept-Encoding");
+      if (String(req.headers["if-none-match"] || "") === pv.etag) { res.statusCode = 304; return res.end(); }
+      const ae = String(req.headers["accept-encoding"] || "");
+      let body = pv.raw;
+      try {
+        if (/\bbr\b/.test(ae)) {
+          if (!pv.br) pv.br = zlib.brotliCompressSync(pv.raw, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: pv.raw.length } });
+          body = pv.br; res.setHeader("Content-Encoding", "br");
+        } else if (/\bgzip\b/.test(ae)) {
+          if (!pv.gz) pv.gz = zlib.gzipSync(pv.raw, { level: 6 });
+          body = pv.gz; res.setHeader("Content-Encoding", "gzip");
+        }
+      } catch (e) { body = pv.raw; res.removeHeader("Content-Encoding"); }
+      res.setHeader("Content-Length", body.length);
+      res.statusCode = 200;
+      return res.end(body);
     }
 
     if (!/^[a-z0-9-]{1,60}$/.test(slug)) return res.status(404).json({ error: "Attività non trovata" });
