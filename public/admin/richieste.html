@@ -237,9 +237,9 @@ nav a.on{background:var(--card2);color:var(--ink);}
 
   function metaLine(r){
     var m = r.meta || {}, t = [];
-    if (r.kind === 'plan_change' && m.from && m.to) t.push((m.from === 'premium' ? 'Premium' : 'Base') + ' \u2192 ' + (m.to === 'premium' ? 'Premium' : 'Base'));
+    if (r.kind === 'plan_change' && m.from && m.to) t.push((m.from === 'premium' ? 'Smart' : 'Base') + ' \u2192 ' + (m.to === 'premium' ? 'Smart' : 'Base'));
     if (r.kind === 'subscription_cancel' && m.period_end) t.push('Il piano scade il ' + dateShort(m.period_end));
-    if (r.kind === 'subscription_cancel' && m.plan) t.push('Piano ' + (m.plan === 'premium' ? 'Premium' : 'Base'));
+    if (r.kind === 'subscription_cancel' && m.plan) t.push('Piano ' + (m.plan === 'premium' ? 'Smart' : 'Base'));
     if (r.kind === 'feedback' && m.rating) { var rt = Math.max(1, Math.min(5, Number(m.rating) || 0)); t.push('\u2605'.repeat(rt) + '\u2606'.repeat(5 - rt) + ' ' + rt + '/5'); }
     return t.join(' \u00b7 ');
   }
