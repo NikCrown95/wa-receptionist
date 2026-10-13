@@ -107,6 +107,18 @@
       "destination": "/teaser/index.html"
     },
     {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/registrati",
+      "destination": "/registrati.html"
+    },
+    {
+      "source": "/reset",
+      "destination": "/reset.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/api/legal?doc=privacy"
     },
