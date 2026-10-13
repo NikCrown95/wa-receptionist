@@ -117,9 +117,20 @@
     {
       "source": "/palestra/:slug",
       "destination": "/api/palestra?b=:slug"
+    },
+    {
+      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|reset|sicurezza|privacy|termini|palestra|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
+      "destination": "/api/booking?b=:slug"
     }
   ],
   "regions": [
     "dub1"
+  ],
+  "redirects": [
+    {
+      "source": "/invito/:code",
+      "destination": "/registrati.html?ref=:code",
+      "permanent": false
+    }
   ]
 }

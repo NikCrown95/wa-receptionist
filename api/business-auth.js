@@ -17,7 +17,7 @@ function slugify(name) {
   return String(name).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "attivita";
 }
 const esc = (v) => String(v || "").replace(/[<>&"']/g, "");
-const PUBLIC_URL = process.env.PUBLIC_URL || "https://wa-receptionist-sigma.vercel.app";
+const PUBLIC_URL = require("../lib/site.js").baseUrl();
 
 /* ---------- Supabase ---------- */
 function headers(extra) {
