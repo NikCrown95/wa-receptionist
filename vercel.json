@@ -103,6 +103,10 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/teaser/index.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/api/legal?doc=privacy"
     },
