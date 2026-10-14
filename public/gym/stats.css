@@ -1,0 +1,33 @@
+.gym #statsSubApp{display:none!important}
+#panelStats > .gx{display:none!important}
+.gcs{--fd:'Manrope','Plus Jakarta Sans',sans-serif;color:var(--ink)}
+.gcs .panel h2,.gcs .kpi .val{font-family:var(--fd)}
+.gcs .kpi .sub2{margin-top:4px;font-size:.76rem;color:var(--muted)}
+.gcs .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:.78rem;color:var(--muted)}
+.gcs .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.gcs svg.ch{display:block;margin-top:14px;width:100%;overflow:visible;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.gcs svg.ch text{font-size:10px;fill:var(--muted)}
+.gcs svg.ch .gl{stroke:var(--line);stroke-width:1}
+.gcs svg.ch .b1{fill:var(--accent)}
+.gcs svg.ch .b2{fill:var(--sec,#6BD6D8)}
+.gcs svg.ch .hl{fill:var(--accent);opacity:.1}
+.gcs svg.ch .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.gcs svg.ch .ln2{stroke:var(--sec,#6BD6D8)}
+.gcs svg.ch .dt{fill:var(--bg);stroke:var(--accent);stroke-width:2}
+.gcs svg.ch .dt.on{fill:var(--accent);r:5}
+.gcs svg.ch .cur{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:0}
+.gcs svg.ch .cur.on{opacity:.8}
+.gcs .panel{cursor:default}
+.gcs .row2{margin-top:0}
+.gcs .hint{margin-top:10px;font-size:.76rem;color:var(--muted)}
+.gcs .crow .av{background:var(--accent-soft);color:var(--accent-ink)}
+.gcs .stNote{margin-top:14px;font-size:.82rem;color:var(--muted)}
+.gcsTip{position:fixed;z-index:9500;left:0;top:0;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:8px 11px;font-size:.78rem;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .1s;max-width:240px}
+.gcsTip.on{opacity:1}
+.gcsTip b{display:block;font-size:.88rem;font-weight:700;margin-bottom:2px}
+.gcsTip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.gcs .donut-css,.gcs .revenue-donut{touch-action:pan-y}
+.gcs .hbar-row{cursor:pointer}
+.gcs .hbar-row.on{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
+.gcs .wrap{max-width:1120px}
+.gcs .panel .sub{margin-bottom:0}
