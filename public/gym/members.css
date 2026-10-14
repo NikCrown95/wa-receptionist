@@ -159,3 +159,19 @@
 .mxE small{font-size:.86rem}
 .mxCh{font-size:1.5rem}
 @media(max-width:700px){.mxRow{min-height:70px;padding:11px 14px}.mxAv{width:42px;height:42px}.mxKp button{display:block}.mxKp b{font-size:1.5rem}}
+
+/* ===== v4: stile "crow" di Prenolia — ogni iscritto è una card ===== */
+.mxKp button,.mxKp button.w,.mxKp button.b{background:var(--card);border:1px solid var(--line);box-shadow:none}
+.mxKp button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mxKp button.w b{color:var(--warn,#E0A23A)}.mxKp button.b b{color:var(--danger)}
+.mxTable{background:transparent;border:0;border-radius:0;overflow:visible;display:flex;flex-direction:column;gap:10px}
+.mxTh{background:transparent;border:0;height:auto;padding:4px 20px}
+.mxRow{background:var(--card);border:1px solid var(--line)!important;border-radius:18px;min-height:76px;padding:12px 20px}
+.mxRow:hover,.mxRow:active{background:var(--card2);border-color:var(--accent)!important}
+.mxRow:last-of-type{border-bottom:1px solid var(--line)!important}
+.mxAv,.mxAv.s-warn,.mxAv.s-bad,.mxAv.s-none{background:var(--accent-soft);color:var(--accent-ink)}
+.mxAv.s-warn{background:color-mix(in srgb,var(--warn,#E0A23A) 22%,var(--card))!important;color:var(--warn,#E0A23A)}
+.mxAv.s-bad{background:color-mix(in srgb,var(--danger) 20%,var(--card))!important;color:var(--danger)}
+.mxP{color:var(--accent-ink)}
+.mxPill{background:transparent;padding:0;border-radius:0;font-size:.98rem!important}
+.mxMore{margin-top:2px}
