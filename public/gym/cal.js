@@ -8,10 +8,10 @@
   var el = G.el, pad = G.pad, parse = G.parse, ymd = G.ymd, addDays = G.addDays, monday = G.monday;
   document.body.classList.add('gcalOn');
 
-  var root = el('div', 'gcal');
+  var root = el('div', 'gcx');
   pCal.appendChild(root);
 
-  var S = { view: 'day', anchor: G.S.today, sel: G.S.today, flt: 'all', side: 'lez', wkSide: false, hl: null, err: '' };
+  var S = { view: 'day', anchor: G.S.today, sel: G.S.today, flt: 'all', side: 'lez', wkOpen: false, sideOpen: false, hl: null, err: '' };
   var C = {};      // data -> { light, full }
   var token = 0;   // evita che una risposta lenta ridisegni una vista già cambiata
   var sectionOn = true;
@@ -19,7 +19,7 @@
   // ---------- utilità ----------
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function today() { return G.S.today; }
-  function phone() { return window.matchMedia('(max-width:859px)').matches; }
+  function phone() { return window.matchMedia('(max-width:699px)').matches; }
   function dow(d) { return parse(d).getDay(); }
   function fmtLong(d) { var x = parse(d); return G.DL[x.getDay()] + ' ' + x.getDate() + ' ' + G.MO[x.getMonth()]; }
   function fmtShort(d) { var x = parse(d); return G.DN[x.getDay()] + ' ' + x.getDate() + ' ' + G.MS[x.getMonth()]; }
@@ -63,31 +63,44 @@
   }
 
   // ---------- disegno ----------
+  var CH = {
+    l: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>',
+    r: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+    r15: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+    r16: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+    x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    plus: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+  };
   function render() {
     token++;
     var my = token;
-    if (!G.S.data) { root.textContent = ''; root.appendChild(el('div', 'gxEmpty', 'Carico...')); G.load().then(function () { if (my === token) render(); }).catch(function (e) { root.textContent = ''; root.appendChild(el('div', 'gxWhy', e.message)); }); return; }
+    root.className = 'gcx ' + (S.view === 'month' ? 'monthMode' : S.view === 'week' ? 'weekMode' : 'dayMode') + (S.view === 'week' && S.wkOpen && !phone() ? ' wkOpen' : '') + (S.view === 'month' && S.sideOpen && phone() ? ' sideOpen' : '');
+    if (!G.S.data) { root.innerHTML = ''; root.appendChild(el('div', 'gxEmpty', 'Carico...')); G.load().then(function () { if (my === token) render(); }).catch(function (e) { root.textContent = ''; root.appendChild(el('div', 'gxWhy', e.message)); }); return; }
     var r = range();
-    root.innerHTML = controlsHTML() + '<div id="gcBody"><div class="gxEmpty">Carico...</div></div>';
+    root.innerHTML = controlsHTML() + '<div class="cal-wrap"><div class="cal-card" id="gcBody"><div class="gxEmpty">Carico...</div></div></div>';
     bindControls();
     toggleFab();
     ensure(r.from, r.to, r.full, function () {
       var body = document.getElementById('gcBody'); if (!body) return;
-      if (S.view === 'day') { body.innerHTML = dayHTML(); bindBody(body); return; }
-      if (S.view === 'week') { body.innerHTML = phone() ? weekPhone() : weekWide(); bindBody(body); return; }
-      // mese: il pannello del giorno scelto ha bisogno anche dei Personal (dettaglio)
-      var drawMonth = function () { body.innerHTML = monthHTML(); bindBody(body); };
-      if (!phone() && !have(S.sel, S.sel, true)) { var my2 = token; fetchRange(S.sel, S.sel, false).then(function () { if (my2 === token) drawMonth(); }).catch(drawMonth); return; }
+      if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); return; }
+      if (S.view === 'week') {
+        if (phone()) { body.innerHTML = '<div class="gcal">' + weekPhone() + '</div>'; bindBody(body); }
+        else { weekDraw(body); }
+        return;
+      }
+      var drawMonth = function () { monthDraw(body); };
+      if (!have(S.sel, S.sel, true)) { var my2 = token; fetchRange(S.sel, S.sel, false).then(function () { if (my2 === token) drawMonth(); }).catch(drawMonth); return; }
       drawMonth();
     });
   }
   function rangeTxt() {
-    if (S.view === 'day') return fmtLong(S.anchor);
+    var y = function (t) { return ' <span class="rangeYear">' + t + '</span>'; };
+    if (S.view === 'day') { var d = parse(S.anchor); return (phone() ? G.DN[d.getDay()] : G.DL[d.getDay()]) + ' ' + d.getDate() + ' ' + (phone() ? G.MS[d.getMonth()] : G.MO[d.getMonth()]) + y(d.getFullYear()); }
     if (S.view === 'week') {
-      var a = monday(S.anchor), b = addDays(a, 5), x = parse(a), y = parse(b);
-      return x.getDate() + (x.getMonth() !== y.getMonth() ? ' ' + G.MS[x.getMonth()] : '') + ' – ' + y.getDate() + ' ' + G.MS[y.getMonth()] + ' ' + y.getFullYear();
+      var a = monday(S.anchor), b = addDays(a, 6), x = parse(a), z = parse(b);
+      return x.getDate() + (x.getMonth() !== z.getMonth() ? ' ' + G.MS[x.getMonth()] : '') + ' – ' + z.getDate() + ' ' + G.MS[z.getMonth()] + y(z.getFullYear());
     }
-    var m = parse(S.anchor); return cap1(G.MO[m.getMonth()]) + ' <i>' + m.getFullYear() + '</i>';
+    var m = parse(S.anchor); return cap1(G.MO[m.getMonth()]) + y(m.getFullYear());
   }
   function isCurrent() {
     if (S.view === 'day') return S.anchor === today();
@@ -95,30 +108,31 @@
     var a = parse(S.anchor), t = parse(today()); return a.getMonth() === t.getMonth() && a.getFullYear() === t.getFullYear();
   }
   function controlsHTML() {
-    var seg = '<div class="gcSeg" role="group" aria-label="Visualizzazione">' + [['day', 'Giorno'], ['week', 'Settimana'], ['month', 'Mese']].map(function (v) { return '<button type="button" data-v="' + v[0] + '" aria-pressed="' + (S.view === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>';
-    var acts = '<div class="gcActs">' + (isCurrent() ? '' : '<button type="button" class="gcNow" id="gcNow">Oggi</button>') + '<button type="button" class="gcGhost" id="gcProg">Programma</button>' + (phone() ? '' : '<button type="button" class="gcPrim" id="gcNew">Nuova prenotazione</button>') + '</div>';
-    return '<div class="gxTop gcTop">' + seg + '</div><div class="gcNav"><button type="button" class="gcArr" id="gcPrev" aria-label="Precedente">‹</button><h1 class="gcRange">' + rangeTxt() + '</h1><button type="button" class="gcArr" id="gcNext" aria-label="Successivo">›</button></div>' + acts;
+    var seg = '<div class="seg" role="group" aria-label="Visualizzazione">' + [['day', 'Giorno'], ['week', 'Settimana'], ['month', 'Mese']].map(function (v) { return '<button type="button" data-v="' + v[0] + '" aria-pressed="' + (S.view === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</div>';
+    return '<header class="top"><div class="controls">' + seg +
+      '<button class="arrow gPrev" type="button" aria-label="Periodo precedente">' + CH.l + '</button>' +
+      '<h1 class="range" aria-live="polite">' + rangeTxt() + '</h1>' +
+      '<button class="arrow gNext" type="button" aria-label="Periodo successivo">' + CH.r + '</button>' +
+      (isCurrent() ? '' : '<button class="jumpToday gToday" type="button">Oggi</button>') +
+      '<button class="jumpToday gProg" type="button">Programma</button></div></header>';
   }
   function bindControls() {
-    [].forEach.call(root.querySelectorAll('[data-v]'), function (b) { b.onclick = function () { S.view = b.dataset.v; if (S.view === 'day') S.anchor = S.sel; S.wkSide = false; render(); }; });
-    document.getElementById('gcPrev').onclick = function () { step(-1); };
-    document.getElementById('gcNext').onclick = function () { step(1); };
-    var n = document.getElementById('gcNow'); if (n) n.onclick = function () { S.anchor = today(); S.sel = today(); render(); };
-    document.getElementById('gcProg').onclick = function () { G.openSetting('corsi'); };
-    var nw = document.getElementById('gcNew'); if (nw) nw.onclick = function () { openNew(); };
+    [].forEach.call(root.querySelectorAll('[data-v]'), function (b) { b.onclick = function () { S.view = b.dataset.v; if (S.view === 'day') S.anchor = S.sel; S.wkOpen = false; S.sideOpen = false; render(); }; });
+    root.querySelector('.gPrev').onclick = function () { step(-1); };
+    root.querySelector('.gNext').onclick = function () { step(1); };
+    var n = root.querySelector('.gToday'); if (n) n.onclick = function () { S.anchor = today(); S.sel = today(); render(); };
+    root.querySelector('.gProg').onclick = function () { G.openSetting('corsi'); };
   }
   function step(k) {
     if (S.view === 'day') { S.anchor = addDays(S.anchor, k); S.sel = S.anchor; }
-    else if (S.view === 'week') { S.anchor = addDays(S.anchor, 7 * k); }
-    else { var d = parse(S.anchor); S.anchor = ymd(new Date(d.getFullYear(), d.getMonth() + k, 1)); }
+    else if (S.view === 'week') { S.anchor = addDays(S.anchor, 7 * k); S.sel = addDays(monday(S.anchor), (parse(S.sel).getDay() + 6) % 7); }
+    else { var d = parse(S.anchor); S.anchor = ymd(new Date(d.getFullYear(), d.getMonth() + k, 1)); S.sel = S.anchor === monthOf(today()) ? today() : S.anchor; }
     render();
   }
+  function monthOf(d) { return d.slice(0, 7) + '-01'; }
   function bindBody(body) {
     var f = body.querySelector('#gcFlt'); if (f) f.onchange = function () { S.flt = f.value; render(); };
     bindActions(body);
-    [].forEach.call(body.querySelectorAll('[data-mc]'), function (b) { b.onclick = function () { var d = b.dataset.mc; S.sel = d; if (parse(d).getMonth() !== parse(S.anchor).getMonth()) S.anchor = d; if (phone()) { render(); openDaySheet(d); } else render(); }; });
-    [].forEach.call(body.querySelectorAll('[data-wh]'), function (b) { b.onclick = function () { S.sel = b.dataset.wh; S.wkSide = true; render(); }; });
-    [].forEach.call(body.querySelectorAll('[data-close]'), function (b) { b.onclick = function () { S.wkSide = false; render(); }; });
     if (S.hl) { var hl = S.hl; setTimeout(function () { if (S.hl === hl) S.hl = null; }, 2600); }
   }
   // azioni comuni a corpo, pannello laterale e foglio del giorno
@@ -166,18 +180,80 @@
     if (have(d, d, true)) go(); else fetchRange(d, d, false).then(go).catch(function (e) { G.toast(e.message, 'bad'); });
   }
 
-  // ---------- mese ----------
-  function monthHTML() {
-    var m = parse(S.anchor), y = m.getFullYear(), mo = m.getMonth(), r = range(), h = '';
+  // ---------- mese (stessa struttura e stesso stile del calendario di Lia) ----------
+  function wkc(s) { var c = ck(s.course.category); return c === 'hyrox' ? 't' : c === 'pilates' ? 'u' : 'v'; }
+  function ringTx(pct, big) {
+    var C = 2 * Math.PI * (big ? 40 : 44), vb = big ? 96 : 104, c = vb / 2, r = big ? 40 : 44;
+    return { C: C, html: '<svg viewBox="0 0 ' + vb + ' ' + vb + '" aria-hidden="true"><circle class="t" cx="' + c + '" cy="' + c + '" r="' + r + '"/><circle class="p" cx="' + c + '" cy="' + c + '" r="' + r + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + C.toFixed(2) + '"/></svg><b>' + pct + '%</b>' };
+  }
+  function animRing(scope, sel, C, pct) { requestAnimationFrame(function () { requestAnimationFrame(function () { var p = scope.querySelector(sel); if (p) p.style.strokeDashoffset = (C * (1 - pct / 100)).toFixed(2); }); }); }
+  function sideRows(d) {
+    var day = getDay(d) || { date: d, sessions: [], pt: [], closed: true }, ss = day.sessions || [], out = '';
+    if (S.side === 'lez') {
+      ss.forEach(function (s) {
+        var sub = s.cancelled ? (s.cancel_reason || 'Annullata') : s.taken + '/' + s.capacity + ' iscritti' + (s.taken >= s.capacity ? ' · completa' : '');
+        out += '<button type="button" class="msRow" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="msDot wkd wkc-' + wkc(s) + '"></span><span class="msTm">' + s.time + '</span><span class="msNm"><b>' + esc(s.course.name) + '</b><small>' + esc(sub) + '</small></span>' + CH.r15 + '</button>';
+      });
+      return out || '<div class="msEmpty">' + (day.closed ? 'Palestra chiusa' : 'Nessuna lezione in questo giorno') + '</div>';
+    }
+    var a = Array.isArray(day.pt) ? day.pt : null;
+    if (!a) return '<div class="msEmpty">Carico...</div>';
+    a.forEach(function (p) {
+      var started = isStarted(d, p.time);
+      if (p.free) out += '<button type="button" class="msRow" data-ptf="' + p.time + '" data-date="' + d + '"' + (started ? ' disabled' : '') + '><span class="msDot wkd wkc-a"></span><span class="msTm">' + p.time + '</span><span class="msNm"><b>Personal 1:1</b><small>Libero · tocca per prenotare</small></span>' + CH.r15 + '</button>';
+      else out += '<button type="button" class="msRow" data-ptb="' + p.time + '" data-date="' + d + '"><span class="msDot wkd wkc-a"></span><span class="msTm">' + p.time + '</span><span class="msNm"><b>' + esc(p.name) + '</b><small>Personal 1:1</small></span>' + CH.r15 + '</button>';
+    });
+    return out || '<div class="msEmpty">Nessuna ora disponibile</div>';
+  }
+  function sideBody(d, wk) {
+    var day = getDay(d) || { date: d, sessions: [], pt: [], closed: true }, st = dayStats(day), x = parse(d), rg = ringTx(st.pct, wk);
+    var free = Math.max(0, st.cap - st.b);
+    var seg = '<div class="seg gcMiniSeg"><button type="button" data-side="lez" aria-pressed="' + (S.side === 'lez') + '">Lezioni</button><button type="button" data-side="pt" aria-pressed="' + (S.side === 'pt') + '">Personal 1:1</button></div>';
+    return { C: rg.C, html: '<div class="msWd">' + cap1(G.DL[x.getDay()]) + '</div><h2 class="msDate">' + x.getDate() + ' ' + cap1(G.MO[x.getMonth()]) + ' ' + x.getFullYear() + '</h2>' +
+      '<div class="' + (wk ? 'wkRing' : 'msRing') + '"><div class="' + (wk ? 'wkRingW' : 'msRingW') + '">' + rg.html + '</div>' + (wk ? '<strong>Occupazione</strong>' : '<div class="msTx"><strong>Occupazione</strong><span>' + (st.n ? st.b + ' su ' + st.cap + ' posti' : 'Chiuso') + '</span></div>') + '</div>' +
+      '<div class="msLh"><div class="msCount"><b>' + st.n + (st.n === 1 ? ' lezione' : ' lezioni') + '</b>' + (wk ? '' : '<small class="msOccTx">' + (st.n ? st.b + ' prenotazioni · ' + free + ' posti liberi' : 'Chiuso') + '</small>') + '</div><button type="button" class="msNew gNewB">' + CH.plus + 'Nuovo</button></div>' + seg +
+      '<div class="' + (wk ? 'wkList' : 'msList') + '">' + sideRows(d).replace(/class="msRow"/g, wk ? 'class="wkRow"' : 'class="msRow"') + '</div>', pct: st.pct };
+  }
+  function monthSideHTML(d) {
+    var b = sideBody(d, false);
+    return { C: b.C, pct: b.pct, html: '<button type="button" class="msHandle" aria-label="Chiudi"><i></i></button><button type="button" class="msClose" aria-label="Chiudi">' + CH.x + '</button><div class="msBody">' + b.html + '</div><div class="msFoot"><button type="button" class="msCta" data-go="' + d + '"><span>Vedi tutta la giornata</span>' + CH.r16 + '</button></div>' };
+  }
+  function monthDraw(body) {
+    var m = parse(S.anchor), mo = m.getMonth(), r = range(), cells = '';
     var rows = Math.round((parse(r.to).getTime() - parse(r.from).getTime()) / 864e5 / 7 + 1 / 7);
     for (var i = 0; i < rows * 7; i++) {
-      var d = addDays(r.from, i), x = parse(d), out = x.getMonth() !== mo, day = getDay(d) || { sessions: [], closed: true }, st = dayStats(day), closed = day.closed;
-      var cls = 'gcMc' + (out ? ' out' : '') + (d === today() ? ' today' : '') + (!out && d < today() ? ' past' : '') + (!out && d > today() ? ' future' : '') + (closed ? ' closed' : '') + (d === S.sel ? ' sel' : '') + (st.pct >= 95 ? ' full' : '');
-      h += '<button type="button" class="' + cls + '" data-mc="' + d + '" aria-label="' + fmtLong(d) + '"><span class="gcDn">' + x.getDate() + '</span><span class="gcMa">' + (closed ? 'Chiuso' : st.n + (st.n === 1 ? ' lez.' : ' lez.')) + '</span><span class="gcMo"><span class="gcMl"><i style="width:' + st.pct + '%"></i></span><span class="gcMp">' + (st.n ? st.pct + '%' : '') + '</span></span></button>';
+      var d = addDays(r.from, i), x = parse(d), out = x.getMonth() !== mo, day = getDay(d) || { sessions: [], closed: true }, st = dayStats(day), closed = !!day.closed || !st.n;
+      var isT = d === today(), past = !out && !isT && d < today(), fut = !out && !isT && d > today();
+      var occ = st.pct >= 70 ? 'occ-hi' : st.pct >= 40 ? 'occ-mid' : 'occ-lo';
+      cells += '<button type="button" class="month-cell' + (out ? ' outside' : '') + (isT ? ' today' : '') + (past ? ' past' : '') + (fut ? ' future' : '') + (st.n ? ' has-events' : '') + (closed ? ' is-closed' : '') + ' ' + occ + (d === S.sel ? ' sel' : '') + '" style="--occ:' + st.pct + '" data-mc="' + d + '" data-ring="' + (!out && !closed ? st.pct : '') + '" aria-label="' + fmtLong(d) + '">' +
+        '<span class="month-cell-top"><span class="dnum">' + x.getDate() + '</span></span><strong class="month-appts">' + (closed ? '' : st.n + ' lez.') + '</strong>' +
+        '<span class="month-occ"><span class="month-load"><i style="width:' + (closed ? 0 : st.pct) + '%"></i></span><span class="month-pct">' + (closed ? '' : st.pct + '%') + '</span></span><span class="month-closed">' + (closed ? 'Chiuso' : '') + '</span></button>';
     }
     var dw = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(function (t) { return '<span>' + t + '</span>'; }).join('');
-    var side = !phone() ? '<aside class="gcSide" aria-label="Giorno selezionato">' + sideHTML(S.sel, false) + '</aside>' : '';
-    return '<div class="gcMwrap' + (side ? ' hasSide' : '') + '"><div><div class="gcDow">' + dw + '</div><div class="gcMgrid">' + h + '</div></div>' + side + '</div>';
+    body.innerHTML = '<div class="month-wrap"><div class="month-hero"></div><div class="month-dow">' + dw + '</div><div class="month-grid" style="--rows:' + rows + '">' + cells + '</div><aside class="monthSide" aria-label="Giorno selezionato"></aside></div>';
+    var side = body.querySelector('.monthSide'), sb = monthSideHTML(S.sel);
+    side.innerHTML = sb.html; animRing(side, '.msRing .p', sb.C, sb.pct);
+    [].forEach.call(body.querySelectorAll('[data-mc]'), function (b) { b.onclick = function () { var d = b.dataset.mc; S.sel = d; if (parse(d).getMonth() !== parse(S.anchor).getMonth()) S.anchor = monthOf(d); render(); if (phone()) openDaySheet(d); }; });
+    side.onclick = function (ev) {
+      if (ev.target.closest('.msClose') || ev.target.closest('.msHandle')) { S.sideOpen = false; root.classList.remove('sideOpen'); return; }
+      if (ev.target.closest('.gNewB')) { openNew(); return; }
+    };
+    bindActions(side);
+    var grid = body.querySelector('.month-grid'); drawRings(grid);
+    if (window.ResizeObserver) { try { new ResizeObserver(function () { drawRings(grid); }).observe(grid); } catch (e) { } }
+  }
+  function drawRings(g) {
+    try {
+      var cs = g.querySelectorAll('.month-cell');
+      for (var i = 0; i < cs.length; i++) {
+        var c = cs[i], old = c.querySelector('.month-ring'); if (old) old.parentNode.removeChild(old);
+        var v = c.getAttribute('data-ring'); if (!v && v !== '0') continue;
+        var w = c.offsetWidth, hh = c.offsetHeight; if (w < 20 || hh < 20) continue;
+        var p = Math.max(0, Math.min(100, Number(v) || 0)), s = 1.5, r = Math.min(9, w / 2 - s), x1 = w - s, y1 = hh - s;
+        var d = 'M' + (w / 2) + ' ' + s + ' H' + (x1 - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + x1 + ' ' + (s + r) + ' V' + (y1 - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (x1 - r) + ' ' + y1 + ' H' + (s + r) + ' A' + r + ' ' + r + ' 0 0 1 ' + s + ' ' + (y1 - r) + ' V' + (s + r) + ' A' + r + ' ' + r + ' 0 0 1 ' + (s + r) + ' ' + s + ' Z';
+        c.insertAdjacentHTML('beforeend', '<svg class="month-ring" viewBox="0 0 ' + w + ' ' + hh + '" aria-hidden="true"><rect x="' + s + '" y="' + s + '" width="' + (w - 2 * s) + '" height="' + (hh - 2 * s) + '" rx="' + r + '"/>' + (p > 0 ? '<path d="' + d + '" pathLength="100" stroke-dasharray="' + p + ' 100"/>' : '') + '</svg>');
+      }
+    } catch (e) { }
   }
 
   // ---------- giorno ----------
@@ -207,42 +283,71 @@
     return hero + '<div class="gcAg">' + out + '</div>';
   }
 
-  // ---------- settimana ----------
-  function weekWide() {
-    var a = monday(S.anchor), days = [];
-    for (var i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
-    var ncols = (days[6].sessions.length || (Array.isArray(days[6].pt) && days[6].pt.some(function (p) { return !p.free; }))) ? 7 : 6;
+  // ---------- settimana (stessa struttura e stesso stile del calendario di Lia) ----------
+  function weekDraw(body) {
+    var a = monday(S.anchor), days = [], i;
+    for (i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
+    if (!(S.sel >= a && S.sel <= addDays(a, 6))) S.sel = a <= today() && today() <= addDays(a, 6) ? today() : a;
     var hmin = 8, hmax = 20;
     days.forEach(function (dd) {
       dd.sessions.forEach(function (s) { hmin = Math.min(hmin, Math.floor(mins(s.time) / 60)); hmax = Math.max(hmax, Math.ceil((mins(s.time) + s.duration_min) / 60)); });
-      (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (!p.free) { hmin = Math.min(hmin, Math.floor(mins(p.time) / 60)); hmax = Math.max(hmax, Math.ceil(mins(p.time) / 60) + 1); } });
     });
-    var H = 52, total = (hmax - hmin) * H, tl = '', head = '', cols = '';
-    for (var h = hmin; h < hmax; h++) tl += '<div>' + pad(h) + ':00</div>';
-    for (var k = 0; k < ncols; k++) {
-      var dd2 = days[k], d = dd2.date, st = dayStats(dd2), b = '';
-      head += '<button type="button" data-wh="' + d + '" class="' + (d === today() ? 'tod ' : '') + (S.wkSide && d === S.sel ? 'sel2' : '') + '"><small>' + G.DN[dow(d)] + '</small><b>' + parse(d).getDate() + '</b><span class="gcBar"><i class="' + (st.pct >= 95 ? 'f' : '') + '" style="width:' + st.pct + '%"></i></span><span class="gcPc">' + (st.n ? st.pct + '%' : '–') + '</span></button>';
-      for (var h2 = 1; h2 < hmax - hmin; h2++) b += '<div class="gcHl" style="top:' + h2 * H + 'px"></div>';
-      var seen = {};
-      dd2.sessions.forEach(function (s) { seen[s.time] = (seen[s.time] || 0) + 1; });
-      var idx = {};
-      dd2.sessions.forEach(function (s) {
-        if (S.flt !== 'all' && ck(s.course.category) !== S.flt) return;
-        var n = seen[s.time], j = idx[s.time] = (idx[s.time] || 0) + 1;
-        var top = (mins(s.time) - hmin * 60) / 60 * H + 2, ht = Math.max(30, s.duration_min / 60 * H - 4);
-        b += '<button type="button" class="gcBk' + (isEnded(d, s.time, s.duration_min) ? ' past' : '') + (s.cancelled ? ' off' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--cc:' + col(s) + ';left:calc(' + ((j - 1) / n * 100) + '% + 4px);right:calc(' + ((n - j) / n * 100) + '% + 4px)" data-sess="' + s.schedule_id + '" data-date="' + d + '"><b>' + s.time + ' ' + esc(s.course.name) + '</b>' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</button>';
+    var f = S.flt;
+    var head = '<div class="wkHd"><div class="wkCorner"></div>', hours = '';
+    days.forEach(function (dd, k) {
+      var st = dayStats(dd), d = dd.date;
+      head += '<div class="wkDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '" role="button" tabindex="0"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="oc"><span class="tr"><i style="width:' + st.pct + '%"></i></span><span class="pc">' + (st.n ? st.pct + '%' : '–') + '</span></span></div>';
+    });
+    head += '</div>';
+    var nowH = new Date().getHours();
+    for (var hr = hmin; hr < hmax; hr++) {
+      var lo = hr * 60, hi = lo + 60, cs = days.map(function (dd, k) {
+        var L = [];
+        dd.sessions.forEach(function (s) { var m = mins(s.time); if (m >= lo && m < hi && (f === 'all' || ck(s.course.category) === f)) L.push({ t: s.time, s: s }); });
+        if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { var m = mins(p.time); if (!p.free && m >= lo && m < hi) L.push({ t: p.time, p: p }); });
+        L.sort(function (x, y) { return x.t < y.t ? -1 : 1; });
+        return { dd: dd, k: k, L: L };
       });
-      if (S.flt === 'all' || S.flt === 'pt') (Array.isArray(dd2.pt) ? dd2.pt : []).forEach(function (p) {
-        if (p.free) return;
-        b += '<button type="button" class="gcBk pt" style="top:' + ((mins(p.time) - hmin * 60) / 60 * H + 2) + 'px;height:' + (H - 4) + 'px" data-ptb="' + p.time + '" data-date="' + d + '"><b>' + p.time + ' Personal 1:1</b>' + esc(p.name.split(' ')[0] + ' ' + (p.name.split(' ')[1] || '').charAt(0) + '.') + '</button>';
+      var thin = cs.every(function (c) { return !c.L.length; });
+      hours += '<div class="wkTh' + (thin ? ' thin' : '') + '">' + pad(hr) + ':00</div>';
+      cs.forEach(function (c) {
+        var d = c.dd.date, isNow = d === today() && hr === nowH;
+        hours += '<div class="wkTc' + (thin ? ' thin' : '') + (d === S.sel ? ' sel' : '') + (c.dd.closed ? ' closed' : '') + (isNow ? ' nowc' : '') + '" data-i="' + c.k + '" data-h="' + hr + '">' + c.L.map(function (x) {
+          if (x.s) {
+            var s = x.s, past = isEnded(d, s.time, s.duration_min);
+            return '<button type="button" class="wkPill wkc-' + wkc(s) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '" title="' + esc(s.course.name) + '">' + (s.time.slice(3) !== '00' ? '<span class="u">' + s.time + '</span>' : '') + '<b>' + esc(s.course.name.split(' ')[0]) + ' ' + (s.cancelled ? '✕' : s.taken + '/' + s.capacity) + '</b></button>';
+          }
+          var p = x.p; return '<button type="button" class="wkPill wkc-a' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '" title="Personal 1:1">' + (p.time.slice(3) !== '00' ? '<span class="u">' + p.time + '</span>' : '') + '<b>' + esc(p.name.split(' ')[0] + ' ' + (p.name.split(' ')[1] || '').charAt(0) + '.') + '</b></button>';
+        }).join('') + '</div>';
       });
-      if (d === today()) b += '<div class="gcNowl" style="top:' + ((nowMin() - hmin * 60) / 60 * H) + 'px"></div>';
-      cols += '<div class="gcHc' + (d === today() ? ' tod' : '') + '" style="height:' + total + 'px">' + b + '</div>';
     }
     var opts = '<option value="all">Tutti i corsi</option>' + [['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates']].map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('') + '<option value="pt"' + (S.flt === 'pt' ? ' selected' : '') + '>Solo Personal 1:1</option>';
-    var side = S.wkSide ? '<aside class="gcSide">' + sideHTML(S.sel, true) + '</aside>' : '';
-    var gt = '48px repeat(' + ncols + ',minmax(0,1fr))';
-    return '<div class="gcFilt"><select class="gcSel" id="gcFlt" aria-label="Corso">' + opts + '</select></div><div class="gcWk' + (side ? ' hasSide' : '') + '"><div class="gcWkc"><div class="gcWkh" style="grid-template-columns:' + gt + '"><div></div>' + head + '</div><div class="gcWkb" style="grid-template-columns:' + gt + '"><div class="gcTl">' + tl + '</div>' + cols + '</div></div>' + side + '</div>';
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter" style="display:flex"><select class="gcSel" id="gcFlt" aria-label="Corso">' + opts + '</select></div><div class="wkMain"><div class="wkScroll"><div class="wkGrid">' + head + hours + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    var grid = body.querySelector('.wkGrid'), side = body.querySelector('.wkSide');
+    function drawSide() {
+      var b = sideBody(S.sel, true);
+      side.innerHTML = '<button type="button" class="wkHandle" aria-label="Chiudi"><i></i></button><button type="button" class="wkClose" aria-label="Chiudi">' + CH.x + '</button><div class="wkSBody">' + b.html + '</div><div class="wkFoot"><button type="button" class="msCta wkCta" data-go="' + S.sel + '"><span>Vedi tutta la giornata</span>' + CH.r16 + '</button></div>';
+      animRing(side, '.wkRing .p', b.C, b.pct);
+      bindActions(side);
+    }
+    drawSide();
+    side.addEventListener('click', function (ev) {
+      if (ev.target.closest('.wkClose') || ev.target.closest('.wkHandle')) { S.wkOpen = false; root.classList.remove('wkOpen'); return; }
+      if (ev.target.closest('.gNewB')) openNew();
+    });
+    grid.addEventListener('click', function (ev) {
+      var p = ev.target.closest('.wkPill');
+      var x = ev.target.closest('.wkDh,.wkTc');
+      if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
+      if (x) {
+        var d = addDays(a, +x.dataset.i);
+        if (S.wkOpen && S.sel === d) { S.wkOpen = false; root.classList.remove('wkOpen'); }
+        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.wkDh,.wkTc'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
+      }
+    });
+    var fl = body.querySelector('#gcFlt'); fl.onchange = function () { S.flt = fl.value; render(); };
+    var sc = body.querySelector('.wkScroll'), row = grid.querySelector('.wkTc.nowc') || grid.querySelector('.wkTc[data-h="9"]');
+    if (row) sc.scrollTop = Math.max(0, row.offsetTop - 120);
   }
   function weekPhone() {
     var a = monday(S.anchor), tot = 0, rows = '';
@@ -381,7 +486,7 @@
   // ---------- pulsante + (telefono, vista mese) ----------
   var fab = el('button', 'gxFab gcFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = G.ic('plus', 26); document.body.appendChild(fab);
   fab.addEventListener('click', function () { openNew(); });
-  function toggleFab() { fab.hidden = !(sectionOn && S.view === 'month' && phone()); }
+  function toggleFab() { fab.hidden = !(sectionOn && phone()); }
 
   // ---------- collegamenti con il resto del dashboard ----------
   // dalla campanella: "Nuova prenotazione" porta al giorno e alla lezione indicati
