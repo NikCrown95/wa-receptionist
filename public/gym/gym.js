@@ -89,7 +89,7 @@
   fab.addEventListener('click', function () { if (S.section === 'clients') memberForm(); });
 
   function showSection(w) {
-    fab.hidden = w !== 'clients';
+    fab.hidden = true;
     if (w === 'clients') renderMem(); else if (w === 'stats') renderStat();
     if (S.data && w !== 'cal' && w !== 'clients' && w !== 'stats') return;
     if (!S.data) load().then(function () { renderAll(); }).catch(function (e) { var x = w === 'clients' ? xMem : w === 'stats' ? xStat : xCal; x.textContent = ''; x.appendChild(el('div', 'gxWhy', e.message)); });
@@ -252,42 +252,64 @@
   };
 
   // ---------- Iscritti ----------
+  var SORTS = { name: 'Nome', phone: 'Telefono', plan: 'Abbonamento', end: 'Scadenza' };
+  function sortVal(m, k) {
+    if (k === 'name') return (m.last_name + ' ' + m.first_name).toLowerCase();
+    if (k === 'phone') return m.phone.replace(/\D/g, '');
+    if (k === 'plan') { var c = curPlan(m); return c ? c.plan_name.toLowerCase() : '￿'; }
+    return String(endOf(m));
+  }
+  function expTxt(dl) { return dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : 'tra ' + dl + ' giorni'; }
+  function avRing(m) {
+    var u = m.usage || {}, r = 19, c = 2 * Math.PI * r, p = u.max_period ? Math.min(1, (u.period || 0) / u.max_period) : 0;
+    return '<span class="mxAv s-' + m.status.s + '"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3"/><circle class="p" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span>';
+  }
   function renderMem() {
     xMem.textContent = '';
     if (!S.data) { xMem.appendChild(el('div', 'gxEmpty', 'Carico...')); return; }
-    var q = el('input', 'gxSearch'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; xMem.appendChild(q);
-    var fl = el('div', 'gxFl');
-    var cnt = { all: S.data.members.length, warn: 0, bad: 0, none: 0 };
+    if (S.mid) { var mm = S.data.members.filter(function (x) { return x.id === S.mid; })[0]; if (mm) { memberPage(mm); return; } S.mid = null; }
+    var root = el('div', 'mx'); xMem.appendChild(root);
+    var cnt = { all: S.data.members.length, warn: 0, bad: 0, none: 0, ok: 0 };
     S.data.members.forEach(function (m) { if (cnt[m.status.s] != null) cnt[m.status.s]++; });
-    [['all', 'Tutti'], ['warn', 'In scadenza'], ['bad', 'Scaduti'], ['none', 'Senza abbonamento']].forEach(function (f) {
-      if (f[0] === 'none' && !cnt.none) return;
-      var b = el('button', 'gxCp', f[1] + ' ' + cnt[f[0]]); b.type = 'button'; b.setAttribute('aria-pressed', S.flt === f[0] ? 'true' : 'false');
-      b.addEventListener('click', function () { S.flt = f[0]; renderMem(); }); fl.appendChild(b);
+    var valid = cnt.ok + cnt.warn;
+    var head = el('div', 'mxHead'); head.innerHTML = '<div><h1>Iscritti</h1><small>' + cnt.all + (cnt.all === 1 ? ' iscritto' : ' iscritti') + ' · ' + valid + ' con abbonamento valido</small></div>';
+    var add = btn('', 'mxAdd', function () { memberForm(); }); add.innerHTML = ic('plus', 16) + '<span>Nuovo iscritto</span>'; head.appendChild(add); root.appendChild(head);
+    var kp = el('div', 'mxKp');
+    [['all', 'Tutti', ''], ['warn', 'In scadenza', 'w'], ['bad', 'Scaduti', 'b']].concat(cnt.none ? [['none', 'Senza abbonamento', 'n']] : []).forEach(function (f) {
+      var b = el('button', f[2]); b.type = 'button'; b.setAttribute('aria-pressed', S.flt === f[0] ? 'true' : 'false');
+      b.innerHTML = '<b>' + cnt[f[0]] + '</b><span>' + f[1] + '</span>';
+      b.addEventListener('click', function () { S.flt = S.flt === f[0] ? 'all' : f[0]; S.more = false; renderMem(); }); kp.appendChild(b);
     });
-    xMem.appendChild(fl);
-    var box = el('div'); xMem.appendChild(box);
+    root.appendChild(kp);
+    var sr = el('label', 'mxSearch'); sr.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    var q = el('input'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; q.autocomplete = 'off'; sr.appendChild(q); root.appendChild(sr);
+    var tbl = el('div', 'mxTable'); root.appendChild(tbl);
+    var sort = S.sort || (S.sort = { k: 'name', d: 1 });
     function list() {
-      box.textContent = '';
+      tbl.textContent = '';
       var qq = S.q.trim().toLowerCase();
       var ms = S.data.members.filter(function (m) { return (S.flt === 'all' || m.status.s === S.flt) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0); });
-      if (S.flt === 'warn' || S.flt === 'bad') ms.sort(function (a, b) { return String(endOf(a)).localeCompare(String(endOf(b))); });
-      if (!ms.length) { box.appendChild(el('div', 'gxEmpty', S.data.members.length ? 'Nessun risultato.' : 'Ancora nessun iscritto. Aggiungi il primo con il pulsante più.')); return; }
-      var shown = (S.more || qq) ? ms : ms.slice(0, 40);
-      var grid = el('div', 'gmGrid'); box.appendChild(grid);
-      shown.forEach(function (m) {
-        var u = m.usage || {}, cur = curPlan(m), r = el('button', 'gmCard'); r.type = 'button';
-        var dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null;
-        var exp = cur && cur.ends_on ? (dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : 'tra ' + dl + ' giorni') : '';
-        var html = '<div class="gmTop"><span class="gmAv s-' + m.status.s + '">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><span class="gmId"><b>' + esc(m.first_name + ' ' + m.last_name) + '</b><small>' + esc(m.phone) + '</small></span><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span></div>';
-        if (cur) {
-          html += '<div class="gmStats"><div><label>Scadenza</label><b>' + short(cur.ends_on || S.data.today) + '</b><small class="' + (dl != null && dl <= (S.data.settings.expiry_days || 5) ? 'hot' : '') + '">' + exp + '</small></div>' +
-            '<div><label>Ingressi mese</label><b>' + (u.period || 0) + '<i>/' + (u.max_period || '∞') + '</i></b>' + meter(u.period, u.max_period) + '</div>' +
-            '<div><label>Settimana</label><b>' + (u.week || 0) + '<i>/' + (u.max_week || '∞') + '</i></b>' + meter(u.week, u.max_week) + '</div></div>';
-        } else html += '<div class="gmNone">Nessun abbonamento attivo</div>';
-        r.innerHTML = html;
-        r.addEventListener('click', function () { memberSheet(m.id); }); grid.appendChild(r);
+      ms.sort(function (a, b) { var x = sortVal(a, sort.k), y = sortVal(b, sort.k); return (x < y ? -1 : x > y ? 1 : 0) * sort.d; });
+      var hd = el('div', 'mxTh');
+      Object.keys(SORTS).forEach(function (k) {
+        var b = el('button', sort.k === k ? 'on' : ''); b.type = 'button'; b.innerHTML = SORTS[k] + '<i>' + (sort.k === k ? (sort.d > 0 ? '↑' : '↓') : '') + '</i>';
+        b.addEventListener('click', function () { if (sort.k === k) sort.d = -sort.d; else { sort.k = k; sort.d = 1; } list(); }); hd.appendChild(b);
       });
-      if (shown.length < ms.length) { var more = btn('Mostra altri ' + (ms.length - shown.length), 'ghost block', function () { S.more = true; list(); }); more.style.marginTop = '6px'; box.appendChild(more); }
+      hd.appendChild(el('span'));
+      tbl.appendChild(hd);
+      if (!ms.length) { tbl.appendChild(el('div', 'mxEmpty', S.data.members.length ? 'Nessun risultato.' : 'Ancora nessun iscritto. Aggiungi il primo con "Nuovo iscritto".')); return; }
+      var shown = (S.more || qq) ? ms : ms.slice(0, 30);
+      shown.forEach(function (m) {
+        var cur = curPlan(m), dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, u = m.usage || {};
+        var r = el('button', 'mxRow'); r.type = 'button';
+        r.innerHTML = '<span class="mxC mxN">' + avRing(m) + '<b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
+          '<span class="mxC mxP">' + esc(m.phone) + '</span>' +
+          '<span class="mxC mxA"><b>' + (cur ? esc(cur.plan_name) : '—') + '</b>' + (cur && u.max_period ? '<small>' + (u.period || 0) + '/' + u.max_period + ' ingressi</small>' : '') + '</span>' +
+          '<span class="mxC mxE"><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span>' + (cur && cur.ends_on ? '<small' + (dl != null && dl <= (S.data.settings.expiry_days || 5) ? ' class="hot"' : '') + '>' + short(cur.ends_on) + ' · ' + expTxt(dl) + '</small>' : '<small>Nessun abbonamento</small>') + '</span>' +
+          '<span class="mxCh">›</span>';
+        r.addEventListener('click', function () { S.mid = m.id; S.tab = 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }); tbl.appendChild(r);
+      });
+      if (shown.length < ms.length) { var more = btn('Mostra altri ' + (ms.length - shown.length), 'mxMore', function () { S.more = true; list(); }); tbl.appendChild(more); }
     }
     q.addEventListener('input', function () { S.q = q.value; list(); });
     list();
@@ -306,73 +328,99 @@
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
         msg.textContent = ''; msg.className = '';
-        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, notes: n.value }).then(function (j) { toast('Salvato.', 'ok'); close(); return reload().then(function () { if (!m) memberSheet(j.id); }); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, notes: n.value }).then(function (j) { toast('Salvato.', 'ok'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
       }));
     });
   }
-  function memberSheet(id) {
-    var m = S.data.members.filter(function (x) { return x.id === id; })[0]; if (!m) return;
-    sheet('', function (w, close) {
-      var cur = curPlan(m), u = m.usage || {}, dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null;
-      w.classList.add('gmSheet');
-      var h3 = w.querySelector('h3'); if (h3) h3.remove();
-      var hd = el('div', 'gmHead');
-      hd.innerHTML = '<span class="gmAv big s-' + m.status.s + '">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><div class="gmHid"><h3>' + esc(m.first_name + ' ' + m.last_name) + '</h3><a href="tel:' + esc(m.phone.replace(/[^\d+]/g, '')) + '">' + esc(m.phone) + '</a>' + (m.notes ? '<small>' + esc(m.notes) + '</small>' : '') + '</div><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span>';
-      w.appendChild(hd);
-      // abbonamento
-      w.appendChild(el('div', 'gmSec', 'Abbonamento'));
-      if (!cur) w.appendChild(el('div', 'gxEmpty', 'Nessun abbonamento.'));
-      else {
-        var c = el('div', 'gmPanel');
-        var left = dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : 'mancano ' + dl + ' giorni';
-        c.innerHTML = '<div class="gmPlan"><b>' + esc(cur.plan_name) + '</b><span>' + (cur.price_paid != null ? eur(cur.price_paid) : '') + '</span></div>' +
-          (cur.kind === 'time' ? '<div class="gmDates"><div><label>Inizio</label><b>' + short(cur.starts_on) + '</b></div><div class="gmArrow">→</div><div><label>Scadenza</label><b>' + short(cur.ends_on) + '</b></div><div class="gmLeft ' + (dl != null && dl <= (S.data.settings.expiry_days || 5) ? 'hot' : '') + '">' + esc(left) + '</div></div>' : '<div class="gmDates"><div><label>Ingressi rimasti</label><b>' + cur.entries_left + ' su ' + cur.entries_total + '</b></div></div>') +
-          (u.max_period || u.max_week ? '<div class="gmUse">' + (u.max_period ? '<div><div class="gmUh"><label>Ingressi del mese</label><b>' + u.period + '<i>/' + u.max_period + '</i></b></div>' + meter(u.period, u.max_period) + '</div>' : '') + (u.max_week ? '<div><div class="gmUh"><label>Questa settimana</label><b>' + u.week + '<i>/' + u.max_week + '</i></b></div>' + meter(u.week, u.max_week) + '</div>' : '') + '</div>' : '');
-        var ac = el('div', 'gxActs');
-        ac.appendChild(btn(cur.kind === 'time' ? 'Cambia scadenza' : 'Cambia ingressi', 'ghost sm', function () { editPlan(cur, close); }));
-        ac.appendChild(btn('Annulla abbonamento', 'danger sm', function () { confirmBar(c, 'Annullare questo abbonamento?', function () { act({ action: 'member_plan_update', id: cur.id, cancelled: true }, 'Annullato.').then(function () { close(); return reload().then(function () { memberSheet(id); }); }); }); }));
-        c.appendChild(ac); w.appendChild(c);
-      }
-      var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
-      if (tpl) {
-        var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today;
-        var rn = btn('Rinnova' + (tpl.price_eur != null ? ' · ' + eur(tpl.price_eur) : '') + ' · parte il ' + short(from), 'block', function () {
-          rn.disabled = true;
-          act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato.').then(function () { close(); return reload().then(function () { memberSheet(id); }); }).catch(function () { rn.disabled = false; });
+  function memberSheet(id) { S.mid = id; S.tab = 'pren'; if (S.section === 'clients') renderMem(); }
+  function memberPage(m) {
+    var id = m.id, cur = curPlan(m), u = m.usage || {}, dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, soon = S.data.settings.expiry_days || 5;
+    var root = el('div', 'mx mxD'); xMem.appendChild(root);
+    var hero = el('div', 'mxHero');
+    var pos = 0, dsHtml = '';
+    if (cur && cur.kind === 'time' && cur.starts_on && cur.ends_on) {
+      var tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)), el_ = Math.max(0, Math.min(tot, Math.round((parse(S.data.today) - parse(cur.starts_on)) / 864e5))); pos = (el_ / tot * 100).toFixed(1);
+      dsHtml = '<div class="mxTl"><div class="mxTr"><i style="width:' + pos + '%"></i><em style="left:' + pos + '%"></em></div><div class="mxDs"><span>Inizio <b>' + short(cur.starts_on) + '</b></span><span><b>' + esc(dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'mancano ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + '</b></span><span>Scadenza <b>' + short(cur.ends_on) + '</b></span></div></div>';
+    } else if (cur && cur.kind === 'entries') {
+      pos = cur.entries_total ? Math.round((cur.entries_total - cur.entries_left) / cur.entries_total * 100) : 0;
+      dsHtml = '<div class="mxTl"><div class="mxTr"><i style="width:' + pos + '%"></i></div><div class="mxDs"><span>Usati <b>' + (cur.entries_total - cur.entries_left) + '</b></span><span><b>' + cur.entries_left + ' rimasti</b></span><span>Totali <b>' + cur.entries_total + '</b></span></div></div>';
+    }
+    hero.innerHTML = '<div class="mxBar"><button type="button" class="mxBack">‹ Iscritti</button><span class="mxTag">Tessera iscritto</span></div>' +
+      '<h2>' + esc(m.first_name + ' ' + m.last_name) + '</h2><a class="mxTel" href="tel:' + esc(m.phone.replace(/[^\d+]/g, '')) + '">' + esc(m.phone) + '</a>' +
+      '<div class="mxPl"><div><b>' + (cur ? esc(cur.plan_name) + (cur.price_paid != null ? ' · ' + eur(cur.price_paid) : '') : 'Nessun abbonamento') + '</b>' + (cur && (u.max_period || u.max_week) ? '<span>' + (u.max_period ? u.max_period + ' ingressi' : '') + (u.max_period && u.max_week ? ' · ' : '') + (u.max_week ? 'max ' + u.max_week + ' a settimana' : '') + '</span>' : '') + '</div><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span></div>' + dsHtml;
+    root.appendChild(hero);
+    hero.querySelector('.mxBack').addEventListener('click', function () { S.mid = null; renderMem(); });
+    var body = el('div', 'mxBody'); root.appendChild(body);
+    function ringHtml(n, max) { var r = 26, c = 2 * Math.PI * r, p = max ? Math.min(1, n / max) : 0; return '<div class="mxRing"><svg viewBox="0 0 60 60"><circle class="t" cx="30" cy="30" r="' + r + '" fill="none" stroke-width="6"/><circle class="p' + (max && n >= max ? ' full' : '') + '" cx="30" cy="30" r="' + r + '" fill="none" stroke-width="6" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg><b>' + n + (max ? '/' + max : '') + '</b></div>'; }
+    var gs = el('div', 'mxGauges');
+    gs.innerHTML = '<div class="mxG">' + ringHtml(u.period || 0, u.max_period) + '<div><label>Ingressi del mese</label><span>' + (u.max_period ? Math.max(0, u.max_period - (u.period || 0)) + ' ancora disponibili' : 'senza limite') + '</span></div></div>' +
+      '<div class="mxG">' + ringHtml(u.week || 0, u.max_week) + '<div><label>Questa settimana</label><span>' + (u.max_week ? Math.max(0, u.max_week - (u.week || 0)) + ' ancora disponibili' : 'senza limite') + '</span></div></div>';
+    body.appendChild(gs);
+    var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
+    var acts = el('div', 'mxActs');
+    if (tpl) {
+      var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today;
+      var rn = btn('Rinnova' + (tpl.price_eur != null ? ' · ' + eur(tpl.price_eur) : ''), 'mxPrim', function () {
+        rn.disabled = true;
+        act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rn.disabled = false; });
+      });
+      acts.appendChild(rn);
+    }
+    acts.appendChild(btn('Prenota', 'mxGh', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); }));
+    var call = el('a', 'mxGh', 'Chiama'); call.href = 'tel:' + m.phone.replace(/[^\d+]/g, ''); acts.appendChild(call);
+    body.appendChild(acts);
+    var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
+    var pane = el('div', 'mxPane'); body.appendChild(pane);
+    function drawTabs() {
+      tabs.textContent = '';
+      [['pren', 'Prenotazioni'], ['abb', 'Abbonamenti'], ['note', 'Note']].forEach(function (t) { var b = el('button', null, t[1]); b.type = 'button'; b.setAttribute('aria-pressed', S.tab === t[0] ? 'true' : 'false'); b.addEventListener('click', function () { S.tab = t[0]; drawTabs(); drawPane(); }); tabs.appendChild(b); });
+    }
+    function evRow(x, past) {
+      var d = parse(x.date), r = el('div', 'mxEv' + (past && x.no_show ? ' ns' : ''));
+      r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(x.name) + '</b><span>' + esc(x.time) + (past ? (x.no_show ? ' · assente' : ' · presente') : ' · prenotato') + '</span></span>';
+      if (past) r.appendChild(el('span', 'gxChip ' + (x.no_show ? 'bad' : 'ok'), x.no_show ? 'Assente' : 'Presente'));
+      else r.appendChild(btn('Togli', 'ghost sm', function () { confirmBar(pane, 'Togliere ' + x.name + ' del ' + short(x.date) + '? Se aveva usato un ingresso, gli torna.', function () { act(x.kind === 'pt' ? { action: 'pt_cancel', booking_id: x.id, member_id: id } : { action: 'booking_cancel', booking_id: x.id, member_id: id }, 'Tolto.').then(function () { S.mcache = {}; return reload(); }); }); }));
+      return r;
+    }
+    function drawPane() {
+      pane.textContent = '';
+      if (S.tab === 'pren') {
+        var cache = (S.mcache = S.mcache || {});
+        var fill = function (j) {
+          pane.textContent = '';
+          pane.appendChild(el('div', 'mxSec', 'In programma'));
+          var l1 = el('div', 'mxLs'); if (!j.upcoming.length) l1.appendChild(el('div', 'mxEmpty', 'Nessuna prenotazione in programma.')); j.upcoming.slice(0, 12).forEach(function (x) { l1.appendChild(evRow(x, false)); }); pane.appendChild(l1);
+          pane.appendChild(el('div', 'mxSec', 'Ultime presenze'));
+          var l2 = el('div', 'mxLs'); if (!j.past.length) l2.appendChild(el('div', 'mxEmpty', 'Ancora nessuna lezione.')); j.past.slice(0, 10).forEach(function (x) { l2.appendChild(evRow(x, true)); }); pane.appendChild(l2);
+        };
+        if (cache[id]) fill(cache[id]);
+        else { pane.appendChild(el('div', 'mxEmpty', 'Carico le prenotazioni...')); api(null, API + '&member=' + encodeURIComponent(id)).then(function (j) { cache[id] = j; if (S.mid === id && S.tab === 'pren') fill(j); }).catch(function () { pane.textContent = ''; }); }
+      } else if (S.tab === 'abb') {
+        var paid = m.plans.reduce(function (t, p) { return t + (Number(p.price_paid) || 0); }, 0);
+        var tot2 = el('div', 'mxTot'); tot2.innerHTML = '<div><span>Totale versato</span><b>' + eur(paid) + '</b></div><span class="gxChip ok">' + m.plans.length + (m.plans.length === 1 ? ' abbonamento' : ' abbonamenti') + '</span>'; pane.appendChild(tot2);
+        var ls = el('div', 'mxLs'); if (!m.plans.length) ls.appendChild(el('div', 'mxEmpty', 'Nessun abbonamento.'));
+        m.plans.slice(0, 12).forEach(function (p) {
+          var d = parse(p.starts_on || S.data.today), r = el('div', 'mxEv');
+          r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.plan_name) + '</b><span>' + (p.kind === 'time' ? short(p.starts_on) + ' → ' + short(p.ends_on) : p.entries_left + ' ingressi rimasti') + '</span></span><b>' + (p.price_paid != null ? eur(p.price_paid) : '') + '</b>';
+          ls.appendChild(r);
         });
-        rn.style.marginTop = '12px'; w.appendChild(rn);
-      }
-      var up = el('div'); w.appendChild(up);
-      up.appendChild(el('div', 'gxM', 'Carico le prenotazioni...'));
-      api(null, API + '&member=' + encodeURIComponent(id)).then(function (j) {
-        up.textContent = '';
-        function lst(title, a, empty, past) {
-          up.appendChild(el('div', 'gmSec', title));
-          var box = el('div', 'gmList');
-          if (!a.length) box.appendChild(el('div', 'gmEmpty', empty));
-          a.slice(0, 6).forEach(function (x) {
-            var row = el('div', 'gmRow' + (past && x.no_show ? ' ns' : ''));
-            row.innerHTML = '<span class="gmDot ' + (x.kind === 'pt' ? 'pt' : '') + '"></span><span class="gmWhat"><b>' + esc(x.name) + '</b><small>' + short(x.date) + ' · ' + esc(x.time) + '</small></span>' + (past && x.no_show ? '<span class="gxChip bad">Assente</span>' : '');
-            box.appendChild(row);
-          });
-          up.appendChild(box);
+        pane.appendChild(ls);
+        var ac = el('div', 'mxManage');
+        ac.appendChild(btn('Nuovo abbonamento', 'ghost sm', function () { newPlan(m); }));
+        if (cur) {
+          ac.appendChild(btn(cur.kind === 'time' ? 'Cambia scadenza' : 'Cambia ingressi', 'ghost sm', function () { editPlan(cur, function () { }); }));
+          ac.appendChild(btn('Annulla abbonamento', 'danger sm', function () { confirmBar(pane, 'Annullare l\'abbonamento in corso?', function () { act({ action: 'member_plan_update', id: cur.id, cancelled: true }, 'Annullato.').then(function () { return reload(); }); }); }));
         }
-        lst('Prossime prenotazioni', j.upcoming, 'Nessuna prenotazione in programma.', false);
-        lst('Ultime presenze', j.past, 'Ancora nessuna lezione.', true);
-      }).catch(function () { up.textContent = ''; });
-      var older = m.plans.filter(function (p) { return p !== cur; });
-      if (older.length) {
-        w.appendChild(el('div', 'gmSec', 'Abbonamenti precedenti'));
-        var ob = el('div', 'gmList');
-        older.slice(0, 4).forEach(function (p) { var row = el('div', 'gmRow'); row.innerHTML = '<span class="gmWhat"><b>' + esc(p.plan_name) + '</b><small>' + (p.kind === 'time' ? short(p.starts_on) + ' – ' + short(p.ends_on) : p.entries_left + ' ingressi rimasti') + '</small></span><span class="gxChip ' + (p.valid ? 'ok' : 'none') + '">' + (p.valid ? 'Valido' : 'Concluso') + '</span>'; ob.appendChild(row); });
-        w.appendChild(ob);
+        pane.appendChild(ac);
+      } else {
+        pane.appendChild(el('div', 'mxNote', m.notes ? m.notes : 'Nessuna nota. Puoi scrivere ad esempio infortuni da tenere presenti, obiettivi o accordi particolari.'));
+        var ac3 = el('div', 'mxManage');
+        ac3.appendChild(btn(m.notes ? 'Modifica note e dati' : 'Aggiungi una nota', 'ghost sm', function () { memberForm(m); }));
+        ac3.appendChild(btn('Elimina iscritto', 'danger sm', function () { confirmBar(pane, 'Eliminare ' + m.first_name + ' ' + m.last_name + '? Le sue prenotazioni future vengono tolte.', function () { act({ action: 'member_delete', id: m.id }, 'Eliminato.').then(function () { S.mid = null; return reload(); }); }); }));
+        pane.appendChild(ac3);
       }
-      var ac2 = el('div', 'gmFoot');
-      ac2.appendChild(btn('Nuovo abbonamento', 'ghost sm', function () { close(); newPlan(m); }));
-      ac2.appendChild(btn('Modifica dati', 'ghost sm', function () { close(); memberForm(m); }));
-      var del = btn('Elimina iscritto', 'danger sm', function () { confirmBar(w, 'Eliminare ' + m.first_name + ' ' + m.last_name + '? Le sue prenotazioni future vengono tolte.', function () { act({ action: 'member_delete', id: m.id }, 'Eliminato.').then(function () { close(); return reload(); }); }); });
-      ac2.appendChild(del); w.appendChild(ac2);
-    });
+    }
+    drawTabs(); drawPane();
   }
   function editPlan(p, closeParent) {
     sheet(p.plan_name, function (w, close) {
@@ -391,7 +439,7 @@
       ps.addEventListener('change', upd); upd();
       w.appendChild(field('Tipo', ps)); w.appendChild(info);
       var two = el('div', 'gxTwo'); two.appendChild(field('Inizia il', st)); two.appendChild(field('Pagato (€)', pr)); w.appendChild(two);
-      w.appendChild(btn('Aggiungi', 'block', function () { act({ action: 'member_plan_add', member_id: m.id, plan_id: ps.value, starts_on: st.value, price_paid: pr.value }, 'Abbonamento aggiunto.').then(function () { close(); return reload().then(function () { memberSheet(m.id); }); }); }));
+      w.appendChild(btn('Aggiungi', 'block', function () { act({ action: 'member_plan_add', member_id: m.id, plan_id: ps.value, starts_on: st.value, price_paid: pr.value }, 'Abbonamento aggiunto.').then(function () { close(); return reload(); }); }));
     });
   }
 
