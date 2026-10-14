@@ -195,3 +195,19 @@
 .mxKp button{box-shadow:0 8px 22px -16px rgba(0,0,0,.5)}
 .mxSearch{box-shadow:0 8px 22px -18px rgba(0,0,0,.5)}
 @media(max-width:700px){.mxRow{padding:12px 14px 12px 18px;min-height:72px}.mxCh{display:none}.mxTable{border-radius:20px}}
+
+/* ===== scheda singolo iscritto: più piccola ===== */
+.mx.mxD{max-width:760px;padding-top:4px}
+.mxD .mxHero{padding:14px 16px 16px;border-radius:20px}
+.mxD .mxHero h2{margin-top:12px;font-size:1.5rem}
+.mxD .mxTel{font-size:.88rem}
+.mxD .mxPl{margin-top:14px}.mxD .mxPl b{font-size:1.02rem}
+.mxD .mxTl{margin-top:14px}
+.mxD .mxBack{padding:6px 12px;font-size:.8rem}
+.mxD .mxBody{padding-top:12px}
+.mxD .mxGauges{gap:10px}
+.mxD .mxG{padding:10px 12px;gap:12px;border-radius:16px}
+.mxD .mxRing{width:50px;height:50px}.mxD .mxRing b{font-size:.82rem}
+.mxD .mxActs{margin:12px 0 2px;gap:8px}.mxD .mxActs>*{min-height:42px;border-radius:12px;font-size:.88rem}
+.mxD .mxTabs{margin:14px 0 10px}.mxD .mxTabs button{min-height:34px;font-size:.82rem}
+.mxD .mxEv{padding:10px 14px}.mxD .mxTot{padding:11px 14px}.mxD .mxTot b{font-size:1.2rem}
