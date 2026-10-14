@@ -262,7 +262,8 @@
   function expTxt(dl) { return dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : 'tra ' + dl + ' giorni'; }
   function avRing(m) {
     var u = m.usage || {}, r = 19, c = 2 * Math.PI * r, p = u.max_period ? Math.min(1, (u.period || 0) / u.max_period) : 0;
-    return '<span class="mxAv s-' + m.status.s + '"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3"/><circle class="p" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span>';
+    var hh = 0, nm = m.first_name + m.last_name; for (var i = 0; i < nm.length; i++) hh = (hh * 31 + nm.charCodeAt(i)) % 360;
+    return '<span class="mxAv s-' + m.status.s + '" style="--h:' + hh + '"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3"/><circle class="p" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span>';
   }
   function renderMem() {
     xMem.textContent = '';
@@ -301,10 +302,10 @@
       var shown = (S.more || qq) ? ms : ms.slice(0, 30);
       shown.forEach(function (m) {
         var cur = curPlan(m), dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, u = m.usage || {};
-        var r = el('button', 'mxRow'); r.type = 'button';
+        var r = el('button', 'mxRow st-' + m.status.s); r.type = 'button';
         r.innerHTML = '<span class="mxC mxN">' + avRing(m) + '<b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
           '<span class="mxC mxP">' + esc(m.phone) + '</span>' +
-          '<span class="mxC mxA"><b>' + (cur ? esc(cur.plan_name) : '—') + '</b>' + (cur && u.max_period ? '<small>' + (u.period || 0) + '/' + u.max_period + ' ingressi</small>' : '') + '</span>' +
+          '<span class="mxC mxA"><b class="mxPill">' + (cur ? esc(cur.plan_name) : '—') + '</b>' + (cur && u.max_period ? '<small>' + (u.period || 0) + '/' + u.max_period + ' ingressi</small>' : '') + '</span>' +
           '<span class="mxC mxE"><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span>' + (cur && cur.ends_on ? '<small' + (dl != null && dl <= (S.data.settings.expiry_days || 5) ? ' class="hot"' : '') + '>' + short(cur.ends_on) + ' · ' + expTxt(dl) + '</small>' : '<small>Nessun abbonamento</small>') + '</span>' +
           '<span class="mxCh">›</span>';
         r.addEventListener('click', function () { S.mid = m.id; S.tab = 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }); tbl.appendChild(r);
