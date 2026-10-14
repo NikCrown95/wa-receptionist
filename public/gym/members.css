@@ -159,3 +159,39 @@
 .mxE small{font-size:.86rem}
 .mxCh{font-size:1.5rem}
 @media(max-width:700px){.mxRow{min-height:70px;padding:11px 14px}.mxAv{width:42px;height:42px}.mxKp button{display:block}.mxKp b{font-size:1.5rem}}
+
+/* ===== v4: stile "crow" di Prenolia — ogni iscritto è una card ===== */
+.mxKp button,.mxKp button.w,.mxKp button.b{background:var(--card);border:1px solid var(--line);box-shadow:none}
+.mxKp button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mxKp button.w b{color:var(--warn,#E0A23A)}.mxKp button.b b{color:var(--danger)}
+.mxTable{background:transparent;border:0;border-radius:0;overflow:visible;display:flex;flex-direction:column;gap:10px}
+.mxTh{background:transparent;border:0;height:auto;padding:4px 20px}
+.mxRow{background:var(--card);border:1px solid var(--line)!important;border-radius:18px;min-height:76px;padding:12px 20px}
+.mxRow:hover,.mxRow:active{background:var(--card2);border-color:var(--accent)!important}
+.mxRow:last-of-type{border-bottom:1px solid var(--line)!important}
+.mxAv,.mxAv.s-warn,.mxAv.s-bad,.mxAv.s-none{background:var(--accent-soft);color:var(--accent-ink)}
+.mxAv.s-warn{background:color-mix(in srgb,var(--warn,#E0A23A) 22%,var(--card))!important;color:var(--warn,#E0A23A)}
+.mxAv.s-bad{background:color-mix(in srgb,var(--danger) 20%,var(--card))!important;color:var(--danger)}
+.mxP{color:var(--accent-ink)}
+.mxPill{background:transparent;padding:0;border-radius:0;font-size:.98rem!important}
+.mxMore{margin-top:2px}
+
+/* ===== v5: struttura v3 (tabella unica), estetica rifinita ===== */
+.mxTable{background:var(--card);border:1px solid var(--line);border-radius:24px;overflow:hidden;display:block;gap:0;box-shadow:0 12px 32px -18px rgba(0,0,0,.45)}
+.mxTh{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 14%,var(--card2)),var(--card2));border-bottom:1px solid var(--line);height:50px;padding:0 24px}
+.mxRow{background:transparent;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0;min-height:82px;padding:12px 24px;transition:background .15s}
+.mxRow:last-of-type{border-bottom:0!important}
+.mxRow:hover,.mxRow:active{background:color-mix(in srgb,var(--accent) 8%,var(--card));border-color:var(--line)!important}
+.mxRow::before{display:block;content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:var(--accent)}
+.mxRow.st-warn::before{background:var(--warn,#E0A23A)}.mxRow.st-bad::before{background:var(--danger)}.mxRow.st-none::before{background:var(--line2)}
+.mxAv{width:50px;height:50px;font-size:.95rem;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent)}
+.mxN b{font-size:1.12rem;letter-spacing:-.01em}
+.mxP{font-weight:600;font-variant-numeric:tabular-nums}
+.mxPill{display:inline-block!important;padding:5px 13px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,var(--card2));border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);font-size:.9rem!important;font-weight:700}
+.mxA small{margin-top:5px}
+.mxE .gxChip{font-size:.8rem;padding:4px 11px;font-weight:800}
+.mxCh{width:32px;height:32px;display:grid;place-items:center;justify-self:end;border-radius:50%;background:var(--card2);font-size:1.3rem;line-height:1}
+.mxRow:hover .mxCh{background:var(--accent);color:var(--on-accent)}
+.mxKp button{box-shadow:0 8px 22px -16px rgba(0,0,0,.5)}
+.mxSearch{box-shadow:0 8px 22px -18px rgba(0,0,0,.5)}
+@media(max-width:700px){.mxRow{padding:12px 14px 12px 18px;min-height:72px}.mxCh{display:none}.mxTable{border-radius:20px}}
