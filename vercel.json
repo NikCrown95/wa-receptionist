@@ -23,6 +23,10 @@
     {
       "path": "/api/closures-reminder",
       "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/billing-reminders",
+      "schedule": "30 7 * * *"
     }
   ],
   "headers": [

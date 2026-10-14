@@ -444,7 +444,7 @@ window.startClients = function(){
     if (c.status === 'none') {
       add('Assegna piano Base (39,99 €/mese)', 'ghost', { action: 'assign_plan', plan: 'base' });
       add('Assegna piano Smart (24,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
-      add('Smart in prova per 30 giorni', 'ghost', { action: 'assign_plan', plan: 'ai', status: 'trial' });
+      add('Smart in prova gratuita (14 giorni)', 'ghost', { action: 'assign_plan', plan: 'ai', status: 'trial' });
     } else if (c.status === 'cancelled') {
       add('Riattiva (1 mese da oggi)', '', { action: 'reactivate' }, 'Riattivare ' + c.name + ' per 1 mese a partire da oggi?');
     } else {
