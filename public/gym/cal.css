@@ -133,63 +133,6 @@
 .gcActs{margin-bottom:10px}
 @media (max-width:520px){.gcCtl{flex-direction:column;align-items:stretch}.gcSeg{display:flex}.gcSeg button{flex:1}.gcRng{justify-content:space-between}.gcRng .gcRange{flex:1;text-align:center}}
 
-/* ---- iscritti ---- */
-.gmGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.gmCard{display:flex;flex-direction:column;gap:14px;text-align:left;width:100%;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);color:inherit;font:inherit;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 8px 20px -14px rgba(0,0,0,.5);transition:transform .12s,border-color .12s}
-.gmCard:active{transform:scale(.99)}
-.gmCard:hover{border-color:var(--line2)}
-.gmTop{display:flex;align-items:center;gap:12px;min-width:0}
-.gmAv{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-family:Manrope,sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.02em;background:var(--card2);color:var(--muted)}
-.gmAv.big{width:54px;height:54px;border-radius:18px;font-size:1.1rem}
-.gmAv.s-ok{background:color-mix(in srgb,var(--live,#22E66B) 16%,transparent);color:var(--live,#22E66B)}
-.gmAv.s-warn{background:color-mix(in srgb,#F2B84B 20%,transparent);color:#E0A23A}
-.gmAv.s-bad{background:color-mix(in srgb,var(--danger,#FF6B6B) 16%,transparent);color:var(--danger,#FF6B6B)}
-.gmId{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.gmId b{font-family:Manrope,sans-serif;font-size:1rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gmId small{color:var(--muted);font-size:.8rem}
-.gmStats{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px;padding-top:12px;border-top:1px solid var(--line)}
-.gmStats>div{display:flex;flex-direction:column;gap:3px;min-width:0}
-.gmStats label,.gmDates label,.gmUh label{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.gmStats b{font-family:Manrope,sans-serif;font-size:1.02rem;font-weight:800}
-.gmStats b i,.gmUh b i{font-style:normal;font-weight:600;color:var(--muted);font-size:.8em}
-.gmStats small{font-size:.74rem;color:var(--muted)}
-.gmStats small.hot,.gmLeft.hot{color:#E0A23A;font-weight:700}
-.gmMeter{display:block;height:6px;border-radius:9px;background:var(--line2);overflow:hidden;margin-top:3px}
-.gmMeter i{display:block;height:100%;border-radius:9px;background:var(--accent)}
-.gmMeter i.f{background:#E0A23A}
-.gmNone{padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:.84rem}
-/* scheda */
-.gmHead{display:flex;align-items:center;gap:14px;margin:2px 0 6px}
-.gmHid{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.gmHid h3{margin:0;font-family:Manrope,sans-serif;font-size:1.3rem;font-weight:800;line-height:1.15}
-.gmHid a{color:var(--accent-ink);font-weight:600;font-size:.9rem;text-decoration:none}
-.gmHid small{color:var(--muted);font-size:.8rem}
-.gmSec{margin:22px 0 8px;font-size:.7rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.gmPanel{padding:16px;border-radius:18px;background:var(--card2);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
-.gmPlan{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.gmPlan b{font-family:Manrope,sans-serif;font-size:1.05rem;font-weight:800}
-.gmPlan span{color:var(--muted);font-weight:700}
-.gmDates{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gmDates>div{display:flex;flex-direction:column;gap:3px}
-.gmDates b{font-family:Manrope,sans-serif;font-size:1.05rem;font-weight:800}
-.gmArrow{color:var(--muted);font-size:1.1rem}
-.gmLeft{margin-left:auto;padding:5px 11px;border-radius:99px;background:var(--card);font-size:.76rem;font-weight:700;color:var(--muted)}
-.gmLeft.hot{background:color-mix(in srgb,#F2B84B 20%,transparent)}
-.gmUse{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:14px;border-top:1px solid var(--line)}
-.gmUh{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
-.gmUh b{font-family:Manrope,sans-serif;font-weight:800;font-size:1rem}
-.gmList{display:flex;flex-direction:column;border-radius:16px;background:var(--card);border:1px solid var(--line);overflow:hidden}
-.gmRow{display:flex;align-items:center;gap:12px;padding:12px 14px}
-.gmRow+.gmRow{border-top:1px solid var(--line)}
-.gmDot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--accent)}
-.gmDot.pt{background:#E0A23A}
-.gmWhat{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.gmWhat b{font-size:.92rem;font-weight:700}
-.gmWhat small{color:var(--muted);font-size:.78rem}
-.gmEmpty{padding:14px;color:var(--muted);font-size:.85rem}
-.gmFoot{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
-@media (max-width:420px){.gmStats{grid-template-columns:1fr 1fr}.gmStats>div:first-child{grid-column:1/-1}.gmUse{grid-template-columns:1fr}}
-
 /* ---- innesto del calendario di Lia (cal-core.css) ---- */
 .gcx{--fd:'Manrope','Plus Jakarta Sans',sans-serif;color:var(--ink)}
 .gcx .gcal{padding:0;max-width:none;margin:0;width:100%;flex:none}

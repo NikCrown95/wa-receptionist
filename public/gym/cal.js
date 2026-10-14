@@ -457,8 +457,8 @@
   }
 
   // ---------- nuova prenotazione (da un iscritto alla prima lezione utile) ----------
-  function openNew() {
-    pickMember('Nuova prenotazione', noSub, function (m) {
+  function openNew(pre) {
+    var run = function (m) {
       var from = today(), to = addDays(today(), 7);
       var show = function () {
         var slots = [];
@@ -485,8 +485,10 @@
         });
       };
       if (have(from, to, true)) show(); else fetchRange(from, to, false).then(show).catch(function (e) { G.toast(e.message, 'bad'); });
-    });
+    };
+    if (pre) run(pre); else pickMember('Nuova prenotazione', noSub, run);
   }
+  window.liaGymBookFor = function (id) { var m = G.S.data && G.S.data.members.filter(function (x) { return x.id === id; })[0]; if (m) openNew(m); };
 
   // ---------- pulsante + (telefono, vista mese) ----------
   var fab = el('button', 'gxFab gcFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = G.ic('plus', 26); document.body.appendChild(fab);
