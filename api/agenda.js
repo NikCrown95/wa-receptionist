@@ -31,6 +31,26 @@ function pageVariant(key, html) {
   return v;
 }
 // Tipo di attivita' per codice, ricordato qualche minuto: evita una richiesta al database a ogni apertura della pagina.
+// Campanella delle palestre: aggiunge l'avviso "abbonamento in scadenza" (le altre attività non vengono toccate).
+function patchGymBell(html) {
+  const pairs = [
+    ["function alive(e){return Date.now()-new Date(e.created_at).getTime()<LIFE}", "function alive(e){return e.type==='sub_expiring'||Date.now()-new Date(e.created_at).getTime()<LIFE}"],
+    ["function kcls(e){return e.type==='feedback_ask'?'r':", "function kcls(e){return e.type==='sub_expiring'?'k':e.type==='feedback_ask'?'r':"],
+    ["function kic(e){return e.type==='feedback_ask'?IC_FB:", "function kic(e){return e.type==='sub_expiring'?IC_CAL:e.type==='feedback_ask'?IC_FB:"],
+    ["function ttl(e){return e.type==='feedback_ask'?", "function ttl(e){return e.type==='sub_expiring'?'Abbonamento in scadenza':e.type==='feedback_ask'?"],
+    ["var sp=el('span');if(e.type==='feedback_ask'){", "var sp=el('span');if(e.type==='sub_expiring'){var dl=e.meta?e.meta.days_left:0;sp.appendChild(document.createTextNode((e.customer_name||'')+' \u00b7 '+(dl<=0?'scade oggi':dl===1?'scade domani':'scade tra '+dl+' giorni')))}else if(e.type==='feedback_ask'){"],
+    ["if(e.type==='closures_reminder')tx.appendChild(el('em',null,'Apri Chiusure e ferie", "if(e.type==='sub_expiring')tx.appendChild(el('em',null,'Apri la scheda \u203a'));if(e.type==='closures_reminder')tx.appendChild(el('em',null,'Apri Chiusure e ferie"],
+    ["tx.appendChild(el('small',null,ago(e.created_at)+", "tx.appendChild(el('small',null,(e.type==='sub_expiring'&&e.meta?'Scade il '+new Date(e.meta.ends_on+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long'}):ago(e.created_at))+"],
+    ["e.type==='feedback_ask'?'Dicci come ti trovi':", "e.type==='sub_expiring'?(e.customer_name||''):e.type==='feedback_ask'?'Dicci come ti trovi':"],
+    ["if(e.type==='feedback_ask'){if(window.liaFeedbackOpen)window.liaFeedbackOpen(true);return}", "if(e.type==='sub_expiring'){if(window.liaGymMember)window.liaGymMember(e.meta&&e.meta.member_id);return}if(e.type==='feedback_ask'){if(window.liaFeedbackOpen)window.liaFeedbackOpen(true);return}"],
+  ];
+  let out = html;
+  for (const [a, b] of pairs) {
+    if (out.indexOf(a) < 0) { console.error("patchGymBell: frammento non trovato: " + a.slice(0, 50)); continue; }
+    out = out.replace(a, () => b);
+  }
+  return out;
+}
 const bizTypeCache = new Map();
 const BIZ_TYPE_TTL = 10 * 60 * 1000;
 async function businessTypeCached(token) {
@@ -109,7 +129,7 @@ function addDays(dateStr, n) {
 
 async function getBusinessByToken(token) {
   if (!/^[a-f0-9]{32,128}$/.test(token)) return null;
-  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,timezone,team_mode,created_at,business_type");
+  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,timezone,team_mode,created_at,business_type,booking_rules");
   if (!r.ok || !Array.isArray(r.data) || !r.data.length) return null;
   return r.data[0];
 }
@@ -305,7 +325,7 @@ module.exports = async (req, res) => {
         const bt = await businessTypeCached(gt);
         if (bt === "palestra") {
           variantKey = "gym";
-          html = PAGE_READY.replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=1"><body>').replace("</body>", '<script src="/gym/gym.js?v=1"></script></body>');
+          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=3"><link rel="stylesheet" href="/gym/cal.css?v=3"><body>').replace("</body>", '<script src="/gym/gym.js?v=3"></script><script src="/gym/cal.js?v=3"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }
@@ -1086,8 +1106,14 @@ module.exports = async (req, res) => {
       let ev = await sb("GET", evBase + ",meta");
       if (!ev.ok && ev.status === 400) ev = await sb("GET", evBase); // colonna meta non ancora creata: la campanella funziona come prima
       if (ev.ok && Array.isArray(ev.data)) {
-        const evList = ev.data.filter(function (e) { return !fbEv || e.id !== fbEv.id; }).concat(fbEv ? [{ id: fbEv.id, event_type: "feedback_ask", created_at: fbEv.created_at, meta: fbEv.meta || null }] : []).sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
-        return res.status(200).json({ mode: "events", now: new Date().toISOString(), events: evList.map(function (e) { return { id: "e" + e.id, type: e.event_type, customer_name: e.customer_name || "", service: e.service_name || "", starts_at: e.starts_at, channel: e.channel || "", created_at: e.created_at, meta: e.meta || null }; }) });
+        let subEv = [];
+        if (biz.business_type === "palestra") {
+          try {
+            subEv = (await require("../lib/palestra.js").expiringEvents(biz)).map(function (x) { return { id: x.id, event_type: "sub_expiring", customer_name: x.customer_name, service_name: x.service_name, starts_at: x.starts_at, created_at: x.created_at, meta: { member_id: x.member_id, ends_on: x.ends_on, days_left: x.days_left, phone: x.customer_phone } }; });
+          } catch (e) { console.error("Abbonamenti in scadenza non letti: " + e.message); }
+        }
+        const evList = ev.data.filter(function (e) { return !fbEv || e.id !== fbEv.id; }).concat(fbEv ? [{ id: fbEv.id, event_type: "feedback_ask", created_at: fbEv.created_at, meta: fbEv.meta || null }] : []).concat(subEv).sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
+        return res.status(200).json({ mode: "events", now: new Date().toISOString(), events: evList.map(function (e) { return { id: String(e.id).indexOf("sub:") === 0 ? e.id : "e" + e.id, type: e.event_type, customer_name: e.customer_name || "", service: e.service_name || "", starts_at: e.starts_at, channel: e.channel || "", created_at: e.created_at, meta: e.meta || null }; }) });
       }
       if (ev.status !== 404) return res.status(500).json({ error: "Errore nella lettura delle notifiche" });
       // Tabella non ancora creata: mostra solo le nuove prenotazioni (le cancellazioni non hanno una data registrata)
