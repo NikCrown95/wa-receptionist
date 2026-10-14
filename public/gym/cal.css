@@ -201,3 +201,18 @@
 .gcx .gcSel{height:34px;border-radius:11px;border:1px solid var(--line2);background:var(--card);color:var(--ink);padding:0 12px;font:inherit;font-size:.84rem}
 .gcx .msRow[disabled]{opacity:.5}
 @media(max-width:699px){.gcx .controls .jumpToday.gProg{display:none}}
+
+/* scorrimento del pannello del giorno: scorre tutto il pannello, non solo l'elenco */
+.gcx .msBody,.gcx .wkSBody{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+.gcx .msBody>*,.gcx .wkSBody>*{flex:none}
+.gcx .msList,.gcx .wkList{overflow:visible;flex:none;min-height:auto;margin:0;padding:0}
+.gcx .msBody{padding-bottom:14px}
+.gxSheet{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+/* caricamento: sagome al posto della scritta */
+.gcSk{display:grid;gap:10px}
+.gcSkM{grid-template-columns:repeat(7,1fr);padding:6px 0}
+.gcSkM i{height:64px;border-radius:14px}
+.gcSkL i{height:78px;border-radius:16px}
+.gcSk i{background:linear-gradient(100deg,var(--card) 30%,var(--card2) 50%,var(--card) 70%);background-size:300% 100%;animation:gcSh 1.3s linear infinite;border:1px solid var(--line)}
+@keyframes gcSh{from{background-position:100% 0}to{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.gcSk i{animation:none}}

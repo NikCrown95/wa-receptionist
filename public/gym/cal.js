@@ -75,9 +75,9 @@
     token++;
     var my = token;
     root.className = 'gcx ' + (S.view === 'month' ? 'monthMode' : S.view === 'week' ? 'weekMode' : 'dayMode') + (S.view === 'week' && S.wkOpen && !phone() ? ' wkOpen' : '') + (S.view === 'month' && S.sideOpen && phone() ? ' sideOpen' : '');
-    if (!G.S.data) { root.innerHTML = ''; root.appendChild(el('div', 'gxEmpty', 'Carico...')); G.load().then(function () { if (my === token) render(); }).catch(function (e) { root.textContent = ''; root.appendChild(el('div', 'gxWhy', e.message)); }); return; }
+    if (!G.S.data) G.load().catch(function () {});
     var r = range();
-    root.innerHTML = controlsHTML() + '<div class="cal-wrap"><div class="cal-card" id="gcBody"><div class="gxEmpty">Carico...</div></div></div>';
+    root.innerHTML = controlsHTML() + '<div class="cal-wrap"><div class="cal-card" id="gcBody">' + skel() + '</div></div>';
     bindControls();
     toggleFab();
     ensure(r.from, r.to, r.full, function () {
@@ -92,6 +92,10 @@
       if (!have(S.sel, S.sel, true)) { var my2 = token; fetchRange(S.sel, S.sel, false).then(function () { if (my2 === token) drawMonth(); }).catch(drawMonth); return; }
       drawMonth();
     });
+  }
+  function skel() {
+    if (S.view === 'month') { var c = ''; for (var i = 0; i < 35; i++) c += '<i></i>'; return '<div class="gcSk gcSkM">' + c + '</div>'; }
+    return '<div class="gcSk gcSkL"><i></i><i></i><i></i><i></i></div>';
   }
   function rangeTxt() {
     var y = function (t) { return ' <span class="rangeYear">' + t + '</span>'; };
@@ -363,6 +367,7 @@
   // ---------- scelta dell'iscritto ----------
   function memberChip(m) { return '<span class="gcChip ' + (m.status.s === 'none' ? 'none' : m.status.s) + '">' + esc(m.status.label) + '</span>'; }
   function pickMember(title, reason, onPick, onBack) {
+    if (!G.S.data) { G.load().then(function () { pickMember(title, reason, onPick, onBack); }).catch(function (e) { G.toast(e.message, 'bad'); }); return; }
     var q = '';
     G.sheet(title, function (w, close) {
       var inp = G.inp('search', '', 'Cerca per nome o telefono'); inp.className = 'gxSearch'; w.appendChild(inp);
@@ -497,10 +502,15 @@
   };
   document.addEventListener('lia:section', function (e) {
     sectionOn = e.detail === 'cal'; toggleFab();
-    if (sectionOn) { bust(); render(); }
+    if (sectionOn) { render(); revalidate(); }
   });
   document.addEventListener('lia:gymchanged', function () { bust(); if (sectionOn) render(); });
   var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (sectionOn) render(); }, 200); });
+  function snap() { var r = range(), o = []; for (var d = r.from; d <= r.to; d = addDays(d, 1)) o.push(C[d]); return JSON.stringify(o); }
+  function revalidate() {
+    var r = range(), before = snap();
+    fetchRange(r.from, r.to, !r.full).then(function () { if (sectionOn && !document.querySelector('.gxShade') && snap() !== before) render(); }).catch(function () {});
+  }
   // aggiorna da solo ogni minuto, senza disturbare se c'è una finestra aperta
   setInterval(function () {
     if (!sectionOn || document.visibilityState === 'hidden' || document.querySelector('.gxShade')) return;
