@@ -133,3 +133,29 @@
 @media(max-width:700px){.mx{padding-left:14px;padding-right:14px}.mxHead h1{font-size:1.8rem}.mxKp b{font-size:1.7rem}.mxKp button{padding:14px}.mxRow{min-height:78px;padding:12px 14px 12px 18px}.mxN b{font-size:1.05rem}.mxAv{width:48px;height:48px}.mxPill{padding:3px 10px;font-size:.82rem!important}}
 .gx.mx,.gx:has(>.mx){max-width:1360px}
 .gx.mx{padding-left:24px;padding-right:24px}
+
+/* ===== v3: più compatta, colori solo Prenolia, significato = stato ===== */
+.gx.mx,.gx:has(>.mx){max-width:1120px}
+.mxKp{gap:12px}
+.mxKp button{padding:14px 18px;border-radius:18px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.mxKp b{font-size:2rem;display:inline-block}
+.mxKp span{font-size:.92rem}
+.mxSearch{height:50px}
+.mxTable{border-radius:22px}
+.mxTh{height:48px;background:var(--card2)}
+.mxTh,.mxRow{gap:16px;padding:0 22px}
+.mxRow{min-height:78px}
+.mxRow::before{display:none}
+.mxRow{border-left:0}
+.mxN b{font-size:1.08rem}
+.mxP{font-size:.98rem;opacity:1;color:var(--muted)}
+.mxAv{width:46px;height:46px;font-size:.9rem;background:color-mix(in srgb,var(--accent) 30%,var(--card2));color:var(--ink)}
+.mxAv.s-warn{background:color-mix(in srgb,var(--warn,#E0A23A) 30%,var(--card2))}
+.mxAv.s-bad{background:color-mix(in srgb,var(--danger) 28%,var(--card2))}
+.mxAv.s-none{background:var(--card2)}
+.mxAv svg{inset:-3px;width:calc(100% + 6px);height:calc(100% + 6px)}
+.mxPill{padding:4px 12px;font-size:.9rem!important;background:color-mix(in srgb,var(--accent) 18%,var(--card2))}
+.mxE .gxChip{font-size:.8rem;padding:4px 10px}
+.mxE small{font-size:.86rem}
+.mxCh{font-size:1.5rem}
+@media(max-width:700px){.mxRow{min-height:70px;padding:11px 14px}.mxAv{width:42px;height:42px}.mxKp button{display:block}.mxKp b{font-size:1.5rem}}
