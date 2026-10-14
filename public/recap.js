@@ -212,21 +212,20 @@
 (function () {
   "use strict";
   var mq = window.matchMedia ? window.matchMedia("(max-width:699px)") : null;
-  var MIN = 13, queued = false, seen = new WeakMap();
+  var MIN = 10, queued = false;
 
   function fit(el, maxPx) {
     if (!el) return;
-    var key = (el.textContent || "") + "|" + el.clientWidth + "|" + maxPx;
-    if (seen.get(el) === key) return;
+    /* nessuna cache: va rimisurato ogni volta, perche' dopo il caricamento del font il testo diventa piu' largo
+       a parita' di testo e di larghezza (la cache lasciava il titolo grande e troncato dai puntini) */
     var s = maxPx;
     el.style.setProperty("font-size", s + "px", "important");
     while (el.scrollWidth > el.clientWidth + 0.5 && s > MIN) {
       s -= 0.5;
       el.style.setProperty("font-size", s + "px", "important");
     }
-    seen.set(el, (el.textContent || "") + "|" + el.clientWidth + "|" + maxPx);
   }
-  function reset(el) { if (el) { el.style.removeProperty("font-size"); seen.delete(el); } }
+  function reset(el) { if (el) el.style.removeProperty("font-size"); }
 
   function run() {
     queued = false;
@@ -249,7 +248,12 @@
     window.addEventListener("resize", queue);
     window.addEventListener("orientationchange", queue);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
-    setTimeout(queue, 600);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", queue);
+    try {
+      var ro = new ResizeObserver(queue), r1 = document.querySelector("#calSubApp .controls .range"), r2 = document.getElementById("businessName");
+      if (r1) ro.observe(r1); if (r2) ro.observe(r2);
+    } catch (e) {}
+    setTimeout(queue, 600); setTimeout(queue, 1800);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
