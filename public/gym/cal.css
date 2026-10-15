@@ -311,3 +311,11 @@
 .gcx.gcx .gpw .gpCell.closed{background:color-mix(in srgb,var(--muted) 7%,transparent)!important}
 .gcx.gcx .gpw .gpCell.sel{background:color-mix(in srgb,var(--accent) 7%,transparent)!important}
 .gcx.gcx .gpw .gpRow{border-top:1px solid color-mix(in srgb,var(--ink) 18%,var(--line2));padding-top:8px;margin-top:2px}
+/* settimana: linea verticale sottile tra un giorno e l'altro */
+.gcx.gcx .gpw .gpCell{border-left:1px solid color-mix(in srgb,var(--ink) 18%,var(--line2))!important;padding:6px 5px!important}
+.gcx.gcx .gpw .gpRow{column-gap:0}
+.gcx.gcx .gpw .gpLb{margin-right:8px}
+.gcx.gcx .gpw .gpHd,.gcx.gcx .gpw .gpTot{column-gap:0}
+.gcx.gcx .gpw .gpHd>.gpDh{margin:0 3px}
+.gcx.gcx .gpw .gpHd>div:first-child,.gcx.gcx .gpw .gpTot>div:first-child{margin-right:8px}
+.gcx.gcx .gpw .gpCell.sel,.gcx.gcx .gpw .gpCell.closed{border-left-color:color-mix(in srgb,var(--ink) 18%,var(--line2))!important}
