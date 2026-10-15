@@ -203,7 +203,7 @@
 .gkChip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 
 /* ===== Settimana palestra: una colonna per giorno, lezioni come schede ===== */
-.gcx .gwkScroll{overflow-y:auto;overflow-x:hidden;padding:0!important}
+.gcx .gwkScroll{overflow-y:auto;overflow-x:hidden;padding:6px 0 0!important}
 .gwk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:start;padding:2px 0 24px}
 .gwCol{display:flex;flex-direction:column;gap:8px;min-width:0}
 .gwDh{display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid var(--line2);background:var(--card);border-radius:14px;padding:9px 6px 8px;cursor:pointer;font-family:inherit;color:var(--ink)}

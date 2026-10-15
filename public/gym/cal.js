@@ -372,6 +372,7 @@
         else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gwCol'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
       }
     });
+    var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;
     [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
   }
   function weekPhone() {
