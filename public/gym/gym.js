@@ -16,7 +16,7 @@
   var MS = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
   var CATL = { corsi: 'Corsi', circuiti: 'Circuiti', hyrox: 'Hyrox', pilates: 'Pilates', personal: 'Personal 1:1' };
   var IC = {
-    l: '<path d="M15 6l-6 6 6 6"/>', r: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+    users: '<circle cx="9" cy="8" r="3.3"/><path d="M2.8 20c.4-3.6 3-5.6 6.2-5.6s5.8 2 6.2 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.3.2 3.8 1.8 4.2 4.3"/>', check: '<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.3 9.5"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.3 2"/>', alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.4v.1"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2"/>', dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>', chev: '<path d="m6 9 6 6 6-6"/>', l: '<path d="M15 6l-6 6 6 6"/>', r: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
     card: '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/>',
     cal: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
@@ -269,48 +269,75 @@
     xMem.textContent = '';
     if (!S.data) { xMem.appendChild(el('div', 'gxEmpty', 'Carico...')); return; }
     if (S.mid) { var mm = S.data.members.filter(function (x) { return x.id === S.mid; })[0]; if (mm) { memberPage(mm); return; } S.mid = null; }
-    var root = el('div', 'mx'); xMem.appendChild(root);
-    var cnt = { all: S.data.members.length, warn: 0, bad: 0, none: 0, ok: 0 };
-    S.data.members.forEach(function (m) { if (cnt[m.status.s] != null) cnt[m.status.s]++; });
-    var valid = cnt.ok + cnt.warn;
-    var head = el('div', 'mxHead'); head.innerHTML = '<div><h1>Iscritti</h1><small>' + cnt.all + (cnt.all === 1 ? ' iscritto' : ' iscritti') + ' · ' + valid + ' con abbonamento valido</small></div>';
-    var add = btn('', 'mxAdd', function () { memberForm(); }); add.innerHTML = ic('plus', 16) + '<span>Nuovo iscritto</span>'; head.appendChild(add); root.appendChild(head);
-    var kp = el('div', 'mxKp');
-    [['all', 'Tutti', ''], ['warn', 'In scadenza', 'w'], ['bad', 'Scaduti', 'b']].concat(cnt.none ? [['none', 'Senza abbonamento', 'n']] : []).forEach(function (f) {
-      var b = el('button', f[2]); b.type = 'button'; b.setAttribute('aria-pressed', S.flt === f[0] ? 'true' : 'false');
-      b.innerHTML = '<b>' + cnt[f[0]] + '</b><span>' + f[1] + '</span>';
-      b.addEventListener('click', function () { S.flt = S.flt === f[0] ? 'all' : f[0]; S.more = false; renderMem(); }); kp.appendChild(b);
+    var root = el('div', 'mx mxList'); xMem.appendChild(root);
+    var mem = S.data.members, exd = S.data.settings.expiry_days || 5;
+    var cnt = { all: mem.length, warn: 0, bad: 0, none: 0, ok: 0 };
+    mem.forEach(function (m) { if (cnt[m.status.s] != null) cnt[m.status.s]++; });
+    var valid = cnt.ok + cnt.warn, newM = mem.filter(function (m) { return m.created_at && (new Date(S.data.today).getTime() - new Date(m.created_at).getTime()) / 864e5 <= 30; }).length;
+    function pc(n) { return cnt.all ? Math.round(n / cnt.all * 100) : 0; }
+    var head = el('div', 'mzHead');
+    head.innerHTML = '<div><div class="mzCrumb">' + esc((S.data.business && S.data.business.name) || 'Palestra') + ' / Gestione</div><h1>Iscritti</h1><p>Gestisci iscrizioni e abbonamenti</p></div>';
+    var add = btn('', 'mzAdd', function () { memberForm(); }); add.innerHTML = ic('plus', 18) + '<span>Nuovo iscritto</span>'; head.appendChild(add); root.appendChild(head);
+    function ring(p, c) { return '<span class="mzRing ' + c + '" style="--p:' + p + '"><b>' + p + '%</b></span>'; }
+    var kp = el('div', 'mzKp');
+    [['all', 'users', 'Iscritti', cnt.all, newM ? '<span class="mzUp">↑ +' + newM + '</span><small>ultimi 30 giorni</small>' : '', ''],
+     ['ok', 'check', 'Abbonamenti validi', valid, ring(pc(valid), 'ok'), 'ok'],
+     ['warn', 'clock', 'In scadenza', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'],
+     ['bad', 'alert', 'Scaduti', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
+      var on = k[0] === 'ok' ? S.flt === 'valid' : S.flt === k[0] || (k[0] === 'all' && S.flt === 'all');
+      var b = el('button', 'mzK ' + (k[5] || 'all')); b.type = 'button'; b.setAttribute('aria-pressed', on && k[0] !== 'all' ? 'true' : 'false');
+      b.innerHTML = '<span class="mzKi">' + ic(k[1], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span>' + k[2] + '</span></span><span class="mzKr">' + k[4] + '</span>';
+      b.addEventListener('click', function () { S.flt = k[0] === 'ok' ? (S.flt === 'valid' ? 'all' : 'valid') : k[0] === 'all' ? 'all' : (S.flt === k[0] ? 'all' : k[0]); S.more = false; renderMem(); }); kp.appendChild(b);
     });
     root.appendChild(kp);
-    var sr = el('label', 'mxSearch'); sr.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
-    var q = el('input'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; q.autocomplete = 'off'; sr.appendChild(q); root.appendChild(sr);
-    var tbl = el('div', 'mxTable'); root.appendChild(tbl);
-    var sort = S.sort || (S.sort = { k: 'name', d: 1 });
+    var bar = el('div', 'mzBar');
+    var sr = el('label', 'mzSearch'); sr.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+    var q = el('input'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; q.autocomplete = 'off'; sr.appendChild(q); bar.appendChild(sr);
+    function sel(opts, val, fn) { var w = el('label', 'mzSel'); var x = el('select'); opts.forEach(function (o) { var e = el('option', null, o[1]); e.value = o[0]; if (o[0] === val) e.selected = true; x.appendChild(e); }); x.addEventListener('change', function () { fn(x.value); }); w.appendChild(x); w.insertAdjacentHTML('beforeend', ic('chev', 16)); return w; }
+    var planOpts = [['all', 'Tutti gli abbonamenti']].concat(S.data.plans.map(function (p) { return [p.id, p.name]; }));
+    S.pf = S.pf || 'all'; S.srt = S.srt || 'end';
+    bar.appendChild(sel([['all', 'Tutti gli stati'], ['ok', 'Attivi'], ['valid', 'Validi'], ['warn', 'In scadenza'], ['bad', 'Scaduti']].concat(cnt.none ? [['none', 'Senza abbonamento']] : []), S.flt, function (v) { S.flt = v; S.more = false; renderMem(); }));
+    bar.appendChild(sel(planOpts, S.pf, function (v) { S.pf = v; S.more = false; renderMem(); }));
+    bar.appendChild(sel([['end', 'Scadenza (più vicine)'], ['endd', 'Scadenza (più lontane)'], ['name', 'Nome A-Z'], ['named', 'Nome Z-A']], S.srt, function (v) { S.srt = v; renderMem(); }));
+    root.appendChild(bar);
+    var tbl = el('div', 'mzTable'); root.appendChild(tbl);
     function list() {
       tbl.textContent = '';
       var qq = S.q.trim().toLowerCase();
-      var ms = S.data.members.filter(function (m) { return (S.flt === 'all' || m.status.s === S.flt) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0); });
-      ms.sort(function (a, b) { var x = sortVal(a, sort.k), y = sortVal(b, sort.k); return (x < y ? -1 : x > y ? 1 : 0) * sort.d; });
-      var hd = el('div', 'mxTh');
-      Object.keys(SORTS).forEach(function (k) {
-        var b = el('button', sort.k === k ? 'on' : ''); b.type = 'button'; b.innerHTML = SORTS[k] + '<i>' + (sort.k === k ? (sort.d > 0 ? '↑' : '↓') : '') + '</i>';
-        b.addEventListener('click', function () { if (sort.k === k) sort.d = -sort.d; else { sort.k = k; sort.d = 1; } list(); }); hd.appendChild(b);
+      var ms = mem.filter(function (m) {
+        var cur = curPlan(m), ok = S.flt === 'all' || (S.flt === 'valid' ? (m.status.s === 'ok' || m.status.s === 'warn') : m.status.s === S.flt);
+        return ok && (S.pf === 'all' || (cur && cur.plan_id === S.pf)) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0);
       });
-      hd.appendChild(el('span'));
+      var k = S.srt, d = /d$/.test(k) ? -1 : 1, key = k.indexOf('name') === 0 ? 'name' : 'end';
+      ms.sort(function (a, b) { var x = sortVal(a, key), y = sortVal(b, key); return (x < y ? -1 : x > y ? 1 : 0) * d; });
+      var hd = el('div', 'mzTh'); ['Nome', 'Telefono', 'Abbonamento', 'Ingressi', 'Scadenza', 'Stato', 'Azioni'].forEach(function (h, i) { hd.appendChild(el('span', i === 0 ? 'on' : '', h + (i === 0 && key === 'name' ? (d > 0 ? ' ↑' : ' ↓') : ''))); });
       tbl.appendChild(hd);
-      if (!ms.length) { tbl.appendChild(el('div', 'mxEmpty', S.data.members.length ? 'Nessun risultato.' : 'Ancora nessun iscritto. Aggiungi il primo con "Nuovo iscritto".')); return; }
+      if (!ms.length) { tbl.appendChild(el('div', 'mxEmpty', mem.length ? 'Nessun risultato. Prova a cambiare i filtri.' : 'Ancora nessun iscritto. Aggiungi il primo con "Nuovo iscritto".')); return; }
       var shown = (S.more || qq) ? ms : ms.slice(0, 30);
       shown.forEach(function (m) {
-        var cur = curPlan(m), dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, u = m.usage || {};
-        var r = el('button', 'mxRow st-' + m.status.s); r.type = 'button';
-        r.innerHTML = '<span class="mxC mxN">' + avRing(m) + '<b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
-          '<span class="mxC mxP">' + esc(m.phone) + '</span>' +
-          '<span class="mxC mxA"><b class="mxPill">' + (cur ? esc(cur.plan_name) : '—') + '</b>' + (cur && u.max_period ? '<small>' + (u.period || 0) + '/' + u.max_period + ' ingressi</small>' : '') + '</span>' +
-          '<span class="mxC mxE"><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span>' + (cur && cur.ends_on ? '<small' + (dl != null && dl <= (S.data.settings.expiry_days || 5) ? ' class="hot"' : '') + '>' + short(cur.ends_on) + ' · ' + expTxt(dl) + '</small>' : '<small>Nessun abbonamento</small>') + '</span>' +
-          '<span class="mxCh">›</span>';
-        r.addEventListener('click', function () { S.mid = m.id; S.tab = 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }); tbl.appendChild(r);
+        var cur = curPlan(m), dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, u = m.usage || {}, hot = dl != null && dl <= exd && dl >= 0;
+        var r = el('div', 'mzRow st-' + m.status.s); r.tabIndex = 0; r.setAttribute('role', 'button');
+        var ing = cur && u.max_period ? (u.period || 0) + '/' + u.max_period : '—';
+        var sc = cur && cur.ends_on ? (dl === 0 ? '<b class="mzHot">Oggi, ' + short(cur.ends_on) + '</b><small class="mzHot">scade oggi</small>' : '<span>' + short(cur.ends_on) + ' <i>·</i> ' + expTxt(dl) + '</span>') : '<span class="mzMute">Nessun abbonamento</span>';
+        r.innerHTML = '<span class="mzC mzN"><span class="mzAv s-' + m.status.s + '">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
+          '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
+          '<span class="mzC" data-l="Abbonamento">' + (cur ? esc(cur.plan_name) : '—') + '</span>' +
+          '<span class="mzC mzI" data-l="Ingressi">' + ing + '</span>' +
+          '<span class="mzC mzE ' + (hot ? 'hot' : '') + '" data-l="Scadenza">' + sc + '</span>' +
+          '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span>' +
+          '<span class="mzC mzA"></span>';
+        var A = r.querySelector('.mzA');
+        var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
+        function open(tab) { S.mid = m.id; S.tab = tab || 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }
+        if (tpl) {
+          var rn = el('button', 'mzRn', 'Rinnova'); rn.type = 'button';
+          rn.addEventListener('click', function (e) { e.stopPropagation(); rn.disabled = true; var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today; act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rn.disabled = false; }); });
+          A.appendChild(rn);
+        }
+        r.addEventListener('click', function () { open(); }); r.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
+        tbl.appendChild(r);
       });
-      if (shown.length < ms.length) { var more = btn('Mostra altri ' + (ms.length - shown.length), 'mxMore', function () { S.more = true; list(); }); tbl.appendChild(more); }
+      if (shown.length < ms.length) { tbl.appendChild(btn('Mostra altri ' + (ms.length - shown.length), 'mxMore', function () { S.more = true; list(); })); }
     }
     q.addEventListener('input', function () { S.q = q.value; list(); });
     list();
