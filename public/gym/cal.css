@@ -167,3 +167,7 @@
 /* Programma: tema chiaro più pulito */
 :root[data-theme="light"] .gcx .controls .jumpToday.gProg{background:var(--accent);box-shadow:0 6px 16px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
 @media(prefers-color-scheme:light){:root:not([data-theme="dark"]) .gcx .controls .jumpToday.gProg{background:var(--accent);box-shadow:0 6px 16px -6px color-mix(in srgb,var(--accent) 70%,transparent)}}
+
+/* mese come le altre attivita': conteggio in grigio, barra senza percentuale */
+.gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell .month-appts,.gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell.has-events .month-appts,.gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell.future .month-appts{color:var(--muted)!important;font-weight:600!important}
+.gcx.gcx.monthMode .month-grid .month-cell .month-pct{display:none!important}

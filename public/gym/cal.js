@@ -141,7 +141,7 @@
       '<button class="arrow gPrev" type="button" aria-label="Periodo precedente">' + CH.l + '</button>' +
       '<h1 class="range" aria-live="polite">' + rangeTxt() + '</h1>' +
       '<button class="arrow gNext" type="button" aria-label="Periodo successivo">' + CH.r + '</button>' +
-      (isCurrent() ? '' : '<button class="jumpToday gToday" type="button">Oggi</button>') +
+      '<button class="jumpToday gToday" type="button">Oggi</button>' +
       '<button class="jumpToday gProg" type="button">Programma</button></div></header>';
   }
   function bindControls() {
