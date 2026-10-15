@@ -369,10 +369,3 @@
 .mzKr .mzRing{width:42px;height:42px}.mzKr .mzRing b{width:33px;height:33px;font-size:.66rem}
 @media(max-width:1100px){.mzBar{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.mzBar{grid-template-columns:1fr 1fr}}
-
-/* nomi colorati: una tinta per persona, scelta tra colori in armonia col verde acqua */
-.mzN{--nc:hsl(var(--h) 62% 32%);--nb:hsl(var(--h) 70% 92%)}
-:root[data-theme="dark"] .mzN{--nc:hsl(var(--h) 80% 76%);--nb:hsl(var(--h) 38% 21%)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .mzN{--nc:hsl(var(--h) 80% 76%);--nb:hsl(var(--h) 38% 21%)}}
-.mzN b{color:var(--nc)}
-.mzAv i,.mzAv.s-warn i,.mzAv.s-bad i,.mzAv.s-none i{background:var(--nb);color:var(--nc)}
