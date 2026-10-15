@@ -322,39 +322,37 @@
     var a = monday(S.anchor), days = [], i;
     for (i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
     if (!(S.sel >= a && S.sel <= addDays(a, 6))) S.sel = a <= today() && today() <= addDays(a, 6) ? today() : a;
-    var f = S.flt, heads = '', H = [], hmin = 8, hmax = 20;
+    var f = S.flt, heads = '', rows = [], rowIx = {}, tot = [];
     function endOf(t, dur) { var m = mins(t) + (dur || 60); return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
+    function rowOf(key, name, cat) { if (!(key in rowIx)) { rowIx[key] = rows.length; rows.push({ key: key, name: name, cat: cat, cells: [[], [], [], [], [], [], []], n: 0, tk: 0, cp: 0 }); } return rows[rowIx[key]]; }
     days.forEach(function (dd, k) {
-      var st = dayStats(dd), d = dd.date, cell = {}, cards = 0; H[k] = cell;
-      function put(t, h) { var hr = +t.slice(0, 2); cell[hr] = (cell[hr] || '') + h; if (hr < hmin) hmin = hr; if (hr > hmax) hmax = hr; }
-      var items = [];
-      (dd.sessions || []).forEach(function (s) { if (f === 'all' || ck(s.course.category) === f) items.push({ t: s.time, s: s }); });
-      if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (!p.free) items.push({ t: p.time, p: p }); });
-      items.sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; });
-      items.forEach(function (x) {
-        cards++;
-        if (x.p) {
-          var p = x.p, nm = p.name.split(' ');
-          put(x.t, '<button type="button" class="gwPt' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '"><span class="gwTm">' + p.time + '<i>Personal</i></span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>');
-          return;
-        }
-        var s = x.s, past = isEnded(d, s.time, s.duration_min), full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
-        var tag = s.cancelled ? '<span class="gwTag off">Annullata</span>' : full ? '<span class="gwTag full">Pieno</span>' : '';
-        put(x.t, '<button type="button" class="gwCard gwc-' + ck(s.course.category) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '">' +
-          '<span class="gwTm">' + s.time + '<i>–' + endOf(s.time, s.duration_min) + '</i>' + tag + '</span><b class="gwNm">' + esc(s.course.name) + '</b>' +
-          '<span class="gwS"><span class="gwBar"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></span></button>');
-      });
-      heads += '<button type="button" class="gwDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="gwOc">' + (dd.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap + ' posti' : '&nbsp;') + '</span></button>';
+      var d = dd.date, st = dayStats(dd);
+      (dd.sessions || []).forEach(function (s) { var c = ck(s.course.category); if (f !== 'all' && c !== f) return; var r = rowOf('c:' + s.course.name, s.course.name, c); r.cells[k].push({ t: s.time, s: s }); if (!s.cancelled) { r.n++; r.tk += s.taken; r.cp += s.capacity; } });
+      if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (p.free) return; var r = rowOf('pt', 'Personal 1:1', 'pt'); r.cells[k].push({ t: p.time, p: p }); r.n++; });
+      tot[k] = dd.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap : '–';
+      heads += '<button type="button" class="gpDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
     });
-    var cols = '<div class="gwHd"><div class="gwCorner"></div>' + heads + '</div>';
-    for (var hr = hmin; hr <= hmax; hr++) {
-      cols += '<div class="gwRow"><div class="gwHr">' + pad(hr) + ':00</div>';
-      for (var kk = 0; kk < 7; kk++) { var dq = days[kk].date; cols += '<div class="gwCell' + (dq === S.sel ? ' sel' : '') + (dq === today() ? ' today' : '') + (days[kk].closed ? ' closed' : '') + (H[kk][hr] ? '' : ' none') + '" data-i="' + kk + '">' + (H[kk][hr] || '') + '</div>'; }
+    var ord = { circuit: 0, hyrox: 1, pilates: 2, pt: 9 };
+    rows.sort(function (x, y) { var ox = x.cat in ord ? ord[x.cat] : 5, oy = y.cat in ord ? ord[y.cat] : 5; return ox - oy || (x.name < y.name ? -1 : 1); });
+    var cols = '<div class="gpHd"><div></div>' + heads + '</div>';
+    rows.forEach(function (r) {
+      cols += '<div class="gpRow"><div class="gpLb gpl-' + r.cat + '"><b>' + esc(r.name) + '</b><span>' + (r.cat === 'pt' ? r.n + ' prenotati' : r.n + (r.n === 1 ? ' lezione' : ' lezioni') + ' · ' + r.tk + '/' + r.cp) + '</span></div>';
+      for (var kk = 0; kk < 7; kk++) {
+        var dq = days[kk].date, its = r.cells[kk].sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; }), h = '';
+        its.forEach(function (x) {
+          if (x.p) { var nm = x.p.name.split(' '); h += '<button type="button" class="gpC gpc-pt' + (isEnded(dq, x.t, 60) ? ' past' : '') + '" data-ptb="' + x.t + '" data-date="' + dq + '"><span class="gpT">' + x.t + '</span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>'; return; }
+          var s = x.s, full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
+          h += '<button type="button" class="gpC gpc-' + r.cat + (isEnded(dq, s.time, s.duration_min) ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + dq + '"><span class="gpT">' + s.time + '<em>' + (s.cancelled ? 'annullata' : full ? 'pieno' : '') + '</em></span><span class="gpB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></button>';
+        });
+        cols += '<div class="gpCell' + (dq === S.sel ? ' sel' : '') + (days[kk].closed ? ' closed' : '') + (h ? '' : ' none') + '" data-i="' + kk + '">' + (h || '<span class="gpNo">–</span>') + '</div>';
+      }
       cols += '</div>';
-    }
+    });
+    if (!rows.length) cols += '<p class="gxM" style="text-align:center;padding:28px">Nessuna lezione in questa settimana.</p>';
+    cols += '<div class="gpTot"><div>Posti prenotati</div>' + tot.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>';
     var opts = '<option value="all">Tutti i corsi</option>' + [['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates']].map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('') + '<option value="pt"' + (S.flt === 'pt' ? ' selected' : '') + '>Solo Personal 1:1</option>';
-    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg"><u class="c1"></u>Circuit<u class="c2"></u>Hyrox<u class="c3"></u>Pilates<u class="c4"></u>Personal</span></div><div class="wkMain"><div class="wkScroll gwkScroll"><div class="gwk">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
-    var grid = body.querySelector('.gwk'), side = body.querySelector('.wkSide');
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg"><u class="c1"></u>Circuit<u class="c2"></u>Hyrox<u class="c3"></u>Pilates<u class="c4"></u>Personal</span></div><div class="wkMain"><div class="wkScroll gwkScroll"><div class="gpw">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    var grid = body.querySelector('.gpw'), side = body.querySelector('.wkSide');
     function drawSide() {
       var b = sideBody(S.sel, true);
       side.innerHTML = '<button type="button" class="wkHandle" aria-label="Chiudi"><i></i></button><button type="button" class="wkClose" aria-label="Chiudi">' + CH.x + '</button><div class="wkSBody">' + b.html + '</div><div class="wkFoot"><button type="button" class="msCta wkCta" data-go="' + S.sel + '"><span>Vedi tutta la giornata</span>' + CH.r16 + '</button></div>';
@@ -367,13 +365,13 @@
       if (ev.target.closest('.gNewB')) openNew();
     });
     grid.addEventListener('click', function (ev) {
-      var p = ev.target.closest('.gwCard,.gwPt');
-      var x = ev.target.closest('.gwDh,.gwCell');
+      var p = ev.target.closest('.gpC');
+      var x = ev.target.closest('.gpDh,.gpCell');
       if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
       if (x) {
         var d = addDays(a, +x.dataset.i);
         if (S.wkOpen && S.sel === d) { S.wkOpen = false; root.classList.remove('wkOpen'); }
-        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gwDh,.gwCell'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
+        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gpDh,.gpCell'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
       }
     });
     var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;
