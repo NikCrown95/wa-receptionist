@@ -267,6 +267,12 @@
   }
   var MZH = [175, 205, 240, 275, 320, 350, 25, 150];
   function mzHue(m) { var h = 0, n = m.first_name + m.last_name; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return MZH[h % MZH.length]; }
+  function mzPips(cur, u) {
+    if (!cur || !u.max_period) return '<span class="mzMute">—</span>';
+    var n = u.max_period, k = Math.min(n, u.period || 0), h = '<span class="mzPips" title="' + k + ' su ' + n + ' ingressi usati">';
+    if (n <= 12) { for (var i = 0; i < n; i++) h += '<i' + (i < k ? ' class="on"' : '') + '></i>'; } else h += '<span class="mzPb"><i style="width:' + Math.round(k / n * 100) + '%"></i></span>';
+    return h + '</span><em class="mzPn">' + k + '/' + n + '</em>';
+  }
   function mzRing(cur, dl) {
     var r = 26, c = 2 * Math.PI * r, f = 0;
     if (cur && cur.ends_on && dl != null) { var tot = cur.starts_on ? Math.max(1, Math.round((parse(cur.ends_on).getTime() - parse(cur.starts_on).getTime()) / 864e5)) : 30; f = Math.max(0, Math.min(1, dl / tot)); }
@@ -333,8 +339,8 @@
         } else sc = '<span class="mzMute">Nessun abbonamento</span>';
         r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
-          '<span class="mzC" data-l="Abbonamento">' + (cur ? esc(cur.plan_name) : '—') + '</span>' +
-          '<span class="mzC mzI" data-l="Ingressi">' + ing + '</span>' +
+          '<span class="mzC" data-l="Abbonamento">' + (cur ? '<span class="mzPl pl' + (Math.max(0, S.data.plans.map(function (p) { return p.id; }).indexOf(cur.plan_id)) % 4) + '">' + esc(cur.plan_name) + '</span>' : '—') + '</span>' +
+          '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
           '<span class="mzC mzE ' + (hot ? 'hot' : '') + '" data-l="Scadenza">' + sc + '</span>' +
           '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span>' +
           '<span class="mzC mzA"></span>';

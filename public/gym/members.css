@@ -385,3 +385,24 @@
 
 /* scorrimento della pagina Iscritti (telefono e iPad) */
 @media(max-width:699px){#panelClients>.gx{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y}}
+
+/* ===== v7: più ritmo e differenziazione nelle righe ===== */
+.mzRow:nth-child(even){background:color-mix(in srgb,var(--accent) 3.5%,var(--card))}
+.mzRow.st-warn,.mzRow.st-warn:nth-child(even){background:color-mix(in srgb,#E0A23A 10%,var(--card))}
+.mzRow:hover{background:color-mix(in srgb,var(--accent) 8%,var(--card))!important}
+.mzN b{font-size:1.06rem;letter-spacing:-.015em}
+.mzP{color:var(--muted);font-size:.9rem;font-weight:500}
+.mzPl{display:inline-block;padding:5px 12px;border-radius:9px;font:700 .86rem var(--fd);letter-spacing:.01em;background:color-mix(in srgb,var(--pc) 16%,var(--card));color:var(--pc);border:1px solid color-mix(in srgb,var(--pc) 30%,transparent)}
+.mzPl{--pc:#2B8A94}.mzPl.pl1{--pc:#3E7BD8}.mzPl.pl2{--pc:#8A5BD6}.mzPl.pl3{--pc:#D5782B}
+:root[data-theme="dark"] .mzPl{--pc:#4FC3CF}:root[data-theme="dark"] .mzPl.pl1{--pc:#7CA8F5}:root[data-theme="dark"] .mzPl.pl2{--pc:#B59BF0}:root[data-theme="dark"] .mzPl.pl3{--pc:#F0A266}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .mzPl{--pc:#4FC3CF}:root:not([data-theme="light"]) .mzPl.pl1{--pc:#7CA8F5}:root:not([data-theme="light"]) .mzPl.pl2{--pc:#B59BF0}:root:not([data-theme="light"]) .mzPl.pl3{--pc:#F0A266}}
+.mzI{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.mzPips{display:flex;gap:3px}
+.mzPips i{display:block;width:7px;height:14px;border-radius:3px;background:var(--line2)}
+.mzPips i.on{background:var(--accent)}
+.mzPb{display:block;width:70px;height:7px;border-radius:7px;background:var(--line2);overflow:hidden}.mzPb i{display:block;height:100%;background:var(--accent)}
+.mzPn{font-style:normal;font-size:.8rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.mzXb{height:6px}
+.mzXt b{font-size:1.06rem}
+.mzTh{background:var(--card2)}
+@media(max-width:980px){.mzI{flex-direction:row;align-items:center}}
