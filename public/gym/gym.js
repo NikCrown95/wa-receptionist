@@ -265,6 +265,8 @@
     var hh = 0, nm = m.first_name + m.last_name; for (var i = 0; i < nm.length; i++) hh = (hh * 31 + nm.charCodeAt(i)) % 360;
     return '<span class="mxAv s-' + m.status.s + '" style="--h:' + hh + '"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3"/><circle class="p" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span>';
   }
+  var MZH = [175, 205, 240, 275, 320, 350, 25, 150];
+  function mzHue(m) { var h = 0, n = m.first_name + m.last_name; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return MZH[h % MZH.length]; }
   function mzRing(cur, dl) {
     var r = 26, c = 2 * Math.PI * r, f = 0;
     if (cur && cur.ends_on && dl != null) { var tot = cur.starts_on ? Math.max(1, Math.round((parse(cur.ends_on).getTime() - parse(cur.starts_on).getTime()) / 864e5)) : 30; f = Math.max(0, Math.min(1, dl / tot)); }
@@ -285,7 +287,7 @@
     var add = btn('', 'mzAdd', function () { memberForm(); }); add.innerHTML = ic('plus', 18) + '<span>Nuovo iscritto</span>'; head.appendChild(add); root.appendChild(head);
     function ring(p, c) { return '<span class="mzRing ' + c + '" style="--p:' + p + '"><b>' + p + '%</b></span>'; }
     var kp = el('div', 'mzKp');
-    [['all', 'users', 'Iscritti', cnt.all, newM ? '<span class="mzUp">↑ +' + newM + '</span><small>ultimi 30 giorni</small>' : '', ''],
+    [['all', 'users', 'Iscritti', cnt.all, newM && newM < cnt.all ? '<span class="mzUp">↑ +' + newM + '</span><small>ultimi 30 giorni</small>' : '', ''],
      ['ok', 'check', 'Abbonamenti validi', valid, ring(pc(valid), 'ok'), 'ok'],
      ['warn', 'clock', 'In scadenza', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'],
      ['bad', 'alert', 'Scaduti', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
@@ -324,7 +326,7 @@
         var r = el('div', 'mzRow st-' + m.status.s); r.tabIndex = 0; r.setAttribute('role', 'button');
         var ing = cur && u.max_period ? (u.period || 0) + '/' + u.max_period : '—';
         var sc = cur && cur.ends_on ? (dl === 0 ? '<b class="mzHot">Oggi, ' + short(cur.ends_on) + '</b><small class="mzHot">scade oggi</small>' : '<span>' + short(cur.ends_on) + ' <i>·</i> ' + expTxt(dl) + '</span>') : '<span class="mzMute">Nessun abbonamento</span>';
-        r.innerHTML = '<span class="mzC mzN"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
+        r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? esc(cur.plan_name) : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + ing + '</span>' +
