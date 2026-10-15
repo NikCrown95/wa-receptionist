@@ -536,7 +536,89 @@
     if (S.data) go(); else load().then(go).catch(function (e) { toast(e.message, 'bad'); });
   }
   function sCorsi() {
-    sheet('Corsi e programma', function (w, close) {
+    var D = S.data;
+    sheet('Programma', function (w, close) {
+      var st = { mode: D.courses.length ? 'old' : 'new', cid: D.courses[0] ? D.courses[0].id : null, cap: D.courses[0] ? D.courses[0].capacity : 12, dur: 60, name: '', cat: 'corsi', days: [], times: [], extra: false, busy: false };
+      var seg = el('div', 'gxSeg'), box = el('div'), msg = el('div');
+      w.appendChild(seg); w.appendChild(box); w.appendChild(msg);
+      function course() { return D.courses.filter(function (c) { return c.id === st.cid; })[0]; }
+      function stepper(label, val, step, min, max, set, fixed) {
+        var f = el('div', 'gxF'); f.appendChild(el('span', null, label));
+        var r = el('div', 'gxStep'), v = el('b', null, fixed || String(val));
+        if (!fixed) { var mi = el('button', null, '−'), pl = el('button', null, '+'); mi.type = 'button'; pl.type = 'button'; mi.addEventListener('click', function () { set(Math.max(min, val - step)); }); pl.addEventListener('click', function () { set(Math.min(max, val + step)); }); r.appendChild(mi); r.appendChild(v); r.appendChild(pl); } else r.appendChild(v);
+        f.appendChild(r); return f;
+      }
+      function pairs() { var o = []; st.days.slice().sort().forEach(function (d) { st.times.slice().sort().forEach(function (t) { o.push([d, t]); }); }); return o; }
+      function draw() {
+        seg.innerHTML = '';
+        [['old', 'Corso esistente'], ['new', 'Nuovo corso']].forEach(function (m) {
+          if (m[0] === 'old' && !D.courses.length) return;
+          var b = el('button', null, m[1]); b.type = 'button'; b.setAttribute('aria-pressed', st.mode === m[0] ? 'true' : 'false');
+          b.addEventListener('click', function () { st.mode = m[0]; if (m[0] === 'old' && course()) st.cap = course().capacity; draw(); }); seg.appendChild(b);
+        });
+        box.innerHTML = ''; msg.className = ''; msg.textContent = '';
+        var c = course();
+        if (st.mode === 'old') {
+          box.appendChild(el('div', 'gxDh', 'Corso'));
+          var ch = el('div', 'gxChips');
+          D.courses.forEach(function (x) { var b = el('button', 'gxCp', x.name); b.type = 'button'; b.setAttribute('aria-pressed', x.id === st.cid ? 'true' : 'false'); b.addEventListener('click', function () { st.cid = x.id; st.cap = x.capacity; draw(); }); ch.appendChild(b); });
+          box.appendChild(ch);
+          if (c) { var ed = btn('Modifica questo corso', 'ghost sm', function () { close(); courseForm(c); }); ed.style.marginTop = '8px'; box.appendChild(ed); }
+        } else {
+          var n = inp('text', st.name, 'Es. Boxe, Yoga, CrossFit'); n.addEventListener('input', function () { st.name = n.value; sum(); });
+          var ct = sel(D.categories.map(function (x) { return [x, cat(x)]; }), st.cat); ct.addEventListener('change', function () { st.cat = ct.value; });
+          box.appendChild(field('Nome del corso', n)); box.appendChild(field('Tipo (decide quali abbonamenti lo includono)', ct));
+        }
+        var two = el('div', 'gxTwo');
+        two.appendChild(stepper('Capienza', st.cap, 1, 1, 200, function (v) { st.cap = v; draw(); }));
+        two.appendChild(st.mode === 'old' ? stepper('Durata', 0, 0, 0, 0, null, (c ? c.duration_min : 60) + ' min') : stepper('Durata (min)', st.dur, 5, 15, 240, function (v) { st.dur = v; draw(); }));
+        box.appendChild(two);
+        box.appendChild(el('div', 'gxDh', 'Giorni'));
+        var dr = el('div', 'gxDays');
+        [1, 2, 3, 4, 5, 6, 7].forEach(function (d) { var b = el('button', 'gxCp', WD[d].slice(0, 3)); b.type = 'button'; b.setAttribute('aria-pressed', st.days.indexOf(d) >= 0 ? 'true' : 'false'); b.addEventListener('click', function () { var i = st.days.indexOf(d); if (i >= 0) st.days.splice(i, 1); else st.days.push(d); draw(); }); dr.appendChild(b); });
+        box.appendChild(dr);
+        box.appendChild(el('div', 'gxDh', 'Orario'));
+        var base = ['08:00', '09:00', '10:00', '12:00', '17:00', '18:00', '19:00', '20:00'];
+        st.times.forEach(function (t) { if (base.indexOf(t) < 0) base.push(t); }); base.sort();
+        var tr = el('div', 'gxChips');
+        base.forEach(function (t) { var b = el('button', 'gxCp', t); b.type = 'button'; b.setAttribute('aria-pressed', st.times.indexOf(t) >= 0 ? 'true' : 'false'); b.addEventListener('click', function () { var i = st.times.indexOf(t); if (i >= 0) st.times.splice(i, 1); else st.times.push(t); draw(); }); tr.appendChild(b); });
+        if (st.extra) { var ti = inp('time', '18:30'); ti.addEventListener('change', function () { if (/^\d{2}:\d{2}$/.test(ti.value) && st.times.indexOf(ti.value) < 0) { st.times.push(ti.value); st.extra = false; draw(); } }); tr.appendChild(ti); }
+        else { var ex = el('button', 'gxCp gxAlt', '+ Altro'); ex.type = 'button'; ex.addEventListener('click', function () { st.extra = true; draw(); }); tr.appendChild(ex); }
+        box.appendChild(tr);
+        var sm = el('div', 'gxSum'); box.appendChild(sm);
+        var go = btn('', 'block', submit); go.style.marginTop = '12px'; box.appendChild(go);
+        var lst = btn('Già in programma · ' + D.schedule.length + ' lezioni a settimana  ›', 'ghost block', function () { close(); sProgList(); }); lst.style.marginTop = '10px'; box.appendChild(lst);
+        function sumFn() {
+          var nm = st.mode === 'old' ? (c ? c.name : '') : (st.name.trim() || 'Nuovo corso'), p = pairs();
+          if (!p.length) { sm.innerHTML = '<b>RIEPILOGO</b>Scegli almeno un giorno e un orario.'; go.textContent = 'Aggiungi al programma'; go.disabled = true; return; }
+          var ds = st.days.slice().sort().map(function (d) { return WD[d].toLowerCase(); }).join(', '), ts = st.times.slice().sort().join(' e ');
+          sm.innerHTML = '<b>RIEPILOGO</b>' + esc2(nm) + ' · ' + ds + ' alle ' + ts + ' · ' + st.cap + ' posti<small>' + p.length + (p.length === 1 ? ' lezione' : ' lezioni') + ' a settimana</small>';
+          go.textContent = 'Aggiungi ' + p.length + (p.length === 1 ? ' lezione' : ' lezioni'); go.disabled = st.mode === 'new' && !st.name.trim();
+        }
+        sum = sumFn; sumFn();
+      }
+      var sum = function () {};
+      function esc2(x) { return String(x).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+      function fail(e) { st.busy = false; msg.className = 'gxWhy'; msg.textContent = e.message || String(e); }
+      function submit() {
+        if (st.busy) return; st.busy = true; msg.className = ''; msg.textContent = '';
+        var p = pairs(), c = course(), prep;
+        if (st.mode === 'new') {
+          var nm = st.name.trim();
+          prep = api({ action: 'course_save', name: nm, category: st.cat, duration_min: st.dur, capacity: st.cap }).then(function () { return reload(); }).then(function () { D = S.data; var f = D.courses.filter(function (x) { return x.name === nm; }).pop(); if (!f) throw new Error('Corso non trovato dopo il salvataggio.'); return f; });
+        } else prep = Promise.resolve(c);
+        prep.then(function (cc) {
+          var added = 0, skipped = 0, chain = Promise.resolve();
+          p.forEach(function (x) { chain = chain.then(function () { return api({ action: 'schedule_add', course_id: cc.id, weekday: x[0], time: x[1], capacity: st.cap === cc.capacity ? '' : st.cap }).then(function () { added++; }).catch(function (e) { if (/già/i.test(e.message)) skipped++; else throw e; }); }); });
+          return chain.then(function () { return reload(); }).then(function () { toast(added ? (added === 1 ? 'Aggiunta 1 lezione.' : 'Aggiunte ' + added + ' lezioni.') + (skipped ? ' ' + skipped + ' c\'erano già.' : '') : 'Erano già tutte in programma.', added ? 'ok' : 'bad'); close(); });
+        }).catch(fail);
+      }
+      draw();
+    });
+  }
+  function sProgList() {
+    sheet('Già in programma', function (w, close) {
+      var bk = btn('‹ Aggiungi al programma', 'ghost sm', function () { close(); sCorsi(); }); bk.style.marginBottom = '6px'; w.appendChild(bk);
       w.appendChild(el('div', 'gxDh', 'Corsi'));
       if (!S.data.courses.length) w.appendChild(el('div', 'gxEmpty', 'Nessun corso. Crea il primo.'));
       S.data.courses.forEach(function (c) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, c.name)); l.appendChild(el('div', 'gxM', cat(c.category) + ' · ' + c.duration_min + ' min · ' + c.capacity + ' posti')); r.appendChild(l); r.appendChild(btn('Modifica', 'ghost sm', function () { close(); courseForm(c); })); w.appendChild(r); });
@@ -550,8 +632,8 @@
           items.forEach(function (s) {
             var c = S.data.courses.filter(function (x) { return x.id === s.course_id; })[0]; if (!c) return;
             var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, s.time + ' · ' + c.name)); if (s.capacity) l.appendChild(el('div', 'gxM', s.capacity + ' posti')); r.appendChild(l);
-            r.appendChild(btn('Modifica', 'ghost sm', function () { close(); lessonEdit(s, c, sCorsi); }));
-            r.appendChild(btn('Togli', 'ghost sm', function () { confirmBar(w, 'Togliere ' + c.name + ' del ' + WD[d].toLowerCase() + ' alle ' + s.time + '? Chi è prenotato viene tolto.', function () { act({ action: 'schedule_delete', id: s.id }, 'Tolta.').then(function () { close(); return reload().then(sCorsi); }); }); }));
+            r.appendChild(btn('Modifica', 'ghost sm', function () { close(); lessonEdit(s, c, sProgList); }));
+            r.appendChild(btn('Togli', 'ghost sm', function () { confirmBar(w, 'Togliere ' + c.name + ' del ' + WD[d].toLowerCase() + ' alle ' + s.time + '? Chi è prenotato viene tolto.', function () { act({ action: 'schedule_delete', id: s.id }, 'Tolta.').then(function () { close(); return reload().then(sProgList); }); }); }));
             w.appendChild(r);
           });
         })(d);
