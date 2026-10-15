@@ -432,3 +432,16 @@
 :root[data-theme="dark"] .mx .mzN.gf .mzAv i{background:#3a1f2d;color:#ff9fc2}
 :root[data-theme="dark"] .mx .mzN.gm .mzAv i{background:#16293f;color:#8ec5ff}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .mx .mzN.gf .mzAv i{background:#3a1f2d;color:#ff9fc2}:root:not([data-theme="light"]) .mx .mzN.gm .mzAv i{background:#16293f;color:#8ec5ff}}
+
+/* palette ispirata al mockup: navy + verde smeraldo + azzurri tenui, niente anello */
+.mx{--nv:#0f172a;--nvt:#fff;--pip:#10b981;--pipoff:#e4e8ef;--pill:#e6f0fd;--pillt:#1d6fd1;--ok:#d9f8e8;--okt:#0b9560}
+:root[data-theme="dark"] .mx{--nv:var(--accent);--nvt:var(--on-accent);--pip:#34d399;--pipoff:var(--line2);--pill:#16293f;--pillt:#8ec5ff;--ok:#0f3326;--okt:#4ade80}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .mx{--nv:var(--accent);--nvt:var(--on-accent);--pip:#34d399;--pipoff:var(--line2);--pill:#16293f;--pillt:#8ec5ff;--ok:#0f3326;--okt:#4ade80}}
+.mx .mzRn,.mx .mzAdd{background:var(--nv);color:var(--nvt);box-shadow:none}
+.mx .mzPips i{background:var(--pipoff)}
+.mx .mzPips i.on{background:var(--pip)}
+.mx .mzPl{background:var(--pill);color:var(--pillt);border-color:transparent}
+.mx .mzSt:not(.warn):not(.bad):not(.none){background:var(--ok);color:var(--okt);border-color:transparent}
+.mx .mzAv svg{display:none}
+.mx .mzAv i{inset:0}
+.mx .mzN.gm .mzAv i{background:#e0ecff;color:#1e56c9}
