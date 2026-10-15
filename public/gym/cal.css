@@ -319,3 +319,7 @@
 .gcx.gcx .gpw .gpHd>.gpDh{margin:0 3px}
 .gcx.gcx .gpw .gpHd>div:first-child,.gcx.gcx .gpw .gpTot>div:first-child{margin-right:8px}
 .gcx.gcx .gpw .gpCell.sel,.gcx.gcx .gpw .gpCell.closed{border-left-color:color-mix(in srgb,var(--ink) 18%,var(--line2))!important}
+.gcx .wkKp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}
+.gcx .wkKp div{display:flex;flex-direction:column;gap:2px;padding:10px 10px;border-radius:13px;background:var(--card);border:1px solid var(--line)}
+.gcx .wkKp b{font:800 1.35rem/1 var(--fd,'Manrope',sans-serif);color:var(--ink)}
+.gcx .wkKp span{font:600 .68rem/1.2 var(--fb,'Plus Jakarta Sans',sans-serif);color:var(--muted)}
