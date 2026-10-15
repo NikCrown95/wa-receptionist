@@ -306,3 +306,8 @@
 .gcx.gcx .gpw .gpRow{align-items:stretch}
 .gcx.gcx .gpw .gpCell.sel{border-color:var(--accent)!important}
 .gcx.gcx .gpw .gpNo{display:none}
+/* settimana: niente riquadri attorno alle celle, solo linee orizzontali sottili tra i corsi */
+.gcx.gcx .gpw .gpCell{border:0!important;border-radius:0!important;background:transparent!important;padding:6px 3px!important}
+.gcx.gcx .gpw .gpCell.closed{background:color-mix(in srgb,var(--muted) 7%,transparent)!important}
+.gcx.gcx .gpw .gpCell.sel{background:color-mix(in srgb,var(--accent) 7%,transparent)!important}
+.gcx.gcx .gpw .gpRow{border-top:1px solid color-mix(in srgb,var(--ink) 18%,var(--line2));padding-top:8px;margin-top:2px}
