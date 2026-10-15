@@ -540,6 +540,8 @@
     sheet('Programma', function (w, close) {
       var st = { mode: D.courses.length ? 'old' : 'new', cid: D.courses[0] ? D.courses[0].id : null, cap: D.courses[0] ? D.courses[0].capacity : 12, dur: 60, name: '', cat: 'corsi', days: [], times: [], extra: false, busy: false };
       var seg = el('div', 'gxSeg'), box = el('div'), msg = el('div');
+      w.classList.add('gxProg'); var xb = el('button', 'gxX', '✕'); xb.type = 'button'; xb.setAttribute('aria-label', 'Chiudi'); xb.addEventListener('click', close); w.appendChild(xb);
+      function ccol(x) { var k = x.category === 'hyrox' ? 'hyrox' : x.category === 'pilates' ? 'pilates' : 'circuit'; return 'var(--c-' + k + ')'; }
       w.appendChild(seg); w.appendChild(box); w.appendChild(msg);
       function course() { return D.courses.filter(function (c) { return c.id === st.cid; })[0]; }
       function stepper(label, val, step, min, max, set, fixed) {
@@ -559,25 +561,26 @@
         box.innerHTML = ''; msg.className = ''; msg.textContent = '';
         var c = course();
         if (st.mode === 'old') {
-          box.appendChild(el('div', 'gxDh', 'Corso'));
-          var ch = el('div', 'gxChips');
-          D.courses.forEach(function (x) { var b = el('button', 'gxCp', x.name); b.type = 'button'; b.setAttribute('aria-pressed', x.id === st.cid ? 'true' : 'false'); b.addEventListener('click', function () { st.cid = x.id; st.cap = x.capacity; draw(); }); ch.appendChild(b); });
+          var hd = el('div', 'gxHd'); hd.appendChild(el('div', 'gxDh', 'Corso'));
+          if (c) { var ed = el('button', 'gxLink', 'Modifica corso'); ed.type = 'button'; ed.addEventListener('click', function () { close(); courseForm(c); }); hd.appendChild(ed); }
+          box.appendChild(hd);
+          var ch = el('div', 'gxCourses');
+          D.courses.forEach(function (x) { var b = el('button', 'gxCo', '<i></i>' + esc2(x.name)); b.innerHTML = '<i></i>' + esc2(x.name); b.type = 'button'; b.style.setProperty('--cc', ccol(x)); b.setAttribute('aria-pressed', x.id === st.cid ? 'true' : 'false'); b.addEventListener('click', function () { st.cid = x.id; st.cap = x.capacity; draw(); }); ch.appendChild(b); });
           box.appendChild(ch);
-          if (c) { var ed = btn('Modifica questo corso', 'ghost sm', function () { close(); courseForm(c); }); ed.style.marginTop = '8px'; box.appendChild(ed); }
         } else {
           var n = inp('text', st.name, 'Es. Boxe, Yoga, CrossFit'); n.addEventListener('input', function () { st.name = n.value; sum(); });
           var ct = sel(D.categories.map(function (x) { return [x, cat(x)]; }), st.cat); ct.addEventListener('change', function () { st.cat = ct.value; });
           box.appendChild(field('Nome del corso', n)); box.appendChild(field('Tipo (decide quali abbonamenti lo includono)', ct));
         }
-        var two = el('div', 'gxTwo');
+        var two = el('div', 'gxTwo gxSteps');
         two.appendChild(stepper('Capienza', st.cap, 1, 1, 200, function (v) { st.cap = v; draw(); }));
         two.appendChild(st.mode === 'old' ? stepper('Durata', 0, 0, 0, 0, null, (c ? c.duration_min : 60) + ' min') : stepper('Durata (min)', st.dur, 5, 15, 240, function (v) { st.dur = v; draw(); }));
         box.appendChild(two);
-        box.appendChild(el('div', 'gxDh', 'Giorni'));
+        box.appendChild(el('div', 'gxDh gxSecT', 'Giorni'));
         var dr = el('div', 'gxDays');
         [1, 2, 3, 4, 5, 6, 7].forEach(function (d) { var b = el('button', 'gxCp', WD[d].slice(0, 3)); b.type = 'button'; b.setAttribute('aria-pressed', st.days.indexOf(d) >= 0 ? 'true' : 'false'); b.addEventListener('click', function () { var i = st.days.indexOf(d); if (i >= 0) st.days.splice(i, 1); else st.days.push(d); draw(); }); dr.appendChild(b); });
         box.appendChild(dr);
-        box.appendChild(el('div', 'gxDh', 'Orario'));
+        box.appendChild(el('div', 'gxDh gxSecT', 'Orario'));
         var base = ['08:00', '09:00', '10:00', '12:00', '17:00', '18:00', '19:00', '20:00'];
         st.times.forEach(function (t) { if (base.indexOf(t) < 0) base.push(t); }); base.sort();
         var tr = el('div', 'gxChips');
@@ -586,8 +589,8 @@
         else { var ex = el('button', 'gxCp gxAlt', '+ Altro'); ex.type = 'button'; ex.addEventListener('click', function () { st.extra = true; draw(); }); tr.appendChild(ex); }
         box.appendChild(tr);
         var sm = el('div', 'gxSum'); box.appendChild(sm);
-        var go = btn('', 'block', submit); go.style.marginTop = '12px'; box.appendChild(go);
-        var lst = btn('Già in programma · ' + D.schedule.length + ' lezioni a settimana  ›', 'ghost block', function () { close(); sProgList(); }); lst.style.marginTop = '10px'; box.appendChild(lst);
+        var go = btn('', 'block gxGo', submit); box.appendChild(go);
+        var lst = el('button', 'gxMore'); lst.type = 'button'; lst.innerHTML = '<span>Già in programma</span><em>' + D.schedule.length + ' lezioni a settimana</em><u>›</u>'; lst.addEventListener('click', function () { close(); sProgList(); }); box.appendChild(lst);
         function sumFn() {
           var nm = st.mode === 'old' ? (c ? c.name : '') : (st.name.trim() || 'Nuovo corso'), p = pairs();
           if (!p.length) { sm.innerHTML = '<b>RIEPILOGO</b>Scegli almeno un giorno e un orario.'; go.textContent = 'Aggiungi al programma'; go.disabled = true; return; }

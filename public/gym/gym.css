@@ -101,3 +101,38 @@
 .gxSum small{display:block;font-weight:600;font-size:.76rem;color:var(--muted);margin-top:2px}
 .gxBtn:disabled{opacity:.45;cursor:default}
 .gxSheet .gxTwo{margin-top:12px}
+
+/* ===== Finestra Programma (curata) ===== */
+.gxShade:has(.gxProg){align-items:center}
+.gxSheet.gxProg{position:relative;max-width:640px;border-radius:28px;padding:26px 28px calc(26px + env(safe-area-inset-bottom,0px));background:var(--card2)}
+.gxProg h3{font-size:1.55rem;letter-spacing:-.02em;margin:0 0 18px}
+.gxProg .gxX{position:absolute;top:22px;right:24px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-size:1rem;font-weight:700;cursor:pointer}
+.gxProg .gxSeg{margin:0 0 20px}
+.gxProg .gxSeg button{padding:12px;border-radius:11px;font-size:.92rem}
+.gxProg .gxHd{display:flex;align-items:center;justify-content:space-between;margin:0 0 9px}
+.gxProg .gxDh{margin:0 0 9px;font-size:.68rem;letter-spacing:.1em}
+.gxProg .gxSecT{margin-top:22px}
+.gxProg .gxLink{border:0;background:none;color:var(--accent);font:inherit;font-weight:700;font-size:.84rem;cursor:pointer;padding:4px 0}
+.gxCourses{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
+.gxCo{display:flex;align-items:center;gap:9px;padding:14px 14px;border-radius:15px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-weight:800;font-size:.95rem;cursor:pointer;text-align:left}
+.gxCo i{width:10px;height:10px;border-radius:50%;background:var(--cc);flex:none}
+.gxCo[aria-pressed="true"]{background:var(--cc);border-color:var(--cc);color:#fff}
+.gxCo[aria-pressed="true"] i{background:#fff}
+.gxProg .gxSteps{margin-top:22px;gap:12px}
+.gxProg .gxSteps .gxF{margin:0}
+.gxProg .gxSteps .gxF>span{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+.gxProg .gxStep{margin:0;gap:0;padding:5px;border:1px solid var(--line2);border-radius:15px;background:var(--card);justify-content:space-between;min-height:56px}
+.gxProg .gxStep button{width:46px;height:46px;border:0;border-radius:11px;background:var(--card2)}
+.gxProg .gxStep b{flex:1;font-size:1.25rem}
+.gxProg .gxCp{padding:13px 4px;font-size:.92rem;font-weight:700;border-radius:13px;background:var(--card);border:1px solid var(--line2)}
+.gxProg .gxDays .gxCp{padding:15px 0}
+.gxProg .gxChips{gap:8px}
+.gxProg .gxChips .gxCp{padding:12px 18px;font-weight:800;font-family:'Manrope','Plus Jakarta Sans',sans-serif}
+.gxProg .gxCp[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+.gxProg .gxAlt{border-style:dashed;background:transparent;color:var(--muted)}
+.gxProg .gxChips input[type=time]{width:auto;min-height:46px;padding:8px 12px;border-radius:13px}
+.gxProg .gxSum{margin-top:22px;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--warn,#C98512) 13%,var(--card));border:1px solid color-mix(in srgb,var(--warn,#C98512) 35%,var(--line2));font-size:1rem}
+.gxProg .gxSum b{color:var(--warn,#B77A12);letter-spacing:.1em}
+.gxProg .gxGo{margin-top:16px;min-height:54px;border-radius:15px;font-size:1.02rem;font-weight:800}
+.gxMore{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:14px 4px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;text-align:left}
+.gxMore span{flex:1}.gxMore em{font-style:normal;font-weight:600;color:var(--muted)}.gxMore u{text-decoration:none;color:var(--accent);font-size:1.3rem;line-height:1}
