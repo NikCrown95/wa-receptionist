@@ -322,10 +322,11 @@
     var a = monday(S.anchor), days = [], i;
     for (i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
     if (!(S.sel >= a && S.sel <= addDays(a, 6))) S.sel = a <= today() && today() <= addDays(a, 6) ? today() : a;
-    var f = S.flt, cols = '';
+    var f = S.flt, heads = '', H = [], hmin = 8, hmax = 20;
     function endOf(t, dur) { var m = mins(t) + (dur || 60); return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
     days.forEach(function (dd, k) {
-      var st = dayStats(dd), d = dd.date, body2 = '', cards = 0;
+      var st = dayStats(dd), d = dd.date, cell = {}, cards = 0; H[k] = cell;
+      function put(t, h) { var hr = +t.slice(0, 2); cell[hr] = (cell[hr] || '') + h; if (hr < hmin) hmin = hr; if (hr > hmax) hmax = hr; }
       var items = [];
       (dd.sessions || []).forEach(function (s) { if (f === 'all' || ck(s.course.category) === f) items.push({ t: s.time, s: s }); });
       if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (!p.free) items.push({ t: p.time, p: p }); });
@@ -334,20 +335,23 @@
         cards++;
         if (x.p) {
           var p = x.p, nm = p.name.split(' ');
-          body2 += '<button type="button" class="gwPt' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '"><span class="gwTm">' + p.time + '<i>Personal</i></span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>';
+          put(x.t, '<button type="button" class="gwPt' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '"><span class="gwTm">' + p.time + '<i>Personal</i></span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>');
           return;
         }
         var s = x.s, past = isEnded(d, s.time, s.duration_min), full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
         var tag = s.cancelled ? '<span class="gwTag off">Annullata</span>' : full ? '<span class="gwTag full">Pieno</span>' : '';
-        body2 += '<button type="button" class="gwCard gwc-' + ck(s.course.category) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '">' +
+        put(x.t, '<button type="button" class="gwCard gwc-' + ck(s.course.category) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '">' +
           '<span class="gwTm">' + s.time + '<i>–' + endOf(s.time, s.duration_min) + '</i>' + tag + '</span><b class="gwNm">' + esc(s.course.name) + '</b>' +
-          '<span class="gwS"><span class="gwBar"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></span></button>';
+          '<span class="gwS"><span class="gwBar"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></span></button>');
       });
-      if (!cards) body2 = '<div class="gwEmpty">' + (dd.closed ? 'Chiuso' : 'Nessuna lezione') + '</div>';
-      cols += '<div class="gwCol' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + (dd.closed ? ' closed' : '') + '" data-i="' + k + '">' +
-        '<button type="button" class="gwDh" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="gwOc">' + (st.n ? st.b + '/' + st.cap + ' posti' : '&nbsp;') + '</span></button>' +
-        '<div class="gwBody">' + body2 + '</div></div>';
+      heads += '<button type="button" class="gwDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="gwOc">' + (dd.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap + ' posti' : '&nbsp;') + '</span></button>';
     });
+    var cols = '<div class="gwHd"><div class="gwCorner"></div>' + heads + '</div>';
+    for (var hr = hmin; hr <= hmax; hr++) {
+      cols += '<div class="gwRow"><div class="gwHr">' + pad(hr) + ':00</div>';
+      for (var kk = 0; kk < 7; kk++) { var dq = days[kk].date; cols += '<div class="gwCell' + (dq === S.sel ? ' sel' : '') + (dq === today() ? ' today' : '') + (days[kk].closed ? ' closed' : '') + (H[kk][hr] ? '' : ' none') + '" data-i="' + kk + '">' + (H[kk][hr] || '') + '</div>'; }
+      cols += '</div>';
+    }
     var opts = '<option value="all">Tutti i corsi</option>' + [['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates']].map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('') + '<option value="pt"' + (S.flt === 'pt' ? ' selected' : '') + '>Solo Personal 1:1</option>';
     body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg"><u class="c1"></u>Circuit<u class="c2"></u>Hyrox<u class="c3"></u>Pilates<u class="c4"></u>Personal</span></div><div class="wkMain"><div class="wkScroll gwkScroll"><div class="gwk">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
     var grid = body.querySelector('.gwk'), side = body.querySelector('.wkSide');
@@ -364,12 +368,12 @@
     });
     grid.addEventListener('click', function (ev) {
       var p = ev.target.closest('.gwCard,.gwPt');
-      var x = ev.target.closest('.gwDh,.gwCol');
+      var x = ev.target.closest('.gwDh,.gwCell');
       if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
       if (x) {
         var d = addDays(a, +x.dataset.i);
         if (S.wkOpen && S.sel === d) { S.wkOpen = false; root.classList.remove('wkOpen'); }
-        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gwCol'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
+        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gwDh,.gwCell'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
       }
     });
     var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;

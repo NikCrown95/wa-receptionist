@@ -240,3 +240,22 @@
 .gwEmpty{padding:18px 6px;text-align:center;font-size:.8rem;font-weight:600;color:var(--muted);border:1px dashed var(--line2);border-radius:12px}
 .gwCol.closed .gwEmpty{background:repeating-linear-gradient(135deg,transparent 0 7px,color-mix(in srgb,var(--ink) 4%,transparent) 7px 8px)}
 @media(max-width:1000px){.gwk{gap:6px}.gwDh .dd{font-size:1.25rem}.gwCard{padding:8px 7px 8px 8px}.gwTm{font-size:.88rem}.gwTm i{display:none}.gwNm{font-size:.8rem}.gwTag{display:none}}
+
+/* ===== Settimana a fasce orarie (anche vuote), righe tratteggiate ===== */
+.gcx .gwkScroll{background:transparent!important}
+.gwk{display:block!important;background:color-mix(in srgb,var(--accent) 6%,var(--card2));border:1px solid var(--line2);border-radius:18px;padding:0 0 6px!important;gap:0!important;overflow:hidden}
+.gwHd,.gwRow{display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr));align-items:stretch}
+.gwHd{position:sticky;top:0;z-index:3;gap:6px;padding:8px 6px 8px 0;background:color-mix(in srgb,var(--accent) 6%,var(--card2));border-bottom:1px solid var(--line2)}
+.gwHd .gwDh{min-width:0}
+.gwRow{border-top:1px dashed color-mix(in srgb,var(--ink) 22%,transparent)}
+.gwRow:first-of-type{border-top:0}
+.gwHr{font:800 .8rem var(--fd);color:var(--muted);padding:12px 0 0 14px;font-variant-numeric:tabular-nums}
+.gwCell{display:flex;flex-direction:column;gap:6px;padding:6px 3px;min-height:54px;min-width:0;border-left:1px dashed color-mix(in srgb,var(--ink) 16%,transparent)}
+.gwCell.none{min-height:46px}
+.gwCell.today{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.gwCell.closed{background:repeating-linear-gradient(135deg,transparent 0 7px,color-mix(in srgb,var(--ink) 4%,transparent) 7px 8px)}
+.gwCell.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+@media(max-width:1000px){.gwHd,.gwRow{grid-template-columns:44px repeat(7,minmax(0,1fr))}.gwHr{padding-left:8px;font-size:.7rem}.gwCell{padding:5px 2px}}
+.gwDh.today{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--on-accent)!important}
+.gwDh.today .dn,.gwDh.today .gwOc{color:color-mix(in srgb,var(--on-accent) 80%,transparent)!important}
+.gwDh.sel:not(.today){border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 28%,transparent)}
