@@ -253,9 +253,17 @@
       var d = addDays(r.from, i), x = parse(d), out = x.getMonth() !== mo, day = getDay(d) || { sessions: [], closed: true }, st = dayStats(day), closed = !!day.closed || !st.n;
       var isT = d === today(), past = !out && !isT && d < today(), fut = !out && !isT && d > today();
       var occ = st.pct >= 70 ? 'occ-hi' : st.pct >= 40 ? 'occ-mid' : 'occ-lo';
-      cells += '<button type="button" class="month-cell' + (out ? ' outside' : '') + (isT ? ' today' : '') + (past ? ' past' : '') + (fut ? ' future' : '') + (st.n ? ' has-events' : '') + (closed ? ' is-closed' : '') + ' ' + occ + (d === S.sel ? ' sel' : '') + '" style="--occ:' + st.pct + '" data-mc="' + d + '" data-ring="' + (!out && !closed ? st.pct : '') + '" aria-label="' + fmtLong(d) + '">' +
-        '<span class="month-cell-top"><span class="dnum">' + x.getDate() + '</span></span><strong class="month-appts">' + (closed ? '' : st.n + ' lez.') + '</strong>' +
-        '<span class="month-occ"><span class="month-load"><i style="width:' + (closed ? 0 : st.pct) + '%"></i></span><span class="month-pct">' + (closed ? '' : st.pct + '%') + '</span></span><span class="month-closed">' + (closed ? 'Chiuso' : '') + '</span></button>';
+      var ls = '';
+      if (!closed) {
+        var ss = (day.sessions || []).filter(function (z) { return !z.cancelled; }).slice().sort(function (p, q) { return p.time < q.time ? -1 : 1; });
+        ss.slice(0, 3).forEach(function (z) {
+          var full = z.taken >= z.capacity;
+          ls += '<i class="mzL mzc-' + ck(z.course.category) + (full ? ' full' : '') + '"><u></u><em>' + z.time + '</em><b>' + esc(z.course.name.split(' ')[0]) + '</b><s>' + (full ? 'Pieno' : z.taken + '/' + z.capacity) + '</s></i>';
+        });
+        if (ss.length > 3) ls += '<i class="mzMore">+' + (ss.length - 3) + ' altre</i>';
+      }
+      cells += '<button type="button" class="month-cell mzCell' + (out ? ' outside' : '') + (isT ? ' today' : '') + (past ? ' past' : '') + (fut ? ' future' : '') + (st.n ? ' has-events' : '') + (closed ? ' is-closed' : '') + (d === S.sel ? ' sel' : '') + '" data-mc="' + d + '" aria-label="' + fmtLong(d) + '">' +
+        '<span class="month-cell-top"><span class="dnum">' + x.getDate() + '</span></span><span class="mzLs">' + ls + '</span><span class="month-closed">' + (closed ? 'Chiuso' : '') + '</span></button>';
     }
     var dw = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(function (t) { return '<span>' + t + '</span>'; }).join('');
     body.innerHTML = '<div class="month-wrap"><div class="month-hero"></div><div class="month-dow">' + dw + '</div><div class="month-grid" style="--rows:' + rows + '">' + cells + '</div><aside class="monthSide" aria-label="Giorno selezionato"></aside></div>';
@@ -343,14 +351,15 @@
         hours += '<div class="wkTc' + (thin ? ' thin' : '') + (d === S.sel ? ' sel' : '') + (c.dd.closed ? ' closed' : '') + (isNow ? ' nowc' : '') + '" data-i="' + c.k + '" data-h="' + hr + '">' + c.L.map(function (x) {
           if (x.s) {
             var s = x.s, past = isEnded(d, s.time, s.duration_min);
-            return '<button type="button" class="wkPill wkc-' + wkc(s) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '" title="' + esc(s.course.name) + '">' + (s.time.slice(3) !== '00' ? '<span class="u">' + s.time + '</span>' : '') + '<b>' + esc(s.course.name.split(' ')[0]) + ' ' + (s.cancelled ? '✕' : s.taken + '/' + s.capacity) + '</b></button>';
+            var full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
+            return '<button type="button" class="wkPill gk wkc-' + wkc(s) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '" title="' + esc(s.course.name) + '"><span class="gkT"><b>' + esc(s.course.name.split(' ')[0]) + '</b><em>' + s.time + '</em></span><span class="gkS"><span class="gkBar"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? 'Annullata' : full ? 'Pieno' : s.taken + '/' + s.capacity) + '</s></span></button>';
           }
           var p = x.p; return '<button type="button" class="wkPill wkc-a' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '" title="Personal 1:1">' + (p.time.slice(3) !== '00' ? '<span class="u">' + p.time + '</span>' : '') + '<b>' + esc(p.name.split(' ')[0] + ' ' + (p.name.split(' ')[1] || '').charAt(0) + '.') + '</b></button>';
         }).join('') + '</div>';
       });
     }
     var opts = '<option value="all">Tutti i corsi</option>' + [['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates']].map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('') + '<option value="pt"' + (S.flt === 'pt' ? ' selected' : '') + '>Solo Personal 1:1</option>';
-    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter" style="display:flex"><select class="gcSel" id="gcFlt" aria-label="Corso">' + opts + '</select></div><div class="wkMain"><div class="wkScroll"><div class="wkGrid">' + head + hours + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '</div><div class="wkMain"><div class="wkScroll"><div class="wkGrid">' + head + hours + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
     var grid = body.querySelector('.wkGrid'), side = body.querySelector('.wkSide');
     function drawSide() {
       var b = sideBody(S.sel, true);
@@ -373,7 +382,7 @@
         else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.wkDh,.wkTc'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
       }
     });
-    var fl = body.querySelector('#gcFlt'); fl.onchange = function () { S.flt = fl.value; render(); };
+    [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
     var sc = body.querySelector('.wkScroll'), row = grid.querySelector('.wkTc.nowc') || grid.querySelector('.wkTc[data-h="9"]');
     if (row) sc.scrollTop = Math.max(0, row.offsetTop - 120);
   }
