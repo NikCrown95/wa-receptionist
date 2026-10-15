@@ -325,7 +325,7 @@ module.exports = async (req, res) => {
         const bt = await businessTypeCached(gt);
         if (require("../lib/verticals.js").areaOf(bt) === "palestra") {
           variantKey = "gym";
-          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=26"><link rel="stylesheet" href="/gym/members.css?v=26"><link rel="stylesheet" href="/gym/cal-core.css?v=26"><link rel="stylesheet" href="/gym/cal.css?v=26"><link rel="stylesheet" href="/gym/stats-core.css?v=26"><link rel="stylesheet" href="/gym/stats.css?v=26"><body>').replace("</body>", '<script src="/gym/gym.js?v=26"></script><script src="/gym/cal.js?v=26"></script><script src="/gym/stats.js?v=26"></script></body>');
+          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=27"><link rel="stylesheet" href="/gym/members.css?v=27"><link rel="stylesheet" href="/gym/cal-core.css?v=27"><link rel="stylesheet" href="/gym/cal.css?v=27"><link rel="stylesheet" href="/gym/stats-core.css?v=27"><link rel="stylesheet" href="/gym/stats.css?v=27"><body>').replace("</body>", '<script src="/gym/gym.js?v=27"></script><script src="/gym/cal.js?v=27"></script><script src="/gym/stats.js?v=27"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }

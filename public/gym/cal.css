@@ -172,25 +172,19 @@
 .gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell .month-appts,.gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell.has-events .month-appts,.gcx.gcx.gcx.gcx.monthMode .month-grid .month-cell.future .month-appts{color:var(--muted)!important;font-weight:600!important}
 .gcx.gcx.monthMode .month-grid .month-cell .month-pct{display:none!important}
 
-/* ===== Mese palestra: lezioni elencate nella casella, niente barre o percentuali ===== */
-.gcx.gcx.gcx.monthMode .month-grid .month-cell.mzCell{display:flex!important;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;padding:10px 10px 8px!important;text-align:left;overflow:hidden}
-.gcx.gcx.gcx.monthMode .month-grid .month-cell.mzCell .month-cell-top{flex:none}
-.mzLs{display:flex;flex-direction:column;gap:3px;min-width:0}
-.mzL{display:grid;grid-template-columns:7px auto minmax(0,1fr) auto;align-items:center;gap:5px;font-style:normal;font-size:.68rem;line-height:1.15;color:var(--ink);min-width:0}
-.mzL u{width:7px;height:7px;border-radius:50%;background:var(--c-circuit)}
-.mzL.mzc-hyrox u{background:var(--c-hyrox)}.mzL.mzc-pilates u{background:var(--c-pilates)}
-.mzL em{font-style:normal;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
-.mzL b{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.mzL s{text-decoration:none;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
-.mzL.full s{color:var(--danger)}
-.mzMore{font-style:normal;font-size:.66rem;font-weight:700;color:var(--muted)}
-.gcx .month-cell.mzCell.past .mzL,.gcx .month-cell.mzCell.outside .mzL{opacity:.55}
+/* ===== Mese palestra: semplice, come le altre attivita' ===== */
+.gcx.gcx.gcx.monthMode .month-grid .month-cell.mzCell{display:flex!important;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;padding:10px 12px 9px!important;text-align:left;overflow:hidden}
+.mzLs{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mzN{font-size:.76rem;font-weight:600;color:var(--muted)}
+.mzDots{display:flex;gap:5px;min-height:8px}
+.mzDots u{width:8px;height:8px;border-radius:50%;background:var(--c-circuit)}
+.mzDots u.mzc-hyrox{background:var(--c-hyrox)}.mzDots u.mzc-pilates{background:var(--c-pilates)}
+.mzFull{font-size:.66rem;font-weight:800;color:var(--danger);letter-spacing:.02em}
+.gcx .month-cell.mzCell.past .mzLs,.gcx .month-cell.mzCell.outside .mzLs{opacity:.6}
 .gcx .month-cell.mzCell .month-closed{margin-top:auto}
-@media(max-width:1399px){.mzL{grid-template-columns:7px minmax(0,1fr) auto;font-size:.7rem}.mzL b{display:none}}
 @media(max-width:699px){
   .gcx.gcx.gcx.monthMode .month-grid .month-cell.mzCell{padding:6px 4px!important;align-items:center}
-  .mzLs{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:3px}
-  .mzL{display:block}.mzL em,.mzL b,.mzL s,.mzMore{display:none}.mzL u{display:block;width:7px;height:7px}
+  .mzLs{align-items:center;gap:3px}.mzN,.mzFull{display:none}
 }
 
 /* ===== Settimana palestra: blocchi lezione con barra dei posti ===== */
@@ -207,4 +201,3 @@
 .gkChips{gap:8px!important;flex-wrap:wrap}
 .gkChip{border:1px solid var(--line2);background:var(--card);color:var(--ink);font:700 .84rem var(--fb);padding:8px 14px;border-radius:999px;cursor:pointer}
 .gkChip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
-.mzL s{justify-self:end}

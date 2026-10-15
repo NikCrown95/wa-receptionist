@@ -253,14 +253,11 @@
       var d = addDays(r.from, i), x = parse(d), out = x.getMonth() !== mo, day = getDay(d) || { sessions: [], closed: true }, st = dayStats(day), closed = !!day.closed || !st.n;
       var isT = d === today(), past = !out && !isT && d < today(), fut = !out && !isT && d > today();
       var occ = st.pct >= 70 ? 'occ-hi' : st.pct >= 40 ? 'occ-mid' : 'occ-lo';
-      var ls = '';
+      var ls = '', dots = '';
       if (!closed) {
-        var ss = (day.sessions || []).filter(function (z) { return !z.cancelled; }).slice().sort(function (p, q) { return p.time < q.time ? -1 : 1; });
-        ss.slice(0, 3).forEach(function (z) {
-          var full = z.taken >= z.capacity;
-          ls += '<i class="mzL mzc-' + ck(z.course.category) + (full ? ' full' : '') + '"><u></u><em>' + z.time + '</em><b>' + esc(z.course.name.split(' ')[0]) + '</b><s>' + (full ? 'Pieno' : z.taken + '/' + z.capacity) + '</s></i>';
-        });
-        if (ss.length > 3) ls += '<i class="mzMore">+' + (ss.length - 3) + ' altre</i>';
+        var ss = (day.sessions || []).filter(function (z) { return !z.cancelled; }), seen = {}, anyFull = false;
+        ss.forEach(function (z) { var k = ck(z.course.category); if (z.taken >= z.capacity) anyFull = true; if (!seen[k]) { seen[k] = 1; dots += '<u class="mzc-' + k + '"></u>'; } });
+        ls = '<span class="mzN">' + st.n + ' lez.</span><span class="mzDots">' + dots + '</span>' + (anyFull ? '<span class="mzFull">Pieno</span>' : '');
       }
       cells += '<button type="button" class="month-cell mzCell' + (out ? ' outside' : '') + (isT ? ' today' : '') + (past ? ' past' : '') + (fut ? ' future' : '') + (st.n ? ' has-events' : '') + (closed ? ' is-closed' : '') + (d === S.sel ? ' sel' : '') + '" data-mc="' + d + '" aria-label="' + fmtLong(d) + '">' +
         '<span class="month-cell-top"><span class="dnum">' + x.getDate() + '</span></span><span class="mzLs">' + ls + '</span><span class="month-closed">' + (closed ? 'Chiuso' : '') + '</span></button>';
