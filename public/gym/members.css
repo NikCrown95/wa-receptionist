@@ -382,3 +382,6 @@
 :root[data-theme="dark"] .mzX.warn .mzXt em{color:#F0B955}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .mzX.warn .mzXt em{color:#F0B955}}
 @media(max-width:980px){.mzRow>.mzC:nth-child(5){padding-left:68px;margin-top:-4px}.mzX{max-width:240px}}
+
+/* scorrimento della pagina Iscritti (telefono e iPad) */
+@media(max-width:699px){#panelClients>.gx{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y}}
