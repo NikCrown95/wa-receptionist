@@ -326,30 +326,30 @@
     function endOf(t, dur) { var m = mins(t) + (dur || 60); return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
     days.forEach(function (dd, k) {
       var st = dayStats(dd), d = dd.date, body2 = '', cards = 0;
-      (dd.sessions || []).slice().sort(function (p, q) { return p.time < q.time ? -1 : 1; }).forEach(function (s) {
-        if (f !== 'all' && ck(s.course.category) !== f) return;
+      var items = [];
+      (dd.sessions || []).forEach(function (s) { if (f === 'all' || ck(s.course.category) === f) items.push({ t: s.time, s: s }); });
+      if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (!p.free) items.push({ t: p.time, p: p }); });
+      items.sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; });
+      items.forEach(function (x) {
         cards++;
-        var past = isEnded(d, s.time, s.duration_min), full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
+        if (x.p) {
+          var p = x.p, nm = p.name.split(' ');
+          body2 += '<button type="button" class="gwPt' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '"><span class="gwTm">' + p.time + '<i>Personal</i></span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>';
+          return;
+        }
+        var s = x.s, past = isEnded(d, s.time, s.duration_min), full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
         var tag = s.cancelled ? '<span class="gwTag off">Annullata</span>' : full ? '<span class="gwTag full">Pieno</span>' : '';
         body2 += '<button type="button" class="gwCard gwc-' + ck(s.course.category) + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '">' +
           '<span class="gwTm">' + s.time + '<i>–' + endOf(s.time, s.duration_min) + '</i>' + tag + '</span><b class="gwNm">' + esc(s.course.name) + '</b>' +
           '<span class="gwS"><span class="gwBar"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></span></button>';
       });
-      var pts = (f === 'all' || f === 'pt') ? (Array.isArray(dd.pt) ? dd.pt : []).filter(function (p) { return !p.free; }) : [];
-      if (pts.length) {
-        body2 += '<div class="gwPtH">Personal</div>' + pts.map(function (p) {
-          var nm = p.name.split(' ');
-          return '<button type="button" class="gwPt' + (isEnded(d, p.time, 60) ? ' past' : '') + '" data-ptb="' + p.time + '" data-date="' + d + '"><em>' + p.time + '</em><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>';
-        }).join('');
-        cards += pts.length;
-      }
       if (!cards) body2 = '<div class="gwEmpty">' + (dd.closed ? 'Chiuso' : 'Nessuna lezione') + '</div>';
       cols += '<div class="gwCol' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + (dd.closed ? ' closed' : '') + '" data-i="' + k + '">' +
         '<button type="button" class="gwDh" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="gwOc">' + (st.n ? st.b + '/' + st.cap + ' posti' : '&nbsp;') + '</span></button>' +
         '<div class="gwBody">' + body2 + '</div></div>';
     });
     var opts = '<option value="all">Tutti i corsi</option>' + [['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates']].map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('') + '<option value="pt"' + (S.flt === 'pt' ? ' selected' : '') + '>Solo Personal 1:1</option>';
-    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '</div><div class="wkMain"><div class="wkScroll gwkScroll"><div class="gwk">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew"><div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti'], ['circuit', 'Circuiti'], ['hyrox', 'Hyrox'], ['pilates', 'Pilates'], ['pt', 'Personal']].map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg"><u class="c1"></u>Circuit<u class="c2"></u>Hyrox<u class="c3"></u>Pilates<u class="c4"></u>Personal</span></div><div class="wkMain"><div class="wkScroll gwkScroll"><div class="gwk">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
     var grid = body.querySelector('.gwk'), side = body.querySelector('.wkSide');
     function drawSide() {
       var b = sideBody(S.sel, true);

@@ -227,11 +227,16 @@
 .gwTag.off{background:var(--card2);color:var(--muted)}
 .gwCard.full{border-color:color-mix(in srgb,var(--danger) 40%,var(--line2));border-left-color:var(--cc)}
 .gwCard.past{opacity:.55}.gwCard.off{opacity:.5}.gwCard.off .gwNm{text-decoration:line-through}
-.gwPtH{margin-top:4px;font:800 .66rem var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 2px}
-.gwPt{display:flex;align-items:baseline;gap:7px;border:1px solid var(--line2);background:color-mix(in srgb,var(--accent-soft) 60%,var(--card));color:var(--ink);border-radius:10px;padding:7px 9px;font-family:inherit;cursor:pointer;text-align:left;min-width:0}
-.gwPt em{font-style:normal;font-weight:800;font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--accent-ink)}
-.gwPt b{font-weight:700;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gwPt{--cc:#2F6BDB;display:flex;flex-direction:column;gap:1px;text-align:left;border:1px solid color-mix(in srgb,var(--cc) 25%,var(--line2));border-left:4px solid var(--cc);background:color-mix(in srgb,var(--cc) 10%,var(--card));color:var(--ink);border-radius:12px;padding:7px 9px 7px 10px;font-family:inherit;cursor:pointer;min-width:0}
+.gwPt .gwTm{font-size:.9rem}.gwPt .gwTm i{font-size:.66rem;letter-spacing:.04em}
+.gwPt b{font-weight:700;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gwPt.past{opacity:.55}
+:root[data-theme="dark"] .gwPt{--cc:#6C9BFF}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .gwPt{--cc:#6C9BFF}}
+.gkLeg{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted)}
+.gkLeg u{width:10px;height:10px;border-radius:3px;margin-left:8px}
+.gkLeg .c1{background:var(--c-circuit)}.gkLeg .c2{background:var(--c-hyrox)}.gkLeg .c3{background:var(--c-pilates)}.gkLeg .c4{background:#2F6BDB}
+@media(max-width:1000px){.gkLeg{display:none}}
 .gwEmpty{padding:18px 6px;text-align:center;font-size:.8rem;font-weight:600;color:var(--muted);border:1px dashed var(--line2);border-radius:12px}
 .gwCol.closed .gwEmpty{background:repeating-linear-gradient(135deg,transparent 0 7px,color-mix(in srgb,var(--ink) 4%,transparent) 7px 8px)}
 @media(max-width:1000px){.gwk{gap:6px}.gwDh .dd{font-size:1.25rem}.gwCard{padding:8px 7px 8px 8px}.gwTm{font-size:.88rem}.gwTm i{display:none}.gwNm{font-size:.8rem}.gwTag{display:none}}
