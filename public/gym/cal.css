@@ -299,3 +299,10 @@
 .gcx.gcx .gpw .gpTot div{font:800 .64rem var(--fb)!important;letter-spacing:.05em}
 .gcx.gcx .gpw .gpC s,.gcx.gcx .gpw .gpC.gpc-pt b,.gcx.gcx .gpw .gpLb span,.gcx.gcx .gpw .gpTot div{font-size:.7rem!important;font-weight:700!important;font-family:inherit}
 .gcx.gcx .gpw .gpC.gpc-pt b{font-size:.76rem!important}
+/* settimana: niente tratteggio, linea sottile ma ben visibile; più lezioni dello stesso corso nello stesso giorno restano ordinate */
+.gcx.gcx .gpw .gpCell{border:1px solid color-mix(in srgb,var(--ink) 22%,var(--line2))!important;border-style:solid!important;justify-content:flex-start;gap:6px}
+.gcx.gcx .gpw .gpCell.none,.gcx.gcx .gpw .gpCell.closed{justify-content:center}
+.gcx.gcx .gpw .gpC{border-color:color-mix(in srgb,var(--ink) 22%,var(--line2))!important;border-left-color:var(--cc)!important;min-height:48px;flex:none}
+.gcx.gcx .gpw .gpRow{align-items:stretch}
+.gcx.gcx .gpw .gpCell.sel{border-color:var(--accent)!important}
+.gcx.gcx .gpw .gpNo{display:none}
