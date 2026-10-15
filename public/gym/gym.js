@@ -266,6 +266,8 @@
     return '<span class="mxAv s-' + m.status.s + '" style="--h:' + hh + '"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3"/><circle class="p" cx="22" cy="22" r="' + r + '" fill="none" stroke-width="3" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span>';
   }
   var MZH = [175, 205, 240, 275, 320, 350, 25, 150];
+  var MZM = /^(luca|andrea|nicola|mattia|elia|tobia|gianluca|jonathan|enea|ezio|noah|joshua|santa?|mustafa|osama|bubi)$/i;
+  function mzGen(m) { var f = String(m.first_name || '').trim().split(/\s+/)[0].toLowerCase(); if (MZM.test(f)) return 'gm'; return /a$/.test(f) ? 'gf' : 'gm'; }
   function mzHue(m) { var h = 0, n = m.first_name + m.last_name; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return MZH[h % MZH.length]; }
   function mzPips(cur, u) {
     if (!cur || !u.max_period) return '<span class="mzMute">—</span>';
@@ -337,7 +339,7 @@
           var big = dl < 0 ? '−' + (-dl) : String(dl), unit = Math.abs(dl) === 1 ? 'giorno' : 'giorni', cap = dl < 0 ? 'scaduto il' : dl === 0 ? 'scade oggi' : 'scade il';
           sc = '<span class="mzX ' + m.status.s + '"><span class="mzXn"><b>' + big + '</b><small>' + unit + '</small></span><span class="mzXd"><small>' + cap + '</small><b>' + short(cur.ends_on) + '</b></span></span>';
         } else sc = '<span class="mzMute">Nessun abbonamento</span>';
-        r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b></span>' +
+        r.innerHTML = '<span class="mzC mzN ' + mzGen(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b></span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? '<span class="mzPl pl' + (Math.max(0, S.data.plans.map(function (p) { return p.id; }).indexOf(cur.plan_id)) % 4) + '">' + esc(cur.plan_name) + '</span>' : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
