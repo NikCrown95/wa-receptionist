@@ -323,7 +323,7 @@ module.exports = async (req, res) => {
       const gt = String(q.t || "").trim();
       if (/^[a-f0-9]{32,128}$/.test(gt) && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
         const bt = await businessTypeCached(gt);
-        if (bt === "palestra") {
+        if (require("../lib/verticals.js").areaOf(bt) === "palestra") {
           variantKey = "gym";
           html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=21"><link rel="stylesheet" href="/gym/members.css?v=21"><link rel="stylesheet" href="/gym/cal-core.css?v=21"><link rel="stylesheet" href="/gym/cal.css?v=21"><link rel="stylesheet" href="/gym/stats-core.css?v=21"><link rel="stylesheet" href="/gym/stats.css?v=21"><body>').replace("</body>", '<script src="/gym/gym.js?v=21"></script><script src="/gym/cal.js?v=21"></script><script src="/gym/stats.js?v=21"></script></body>');
         }
