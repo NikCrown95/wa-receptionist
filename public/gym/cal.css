@@ -323,3 +323,35 @@
 .gcx .wkKp div{display:flex;flex-direction:column;gap:2px;padding:10px 10px;border-radius:13px;background:var(--card);border:1px solid var(--line)}
 .gcx .wkKp b{font:800 1.35rem/1 var(--fd,'Manrope',sans-serif);color:var(--ink)}
 .gcx .wkKp span{font:600 .68rem/1.2 var(--fb,'Plus Jakarta Sans',sans-serif);color:var(--muted)}
+/* settimana compatta: tutta la settimana in una pagina sola */
+.gcx.gcx .gpw{gap:2px;padding:8px 10px 6px;border-radius:18px}
+.gcx.gcx .gpw .gpHd{padding-bottom:6px}
+.gcx.gcx .gpw .gpDh{flex-direction:row;justify-content:center;align-items:baseline;gap:6px;padding:7px 2px;border-radius:11px}
+.gcx.gcx .gpw .gpDh .dd{font-size:1.05rem}
+.gcx.gcx .gpw .gpDh .dn{font-size:.66rem}
+.gcx.gcx .gpw .gpRow{padding-top:5px;margin-top:0}
+.gcx.gcx .gpw .gpLb{padding:6px 9px;border-radius:11px;gap:1px}
+.gcx.gcx .gpw .gpLb b{font-size:.82rem;line-height:1.15}
+.gcx.gcx .gpw .gpLb span{font-size:.64rem!important;line-height:1.2}
+.gcx.gcx .gpw .gpCell{padding:3px 4px!important;gap:4px;min-height:0}
+.gcx.gcx .gpw .gpC{flex-direction:row;align-items:center;gap:6px;padding:5px 7px;min-height:0;border-radius:8px}
+.gcx.gcx .gpw .gpT{font-size:.76rem;flex:none}
+.gcx.gcx .gpw .gpT em{display:none}
+.gcx.gcx .gpw .gpB{flex:1;min-width:10px;height:4px}
+.gcx.gcx .gpw .gpC s{flex:none;font-size:.66rem!important}
+.gcx.gcx .gpw .gpC.gpc-pt{gap:7px}
+.gcx.gcx .gpw .gpC.gpc-pt b{flex:1;min-width:0;font-size:.7rem!important}
+.gcx.gcx .gpw .gpTot{padding-top:5px}
+.gcx.gcx .gpw .gpTot span{font-size:.76rem}
+.gcx.gcx .gpw .gpCell{container-type:inline-size}
+.gcx.gcx .gpw .gpC{padding:7px 8px}
+.gcx.gcx .gpw .gpCell{padding:4px 4px!important}
+.gcx.gcx .gpw .gpLb{padding:8px 10px}
+.gcx.gcx .gpw .gpDh{padding:9px 2px}
+@container (max-width:118px){
+  .gpw .gpC{flex-wrap:wrap;row-gap:1px}
+  .gpw .gpB{display:none}
+  .gpw .gpC s{margin-left:auto}
+  .gcx.gcx .gpw .gpC.gpc-pt b{flex:1 0 100%;order:3}
+  .gpw .gpT{font-size:.74rem}
+}
