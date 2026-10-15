@@ -41,18 +41,41 @@
   function getDay(d) { var c = C[d]; return c ? (c.full || c.light) : null; }
 
   // ---------- dati ----------
-  function bust() { C = {}; }
+  var BUST = 0;
+  function bust() { C = {}; PEND = {}; BUST++; }
   function have(from, to, needFull) { for (var d = from; d <= to; d = addDays(d, 1)) { var c = C[d]; if (!c || !(needFull ? c.full : (c.full || c.light))) return false; } return true; }
+  var PEND = {};
   function fetchRange(from, to, light) {
-    return G.api(null, G.API + '&cal=1&from=' + from + '&to=' + to + (light ? '&light=1' : '')).then(function (j) {
+    var key = from + '|' + to + '|' + (light ? 1 : 0), gen = BUST;
+    if (PEND[key]) return PEND[key];
+    var p = G.api(null, G.API + '&cal=1&from=' + from + '&to=' + to + (light ? '&light=1' : '')).then(function (j) {
+      delete PEND[key];
+      if (gen !== BUST) return;
       j.days.forEach(function (d) { var c = C[d.date] = C[d.date] || {}; c[light ? 'light' : 'full'] = d; });
       if (j.today) G.S.today = j.today;
-    });
+    }, function (e) { delete PEND[key]; throw e; });
+    PEND[key] = p;
+    return p;
   }
   function ensure(from, to, needFull, cb) {
     if (have(from, to, needFull)) { cb(); return; }
     var my = token;
     fetchRange(from, to, !needFull).then(function () { if (my === token) cb(); }).catch(function (e) { if (my === token) { root.textContent = ''; root.appendChild(el('div', 'gxWhy', e.message || 'Errore')); } });
+  }
+  // a riposo si scaricano il periodo precedente e il successivo: il cambio di settimana/mese e' immediato
+  var pfT;
+  function prefetchNear() {
+    clearTimeout(pfT);
+    pfT = setTimeout(function () {
+      if (!sectionOn || S.view === 'day' || document.visibilityState === 'hidden') return;
+      var keep = S.anchor, view = S.view, out = [];
+      [-1, 1].forEach(function (k) {
+        var a = view === 'week' ? addDays(S.anchor, 7 * k) : (function () { var d = parse(S.anchor); return ymd(new Date(d.getFullYear(), d.getMonth() + k, 1)); })();
+        var sv = S.anchor; S.anchor = a; var r = range(); S.anchor = sv;
+        if (!have(r.from, r.to, r.full)) out.push(r);
+      });
+      out.forEach(function (r) { fetchRange(r.from, r.to, !r.full).catch(function () {}); });
+    }, 600);
   }
   function range() {
     if (S.view === 'day') return { from: S.anchor, to: S.anchor, full: true };
@@ -81,6 +104,7 @@
     bindControls();
     toggleFab();
     ensure(r.from, r.to, r.full, function () {
+      prefetchNear();
       var body = document.getElementById('gcBody'); if (!body) return;
       if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); return; }
       if (S.view === 'week') {
@@ -88,9 +112,9 @@
         else { weekDraw(body); }
         return;
       }
-      var drawMonth = function () { monthDraw(body); };
-      if (!have(S.sel, S.sel, true)) { var my2 = token; fetchRange(S.sel, S.sel, false).then(function () { if (my2 === token) drawMonth(); }).catch(drawMonth); return; }
-      drawMonth();
+      monthDraw(body);
+      // il dettaglio del giorno scelto arriva dopo: il mese si vede subito
+      if (!have(S.sel, S.sel, true)) { var my2 = token, selD = S.sel; fetchRange(selD, selD, false).then(function () { if (my2 === token && selD === S.sel) { var b2 = document.getElementById('gcBody'); if (b2 && S.view === 'month') monthDraw(b2); } }).catch(function () {}); }
     });
   }
   function skel() {
@@ -504,7 +528,7 @@
   };
   document.addEventListener('lia:section', function (e) {
     sectionOn = e.detail === 'cal'; toggleFab();
-    if (sectionOn) { render(); revalidate(); }
+    if (sectionOn) { var rr = range(), warm = have(rr.from, rr.to, rr.full); render(); if (warm) revalidate(); }
   });
   document.addEventListener('lia:gymchanged', function () { bust(); if (sectionOn) render(); });
   var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (sectionOn) render(); }, 200); });
