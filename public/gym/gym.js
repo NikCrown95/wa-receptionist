@@ -334,10 +334,10 @@
         var sc;
         if (cur && cur.ends_on) {
           var tot = cur.starts_on ? Math.max(1, Math.round((parse(cur.ends_on).getTime() - parse(cur.starts_on).getTime()) / 864e5)) : 30, fr = dl < 0 ? 1 : Math.max(0.04, Math.min(1, dl / tot));
-          var lab = dl < 0 ? 'scaduto da ' + (-dl) + ' gg' : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : dl + ' giorni';
-          sc = '<span class="mzX ' + m.status.s + '"><span class="mzXt"><b>' + short(cur.ends_on) + '</b><em>' + lab + '</em></span><span class="mzXb"><i style="width:' + Math.round(fr * 100) + '%"></i></span></span>';
+          var big = dl < 0 ? '−' + (-dl) : String(dl), unit = Math.abs(dl) === 1 ? 'giorno' : 'giorni', cap = dl < 0 ? 'scaduto il' : dl === 0 ? 'scade oggi' : 'scade il';
+          sc = '<span class="mzX ' + m.status.s + '"><span class="mzXn"><b>' + big + '</b><small>' + unit + '</small></span><span class="mzXd"><small>' + cap + '</small><b>' + short(cur.ends_on) + '</b></span></span>';
         } else sc = '<span class="mzMute">Nessun abbonamento</span>';
-        r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
+        r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b></span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? '<span class="mzPl pl' + (Math.max(0, S.data.plans.map(function (p) { return p.id; }).indexOf(cur.plan_id)) % 4) + '">' + esc(cur.plan_name) + '</span>' : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
