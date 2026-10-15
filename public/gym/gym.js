@@ -325,7 +325,12 @@
         var cur = curPlan(m), dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, u = m.usage || {}, hot = dl != null && dl <= exd && dl >= 0;
         var r = el('div', 'mzRow st-' + m.status.s); r.tabIndex = 0; r.setAttribute('role', 'button');
         var ing = cur && u.max_period ? (u.period || 0) + '/' + u.max_period : '—';
-        var sc = cur && cur.ends_on ? (dl === 0 ? '<b class="mzHot">Oggi, ' + short(cur.ends_on) + '</b><small class="mzHot">scade oggi</small>' : '<span>' + short(cur.ends_on) + ' <i>·</i> ' + expTxt(dl) + '</span>') : '<span class="mzMute">Nessun abbonamento</span>';
+        var sc;
+        if (cur && cur.ends_on) {
+          var tot = cur.starts_on ? Math.max(1, Math.round((parse(cur.ends_on).getTime() - parse(cur.starts_on).getTime()) / 864e5)) : 30, fr = dl < 0 ? 1 : Math.max(0.04, Math.min(1, dl / tot));
+          var lab = dl < 0 ? 'scaduto da ' + (-dl) + ' gg' : dl === 0 ? 'scade oggi' : dl === 1 ? 'scade domani' : dl + ' giorni';
+          sc = '<span class="mzX ' + m.status.s + '"><span class="mzXt"><b>' + short(cur.ends_on) + '</b><em>' + lab + '</em></span><span class="mzXb"><i style="width:' + Math.round(fr * 100) + '%"></i></span></span>';
+        } else sc = '<span class="mzMute">Nessun abbonamento</span>';
         r.innerHTML = '<span class="mzC mzN" style="--h:' + mzHue(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name + ' ' + m.last_name) + '</b></span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? esc(cur.plan_name) : '—') + '</span>' +
