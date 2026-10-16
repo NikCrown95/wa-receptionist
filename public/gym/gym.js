@@ -14,7 +14,7 @@
   var WD = ['', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
   var MO = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
   var MS = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
-  var CATL = { corsi: 'Corsi', circuiti: 'Circuiti', hyrox: 'Hyrox', pilates: 'Pilates', personal: 'Personal 1:1' };
+  var CATL = { tutti: 'Tutti i corsi', corsi: 'Corsi', circuiti: 'Circuiti', hyrox: 'Hyrox', pilates: 'Pilates', personal: 'Personal 1:1' };
   var IC = {
     users: '<circle cx="9" cy="8" r="3.3"/><path d="M2.8 20c.4-3.6 3-5.6 6.2-5.6s5.8 2 6.2 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.3.2 3.8 1.8 4.2 4.3"/>', check: '<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.3 9.5"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.3 2"/>', alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.4v.1"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2"/>', dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>', chev: '<path d="m6 9 6 6 6-6"/>', l: '<path d="M15 6l-6 6 6 6"/>', r: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
     card: '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/>',
@@ -741,7 +741,7 @@
       var mx = inp('number', p && p.max_entries ? p.max_entries : ''), mw = inp('number', p && p.max_per_week ? p.max_per_week : ''); mx.inputMode = 'numeric'; mw.inputMode = 'numeric'; mx.placeholder = 'nessun limite'; mw.placeholder = 'nessun limite';
       if (!p) {
         var tp = el('div', 'gxChips'); tp.style.marginBottom = '10px';
-        var all = (S.data.plan_categories || S.data.categories), noPt = all.filter(function (x) { return x !== 'personal'; });
+        var all = (S.data.plan_categories || S.data.categories), noPt = ['tutti'];
         [['Mensile', 'time', 30, 60, noPt], ['Trimestrale', 'time', 90, 150, noPt], ['Piano Personal', 'entries', 10, 100, ['personal']], ['Carnet 10 ingressi', 'entries', 10, 70, noPt]].forEach(function (t) {
           var b = el('button', 'gxCp gxAlt', t[0]); b.type = 'button';
           b.addEventListener('click', function () { n.value = t[0]; k.value = t[1]; sync(); dv.value = t[2]; pr.value = t[3]; sel0.length = 0; t[4].forEach(function (x) { if (all.indexOf(x) >= 0) sel0.push(x); }); paints.forEach(function (f) { f(); }); });
@@ -752,8 +752,8 @@
       w.appendChild(field('Nome', n)); w.appendChild(field('Tipo', k)); w.appendChild(dl); w.appendChild(field('Prezzo (€)', pr));
       var lim = el('div', 'gxTwo'); lim.appendChild(field('Ingressi al mese (max)', mx)); lim.appendChild(field('A settimana (max)', mw)); w.appendChild(lim);
       w.appendChild(el('div', 'gxDh', 'Corsi inclusi'));
-      var sel0 = p ? p.covers.slice() : (S.data.plan_categories || S.data.categories).slice(), ch = el('div', 'gxChips');
-      var paints = []; (S.data.plan_categories || S.data.categories).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paints.push(paint); paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else sel0.push(c); paint(); }); ch.appendChild(b); });
+      var sel0 = p ? p.covers.slice() : ['tutti'], ch = el('div', 'gxChips');
+      var paints = []; (S.data.plan_categories || S.data.categories).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paints.push(paint); paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else { if (c === 'tutti') { for (var q = sel0.length - 1; q >= 0; q--) if (sel0[q] !== 'personal') sel0.splice(q, 1); } else if (c !== 'personal') { var t = sel0.indexOf('tutti'); if (t >= 0) sel0.splice(t, 1); } sel0.push(c); } paints.forEach(function (f) { f(); }); }); ch.appendChild(b); });
       w.appendChild(ch);
       var h = el('p', null, 'Esempio: il Mensile da 60 € include i corsi, con 8 ingressi al mese e massimo 2 a settimana. Il Piano Personal da 100 € è a parte: 10 lezioni da un\'ora con il trainer, una al giorno. Un iscritto può avere entrambi.'); h.style.marginTop = '8px'; w.appendChild(h);
       var msg = el('div'); w.appendChild(msg);
