@@ -742,7 +742,7 @@
       if (!p) {
         var tp = el('div', 'gxChips'); tp.style.marginBottom = '10px';
         var all = (S.data.plan_categories || S.data.categories), noPt = ['tutti'];
-        [['Mensile', 'time', 30, 60, noPt], ['Trimestrale', 'time', 90, 150, noPt], ['Piano Personal', 'entries', 10, 100, ['personal']], ['Carnet 10 ingressi', 'entries', 10, 70, noPt]].forEach(function (t) {
+        [['Mensile', 'time', 30, 60, noPt], ['Piano Personal', 'entries', 10, 100, ['personal']], ['Carnet 10 ingressi', 'entries', 10, 70, noPt]].forEach(function (t) {
           var b = el('button', 'gxCp gxAlt', t[0]); b.type = 'button';
           b.addEventListener('click', function () { n.value = t[0]; k.value = t[1]; sync(); dv.value = t[2]; pr.value = t[3]; sel0.length = 0; t[4].forEach(function (x) { if (all.indexOf(x) >= 0) sel0.push(x); }); paints.forEach(function (f) { f(); }); });
           tp.appendChild(b);
