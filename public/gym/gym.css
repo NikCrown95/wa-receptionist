@@ -158,3 +158,9 @@
 .gxPlanBox .gxChips{margin-bottom:8px}
 .gxPlanBox .gxCp[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
 .gxPlanInfo{margin:6px 0 10px!important}
+
+/* Scheda palestra */
+:root:root #panelProfile #pfServices.gpfList{max-height:none;overflow:visible;display:flex;flex-direction:column;gap:8px;-webkit-mask-image:none;mask-image:none}
+.gpfList .gpfH{margin:8px 2px 0;font:800 .66rem/1 var(--fb,inherit);font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gpfList .gpfH:first-child{margin-top:2px}
+.gpfList .gpfCnt{flex:none;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap}

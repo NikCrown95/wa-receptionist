@@ -771,6 +771,72 @@
     });
   }
 
+  // ---------- Scheda palestra: stessa struttura delle altre attività, riempita con i dati della palestra ----------
+  var pfObs = null, pfBusy = false;
+  function pfPaint() {
+    var D = S.data, root = document.getElementById('panelProfile'); if (!D || !root || pfBusy) return;
+    pfBusy = true; if (pfObs) pfObs.disconnect();
+    try {
+      var kd = document.getElementById('pfKind'); if (kd) kd.textContent = 'Palestra';
+      var nm = document.getElementById('pfName'); if (nm && (!nm.textContent || nm.textContent === 'La tua attività') && D.business && D.business.name) nm.textContent = D.business.name;
+      var CL = { circuiti: 'a', hyrox: 'c', pilates: 'd', personal: 'b' };
+      // --- corsi e abbonamenti
+      var sv = document.getElementById('pfServices');
+      if (sv) {
+        var card = sv.closest('.pfCard'); if (card) { var h = card.querySelector('h3'); if (h) h.textContent = 'Corsi e abbonamenti'; var sub = card.querySelector('.svSub'); if (sub) sub.textContent = 'Quello che gli iscritti trovano in palestra.'; }
+        sv.innerHTML = ''; sv.className = 'gpfList';
+        var perC = {}; (D.schedule || []).forEach(function (x) { perC[x.course_id] = (perC[x.course_id] || 0) + 1; });
+        function row(col, name, meta, right, price) {
+          var r = el('div', 'svRow'); r.style.setProperty('--sv', 'var(--wk-' + col + '-bd, var(--accent))'); r.appendChild(el('span', 'svBar'));
+          var tx = el('div', 'svTx'); tx.appendChild(el('b', null, name)); tx.appendChild(el('span', null, meta)); r.appendChild(tx);
+          if (right) r.appendChild(el('span', price ? 'svPrice' : 'gpfCnt', right)); return r;
+        }
+        function head(t) { return el('div', 'gpfH', t); }
+        if ((D.courses || []).length) {
+          sv.appendChild(head('Corsi'));
+          D.courses.forEach(function (c) { var n = perC[c.id] || 0; sv.appendChild(row(CL[c.category] || 'a', c.name, c.duration_min + ' min · max ' + c.capacity + ' posti', n ? n + (n === 1 ? ' lezione' : ' lezioni') + '/sett.' : 'non in programma')); });
+        }
+        var pth = (D.settings && D.settings.pt_hours) || [];
+        sv.appendChild(row('b', 'Personal 1:1', 'Su prenotazione' + (pth.length ? ' · ' + pth.length + ' fasce al giorno' : ''), ''));
+        if ((D.plans || []).length) {
+          sv.appendChild(head('Abbonamenti'));
+          D.plans.forEach(function (p) {
+            var meta = p.kind === 'entries' ? (p.entries || '') + ' ingressi' : (p.days === 30 ? 'Mensile' : p.days === 90 ? 'Trimestrale' : p.days === 365 ? 'Annuale' : p.days + ' giorni');
+            if (p.max_per_week) meta += ' · max ' + p.max_per_week + ' a settimana';
+            sv.appendChild(row('e', p.name, meta, eur(p.price_eur), true));
+          });
+        }
+      }
+      // --- orari: dalle lezioni in programma
+      var hb = document.getElementById('pfHours');
+      if (hb) {
+        var byD = {}; (D.schedule || []).forEach(function (x) { var c = (D.courses || []).filter(function (y) { return y.id === x.course_id; })[0], dur = c ? c.duration_min : 60, a = x.time.split(':'), st = (+a[0]) * 60 + (+a[1]), en = st + dur; var o = byD[x.weekday] || (byD[x.weekday] = { a: 1e9, b: 0 }); o.a = Math.min(o.a, st); o.b = Math.max(o.b, en); });
+        function hm(m) { return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
+        hb.innerHTML = '';
+        for (var w = 1; w <= 7; w++) { var o = byD[w], r = el('div', 'pfRow' + (o ? '' : ' closed')); r.appendChild(el('span', 'pfRowName', WD[w])); r.appendChild(el('span', 'pfRowMeta', o ? hm(o.a) + '–' + hm(o.b) : 'Chiuso')); hb.appendChild(r); }
+        var tz = document.getElementById('pfTz'); if (tz) tz.textContent = 'Dalla prima all’ultima lezione in programma';
+      }
+      // --- in breve
+      var st = document.getElementById('pfStats');
+      if (st) {
+        var act_ = 0, soon = 0; (D.members || []).forEach(function (m) { if (m.status && (m.status.s === 'ok' || m.status.s === 'warn')) act_++; if (m.status && m.status.s === 'warn') soon++; });
+        var cells = [['Iscritti attivi', String(act_)], ['Lezioni / sett.', String((D.schedule || []).length)], ['In scadenza', String(soon)]];
+        st.innerHTML = ''; cells.forEach(function (c) { var d = el('div', 'pf2St'); d.appendChild(el('small', null, c[0])); d.appendChild(el('b', null, c[1])); st.appendChild(d); });
+        var hint = st.parentNode.querySelector('.pfHint'); if (hint) hint.textContent = 'Iscritti con abbonamento valido, lezioni in programma ogni settimana e abbonamenti in scadenza.';
+      }
+      // --- "Modifica" porta alle impostazioni della palestra
+      root.querySelectorAll('[data-pfedit]').forEach(function (b) { b.onclick = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); }; });
+    } catch (e) { /* la scheda resta com’è */ }
+    pfBusy = false; pfWatch();
+  }
+  function pfWatch() {
+    var root = document.getElementById('panelProfile'); if (!root) return;
+    if (!pfObs) pfObs = new MutationObserver(function () { clearTimeout(pfObs.t); pfObs.t = setTimeout(pfPaint, 60); });
+    pfObs.observe(root, { childList: true, subtree: true });
+  }
+  document.addEventListener('lia:gymchanged', function () { pfPaint(); });
+  pfWatch();
+
   // ---------- condivisione con il calendario (cal.js) ----------
   window.liaGym = {
     S: S, API: API, api: api, act: act, load: load, reload: reload, toast: toast, sheet: sheet, field: field, inp: inp, sel: sel, btn: btn, el: el, confirmBar: confirmBar,
@@ -791,4 +857,5 @@
   try { var ap = document.querySelector('.tabPanel.on'); if (ap) current = ({ panelCal: 'cal', panelClients: 'clients', panelStats: 'stats', panelProfile: 'profile', panelShop: 'shop', panelOther: 'other' })[ap.id] || 'cal'; } catch (e) { /* si resta su cal */ }
   S.section = current; setLabel(current);
   showSection(current);
+  (S.data ? Promise.resolve() : load().catch(function () {})).then(function () { pfPaint(); });
 })();
