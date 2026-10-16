@@ -227,7 +227,7 @@
 .gwTag.off{background:var(--card2);color:var(--muted)}
 .gwCard.full{border-color:color-mix(in srgb,var(--danger) 40%,var(--line2));border-left-color:var(--cc)}
 .gwCard.past{opacity:.55}.gwCard.off{opacity:.5}.gwCard.off .gwNm{text-decoration:line-through}
-.gwPt{--cc:#D6456B;display:flex;flex-direction:column;gap:1px;text-align:left;border:1px solid color-mix(in srgb,var(--cc) 25%,var(--line2));border-left:4px solid var(--cc);background:color-mix(in srgb,var(--cc) 10%,var(--card));color:var(--ink);border-radius:12px;padding:7px 9px 7px 10px;font-family:inherit;cursor:pointer;min-width:0}
+.gwPt{--cc:#C9A24B;display:flex;flex-direction:column;gap:1px;text-align:left;border:1px solid color-mix(in srgb,var(--cc) 25%,var(--line2));border-left:4px solid var(--cc);background:color-mix(in srgb,var(--cc) 10%,var(--card));color:var(--ink);border-radius:12px;padding:7px 9px 7px 10px;font-family:inherit;cursor:pointer;min-width:0}
 .gwPt .gwTm{font-size:.9rem}.gwPt .gwTm i{font-size:.66rem;letter-spacing:.04em}
 .gwPt b{font-weight:700;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gwPt.past{opacity:.55}
@@ -235,7 +235,7 @@
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .gwPt{--cc:#6C9BFF}}
 .gkLeg{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted)}
 .gkLeg u{width:10px;height:10px;border-radius:3px;margin-left:8px}
-.gkLeg .c1{background:var(--c-circuit)}.gkLeg .c2{background:var(--c-hyrox)}.gkLeg .c3{background:var(--c-pilates)}.gkLeg .c4{background:#D6456B}
+.gkLeg .c1{background:var(--c-circuit)}.gkLeg .c2{background:var(--c-hyrox)}.gkLeg .c3{background:var(--c-pilates)}.gkLeg .c4{background:#C9A24B}
 @media(max-width:1000px){.gkLeg{display:none}}
 .gwEmpty{padding:18px 6px;text-align:center;font-size:.8rem;font-weight:600;color:var(--muted);border:1px dashed var(--line2);border-radius:12px}
 .gwCol.closed .gwEmpty{background:repeating-linear-gradient(135deg,transparent 0 7px,color-mix(in srgb,var(--ink) 4%,transparent) 7px 8px)}
@@ -262,7 +262,7 @@
 
 /* ===== Settimana "per corso" (righe = corsi, colonne = giorni) ===== */
 .gcx .gwkScroll{background:transparent!important}
-.gcx .gpw{--c-pt:#D6456B;display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:12px 12px 10px;min-width:0}
+.gcx .gpw{--c-pt:#C9A24B;display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:12px 12px 10px;min-width:0}
 .gcx .gpHd,.gcx .gpRow,.gcx .gpTot{display:grid;grid-template-columns:minmax(96px,1.15fr) repeat(7,minmax(0,1fr));gap:6px;align-items:stretch}
 .gcx .gpHd{position:sticky;top:0;z-index:3;background:var(--card);padding-bottom:2px}
 .gcx .gpDh{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;border-radius:12px;padding:7px 2px;background:var(--card2);color:var(--ink);display:flex;flex-direction:column;gap:1px}
@@ -273,13 +273,13 @@
 .gcx .gpLb{border-radius:14px;padding:10px 10px;display:flex;flex-direction:column;justify-content:center;gap:3px;border-left:5px solid var(--cc,var(--accent));background:color-mix(in srgb,var(--cc,var(--accent)) 12%,var(--card));min-width:0}
 .gcx .gpLb b{font:800 .9rem var(--fd);color:var(--ink)}
 .gcx .gpLb span{font:600 .72rem var(--fb);color:var(--muted)}
-.gcx .gpl-circuit{--cc:var(--c-circuit,#237F8B)}.gcx .gpl-hyrox{--cc:var(--c-hyrox,#C98512)}.gcx .gpl-pilates{--cc:var(--c-pilates,#7D63C4)}.gcx .gpl-pt{--cc:#D6456B}
+.gcx .gpl-circuit{--cc:var(--c-circuit,#237F8B)}.gcx .gpl-hyrox{--cc:var(--c-hyrox,#C98512)}.gcx .gpl-pilates{--cc:var(--c-pilates,#7D63C4)}.gcx .gpl-pt{--cc:#C9A24B}
 .gcx .gpCell{border:1px dashed var(--line2);border-radius:12px;min-height:84px;padding:5px;display:flex;flex-direction:column;gap:5px;justify-content:center;min-width:0;cursor:pointer}
 .gcx .gpCell.sel{background:color-mix(in srgb,var(--accent) 8%,transparent);border-color:var(--accent)}
 .gcx .gpCell.closed{background:color-mix(in srgb,var(--muted) 8%,transparent)}
 .gcx .gpNo{text-align:center;color:var(--muted);opacity:.5;font-weight:600;font-size:.8rem}
 .gcx .gpC{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--cc,var(--accent));border-radius:9px;padding:5px 7px;min-width:0}
-.gcx .gpc-circuit{--cc:var(--c-circuit,#237F8B)}.gcx .gpc-hyrox{--cc:var(--c-hyrox,#C98512)}.gcx .gpc-pilates{--cc:var(--c-pilates,#7D63C4)}.gcx .gpc-pt{--cc:#D6456B}
+.gcx .gpc-circuit{--cc:var(--c-circuit,#237F8B)}.gcx .gpc-hyrox{--cc:var(--c-hyrox,#C98512)}.gcx .gpc-pilates{--cc:var(--c-pilates,#7D63C4)}.gcx .gpc-pt{--cc:#C9A24B}
 .gcx .gpT{font:800 .8rem var(--fd);color:var(--ink);display:flex;gap:4px;align-items:baseline;flex-wrap:wrap}
 .gcx .gpT em{font:800 .56rem var(--fb);font-style:normal;letter-spacing:.05em;text-transform:uppercase;color:var(--danger)}
 .gcx .gpB{height:5px;border-radius:99px;background:color-mix(in srgb,var(--ink) 12%,transparent);overflow:hidden;display:block}
@@ -404,9 +404,11 @@
 :root:root .gcx.gcx.gcx .controls .jumpToday.gProg::before{width:19px;height:19px}
 :root:root .gcx.gcx.gcx .controls .jumpToday.gProg:hover{background:var(--accent-soft,color-mix(in srgb,var(--accent) 10%,var(--card)));border-color:var(--accent)}
 :root:root .gcx.gcx.gcx .controls .jumpToday.gProg:active{transform:scale(.97)}
-/* Personal: look distinto dai corsi (rosa, tratteggio, badge PT) */
-.gcx .gpC.gpc-pt{background:color-mix(in srgb,#D6456B 11%,var(--card))!important;border-style:dashed!important;border-left-style:solid!important}
-.gcx .gpC.gpc-pt .gpT::after{content:"PT";font:800 .54rem var(--fb);letter-spacing:.06em;color:#fff;background:#D6456B;border-radius:5px;padding:2px 5px}
-.gcx .gpl-pt b{color:#D6456B}
-.gpmR.gpmPt{background:color-mix(in srgb,#D6456B 9%,transparent)}
-.gpmR.gpmPt .gpmN::after{content:"PT";margin-left:8px;font:800 .54rem var(--fb);letter-spacing:.06em;color:#fff;background:#D6456B;border-radius:5px;padding:2px 5px;vertical-align:middle}
+/* Personal: card scura con filo oro, ben distinta dai corsi colorati */
+.gcx .gpC.gpc-pt{background:#1E2B30!important;border-color:#1E2B30!important;border-left-color:#C9A24B!important}
+.gcx .gpC.gpc-pt .gpT,.gcx .gpC.gpc-pt b,.gcx.gcx .gpw .gpC.gpc-pt b{color:#fff!important}
+.gcx .gpC.gpc-pt .gpT{color:#E6C877!important}
+.gcx .gpC.gpc-pt.past{opacity:.6}
+.gcx .gpl-pt{background:#1E2B30!important}.gcx .gpl-pt b{color:#fff!important}.gcx .gpl-pt span{color:#E6C877!important}
+.gpmR.gpmPt{background:#1E2B30}
+.gpmR.gpmPt b,.gpmR.gpmPt .gpmN{color:#fff}.gpmR.gpmPt .gpmN small{color:#E6C877}

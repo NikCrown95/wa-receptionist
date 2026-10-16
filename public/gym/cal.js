@@ -398,7 +398,7 @@
       (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (!p.free) its.push({ t: p.time, p: p }); });
       its.sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; });
       var body = its.map(function (x) {
-        if (x.p) { var nm = x.p.name.split(' '); return '<button type="button" class="gpmR gpmPt" style="--cc:#D6456B" data-ptb="' + x.t + '" data-date="' + d + '"><b>' + x.t + '</b><span class="gpmN">Personal 1:1<small>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</small></span></button>'; }
+        if (x.p) { var nm = x.p.name.split(' '); return '<button type="button" class="gpmR gpmPt" style="--cc:#C9A24B" data-ptb="' + x.t + '" data-date="' + d + '"><b>' + x.t + '</b><span class="gpmN">Personal 1:1<small>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</small></span></button>'; }
         var s = x.s, full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
         return '<button type="button" class="gpmR' + (s.cancelled ? ' off' : '') + (isEnded(d, s.time, s.duration_min) ? ' past' : '') + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><b>' + s.time + '</b><span class="gpmN">' + esc(s.course.name) + '</span><span class="gpmB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s' + (full ? ' class="full"' : '') + '>' + (s.cancelled ? 'annullata' : s.taken + '/' + s.capacity) + '</s></button>';
       }).join('');
