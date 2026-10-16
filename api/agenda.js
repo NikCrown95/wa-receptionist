@@ -469,7 +469,10 @@ module.exports = async (req, res) => {
 
     // Impostazioni reali della dashboard: servizi e orari condivisi con Lia.
     if (q.settings === "1") {
-      const resource = biz.__hoursResource || biz.resources.find(r => Array.isArray(r.opening_hours) && r.opening_hours.length) || biz.resources[0];
+      let resource = biz.__hoursResource || biz.resources.find(r => Array.isArray(r.opening_hours) && r.opening_hours.length) || biz.resources[0];
+      // La palestra non ha orari standard (lezioni e abbonamenti stanno nelle sue tabelle): nome, indirizzo, contatti e il resto si salvano lo stesso.
+      const gymNoRes = !resource && req.method === "POST" && require("./../lib/verticals.js").areaOf(biz.business_type) === "palestra";
+      if (gymNoRes) resource = { id: null, opening_hours: [] };
       if (!resource) return res.status(400).json({ error: "Nessuna risorsa attiva configurata" });
 
       if (req.method === "GET") {
@@ -612,6 +615,7 @@ module.exports = async (req, res) => {
       }
 
       if (action === "hours_replace") {
+        if (!resource.id) return res.status(400).json({ error: "Gli orari della palestra si cambiano da Corsi e programma." });
         const hours=Array.isArray(body.hours)?body.hours:[];
         if(hours.length>28) return res.status(400).json({error:"Troppi intervalli"});
         const clean=[];
