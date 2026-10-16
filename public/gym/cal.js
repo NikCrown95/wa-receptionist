@@ -376,10 +376,19 @@
   function weekPhone() {
     var a = monday(S.anchor), tot = 0, rows = '';
     for (var i = 0; i < 7; i++) {
-      var d = addDays(a, i), day = getDay(d) || { sessions: [], closed: true }, st = dayStats(day);
+      var d = addDays(a, i), day = getDay(d) || { sessions: [], pt: [], closed: true }, st = dayStats(day);
       if (i === 6 && day.closed) continue;
       tot += st.b;
-      rows += '<button type="button" class="gcWrow' + (d === today() ? ' tod' : '') + '" data-go="' + d + '"><span class="gcWd"><small>' + G.DN[dow(d)] + '</small><b>' + parse(d).getDate() + '</b></span><span class="gcCh">' + (day.sessions.filter(function (s) { return !s.cancelled; }).map(function (s) { return '<span style="--cc:' + col(s) + '">' + s.time + ' ' + esc(s.course.name.split(' ')[0]) + ' ' + s.taken + '</span>'; }).join('') || '<span class="none">Chiuso</span>') + '</span><span class="gcPc">' + (st.n ? st.pct + '%' : '') + '</span></button>';
+      var its = [];
+      (day.sessions || []).forEach(function (s) { its.push({ t: s.time, s: s }); });
+      (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (!p.free) its.push({ t: p.time, p: p }); });
+      its.sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; });
+      var body = its.map(function (x) {
+        if (x.p) { var nm = x.p.name.split(' '); return '<button type="button" class="gpmR" style="--cc:#2F6BDB" data-ptb="' + x.t + '" data-date="' + d + '"><b>' + x.t + '</b><span class="gpmN">Personal<small>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</small></span></button>'; }
+        var s = x.s, full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
+        return '<button type="button" class="gpmR' + (s.cancelled ? ' off' : '') + (isEnded(d, s.time, s.duration_min) ? ' past' : '') + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><b>' + s.time + '</b><span class="gpmN">' + esc(s.course.name) + '</span><span class="gpmB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s' + (full ? ' class="full"' : '') + '>' + (s.cancelled ? 'annullata' : s.taken + '/' + s.capacity) + '</s></button>';
+      }).join('');
+      rows += '<div class="gpmD' + (d === today() ? ' tod' : '') + (day.closed || !its.length ? ' none' : '') + '"><button type="button" class="gpmH" data-go="' + d + '"><span class="gpmDn">' + G.DN[dow(d)] + '</span><span class="gpmDd">' + parse(d).getDate() + '</span><span class="gpmOc">' + (day.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap + ' posti' : 'Nessuna lezione') + '</span><span class="gpmCh">›</span></button>' + (body ? '<div class="gpmL">' + body + '</div>' : '') + '</div>';
     }
     return '<div class="gcOv"><span class="gcKick">Prenotazioni</span><b class="gcBig">' + tot + '</b></div>' + rows;
   }

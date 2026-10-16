@@ -448,3 +448,18 @@
 .mx .mzN{min-width:0}
 .mx .mzN b,.mx .mzN b span{font-weight:800;color:var(--ink)}
 .mx .mzN b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;overflow-wrap:anywhere}
+
+/* ===== Iscritti su smartphone: riga leggibile con nome, stato, scadenza e Rinnova ===== */
+@media(max-width:700px){
+  .mzRow.mzRow{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n s" "p a" "e a";gap:6px 12px;padding:14px 14px 14px 18px;align-items:center}
+  .mzRow.mzRow>.mzC{display:none}
+  .mzRow.mzRow>.mzN{display:flex;grid-area:n;min-width:0}
+  .mzRow.mzRow>.mzC:nth-child(3){display:block;grid-area:p;padding:0 0 0 58px;margin:0;font-size:.82rem;color:var(--muted)}
+  .mzRow.mzRow>.mzC:nth-child(5){display:block;grid-area:e;padding:0 0 0 58px;margin:0}
+  .mzRow.mzRow>.mzC:nth-child(6){display:block;grid-area:s;justify-self:end}
+  .mzRow.mzRow>.mzA{display:block;grid-area:a;justify-self:end;align-self:center}
+  .mzRow.mzRow>.mzA .mzRn{flex:none;width:auto;min-width:96px;min-height:40px;padding:0 16px;font-size:.88rem}
+  .mzRow.mzRow .mzX{max-width:none;gap:8px}
+  .mzRow.mzRow .mzXn{padding:4px 8px}
+  .mzRow.mzRow .mzN b{white-space:normal;line-height:1.15}
+}

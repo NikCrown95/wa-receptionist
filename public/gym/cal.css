@@ -376,3 +376,26 @@
 .gcx.gcx .gpw .gpTot div{font-size:.7rem!important}
 .gcx.gcx .gpw .gpHd,.gcx.gcx .gpw .gpRow,.gcx.gcx .gpw .gpTot{grid-template-columns:minmax(118px,1.2fr) repeat(7,minmax(0,1fr))}
 .gcx.gcx .gpw .gpLb b{overflow-wrap:anywhere}
+/* settimana su smartphone: una scheda per giorno, con tutte le lezioni in riga */
+.gpmD{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:9px;overflow:hidden}
+.gpmD.tod{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.gpmH{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;cursor:pointer}
+.gpmD.tod .gpmH{background:var(--accent);color:var(--on-accent,#fff)}
+.gpmDn{font:800 .7rem var(--fb);letter-spacing:.09em;text-transform:uppercase;opacity:.75;min-width:30px}
+.gpmDd{font:800 1.3rem/1 var(--fd)}
+.gpmOc{flex:1;font:600 .8rem var(--fb);opacity:.8}
+.gpmCh{font-size:1.3rem;opacity:.5;line-height:1}
+.gpmL{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.gpmR{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:11px 14px 11px 12px;border-left:5px solid var(--cc);cursor:pointer;border-top:1px solid var(--line)}
+.gpmR:first-child{border-top:0}
+.gpmR b{font:800 .95rem var(--fd);color:var(--ink);min-width:44px}
+.gpmN{flex:1;min-width:0;font:700 .9rem var(--fb);color:var(--ink);display:flex;flex-direction:column;gap:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gpmN small{font:600 .74rem var(--fb);color:var(--muted)}
+.gpmB{width:54px;height:5px;border-radius:99px;background:color-mix(in srgb,var(--ink) 12%,transparent);overflow:hidden;flex:none}
+.gpmB i{display:block;height:100%;background:var(--cc);border-radius:99px}
+.gpmR s{text-decoration:none;font:700 .8rem var(--fb);color:var(--muted);min-width:42px;text-align:right}
+.gpmR s.full{color:var(--danger)}
+.gpmR.past,.gpmR.off{opacity:.55}
+.gpmD.none .gpmH{opacity:.75}
+.gpmN{flex-direction:row;align-items:baseline;gap:6px}
+.gpmR{padding-top:10px;padding-bottom:10px}
