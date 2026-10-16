@@ -347,7 +347,7 @@
           '<span class="mzC mzE ' + (hot ? 'hot' : '') + '" data-l="Scadenza">' + sc + '</span>' +
           '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span>' +
           '<span class="mzC mzA"></span>' +
-          '<span class="mzC mzSm ' + m.status.s + '">' + (cur ? '<b>' + esc(cur.plan_name) + '</b>' + (cur.ends_on ? ' · ' + (dl < 0 ? 'scaduto il ' + short(cur.ends_on) : dl === 0 ? 'scade oggi' : 'scade il ' + short(cur.ends_on) + (hot ? ' (' + dl + '\u00a0gg)' : '')) : '') : 'Nessun abbonamento') + '</span>';
+          '<span class="mzC mzSm ' + m.status.s + '"><span><small>Abbonamento</small><b>' + (cur ? esc(cur.plan_name) : '—') + '</b></span><span><small>Scadenza</small><b class="mzSd">' + (cur && cur.ends_on ? short(cur.ends_on) : '—') + '</b></span><span><small>Ingressi</small><b>' + (cur && u.max_period ? (u.period || 0) + ' / ' + u.max_period : '—') + '</b></span></span>';
         var A = r.querySelector('.mzA');
         var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
         function open(tab) { S.mid = m.id; S.tab = tab || 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }

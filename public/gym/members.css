@@ -450,23 +450,29 @@
 .mx .mzN b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;overflow-wrap:anywhere}
 
 .mzSm{display:none}
-/* ===== Iscritti su smartphone: scheda chiara = nome, stato, abbonamento e scadenza ===== */
+/* ===== Iscritti su smartphone: card scure con alone (nome, stato, abbonamento, scadenza, ingressi) ===== */
 @media(max-width:700px){
   :root:root .mzTh{display:none}
-  :root:root .mzRow{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n s" "m a";gap:4px 10px;padding:14px 14px 14px 16px;min-height:0;align-items:center}
+  :root:root .mzTable{background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;display:flex;flex-direction:column;gap:10px}
+  :root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n s" "m m" "a a";gap:0;padding:0;min-height:0;align-items:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);border-radius:22px;color:#fff;background:linear-gradient(160deg,#1E3A42,#0F1E23)!important;--g:#8AA0A7;--t:#C3D2D6}
+  :root:root .mzRow.st-ok{--g:#2FCB82;--t:#7FE3B2}:root:root .mzRow.st-warn{--g:#F5BC4A;--t:#F7CF82}:root:root .mzRow.st-bad{--g:#F0736B;--t:#FFA6A0}
+  :root:root .mzRow::before,:root:root .mzRow.st-warn::before,:root:root .mzRow.st-bad::before{content:"";position:absolute;left:-30px;top:-50px;right:auto;bottom:auto;width:180px;height:100px;border-radius:50%;background:var(--g);opacity:.38;filter:blur(28px);pointer-events:none}
   :root:root .mzRow>.mzC{display:none}
-  :root:root .mzRow>.mzN{display:flex;grid-area:n;min-width:0}
-  :root:root .mzRow>.mzC:nth-child(6){display:block;grid-area:s;justify-self:end}
-  :root:root .mzRow>.mzSm{display:block;grid-area:m;padding:0 0 0 52px;font-size:.78rem;line-height:1.35;color:var(--muted);font-weight:600}
-  :root:root .mzRow>.mzSm b{color:var(--ink);font-weight:800}
-  :root:root .mzRow.st-warn>.mzSm:not(.x){color:#8A5A06}
-  :root:root .mzRow.st-bad>.mzSm{color:#C2373C}
-  :root:root .mzRow>.mzA{display:block;grid-area:a;justify-self:end}
-  :root:root .mzRow.st-ok>.mzA{display:none}
-  :root:root .mzRow>.mzA:empty{display:none}
-  :root:root .mzRow>.mzA .mzRn{flex:none;width:auto;min-width:0;min-height:36px;padding:0 12px;font-size:.8rem;border-radius:11px}
-  :root:root .mzRow .mzN b{white-space:normal;line-height:1.15;font-size:1.02rem}
-  :root:root .mzRow>.mzC:nth-child(6) .mzSt{font-size:.74rem;padding:3px 10px}
+  :root:root .mzRow>.mzN{display:flex;grid-area:n;min-width:0;position:relative;padding:14px 0 12px 14px;gap:12px;align-items:center}
+  :root:root .mzRow .mzAv{width:42px;height:42px;background:rgba(255,255,255,.12)!important;border:1.5px solid var(--t);box-shadow:none}
+  :root:root .mzRow .mzAv i{background:transparent!important;color:#fff!important}
+  :root:root .mzRow .mzN b,:root:root .mzRow .mzN b span{color:#fff!important;font-size:1.02rem;white-space:normal;line-height:1.15}
+  :root:root .mzRow>.mzC:nth-child(6){display:block;grid-area:s;justify-self:end;position:relative;padding:14px 14px 12px 8px}
+  :root:root .mzRow>.mzC:nth-child(6) .mzSt{background:rgba(255,255,255,.1)!important;border:1px solid var(--t)!important;color:var(--t)!important;text-transform:uppercase;letter-spacing:.06em;font-size:.66rem;font-weight:800;padding:4px 10px}
+  :root:root .mzRow>.mzSm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-area:m;position:relative;background:rgba(0,0,0,.28);border-top:1px solid rgba(255,255,255,.07);padding:0;color:#fff}
+  :root:root .mzRow>.mzSm>span{display:flex;flex-direction:column;gap:2px;padding:10px 14px;min-width:0}
+  :root:root .mzRow>.mzSm>span+span{border-left:1px solid rgba(255,255,255,.07)}
+  :root:root .mzRow>.mzSm small{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9FB6BC}
+  :root:root .mzRow>.mzSm b{font-size:.9rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  :root:root .mzRow>.mzSm b.mzSd{color:var(--t)}
+  :root:root .mzRow>.mzA{display:block;grid-area:a;position:relative;padding:0 14px 14px;margin-top:-1px;background:rgba(0,0,0,.28);justify-self:stretch}
+  :root:root .mzRow.st-ok>.mzA,:root:root .mzRow>.mzA:empty{display:none}
+  :root:root .mzRow>.mzA .mzRn{width:100%;min-width:0;min-height:42px;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;border:1px solid var(--t);font-size:.9rem;font-weight:800}
 }
 /* Smartphone: elenco iscritti più compatto, si vedono subito più persone */
 @media(max-width:700px){
