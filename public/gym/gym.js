@@ -844,8 +844,30 @@
     if (!pfObs) pfObs = new MutationObserver(function () { clearTimeout(pfObs.t); pfObs.t = setTimeout(pfPaint, 60); });
     pfObs.observe(root, { childList: true, subtree: true });
   }
+  // "Invita un amico": se per qualche motivo la scheda standard non lo mostra, lo compila la palestra con gli stessi elementi
+  var refTry = 0;
+  function pfRefEnsure() {
+    var card = document.getElementById('pfRefCard'); if (!card || !card.hidden || refTry >= 3) return;
+    refTry++;
+    fetch('/api/agenda?t=' + encodeURIComponent(token) + '&referral=1').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.available || !d.link || !card.hidden) return;
+      var st = document.getElementById('pfRefStats'), m = Number(d.credit_months) || 0;
+      if (st) { st.innerHTML = ''; [['hi', 'In regalo', m], ['', 'Invitate', d.invited || 0], ['', 'Hanno pagato', m]].forEach(function (c) { var x = el('div', 'rfStat' + (c[0] ? ' ' + c[0] : '')); x.appendChild(el('small', null, c[1])); x.appendChild(el('b', null, String(c[2]))); st.appendChild(x); }); }
+      var u = document.getElementById('pfRefUrl'); if (u) u.textContent = d.link.replace(/^https?:\/\//, '');
+      var cd = document.getElementById('pfRefCode'); if (cd) cd.textContent = d.code || '';
+      function copy(txt, b, lab) { try { navigator.clipboard.writeText(txt); } catch (e) { } var sp = b.querySelector('span'); if (sp) { sp.textContent = 'Copiato'; setTimeout(function () { sp.textContent = lab; }, 1500); } }
+      var cp = document.getElementById('pfRefCopy'), sh = document.getElementById('pfRefShare'), cc = document.getElementById('pfRefCodeCopy');
+      var msg = 'Uso Prenolia per gestire gli appuntamenti della mia attività. Provalo gratis da qui (o usa il codice ' + (d.code || '') + '):';
+      if (cp) cp.onclick = function () { copy(d.link, cp, 'Copia link'); };
+      if (cc) cc.onclick = function () { copy(d.code || '', cc, 'Copia codice'); };
+      if (sh) sh.onclick = function () { if (navigator.share) navigator.share({ title: 'Prenolia', text: msg, url: d.link }).catch(function () { }); else copy(msg + ' ' + d.link, sh, 'Condividi'); };
+      card.hidden = false;
+    }).catch(function () { });
+  }
   document.addEventListener('lia:gymchanged', function () { pfPaint(); });
   pfWatch();
+  setTimeout(pfRefEnsure, 3500);
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('#menuTabProfile')) { refTry = 0; setTimeout(pfRefEnsure, 2500); } }, true);
 
   // ---------- condivisione con il calendario (cal.js) ----------
   window.liaGym = {
