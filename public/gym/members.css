@@ -513,3 +513,14 @@
 .mzKt .sh{display:none}
 @media(max-width:700px){.mzKt .sh{display:inline}}
 @media(max-width:700px){:root:root .mzKt>span span{color:inherit;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit}}
+/* KPI più compatte su smartphone */
+@media(max-width:700px){
+  :root:root .mzKp{gap:8px;margin-bottom:12px}
+  :root:root .mzK{padding:11px 14px 10px;min-height:0;border-radius:18px;column-gap:7px}
+  :root:root .mzKi svg{width:15px;height:15px}
+  :root:root .mzKt>span{font-size:.66rem}
+  :root:root .mzKt b{margin-top:6px;font-size:1.9rem}
+  :root:root .mzKr{margin-top:3px;font-size:.7rem}
+  :root:root .mzKr small,:root:root .mzRing b{font-size:.7rem}
+  :root:root .mzK::before{top:-56px;height:80px}
+}
