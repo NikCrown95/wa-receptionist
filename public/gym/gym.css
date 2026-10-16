@@ -164,8 +164,6 @@
 .gpfList .gpfH{margin:8px 2px 0;font:800 .66rem/1 var(--fb,inherit);font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gpfList .gpfH:first-child{margin-top:2px}
 .gpfList .gpfCnt{flex:none;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap}
-:root:root .gym #panelProfile .pf2Col:first-child>:nth-child(1){display:block}
-:root:root .gym #panelProfile .pf2Col:first-child>:nth-child(1){grid-column:1/-1;order:0}
 :root:root .gym #panelProfile .pf2Grid .pfSpan{grid-column:auto}
 /* Panoramica: sfondo e logo della palestra */
 :root:root .gym #panelProfile #pfHero{--h:36;min-height:230px;border-color:rgba(214,160,80,.35);background:linear-gradient(180deg,rgba(8,6,4,.25),rgba(8,6,4,.62)),url(/gym/hero.jpg) center 62%/cover no-repeat,#120d08}
@@ -174,7 +172,4 @@
 :root:root .gym #panelProfile #pfAvatar svg{display:none}
 :root:root .gym #panelProfile #pfHero .pfKind{color:#E8B864}
 
-/* Orari: le righe si distribuiscono sull'altezza della card accanto (Corsi e abbonamenti) */
-:root:root .gym #panelProfile .gpfHrsCard{display:flex;flex-direction:column}
-:root:root .gym #panelProfile .gpfHrsCard #pfHours{flex:1;display:flex;flex-direction:column}
-:root:root .gym #panelProfile .gpfHrsCard #pfHours .pfRow{flex:1;padding-top:0;padding-bottom:0}
+:root:root .gym #panelProfile .gpfPlans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:8px}
