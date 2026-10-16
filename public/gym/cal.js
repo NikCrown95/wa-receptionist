@@ -204,9 +204,13 @@
   function sessRow(s, d) {
     return '<button type="button" class="gcSrow' + (s.cancelled ? ' off' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="gcDt">' + s.time + '</span><span class="gcSb"><b><span class="gcDot" style="background:' + col(s) + '"></span>' + esc(s.course.name) + '</b>' + barHTML(s.taken, s.capacity) + '</span><span class="gcCnt">' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</span></button>';
   }
+  // Palestra senza corsi: nei calendari compaiono solo i Personal già prenotati (le ore libere si vedono quando si prenota)
+  function onlyBooked() { return !!(G.OF && !G.OF().cls); }
   function ptRowsHTML(day) {
     var a = Array.isArray(day.pt) ? day.pt : null;
     if (!a) return '<p class="gxM">Carico...</p>';
+    if (onlyBooked()) a = a.filter(function (p) { return !p.free; });
+    if (onlyBooked() && !a.length) return '<p class="gxM">Nessun Personal prenotato.</p>';
     return a.map(function (p) {
       if (!p.free) return '<button type="button" class="gcSrow" data-ptb="' + p.time + '" data-date="' + day.date + '"><span class="gcDt">' + p.time + '</span><span class="gcSb"><b><span class="gcDot"></span>Personal 1:1</b><span class="gxM">' + esc(p.name) + '</span></span></button>';
       return '<button type="button" class="gcSrow free" data-ptf="' + p.time + '" data-date="' + day.date + '"' + (isStarted(day.date, p.time) ? ' disabled' : '') + '><span class="gcDt">' + p.time + '</span><span class="gcSb"><b><span class="gcDot"></span>Personal 1:1</b><span class="gxM">Libero · tocca per prenotare</span></span></button>';
@@ -251,6 +255,7 @@
     if (!a) return '<div class="msEmpty">Carico...</div>';
     a.forEach(function (p) {
       var started = isStarted(d, p.time);
+      if (p.free && onlyBooked()) return;
       if (p.free) out += '<button type="button" class="msRow" data-ptf="' + p.time + '" data-date="' + d + '"' + (started ? ' disabled' : '') + '><span class="msDot wkd wkc-a"></span><span class="msTm">' + p.time + '</span><span class="msNm"><b>Personal 1:1</b><small>Libero · tocca per prenotare</small></span>' + CH.r15 + '</button>';
       else out += '<button type="button" class="msRow" data-ptb="' + p.time + '" data-date="' + d + '"><span class="msDot wkd wkc-a"></span><span class="msTm">' + p.time + '</span><span class="msNm"><b>' + esc(p.name) + '</b><small>Personal 1:1</small></span>' + CH.r15 + '</button>';
     });
@@ -317,7 +322,7 @@
     var d = S.anchor, day = getDay(d) || { sessions: [], pt: [], closed: true }, ss = day.sessions || [], isT = d === today();
     var live = ss.filter(function (s) { return !s.cancelled; });
     var items = ss.map(function (s) { return { t: s.time, s: s }; });
-    (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { items.push({ t: p.time, pt: p }); });
+    (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (p.free && onlyBooked()) return; items.push({ t: p.time, pt: p }); });
     items.sort(function (a, b) { return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
     var nxt = live.filter(function (s) { return !isStarted(d, s.time); })[0];
     var left = live.filter(function (s) { return !isEnded(d, s.time, s.duration_min); }).length;
