@@ -154,3 +154,7 @@
 .gxProg .gxSum{margin-top:16px;padding:11px 14px}
 .gxProg .gxGo{margin-top:12px;min-height:48px}
 .gxMore{margin-top:10px;padding-top:10px}
+.gxPlanBox{margin-bottom:11px}
+.gxPlanBox .gxChips{margin-bottom:8px}
+.gxPlanBox .gxCp[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+.gxPlanInfo{margin:6px 0 10px!important}

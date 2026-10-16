@@ -371,12 +371,36 @@
     sheet(m ? 'Modifica dati' : 'Nuovo iscritto', function (w, close) {
       var f = inp('text', m ? m.first_name : ''), l = inp('text', m ? m.last_name : ''), p = inp('tel', m ? m.phone : ''), n = el('textarea'); n.value = m ? m.notes : '';
       var two = el('div', 'gxTwo'); two.appendChild(field('Nome', f)); two.appendChild(field('Cognome', l)); w.appendChild(two);
-      w.appendChild(field('Telefono', p)); w.appendChild(field('Note (facoltative)', n));
+      w.appendChild(field('Telefono', p));
+      // abbonamento scelto subito (solo per un iscritto nuovo)
+      var plans = !m && S.data && S.data.plans ? S.data.plans : [], pick = null, st = inp('date', S.data ? S.data.today : ''), pr = inp('number', ''), box = el('div', 'gxPlanBox');
+      pr.step = '0.01'; pr.inputMode = 'decimal';
+      if (plans.length) {
+        w.appendChild(el('div', 'gxDh', 'Abbonamento'));
+        w.appendChild(box);
+        var drawPlan = function () {
+          box.innerHTML = '';
+          var ch = el('div', 'gxChips');
+          var none = el('button', 'gxCp', 'Nessuno per ora'); none.type = 'button'; none.setAttribute('aria-pressed', pick ? 'false' : 'true'); none.addEventListener('click', function () { pick = null; drawPlan(); }); ch.appendChild(none);
+          plans.forEach(function (x) { var b = el('button', 'gxCp', x.name + (x.price_eur != null ? ' · ' + eur(x.price_eur) : '')); b.type = 'button'; b.setAttribute('aria-pressed', pick && pick.id === x.id ? 'true' : 'false'); b.addEventListener('click', function () { pick = x; pr.value = x.price_eur != null ? x.price_eur : ''; drawPlan(); }); ch.appendChild(b); });
+          box.appendChild(ch);
+          if (pick) {
+            var info = el('p', 'gxPlanInfo', (pick.kind === 'time' ? 'Dura ' + pick.days + ' giorni dalla data di inizio. ' : pick.entries + ' ingressi. ') + 'Include: ' + pick.covers.map(cat).join(', ') + '.');
+            box.appendChild(info);
+            var t2 = el('div', 'gxTwo'); t2.appendChild(field('Inizia il', st)); t2.appendChild(field('Pagato (€)', pr)); box.appendChild(t2);
+          }
+        };
+        drawPlan();
+      }
+      w.appendChild(field('Note (facoltative)', n));
       w.appendChild(el('p', null, 'Nome, cognome e telefono servono all\'iscritto per entrare e prenotare: devono essere scritti come li dirà lui.'));
       var msg = el('div'); w.appendChild(msg);
-      w.appendChild(btn('Salva', 'block', function () {
+      w.appendChild(btn(!m && plans.length ? 'Salva iscritto' : 'Salva', 'block', function () {
         msg.textContent = ''; msg.className = '';
-        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, notes: n.value }).then(function (j) { toast('Salvato.', 'ok'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, notes: n.value }).then(function (j) {
+          var next = pick && !m ? api({ action: 'member_plan_add', member_id: j.id, plan_id: pick.id, starts_on: st.value, price_paid: pr.value }) : Promise.resolve();
+          return next.then(function () { toast(pick && !m ? 'Iscritto e abbonamento salvati.' : 'Salvato.', 'ok'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); }, function (e) { toast('Iscritto salvato, ma l\'abbonamento no: ' + e.message, 'bad'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); });
+        }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
       }));
     });
   }
