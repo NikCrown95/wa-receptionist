@@ -196,3 +196,29 @@
 .gxSheet.gxProg.gxNarrow{max-width:520px}
 .gxProg > div.gxOne.gxOne{grid-template-columns:minmax(0,1fr);gap:0}
 .gxProg .gxOne .gxGo{margin-top:18px}
+
+/* Nuovo iscritto / Modifica dati: scheda scura */
+.gxSheet.gxMf{--mf-l:#46636E;background:linear-gradient(170deg,#16262D,#0E1A1F);color:#fff;border:1px solid #2A404A;max-width:480px}
+.gxSheet.gxMf h3{color:#fff}
+.gxSheet.gxMf p,.gxSheet.gxMf .gxF>span{color:#9FB6BC}
+.gxMf .gxMfS{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9FB6BC;margin:14px 0 8px}
+.gxMf .gxF input{background:rgba(255,255,255,.06);border:1.5px solid var(--mf-l);color:#fff;border-radius:14px}
+.gxMf .gxF input:focus{outline:0;border-color:#4FA3B0}
+.gxMf .gxF{margin-bottom:10px}
+.gxMf .gxTwo{margin-top:0}
+.gxMf .gxPlanBox{display:flex;flex-direction:column;gap:10px}
+.gxMf .gxMfP{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1.5px solid var(--mf-l);background:linear-gradient(165deg,#1C2E35,#121F25);color:#fff;font:inherit;text-align:left;cursor:pointer;width:100%}
+.gxMf .gxMfP::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#7F97A0,transparent 75%)}
+.gxMf .gxMfP[aria-pressed="true"]{border:2px solid #4FA3B0;padding:13.5px}
+.gxMf .gxMfP[aria-pressed="true"]::before{background:linear-gradient(90deg,#4FA3B0,transparent 75%)}
+.gxMf .gxMfP .r{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #7F97A0;display:grid;place-items:center}
+.gxMf .gxMfP .r u{width:11px;height:11px;border-radius:50%;background:transparent}
+.gxMf .gxMfP[aria-pressed="true"] .r{border-color:#4FA3B0}
+.gxMf .gxMfP[aria-pressed="true"] .r u{background:#4FA3B0}
+.gxMf .gxMfP .t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.gxMf .gxMfP .t b{font-size:.95rem}
+.gxMf .gxMfP .t small{font-size:.76rem;color:#9FB6BC;font-weight:600}
+.gxMf .gxMfP em{font-style:normal;font-weight:800;font-size:1.05rem;color:#B7C6CC;font-family:'Manrope','Plus Jakarta Sans',sans-serif}
+.gxMf .gxMfP[aria-pressed="true"] em{color:#9CCFD7}
+.gxMf .gxMfH{font-size:.78rem;margin:10px 0}
+.gxMf .gxMfGo{background:#4FA3B0;color:#0B1A1F;border-color:#4FA3B0;font-weight:800;border-radius:16px;min-height:54px}
