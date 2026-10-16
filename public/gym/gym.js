@@ -651,9 +651,9 @@
           prep = api({ action: 'course_save', name: nm, category: st.cat, duration_min: st.dur, capacity: st.cap }).then(function () { return reload(); }).then(function () { D = S.data; var f = D.courses.filter(function (x) { return x.name === nm; }).pop(); if (!f) throw new Error('Corso non trovato dopo il salvataggio.'); return f; });
         } else prep = Promise.resolve(c);
         prep.then(function (cc) {
-          var added = 0, skipped = 0, chain = Promise.resolve();
-          p.forEach(function (x) { chain = chain.then(function () { return api({ action: 'schedule_add', course_id: cc.id, weekday: x[0], time: x[1], capacity: st.cap === cc.capacity ? '' : st.cap }).then(function () { added++; }).catch(function (e) { if (/già/i.test(e.message)) skipped++; else throw e; }); }); });
-          return chain.then(function () { return reload(); }).then(function () { toast(added ? (added === 1 ? 'Aggiunta 1 lezione.' : 'Aggiunte ' + added + ' lezioni.') + (skipped ? ' ' + skipped + ' c\'erano già.' : '') : 'Erano già tutte in programma.', added ? 'ok' : 'bad'); close(); });
+          var added = 0, skipped = 0, clashed = 0, lastClash = '', chain = Promise.resolve();
+          p.forEach(function (x) { chain = chain.then(function () { return api({ action: 'schedule_add', course_id: cc.id, weekday: x[0], time: x[1], capacity: st.cap === cc.capacity ? '' : st.cap }).then(function () { added++; }).catch(function (e) { if (/già/i.test(e.message)) skipped++; else if (/trainer|Personal già/.test(e.message)) { clashed++; lastClash = e.message; } else throw e; }); }); });
+          return chain.then(function () { return reload(); }).then(function () { if (!added && clashed && !skipped) { st.busy = false; msg.className = 'gxWhy'; msg.textContent = lastClash; return; } toast(added ? (added === 1 ? 'Aggiunta 1 lezione.' : 'Aggiunte ' + added + ' lezioni.') + (skipped ? ' ' + skipped + ' c\'erano già.' : '') + (clashed ? ' ' + clashed + ' non aggiunte: orario occupato.' : '') : 'Erano già tutte in programma.', added ? 'ok' : 'bad'); close(); });
         }).catch(fail);
       }
       draw();
