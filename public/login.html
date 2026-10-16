@@ -33,7 +33,22 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
 .hint{color:var(--muted);font-size:.85rem;margin-top:10px;text-align:center}
 .hide{display:none}
 @media(max-width:520px){.loginbox{margin-top:9vh}.card{padding:26px 20px}}
+.ov{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;opacity:0;pointer-events:none;transition:opacity .4s}
+.ov.on{opacity:1;pointer-events:auto}
+.mk{position:relative;width:104px;height:104px;display:grid;place-items:center}
+.mk img{width:64px;height:auto;position:relative;animation:breathe 2.2s ease-in-out infinite}
+.mk::before,.mk::after{content:"";position:absolute;inset:0;border-radius:50%}
+.mk::before{border:1px solid var(--line2)}
+.mk::after{border:2px solid transparent;border-top-color:var(--accent);border-right-color:rgba(45,210,220,.25);animation:spin 1.3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.07);opacity:1}}
+.ov .hello{font-size:1.15rem;font-weight:600;letter-spacing:-.01em;text-align:center}
+.ov .bar{width:170px;height:3px;border-radius:3px;background:var(--line2);overflow:hidden}
+.ov .bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--accent),#E6C77A)}
+.ov .msg{color:var(--muted);font-size:.9rem;text-align:center;min-height:1.4em;transition:opacity .25s}
+@media(prefers-reduced-motion:reduce){.mk::after,.mk img{animation-duration:3s}}
 </style>
+<link rel="preload" as="image" href="/brand/mark.png">
 <link rel="icon" type="image/png" href="/brand/favicon.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 </head>
@@ -66,19 +81,30 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
     <p class="hint"><a href="/privacy" style="color:inherit">Privacy</a> · <a href="/termini" style="color:inherit">Termini</a></p>
   </div>
 </div>
+<div class="ov" id="ov" aria-live="polite">
+  <div class="mk"><img src="/brand/mark.png" alt=""></div>
+  <p class="hello">Bentornato</p>
+  <div class="bar"><i id="bar"></i></div>
+  <p class="msg" id="msg"></p>
+</div>
 <script>
 (function(){
 var f=document.getElementById("f"),f2=document.getElementById("f2"),go=document.getElementById("go"),go2=document.getElementById("go2"),err=document.getElementById("err"),err2=document.getElementById("err2"),sub=document.querySelector(".sub"),challenge="";
 function show(el,m){el.textContent=m;el.style.display="block"}
-function enter(j){location.replace("/api/agenda?t="+j.agenda_token)}
+var ov=document.getElementById("ov"),bar=document.getElementById("bar"),msg=document.getElementById("msg"),timers=[],steps=["Verifico le credenziali…","Carico i tuoi appuntamenti…","Preparo la tua agenda…"];
+function loading(on){timers.forEach(clearTimeout);timers=[];
+if(!on){ov.classList.remove("on");return}
+ov.classList.add("on");msg.style.opacity=1;msg.textContent=steps[0];bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;bar.style.transition="width 2.6s cubic-bezier(.3,.7,.2,1)";bar.style.width="92%";
+[1,2].forEach(function(k){timers.push(setTimeout(function(){msg.style.opacity=0;timers.push(setTimeout(function(){msg.textContent=steps[k];msg.style.opacity=1},220))},k*950))})}
+function enter(j){if(!ov.classList.contains("on"))loading(true);bar.style.transition="width .3s ease-out";bar.style.width="100%";location.replace("/api/agenda?t="+j.agenda_token)}
 function post(url,data){return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok){var e=new Error(j.error||"Accesso non riuscito");e.restart=j.restart;throw e}return j})})}
 fetch("/api/business-auth").then(function(r){if(r.ok)r.json().then(function(j){if(j.agenda_token)enter(j)})});
-f.addEventListener("submit",function(e){e.preventDefault();err.style.display="none";go.disabled=true;go.textContent="Un attimo…";
+f.addEventListener("submit",function(e){e.preventDefault();err.style.display="none";go.disabled=true;go.textContent="Un attimo…";loading(true);
 post("/api/business-auth",{email:document.getElementById("email").value,password:document.getElementById("pw").value,remember:document.getElementById("rem").checked}).then(function(j){
-if(j.need_code){challenge=j.challenge;f.classList.add("hide");f2.classList.remove("hide");sub.textContent="Un ultimo passaggio.";document.getElementById("code").focus();return}
-enter(j)}).catch(function(e){show(err,e.message)}).then(function(){go.disabled=false;go.textContent="Entra"})});
-f2.addEventListener("submit",function(e){e.preventDefault();err2.style.display="none";go2.disabled=true;go2.textContent="Un attimo…";
-post("/api/business-auth?action=verify2fa",{challenge:challenge,code:document.getElementById("code").value}).then(enter).catch(function(e){show(err2,e.message);if(e.restart)setTimeout(back,1800)}).then(function(){go2.disabled=false;go2.textContent="Conferma"})});
+if(j.need_code){loading(false);challenge=j.challenge;f.classList.add("hide");f2.classList.remove("hide");sub.textContent="Un ultimo passaggio.";document.getElementById("code").focus();return}
+enter(j)}).catch(function(e){loading(false);show(err,e.message)}).then(function(){go.disabled=false;go.textContent="Entra"})});
+f2.addEventListener("submit",function(e){e.preventDefault();err2.style.display="none";go2.disabled=true;go2.textContent="Un attimo…";loading(true);
+post("/api/business-auth?action=verify2fa",{challenge:challenge,code:document.getElementById("code").value}).then(enter).catch(function(e){loading(false);show(err2,e.message);if(e.restart)setTimeout(back,1800)}).then(function(){go2.disabled=false;go2.textContent="Conferma"})});
 function back(){challenge="";f2.classList.add("hide");f.classList.remove("hide");sub.textContent="La tua agenda ti aspetta.";document.getElementById("code").value="";err2.style.display="none"}
 document.getElementById("back").addEventListener("click",back);
 })();
