@@ -524,3 +524,19 @@
   :root:root .mzKr small,:root:root .mzRing b{font-size:.7rem}
   :root:root .mzK::before{top:-56px;height:80px}
 }
+/* Palette più sobria e professionale (smartphone): grafite, accenti desaturati, filo colorato in alto */
+@media(max-width:700px){
+  :root:root .mzK,:root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover{background:linear-gradient(165deg,#1C2E35,#121F25)!important;border-color:rgba(255,255,255,.07);--g:#7F97A0;--t:#B7C6CC}
+  :root:root .mzK{--g:#4FA3B0;--t:#9CCFD7}
+  :root:root .mzK.ok,:root:root .mzRow.st-ok{--g:#3FAF82;--t:#86CDAA}
+  :root:root .mzK.warn,:root:root .mzRow.st-warn{--g:#D9A441;--t:#E6C27A}
+  :root:root .mzK.bad,:root:root .mzRow.st-bad{--g:#D9695F;--t:#E79A92}
+  :root:root .mzK::before,:root:root .mzRow::before,:root:root .mzRow.st-warn::before,:root:root .mzRow.st-bad::before{left:0;right:0;top:0;bottom:auto;width:auto;height:2px;border-radius:0;background:linear-gradient(90deg,var(--g),transparent 75%);opacity:1;filter:none}
+  :root:root .mzK[aria-pressed="true"]{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+  :root:root .mzRow .mzAv{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.08)!important}
+  :root:root .mzRow>.mzC:nth-child(6) .mzSt{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.16)!important;color:var(--t)!important}
+  :root:root .mzRow>.mzC:nth-child(6) .mzSt::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--g);margin-right:6px;vertical-align:1px}
+  :root:root .mzRow>.mzSm{background:rgba(0,0,0,.22)}
+  :root:root .mzRow>.mzA{background:rgba(0,0,0,.22)}
+  :root:root .mzRow>.mzA .mzRn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+}
