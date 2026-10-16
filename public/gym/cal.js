@@ -397,11 +397,14 @@
       (day.sessions || []).forEach(function (s) { its.push({ t: s.time, s: s }); });
       (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (!p.free) its.push({ t: p.time, p: p }); });
       its.sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; });
-      var body = its.map(function (x) {
-        if (x.p) { var nm = x.p.name.split(' '); return '<button type="button" class="gpmR gpmPt" style="--cc:#C9A24B" data-ptb="' + x.t + '" data-date="' + d + '"><b>' + x.t + '</b><span class="gpmN">Personal 1:1<small>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</small></span></button>'; }
+      var parts = its.map(function (x) {
+        if (x.p) { var nm = x.p.name.split(' '); return { pt: 1, h: '<button type="button" class="gpmR gpmPt" data-ptb="' + x.t + '" data-date="' + d + '"><b>' + x.t + '</b><span class="gpmN"><em>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</em><small>Personal 1:1</small></span><span class="gpmIc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></span></button>' }; }
         var s = x.s, full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
-        return '<button type="button" class="gpmR' + (s.cancelled ? ' off' : '') + (isEnded(d, s.time, s.duration_min) ? ' past' : '') + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><b>' + s.time + '</b><span class="gpmN">' + esc(s.course.name) + '</span><span class="gpmB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s' + (full ? ' class="full"' : '') + '>' + (s.cancelled ? 'annullata' : s.taken + '/' + s.capacity) + '</s></button>';
-      }).join('');
+        return { h: '<button type="button" class="gpmR' + (s.cancelled ? ' off' : '') + (isEnded(d, s.time, s.duration_min) ? ' past' : '') + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><b>' + s.time + '</b><span class="gpmN">' + esc(s.course.name) + '</span><span class="gpmB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s' + (full ? ' class="full"' : '') + '>' + (s.cancelled ? 'annullata' : s.taken + '/' + s.capacity) + '</s></button>' };
+      });
+      var body = '', open = false;
+      parts.forEach(function (q) { if (q.pt && !open) { body += '<div class="gpmBand">'; open = true; } else if (!q.pt && open) { body += '</div>'; open = false; } body += q.h; });
+      if (open) body += '</div>';
       rows += '<div class="gpmD' + (d === today() ? ' tod' : '') + (day.closed || !its.length ? ' none' : '') + '"><button type="button" class="gpmH" data-go="' + d + '"><span class="gpmDn">' + G.DN[dow(d)] + '</span><span class="gpmDd">' + parse(d).getDate() + '</span><span class="gpmOc">' + (day.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap + ' posti' : 'Nessuna lezione') + '</span><span class="gpmCh">›</span></button>' + (body ? '<div class="gpmL">' + body + '</div>' : '') + '</div>';
     }
     return '<div class="gcOv"><span class="gcKick">Prenotazioni</span><b class="gcBig">' + tot + '</b></div>' + rows;
