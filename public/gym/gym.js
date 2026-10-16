@@ -346,7 +346,8 @@
           '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
           '<span class="mzC mzE ' + (hot ? 'hot' : '') + '" data-l="Scadenza">' + sc + '</span>' +
           '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span>' +
-          '<span class="mzC mzA"></span>';
+          '<span class="mzC mzA"></span>' +
+          '<span class="mzC mzSm ' + m.status.s + '">' + (cur ? '<b>' + esc(cur.plan_name) + '</b>' + (cur.ends_on ? ' · ' + (dl < 0 ? 'scaduto il ' + short(cur.ends_on) : dl === 0 ? 'scade oggi' : 'scade il ' + short(cur.ends_on) + (hot ? ' (' + dl + '\u00a0gg)' : '')) : '') : 'Nessun abbonamento') + '</span>';
         var A = r.querySelector('.mzA');
         var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
         function open(tab) { S.mid = m.id; S.tab = tab || 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }
