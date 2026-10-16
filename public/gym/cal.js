@@ -77,9 +77,11 @@
       out.forEach(function (r) { fetchRange(r.from, r.to, !r.full).catch(function () {}); });
     }, 600);
   }
+  // la settimana parte sempre dal giorno corrente (e si sposta di 7 giorni alla volta)
+  function wkStart(a) { var n = Math.floor(Math.round((parse(a).getTime() - parse(today()).getTime()) / 864e5) / 7); return addDays(today(), 7 * n); }
   function range() {
     if (S.view === 'day') return { from: S.anchor, to: S.anchor, full: true };
-    if (S.view === 'week') { var m = monday(S.anchor); return { from: m, to: addDays(m, 6), full: true }; }
+    if (S.view === 'week') { var m = wkStart(S.anchor); return { from: m, to: addDays(m, 6), full: true }; }
     var an = parse(S.anchor), f = new Date(an.getFullYear(), an.getMonth(), 1), gs = monday(ymd(f));
     var lead = Math.round((f.getTime() - parse(gs).getTime()) / 864e5), dim = new Date(an.getFullYear(), an.getMonth() + 1, 0).getDate(), rows = Math.ceil((lead + dim) / 7);
     return { from: gs, to: addDays(gs, rows * 7 - 1), full: false };
@@ -126,14 +128,14 @@
     var y = function (t) { return ' <span class="rangeYear">' + t + '</span>'; };
     if (S.view === 'day') { var d = parse(S.anchor); return (phone() ? G.DN[d.getDay()] : G.DL[d.getDay()]) + ' ' + d.getDate() + ' ' + (phone() ? G.MS[d.getMonth()] : G.MO[d.getMonth()]) + y(d.getFullYear()); }
     if (S.view === 'week') {
-      var a = monday(S.anchor), b = addDays(a, 6), x = parse(a), z = parse(b);
+      var a = wkStart(S.anchor), b = addDays(a, 6), x = parse(a), z = parse(b);
       return x.getDate() + (x.getMonth() !== z.getMonth() ? ' ' + G.MS[x.getMonth()] : '') + ' – ' + z.getDate() + ' ' + G.MS[z.getMonth()] + y(z.getFullYear());
     }
     var m = parse(S.anchor); return cap1(G.MO[m.getMonth()]) + y(m.getFullYear());
   }
   function isCurrent() {
     if (S.view === 'day') return S.anchor === today();
-    if (S.view === 'week') return monday(S.anchor) === monday(today());
+    if (S.view === 'week') return wkStart(S.anchor) === today();
     var a = parse(S.anchor), t = parse(today()); return a.getMonth() === t.getMonth() && a.getFullYear() === t.getFullYear();
   }
   function controlsHTML() {
@@ -154,7 +156,7 @@
   }
   function step(k) {
     if (S.view === 'day') { S.anchor = addDays(S.anchor, k); S.sel = S.anchor; }
-    else if (S.view === 'week') { S.anchor = addDays(S.anchor, 7 * k); S.sel = addDays(monday(S.anchor), (parse(S.sel).getDay() + 6) % 7); }
+    else if (S.view === 'week') { S.anchor = addDays(S.anchor, 7 * k); S.sel = wkStart(S.anchor); }
     else { var d = parse(S.anchor); S.anchor = ymd(new Date(d.getFullYear(), d.getMonth() + k, 1)); S.sel = S.anchor === monthOf(today()) ? today() : S.anchor; }
     render();
   }
@@ -319,7 +321,7 @@
 
   // ---------- settimana (stessa struttura e stesso stile del calendario di Lia) ----------
   function weekDraw(body) {
-    var a = monday(S.anchor), days = [], i;
+    var a = wkStart(S.anchor), days = [], i;
     for (i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
     if (!(S.sel >= a && S.sel <= addDays(a, 6))) S.sel = a <= today() && today() <= addDays(a, 6) ? today() : a;
     var f = S.flt, heads = '', rows = [], rowIx = {}, tot = [];
@@ -374,7 +376,7 @@
     [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
   }
   function weekPhone() {
-    var a = monday(S.anchor), tot = 0, rows = '';
+    var a = wkStart(S.anchor), tot = 0, rows = '';
     for (var i = 0; i < 7; i++) {
       var d = addDays(a, i), day = getDay(d) || { sessions: [], pt: [], closed: true }, st = dayStats(day);
       if (i === 6 && day.closed) continue;
