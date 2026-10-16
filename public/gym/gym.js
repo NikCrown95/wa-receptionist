@@ -773,6 +773,15 @@
 
   // ---------- Scheda palestra: stessa struttura delle altre attività, riempita con i dati della palestra ----------
   var pfObs = null, pfBusy = false;
+  // l'intestazione compare una volta sola, già completa (niente scatti tra testo standard e testo della palestra)
+  ['/gym/hero.jpg', '/gym/logo.png'].forEach(function (u) { try { new Image().src = u; } catch (e) { } });
+  function pfReady() {
+    var h = document.getElementById('pfHero'), nm = document.getElementById('pfName');
+    if (!h || h.classList.contains('gpfReady')) return;
+    if (nm && nm.textContent && nm.textContent !== 'La tua attività') h.classList.add('gpfReady');
+  }
+  setTimeout(function () { var h = document.getElementById('pfHero'); if (h) h.classList.add('gpfReady'); }, 3500);
+  (function () { var k = document.getElementById('pfKind'); if (!k) return; var fix = function () { if (k.textContent !== 'Palestra') k.textContent = 'Palestra'; }; fix(); new MutationObserver(fix).observe(k, { childList: true, characterData: true, subtree: true }); })();
   function pfPaint() {
     var D = S.data, root = document.getElementById('panelProfile'); if (!D || !root || pfBusy) return;
     pfBusy = true; if (pfObs) pfObs.disconnect();
@@ -846,6 +855,7 @@
       // --- "Modifica" porta alle impostazioni della palestra
       root.querySelectorAll('[data-pfedit]').forEach(function (b) { b.onclick = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); }; });
     } catch (e) { /* la scheda resta com’è */ }
+    pfReady();
     pfBusy = false; pfWatch();
   }
   function pfWatch() {
