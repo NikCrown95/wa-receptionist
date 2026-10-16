@@ -50,8 +50,20 @@
     setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 4200);
   }
   function act(body, ok) { return api(body).then(function (j) { if (ok) toast(ok, 'ok'); return j; }).catch(function (e) { toast(e.message, 'bad'); throw e; }); }
+  // Cosa offre questa palestra: corsi, Personal 1:1, prenotazione online (senza nessuna = solo gestionale iscritti)
+  function OF() { var s = (S.data && S.data.settings) || {}, c = s.classes !== false, p = s.personal !== false; return { cls: c, pt: p, on: s.online !== false && (c || p) }; }
+  function applyOffers() {
+    var o = OF(), b = document.body; if (!b) return;
+    b.classList.toggle('gymNoCls', !o.cls); b.classList.toggle('gymNoPt', !o.pt); b.classList.toggle('gymNoCal', !o.cls && !o.pt); b.classList.toggle('gymNoOnline', !o.on);
+    var lab = o.cls ? 'Lezioni' : 'Personal'; LABELS.cal = lab; MENU.menuTabCal = lab;
+    var cb = document.getElementById('menuTabCal');
+    if (cb) { cb.style.display = !o.cls && !o.pt ? 'none' : ''; for (var i = cb.childNodes.length - 1; i >= 0; i--) { var n = cb.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + lab + '\n  '; break; } } }
+    var cr = document.querySelector('[data-gx="corsi"]'); if (cr) cr.style.display = o.cls ? '' : 'none';
+    if (!o.cls && !o.pt && S.section === 'cal') { var cl = document.getElementById('menuTabClients'); if (cl) cl.click(); }
+    setLabel(S.section);
+  }
   function load() {
-    return api(null, API + '&data=1').then(function (d) { S.data = d; S.today = d.today; if (!S.dayInit) { S.day = d.today; S.dayInit = true; } return d; });
+    return api(null, API + '&data=1').then(function (d) { S.data = d; S.today = d.today; if (!S.dayInit) { S.day = d.today; S.dayInit = true; } applyOffers(); return d; });
   }
   function reload() { S.sessions = null; S.week = null; S.stats = null; return load().then(function () { renderAll(); try { document.dispatchEvent(new CustomEvent('lia:gymchanged')); } catch (e) {} }); }
 
@@ -537,8 +549,9 @@
     [[s.active, 'Iscritti attivi'], [s.soon, 'In scadenza'], [s.week_bookings, 'Prenotazioni questa settimana'], [s.sold_month, 'Abbonamenti venduti nel mese' + (s.revenue_month ? ' (' + eur(s.revenue_month) + ')' : '')]].forEach(function (x) { var d = el('div', 'gxTile'); d.appendChild(el('b', null, String(x[0]))); d.appendChild(el('span', null, x[1])); t.appendChild(d); });
     xStat.appendChild(t);
     if (s.expired) xStat.appendChild(el('div', 'gxM', s.expired + (s.expired === 1 ? ' iscritto ha l\'abbonamento scaduto o non ne ha uno.' : ' iscritti hanno l\'abbonamento scaduto o non ne hanno uno.'))).style.marginTop = '6px';
-    xStat.appendChild(el('div', 'gxLb', 'Riempimento dei corsi, ultime 4 settimane'));
-    if (!s.fill.length) xStat.appendChild(el('div', 'gxEmpty', 'Ancora nessun dato: compare dopo le prime lezioni.'));
+    if (OF().cls) xStat.appendChild(el('div', 'gxLb', 'Riempimento dei corsi, ultime 4 settimane'));
+    if (!OF().cls) s.fill = [];
+    else if (!s.fill.length) xStat.appendChild(el('div', 'gxEmpty', 'Ancora nessun dato: compare dopo le prime lezioni.'));
     s.fill.forEach(function (x) { var h = el('div', 'gxHb'), d = el('div', null, x.name), tr = el('div', 't'), i = el('i'); i.style.width = x.pct + '%'; tr.appendChild(i); d.appendChild(tr); h.appendChild(d); h.appendChild(el('em', null, x.pct + '%')); xStat.appendChild(h); });
     if (s.fill.length) { var n = el('div', 'gxM', 'Un corso quasi sempre pieno si può raddoppiare; uno sotto la metà si può cambiare di orario.'); n.style.marginTop = '10px'; xStat.appendChild(n); }
   }
@@ -569,6 +582,7 @@
     var first = menu.querySelector('.stGroup .stList'); if (!first || first.querySelector('[data-gx]')) return true;
     var anchor = menu.querySelector('[data-st="services"]');
     var rows = [
+      ['tipo', 'c-teal', 'gear', 'Cosa offri', 'Corsi, Personal, prenotazione online'],
       ['orari', 'c-amber', 'clock', 'Orari di apertura', 'Quando la palestra è aperta'],
       ['corsi', 'c-violet', 'weights', 'Corsi e programma', 'Corsi, orari e posti'],
       ['abb', 'c-blue', 'card', 'Abbonamenti', 'Tipi, prezzi e ingressi'],
@@ -580,11 +594,42 @@
       b.innerHTML = '<span class="stIc ' + r[1] + ' gxI">' + ic(r[2]) + '</span><span class="stTx"><b>' + r[3] + '</b><small>' + r[4] + '</small></span><span class="stCh" aria-hidden="true">›</span>';
       b.addEventListener('click', function () { openSetting(r[0]); }); if (anchor && anchor.parentNode === first) first.insertBefore(b, anchor); else first.appendChild(b);
     });
+    if (S.data) applyOffers();
     return true;
   }
   function openSetting(k) {
-    var go = function () { ({ orari: sOrari, corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
+    var go = function () { ({ tipo: sTipo, orari: sOrari, corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
     if (S.data) go(); else load().then(go).catch(function (e) { toast(e.message, 'bad'); });
+  }
+  function sTipo() {
+    sheet('Cosa offri', function (w, close) {
+      var o = OF(), st = { cls: o.cls, pt: o.pt, on: o.on };
+      w.appendChild(el('p', null, 'Scegli come lavora la tua palestra. Puoi cambiarlo quando vuoi: niente viene cancellato.'));
+      var box = el('div', 'gxTipo'); w.appendChild(box);
+      var rows = [
+        ['cls', 'Corsi di gruppo', 'Lezioni a orari fissi con un numero di posti, che si ripetono ogni settimana.'],
+        ['pt', 'Personal 1:1', 'Lezioni individuali con il trainer, a ore libere.'],
+        ['on', 'Prenotazione online', 'Gli iscritti prenotano da soli dalla pagina della palestra. Spento, usi l\'app solo per tenere traccia di iscritti e abbonamenti.']
+      ];
+      function draw() {
+        box.innerHTML = '';
+        rows.forEach(function (r) {
+          var off = r[0] === 'on' && !st.cls && !st.pt;
+          var b = el('button', 'gxTp'); b.type = 'button'; b.setAttribute('aria-pressed', (st[r[0]] && !off) ? 'true' : 'false'); b.disabled = off;
+          b.innerHTML = '<span class="t"><b>' + esc(r[1]) + '</b><small>' + esc(r[2]) + '</small></span><i class="sw"><u></u></i>';
+          b.addEventListener('click', function () { st[r[0]] = !st[r[0]]; if (!st.cls && !st.pt) st.on = false; draw(); });
+          box.appendChild(b);
+        });
+        var hint = !st.cls && !st.pt ? 'Con tutto spento l\'app è un gestionale: iscritti e abbonamenti, senza calendario né prenotazioni.' : !st.cls ? 'Solo Personal: il calendario mostra le ore di Personal di ogni giorno di apertura.' : !st.pt ? 'Solo corsi: il Personal non compare da nessuna parte.' : '';
+        if (hint) box.appendChild(el('p', 'gxM', hint));
+      }
+      draw();
+      var msg = el('div'); w.appendChild(msg);
+      w.appendChild(btn('Salva', 'block', function () {
+        msg.className = ''; msg.textContent = '';
+        api({ action: 'settings_save', classes: st.cls, personal: st.pt, online: st.on && (st.cls || st.pt) }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+      }));
+    });
   }
   function sOrari() {
     sheet('Orari di apertura', function (w, close) {
@@ -784,21 +829,25 @@
       var mx = inp('number', p && p.max_entries ? p.max_entries : ''), mw = inp('number', p && p.max_per_week ? p.max_per_week : ''); mx.inputMode = 'numeric'; mw.inputMode = 'numeric'; mx.placeholder = 'nessun limite'; mw.placeholder = 'nessun limite';
       if (!p) {
         var tp = el('div', 'gxChips'); tp.style.marginBottom = '10px';
-        var all = (S.data.plan_categories || S.data.categories), noPt = ['tutti'];
-        [['Mensile', 'time', 30, 60, noPt], ['Piano Personal', 'entries', 10, 100, ['personal']], ['Carnet 10 ingressi', 'entries', 10, 70, noPt]].forEach(function (t) {
+        var all = (S.data.plan_categories || S.data.categories), o = OF(), tpls = [];
+        // modelli solo come spunto, senza prezzi: decide la palestra
+        if (o.cls) { tpls.push(['Mensile', 'time', 30, ['tutti']]); tpls.push(['Carnet 10 ingressi', 'entries', 10, ['tutti']]); }
+        if (o.pt) tpls.push(['Pacchetto Personal', 'entries', 10, ['personal']]);
+        if (!o.cls && !o.pt) { tpls.push(['Mensile', 'time', 30, ['tutti']]); tpls.push(['Trimestrale', 'time', 90, ['tutti']]); tpls.push(['Carnet 10 ingressi', 'entries', 10, ['tutti']]); }
+        tpls.forEach(function (t) {
           var b = el('button', 'gxCp gxAlt', t[0]); b.type = 'button';
-          b.addEventListener('click', function () { n.value = t[0]; k.value = t[1]; sync(); dv.value = t[2]; pr.value = t[3]; sel0.length = 0; t[4].forEach(function (x) { if (all.indexOf(x) >= 0) sel0.push(x); }); paints.forEach(function (f) { f(); }); });
+          b.addEventListener('click', function () { n.value = t[0]; k.value = t[1]; sync(); dv.value = t[2]; sel0.length = 0; t[3].forEach(function (x) { if (all.indexOf(x) >= 0) sel0.push(x); }); paints.forEach(function (f) { f(); }); });
           tp.appendChild(b);
         });
         w.appendChild(el('div', 'gxDh', 'Parti da un modello')); w.appendChild(tp);
       }
       w.appendChild(field('Nome', n)); w.appendChild(field('Tipo', k)); w.appendChild(dl); w.appendChild(field('Prezzo (€)', pr));
       var lim = el('div', 'gxTwo'); lim.appendChild(field('Ingressi al mese (max)', mx)); lim.appendChild(field('A settimana (max)', mw)); w.appendChild(lim);
-      w.appendChild(el('div', 'gxDh', 'Corsi inclusi'));
-      var sel0 = p ? p.covers.slice() : ['tutti'], ch = el('div', 'gxChips');
-      var paints = []; (S.data.plan_categories || S.data.categories).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paints.push(paint); paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else { if (c === 'tutti') { for (var q = sel0.length - 1; q >= 0; q--) if (sel0[q] !== 'personal') sel0.splice(q, 1); } else if (c !== 'personal') { var t = sel0.indexOf('tutti'); if (t >= 0) sel0.splice(t, 1); } sel0.push(c); } paints.forEach(function (f) { f(); }); }); ch.appendChild(b); });
-      w.appendChild(ch);
-      var h = el('p', null, 'Esempio: il Mensile da 60 € include i corsi, con 8 ingressi al mese e massimo 2 a settimana. Il Piano Personal da 100 € è a parte: 10 lezioni da un\'ora con il trainer, una al giorno. Un iscritto può avere entrambi.'); h.style.marginTop = '8px'; w.appendChild(h);
+      var of = OF(), onlyPt = of.pt && !of.cls, none = !of.pt && !of.cls;
+      var sel0 = p ? p.covers.slice() : (onlyPt ? ['personal'] : ['tutti']), ch = el('div', 'gxChips');
+      var paints = []; (S.data.plan_categories || S.data.categories).filter(function (c) { return c === 'personal' ? of.pt : of.cls; }).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paints.push(paint); paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else { if (c === 'tutti') { for (var q = sel0.length - 1; q >= 0; q--) if (sel0[q] !== 'personal') sel0.splice(q, 1); } else if (c !== 'personal') { var t = sel0.indexOf('tutti'); if (t >= 0) sel0.splice(t, 1); } sel0.push(c); } paints.forEach(function (f) { f(); }); }); ch.appendChild(b); });
+      if (!onlyPt && !none) { w.appendChild(el('div', 'gxDh', of.pt ? 'Cosa include' : 'Corsi inclusi')); w.appendChild(ch); }
+      var h = el('p', null, 'Decidi tu nome, prezzo, durata o numero di ingressi e i limiti. Ogni iscritto può avere più abbonamenti insieme' + (of.pt && of.cls ? ', ad esempio un mensile e un pacchetto Personal.' : '.')); h.style.marginTop = '8px'; w.appendChild(h);
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
         var b = { action: 'plan_save', id: p ? p.id : undefined, name: n.value, kind: k.value, price_eur: pr.value, covers: sel0, max_entries: mx.value, max_per_week: mw.value }; if (k.value === 'time') b.days = dv.value; else b.entries = dv.value;
@@ -829,13 +878,12 @@
       var ex = sel([[3, '3 giorni prima'], [5, '5 giorni prima'], [7, '7 giorni prima'], [10, '10 giorni prima']], st.expiry_days || 5);
       w.appendChild(field('Avvisami della scadenza', ex));
       w.appendChild(el('p', null, 'Da quel giorno l\'abbonamento compare tra le notifiche e in "In scadenza".'));
-      w.appendChild(el('div', 'gxDh', 'Ore del Personal 1:1'));
       var hours = (st.pt_hours || []).slice(), ch = el('div', 'gxChips');
+      if (OF().pt) w.appendChild(el('div', 'gxDh', 'Ore del Personal 1:1'));
       for (var hh = 7; hh <= 21; hh++) {
         (function (t) { var b = el('button', 'gxCp', t); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', hours.indexOf(t) >= 0 ? 'true' : 'false'); } paint(); b.addEventListener('click', function () { var i = hours.indexOf(t); if (i >= 0) hours.splice(i, 1); else hours.push(t); paint(); }); ch.appendChild(b); })(pad(hh) + ':00');
       }
-      w.appendChild(ch);
-      var n = el('p', null, 'Il Personal compare solo in queste ore e solo se in quell\'ora non c\'è un corso.'); n.style.marginTop = '8px'; w.appendChild(n);
+      if (OF().pt) { w.appendChild(ch); var n = el('p', null, OF().cls ? 'Il Personal compare solo in queste ore e solo se in quell\'ora non c\'è un corso.' : 'Il Personal si può prenotare solo in queste ore, nei giorni di apertura.'); n.style.marginTop = '8px'; w.appendChild(n); }
       w.appendChild(btn('Salva', 'block', function () { act({ action: 'settings_save', cutoff_hours: h.value, expiry_days: ex.value, pt_hours: hours.sort() }, 'Salvato.').then(function () { close(); return reload(); }); }));
     });
   }
@@ -989,7 +1037,7 @@
   window.liaGym = {
     S: S, API: API, api: api, act: act, load: load, reload: reload, toast: toast, sheet: sheet, field: field, inp: inp, sel: sel, btn: btn, el: el, confirmBar: confirmBar,
     ymd: ymd, parse: parse, addDays: addDays, monday: monday, dlabel: dlabel, short: short, cat: cat, eur: eur, pad: pad, ic: ic,
-    DN: DN, DL: DL, MO: MO, MS: MS, WD: WD, memberSheet: memberSheet, memberForm: memberForm, newPlan: newPlan, openSetting: openSetting
+    DN: DN, DL: DL, MO: MO, MS: MS, WD: WD, memberSheet: memberSheet, OF: OF, cat: cat, memberForm: memberForm, newPlan: newPlan, openSetting: openSetting
   };
   // dalla campanella: "Abbonamento in scadenza" apre la scheda di quell'iscritto
   window.liaGymMember = function (id) {

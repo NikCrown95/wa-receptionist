@@ -222,3 +222,18 @@
 .gxMf .gxMfP[aria-pressed="true"] em{color:#9CCFD7}
 .gxMf .gxMfH{font-size:.78rem;margin:10px 0}
 .gxMf .gxMfGo{background:#4FA3B0;color:#0B1A1F;border-color:#4FA3B0;font-weight:800;border-radius:16px;min-height:54px}
+
+/* Cosa offre la palestra: corsi / Personal / solo gestionale */
+.gymNoCls .gProg,.gymNoCal #menuTabCal{display:none!important}
+.gymNoCls [data-side="lez"],.gymNoPt [data-side="pt"]{display:none!important}
+.gxTipo{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.gxTp{display:flex;align-items:center;gap:14px;width:100%;padding:14px;border-radius:16px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.gxTp .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.gxTp .t b{font-size:.98rem}
+.gxTp .t small{font-size:.8rem;color:var(--muted);line-height:1.35}
+.gxTp .sw{flex:none;width:46px;height:28px;border-radius:99px;background:var(--line2);position:relative;transition:background .15s}
+.gxTp .sw u{position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.gxTp[aria-pressed="true"]{border-color:var(--accent)}
+.gxTp[aria-pressed="true"] .sw{background:var(--accent)}
+.gxTp[aria-pressed="true"] .sw u{transform:translateX(18px)}
+.gxTp:disabled{opacity:.45;cursor:default}
