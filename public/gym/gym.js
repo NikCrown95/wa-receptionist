@@ -402,7 +402,7 @@
           }
           opt('Nessuno per ora', 'Lo aggiungi più tardi', '', !picks.length, function () { picks = []; drawPlan(); });
           plans.forEach(function (x) {
-            var sub = (x.kind === 'time' ? x.days + ' giorni' : x.entries + ' ingressi') + ' · ' + x.covers.map(cat).join(', '), on = picks.indexOf(x) >= 0;
+            var sub = (x.kind === 'time' ? (x.days === 1 ? '1 giorno' : x.days + ' giorni') : x.entries + ' ingressi') + ' · ' + x.covers.map(cat).join(', '), on = picks.indexOf(x) >= 0;
             opt(x.name, sub, x.price_eur != null ? eur(x.price_eur) : '', on, function () { if (on) picks.splice(picks.indexOf(x), 1); else { picks.push(x); paid[x.id] = x.price_eur != null ? x.price_eur : ''; } drawPlan(); });
           });
           if (picks.length) {
@@ -815,7 +815,7 @@
   function sAbb() {
     sheet('Abbonamenti', function (w, close) {
       if (!S.data.plans.length) w.appendChild(el('div', 'gxEmpty', 'Nessun abbonamento. Crea il primo, per esempio Mensile.'));
-      S.data.plans.forEach(function (p) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, p.name + (p.price_eur != null ? ' · ' + eur(p.price_eur) : ''))); l.appendChild(el('div', 'gxM', (p.kind === 'time' ? p.days + ' giorni' : p.entries + ' ingressi') + (p.max_entries ? ' · ' + p.max_entries + ' ingressi al mese' : '') + (p.max_per_week ? ' · max ' + p.max_per_week + ' a settimana' : '') + ' · ' + p.covers.map(cat).join(', '))); r.appendChild(l); r.appendChild(btn('Modifica', 'ghost sm', function () { close(); planForm(p); })); w.appendChild(r); });
+      S.data.plans.forEach(function (p) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, p.name + (p.price_eur != null ? ' · ' + eur(p.price_eur) : ''))); l.appendChild(el('div', 'gxM', (p.kind === 'time' ? (p.days === 1 ? '1 giorno' : p.days + ' giorni') : p.entries + ' ingressi') + (p.max_entries ? ' · ' + p.max_entries + ' ingressi al mese' : '') + (p.max_per_week ? ' · max ' + p.max_per_week + ' a settimana' : '') + ' · ' + p.covers.map(cat).join(', '))); r.appendChild(l); r.appendChild(btn('Modifica', 'ghost sm', function () { close(); planForm(p); })); w.appendChild(r); });
       var a = btn('Nuovo tipo', 'block', function () { close(); planForm(); }); a.style.marginTop = '8px'; w.appendChild(a);
     });
   }
