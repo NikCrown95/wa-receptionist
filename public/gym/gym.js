@@ -775,6 +775,32 @@
   var pfObs = null, pfBusy = false;
   // l'intestazione compare una volta sola, già completa (niente scatti tra testo standard e testo della palestra)
   ['/gym/hero.jpg', '/gym/logo.png'].forEach(function (u) { try { new Image().src = u; } catch (e) { } });
+  // aperto/chiuso: dalla prima all'ultima lezione del giorno (gli stessi orari mostrati in "Orari di apertura"), nel fuso della palestra
+  function pfOpenNow() {
+    var on = document.getElementById('pfOpenNow'), D = S.data; if (!on || !D || !D.schedule) return;
+    if (!D.schedule.length) { on.hidden = true; return; }
+    var tz = 'Europe/Rome'; try { tz = (window.liaProfileData && window.liaProfileData.business && window.liaProfileData.business.timezone) || tz; } catch (e) { }
+    var wd, nm; try {
+      var p = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()), o = {}; p.forEach(function (x) { o[x.type] = x.value; });
+      wd = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 }[o.weekday]; nm = (+o.hour) * 60 + (+o.minute);
+    } catch (e) { var n = new Date(); wd = n.getDay() || 7; nm = n.getHours() * 60 + n.getMinutes(); }
+    var a = 1e9, z = 0;
+    D.schedule.forEach(function (x) { if (x.weekday !== wd) return; var c = (D.courses || []).filter(function (y) { return y.id === x.course_id; })[0], t = x.time.split(':'), st = (+t[0]) * 60 + (+t[1]); a = Math.min(a, st); z = Math.max(z, st + (c ? c.duration_min : 60)); });
+    var open = a < 1e9 && nm >= a && nm < z;
+    on.hidden = false; on.className = 'pfOpenNow' + (open ? ' open' : '');
+    on.textContent = open ? 'Aperto ora · fino alle ' + pad(Math.floor(z / 60) % 24) + ':' + pad(z % 60) : 'Chiuso ora';
+  }
+  // "Scade tra …" sempre, anche in prova (mai "La prova finisce tra …")
+  function pfTrialText() {
+    ['pfBadge', 'pfCdTag', 'plTop'].forEach(function (id) {
+      var r = document.getElementById(id); if (!r) return;
+      var w = document.createTreeWalker(r, NodeFilter.SHOW_TEXT, null), n;
+      while ((n = w.nextNode())) { var t = n.nodeValue; if (/La prova finisce/.test(t)) n.nodeValue = t.replace(/La prova finisce (tra|oggi|domani)/, function (m, k) { return k === 'tra' ? 'Scade tra' : k === 'oggi' ? 'Scade oggi' : 'Scade domani'; }); }
+    });
+  }
+  new MutationObserver(pfTrialText).observe(document.body, { childList: true, subtree: true, characterData: true });
+  pfTrialText();
+  setInterval(function () { try { pfOpenNow(); } catch (e) { } }, 60000);
   function pfReady() {
     var h = document.getElementById('pfHero'), nm = document.getElementById('pfName');
     if (!h || h.classList.contains('gpfReady')) return;
@@ -844,14 +870,13 @@
       place(document.getElementById('pfTeamCard'), 5); place(document.getElementById('pfChannels'), 6); place(document.getElementById('pfContactsCard'), 7, true);
       // --- canali: solo il calendario online (niente WhatsApp, Telegram, webchat)
       root.querySelectorAll('#pfChannels .pf2Ch').forEach(function (r) { if (r.querySelector('.pf2Ci.chat, .pf2Ci.wa, .pf2Ci.tg')) r.remove(); });
-      // --- aperto adesso, dalle lezioni in programma
-      var on = document.getElementById('pfOpenNow');
-      if (on && S.data.schedule && S.data.schedule.length) {
-        var nw = new Date(), wd = nw.getDay() || 7, nm_ = nw.getHours() * 60 + nw.getMinutes(), until = null;
-        S.data.schedule.forEach(function (x) { if (x.weekday !== wd) return; var c = (S.data.courses || []).filter(function (y) { return y.id === x.course_id; })[0], a = x.time.split(':'), st_ = (+a[0]) * 60 + (+a[1]), en_ = st_ + (c ? c.duration_min : 60); if (nm_ >= st_ - 30 && nm_ < en_) until = Math.max(until || 0, en_); });
-        on.hidden = false; on.className = 'pfOpenNow' + (until ? ' open' : '');
-        on.textContent = until ? 'Aperto ora · fino alle ' + pad(Math.floor(until / 60) % 24) + ':' + pad(until % 60) : 'Chiuso ora';
-      }
+      pfOpenNow();
+      // --- ordine delle card (uguale alle altre attività, con gli abbonamenti a sé)
+      function place(node, ord, full) { var c = node && (node.classList && node.classList.contains('pfCard') ? node : node.closest && node.closest('.pfCard')); if (c) { c.style.order = ord; c.style.gridColumn = full ? '1 / -1' : 'auto'; } }
+      place(document.getElementById('pfRefCard'), 1, true); place(sv, 2); place(document.getElementById('pfHours'), 3); place(document.getElementById('gpfPlansCard'), 4, true);
+      place(document.getElementById('pfTeamCard'), 5); place(document.getElementById('pfChannels'), 6); place(document.getElementById('pfContactsCard'), 7, true);
+      // --- canali: solo il calendario online (niente WhatsApp, Telegram, webchat)
+      root.querySelectorAll('#pfChannels .pf2Ch').forEach(function (r) { if (r.querySelector('.pf2Ci.chat, .pf2Ci.wa, .pf2Ci.tg')) r.remove(); });
       // --- "Modifica" porta alle impostazioni della palestra
       root.querySelectorAll('[data-pfedit]').forEach(function (b) { b.onclick = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); }; });
     } catch (e) { /* la scheda resta com’è */ }
