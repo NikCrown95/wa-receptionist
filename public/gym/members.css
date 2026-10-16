@@ -555,20 +555,14 @@
   :root:root .mzRow>.mzA{padding:0 12px 10px}
   :root:root .mzRow>.mzA .mzRn{min-height:36px;font-size:.84rem;border-radius:10px}
 }
-/* In scadenza = tutto giallo, Scaduti = tutto rosso: perimetro, sfondo, testi e pulsante */
+/* In scadenza / Scaduti: solo il perimetro della card colorato (giallo / rosso) */
 @media(max-width:700px){
-  :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{--g:#E0A93B;--t:#F2D28A;--l:#C9A65B;border:1.5px solid #E0A93B;background:linear-gradient(165deg,#302A17,#1E1A0E)!important}
-  :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{--g:#E0635A;--t:#F4ABA5;--l:#C98A85;border:1.5px solid #E0635A;background:linear-gradient(165deg,#34201F,#201111)!important}
+  :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{border:2px solid #E0A93B}
+  :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{border:2px solid #E0635A}
   :root:root .mzRow.st-warn::before,:root:root .mzRow.st-bad::before{display:none}
-  :root:root .mzRow.st-warn .mzN b,:root:root .mzRow.st-warn .mzN b span,:root:root .mzRow.st-bad .mzN b,:root:root .mzRow.st-bad .mzN b span,
-  :root:root .mzRow.st-warn>.mzSm b,:root:root .mzRow.st-bad>.mzSm b{color:var(--t)!important}
-  :root:root .mzRow.st-warn>.mzSm small,:root:root .mzRow.st-bad>.mzSm small{color:var(--l)}
-  :root:root .mzRow.st-warn .mzAv,:root:root .mzRow.st-bad .mzAv{border-color:var(--g)}
-  :root:root .mzRow.st-warn .mzAv i,:root:root .mzRow.st-bad .mzAv i{color:var(--t)!important}
-  :root:root .mzRow.st-warn>.mzSm,:root:root .mzRow.st-bad>.mzSm,:root:root .mzRow.st-warn>.mzA,:root:root .mzRow.st-bad>.mzA{background:rgba(0,0,0,.2);border-color:color-mix(in srgb,var(--g) 40%,transparent)}
-  :root:root .mzRow.st-warn>.mzSm>span+span,:root:root .mzRow.st-bad>.mzSm>span+span{border-left-color:color-mix(in srgb,var(--g) 30%,transparent)}
-  :root:root .mzRow.st-warn>.mzC:nth-child(6) .mzSt,:root:root .mzRow.st-bad>.mzC:nth-child(6) .mzSt{background:var(--g)!important;border-color:var(--g)!important;color:#1B1405!important}
-  :root:root .mzRow.st-bad>.mzC:nth-child(6) .mzSt{color:#fff!important}
-  :root:root .mzRow.st-warn>.mzC:nth-child(6) .mzSt::before,:root:root .mzRow.st-bad>.mzC:nth-child(6) .mzSt::before{display:none}
-  :root:root .mzRow.st-warn>.mzA .mzRn,:root:root .mzRow.st-bad>.mzA .mzRn{background:transparent;border:1.5px solid var(--g);color:var(--t)}
+}
+@media(max-width:700px){
+  :root:root .mzRow.st-ok,:root:root .mzRow.st-ok:nth-child(even),:root:root .mzRow.st-ok:hover{--g:#3FAF82;--t:#86CDAA}
+  :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{--g:#D9A441;--t:#E6C27A}
+  :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{--g:#D9695F;--t:#E79A92}
 }
