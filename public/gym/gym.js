@@ -18,6 +18,7 @@
   var IC = {
     users: '<circle cx="9" cy="8" r="3.3"/><path d="M2.8 20c.4-3.6 3-5.6 6.2-5.6s5.8 2 6.2 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.3.2 3.8 1.8 4.2 4.3"/>', check: '<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.3 9.5"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.3 2"/>', alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.4v.1"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2"/>', dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>', chev: '<path d="m6 9 6 6 6-6"/>', l: '<path d="M15 6l-6 6 6 6"/>', r: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
     card: '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     cal: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
     weights: '<path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/>',
@@ -559,6 +560,7 @@
     var first = menu.querySelector('.stGroup .stList'); if (!first || first.querySelector('[data-gx]')) return true;
     var anchor = menu.querySelector('[data-st="services"]');
     var rows = [
+      ['orari', 'c-amber', 'clock', 'Orari di apertura', 'Quando la palestra è aperta'],
       ['corsi', 'c-violet', 'weights', 'Corsi e programma', 'Corsi, orari e posti'],
       ['abb', 'c-blue', 'card', 'Abbonamenti', 'Tipi, prezzi e ingressi'],
       ['chiusure', 'c-coral', 'off', 'Chiusure e ferie', 'Giorni senza lezioni'],
@@ -572,8 +574,32 @@
     return true;
   }
   function openSetting(k) {
-    var go = function () { ({ corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
+    var go = function () { ({ orari: sOrari, corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
     if (S.data) go(); else load().then(go).catch(function (e) { toast(e.message, 'bad'); });
+  }
+  function sOrari() {
+    sheet('Orari di apertura', function (w, close) {
+      var cur = (S.data.settings && S.data.settings.hours) || null, rows = [];
+      w.appendChild(el('p', null, 'I corsi e il Personal si possono mettere solo quando la palestra è aperta.'));
+      for (var d = 1; d <= 7; d++) {
+        (function (d) {
+          var h = cur ? cur[d] : (d === 7 ? null : { open: '07:00', close: '21:00' });
+          var st = { on: !!h }, r = el('div', 'gxLs'), nm = el('b', null, WD[d]), o = inp('time', h ? h.open : '07:00'), c = inp('time', h ? h.close : '21:00'), tg = el('button', 'gxCp'); tg.type = 'button';
+          function paint() { tg.setAttribute('aria-pressed', st.on ? 'true' : 'false'); tg.textContent = st.on ? 'Aperto' : 'Chiuso'; o.disabled = c.disabled = !st.on; o.style.opacity = c.style.opacity = st.on ? 1 : .35; }
+          tg.addEventListener('click', function () { st.on = !st.on; paint(); }); paint();
+          var l = el('div'); l.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex:1;min-width:0'; l.appendChild(nm);
+          var tr = el('div'); tr.style.cssText = 'display:flex;gap:8px;align-items:center'; tr.appendChild(o); tr.appendChild(el('span', 'gxM', '–')); tr.appendChild(c); l.appendChild(tr);
+          r.appendChild(l); r.appendChild(tg); w.appendChild(r);
+          rows.push({ st: st, o: o, c: c, paint: paint });
+        })(d);
+      }
+      var cp = btn('Copia il lunedì su lunedì–venerdì', 'ghost block', function () { for (var i = 1; i < 5; i++) { rows[i].st.on = rows[0].st.on; rows[i].o.value = rows[0].o.value; rows[i].c.value = rows[0].c.value; rows[i].paint(); } }); cp.style.marginTop = '8px'; w.appendChild(cp);
+      var msg = el('div'); w.appendChild(msg);
+      var sv = btn('Salva', 'block', function () {
+        msg.className = ''; msg.textContent = '';
+        api({ action: 'hours_save', hours: rows.map(function (x) { return x.st.on ? { open: x.o.value, close: x.c.value } : null; }) }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+      }); sv.style.marginTop = '8px'; w.appendChild(sv);
+    });
   }
   function sCorsi() {
     var D = S.data;
@@ -804,14 +830,15 @@
   // aperto/chiuso: dalla prima all'ultima lezione del giorno (gli stessi orari mostrati in "Orari di apertura"), nel fuso della palestra
   function pfOpenNow() {
     var on = document.getElementById('pfOpenNow'), D = S.data; if (!on || !D || !D.schedule) return;
-    if (!D.schedule.length) { on.hidden = true; return; }
+    if (!D.schedule.length && !(D.settings && D.settings.hours)) { on.hidden = true; return; }
     var tz = 'Europe/Rome'; try { tz = (window.liaProfileData && window.liaProfileData.business && window.liaProfileData.business.timezone) || tz; } catch (e) { }
     var wd, nm; try {
       var p = new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()), o = {}; p.forEach(function (x) { o[x.type] = x.value; });
       wd = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 }[o.weekday]; nm = (+o.hour) * 60 + (+o.minute);
     } catch (e) { var n = new Date(); wd = n.getDay() || 7; nm = n.getHours() * 60 + n.getMinutes(); }
-    var a = 1e9, z = 0;
-    D.schedule.forEach(function (x) { if (x.weekday !== wd) return; var c = (D.courses || []).filter(function (y) { return y.id === x.course_id; })[0], t = x.time.split(':'), st = (+t[0]) * 60 + (+t[1]); a = Math.min(a, st); z = Math.max(z, st + (c ? c.duration_min : 60)); });
+    var a = 1e9, z = 0, cfgH = D.settings && D.settings.hours;
+    if (cfgH) { var dh = cfgH[wd]; if (dh) { var pa = dh.open.split(':'), pb = dh.close.split(':'); a = (+pa[0]) * 60 + (+pa[1]); z = (+pb[0]) * 60 + (+pb[1]); } }
+    else D.schedule.forEach(function (x) { if (x.weekday !== wd) return; var c = (D.courses || []).filter(function (y) { return y.id === x.course_id; })[0], t = x.time.split(':'), st = (+t[0]) * 60 + (+t[1]); a = Math.min(a, st); z = Math.max(z, st + (c ? c.duration_min : 60)); });
     var open = a < 1e9 && nm >= a && nm < z;
     on.hidden = false; on.className = 'pfOpenNow' + (open ? ' open' : '');
     on.textContent = open ? 'Aperto ora · fino alle ' + pad(Math.floor(z / 60) % 24) + ':' + pad(z % 60) : 'Chiuso ora';
@@ -889,6 +916,7 @@
         function hm(m) { return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
         var hc = hb.closest('.pfCard'); if (hc) hc.classList.add('gpfHrsCard');
         hb.innerHTML = '';
+        var cfgH = D.settings && D.settings.hours; if (cfgH) { byD = {}; for (var q = 1; q <= 7; q++) if (cfgH[q]) { var oa = cfgH[q].open.split(':'), ob = cfgH[q].close.split(':'); byD[q] = { a: (+oa[0]) * 60 + (+oa[1]), b: (+ob[0]) * 60 + (+ob[1]) }; } }
         for (var w = 1; w <= 7; w++) { var o = byD[w], r = el('div', 'pfRow' + (o ? '' : ' closed')); r.appendChild(el('span', 'pfRowName', WD[w])); r.appendChild(el('span', 'pfRowMeta', o ? hm(o.a) + '–' + hm(o.b) : 'Chiuso')); hb.appendChild(r); }
       }
       // --- ordine delle card (uguale alle altre attività, con gli abbonamenti a sé)
