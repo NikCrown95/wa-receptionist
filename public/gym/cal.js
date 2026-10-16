@@ -109,7 +109,7 @@
     ensure(r.from, r.to, r.full, function () {
       prefetchNear();
       var body = document.getElementById('gcBody'); if (!body) return;
-      if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); return; }
+      if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); dayFocus(body); return; }
       if (S.view === 'week') {
         if (phone()) { body.innerHTML = '<div class="gcal">' + weekPhone() + '</div>'; bindBody(body); }
         else { weekDraw(body); }
@@ -119,6 +119,18 @@
       // il dettaglio del giorno scelto arriva dopo: il mese si vede subito
       if (!have(S.sel, S.sel, true)) { var my2 = token, selD = S.sel; fetchRange(selD, selD, false).then(function () { if (my2 === token && selD === S.sel) { var b2 = document.getElementById('gcBody'); if (b2 && S.view === 'month') monthDraw(b2); } }).catch(function () {}); }
     });
+  }
+  // giorno di oggi: parte dalla lezione in corso o dalla prossima, non dalla mattina
+  function dayFocus(body) {
+    if (S.anchor !== today()) return;
+    var t = body.querySelector('.gcAc:not(.past):not(.off)'); if (!t) return;
+    var ag = body.querySelector('.gcAg'); if (!ag || t === ag.firstElementChild) return;
+    setTimeout(function () {
+      var sc = null, n = t.parentNode;
+      while (n && n !== document.body) { var o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight + 2) { sc = n; break; } n = n.parentNode; }
+      if (sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
+      else window.scrollTo(0, window.scrollY + t.getBoundingClientRect().top - 70);
+    }, 30);
   }
   function skel() {
     if (S.view === 'month') { var c = ''; for (var i = 0; i < 35; i++) c += '<i></i>'; return '<div class="gcSk gcSkM">' + c + '</div>'; }
