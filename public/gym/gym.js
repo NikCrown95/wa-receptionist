@@ -587,7 +587,7 @@
           var st = { on: !!h }, r = el('div', 'gxLs'), nm = el('b', null, WD[d]), o = inp('time', h ? h.open : '07:00'), c = inp('time', h ? h.close : '21:00'), tg = el('button', 'gxCp'); tg.type = 'button';
           function paint() { tg.setAttribute('aria-pressed', st.on ? 'true' : 'false'); tg.textContent = st.on ? 'Aperto' : 'Chiuso'; o.disabled = c.disabled = !st.on; o.style.opacity = c.style.opacity = st.on ? 1 : .35; }
           tg.addEventListener('click', function () { st.on = !st.on; paint(); }); paint();
-          var l = el('div'); l.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex:1;min-width:0'; l.appendChild(nm);
+          o.className = c.className = 'gxTi'; var l = el('div'); l.style.cssText = 'display:flex;flex-direction:column;gap:6px;flex:1;min-width:0'; l.appendChild(nm);
           var tr = el('div'); tr.style.cssText = 'display:flex;gap:8px;align-items:center'; tr.appendChild(o); tr.appendChild(el('span', 'gxM', '–')); tr.appendChild(c); l.appendChild(tr);
           r.appendChild(l); r.appendChild(tg); w.appendChild(r);
           rows.push({ st: st, o: o, c: c, paint: paint });

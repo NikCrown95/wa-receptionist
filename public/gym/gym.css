@@ -181,3 +181,14 @@
 .gym #stShell .stRow[data-st="services"],.gym #stShell .stRow[data-st="combos"],.gym #stShell .stRow[data-st="hours"],.gym #stShell .stRow[data-st="blocks"],.gym #stShell .stRow[data-st="staff"],.gym #stShell .stRow[data-st="rules"],.gym #stShell .stRow[data-st="telegram"],.gym #stShell .stRow[data-st="whatsapp"],
 .gym #stShell .stPage[data-st="services"],.gym #stShell .stPage[data-st="combos"],.gym #stShell .stPage[data-st="hours"],.gym #stShell .stPage[data-st="blocks"],.gym #stShell .stPage[data-st="staff"],.gym #stShell .stPage[data-st="staffdetail"],.gym #stShell .stPage[data-st="rules"],.gym #stShell .stPage[data-st="telegram"],.gym #stShell .stPage[data-st="whatsapp"],
 .gym #stShell .stGroup:has([data-st="telegram"]){display:none!important}
+/* Smartphone: i fogli a due colonne diventano una colonna sola */
+.gxTi{flex:1;min-width:0;min-height:44px;padding:8px 10px;border:1px solid var(--line2);border-radius:12px;background:var(--bg2);color:var(--ink);font:inherit;font-size:16px}
+.gxTi:disabled{opacity:.4}
+@media(max-width:699px){
+  .gxSheet.gxProg{padding:16px 14px calc(18px + env(safe-area-inset-bottom,0px));max-height:calc(100% - 12px);overflow:auto;border-radius:22px}
+  .gxProg > div:not(.gxSeg){grid-template-columns:minmax(0,1fr);gap:4px}
+  .gxProg .gxSecT{margin-top:14px}
+  .gxProg .gxCol + .gxCol{margin-top:6px}
+  .gxProg h3{font-size:1.2rem}
+  .gxProg .gxX{top:12px;right:12px}
+}
