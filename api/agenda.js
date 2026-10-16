@@ -151,9 +151,11 @@ async function getBusinessProfileByToken(token) {
   biz.__bot=botr&&botr.ok&&Array.isArray(botr.data)&&botr.data.length?botr.data[0]:null;
   if(!sr.ok||!Array.isArray(sr.data))return {__agendaError:"Errore lettura servizi"};
   const resource=rr.ok&&Array.isArray(rr.data)&&rr.data.length?rr.data[0]:null;
-  if(!resource)return {__agendaError:"Nessuna risorsa attiva configurata"};
+  // La palestra non ha risorse/orari propri (lezioni e abbonamenti stanno nelle sue tabelle): la scheda si apre lo stesso.
+  const isGym=require("../lib/verticals.js").areaOf(biz.business_type)==="palestra";
+  if(!resource&&!isGym)return {__agendaError:"Nessuna risorsa attiva configurata"};
   biz.services=sr.data;
-  biz.resources=[{id:resource.id,active:true,opening_hours:Array.isArray(resource.opening_hours)?resource.opening_hours:[]}];
+  biz.resources=[{id:resource?resource.id:null,active:true,opening_hours:resource&&Array.isArray(resource.opening_hours)?resource.opening_hours:[]}];
   biz.__planName=pr.ok&&Array.isArray(pr.data)&&pr.data.length&&pr.data[0].plans?pr.data[0].plans.name:null;
   const subRow=pr.ok&&Array.isArray(pr.data)&&pr.data.length?pr.data[0]:null;
   biz.__sub=subRow?{status:subRow.status,started_at:subRow.started_at,cancelled_at:subRow.cancelled_at,period_end:subRow.current_period_end||null,trial_ends_at:subRow.trial_ends_at||null,courtesy_until:subRow.courtesy_until||null,grace_days:Number(subRow.grace_days||0),suspended:!!subRow.suspended_manually,price_eur:subRow.plans&&subRow.plans.price_eur!=null?Number(subRow.plans.price_eur):null}:null;
@@ -325,7 +327,7 @@ module.exports = async (req, res) => {
         const bt = await businessTypeCached(gt);
         if (require("../lib/verticals.js").areaOf(bt) === "palestra") {
           variantKey = "gym";
-          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=65"><link rel="stylesheet" href="/gym/members.css?v=65"><link rel="stylesheet" href="/gym/cal-core.css?v=65"><link rel="stylesheet" href="/gym/cal.css?v=65"><link rel="stylesheet" href="/gym/stats-core.css?v=65"><link rel="stylesheet" href="/gym/stats.css?v=65"><body>').replace("</body>", '<script src="/gym/gym.js?v=65"></script><script src="/gym/cal.js?v=65"></script><script src="/gym/stats.js?v=65"></script></body>');
+          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="stylesheet" href="/gym/gym.css?v=66"><link rel="stylesheet" href="/gym/members.css?v=66"><link rel="stylesheet" href="/gym/cal-core.css?v=66"><link rel="stylesheet" href="/gym/cal.css?v=66"><link rel="stylesheet" href="/gym/stats-core.css?v=66"><link rel="stylesheet" href="/gym/stats.css?v=66"><body>').replace("</body>", '<script src="/gym/gym.js?v=66"></script><script src="/gym/cal.js?v=66"></script><script src="/gym/stats.js?v=66"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }

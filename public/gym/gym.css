@@ -173,3 +173,8 @@
 :root:root .gym #panelProfile #pfAvatar{width:76px;height:76px;border-radius:20px;border:0;padding:0;background:url(/gym/logo.jpg) center/cover no-repeat;box-shadow:0 8px 24px -6px rgba(0,0,0,.7),0 0 0 1px rgba(232,180,100,.5);filter:none}
 :root:root .gym #panelProfile #pfAvatar svg{display:none}
 :root:root .gym #panelProfile #pfHero .pfKind{color:#E8B864}
+
+/* Orari: le righe si distribuiscono sull'altezza della card accanto (Corsi e abbonamenti) */
+:root:root .gym #panelProfile .gpfHrsCard{display:flex;flex-direction:column}
+:root:root .gym #panelProfile .gpfHrsCard #pfHours{flex:1;display:flex;flex-direction:column}
+:root:root .gym #panelProfile .gpfHrsCard #pfHours .pfRow{flex:1;padding-top:0;padding-bottom:0}

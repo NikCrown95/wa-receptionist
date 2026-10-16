@@ -812,6 +812,7 @@
       if (hb) {
         var byD = {}; (D.schedule || []).forEach(function (x) { var c = (D.courses || []).filter(function (y) { return y.id === x.course_id; })[0], dur = c ? c.duration_min : 60, a = x.time.split(':'), st = (+a[0]) * 60 + (+a[1]), en = st + dur; var o = byD[x.weekday] || (byD[x.weekday] = { a: 1e9, b: 0 }); o.a = Math.min(o.a, st); o.b = Math.max(o.b, en); });
         function hm(m) { return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
+        var hc = hb.closest('.pfCard'); if (hc) hc.classList.add('gpfHrsCard');
         hb.innerHTML = '';
         for (var w = 1; w <= 7; w++) { var o = byD[w], r = el('div', 'pfRow' + (o ? '' : ' closed')); r.appendChild(el('span', 'pfRowName', WD[w])); r.appendChild(el('span', 'pfRowMeta', o ? hm(o.a) + '–' + hm(o.b) : 'Chiuso')); hb.appendChild(r); }
         var tz = document.getElementById('pfTz'); if (tz) tz.textContent = 'Dalla prima all’ultima lezione in programma';
