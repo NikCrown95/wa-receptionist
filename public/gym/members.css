@@ -540,3 +540,18 @@
   :root:root .mzRow>.mzA{background:rgba(0,0,0,.22)}
   :root:root .mzRow>.mzA .mzRn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
 }
+/* Card iscritti più piccole e bordo più delineato (smartphone) */
+@media(max-width:700px){
+  :root:root .mzTable{gap:8px}
+  :root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover,:root:root .mzK{border:1.5px solid #46636E;border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 6px 14px -10px rgba(10,24,30,.7)}
+  :root:root .mzRow>.mzN{padding:10px 0 9px 12px;gap:10px}
+  :root:root .mzRow .mzAv{width:34px;height:34px;font-size:.78rem}
+  :root:root .mzRow .mzN b,:root:root .mzRow .mzN b span{font-size:.96rem}
+  :root:root .mzRow>.mzC:nth-child(6){padding:10px 12px 9px 6px}
+  :root:root .mzRow>.mzC:nth-child(6) .mzSt{font-size:.62rem;padding:3px 9px}
+  :root:root .mzRow>.mzSm>span{padding:7px 12px;gap:1px}
+  :root:root .mzRow>.mzSm small{font-size:.58rem}
+  :root:root .mzRow>.mzSm b{font-size:.84rem}
+  :root:root .mzRow>.mzA{padding:0 12px 10px}
+  :root:root .mzRow>.mzA .mzRn{min-height:36px;font-size:.84rem;border-radius:10px}
+}
