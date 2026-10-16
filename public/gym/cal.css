@@ -355,3 +355,24 @@
   .gcx.gcx .gpw .gpC.gpc-pt b{flex:1 0 100%;order:3}
   .gpw .gpT{font-size:.74rem}
 }
+/* settimana: usa tutta l'altezza disponibile, schede più grandi e leggibili */
+.gcx.gcx .gwkScroll{height:100%}
+.gcx.gcx .gpw{min-height:calc(100% - 6px);padding:10px 12px 8px;gap:0}
+.gcx.gcx .gpw .gpHd{padding-bottom:8px}
+.gcx.gcx .gpw .gpDh{padding:12px 2px}
+.gcx.gcx .gpw .gpDh .dd{font-size:1.2rem}
+.gcx.gcx .gpw .gpRow{flex:1 1 auto;padding-top:8px;margin-top:0;padding-bottom:8px}
+.gcx.gcx .gpw .gpLb{padding:10px 12px;justify-content:center}
+.gcx.gcx .gpw .gpLb b{font-size:.95rem}
+.gcx.gcx .gpw .gpLb span{font-size:.7rem!important}
+.gcx.gcx .gpw .gpCell{justify-content:center;gap:6px;padding:4px 6px!important}
+.gcx.gcx .gpw .gpC{padding:11px 10px;border-radius:10px;gap:8px}
+.gcx.gcx .gpw .gpT{font-size:.88rem}
+.gcx.gcx .gpw .gpB{height:5px}
+.gcx.gcx .gpw .gpC s{font-size:.74rem!important}
+.gcx.gcx .gpw .gpC.gpc-pt b{font-size:.8rem!important}
+.gcx.gcx .gpw .gpTot{padding-top:10px}
+.gcx.gcx .gpw .gpTot span{font-size:.9rem}
+.gcx.gcx .gpw .gpTot div{font-size:.7rem!important}
+.gcx.gcx .gpw .gpHd,.gcx.gcx .gpw .gpRow,.gcx.gcx .gpw .gpTot{grid-template-columns:minmax(118px,1.2fr) repeat(7,minmax(0,1fr))}
+.gcx.gcx .gpw .gpLb b{overflow-wrap:anywhere}

@@ -368,11 +368,7 @@
       var p = ev.target.closest('.gpC');
       var x = ev.target.closest('.gpDh,.gpCell');
       if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
-      if (x) {
-        var d = addDays(a, +x.dataset.i);
-        if (S.wkOpen && S.sel === d) { S.wkOpen = false; root.classList.remove('wkOpen'); }
-        else { S.sel = d; S.wkOpen = true; root.classList.add('wkOpen'); [].forEach.call(grid.querySelectorAll('.gpDh,.gpCell'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); drawSide(); }
-      }
+      if (x) { var dd2 = addDays(a, +x.dataset.i); S.sel = dd2; S.anchor = dd2; S.view = 'day'; S.wkOpen = false; root.classList.remove('wkOpen'); render(); }
     });
     var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;
     [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
