@@ -164,3 +164,6 @@
 .gpfList .gpfH{margin:8px 2px 0;font:800 .66rem/1 var(--fb,inherit);font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .gpfList .gpfH:first-child{margin-top:2px}
 .gpfList .gpfCnt{flex:none;font-size:.78rem;font-weight:700;color:var(--muted);white-space:nowrap}
+:root:root .gym #panelProfile .pf2Col:first-child>:nth-child(1){display:block}
+:root:root .gym #panelProfile .pf2Col:first-child>:nth-child(1){grid-column:1/-1;order:0}
+:root:root .gym #panelProfile .pf2Grid .pfSpan{grid-column:auto}

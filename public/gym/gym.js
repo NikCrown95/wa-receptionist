@@ -72,12 +72,12 @@
   }
 
   // ---------- menu e intestazione ----------
-  var MENU = { menuTabCal: 'Lezioni', menuTabClients: 'Iscritti', menuTabProfile: 'Scheda palestra' };
+  var MENU = { menuTabCal: 'Lezioni', menuTabClients: 'Iscritti', menuTabProfile: 'Panoramica' };
   Object.keys(MENU).forEach(function (id) {
     var b = document.getElementById(id); if (!b) return;
     for (var i = b.childNodes.length - 1; i >= 0; i--) { var n = b.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + MENU[id] + '\n  '; break; } }
   });
-  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Scheda palestra', shop: 'Shop', other: 'Impostazioni' };
+  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', shop: 'Shop', other: 'Impostazioni' };
   function setLabel(w) { var l = document.getElementById('sectionLabel'); if (l && LABELS[w]) l.textContent = LABELS[w]; }
   document.addEventListener('lia:section', function (e) { S.section = e.detail; setLabel(e.detail); showSection(e.detail); });
 
@@ -823,6 +823,16 @@
         var cells = [['Iscritti attivi', String(act_)], ['Lezioni / sett.', String((D.schedule || []).length)], ['In scadenza', String(soon)]];
         st.innerHTML = ''; cells.forEach(function (c) { var d = el('div', 'pf2St'); d.appendChild(el('small', null, c[0])); d.appendChild(el('b', null, c[1])); st.appendChild(d); });
         var hint = st.parentNode.querySelector('.pfHint'); if (hint) hint.textContent = 'Iscritti con abbonamento valido, lezioni in programma ogni settimana e abbonamenti in scadenza.';
+      }
+      // --- canali: solo il calendario online (niente WhatsApp, Telegram, webchat)
+      root.querySelectorAll('#pfChannels .pf2Ch').forEach(function (r) { if (r.querySelector('.pf2Ci.chat, .pf2Ci.wa, .pf2Ci.tg')) r.remove(); });
+      // --- aperto adesso, dalle lezioni in programma
+      var on = document.getElementById('pfOpenNow');
+      if (on && S.data.schedule && S.data.schedule.length) {
+        var nw = new Date(), wd = nw.getDay() || 7, nm_ = nw.getHours() * 60 + nw.getMinutes(), until = null;
+        S.data.schedule.forEach(function (x) { if (x.weekday !== wd) return; var c = (S.data.courses || []).filter(function (y) { return y.id === x.course_id; })[0], a = x.time.split(':'), st_ = (+a[0]) * 60 + (+a[1]), en_ = st_ + (c ? c.duration_min : 60); if (nm_ >= st_ - 30 && nm_ < en_) until = Math.max(until || 0, en_); });
+        on.hidden = false; on.className = 'pfOpenNow' + (until ? ' open' : '');
+        on.textContent = until ? 'Aperto ora · fino alle ' + pad(Math.floor(until / 60) % 24) + ':' + pad(until % 60) : 'Chiuso ora';
       }
       // --- "Modifica" porta alle impostazioni della palestra
       root.querySelectorAll('[data-pfedit]').forEach(function (b) { b.onclick = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); }; });
