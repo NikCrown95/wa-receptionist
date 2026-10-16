@@ -192,3 +192,7 @@
   .gxProg h3{font-size:1.2rem}
   .gxProg .gxX{top:12px;right:12px}
 }
+
+.gxSheet.gxProg.gxNarrow{max-width:520px}
+.gxProg > div.gxOne.gxOne{grid-template-columns:minmax(0,1fr);gap:0}
+.gxProg .gxOne .gxGo{margin-top:18px}
