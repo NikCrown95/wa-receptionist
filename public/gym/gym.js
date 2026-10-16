@@ -534,9 +534,25 @@
   }
 
   // ---------- Impostazioni: corsi, abbonamenti, chiusure, regole ----------
+  // Impostazioni: su schermo largo non deve restare aperta una pagina che la palestra non ha (Servizi, Orari...); i dati dell'attività si caricano subito
+  var ST_HIDDEN = ['services', 'combos', 'hours', 'blocks', 'staff', 'rules'];
+  function stDefault() {
+    try {
+      if (window.liaLoadProfile) Promise.resolve(window.liaLoadProfile()).then(function () {
+        var b = (window.liaProfileData && window.liaProfileData.business) || {}, put = function (id, v) { var e = document.getElementById(id); if (e && !e.value && !e.getAttribute('data-dirty') && v) e.value = v; };
+        put('biName', b.name); put('biAddr', b.address); put('coPhone', b.public_phone); put('coIg', b.public_instagram ? '@' + String(b.public_instagram).replace(/^@/, '') : ''); put('coFb', b.public_facebook);
+        put('coLegal', b.legal_name); put('coVat', b.vat_number); put('coPriv', b.privacy_email);
+      }).catch(function () { });
+    } catch (e) { }
+    var on = document.querySelector('#stShell .stPage.on'), wide = window.matchMedia && window.matchMedia('(min-width:900px)').matches;
+    if (wide && (!on || ST_HIDDEN.indexOf(on.getAttribute('data-st')) >= 0) && window.liaSettingsOpen) window.liaSettingsOpen('bizinfo');
+  }
+  document.addEventListener('lia:section', function (e) { if (e.detail === 'other') setTimeout(stDefault, 0); });
+  window.addEventListener('resize', function () { setTimeout(stDefault, 0); });
   function mountSettings() {
     var menu = document.querySelector('#panelOther .stMenu'); if (!menu) return false;
-    ['services', 'combos', 'hours', 'blocks', 'staff'].forEach(function (k) { var r = menu.querySelector('[data-st="' + k + '"]'); if (r) r.style.display = 'none'; });
+    ['services', 'combos', 'hours', 'blocks', 'staff', 'rules'].forEach(function (k) { var r = menu.querySelector('[data-st="' + k + '"]'); if (r) r.style.display = 'none'; });
+    stDefault();
     var groups = menu.querySelectorAll('.stGroup');
     groups.forEach(function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'La tua palestra'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati palestra';
@@ -723,13 +739,23 @@
       function sync() { lab.textContent = k.value === 'time' ? 'Durata (giorni)' : 'Numero di ingressi'; }
       k.addEventListener('change', function () { sync(); dv.value = k.value === 'time' ? 30 : 10; }); sync();
       var mx = inp('number', p && p.max_entries ? p.max_entries : ''), mw = inp('number', p && p.max_per_week ? p.max_per_week : ''); mx.inputMode = 'numeric'; mw.inputMode = 'numeric'; mx.placeholder = 'nessun limite'; mw.placeholder = 'nessun limite';
+      if (!p) {
+        var tp = el('div', 'gxChips'); tp.style.marginBottom = '10px';
+        var all = (S.data.plan_categories || S.data.categories), noPt = all.filter(function (x) { return x !== 'personal'; });
+        [['Mensile', 'time', 30, 60, noPt], ['Trimestrale', 'time', 90, 150, noPt], ['Piano Personal', 'entries', 10, 100, ['personal']], ['Carnet 10 ingressi', 'entries', 10, 70, noPt]].forEach(function (t) {
+          var b = el('button', 'gxCp gxAlt', t[0]); b.type = 'button';
+          b.addEventListener('click', function () { n.value = t[0]; k.value = t[1]; sync(); dv.value = t[2]; pr.value = t[3]; sel0.length = 0; t[4].forEach(function (x) { if (all.indexOf(x) >= 0) sel0.push(x); }); paints.forEach(function (f) { f(); }); });
+          tp.appendChild(b);
+        });
+        w.appendChild(el('div', 'gxDh', 'Parti da un modello')); w.appendChild(tp);
+      }
       w.appendChild(field('Nome', n)); w.appendChild(field('Tipo', k)); w.appendChild(dl); w.appendChild(field('Prezzo (€)', pr));
       var lim = el('div', 'gxTwo'); lim.appendChild(field('Ingressi al mese (max)', mx)); lim.appendChild(field('A settimana (max)', mw)); w.appendChild(lim);
       w.appendChild(el('div', 'gxDh', 'Corsi inclusi'));
       var sel0 = p ? p.covers.slice() : (S.data.plan_categories || S.data.categories).slice(), ch = el('div', 'gxChips');
-      (S.data.plan_categories || S.data.categories).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else sel0.push(c); paint(); }); ch.appendChild(b); });
+      var paints = []; (S.data.plan_categories || S.data.categories).forEach(function (c) { var b = el('button', 'gxCp', cat(c)); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', sel0.indexOf(c) >= 0 ? 'true' : 'false'); } paints.push(paint); paint(); b.addEventListener('click', function () { var i = sel0.indexOf(c); if (i >= 0) sel0.splice(i, 1); else sel0.push(c); paint(); }); ch.appendChild(b); });
       w.appendChild(ch);
-      var h = el('p', null, 'Esempio: il Mensile da 60 € include tutti i corsi e il Personal 1:1, con 8 ingressi al mese e massimo 2 a settimana.'); h.style.marginTop = '8px'; w.appendChild(h);
+      var h = el('p', null, 'Esempio: il Mensile da 60 € include i corsi, con 8 ingressi al mese e massimo 2 a settimana. Il Piano Personal da 100 € è a parte: 10 lezioni da un\'ora con il trainer, una al giorno. Un iscritto può avere entrambi.'); h.style.marginTop = '8px'; w.appendChild(h);
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
         var b = { action: 'plan_save', id: p ? p.id : undefined, name: n.value, kind: k.value, price_eur: pr.value, covers: sel0, max_entries: mx.value, max_per_week: mw.value }; if (k.value === 'time') b.days = dv.value; else b.entries = dv.value;
@@ -850,7 +876,8 @@
         pc.innerHTML = '';
         if (!(D.plans || []).length) pc.appendChild(el('p', 'pfHint', 'Nessun abbonamento ancora. Aggiungili da “Modifica”.'));
         (D.plans || []).forEach(function (p) {
-          var meta = p.kind === 'entries' ? (p.entries || '') + ' ingressi' : (p.days === 30 ? 'Mensile' : p.days === 90 ? 'Trimestrale' : p.days === 180 ? 'Semestrale' : p.days === 365 ? 'Annuale' : p.days + ' giorni');
+          var onlyPt = (p.covers || []).length === 1 && p.covers[0] === 'personal';
+          var meta = onlyPt ? (p.entries || '') + ' lezioni da 1 ora con il trainer · 1 al giorno' : p.kind === 'entries' ? (p.entries || '') + ' ingressi' : (p.days === 30 ? 'Mensile' : p.days === 90 ? 'Trimestrale' : p.days === 180 ? 'Semestrale' : p.days === 365 ? 'Annuale' : p.days + ' giorni');
           if (p.max_per_week) meta += ' · max ' + p.max_per_week + ' a settimana';
           pc.appendChild(row('e', p.name, meta, eur(p.price_eur), true));
         });

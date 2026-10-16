@@ -1,0 +1,2 @@
+-- Un solo Personal al giorno per iscritto; messaggi chiari quando manca il Piano Personal.
+-- (applicata via Supabase: vedi definizione di public.gym_pt_book)
