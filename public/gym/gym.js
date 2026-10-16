@@ -302,7 +302,7 @@
      ['bad', 'alert', 'Scaduti', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
       var on = k[0] === 'ok' ? S.flt === 'valid' : S.flt === k[0] || (k[0] === 'all' && S.flt === 'all');
       var b = el('button', 'mzK ' + (k[5] || 'all')); b.type = 'button'; b.setAttribute('aria-pressed', on && k[0] !== 'all' ? 'true' : 'false');
-      b.innerHTML = '<span class="mzKi">' + ic(k[1], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span>' + k[2] + '</span></span><span class="mzKr">' + k[4] + '</span>';
+      b.innerHTML = '<span class="mzKi">' + ic(k[1], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span><span class="lg">' + k[2] + '</span><span class="sh">' + (k[0] === 'ok' ? 'Validi' : k[2]) + '</span></span></span><span class="mzKr">' + k[4] + '</span>';
       b.addEventListener('click', function () { S.flt = k[0] === 'ok' ? (S.flt === 'valid' ? 'all' : 'valid') : k[0] === 'all' ? 'all' : (S.flt === k[0] ? 'all' : k[0]); S.more = false; renderMem(); }); kp.appendChild(b);
     });
     root.appendChild(kp);
