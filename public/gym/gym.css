@@ -136,3 +136,21 @@
 .gxProg .gxGo{margin-top:16px;min-height:54px;border-radius:15px;font-size:1.02rem;font-weight:800}
 .gxMore{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:14px 4px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;text-align:left}
 .gxMore span{flex:1}.gxMore em{font-style:normal;font-weight:600;color:var(--muted)}.gxMore u{text-decoration:none;color:var(--accent);font-size:1.3rem;line-height:1}
+/* Programma: due colonne, tutto visibile senza scorrere */
+.gxSheet.gxProg{max-width:900px;padding:20px 24px 18px;max-height:calc(100% - 24px)}
+.gxProg h3{font-size:1.35rem;margin:0 0 12px}
+.gxProg .gxX{top:16px;right:20px;width:34px;height:34px}
+.gxProg .gxSeg{margin:0 0 14px;max-width:380px}
+.gxProg .gxSeg button{padding:9px}
+.gxProg > div:not(.gxSeg){display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:22px;align-items:start}
+.gxProg .gxCol{min-width:0}
+.gxProg .gxCourses{grid-template-columns:1fr;gap:7px}
+.gxCo{padding:11px 14px}
+.gxProg .gxSteps{margin-top:16px}
+.gxProg .gxSecT{margin-top:0}
+.gxProg .gxCol + .gxCol .gxSecT + .gxChips,.gxProg .gxCol + .gxCol .gxDays{margin-bottom:16px}
+.gxProg .gxDays .gxCp{padding:12px 0}
+.gxProg .gxChips .gxCp{padding:9px 14px}
+.gxProg .gxSum{margin-top:16px;padding:11px 14px}
+.gxProg .gxGo{margin-top:12px;min-height:48px}
+.gxMore{margin-top:10px;padding-top:10px}
