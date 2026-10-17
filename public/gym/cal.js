@@ -458,24 +458,44 @@
       var s = findSession(d, sid); if (!s || !s.attendees) { G.toast('Lezione non trovata.', 'bad'); return; }
       var over = isEnded(d, s.time, s.duration_min), started = isStarted(d, s.time);
       G.sheet(s.course.name, function (w, close) {
-        var sub = el('div', 'gxM', fmtLong(d) + ' · ' + s.time + '–' + endT(s.time, s.duration_min)); sub.style.marginTop = '-6px'; w.appendChild(sub);
-        var rb = el('div', 'gcRingBox'); rb.innerHTML = ringSvg(Math.round(s.taken / s.capacity * 100)) + '<div><b>' + s.taken + ' su ' + s.capacity + ' posti</b><div class="gxM">' + (s.cancelled ? 'Lezione annullata' + (s.cancel_reason ? ': ' + esc(s.cancel_reason) : '') : over ? 'Lezione conclusa' : s.taken >= s.capacity ? 'Completa' : (s.capacity - s.taken) + ' posti liberi') + '</div></div>'; w.appendChild(rb);
-        if (!s.attendees.length) w.appendChild(el('p', 'gxM', 'Nessun iscritto per ora.'));
+        w.classList.add('gxSes'); w.style.setProperty('--sc', col(s));
+        var X = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+        var kick = s.cancelled ? 'ANNULLATA' : over ? 'CONCLUSA' : started ? 'IN CORSO' : 'LEZIONE';
+        var hd = el('div', 'gsH'); hd.innerHTML = '<div class="gsHt"><span class="gsK">' + kick + '</span><b class="gsN">' + esc(s.course.name) + '</b><span class="gsS">' + fmtLong(d) + ' · ' + s.time + '–' + endT(s.time, s.duration_min) + '</span></div>';
+        var xb = el('button', 'gsX'); xb.type = 'button'; xb.setAttribute('aria-label', 'Chiudi'); xb.innerHTML = X; xb.onclick = close; hd.appendChild(xb); w.appendChild(hd);
+        var free = s.capacity - s.taken, oc = el('div', 'gsOc');
+        var chipTx = s.cancelled ? 'Annullata' : over ? 'Conclusa' : free <= 0 ? 'Completa' : free + (free === 1 ? ' posto libero' : ' posti liberi');
+        var pips = ''; if (s.capacity <= 40) { for (var pi = 0; pi < s.capacity; pi++) pips += '<i' + (pi < s.taken ? ' class="on"' : '') + '></i>'; }
+        oc.innerHTML = '<div class="gsOr"><span class="gsBig"><b>' + s.taken + '</b><span>su ' + s.capacity + ' posti</span></span><span class="gsChip' + (s.cancelled || over ? ' mu' : free <= 0 ? ' bad' : '') + '">' + chipTx + '</span></div>' + (pips ? '<div class="gsPips" aria-hidden="true">' + pips + '</div>' : barHTML(s.taken, s.capacity));
+        w.appendChild(oc);
+        if (s.cancelled && s.cancel_reason) { var cr = el('div', 'gsCr', 'Motivo: ' + s.cancel_reason); w.appendChild(cr); }
+        w.appendChild(el('div', 'gsL', 'ISCRITTI · ' + s.attendees.length));
+        var list = el('div', 'gsList');
+        if (!s.attendees.length) list.appendChild(el('p', 'gsEmpty', 'Nessun iscritto per ora.'));
+        var cf = el('div', 'gsCf');
         s.attendees.forEach(function (a) {
-          var row = el('div', 'gxAt' + (a.no_show ? ' gcNs' : '')), nm = el('div'); nm.appendChild(el('span', 'gcNm', a.name)); nm.appendChild(el('small', null, ' ' + a.phone)); row.appendChild(nm);
+          var pp = String(a.name || '').trim().split(/\s+/), ini = ((pp[0] || '?').charAt(0) + (pp.length > 1 ? pp[pp.length - 1].charAt(0) : '')).toUpperCase();
+          var row = el('div', 'gsRow' + (a.no_show ? ' gcNs' : '')), nm = el('div', 'gsWho');
+          row.appendChild(el('span', 'gsAv', ini));
+          nm.appendChild(el('b', 'gcNm', a.name)); nm.appendChild(el('small', null, a.phone)); row.appendChild(nm);
           if (over) row.appendChild(G.btn(a.no_show ? 'Presente' : 'Non si è presentato', 'ghost sm', function () { G.act({ action: 'booking_noshow', booking_id: a.booking_id, kind: 'class', value: !a.no_show }).then(function () { a.no_show = !a.no_show; bust(); close(); render(); setTimeout(function () { openSession(d, sid); }, 30); }); }));
-          else row.appendChild(G.btn('Togli', 'ghost sm', function () { G.confirmBar(w, 'Togliere ' + a.name + ' da questa lezione? Se aveva usato un ingresso, gli torna.', function () { G.act({ action: 'booking_cancel', booking_id: a.booking_id, member_id: a.member_id }, 'Tolto.').then(function () { bust(); close(); render(); setTimeout(function () { openSession(d, sid); }, 30); }); }); }));
-          w.appendChild(row);
+          else {
+            var rm = el('button', 'gsRm'); rm.type = 'button'; rm.setAttribute('aria-label', 'Togli ' + a.name); rm.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>';
+            rm.onclick = function () { cf.innerHTML = ''; G.confirmBar(cf, 'Togliere ' + a.name + ' da questa lezione? Se aveva usato un ingresso, gli torna.', function () { G.act({ action: 'booking_cancel', booking_id: a.booking_id, member_id: a.member_id }, 'Tolto.').then(function () { bust(); close(); render(); setTimeout(function () { openSession(d, sid); }, 30); }); }); };
+            row.appendChild(rm);
+          }
+          list.appendChild(row);
         });
-        var ac = el('div', 'gcStk'); ac.style.marginTop = '14px';
-        if (s.cancelled) ac.appendChild(G.btn('Riattiva lezione', '', function () { G.act({ action: 'session_restore', schedule_id: s.schedule_id, date: d }, 'Lezione riattivata.').then(function () { bust(); close(); render(); }); }));
+        w.appendChild(list); w.appendChild(cf);
+        var ac = el('div', 'gsFt');
+        if (s.cancelled) ac.appendChild(G.btn('Riattiva lezione', 'gsPri', function () { G.act({ action: 'session_restore', schedule_id: s.schedule_id, date: d }, 'Lezione riattivata.').then(function () { bust(); close(); render(); }); }));
         else if (!over) {
-          ac.appendChild(G.btn('Aggiungi un iscritto', '', function () { close(); addToSession(d, s); }));
-          ac.appendChild(G.btn('Annulla questa lezione', 'danger', function () { cancelSession(w, close, d, s); }));
+          ac.appendChild(G.btn('Aggiungi un iscritto', 'gsPri', function () { close(); addToSession(d, s); }));
+          ac.appendChild(G.btn('Annulla questa lezione', 'gsDng', function () { cancelSession(cf, close, d, s); }));
         }
-        var ed = G.btn('Posti, giorno e ora', 'ghost', function () { close(); G.openSetting('corsi'); }); if (!over) ac.appendChild(ed);
+        if (!over) ac.appendChild(G.btn('Posti, giorno e ora', 'gsLnk', function () { close(); G.openSetting('corsi'); }));
         w.appendChild(ac);
-        if (started && !over && !s.cancelled) w.appendChild(el('p', 'gxM', 'La lezione è iniziata: le assenze si segnano a lezione conclusa.'));
+        if (started && !over && !s.cancelled) w.appendChild(el('p', 'gsNote', 'La lezione è iniziata: le assenze si segnano a lezione conclusa.'));
       });
     };
     if (have(d, d, true)) go(); else fetchRange(d, d, false).then(go).catch(function (e) { G.toast(e.message, 'bad'); });

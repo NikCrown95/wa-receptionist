@@ -237,3 +237,43 @@
 .gxTp[aria-pressed="true"] .sw{background:var(--accent)}
 .gxTp[aria-pressed="true"] .sw u{transform:translateX(18px)}
 .gxTp:disabled{opacity:.45;cursor:default}
+
+/* ---- dettaglio lezione (sheet) ---- */
+.gxSheet.gxSes{padding:0;max-width:560px;display:flex;flex-direction:column;overflow:auto;border:1px solid var(--line2)}
+.gxSheet.gxSes>h3{display:none}
+.gsH{position:relative;display:flex;align-items:flex-start;gap:14px;padding:22px 20px 16px 26px;border-bottom:1px solid var(--line)}
+.gsH::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--sc,var(--accent))}
+.gsHt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.gsK{font-size:.68rem;font-weight:800;letter-spacing:.12em;color:var(--sc,var(--accent))}
+.gsN{font:800 1.9rem/1.05 'Manrope','Plus Jakarta Sans',sans-serif;letter-spacing:-.01em}
+.gsS{font-size:.92rem;font-weight:600;color:var(--muted)}
+.gsX{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.gsOc{padding:18px 20px 8px 26px;display:flex;flex-direction:column;gap:12px}
+.gsOr{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.gsBig{display:flex;align-items:baseline;gap:8px}
+.gsBig b{font:800 2.7rem/1 'Manrope','Plus Jakarta Sans',sans-serif}
+.gsBig span{font-size:.92rem;font-weight:600;color:var(--muted)}
+.gsChip{height:30px;padding:0 12px;border-radius:15px;display:inline-flex;align-items:center;font-size:.8rem;font-weight:700;background:color-mix(in srgb,var(--ok,#2DAA7F) 18%,transparent);color:var(--ok,#2DAA7F);white-space:nowrap}
+.gsChip.bad{background:color-mix(in srgb,var(--danger,#E5645C) 18%,transparent);color:var(--danger,#E5645C)}
+.gsChip.mu{background:var(--card);color:var(--muted)}
+.gsPips{display:flex;gap:4px}
+.gsPips i{flex:1;height:10px;min-width:0;border-radius:5px;background:var(--line2)}
+.gsPips i.on{background:var(--accent)}
+.gsCr{margin:6px 20px 0 26px;font-size:.88rem;color:var(--muted)}
+.gsL{padding:12px 20px 6px 26px;font-size:.68rem;font-weight:800;letter-spacing:.12em;color:var(--muted)}
+.gsList{padding:0 12px 0 14px}
+.gsEmpty{margin:8px 12px 14px!important}
+.gsRow{display:flex;align-items:center;gap:14px;min-height:60px;padding:0 6px 0 12px;border-top:1px solid var(--line)}
+.gsAv{width:40px;height:40px;flex:none;border-radius:50%;display:grid;place-items:center;font:800 .85rem 'Manrope','Plus Jakarta Sans',sans-serif;background:color-mix(in srgb,var(--accent) 22%,var(--card));color:var(--accent)}
+.gsWho{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.gsWho b{font-size:1rem;font-weight:700}
+.gsWho small{font-size:.82rem;font-weight:600;color:var(--muted)}
+.gsRm{width:44px;height:44px;flex:none;border-radius:14px;border:1px solid var(--line2);background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.gsCf{padding:0 20px 0 26px}
+.gsFt{position:sticky;bottom:0;margin-top:auto;padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px)) 26px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--card2)}
+.gsFt .gxBtn{width:100%}
+.gsFt .gsPri{height:56px;border-radius:18px;font:800 1.05rem 'Manrope','Plus Jakarta Sans',sans-serif}
+.gsFt .gsDng,.gsFt .gsLnk{height:44px;background:transparent;border:0;box-shadow:none;font-weight:700;font-size:.95rem}
+.gsFt .gsDng{color:var(--danger,#E5645C)}
+.gsFt .gsLnk{color:var(--muted);font-weight:600;font-size:.88rem}
+.gsNote{margin:0!important;padding:0 20px 18px 26px}
