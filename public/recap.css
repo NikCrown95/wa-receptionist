@@ -183,4 +183,4 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 .lr-it .tx>span{display:block;margin-top:3px;font-size:.82rem;color:var(--muted);line-height:1.4}
 .lr-it .tx em{display:block;font-style:normal;font-weight:800;font-size:.8rem;color:var(--accent-ink);margin-top:7px}
 .lr-it .tx small{display:block;font-size:.72rem;color:var(--muted);margin-top:5px}
-.lr-it .ch{color:var(--muted);padding-top:12px}
+.lr-it .ch{color:var(--muted);padding:12px 0 0;display:block;width:auto;min-width:0;height:auto;min-height:0;border:0;border-radius:0;background:none;box-shadow:none}
