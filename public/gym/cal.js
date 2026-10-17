@@ -220,7 +220,7 @@
     var day = getDay(d) || { date: d, sessions: [], pt: [], closed: true }, st = dayStats(day), ss = day.sessions || [];
     var body = S.side === 'lez' ? (ss.map(function (s) { return sessRow(s, d); }).join('') || '<p class="gxM">Nessuna lezione: la palestra è chiusa.</p>') : ptRowsHTML(day);
     return '<div class="gcSideHd"><h2>' + fmtLong(d) + '</h2>' + (closable ? '<button type="button" class="gcX" data-close aria-label="Chiudi">×</button>' : '') + '</div>' +
-      '<div class="gcRingBox">' + ringSvg(st.pct) + '<div><b>' + (st.n ? st.b + ' prenotazioni' : 'Chiuso') + '</b><div class="gxM">' + (st.n ? st.n + (st.n === 1 ? ' lezione' : ' lezioni') + ' · ' + st.cap + ' posti' : '') + '</div></div></div>' +
+      (onlyBooked() ? '<div class="gcRingBox">' + ringSvg(0) + '<div><b>' + (ptStats(day).booked ? ptStats(day).booked + (ptStats(day).booked === 1 ? ' Personal prenotato' : ' Personal prenotati') : day.closed ? 'Chiuso' : 'Nessun Personal') + '</b></div></div>' : '<div class="gcRingBox">' + ringSvg(st.pct) + '<div><b>' + (st.n ? st.b + ' prenotazioni' : 'Chiuso') + '</b><div class="gxM">' + (st.n ? st.n + (st.n === 1 ? ' lezione' : ' lezioni') + ' · ' + st.cap + ' posti' : '') + '</div></div></div>') +
       '<div class="gcSeg gcMini"><button type="button" data-side="lez" aria-pressed="' + (S.side === 'lez') + '">Lezioni</button><button type="button" data-side="pt" aria-pressed="' + (S.side === 'pt') + '">Personal 1:1</button></div>' +
       '<div class="gcStk">' + body + '</div><button type="button" class="gcGhost block" data-go="' + d + '">Vedi tutta la giornata</button>';
   }
@@ -356,7 +356,7 @@
       var d = dd.date, st = dayStats(dd);
       (dd.sessions || []).forEach(function (s) { var c = ck(s.course.category); if (f !== 'all' && s.course.category !== f) return; var r = rowOf('c:' + s.course.name, s.course.name, c); r.cells[k].push({ t: s.time, s: s }); if (!s.cancelled) { r.n++; r.tk += s.taken; r.cp += s.capacity; } });
       if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (p.free) return; var r = rowOf('pt', 'Personal 1:1', 'pt'); r.cells[k].push({ t: p.time, p: p }); r.n++; });
-      tot[k] = dd.closed ? 'Chiuso' : st.n ? st.b + '/' + st.cap : '–';
+      var pb = ptStats(dd).booked; tot[k] = dd.closed && !pb ? 'Chiuso' : onlyBooked() ? (pb ? String(pb) : '–') : st.n ? st.b + '/' + st.cap : '–';
       heads += '<button type="button" class="gpDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
     });
     var ord = { circuit: 0, hyrox: 1, pilates: 2, pt: 9 };
