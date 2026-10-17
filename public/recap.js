@@ -45,7 +45,7 @@
       btn = document.createElement("button");
       btn.id = "liaRecapBtn"; btn.type = "button"; btn.hidden = true;
       btn.setAttribute("aria-haspopup", "dialog"); btn.setAttribute("aria-expanded", "false");
-      btn.setAttribute("aria-label", "Lia");
+      btn.setAttribute("aria-label", "Avvisi");
       btn.innerHTML = LOGO + '<span class="liaRDot" hidden></span>';
       bell.parentNode.insertBefore(btn, bell);
     }
@@ -98,8 +98,8 @@
     var un = unreadKeys(), lit = un.length > 0;
     btn.setAttribute("data-lit", lit ? "1" : "0");
     dot.hidden = !lit;
-    btn.setAttribute("aria-label", lit ? "Lia: ci sono novit\u00e0" : "Lia");
-    if (lit) showTip(un); else tip.hidden = true;
+    btn.setAttribute("aria-label", lit ? "Avvisi: ci sono novit\u00e0" : "Avvisi");
+    tip.hidden = true;
   }
 
   function showTip(un) {
@@ -184,7 +184,7 @@
   }
 
   function render() {
-    var h = '<div class="lr-head"><h2 id="liaRecapTitle">Lia</h2><button type="button" class="lr-x" aria-label="Chiudi">' + X + "</button></div>";
+    var h = '<div class="lr-head"><h2 id="liaRecapTitle">Avvisi</h2><button type="button" class="lr-x" aria-label="Chiudi">' + X + "</button></div>";
     var body = "", mi = monthItem(), list = visibleNotices();
     if (mi) body += monthCard(!isSeen(kOf(mi)));
     if (list.length) {
