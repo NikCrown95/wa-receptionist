@@ -68,7 +68,7 @@
     setLabel(S.section);
   }
   function load() {
-    return api(null, API + '&data=1').then(function (d) { S.data = d; S.today = d.today; if (!S.dayInit) { S.day = d.today; S.dayInit = true; } applyOffers(); return d; });
+    return api(null, API + '&data=1').then(function (d) { S.data = d; S.today = d.today; if (!S.dayInit) { S.day = d.today; S.dayInit = true; } applyOffers(); try { rentSync(); } catch (e) { } return d; });
   }
   function reload() { S.sessions = null; S.week = null; S.stats = null; return load().then(function () { renderAll(); try { document.dispatchEvent(new CustomEvent('lia:gymchanged')); } catch (e) {} }); }
 
@@ -95,7 +95,7 @@
     var b = document.getElementById(id); if (!b) return;
     for (var i = b.childNodes.length - 1; i >= 0; i--) { var n = b.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + MENU[id] + '\n  '; break; } }
   });
-  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', shop: 'Shop', other: 'Impostazioni' };
+  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', shop: 'Shop', other: 'Impostazioni', rent: 'Subaffitto' };
   function setLabel(w) { var l = document.getElementById('sectionLabel'); if (l && LABELS[w]) l.textContent = LABELS[w]; }
   document.addEventListener('lia:section', function (e) { S.section = e.detail; setLabel(e.detail); showSection(e.detail); });
 
@@ -1082,37 +1082,88 @@
   }
   // ---------- Affitto sala: prenotazioni ricevute e card con QR nella Panoramica ----------
   function rentUrl() { var b = S.data && S.data.business; return b && b.rental_link ? location.origin + b.rental_link : ''; }
-  function rentalsSheet(focusIso) {
-    sheet('Affitto sala', function (w, close) {
-      var list = (S.data && S.data.rentals) || [];
-      if (!list.length) { w.appendChild(el('div', 'gxEmpty', 'Nessuna prenotazione in arrivo. Quando qualcuno prenota un\'ora, la vedi qui e nella campanella.')); return; }
-      list.forEach(function (x) {
-        var c = el('div', 'gxRent' + (focusIso && new Date(x.starts_at).getTime() === new Date(focusIso).getTime() ? ' hl' : ''));
-        var d = parse(x.session_date), en = new Date(x.ends_at), pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
-        c.innerHTML = '<div class="rt"><b>' + esc(WD[d.getDay() === 0 ? 7 : d.getDay()]) + ' ' + short(x.session_date) + '</b><span>' + esc(x.start_time) + ' – ' + pad2(en.getHours()) + ':' + pad2(en.getMinutes()) + '</span></div>' +
-          '<div class="rn">' + esc(x.first_name + ' ' + x.last_name) + (x.price_eur != null ? '<em>' + eur(Number(x.price_eur)) + '</em>' : '') + '</div>' +
-          '<div class="rl"><a href="tel:' + esc(String(x.phone).replace(/[^\d+]/g, '')) + '">' + esc(x.phone) + '</a><a href="mailto:' + esc(x.email) + '">' + esc(x.email) + '</a></div>';
-        var acts = el('div', 'rb'); var dis = btn('Disdici', 'ghost sm', function () {
-          confirmBar(c, 'Disdire l\'affitto di ' + x.first_name + ' ' + x.last_name + '? L\'ora torna libera.', function () { api({ action: 'rental_cancel', id: x.id }).then(function () { toast('Affitto disdetto.', 'ok'); close(); return reload(); }).catch(function (e) { toast(e.message, 'bad'); }); });
-        }); acts.appendChild(dis); c.appendChild(acts); w.appendChild(c);
-      });
-    });
+  function rentRow(x, hl, after) {
+    var c = el('div', 'gxRent' + (hl ? ' hl' : ''));
+    var d = parse(x.session_date), en = new Date(x.ends_at), pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+    c.innerHTML = '<div class="rt"><b>' + esc(WD[d.getDay() === 0 ? 7 : d.getDay()]) + ' ' + short(x.session_date) + '</b><span>' + esc(x.start_time) + ' – ' + pad2(en.getHours()) + ':' + pad2(en.getMinutes()) + '</span></div>' +
+      '<div class="rn">' + esc(x.first_name + ' ' + x.last_name) + (x.price_eur != null ? '<em>' + eur(Number(x.price_eur)) + '</em>' : '') + '</div>' +
+      '<div class="rl"><a href="tel:' + esc(String(x.phone).replace(/[^\d+]/g, '')) + '">' + esc(x.phone) + '</a><a href="mailto:' + esc(x.email) + '">' + esc(x.email) + '</a></div>';
+    var acts = el('div', 'rb'); acts.appendChild(btn('Disdici', 'ghost sm', function () {
+      confirmBar(c, 'Disdire l\'affitto di ' + x.first_name + ' ' + x.last_name + '? L\'ora torna libera.', function () { api({ action: 'rental_cancel', id: x.id }).then(function () { toast('Affitto disdetto.', 'ok'); return reload(); }).catch(function (e) { toast(e.message, 'bad'); }); });
+    })); c.appendChild(acts); return c;
   }
-  window.liaGymRentals = function (e) { var go = function () { rentalsSheet(e && e.starts_at); }; if (S.data) load().then(go).catch(go); else load().then(go).catch(function (er) { toast(er.message, 'bad'); }); };
+  // sezione "Subaffitto" nel menu: compare solo se la palestra offre il servizio
+  var pRent = null, xRent = null, RENT_IC = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l9-9M16 6l3 3"></path></svg>';
+  function rentPanel() {
+    if (pRent) return pRent;
+    var host = document.querySelector('.tabPanels'); if (!host) return null;
+    pRent = el('section', 'tabPanel'); pRent.id = 'panelRent'; xRent = el('div', 'gx'); pRent.appendChild(xRent); host.appendChild(pRent);
+    return pRent;
+  }
+  function rentSync() {
+    var rc = S.data && S.data.settings && S.data.settings.rental, on = !!(rc && rc.on), m = document.getElementById('menuTabRent');
+    if (on && !m) {
+      var ref = document.getElementById('menuTabClients'); if (!ref) return;
+      m = document.createElement('button'); m.type = 'button'; m.id = 'menuTabRent'; m.setAttribute('role', 'menuitem'); m.setAttribute('aria-current', 'false');
+      m.innerHTML = RENT_IC + '\n    Subaffitto\n  '; ref.parentNode.insertBefore(m, ref.nextSibling);
+      m.addEventListener('click', function () { goRent(); });
+    }
+    if (!on && m) { m.remove(); if (pRent && pRent.classList.contains('on')) { var cl = document.getElementById('menuTabClients'); if (cl) cl.click(); } }
+    if (on && pRent && pRent.classList.contains('on')) renderRent();
+  }
+  function goRent(focusIso) {
+    if (!rentPanel()) return;
+    var bb = document.getElementById('burgerBtn'); if (bb && bb.getAttribute('aria-expanded') === 'true') bb.click();
+    [].forEach.call(document.querySelectorAll('.tabPanel.on'), function (p) { p.classList.remove('on'); });
+    pRent.classList.add('on');
+    [].forEach.call(document.querySelectorAll('#burgerMenu [role=menuitem]'), function (b) { b.setAttribute('aria-current', b.id === 'menuTabRent' ? 'true' : 'false'); });
+    var ph = document.querySelector('.tabPanels'); if (ph) { ph.classList.remove('profileScroll'); ph.scrollTop = 0; }
+    var td = document.getElementById('today'); if (td) td.hidden = true; var mt = document.querySelector('.mainTop'); if (mt) mt.classList.remove('hide');
+    S.rentFocus = focusIso || null; renderRent();
+    try { document.dispatchEvent(new CustomEvent('lia:section', { detail: 'rent' })); } catch (e) { }
+    setTimeout(function () { var h = xRent && xRent.querySelector('.gxRent.hl'); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 120);
+  }
+  document.addEventListener('lia:section', function (e) { if (e.detail !== 'rent' && pRent) pRent.classList.remove('on'); });
+  function renderRent() {
+    if (!xRent) return; xRent.textContent = '';
+    var D = S.data, rc = D && D.settings && D.settings.rental;
+    xRent.appendChild(el('h2', 'gxTtl gxTop', 'Subaffitto'));
+    if (!D || !rc || !rc.on) { xRent.appendChild(el('div', 'gxEmpty', 'Carico...')); return; }
+    var list = D.rentals || [], url = rentUrl(), tot = 0; list.forEach(function (x) { tot += Number(x.price_eur) || 0; });
+    var top = el('div', 'gxRentTop');
+    top.innerHTML = '<div><b>' + esc(fmtEur(rc.price)) + ' all\'ora</b><small>fino a ' + rc.after_h + (rc.after_h === 1 ? ' ora' : ' ore') + ' dopo la chiusura</small></div>' +
+      '<div><b>' + list.length + '</b><small>' + (list.length === 1 ? 'prenotazione in arrivo' : 'prenotazioni in arrivo') + '</small></div>' +
+      '<div><b>' + esc(fmtEur(tot)) + '</b><small>da incassare</small></div>';
+    xRent.appendChild(top);
+    var ga = el('div', 'gpfRentAc gxRentAc');
+    function ab(label, icon, pri, fn) { var b = el('button', 'gpfRA' + (pri ? ' pri' : '')); b.type = 'button'; b.innerHTML = ic(icon, 20) + '<span>' + label + '</span>'; b.addEventListener('click', fn); ga.appendChild(b); return b; }
+    var cb = ab('Copia link', 'copy', true, function () { copyTxt(url, cb.querySelector('span'), 'Copia link'); });
+    ab('Condividi', 'share', false, function () { if (navigator.share) navigator.share({ title: 'Affitto sala', text: 'Prenota la sala:', url: url }).catch(function () { }); else copyTxt(url, null, ''); });
+    ab('QR code', 'qr', false, function () { qrSheet(url, 'Affitto sala'); });
+    ab('Locandina', 'print', false, function () { posterSheet(); });
+    xRent.appendChild(ga);
+    xRent.appendChild(el('h3', 'gxRentSub', 'In arrivo'));
+    if (!list.length) { xRent.appendChild(el('div', 'gxEmpty', 'Nessuna prenotazione in arrivo. Quando qualcuno prenota un\'ora, la vedi qui e nella campanella.')); return; }
+    list.forEach(function (x) { xRent.appendChild(rentRow(x, S.rentFocus && new Date(x.starts_at).getTime() === new Date(S.rentFocus).getTime())); });
+  }
+  window.liaGymRentals = function (e) { var go = function () { goRent(e && e.starts_at); }; if (S.data) load().then(go).catch(go); else load().then(go).catch(function (er) { toast(er.message, 'bad'); }); };
   function fmtEur(n) { n = Number(n); return '€ ' + (n % 1 ? n.toFixed(2).replace('.', ',') : String(n)); }
   function pfRentCard(root) {
     var D = S.data, old = document.getElementById('gpfRentCard'), rc = D && D.settings && D.settings.rental;
     var ref = document.getElementById('pfRefCard'), host = ref ? ref.parentNode : (root.querySelector('.pfCard') || {}).parentNode; if (!host) return;
-    // locandine: sempre disponibili (corsi), con l'affitto sala se attivo
-    var pc = document.getElementById('gpfPostCard');
-    if (!pc) {
-      pc = el('div', 'pfCard gpfPost'); pc.id = 'gpfPostCard';
-      var pb = el('button', 'gpfPostBtn'); pb.type = 'button';
-      pb.innerHTML = '<span class="ic">' + ic('print', 22) + '</span><span class="tx"><b>Locandine da stampare</b><small></small></span><i>›</i>';
-      pb.addEventListener('click', function () { posterSheet(); }); pc.appendChild(pb);
-      pc.style.order = 2; pc.style.gridColumn = '1 / -1'; if (ref && ref.nextSibling) host.insertBefore(pc, ref.nextSibling); else host.appendChild(pc);
+    // locandine: tutte insieme nella card "Locandina per la vetrina"
+    var oldPc = document.getElementById('gpfPostCard'); if (oldPc) oldPc.remove();
+    var pp = document.getElementById('pfPoster'), pcard = pp && pp.parentNode;
+    if (pcard) {
+      var key = rc && rc.on ? 'on' : 'off', gr = pcard.querySelector('.gxPostAll');
+      if (!gr || gr.getAttribute('data-k') !== key) {
+        if (gr) gr.remove();
+        gr = el('div', 'gxPostAll'); gr.setAttribute('data-k', key);
+        gr.appendChild(el('h4', 'gxPostAllHd', 'Altre locandine'));
+        posterBlocks(gr); pcard.appendChild(gr);
+        var h3 = pcard.querySelector('h3'); if (h3) h3.textContent = 'Locandine per la vetrina';
+      }
     }
-    var ps = pc.querySelector('small'); if (ps) ps.textContent = rc && rc.on ? 'Prenota il corso e Affitta la sala, in PDF' : 'Prenota il tuo corso, in PDF';
     if (!rc || !rc.on) { if (old) old.remove(); return; }
     var card = old || el('div', 'pfCard gpfRent'); card.id = 'gpfRentCard'; card.innerHTML = '';
     var url = rentUrl(), list = D.rentals || [];
@@ -1126,14 +1177,14 @@
     var cb = ab('Copia link', 'copy', true, function () { copyTxt(url, cb.querySelector('span'), 'Copia link'); });
     ab('Condividi', 'share', false, function () { if (navigator.share) navigator.share({ title: 'Affitto sala', text: 'Prenota la sala:', url: url }).catch(function () { }); else copyTxt(url, null, ''); });
     ab('QR code', 'qr', false, function () { qrSheet(url, 'Affitto sala'); });
-    ab('Locandina', 'print', false, function () { posterSheet('sala'); });
+    ab('Locandina', 'print', false, function () { posterSheet(); });
     card.appendChild(ga);
     var nx = el('div', 'gpfRentNx'); nx.appendChild(el('small', null, 'PROSSIMA PRENOTAZIONE'));
     if (list.length) {
       var x = list[0], d = parse(x.session_date), en = new Date(x.ends_at), p2 = function (n) { return (n < 10 ? '0' : '') + n; };
       var row = el('button', 'gpfRentRow'); row.type = 'button';
       row.innerHTML = '<span class="dc"><b>' + d.getDate() + '</b><em>' + MS[d.getMonth()].toUpperCase().slice(0, 3) + '</em></span><span class="tx"><b>' + esc(x.first_name + ' ' + x.last_name) + '</b><small>' + esc(x.start_time) + ' – ' + p2(en.getHours()) + ':' + p2(en.getMinutes()) + '</small></span>' + (list.length > 1 ? '<span class="mo">+' + (list.length - 1) + ' ' + '›</span>' : '<span class="mo">›</span>');
-      row.addEventListener('click', function () { rentalsSheet(); }); nx.appendChild(row);
+      row.addEventListener('click', function () { goRent(); }); nx.appendChild(row);
     } else nx.appendChild(el('p', 'gpfRentNo', 'Nessuna prenotazione in arrivo. Quando qualcuno prenota la vedi qui e nella campanella.'));
     card.appendChild(nx);
     card.style.order = 1; card.style.gridColumn = '1 / -1';
@@ -1200,31 +1251,30 @@
       return cv;
     });
   }
-  function posterSheet(start) {
-    var D = S.data, rc = D.settings && D.settings.rental, st = { kind: start === 'sala' && rc && rc.on ? 'sala' : 'corsi', dark: true };
-    sheet('Locandine da stampare', function (w, close) {
-      var seg = el('div', 'gxSeg'), seg2 = el('div', 'gxSeg'), hold = el('div', 'gxPostCv'), msg = el('p', 'gxM');
-      function segs() {
-        seg.innerHTML = ''; seg2.innerHTML = '';
-        var ks = [['corsi', 'Prenota il corso']]; if (rc && rc.on) ks.push(['sala', 'Affitta la sala']);
-        ks.forEach(function (k) { var b = el('button', null, k[1]); b.type = 'button'; b.setAttribute('aria-pressed', st.kind === k[0] ? 'true' : 'false'); b.addEventListener('click', function () { st.kind = k[0]; segs(); paint(); }); seg.appendChild(b); });
-        [[true, 'Scura'], [false, 'Chiara']].forEach(function (k) { var b = el('button', null, k[1]); b.type = 'button'; b.setAttribute('aria-pressed', st.dark === k[0] ? 'true' : 'false'); b.addEventListener('click', function () { st.dark = k[0]; segs(); paint(); }); seg2.appendChild(b); });
-      }
-      function build(width) { var url = st.kind === 'sala' ? rentUrl() : location.origin + ((D.business && D.business.public_link) || ''); return posterCanvas({ kind: st.kind, dark: st.dark, name: D.business && D.business.name, price: rc && rc.price, M: window.liaQRMatrix(url) }, width); }
-      function paint() { var mine = st.kind + st.dark; hold.textContent = 'Un attimo…'; build(Math.round(300 * (window.devicePixelRatio || 1))).then(function (cv) { if (mine !== st.kind + st.dark) return; hold.innerHTML = ''; hold.appendChild(cv); }).catch(function () { hold.textContent = 'Anteprima non disponibile'; }); }
-      w.appendChild(seg); w.appendChild(seg2); w.appendChild(hold);
-      w.appendChild(el('p', 'gxM', 'Formato 10 × 15 cm, pronta da stampare. Il nome è quello della tua palestra e il QR porta alla pagina giusta.'));
-      var dl = btn('Scarica la locandina (PDF)', 'block', function () {
-        dl.disabled = true; msg.textContent = 'Sto preparando la locandina…';
-        build(1024).then(function (cv) { return liaPosterPdf(cv); }).then(function (blob) {
-          var nm = String((D.business && D.business.name) || 'palestra').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-          var fn = 'locandina-' + (st.kind === 'sala' ? 'affitto-sala-' : 'corsi-') + nm + '-' + (st.dark ? 'scura' : 'chiara') + '.pdf';
-          var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
-          msg.textContent = 'Fatto. Controlla i download.';
-        }).catch(function () { msg.textContent = 'Non sono riuscito a creare la locandina. Riprova.'; }).then(function () { dl.disabled = false; });
+  function posterSheet() { sheet('Locandine da stampare', function (w) { posterBlocks(w); }); }
+  function posterBlocks(w) {
+    var D = S.data, rc = D.settings && D.settings.rental;
+    {
+      var grid = el('div', 'gxPostGrid'); w.appendChild(grid);
+      var kinds = [['corsi', 'Prenota il corso']]; if (rc && rc.on) kinds.push(['sala', 'Affitta la sala']);
+      kinds.forEach(function (k) {
+        var st = { kind: k[0], dark: true }, blk = el('div', 'gxPostBlk'), hold = el('div', 'gxPostCv'), seg = el('div', 'gxSeg'), msg = el('p', 'gxM');
+        blk.appendChild(el('h3', 'gxPostHd', k[1]));
+        function build(width) { var url = st.kind === 'sala' ? rentUrl() : location.origin + ((D.business && D.business.public_link) || ''); return posterCanvas({ kind: st.kind, dark: st.dark, name: D.business && D.business.name, price: rc && rc.price, M: window.liaQRMatrix(url) }, width); }
+        function segs() { seg.innerHTML = ''; [[true, 'Scura'], [false, 'Chiara']].forEach(function (v) { var b = el('button', null, v[1]); b.type = 'button'; b.setAttribute('aria-pressed', st.dark === v[0] ? 'true' : 'false'); b.addEventListener('click', function () { st.dark = v[0]; segs(); paint(); }); seg.appendChild(b); }); }
+        function paint() { var mine = String(st.dark); hold.textContent = 'Un attimo…'; build(Math.round(300 * (window.devicePixelRatio || 1))).then(function (cv) { if (mine !== String(st.dark)) return; hold.innerHTML = ''; hold.appendChild(cv); }).catch(function () { hold.textContent = 'Anteprima non disponibile'; }); }
+        var dl = btn('Scarica PDF', 'block', function () {
+          dl.disabled = true; msg.textContent = 'Sto preparando la locandina…';
+          build(1024).then(function (cv) { return liaPosterPdf(cv); }).then(function (blob) {
+            var nm = String((D.business && D.business.name) || 'palestra').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            var fn = 'locandina-' + (st.kind === 'sala' ? 'affitto-sala-' : 'corsi-') + nm + '-' + (st.dark ? 'scura' : 'chiara') + '.pdf';
+            var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+            msg.textContent = 'Fatto. Controlla i download.';
+          }).catch(function () { msg.textContent = 'Non sono riuscito a creare la locandina. Riprova.'; }).then(function () { dl.disabled = false; });
+        });
+        blk.appendChild(hold); blk.appendChild(seg); blk.appendChild(dl); blk.appendChild(msg); grid.appendChild(blk); segs(); paint();
       });
-      w.appendChild(dl); w.appendChild(msg); segs(); paint();
-    });
+    }
   }
   function pfWatch() {
     var root = document.getElementById('panelProfile'); if (!root) return;
