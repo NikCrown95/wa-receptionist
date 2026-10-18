@@ -181,10 +181,23 @@
     render();
   }
   function monthOf(d) { return d.slice(0, 7) + '-01'; }
+  // evidenzia la lezione (o il Personal) di una notifica: stessa ora e, se nota, stesso corso
+  function hlCls(time, name) {
+    var h = S.hl; if (!h || h.time !== time) return '';
+    if (h.svc && name && String(h.svc).toLowerCase() !== String(name).toLowerCase()) return '';
+    return ' hl' + (h.bad ? ' bad' : '');
+  }
   function bindBody(body) {
     var f = body.querySelector('#gcFlt'); if (f) f.onchange = function () { S.flt = f.value; render(); };
     bindActions(body);
-    if (S.hl) { var hl = S.hl; setTimeout(function () { if (S.hl === hl) S.hl = null; }, 2600); }
+    if (S.hl) {
+      var hl = S.hl, hc = body.querySelector('.gcAc.hl');
+      if (hc) {
+        hc.setAttribute('data-who', hl.who ? (hl.bad ? hl.who + ' ha disdetto' : hl.who + ' ha prenotato') : '');
+        setTimeout(function () { try { hc.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { hc.scrollIntoView(); } }, 60);
+      }
+      setTimeout(function () { if (S.hl === hl) { S.hl = null; var x = document.querySelector('.gcAc.hl'); if (x) x.classList.remove('hl', 'bad'); } }, 6200);
+    }
   }
   // azioni comuni a corpo, pannello laterale e foglio del giorno
   function bindActions(scope, afterClose) {
@@ -334,10 +347,10 @@
       if (isT && !nowDone && mins(it.t) > nowMin()) { out += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; }
       if (it.s) {
         var s = it.s, pc = Math.round(s.taken / s.capacity * 100), past = isEnded(d, s.time, s.duration_min);
-        out += '<button type="button" class="gcAc' + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + (S.hl && S.hl === s.time ? ' hl' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="gcAt"><b>' + s.time + '</b><span>' + endT(s.time, s.duration_min) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot" style="background:' + col(s) + '"></span>' + esc(s.course.name) + '</b><span class="gcChip ' + (s.cancelled ? 'none' : s.taken >= s.capacity ? 'bad' : s.taken >= s.capacity - 3 ? 'warn' : 'ok') + '">' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</span></span>' + barHTML(s.taken, s.capacity) + '<span class="gxM">' + (s.cancelled ? (s.cancel_reason || 'Lezione annullata') : past ? 'Conclusa' : s.taken >= s.capacity ? 'Completa' : (s.capacity - s.taken) + ' posti liberi') + '</span></span></button>';
+        out += '<button type="button" class="gcAc' + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + hlCls(s.time, s.course.name) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="gcAt"><b>' + s.time + '</b><span>' + endT(s.time, s.duration_min) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot" style="background:' + col(s) + '"></span>' + esc(s.course.name) + '</b><span class="gcChip ' + (s.cancelled ? 'none' : s.taken >= s.capacity ? 'bad' : s.taken >= s.capacity - 3 ? 'warn' : 'ok') + '">' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</span></span>' + barHTML(s.taken, s.capacity) + '<span class="gxM">' + (s.cancelled ? (s.cancel_reason || 'Lezione annullata') : past ? 'Conclusa' : s.taken >= s.capacity ? 'Completa' : (s.capacity - s.taken) + ' posti liberi') + '</span></span></button>';
       } else {
         var p = it.pt, booked = !p.free;
-        out += '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + '"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
+        out += '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + (booked ? hlCls(p.time, 'Personal 1:1') : '') + '"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
       }
     });
     if (isT && !nowDone && items.length) out += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>';
@@ -580,7 +593,9 @@
   // dalla campanella: "Nuova prenotazione" porta al giorno e alla lezione indicati
   window.liaOpenDate = function (iso) {
     var dt = new Date(iso); if (isNaN(dt.getTime())) return;
-    var d = ymd(dt); S.view = 'day'; S.anchor = d; S.sel = d; S.hl = pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+    var fe = window.liaFocusEv || {}, who = String(fe.name || '').trim().split(/\s+/);
+    var d = ymd(dt); S.view = 'day'; S.anchor = d; S.sel = d;
+    S.hl = { time: pad(dt.getHours()) + ':' + pad(dt.getMinutes()), svc: fe.svc || '', who: who[0] ? who[0] + (who[1] ? ' ' + who[1].charAt(0) + '.' : '') : '', bad: !!fe.bad };
     bust(); render();
   };
   document.addEventListener('lia:section', function (e) {
