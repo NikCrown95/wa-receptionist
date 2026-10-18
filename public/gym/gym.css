@@ -341,3 +341,8 @@
 .mxD .mvCert .ci{width:44px;height:44px;border-radius:14px}
 .mxD .mvCert .ct b{font-size:1.12rem}
 }
+.mxD .mvTop{position:relative;margin:-4px -6px -4px;gap:6px}
+.mxD .mvBack{height:32px;padding:0 10px 0 6px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:.8rem;font-weight:700;border-radius:16px}
+.mxD .mvBack svg{width:14px;height:14px}
+.mxD .mvEd{width:32px;height:32px;border:0;background:rgba(255,255,255,.14);color:#fff}
+.mxD .mvEd svg{width:15px;height:15px}

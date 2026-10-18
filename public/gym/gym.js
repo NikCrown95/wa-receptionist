@@ -366,7 +366,7 @@
         function open(tab) { S.mid = m.id; S.tab = tab || 'pren'; renderMem(); try { window.scrollTo(0, 0); } catch (e) { } }
         if (tpl) {
           var rn = el('button', 'mzRn', 'Rinnova'); rn.type = 'button';
-          rn.addEventListener('click', function (e) { e.stopPropagation(); rn.disabled = true; var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today; act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rn.disabled = false; }); });
+          rn.addEventListener('click', function (e) { e.stopPropagation(); renewSheet(m); });
           A.appendChild(rn);
         }
         r.addEventListener('click', function () { open(); }); r.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
@@ -442,6 +442,41 @@
       }));
     });
   }
+  function renewSheet(m) {
+    var cur = curPlan(m), plans = S.data.plans || [];
+    sheet('Rinnova · ' + m.first_name + ' ' + m.last_name, function (w, close) {
+      if (!plans.length) { w.appendChild(el('div', 'gxEmpty', 'Prima crea un tipo di abbonamento, da Impostazioni, Abbonamenti.')); return; }
+      var same = cur && cur.plan_id ? cur.plan_id : null, picks = plans.filter(function (x) { return x.id === same; }), paid = {};
+      picks.forEach(function (x) { paid[x.id] = x.price_eur != null ? x.price_eur : ''; });
+      var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today, st = inp('date', from);
+      w.appendChild(el('p', 'gxMfH', cur ? 'Abbonamento attuale: ' + cur.plan_name + '. Scegli cosa aggiungere: lo stesso, uno diverso, oppure anche un pacchetto Personal.' : 'Scegli cosa aggiungere.'));
+      var wrap = el('div', 'gxMf'), box = el('div', 'gxPlanBox'), fx = el('div', 'gxRnF'); wrap.appendChild(box); w.appendChild(wrap); w.appendChild(fx);
+      var draw = function () {
+        box.innerHTML = ''; fx.innerHTML = '';
+        plans.forEach(function (x) {
+          var on = picks.indexOf(x) >= 0, isSame = x.id === same;
+          var sub = (isSame ? 'Stesso abbonamento · ' : '') + (x.kind === 'time' ? (x.days === 1 ? '1 giorno' : x.days + ' giorni') : x.entries + ' ingressi') + ' · ' + x.covers.map(cat).join(', ');
+          var b = el('button', 'gxMfP'); b.type = 'button'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.innerHTML = '<i class="r"><u></u></i><span class="t"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span><em>' + esc(x.price_eur != null ? eur(x.price_eur) : '') + '</em>';
+          b.addEventListener('click', function () { if (on) picks.splice(picks.indexOf(x), 1); else { picks.push(x); paid[x.id] = x.price_eur != null ? x.price_eur : ''; } draw(); });
+          box.appendChild(b);
+        });
+        if (picks.length) {
+          fx.appendChild(el('p', 'gxMfH', 'Puoi sceglierne più di uno: ad esempio il mensile e il pacchetto Personal.'));
+          fx.appendChild(field('Inizia il', st));
+          picks.forEach(function (x) { var pi = inp('number', paid[x.id]); pi.step = '0.01'; pi.inputMode = 'decimal'; pi.addEventListener('input', function () { paid[x.id] = pi.value; }); fx.appendChild(field('Pagato · ' + x.name + ' (€)', pi)); });
+        }
+      };
+      draw();
+      var go = btn('Rinnova', 'block', function () {
+        if (!picks.length) { toast('Scegli almeno un abbonamento.', 'bad'); return; }
+        go.disabled = true; var next = Promise.resolve();
+        picks.forEach(function (x) { next = next.then(function () { return api({ action: 'member_plan_add', member_id: m.id, plan_id: x.id, starts_on: st.value, price_paid: paid[x.id] }); }); });
+        next.then(function () { toast(picks.length > 1 ? 'Abbonamenti aggiunti.' : 'Abbonamento rinnovato (parte il ' + short(st.value) + ').', 'ok'); close(); return reload(); }).catch(function (e) { go.disabled = false; toast(e.message || 'Non riuscito', 'bad'); });
+      });
+      w.appendChild(go);
+    });
+  }
   function memberSheet(id) { S.mid = id; S.tab = 'pren'; if (S.section === 'clients') renderMem(); }
   function memberPage(m) {
     var id = m.id, cur = curPlan(m), u = m.usage || {}, dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, soon = S.data.settings.expiry_days || 5;
@@ -451,7 +486,6 @@
     var top = el('div', 'mvTop');
     var back = el('button', 'mvBack'); back.type = 'button'; back.innerHTML = SV('<path d="M15 6l-6 6 6 6"/>', 16) + '<span>Iscritti</span>'; back.addEventListener('click', function () { S.mid = null; renderMem(); }); top.appendChild(back);
     var ed = el('button', 'mvEd'); ed.type = 'button'; ed.setAttribute('aria-label', 'Modifica iscritto'); ed.innerHTML = SV('<path d="M4 20h4L19 9l-4-4L4 16z"/>', 18); ed.addEventListener('click', function () { memberForm(m); }); top.appendChild(ed);
-    root.appendChild(top);
     var left = null, tot = 0;
     if (cur && cur.kind === 'time' && cur.starts_on && cur.ends_on) { tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)); left = Math.max(0, Math.min(100, Math.round(dl / tot * 100))); }
     else if (cur && cur.kind === 'entries' && cur.entries_total) left = Math.round(cur.entries_left / cur.entries_total * 100);
@@ -463,17 +497,12 @@
         '<div class="mvPd">' + (cur.starts_on ? '<span>dal ' + short(cur.starts_on) + '</span>' : '<span></span>') + '<b>' + (cur.kind === 'entries' ? cur.entries_left + ' ingressi rimasti' : dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'scade tra ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + (cur.ends_on ? ' · ' + short(cur.ends_on) : '') + '</b></div></div>'
       : '<div class="mvPl"><div class="mvPt"><b>Nessun abbonamento</b></div></div>';
     hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.first_name + ' ' + m.last_name) + '</b><span>' + esc(m.phone) + '</span></div></div><div class="mvMeta"><span class="mvChip">' + esc(st.label) + '</span>' + (since ? '<span class="mvSince">Socio da ' + esc(since) + '</span>' : '') + '</div><span class="mvSep"></span>' + planHtml;
-    root.appendChild(hero);
+    hero.insertBefore(top, hero.firstChild.nextSibling); root.appendChild(hero);
     var body = el('div', 'mxBody mvBody'); root.appendChild(body);
     var acts = el('div', 'mvActs');
     function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvA ' + (cls || '')); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = SV(icon) + '<span>' + label + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); return b; }
     if (tpl) {
-      var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today;
-      var rnb = ab('Rinnova', '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 'pri', function () {
-        rnb.disabled = true;
-        act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rnb.disabled = false; });
-      });
-      rnb.title = 'Rinnova' + (tpl.price_eur != null ? ' · ' + eur(tpl.price_eur) : '');
+      var rnb = ab('Rinnova', '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 'pri', function () { renewSheet(m); });
     }
     ab('Prenota', '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', '', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); });
     var dg = String(m.phone || '').replace(/[^\d]/g, ''); if (dg && !/^(39|00)/.test(dg) && dg.length <= 10) dg = '39' + dg; dg = dg.replace(/^00/, '');
