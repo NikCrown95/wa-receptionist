@@ -1224,8 +1224,8 @@
       if (o.kind === 'sala') {
         c.fillStyle = BG; c.fillRect(366, 1212, 292, 145);
         line('1 ora · ' + fmtEur(o.price), '700 40px ' + HF, 1256, ink, 280);
-        c.font = '500 28px ' + BF; var sw2 = c.measureText('Dopo la chiusura').width, sz = sw2 > 270 ? Math.floor(28 * 270 / sw2) : 28;
-        line('Dopo la chiusura', '500 ' + sz + 'px ' + BF, 1300, ink, 400); line('della palestra.', '500 ' + sz + 'px ' + BF, 1338, ink, 400);
+        c.font = '500 28px ' + BF; var sw2 = c.measureText('Scegli giorno e ora,').width, sz = sw2 > 270 ? Math.floor(28 * 270 / sw2) : 28;
+        line('Scegli giorno e ora,', '500 ' + sz + 'px ' + BF, 1300, ink, 400); line('a palestra chiusa.', '500 ' + sz + 'px ' + BF, 1338, ink, 400);
       }
       c.restore(); return cv;
     });
