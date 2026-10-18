@@ -54,6 +54,12 @@ function patchGymBell(html) {
     ["tx.appendChild(el('small',null,ago(e.created_at)+", "tx.appendChild(el('small',null,(e.type==='sub_expiring'&&e.meta?'Scade il '+new Date(e.meta.ends_on+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long'}):ago(e.created_at))+"],
     ["e.type==='feedback_ask'?'Dicci come ti trovi':", "e.type==='sub_expiring'?(e.customer_name||''):e.type==='feedback_ask'?'Dicci come ti trovi':"],
     ["if(e.type==='feedback_ask'){if(window.liaFeedbackOpen)window.liaFeedbackOpen(true);return}", "if(e.type==='sub_expiring'){if(window.liaGymMember)window.liaGymMember(e.meta&&e.meta.member_id);return}if(e.type==='feedback_ask'){if(window.liaFeedbackOpen)window.liaFeedbackOpen(true);return}"],
+    ["(e.type==='booked'||e.type==='cancelled')&&t>seenTs()", "(e.type==='booked'||e.type==='cancelled'||e.type==='rental_booked'||e.type==='rental_cancelled')&&t>seenTs()"],
+    ["function kcls(e){return e.type==='sub_expiring'?'k':", "function kcls(e){return e.type==='rental_booked'||e.type==='rental_cancelled'?'rent':e.type==='sub_expiring'?'k':"],
+    ["function kic(e){return e.type==='sub_expiring'?IC_CAL:", "function kic(e){return e.type==='rental_booked'||e.type==='rental_cancelled'?'<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"M11 12l9-9M16 6l3 3\"/></svg>':e.type==='sub_expiring'?IC_CAL:"],
+    ["function ttl(e){return e.type==='sub_expiring'?", "function ttl(e){return e.type==='rental_booked'?'Sala affittata':e.type==='rental_cancelled'?'Affitto sala disdetto':e.type==='sub_expiring'?"],
+    ["el('div','np-it'+(new Date(e.created_at).getTime()>s?' un':''))", "el('div','np-it'+(e.type.indexOf('rental_')===0?' rent':'')+(new Date(e.created_at).getTime()>s?' un':''))"],
+    ["if(e.type==='sub_expiring'){if(window.liaGymMember)", "if(e.type==='rental_booked'||e.type==='rental_cancelled'){if(window.liaGymRentals)window.liaGymRentals(e);return}if(e.type==='sub_expiring'){if(window.liaGymMember)"],
   ];
   let out = html;
   for (const [a, b] of pairs) {
@@ -348,7 +354,7 @@ module.exports = async (req, res) => {
         const bt = await businessTypeCached(gt);
         if (require("../lib/verticals.js").areaOf(bt) === "palestra") {
           variantKey = "gym";
-          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="preload" as="image" href="/gym/hero.jpg"><link rel="preload" as="image" href="/gym/logo.png?v=73"><link rel="stylesheet" href="/gym/gym.css?v=118"><link rel="stylesheet" href="/gym/members.css?v=118"><link rel="stylesheet" href="/gym/cal-core.css?v=110"><link rel="stylesheet" href="/gym/cal.css?v=110"><link rel="stylesheet" href="/gym/stats-core.css?v=118"><link rel="stylesheet" href="/gym/stats.css?v=118"><body>').replace("</body>", '<script src="/gym/gym.js?v=118"></script><script src="/gym/cal.js?v=110"></script><script src="/gym/stats.js?v=118"></script></body>');
+          html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="preload" as="image" href="/gym/hero.jpg"><link rel="preload" as="image" href="/gym/logo.png?v=73"><link rel="stylesheet" href="/gym/gym.css?v=121"><link rel="stylesheet" href="/gym/members.css?v=121"><link rel="stylesheet" href="/gym/cal-core.css?v=110"><link rel="stylesheet" href="/gym/cal.css?v=110"><link rel="stylesheet" href="/gym/stats-core.css?v=121"><link rel="stylesheet" href="/gym/stats.css?v=121"><body>').replace("</body>", '<script src="/gym/qr.js?v=1"></script><script src="/gym/gym.js?v=121"></script><script src="/gym/cal.js?v=110"></script><script src="/gym/stats.js?v=121"></script></body>');
         }
       }
     } catch (e) { /* se il controllo non riesce si mostra l'agenda di sempre */ }
@@ -1132,7 +1138,7 @@ module.exports = async (req, res) => {
         }
         if (fbEv && ((fbEv.meta && fbEv.meta.done) || Date.now() - Date.parse(fbEv.created_at) > 45 * 86400000)) fbEv = null;
       } catch (e) { fbEv = null; }
-      const evBase = "notification_events?business_id=eq." + biz.id + "&or=" + encodeURIComponent("(created_at.gte." + sinceIso + ",and(event_type.in.(booked,cancelled),created_at.gte." + sinceBookIso + "))") + (biz.business_type === "palestra" ? "&event_type=in.(booked,cancelled)" : "&event_type=not.in.(closures_reminder,feedback_ask)") + "&order=created_at.desc&limit=60&select=id,event_type,customer_name,service_name,starts_at,channel,created_at";
+      const evBase = "notification_events?business_id=eq." + biz.id + "&or=" + encodeURIComponent("(created_at.gte." + sinceIso + ",and(event_type.in.(booked,cancelled,rental_booked,rental_cancelled),created_at.gte." + sinceBookIso + "))") + (biz.business_type === "palestra" ? "&event_type=in.(booked,cancelled,rental_booked,rental_cancelled)" : "&event_type=not.in.(closures_reminder,feedback_ask)") + "&order=created_at.desc&limit=60&select=id,event_type,customer_name,service_name,starts_at,channel,created_at";
       let ev = await sb("GET", evBase + ",meta");
       if (!ev.ok && ev.status === 400) ev = await sb("GET", evBase); // colonna meta non ancora creata: la campanella funziona come prima
       if (ev.ok && Array.isArray(ev.data)) {

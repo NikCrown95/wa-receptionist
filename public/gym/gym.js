@@ -657,13 +657,15 @@
   }
   function sTipo() {
     sheet('Cosa offri', function (w, close) {
-      var o = OF(), st = { cls: o.cls, pt: o.pt, on: o.on };
+      var o = OF(), rc = (S.data.settings && S.data.settings.rental) || {}, st = { cls: o.cls, pt: o.pt, on: o.on, rent: !!rc.on };
       w.appendChild(el('p', null, 'Scegli come lavora la tua palestra. Puoi cambiarlo quando vuoi: niente viene cancellato.'));
       var box = el('div', 'gxTipo'); w.appendChild(box);
+      var rbox = el('div'); w.appendChild(rbox);
       var rows = [
         ['cls', 'Corsi di gruppo', 'Lezioni a orari fissi con un numero di posti, che si ripetono ogni settimana.'],
         ['pt', 'Personal 1:1', 'Lezioni individuali con il trainer, a ore libere.'],
         ['on', 'Prenotazione online', 'Gli iscritti prenotano da soli dalla pagina della palestra. Spento, usi l\'app solo per tenere traccia di iscritti e abbonamenti.']
+        ,['rent', 'Affitto sala', 'Dai in affitto la sala, un\'ora alla volta, a chi tiene corsi: solo nelle ore dopo la chiusura. Si prenota con un link e un QR a parte.']
       ];
       function draw() {
         box.innerHTML = '';
@@ -676,12 +678,19 @@
         });
         var hint = !st.cls && !st.pt ? 'Con tutto spento l\'app è un gestionale: iscritti e abbonamenti, senza calendario né prenotazioni.' : !st.cls ? 'Solo Personal: il calendario mostra le ore di Personal di ogni giorno di apertura.' : !st.pt ? 'Solo corsi: il Personal non compare da nessuna parte.' : '';
         if (hint) box.appendChild(el('p', 'gxM', hint));
+        rbox.innerHTML = '';
+        if (st.rent) {
+          var tw = el('div', 'gxTwo'); tw.appendChild(field('Prezzo di un\'ora (€)', rpr)); tw.appendChild(field('Ore prenotabili dopo la chiusura', raf)); rbox.appendChild(tw);
+          rbox.appendChild(el('p', 'gxM', 'Esempio: se chiudi alle 21:00 e scegli 4 ore, si può prenotare un\'ora tra le 21 e le 22, le 22 e le 23, e così via fino all\'una. Servono gli orari di apertura (Orari di apertura).'));
+        }
       }
+      var rpr = inp('number', rc.price != null ? rc.price : 50), raf = sel([[1, '1 ora'], [2, '2 ore'], [3, '3 ore'], [4, '4 ore'], [5, '5 ore'], [6, '6 ore']], rc.after_h || 4);
+      rpr.step = '0.01'; rpr.inputMode = 'decimal';
       draw();
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
         msg.className = ''; msg.textContent = '';
-        api({ action: 'settings_save', classes: st.cls, personal: st.pt, online: st.on && (st.cls || st.pt) }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+        api({ action: 'settings_save', classes: st.cls, personal: st.pt, online: st.on && (st.cls || st.pt), rental: { on: st.rent, price: rpr.value === '' ? 50 : rpr.value, after_h: raf.value } }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
       }));
     });
   }
@@ -1063,8 +1072,48 @@
       // --- "Modifica" porta alle impostazioni della palestra
       root.querySelectorAll('[data-pfedit]').forEach(function (b) { b.onclick = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); }; });
     } catch (e) { /* la scheda resta com’è */ }
+    try { pfRentCard(document.getElementById('panelProfile')); } catch (e) { }
     pfReady();
     pfBusy = false; pfWatch();
+  }
+  // ---------- Affitto sala: prenotazioni ricevute e card con QR nella Panoramica ----------
+  function rentUrl() { var b = S.data && S.data.business; return b && b.rental_link ? location.origin + b.rental_link : ''; }
+  function rentalsSheet(focusIso) {
+    sheet('Affitto sala', function (w, close) {
+      var list = (S.data && S.data.rentals) || [];
+      if (!list.length) { w.appendChild(el('div', 'gxEmpty', 'Nessuna prenotazione in arrivo. Quando qualcuno prenota un\'ora, la vedi qui e nella campanella.')); return; }
+      list.forEach(function (x) {
+        var c = el('div', 'gxRent' + (focusIso && new Date(x.starts_at).getTime() === new Date(focusIso).getTime() ? ' hl' : ''));
+        var d = parse(x.session_date), en = new Date(x.ends_at), pad2 = function (n) { return (n < 10 ? '0' : '') + n; };
+        c.innerHTML = '<div class="rt"><b>' + esc(WD[d.getDay() === 0 ? 7 : d.getDay()]) + ' ' + short(x.session_date) + '</b><span>' + esc(x.start_time) + ' – ' + pad2(en.getHours()) + ':' + pad2(en.getMinutes()) + '</span></div>' +
+          '<div class="rn">' + esc(x.first_name + ' ' + x.last_name) + (x.price_eur != null ? '<em>' + eur(Number(x.price_eur)) + '</em>' : '') + '</div>' +
+          '<div class="rl"><a href="tel:' + esc(String(x.phone).replace(/[^\d+]/g, '')) + '">' + esc(x.phone) + '</a><a href="mailto:' + esc(x.email) + '">' + esc(x.email) + '</a></div>';
+        var acts = el('div', 'rb'); var dis = btn('Disdici', 'ghost sm', function () {
+          confirmBar(c, 'Disdire l\'affitto di ' + x.first_name + ' ' + x.last_name + '? L\'ora torna libera.', function () { api({ action: 'rental_cancel', id: x.id }).then(function () { toast('Affitto disdetto.', 'ok'); close(); return reload(); }).catch(function (e) { toast(e.message, 'bad'); }); });
+        }); acts.appendChild(dis); c.appendChild(acts); w.appendChild(c);
+      });
+    });
+  }
+  window.liaGymRentals = function (e) { var go = function () { rentalsSheet(e && e.starts_at); }; if (S.data) load().then(go).catch(go); else load().then(go).catch(function (er) { toast(er.message, 'bad'); }); };
+  function pfRentCard(root) {
+    var D = S.data, old = document.getElementById('gpfRentCard'), rc = D && D.settings && D.settings.rental;
+    if (!rc || !rc.on) { if (old) old.remove(); return; }
+    var ref = document.getElementById('pfRefCard'), host = ref ? ref.parentNode : (root.querySelector('.pfCard') || {}).parentNode; if (!host) return;
+    var card = old || el('div', 'pfCard gpfRent'); card.id = 'gpfRentCard'; card.innerHTML = '';
+    var url = rentUrl(), n = ((D.rentals || []).length);
+    var hd = el('div', 'gpfRentHd'); hd.appendChild(el('h3', null, 'Affitto sala')); hd.appendChild(el('small', null, eur(Number(rc.price)) + ' all\'ora · prenotabile fino a ' + rc.after_h + (rc.after_h === 1 ? ' ora' : ' ore') + ' dopo la chiusura')); card.appendChild(hd);
+    var bd = el('div', 'gpfRentBd'), qrb = el('div', 'gpfQr');
+    try { var q = url && window.liaQR ? window.liaQR(url, 132) : null; if (q) qrb.appendChild(q); } catch (e) { }
+    bd.appendChild(qrb);
+    var rt = el('div', 'gpfRentTx'); rt.appendChild(el('small', null, 'LINK PER PRENOTARE LA SALA')); rt.appendChild(el('b', null, url.replace(/^https?:\/\//, ''))); rt.appendChild(el('span', null, 'Diverso dal link dei corsi. Mostra il QR o mandalo a chi vuole affittare.'));
+    var ac = el('div', 'gpfRentAc');
+    var cp = btn('Copia link', 'sm', function () { try { navigator.clipboard.writeText(url); } catch (e) { } cp.textContent = 'Copiato'; setTimeout(function () { cp.textContent = 'Copia link'; }, 1500); });
+    ac.appendChild(cp);
+    if (navigator.share) ac.appendChild(btn('Condividi', 'ghost sm', function () { navigator.share({ title: 'Affitto sala', text: 'Prenota la sala:', url: url }).catch(function () { }); }));
+    rt.appendChild(ac); bd.appendChild(rt); card.appendChild(bd);
+    var lb = el('button', 'gpfRentList'); lb.type = 'button'; lb.innerHTML = '<span>Prenotazioni in arrivo</span><b>' + n + '</b><i>\u203a</i>'; lb.addEventListener('click', function () { rentalsSheet(); }); card.appendChild(lb);
+    card.style.order = 1; card.style.gridColumn = '1 / -1';
+    if (!old) { if (ref && ref.nextSibling) host.insertBefore(card, ref.nextSibling); else host.appendChild(card); }
   }
   function pfWatch() {
     var root = document.getElementById('panelProfile'); if (!root) return;

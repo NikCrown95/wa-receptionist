@@ -139,6 +139,10 @@
       "destination": "/api/agenda?c=:code"
     },
     {
+      "source": "/sala/:slug",
+      "destination": "/api/palestra?r=:slug"
+    },
+    {
       "source": "/palestra/:slug",
       "destination": "/api/palestra?b=:slug"
     },
