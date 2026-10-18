@@ -277,3 +277,12 @@
 .gsFt .gsDng{color:var(--danger,#E5645C)}
 .gsFt .gsLnk{color:var(--muted);font-weight:600;font-size:.88rem}
 .gsNote{margin:0!important;padding:0 20px 18px 26px}
+
+/* certificato medico (scheda iscritto) */
+.gxCert{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:14px;width:100%;margin:12px 0 4px;padding:14px;border-radius:18px;border:1px solid var(--line2);background:var(--card);cursor:pointer;color:var(--ink)}
+.gxCert .ci{width:42px;height:42px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
+.gxCert .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.gxCert .ct small{font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.gxCert .ct b{font-size:1.02rem}.gxCert .ct span{font-size:.84rem;color:var(--muted)}
+.gxCert .cg{flex:none;font-size:.8rem;font-weight:700;color:var(--accent)}
+.gxCert.ok .ci{background:color-mix(in srgb,var(--ok,#2DAA7F) 20%,transparent);color:var(--ok,#2DAA7F)}.gxCert.ok .ct b{color:var(--ok,#2DAA7F)}
+.gxCert.warn .ci{background:color-mix(in srgb,var(--warn,#E9B955) 22%,transparent);color:var(--warn,#E9B955)}.gxCert.warn .ct b{color:var(--warn,#E9B955)}
+.gxCert.bad{border-color:color-mix(in srgb,var(--danger,#E5645C) 50%,transparent)}.gxCert.bad .ci{background:color-mix(in srgb,var(--danger,#E5645C) 20%,transparent);color:var(--danger,#E5645C)}.gxCert.bad .ct b{color:var(--danger,#E5645C)}

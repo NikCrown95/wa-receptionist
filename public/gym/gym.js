@@ -378,9 +378,17 @@
   }
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function curPlan(m) { return m.plans.filter(function (p) { return p.valid; })[0] || m.plans[0] || null; }
-  function daysTo(iso) { return Math.round((parse(iso).getTime() - parse(S.data.today).getTime()) / 864e5); }
+  function daysTo(iso) { return Math.round((parse(iso).getTime() - parse(S.today).getTime()) / 864e5); }
   function meter(n, max) { if (!max) return ''; var pct = Math.min(100, Math.round((n || 0) / max * 100)); return '<span class="gmMeter"><i class="' + (pct >= 100 ? 'f' : '') + '" style="width:' + pct + '%"></i></span>'; }
   function endOf(m) { var e = m.plans.filter(function (p) { return !p.cancelled && p.ends_on; }).map(function (p) { return p.ends_on; }).sort().pop(); return e || '9999'; }
+  function plusYear(iso) { var d = parse(iso); if (isNaN(d)) return ''; var y = d.getFullYear() + 1, mo = d.getMonth(), dd = d.getDate(); var x = new Date(y, mo, dd); if (x.getMonth() !== mo) x = new Date(y, mo + 1, 0); return ymd(x); }
+  function certInfo(m) {
+    var u = m && m.medical_until; if (!u) return { cls: 'none', head: 'Non inserito', sub: 'Scrivi quando l\'iscritto ha fatto il certificato.' };
+    var n = Math.round((parse(u) - parse(S.today)) / 864e5);
+    if (n < 0) return { cls: 'bad', head: 'Scaduto', sub: 'Scaduto il ' + short(u) + ' (da ' + (-n) + (n === -1 ? ' giorno' : ' giorni') + ')' };
+    if (n <= 30) return { cls: 'warn', head: 'In scadenza', sub: 'Scade il ' + short(u) + ' (tra ' + n + (n === 1 ? ' giorno' : ' giorni') + ')' };
+    return { cls: 'ok', head: 'Valido', sub: 'Fino al ' + short(u) + (m.medical_from ? ' · fatto il ' + short(m.medical_from) : '') };
+  }
   function memberForm(m) {
     var close0 = sheet(m ? 'Modifica dati' : 'Nuovo iscritto', function (w, close) {
       w.classList.add('gxMf');
@@ -388,6 +396,13 @@
       var sec = el('div', 'gxMfS', 'Dati'); w.appendChild(sec);
       var two = el('div', 'gxTwo'); two.appendChild(field('Nome', f)); two.appendChild(field('Cognome', l)); w.appendChild(two);
       w.appendChild(field('Telefono', p));
+      // certificato medico: il titolare scrive quando è stato fatto; la scadenza è di un anno (modificabile)
+      w.appendChild(el('div', 'gxMfS', 'Certificato medico'));
+      var mf = inp('date', m && m.medical_from || ''), mu = inp('date', m && m.medical_until || ''), muTouched = !!(m && m.medical_until && m.medical_from && m.medical_until !== plusYear(m.medical_from));
+      mf.addEventListener('change', function () { if (!muTouched || !mu.value) { mu.value = mf.value ? plusYear(mf.value) : ''; muTouched = false; } });
+      mu.addEventListener('input', function () { muTouched = true; });
+      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); w.appendChild(tw);
+      w.appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.'));
       // abbonamento scelto subito (solo per un iscritto nuovo)
       var plans = !m && S.data && S.data.plans ? S.data.plans : [], picks = [], paid = {}, st = inp('date', S.data ? S.data.today : ''), box = el('div', 'gxPlanBox');
       if (plans.length) {
@@ -417,7 +432,7 @@
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn(!m && plans.length ? 'Salva iscritto' : 'Salva', 'block gxMfGo', function () {
         msg.textContent = ''; msg.className = '';
-        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value }).then(function (j) {
+        api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, medical_from: mf.value || '', medical_until: mu.value || '' }).then(function (j) {
           var next = Promise.resolve();
           if (!m) picks.forEach(function (x) { next = next.then(function () { return api({ action: 'member_plan_add', member_id: j.id, plan_id: x.id, starts_on: st.value, price_paid: paid[x.id] }); }); });
           var any = !m && picks.length > 0;
@@ -433,7 +448,7 @@
     var hero = el('div', 'mxHero');
     var pos = 0, dsHtml = '';
     if (cur && cur.kind === 'time' && cur.starts_on && cur.ends_on) {
-      var tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)), el_ = Math.max(0, Math.min(tot, Math.round((parse(S.data.today) - parse(cur.starts_on)) / 864e5))); pos = (el_ / tot * 100).toFixed(1);
+      var tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)), el_ = Math.max(0, Math.min(tot, Math.round((parse(S.today) - parse(cur.starts_on)) / 864e5))); pos = (el_ / tot * 100).toFixed(1);
       dsHtml = '<div class="mxTl"><div class="mxTr"><i style="width:' + pos + '%"></i><em style="left:' + pos + '%"></em></div><div class="mxDs"><span>Inizio <b>' + short(cur.starts_on) + '</b></span><span><b>' + esc(dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'mancano ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + '</b></span><span>Scadenza <b>' + short(cur.ends_on) + '</b></span></div></div>';
     } else if (cur && cur.kind === 'entries') {
       pos = cur.entries_total ? Math.round((cur.entries_total - cur.entries_left) / cur.entries_total * 100) : 0;
@@ -463,6 +478,9 @@
     acts.appendChild(btn('Prenota', 'mxGh', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); }));
     var call = el('a', 'mxGh', 'Chiama'); call.href = 'tel:' + m.phone.replace(/[^\d+]/g, ''); acts.appendChild(call);
     body.appendChild(acts);
+    var ci = certInfo(m), cb = el('button', 'gxCert ' + ci.cls); cb.type = 'button';
+    cb.innerHTML = '<span class="ci">' + ic('card') + '</span><span class="ct"><small>Certificato medico</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">Modifica</span>';
+    cb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cb);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
     function drawTabs() {
