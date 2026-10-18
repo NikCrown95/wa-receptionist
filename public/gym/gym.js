@@ -1219,12 +1219,12 @@
         for (var i = 0; i < txt.length; i++) { c.fillText(txt[i], x, base); c.strokeText(txt[i], x, base); x += c.measureText(txt[i]).width + trk; }
       }
       function fit(txt, size, max) { while (size > 40 && wid(txt, size, -size * 0.045, size * 0.03) > max) size -= 2; return size; }
-      function line(txt, font, base, fill, max) { var size = parseInt(font, 10); c.font = font; while (size > 20) { c.font = font.replace(/\d+px/, size + 'px'); if (c.measureText(txt).width <= max) break; size -= 1; } c.fillStyle = fill; c.textAlign = 'center'; c.fillText(txt, 512, base); c.textAlign = 'left'; }
-      c.fillStyle = BG; c.fillRect(150, 935, 724, 80); line(o.kind === 'sala' ? 'Affitta la sala.' : 'Prenota il tuo corso.', '700 40px ' + HF, 990, ink, 560);
+      function line(txt, font, base, fill, max) { var size = parseInt(font.match(/(\d+)px/)[1], 10); c.font = font; while (size > 20) { c.font = font.replace(/\d+px/, size + 'px'); if (c.measureText(txt).width <= max) break; size -= 1; } c.fillStyle = fill; c.textAlign = 'center'; c.fillText(txt, 512, base); c.textAlign = 'left'; }
+      c.fillStyle = BG; c.fillRect(150, 935, 724, 80); line(o.kind === 'sala' ? 'Affitta la sala.' : 'Prenota il tuo corso.', '700 54px ' + HF, 993, ink, 560);
       if (o.kind === 'sala') {
         c.fillStyle = BG; c.fillRect(366, 1212, 292, 145);
-        line('1 ora · ' + fmtEur(o.price), '700 40px ' + HF, 1256, ink, 280);
-        c.font = '500 28px ' + BF; var sw2 = c.measureText('Scegli giorno e ora,').width, sz = sw2 > 270 ? Math.floor(28 * 270 / sw2) : 28;
+        line('1 ora · ' + fmtEur(o.price), '700 46px ' + HF, 1256, ink, 290);
+        c.font = '500 33px ' + BF; var sw2 = c.measureText('Scegli giorno e ora,').width, sz = sw2 > 300 ? Math.floor(33 * 300 / sw2) : 33;
         line('Scegli giorno e ora,', '500 ' + sz + 'px ' + BF, 1300, ink, 400); line('a palestra chiusa.', '500 ' + sz + 'px ' + BF, 1338, ink, 400);
       }
       c.restore(); return cv;
