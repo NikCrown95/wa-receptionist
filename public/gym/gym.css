@@ -168,7 +168,7 @@
 /* Panoramica: sfondo e logo della palestra */
 :root:root .gym #panelProfile #pfHero{--h:36;min-height:230px;border-color:rgba(214,160,80,.35);background:linear-gradient(180deg,rgba(8,6,4,.25),rgba(8,6,4,.62)),url(/gym/hero.jpg) center 62%/cover no-repeat,#120d08}
 :root:root .gym #panelProfile #pfHero::before,:root:root .gym #panelProfile #pfHero .pfWm{display:none}
-:root:root .gym #panelProfile #pfAvatar{width:76px;height:76px;border-radius:0;border:0;padding:0;background:url(/gym/logo.png?v=72) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55))}
+:root:root .gym #panelProfile #pfAvatar{width:76px;height:76px;border-radius:0;border:0;padding:0;background:url(/gym/logo.png?v=73) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55))}
 :root:root .gym #panelProfile #pfAvatar svg{display:none}
 :root:root .gym #panelProfile #pfHero .pfKind{color:#E8B864}
 
@@ -176,7 +176,7 @@
 :root:root .gym #panelProfile #pfHero>*{transition:opacity .3s ease}
 :root:root .gym #panelProfile #pfHero:not(.gpfReady)>:not(.pfWm){opacity:0}
 :root:root:root .gym #panelProfile .pf2 .pfHero #pfAvatar::before,:root:root:root .gym #panelProfile .pf2 .pfHero #pfAvatar::after{display:none!important;content:none!important}
-:root:root:root .gym #panelProfile .pf2 .pfHero #pfAvatar{box-shadow:none!important;border:0!important;border-radius:0!important;background:url(/gym/logo.png?v=72) center/contain no-repeat!important;width:76px!important;height:76px!important}
+:root:root:root .gym #panelProfile .pf2 .pfHero #pfAvatar{box-shadow:none!important;border:0!important;border-radius:0!important;background:url(/gym/logo.png?v=73) center/contain no-repeat!important;width:76px!important;height:76px!important}
 /* Impostazioni: solo ciò che serve a una palestra (niente servizi, pacchetti, WhatsApp, Telegram, orari standard) */
 .gym #stShell .stRow[data-st="services"],.gym #stShell .stRow[data-st="combos"],.gym #stShell .stRow[data-st="hours"],.gym #stShell .stRow[data-st="blocks"],.gym #stShell .stRow[data-st="staff"],.gym #stShell .stRow[data-st="rules"],.gym #stShell .stRow[data-st="telegram"],.gym #stShell .stRow[data-st="whatsapp"],
 .gym #stShell .stPage[data-st="services"],.gym #stShell .stPage[data-st="combos"],.gym #stShell .stPage[data-st="hours"],.gym #stShell .stPage[data-st="blocks"],.gym #stShell .stPage[data-st="staff"],.gym #stShell .stPage[data-st="staffdetail"],.gym #stShell .stPage[data-st="rules"],.gym #stShell .stPage[data-st="telegram"],.gym #stShell .stPage[data-st="whatsapp"],
