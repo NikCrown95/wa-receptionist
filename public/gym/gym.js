@@ -323,12 +323,11 @@
     var sr = el('label', 'mzSearch'); sr.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
     var q = el('input'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; q.autocomplete = 'off'; sr.appendChild(q); bar.appendChild(sr);
     function sel(opts, val, fn) { var w = el('label', 'mzSel'); var x = el('select'); opts.forEach(function (o) { var e = el('option', null, o[1]); e.value = o[0]; if (o[0] === val) e.selected = true; x.appendChild(e); }); x.addEventListener('change', function () { fn(x.value); }); w.appendChild(x); w.insertAdjacentHTML('beforeend', ic('chev', 16)); return w; }
-    var planOpts = [['all', 'Tutti gli abbonamenti']].concat(S.data.plans.map(function (p) { return [p.id, p.name]; }));
+    var planOpts = [['all', 'Abbonamento']].concat(S.data.plans.map(function (p) { return [p.id, p.name]; }), cnt.none ? [['none', 'Senza abbonamento']] : []);
     S.pf = S.pf || 'all'; S.srt = S.srt || 'end'; S.cf = S.cf || 'all';
-    bar.appendChild(sel([['all', 'Tutti gli stati'], ['ok', 'Attivi'], ['valid', 'Validi'], ['warn', 'In scadenza'], ['bad', 'Scaduti']].concat(cnt.none ? [['none', 'Senza abbonamento']] : []), S.flt, function (v) { S.flt = v; S.more = false; renderMem(); }));
-    bar.appendChild(sel([['all', 'Tutti i certificati'], ['warn', 'Certificato in scadenza'], ['bad', 'Certificato scaduto'], ['none', 'Certificato mancante'], ['ok', 'Certificato valido']], S.cf, function (v) { S.cf = v; S.more = false; renderMem(); }));
+    bar.appendChild(sel([['all', 'Certificato'], ['warn', 'Cert. in scadenza'], ['bad', 'Cert. scaduto'], ['none', 'Cert. mancante'], ['ok', 'Cert. valido']], S.cf, function (v) { S.cf = v; S.more = false; renderMem(); }));
     bar.appendChild(sel(planOpts, S.pf, function (v) { S.pf = v; S.more = false; renderMem(); }));
-    bar.appendChild(sel([['end', 'Scadenza (più vicine)'], ['endd', 'Scadenza (più lontane)'], ['name', 'Nome A-Z'], ['named', 'Nome Z-A']], S.srt, function (v) { S.srt = v; renderMem(); }));
+    bar.appendChild(sel([['end', 'Scadenza ↑'], ['endd', 'Scadenza ↓'], ['name', 'Nome A-Z'], ['named', 'Nome Z-A']], S.srt, function (v) { S.srt = v; renderMem(); }));
     root.appendChild(bar);
     var tbl = el('div', 'mzTable'); root.appendChild(tbl);
     function list() {
@@ -336,7 +335,7 @@
       var qq = S.q.trim().toLowerCase();
       var ms = mem.filter(function (m) {
         var cur = curPlan(m), ok = S.flt === 'all' || (S.flt === 'valid' ? (m.status.s === 'ok' || m.status.s === 'warn') : m.status.s === S.flt);
-        return ok && (S.cf === 'all' || certInfo(m).cls === S.cf) && (S.pf === 'all' || (cur && cur.plan_id === S.pf)) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0);
+        return ok && (S.cf === 'all' || certInfo(m).cls === S.cf) && (S.pf === 'all' || (S.pf === 'none' ? !cur : cur && cur.plan_id === S.pf)) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0);
       });
       var k = S.srt, d = /d$/.test(k) ? -1 : 1, key = k.indexOf('name') === 0 ? 'name' : 'end';
       ms.sort(function (a, b) { var x = sortVal(a, key), y = sortVal(b, key); return (x < y ? -1 : x > y ? 1 : 0) * d; });

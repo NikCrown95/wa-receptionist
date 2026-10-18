@@ -573,3 +573,8 @@
 @media(max-width:620px){.mzBar .mzSel:last-child{grid-column:auto}}
 .mzCt{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:8px;flex:none;font-style:normal;margin-left:4px}
 .mzCt.warn{background:rgba(233,185,85,.18);color:#E9B955}.mzCt.bad{background:rgba(229,100,92,.2);color:#FF8A82}
+
+/* filtri: tre menu in una sola riga (anche su telefono), lo stato si sceglie dai quadrati sopra */
+.mzBar{grid-template-columns:minmax(0,1fr) 170px 200px 170px}
+@media(max-width:1100px){.mzBar{grid-template-columns:repeat(3,minmax(0,1fr))}.mzSearch{grid-column:1/-1}}
+@media(max-width:620px){.mzBar{gap:8px}.mzBar .mzSel{height:48px;padding:0 6px 0 0;border-radius:14px}.mzBar .mzSel select{font-size:.8rem;padding:0 2px 0 10px;text-overflow:ellipsis}.mzBar .mzSel svg{display:none}.mzBar .mzSel:last-child{grid-column:auto}.mzBar .mzSearch{height:50px}}
