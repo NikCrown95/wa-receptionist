@@ -896,6 +896,9 @@
       var ex = sel([[3, '3 giorni prima'], [5, '5 giorni prima'], [7, '7 giorni prima'], [10, '10 giorni prima']], st.expiry_days || 5);
       w.appendChild(field('Avvisami della scadenza', ex));
       w.appendChild(el('p', null, 'Da quel giorno l\'abbonamento compare tra le notifiche e in "In scadenza".'));
+      var reqM = st.require_medical !== false, tm = el('button', 'gxTp'); tm.type = 'button';
+      var paintTm = function () { tm.setAttribute('aria-pressed', reqM ? 'true' : 'false'); tm.innerHTML = '<span class="t"><b>Certificato medico obbligatorio</b><small>' + (reqM ? 'Senza un certificato valido l\'iscritto non può prenotare, anche con l\'abbonamento attivo.' : 'Gli iscritti prenotano anche senza certificato: lo vedono solo nel profilo.') + '</small></span><i class="sw"><u></u></i>'; };
+      paintTm(); tm.onclick = function () { reqM = !reqM; paintTm(); }; tm.style.margin = '0 0 12px'; w.appendChild(tm);
       var showN = st.show_names !== false;
       if (OF().cls) {
         var tg = el('button', 'gxTp'); tg.type = 'button';
@@ -908,7 +911,7 @@
         (function (t) { var b = el('button', 'gxCp', t); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', hours.indexOf(t) >= 0 ? 'true' : 'false'); } paint(); b.addEventListener('click', function () { var i = hours.indexOf(t); if (i >= 0) hours.splice(i, 1); else hours.push(t); paint(); }); ch.appendChild(b); })(pad(hh) + ':00');
       }
       if (OF().pt) { w.appendChild(ch); var n = el('p', null, OF().cls ? 'Il Personal compare solo in queste ore e solo se in quell\'ora non c\'è un corso.' : 'Il Personal si può prenotare solo in queste ore, nei giorni di apertura.'); n.style.marginTop = '8px'; w.appendChild(n); }
-      w.appendChild(btn('Salva', 'block', function () { act({ action: 'settings_save', cutoff_hours: h.value, expiry_days: ex.value, show_names: showN, pt_hours: hours.sort() }, 'Salvato.').then(function () { close(); return reload(); }); }));
+      w.appendChild(btn('Salva', 'block', function () { act({ action: 'settings_save', cutoff_hours: h.value, expiry_days: ex.value, show_names: showN, require_medical: reqM, pt_hours: hours.sort() }, 'Salvato.').then(function () { close(); return reload(); }); }));
     });
   }
 
