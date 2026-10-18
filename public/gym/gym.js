@@ -446,41 +446,47 @@
   function memberPage(m) {
     var id = m.id, cur = curPlan(m), u = m.usage || {}, dl = cur && cur.ends_on ? daysTo(cur.ends_on) : null, soon = S.data.settings.expiry_days || 5;
     var root = el('div', 'mx mxD'); xMem.appendChild(root);
-    var hero = el('div', 'mxHero');
-    var pos = 0, dsHtml = '';
-    if (cur && cur.kind === 'time' && cur.starts_on && cur.ends_on) {
-      var tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)), el_ = Math.max(0, Math.min(tot, Math.round((parse(S.today) - parse(cur.starts_on)) / 864e5))); pos = (el_ / tot * 100).toFixed(1);
-      dsHtml = '<div class="mxTl"><div class="mxTr"><i style="width:' + pos + '%"></i><em style="left:' + pos + '%"></em></div><div class="mxDs"><span>Inizio <b>' + short(cur.starts_on) + '</b></span><span><b>' + esc(dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'mancano ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + '</b></span><span>Scadenza <b>' + short(cur.ends_on) + '</b></span></div></div>';
-    } else if (cur && cur.kind === 'entries') {
-      pos = cur.entries_total ? Math.round((cur.entries_total - cur.entries_left) / cur.entries_total * 100) : 0;
-      dsHtml = '<div class="mxTl"><div class="mxTr"><i style="width:' + pos + '%"></i></div><div class="mxDs"><span>Usati <b>' + (cur.entries_total - cur.entries_left) + '</b></span><span><b>' + cur.entries_left + ' rimasti</b></span><span>Totali <b>' + cur.entries_total + '</b></span></div></div>';
-    }
-    hero.innerHTML = '<div class="mxBar"><button type="button" class="mxBack">‹ Iscritti</button><span class="mxTag">Tessera iscritto</span></div>' +
-      '<h2>' + esc(m.first_name + ' ' + m.last_name) + '</h2><a class="mxTel" href="tel:' + esc(m.phone.replace(/[^\d+]/g, '')) + '">' + esc(m.phone) + '</a>' +
-      '<div class="mxPl"><div><b>' + (cur ? esc(cur.plan_name) + (cur.price_paid != null ? ' · ' + eur(cur.price_paid) : '') : 'Nessun abbonamento') + '</b>' + (cur && (u.max_period || u.max_week) ? '<span>' + (u.max_period ? u.max_period + ' ingressi' : '') + (u.max_period && u.max_week ? ' · ' : '') + (u.max_week ? 'max ' + u.max_week + ' a settimana' : '') + '</span>' : '') + '</div><span class="gxChip ' + m.status.s + '">' + esc(m.status.label) + '</span></div>' + dsHtml;
+    var st = m.status, tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
+    var SV = function (d, w) { return '<svg width="' + (w || 20) + '" height="' + (w || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+    var top = el('div', 'mvTop');
+    var back = el('button', 'mvBack'); back.type = 'button'; back.innerHTML = SV('<path d="M15 6l-6 6 6 6"/>', 16) + '<span>Iscritti</span>'; back.addEventListener('click', function () { S.mid = null; renderMem(); }); top.appendChild(back);
+    var ed = el('button', 'mvEd'); ed.type = 'button'; ed.setAttribute('aria-label', 'Modifica iscritto'); ed.innerHTML = SV('<path d="M4 20h4L19 9l-4-4L4 16z"/>', 18); ed.addEventListener('click', function () { memberForm(m); }); top.appendChild(ed);
+    root.appendChild(top);
+    var left = null, tot = 0;
+    if (cur && cur.kind === 'time' && cur.starts_on && cur.ends_on) { tot = Math.max(1, Math.round((parse(cur.ends_on) - parse(cur.starts_on)) / 864e5)); left = Math.max(0, Math.min(100, Math.round(dl / tot * 100))); }
+    else if (cur && cur.kind === 'entries' && cur.entries_total) left = Math.round(cur.entries_left / cur.entries_total * 100);
+    var since = ''; try { if (m.created_at) since = new Date(m.created_at).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }); } catch (e) { }
+    var hero = el('div', 'mvHero ' + st.s);
+    var planHtml = cur
+      ? '<div class="mvPl"><div class="mvPt"><b>' + esc(cur.plan_name) + '</b>' + (cur.price_paid != null ? '<span>' + eur(cur.price_paid) + ' · pagato</span>' : '') + '</div>' +
+        (left != null ? '<span class="mvPb"><i style="width:' + left + '%"></i></span>' : '') +
+        '<div class="mvPd">' + (cur.starts_on ? '<span>dal ' + short(cur.starts_on) + '</span>' : '<span></span>') + '<b>' + (cur.kind === 'entries' ? cur.entries_left + ' ingressi rimasti' : dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'scade tra ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + (cur.ends_on ? ' · ' + short(cur.ends_on) : '') + '</b></div></div>'
+      : '<div class="mvPl"><div class="mvPt"><b>Nessun abbonamento</b></div></div>';
+    hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.first_name + ' ' + m.last_name) + '</b><span>' + esc(m.phone) + (since ? ' · socio da ' + esc(since) : '') + '</span></div><span class="mvChip">' + esc(st.label) + '</span></div>' + planHtml;
     root.appendChild(hero);
-    hero.querySelector('.mxBack').addEventListener('click', function () { S.mid = null; renderMem(); });
-    var body = el('div', 'mxBody'); root.appendChild(body);
-    function ringHtml(n, max) { var r = 26, c = 2 * Math.PI * r, p = max ? Math.min(1, n / max) : 0; return '<div class="mxRing"><svg viewBox="0 0 60 60"><circle class="t" cx="30" cy="30" r="' + r + '" fill="none" stroke-width="6"/><circle class="p' + (max && n >= max ? ' full' : '') + '" cx="30" cy="30" r="' + r + '" fill="none" stroke-width="6" stroke-dasharray="' + (c * p).toFixed(1) + ' ' + c.toFixed(1) + '"/></svg><b>' + n + (max ? '/' + max : '') + '</b></div>'; }
-    var gs = el('div', 'mxGauges');
-    gs.innerHTML = '<div class="mxG">' + ringHtml(u.period || 0, u.max_period) + '<div><label>Ingressi del mese</label><span>' + (u.max_period ? Math.max(0, u.max_period - (u.period || 0)) + ' ancora disponibili' : 'senza limite') + '</span></div></div>' +
-      '<div class="mxG">' + ringHtml(u.week || 0, u.max_week) + '<div><label>Questa settimana</label><span>' + (u.max_week ? Math.max(0, u.max_week - (u.week || 0)) + ' ancora disponibili' : 'senza limite') + '</span></div></div>';
-    body.appendChild(gs);
-    var tpl = cur && cur.plan_id ? S.data.plans.filter(function (p) { return p.id === cur.plan_id; })[0] : null; tpl = tpl || S.data.plans[0] || null;
-    var acts = el('div', 'mxActs');
+    var body = el('div', 'mxBody mvBody'); root.appendChild(body);
+    var acts = el('div', 'mvActs');
+    function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvA ' + (cls || '')); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = SV(icon) + '<span>' + label + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); return b; }
     if (tpl) {
       var from = cur && cur.valid && cur.kind === 'time' && cur.ends_on >= S.data.today ? addDays(cur.ends_on, 1) : S.data.today;
-      var rn = btn('Rinnova' + (tpl.price_eur != null ? ' · ' + eur(tpl.price_eur) : ''), 'mxPrim', function () {
-        rn.disabled = true;
-        act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rn.disabled = false; });
+      var rnb = ab('Rinnova', '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 'pri', function () {
+        rnb.disabled = true;
+        act({ action: 'member_plan_add', member_id: m.id, plan_id: tpl.id, starts_on: from }, 'Abbonamento rinnovato (parte il ' + short(from) + ').').then(function () { return reload(); }).catch(function () { rnb.disabled = false; });
       });
-      acts.appendChild(rn);
+      rnb.title = 'Rinnova' + (tpl.price_eur != null ? ' · ' + eur(tpl.price_eur) : '');
     }
-    acts.appendChild(btn('Prenota', 'mxGh', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); }));
-    var call = el('a', 'mxGh', 'Chiama'); call.href = 'tel:' + m.phone.replace(/[^\d+]/g, ''); acts.appendChild(call);
+    ab('Prenota', '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', '', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); });
+    var dg = String(m.phone || '').replace(/[^\d]/g, ''); if (dg && !/^(39|00)/.test(dg) && dg.length <= 10) dg = '39' + dg; dg = dg.replace(/^00/, '');
+    if (dg) ab('WhatsApp', '<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>', '', null, 'https://wa.me/' + dg);
+    ab('Chiama', '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>', '', null, 'tel:' + String(m.phone || '').replace(/[^\d+]/g, ''));
     body.appendChild(acts);
-    var ci = certInfo(m), cb = el('button', 'gxCert ' + ci.cls); cb.type = 'button';
-    cb.innerHTML = '<span class="ci">' + ic('shield') + '</span><span class="ct"><small>Certificato medico</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">Modifica</span>';
+    var gs = el('div', 'mvGs');
+    function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || 'senza limite') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
+    gt('INGRESSI DEL MESE', u.period || 0, u.max_period); gt('QUESTA SETTIMANA', u.week || 0, u.max_week);
+    if (cur && cur.kind === 'entries' && cur.entries_total != null) gt('INGRESSI RIMASTI', cur.entries_left || 0, cur.entries_total);
+    body.appendChild(gs);
+    var ci = certInfo(m), cb = el('button', 'mvCert ' + ci.cls); cb.type = 'button';
+    cb.innerHTML = '<span class="ci">' + ic('shield') + '</span><span class="ct"><small>CERTIFICATO MEDICO</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">' + (ci.cls === 'ok' ? 'Modifica' : 'Aggiorna') + '</span>';
     cb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cb);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
