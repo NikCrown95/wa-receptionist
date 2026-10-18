@@ -349,15 +349,25 @@
 
 /* Affitto sala */
 .gpfRent{display:flex;flex-direction:column;gap:14px}
-.gpfRentHd h3{margin:0}.gpfRentHd small{display:block;margin-top:3px;color:var(--muted);font-size:.84rem}
-.gpfRentBd{display:flex;gap:16px;align-items:center}
-.gpfQr{flex:none;width:148px;height:148px;padding:8px;border-radius:16px;background:#fff;display:grid;place-items:center}.gpfQr svg{width:100%;height:100%;display:block}
-.gpfRentTx{min-width:0;display:flex;flex-direction:column;gap:6px}.gpfRentTx small{font-size:.66rem;font-weight:800;letter-spacing:.12em;color:var(--muted)}
-.gpfRentTx b{font-size:.98rem;word-break:break-all;line-height:1.25}.gpfRentTx span{font-size:.82rem;color:var(--muted)}
-.gpfRentAc{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-.gpfRentList{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card2,var(--card));cursor:pointer;font-weight:700}
-.gpfRentList span{flex:1}.gpfRentList b{min-width:26px;height:26px;border-radius:13px;display:grid;place-items:center;background:var(--accent);color:var(--on-accent,#04141A);font-size:.85rem}.gpfRentList i{font-style:normal;color:var(--muted);font-size:1.2rem}
-@media(max-width:480px){.gpfRentBd{flex-direction:column;align-items:stretch}.gpfQr{align-self:center;width:176px;height:176px}}
+.gpfRentHd{display:flex;align-items:center;gap:12px}.gpfRentHd h3{margin:0;font-size:1.12rem}.gpfRentHd small{display:block;margin-top:2px;color:var(--muted);font-size:.8rem;font-weight:600}
+.gpfRentIc{width:46px;height:46px;flex:none;border-radius:15px;background:rgba(142,92,230,.18);color:#A98BFF;display:grid;place-items:center}
+.gpfRentLink{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;background:var(--card2,var(--card));border:1px solid var(--line2);cursor:pointer;color:var(--ink)}
+.gpfRentLink span{flex:1;min-width:0;font-weight:700;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gpfRentLink svg{color:var(--muted);flex:none}
+.gpfRentAc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.gpfRA{all:unset;box-sizing:border-box;height:62px;border-radius:16px;border:1px solid var(--line2);background:var(--card2,var(--card));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;font-size:.72rem;font-weight:700;text-align:center}
+.gpfRA.pri{background:var(--accent);border-color:transparent;color:var(--on-accent,#04141A);font-weight:800}
+.gpfRentNx{display:flex;flex-direction:column;gap:8px}.gpfRentNx small{font-size:.66rem;font-weight:800;letter-spacing:.12em;color:var(--muted)}
+.gpfRentRow{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--card2,var(--card));border:1px solid var(--line);cursor:pointer}
+.gpfRentRow .dc{width:48px;height:48px;flex:none;border-radius:14px;background:var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center}.gpfRentRow .dc b{font-size:1.15rem;line-height:1}.gpfRentRow .dc em{font-style:normal;font-size:.62rem;font-weight:700;color:var(--muted)}
+.gpfRentRow .tx{flex:1;min-width:0;display:flex;flex-direction:column}.gpfRentRow .tx b{font-size:.96rem}.gpfRentRow .tx small{font-size:.82rem;color:var(--muted);font-weight:600;letter-spacing:0}
+.gpfRentRow .mo{font-weight:800;font-size:.84rem;color:#A98BFF}
+.gpfRentNo{margin:0;color:var(--muted);font-size:.86rem}
+.gpfPost{padding:0}.gpfPostBtn{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;color:var(--ink)}
+.gpfPostBtn .ic{width:42px;height:42px;flex:none;border-radius:13px;background:var(--accent-soft,var(--line));color:var(--accent);display:grid;place-items:center}
+.gpfPostBtn .tx{flex:1;min-width:0;display:flex;flex-direction:column}.gpfPostBtn .tx small{color:var(--muted);font-size:.8rem;font-weight:600}.gpfPostBtn i{font-style:normal;color:var(--muted);font-size:1.3rem}
+.gxQrBox{display:grid;place-items:center;padding:14px;border-radius:18px;background:#fff;margin:4px auto 8px;width:fit-content}.gxQrUrl{text-align:center;font-weight:700;word-break:break-all;margin:0 0 6px}
+.gxPostCv{display:grid;place-items:center;min-height:200px;margin:10px 0}.gxPostCv canvas{width:min(300px,100%);height:auto;border-radius:10px;border:1px solid var(--line2)}
+@media(max-width:380px){.gpfRA{font-size:.66rem}}
 .gxRent{border:1px solid var(--line2);border-radius:16px;padding:12px 14px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;background:var(--card)}
 .gxRent.hl{border-color:#C79BFF;box-shadow:0 0 0 3px rgba(199,155,255,.25)}
 .gxRent .rt{display:flex;justify-content:space-between;gap:10px;font-size:1.02rem}.gxRent .rt span{color:var(--muted);font-weight:700}
