@@ -1219,19 +1219,13 @@
         for (var i = 0; i < txt.length; i++) { c.fillText(txt[i], x, base); c.strokeText(txt[i], x, base); x += c.measureText(txt[i]).width + trk; }
       }
       function fit(txt, size, max) { while (size > 40 && wid(txt, size, -size * 0.045, size * 0.03) > max) size -= 2; return size; }
-      // titolo: stesso posto e stessa grandezza di "Prenota qui."
-      c.fillStyle = BG; c.fillRect(90, 150, 850, 352); c.fillRect(380, 498, 120, 26);
-      var l1 = o.kind === 'sala' ? 'Affitta' : 'Prenota', l2 = o.kind === 'sala' ? 'la sala.' : 'il tuo corso.';
-      var s1 = fit(l1, 210, 760); head(l1, s1, 325, ink);
-      var s2 = fit(l2, Math.round(s1 * (o.kind === 'sala' ? 0.74 : 0.7)), 800), w2 = wid(l2, s2, -s2 * 0.045, s2 * 0.03), g = c.createLinearGradient(512 - w2 / 2, 0, 512 + w2 / 2, 0);
-      g.addColorStop(0, '#0A6CFF'); g.addColorStop(1, '#00E0FF'); head(l2, s2, 325 + 12 + s2 * 0.9, g);
+      function line(txt, font, base, fill, max) { var size = parseInt(font, 10); c.font = font; while (size > 20) { c.font = font.replace(/\d+px/, size + 'px'); if (c.measureText(txt).width <= max) break; size -= 1; } c.fillStyle = fill; c.textAlign = 'center'; c.fillText(txt, 512, base); c.textAlign = 'left'; }
+      c.fillStyle = BG; c.fillRect(150, 935, 724, 80); line(o.kind === 'sala' ? 'Affitta la sala.' : 'Prenota il tuo corso.', '700 40px ' + HF, 990, ink, 560);
       if (o.kind === 'sala') {
-        function line(txt, font, base, fill, max) { var size = parseInt(font, 10); c.font = font; while (size > 20) { c.font = font.replace(/\d+px/, size + 'px'); if (c.measureText(txt).width <= max) break; size -= 1; } c.fillStyle = fill; c.textAlign = 'center'; c.fillText(txt, 512, base); c.textAlign = 'left'; }
-        c.fillStyle = BG; c.fillRect(150, 935, 724, 80); line('Hai un corso da tenere?', '700 44px ' + HF, 992, ink, 600);
         c.fillStyle = BG; c.fillRect(366, 1212, 292, 145);
         line('1 ora · ' + fmtEur(o.price), '700 40px ' + HF, 1256, ink, 280);
-        c.font = '500 30px ' + BF; var sw2 = c.measureText('Dopo la chiusura').width, sz = sw2 > 300 ? Math.floor(30 * 300 / sw2) : 30;
-        line('Dopo la chiusura', '500 ' + sz + 'px ' + BF, 1301, ink, 400); line('della palestra.', '500 ' + sz + 'px ' + BF, 1341, ink, 400);
+        c.font = '500 28px ' + BF; var sw2 = c.measureText('Dopo la chiusura').width, sz = sw2 > 270 ? Math.floor(28 * 270 / sw2) : 28;
+        line('Dopo la chiusura', '500 ' + sz + 'px ' + BF, 1300, ink, 400); line('della palestra.', '500 ' + sz + 'px ' + BF, 1338, ink, 400);
       }
       c.restore(); return cv;
     });
