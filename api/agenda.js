@@ -399,6 +399,8 @@ module.exports = async (req, res) => {
     if (q.referral === "1") {
       res.setHeader("Cache-Control", "no-store");
       if (req.method !== "GET") return res.status(405).json({ error: "Metodo non consentito" });
+      // Funzione pronta ma spenta finche' non esiste il sito di registrazione: per accenderla basta REFERRAL_LIVE=1 su Vercel
+      if (process.env.REFERRAL_LIVE !== "1") return res.status(200).json({ available: false });
       try {
         const info = await require("../lib/referral.js").businessInfo(biz.id, async function (path) {
           const r = await sb("GET", path);
