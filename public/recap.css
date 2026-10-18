@@ -178,6 +178,13 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 .lr-it .ic.k1{background:linear-gradient(145deg,#F7AA2B,#E88A17)}
 .lr-it .ic.k2{background:linear-gradient(145deg,#9279F4,#6E52DB)}
 .lr-it .ic.k3{background:linear-gradient(145deg,#FF9484,#E2584A)}
+.lr-it .ic.k4{background:linear-gradient(145deg,#E9B955,#B8861F);color:#2A1E04}
+.lr-secmed{color:#C9A04A}
+.lr-it.med{border-color:rgba(233,185,85,.45);background:linear-gradient(100deg,rgba(233,185,85,.14),var(--card2) 70%)}
+.lr-it.med .tx em{color:#E9B955}
+.lr-it.med.bad{border-color:rgba(229,100,92,.5);background:linear-gradient(100deg,rgba(229,100,92,.14),var(--card2) 70%)}
+.lr-it.med.bad .ic.k4{background:linear-gradient(145deg,#FF9484,#E2584A);color:#fff}
+.lr-it.med.bad .tx em{color:#FF9484}
 .lr-it .tx{min-width:0}
 .lr-it .tx b{display:block;font-weight:800;font-size:.92rem;letter-spacing:-.01em}
 .lr-it .tx>span{display:block;margin-top:3px;font-size:.82rem;color:var(--muted);line-height:1.4}

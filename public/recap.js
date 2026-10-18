@@ -32,10 +32,11 @@
   var IC = {
     closures: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
     feedback: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4A8 8 0 1 1 20 12z"/></svg>',
+    med: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 9v5M9.5 11.5h5"/></svg>',
     sub: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18M7 15h4"/></svg>'
   };
-  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3" };
-  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.sub };
+  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4" };
+  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.sub, medical_expiring: IC.med };
 
   function build() {
     var bell = document.getElementById("bellBtn");
@@ -145,6 +146,11 @@
     if (n.type === "feedback_ask") {
       return { title: "Come ti trovi con Prenolia?", text: "Ci vuole un minuto: dicci cosa funziona e cosa manca.", cta: "Rispondi", time: "" };
     }
+    if (n.type === "medical_expiring") {
+      var md = Number(meta.days_left) || 0, ud = "";
+      try { ud = new Date(meta.until + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) {}
+      return { title: meta.name || "Iscritto", text: "Certificato medico " + (md < 0 ? "scaduto da " + (-md) + (md === -1 ? " giorno" : " giorni") : md === 0 ? "scade oggi" : md === 1 ? "scade domani" : "scade tra " + md + " giorni") + (ud ? ", " + ud : "") + (md < 0 ? ". Non pu\u00f2 prenotare." : ""), cta: "Apri la scheda", time: "" };
+    }
     if (n.type === "member_expiring") {
       var dl = Number(meta.days_left) || 0, ed = "";
       try { ed = new Date(meta.ends_on + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) {}
@@ -178,7 +184,7 @@
   }
   function noticeRow(n, un) {
     var t = noticeText(n);
-    return '<button type="button" class="lr-it' + (un ? " un" : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
+    return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
       '<span class="tx"><b>' + esc(t.title) + "</b><span>" + esc(t.text) + "</span><em>" + esc(t.cta) + " \u203a</em>" + (t.time ? "<small>" + esc(t.time) + "</small>" : "") + "</span>" +
       '<span class="ch">' + CHEV + "</span></button>";
   }
@@ -189,10 +195,11 @@
     if (mi) body += monthCard(!isSeen(kOf(mi)));
     if (list.length) {
       if (mi && !data.gym) body += '<p class="lr-sec">Avvisi</p>';
-      var shownExp = false;
+      var shownExp = false, shownMed = false;
       body += list.map(function (n) {
         var pre = "";
         if (n.type === "member_expiring" && !shownExp) { shownExp = true; pre = '<p class="lr-sec">Abbonamenti in scadenza</p>'; }
+        if (n.type === "medical_expiring" && !shownMed) { shownMed = true; pre = '<p class="lr-sec lr-secmed">Certificati medici</p>'; }
         return pre + noticeRow(n, !isSeen(kOf(n)));
       }).join("");
     }
@@ -213,7 +220,7 @@
   }
   function go(type, mid) {
     closePanel();
-    if (type === "member_expiring" && window.liaGymMember) return window.liaGymMember(mid);
+    if ((type === "member_expiring" || type === "medical_expiring") && window.liaGymMember) return window.liaGymMember(mid);
     if (type === "closures_reminder") { if (data && data.gym && window.liaGym) { var om = document.getElementById("menuTabOther"); if (om) om.click(); return setTimeout(function () { window.liaGym.openSetting("chiusure"); }, 80); } return openSettings("blocks"); }
     if (type === "sub_expiring") return openSettings("subscription");
     if (type === "feedback_ask" && window.liaFeedbackOpen) window.liaFeedbackOpen(true);
