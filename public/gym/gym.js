@@ -17,6 +17,7 @@
   var CATL = { tutti: 'Tutti i corsi', corsi: 'Corsi', circuiti: 'Circuiti', hyrox: 'Hyrox', pilates: 'Pilates', personal: 'Personal 1:1' };
   var IC = {
     users: '<circle cx="9" cy="8" r="3.3"/><path d="M2.8 20c.4-3.6 3-5.6 6.2-5.6s5.8 2 6.2 5.6"/><circle cx="17" cy="9" r="2.6"/><path d="M17.5 14.2c2.3.2 3.8 1.8 4.2 4.3"/>', check: '<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.3 9.5"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.3 2"/>', alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.4v.1"/>', phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2"/>', dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>', chev: '<path d="m6 9 6 6 6-6"/>', l: '<path d="M15 6l-6 6 6 6"/>', r: '<path d="M9 6l6 6-6 6"/>', plus: '<path d="M12 5v14M5 12h14"/>',
+    shield: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
     card: '<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6.5 15h4"/>',
     clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     cal: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
@@ -323,8 +324,9 @@
     var q = el('input'); q.type = 'search'; q.placeholder = 'Cerca per nome o telefono'; q.value = S.q; q.autocomplete = 'off'; sr.appendChild(q); bar.appendChild(sr);
     function sel(opts, val, fn) { var w = el('label', 'mzSel'); var x = el('select'); opts.forEach(function (o) { var e = el('option', null, o[1]); e.value = o[0]; if (o[0] === val) e.selected = true; x.appendChild(e); }); x.addEventListener('change', function () { fn(x.value); }); w.appendChild(x); w.insertAdjacentHTML('beforeend', ic('chev', 16)); return w; }
     var planOpts = [['all', 'Tutti gli abbonamenti']].concat(S.data.plans.map(function (p) { return [p.id, p.name]; }));
-    S.pf = S.pf || 'all'; S.srt = S.srt || 'end';
+    S.pf = S.pf || 'all'; S.srt = S.srt || 'end'; S.cf = S.cf || 'all';
     bar.appendChild(sel([['all', 'Tutti gli stati'], ['ok', 'Attivi'], ['valid', 'Validi'], ['warn', 'In scadenza'], ['bad', 'Scaduti']].concat(cnt.none ? [['none', 'Senza abbonamento']] : []), S.flt, function (v) { S.flt = v; S.more = false; renderMem(); }));
+    bar.appendChild(sel([['all', 'Tutti i certificati'], ['warn', 'Certificato in scadenza'], ['bad', 'Certificato scaduto'], ['none', 'Certificato mancante'], ['ok', 'Certificato valido']], S.cf, function (v) { S.cf = v; S.more = false; renderMem(); }));
     bar.appendChild(sel(planOpts, S.pf, function (v) { S.pf = v; S.more = false; renderMem(); }));
     bar.appendChild(sel([['end', 'Scadenza (più vicine)'], ['endd', 'Scadenza (più lontane)'], ['name', 'Nome A-Z'], ['named', 'Nome Z-A']], S.srt, function (v) { S.srt = v; renderMem(); }));
     root.appendChild(bar);
@@ -334,7 +336,7 @@
       var qq = S.q.trim().toLowerCase();
       var ms = mem.filter(function (m) {
         var cur = curPlan(m), ok = S.flt === 'all' || (S.flt === 'valid' ? (m.status.s === 'ok' || m.status.s === 'warn') : m.status.s === S.flt);
-        return ok && (S.pf === 'all' || (cur && cur.plan_id === S.pf)) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0);
+        return ok && (S.cf === 'all' || certInfo(m).cls === S.cf) && (S.pf === 'all' || (cur && cur.plan_id === S.pf)) && (!qq || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(qq) >= 0);
       });
       var k = S.srt, d = /d$/.test(k) ? -1 : 1, key = k.indexOf('name') === 0 ? 'name' : 'end';
       ms.sort(function (a, b) { var x = sortVal(a, key), y = sortVal(b, key); return (x < y ? -1 : x > y ? 1 : 0) * d; });
@@ -352,7 +354,7 @@
           var big = dl < 0 ? '−' + (-dl) : String(dl), unit = Math.abs(dl) === 1 ? 'giorno' : 'giorni', cap = dl < 0 ? 'scaduto il' : dl === 0 ? 'scade oggi' : 'scade il';
           sc = '<span class="mzX ' + m.status.s + '"><span class="mzXn"><b>' + big + '</b><small>' + unit + '</small></span><span class="mzXd"><small>' + cap + '</small><b>' + short(cur.ends_on) + '</b></span></span>';
         } else sc = '<span class="mzMute">Nessun abbonamento</span>';
-        r.innerHTML = '<span class="mzC mzN ' + mzGen(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b></span>' +
+        r.innerHTML = '<span class="mzC mzN ' + mzGen(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b>' + (function () { var ci = certInfo(m); return ci.cls === 'warn' || ci.cls === 'bad' ? '<i class="mzCt ' + ci.cls + '" title="Certificato medico: ' + esc(ci.head.toLowerCase()) + '">' + ic('shield', 15) + '</i>' : ''; })() + '</span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? '<span class="mzPl pl' + (Math.max(0, S.data.plans.map(function (p) { return p.id; }).indexOf(cur.plan_id)) % 4) + '">' + esc(cur.plan_name) + '</span>' : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
@@ -479,7 +481,7 @@
     var call = el('a', 'mxGh', 'Chiama'); call.href = 'tel:' + m.phone.replace(/[^\d+]/g, ''); acts.appendChild(call);
     body.appendChild(acts);
     var ci = certInfo(m), cb = el('button', 'gxCert ' + ci.cls); cb.type = 'button';
-    cb.innerHTML = '<span class="ci">' + ic('card') + '</span><span class="ct"><small>Certificato medico</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">Modifica</span>';
+    cb.innerHTML = '<span class="ci">' + ic('shield') + '</span><span class="ct"><small>Certificato medico</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">Modifica</span>';
     cb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cb);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);

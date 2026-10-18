@@ -566,3 +566,10 @@
   :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{--g:#D9A441;--t:#E6C27A}
   :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{--g:#D9695F;--t:#E79A92}
 }
+
+/* filtro certificato medico + segnalino nella riga */
+.mzBar{grid-template-columns:minmax(0,1fr) 150px 190px 170px 190px}
+@media(max-width:1100px){.mzBar{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.mzBar .mzSel:last-child{grid-column:auto}}
+.mzCt{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:8px;flex:none;font-style:normal;margin-left:4px}
+.mzCt.warn{background:rgba(233,185,85,.18);color:#E9B955}.mzCt.bad{background:rgba(229,100,92,.2);color:#FF8A82}
