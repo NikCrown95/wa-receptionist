@@ -326,6 +326,16 @@ module.exports = async (req, res) => {
   res.setHeader("Referrer-Policy", "no-referrer");
 
   const q = req.query || {};
+  // Link breve del pannello: prenolia.it/a/CODICE porta al pannello dell'attività
+  if (q.c !== undefined) {
+    const code = String(q.c || "").trim();
+    if (/^[A-Za-z0-9]{8,32}$/.test(code)) {
+      const sr = await sb("GET", "businesses?short_code=eq." + code + "&active=eq.true&select=agenda_token&limit=1");
+      const tk = sr.ok && Array.isArray(sr.data) && sr.data[0] && sr.data[0].agenda_token;
+      if (tk) { res.statusCode = 302; res.setHeader("Location", "/api/agenda?t=" + encodeURIComponent(tk)); return res.end(); }
+    }
+    res.statusCode = 404; res.setHeader("Content-Type", "text/plain; charset=utf-8"); return res.end("Link non valido");
+  }
   const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.notes === "1" || q.push === "1" || q.manifest === "1" || q.notifications === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1" || q.shop === "1" || q.recap === "1" || q.referral === "1" || q.export === "1";
 
   // 1) La pagina

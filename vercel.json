@@ -135,6 +135,10 @@
       "destination": "/api/legal?doc=cliente&b=:slug"
     },
     {
+      "source": "/a/:code",
+      "destination": "/api/agenda?c=:code"
+    },
+    {
       "source": "/palestra/:slug",
       "destination": "/api/palestra?b=:slug"
     },
