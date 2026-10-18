@@ -462,7 +462,7 @@
         (left != null ? '<span class="mvPb"><i style="width:' + left + '%"></i></span>' : '') +
         '<div class="mvPd">' + (cur.starts_on ? '<span>dal ' + short(cur.starts_on) + '</span>' : '<span></span>') + '<b>' + (cur.kind === 'entries' ? cur.entries_left + ' ingressi rimasti' : dl == null ? '' : dl < 0 ? 'scaduto da ' + (-dl) + (dl === -1 ? ' giorno' : ' giorni') : dl === 0 ? 'scade oggi' : 'scade tra ' + dl + (dl === 1 ? ' giorno' : ' giorni')) + (cur.ends_on ? ' · ' + short(cur.ends_on) : '') + '</b></div></div>'
       : '<div class="mvPl"><div class="mvPt"><b>Nessun abbonamento</b></div></div>';
-    hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.first_name + ' ' + m.last_name) + '</b><span>' + esc(m.phone) + (since ? ' · socio da ' + esc(since) : '') + '</span></div><span class="mvChip">' + esc(st.label) + '</span></div>' + planHtml;
+    hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.first_name + ' ' + m.last_name) + '</b><span>' + esc(m.phone) + '</span></div></div><div class="mvMeta"><span class="mvChip">' + esc(st.label) + '</span>' + (since ? '<span class="mvSince">Socio da ' + esc(since) + '</span>' : '') + '</div><span class="mvSep"></span>' + planHtml;
     root.appendChild(hero);
     var body = el('div', 'mxBody mvBody'); root.appendChild(body);
     var acts = el('div', 'mvActs');

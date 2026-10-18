@@ -312,10 +312,32 @@
 .mxD .mvV{display:flex;align-items:baseline;gap:5px}.mxD .mvV b{font-size:1.5rem;font-weight:800;line-height:1}.mxD .mvV small{font-size:.82rem;font-weight:600;color:var(--muted)}
 .mxD .mvB{height:5px;border-radius:3px;background:var(--line);overflow:hidden}.mxD .mvB i{display:block;height:100%;border-radius:3px;background:var(--accent)}
 .mxD .mvG.full .mvV b{color:var(--bad,#E5645C)}.mxD .mvG.full .mvB i{background:var(--bad,#E5645C)}
-.mxD .mvCert{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:20px;border:1px solid var(--line2);background:var(--card);cursor:pointer;color:var(--ink)}
-.mxD .mvCert .ci{width:42px;height:42px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--line);color:var(--muted)}
-.mxD .mvCert .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.mxD .mvCert .ct small{font-size:.64rem;font-weight:800;letter-spacing:.12em;color:var(--muted)}.mxD .mvCert .ct b{font-size:1rem;font-weight:800}.mxD .mvCert .ct span{font-size:.8rem;color:var(--muted)}
-.mxD .mvCert .cg{flex:none;font-size:.8rem;font-weight:800;color:var(--accent)}
-.mxD .mvCert.ok .ci{background:color-mix(in srgb,var(--ok,#2DAA7F) 20%,transparent);color:var(--ok,#2DAA7F)}.mxD .mvCert.ok .ct b{color:var(--ok,#2DAA7F)}
-.mxD .mvCert.warn .ci{background:color-mix(in srgb,var(--warn,#E9B955) 20%,transparent);color:var(--warn,#E9B955)}.mxD .mvCert.warn .ct b{color:var(--warn,#E9B955)}
-.mxD .mvCert.bad{border-color:color-mix(in srgb,var(--bad,#E5645C) 55%,transparent)}.mxD .mvCert.bad .ci{background:color-mix(in srgb,var(--bad,#E5645C) 20%,transparent);color:var(--bad,#E5645C)}.mxD .mvCert.bad .ct b{color:var(--bad,#E5645C)}
+.mxD .mvCert{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:14px;width:100%;padding:16px;border-radius:22px;border:1.5px solid #2C3F49;background:#0F1A22;cursor:pointer;color:#EAF1F4}
+.mxD .mvCert:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mxD .mvCert .ci{width:48px;height:48px;flex:none;border-radius:16px;display:grid;place-items:center;background:#1B2630;color:#9FB0BA}
+.mxD .mvCert .ci svg{width:26px;height:26px}
+.mxD .mvCert .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mxD .mvCert .ct small{font-size:.66rem;font-weight:800;letter-spacing:.13em;color:#8FA3AE}
+.mxD .mvCert .ct b{font-size:1.2rem;font-weight:800;line-height:1.15;color:#EAF1F4}
+.mxD .mvCert .ct span{font-size:.86rem;font-weight:600;color:#9FB0BA}
+.mxD .mvCert .cg{flex:none;height:34px;padding:0 14px;border-radius:17px;display:flex;align-items:center;font-size:.8rem;font-weight:800;background:#1B2C36;color:#BFE3EE}
+.mxD .mvCert.ok{border-color:#1F6B52;background:linear-gradient(100deg,#0F2D26,#0F1A22)}.mxD .mvCert.ok .ci{background:#143A33;color:#6FD6B4}.mxD .mvCert.ok .ct b{color:#6FD6B4}
+.mxD .mvCert.warn{border-color:#8A6A1E;background:linear-gradient(100deg,#2E2510,#0F1A22)}.mxD .mvCert.warn .ci{background:#3A3016;color:#F0C15A}.mxD .mvCert.warn .ct b{color:#F0C15A}
+.mxD .mvCert.bad{border-color:#9A3B38;background:linear-gradient(100deg,#321615,#0F1A22)}.mxD .mvCert.bad .ci{background:#4A1F21;color:#FF8A82}.mxD .mvCert.bad .ct b{color:#FF8A82}
+.mxD .mvCert.none{border-style:dashed}
+@media(max-width:420px){.mxD .mvCert .cg{display:none}}
+.mxD .mvMeta{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:-4px}
+.mxD .mvMeta .mvChip{position:static;align-self:auto}
+.mxD .mvSince{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.72)}
+.mxD .mvSep{height:1px;background:rgba(255,255,255,.16);margin:-2px 0}
+.mxD .mvNm span{font-size:.92rem;font-weight:600}
+@media(max-width:480px){
+.mxD .mvHero{padding:16px;gap:14px;border-radius:22px}
+.mxD .mvAv{width:52px;height:52px}
+.mxD .mvNm b{font-size:1.3rem;overflow-wrap:anywhere}
+.mxD .mvA{height:58px;font-size:.72rem}
+.mxD .mvG{padding:10px 12px}.mxD .mvV b{font-size:1.35rem}
+.mxD .mvCert{padding:14px;gap:12px;border-radius:20px}
+.mxD .mvCert .ci{width:44px;height:44px;border-radius:14px}
+.mxD .mvCert .ct b{font-size:1.12rem}
+}
