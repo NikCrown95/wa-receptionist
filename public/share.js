@@ -143,7 +143,7 @@
     var card = mk("div", "mnShare",
       '<span class="mnShareKick">La tua pagina di prenotazione</span>' +
       '<button type="button" class="mnShareTop" data-a="profile"><span class="mnAv" id="mnAv" aria-hidden="true"></span>' +
-      '<span class="mnShareTxt"><small id="mnKind"></small><b id="mnBizName">La tua attività</b><span id="mnBizAddr" hidden></span></span></button>' +
+      '<span class="mnShareTxt"><small id="mnKind"></small><b id="mnBizName">La tua attività</b><span id="mnBizAddr" hidden></span></span><span class="mnShareGo" aria-hidden="true">' + I.chev + '</span></button>' +
       '<div class="mnShareAct"><button type="button" class="mnBtnA" data-a="share">' + I.share + "<span>Condividi</span></button>" +
       '<button type="button" class="mnBtnB" data-a="qr">' + I.qrs + "<span>Mostra il QR</span></button></div>");
     card.id = "mnShareCard"; card.hidden = true;
@@ -174,9 +174,16 @@
     var oi = other.querySelector("svg");
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     document.body.classList.add("mnOn");
+    var pt = $("menuTabProfile");
+    if (pt && window.MutationObserver) new MutationObserver(markCur).observe(pt, { attributes: true, attributeFilter: ["aria-current"] });
+    markCur();
     return true;
   }
   function txt(id) { var e = $(id); return e && !e.hidden ? String(e.textContent || "").trim() : ""; }
+  function markCur() {
+    var c = $("mnShareCard"), p = $("menuTabProfile");
+    if (c) c.classList.toggle("cur", !!p && p.getAttribute("aria-current") === "true");
+  }
   function syncProfile() {
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};

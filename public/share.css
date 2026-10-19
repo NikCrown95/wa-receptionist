@@ -184,3 +184,9 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 
 
 #burgerMenu .mnShare.mnNoLink .mnShareAct{display:none}
+
+/* la scheda in cima apre la scheda attivita': la voce del menu non serve piu */
+body.mnOn #burgerMenu #menuTabProfile{display:none}
+#burgerMenu .mnShare .mnShareGo{flex:none;margin-left:auto;display:grid;place-items:center;color:var(--muted)}
+#burgerMenu .mnShare .mnShareGo svg{width:18px;height:18px}
+#burgerMenu .mnShare.cur{box-shadow:inset 0 0 0 1.5px var(--accent)}
