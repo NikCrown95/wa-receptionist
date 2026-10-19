@@ -55,7 +55,7 @@
       var b = (d && d.business) || {};
       var gym = b.business_type === "palestra";
       var o = b.gym_offers || null;
-      var res = { name: b.name || "", plan: planLabel(b.plan_name), gym: gym, classes: !gym || !o || o.classes !== false, personal: !gym || !o || o.personal !== false, rental: false, links: [] };
+      var res = { raw: b, name: b.name || "", plan: planLabel(b.plan_name), gym: gym, classes: !gym || !o || o.classes !== false, personal: !gym || !o || o.personal !== false, rental: false, links: [] };
       var main = String(b.public_link || "");
       if (main) res.links.push({ key: "main", seg: gym ? "Prenotazioni" : "Prenota", url: abs(main) });
       if (!gym) return res;
@@ -116,14 +116,16 @@
     menu.setAttribute("data-mn", "1");
 
     var card = mk("div", "mnShare",
-      '<button type="button" class="mnShareTop" data-a="open"><span class="mnThumb" id="mnThumb" aria-hidden="true">' + I.qr + '</span>' +
-      '<span class="mnShareTxt"><b>La tua pagina di prenotazione</b><span id="mnShareUrl"></span></span></button>' +
+      '<span class="mnShareKick">La tua pagina di prenotazione</span>' +
+      '<button type="button" class="mnShareTop" data-a="profile"><span class="mnAv" id="mnAv" aria-hidden="true"></span>' +
+      '<span class="mnShareTxt"><small id="mnKind"></small><b id="mnBizName">La tua attività</b><span id="mnBizAddr" hidden></span></span></button>' +
       '<div class="mnShareAct"><button type="button" class="mnBtnA" data-a="share">' + I.share + "<span>Condividi</span></button>" +
       '<button type="button" class="mnBtnB" data-a="qr">' + I.qrs + "<span>Mostra il QR</span></button></div>");
     card.id = "mnShareCard"; card.hidden = true;
     card.addEventListener("click", function (ev) {
       var b = ev.target.closest("[data-a]"); if (!b || !biz || !biz.links.length) return;
       var a = b.getAttribute("data-a");
+      if (a === "profile") { var pf = $("menuTabProfile"); if (pf) pf.click(); return; }
       if (a === "share") {
         var u = biz.links[0].url;
         if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: "Prenota da " + (biz.name || "noi"), url: u }).catch(function () {});
@@ -147,20 +149,28 @@
     document.body.classList.add("mnOn");
     return true;
   }
-  function thumbSvg(q) {
-    if (!q || !q.M) return "";
-    var N = q.N, m = 1, d = "", x, y;
-    for (y = 0; y < N; y++) for (x = 0; x < N; x++) if (q.M[y][x]) d += "M" + (x + m) + " " + (y + m) + "h1v1h-1z";
-    var W = N + m * 2;
-    return '<svg viewBox="0 0 ' + W + " " + W + '" shape-rendering="crispEdges" aria-hidden="true"><rect width="' + W + '" height="' + W + '" fill="#fff"/><path d="' + d + '" fill="#0B1A20"/></svg>';
+  function txt(id) { var e = $(id); return e && !e.hidden ? String(e.textContent || "").trim() : ""; }
+  function syncProfile() {
+    var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
+    var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
+    var k = window.liaHeroKindOf ? window.liaHeroKindOf(raw) : null;
+    av.className = "mnAv" + (k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
+    if (k) {
+      card.style.setProperty("--mnh", String(k.h));
+      av.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" ' + S + ' stroke-width="1.7">' + k.icon + "</svg>";
+    } else av.textContent = String(raw.name || biz.name || "A").charAt(0).toUpperCase();
+    var kd = $("mnKind"); if (kd) { kd.textContent = k ? k.label : ""; kd.hidden = !k; }
+    var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
+    var nm = $("mnBizName"); if (nm) nm.textContent = name;
+    var ad = $("mnBizAddr"), addr = txt("pfAddr") || String(raw.address || "").trim();
+    if (ad) { ad.textContent = addr; ad.hidden = !addr; }
   }
   function paintMenu() {
     var c = $("mnShareCard");
     if (c) c.hidden = !(biz && biz.links.length);
     if (!c || !biz || !biz.links.length) return;
-    var u = biz.links[0].url, t = $("mnThumb"), s = $("mnShareUrl");
-    if (s) s.textContent = u.replace(/^https?:\/\//, "");
-    if (t) { var q = qrFor(u), sv = thumbSvg(q); if (sv) t.innerHTML = sv; }
+    syncProfile();
+    if (window.MutationObserver && menu) new MutationObserver(syncProfile).observe(menu, { attributes: true, attributeFilter: ["class", "hidden"] });
   }
 
   /* ---------- foglio "Condividi la tua pagina" ---------- */
@@ -171,9 +181,9 @@
     sheet.innerHTML =
       '<button type="button" class="mnScrim" id="mnShareScrim" aria-label="Chiudi"></button>' +
       '<div class="mnSheet"><div class="mnGrab"></div>' +
-      '<div class="mnSH"><div><h2 id="mnShT">Condividi la tua pagina</h2><p class="mnSub" id="mnShSub"></p></div><button type="button" class="mnClose" data-a="close" aria-label="Chiudi">' + I.x + "</button></div>" +
+      '<div class="mnSH"><div><span class="mnQrKick">Il tuo QR code</span><h2 id="mnShT">Condividi la tua pagina</h2><p class="mnSub" id="mnShSub"></p></div><button type="button" class="mnClose" data-a="close" aria-label="Chiudi">' + I.x + "</button></div>" +
       '<div class="mnSeg" role="group" aria-label="Quale link" hidden></div>' +
-      '<div class="mnQrCard"><div class="mnQrBox" id="mnQrBox"></div><div class="mnQrInfo"><b id="mnQrName"></b><span id="mnQrHint"></span></div></div>' +
+      '<div class="mnQrCard"><div class="mnQrFrame"><i></i><i></i><i></i><i></i><div class="mnQrBox" id="mnQrBox"></div></div><div class="mnQrInfo"><b id="mnQrName"></b><span id="mnQrHint"></span></div></div>' +
       '<div class="mnLinkRow"><code id="mnLinkTxt"></code><button type="button" class="mnCopy" data-a="copy">' + I.copy + "<span>Copia</span></button></div>" +
       '<div class="mnActs">' +
       '<button type="button" class="mnAct" data-a="wa"><i class="wa">' + I.wa + '</i><span class="mnT">Invia su WhatsApp</span></button>' +
@@ -208,6 +218,7 @@
     $("mnShSub").textContent = rent ? "Chi vuole affittare la sala prenota da solo, in un tocco." : (biz.gym ? "Gli iscritti prenotano da soli, a qualsiasi ora." : "I clienti prenotano da soli, a qualsiasi ora.");
     $("mnQrName").textContent = biz.name || "La tua attività";
     $("mnQrHint").textContent = rent ? "Inquadra con la fotocamera per affittare la sala." : "Inquadra con la fotocamera per aprire la pagina di prenotazione.";
+    if (sheet.classList.contains("mnQrOnly")) $("mnQrHint").textContent = rent ? "Inquadra per affittare la sala" : "Inquadra con la fotocamera per prenotare";
     $("mnLinkTxt").textContent = l.url.replace(/^https?:\/\//, "");
     var q = qrFor(l.url);
     $("mnQrBox").innerHTML = q ? q.svg : "";
@@ -237,7 +248,7 @@
       if (!sheet) buildSheet();
       cur = Math.min(Number(i) || 0, b.links.length - 1);
       sheet.classList.toggle("mnQrOnly", !!qrOnly);
-      var st = $("mnShT"); if (st) st.textContent = qrOnly ? "Il tuo QR code" : "Condividi la tua pagina";
+      var st = $("mnShT"); if (st) st.textContent = qrOnly ? (b.name || "La tua attività") : "Condividi la tua pagina";
       paintSheet();
       lastFocus = document.activeElement;
       sheet.hidden = false;
@@ -277,7 +288,7 @@
       ];
       var t7q = [];
       if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);
-      t7q.push(["Come faccio prenotare dalla vetrina?", "Ordina la locandina adesiva con il tuo QR: chi passa inquadra e prenota anche a negozio chiuso.", M + "Shop"]);
+      t7q.push(["Come faccio prenotare dalla vetrina?", "Scarica la locandina con il tuo QR, stampala e attaccala in vetrina: chi passa inquadra e prenota anche a negozio chiuso.", M + "Scheda attività"]);
       return {
         can: [
           ["link", "Ricevere prenotazioni a qualsiasi ora", "I clienti prenotano da soli dal tuo link o dal QR", "t1"],

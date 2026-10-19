@@ -23,11 +23,21 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 #burgerMenu .mnShare[hidden]{display:none}
 #burgerMenu .mnShare .mnShareTop{display:flex;align-items:center;gap:12px;width:100%;min-height:0;padding:0;border:0;border-radius:10px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
 #burgerMenu .mnShare .mnShareTop:hover{background:transparent}
-#burgerMenu .mnShare .mnThumb{flex:none;width:52px;height:52px;border-radius:9px;background:#fff;color:#0B1A20;display:grid;place-items:center;overflow:hidden}
-#burgerMenu .mnShare .mnThumb svg{display:block;width:100%;height:100%;color:#0B1A20}
+#burgerMenu .mnShare{--mnh:200}
+#burgerMenu .mnShare .mnShareKick{display:block;margin:0 0 10px;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+#burgerMenu .mnShare .mnAv{flex:none;position:relative;width:54px;height:54px;border-radius:18px;display:grid;place-items:center;overflow:hidden;color:hsl(var(--mnh) 70% 72%);background:linear-gradient(150deg,hsl(var(--mnh) 50% 30%) 0%,hsl(var(--mnh) 45% 14%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh) 55% 55% / .45),0 8px 18px -8px rgba(0,0,0,.6);font-family:Manrope,inherit;font-size:1.4rem;font-weight:800}
+:root[data-theme="light"] #burgerMenu .mnShare .mnAv{color:hsl(var(--mnh) 65% 32%);background:linear-gradient(150deg,hsl(var(--mnh) 75% 92%) 0%,hsl(var(--mnh) 60% 80%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh) 45% 62% / .6)}
+#burgerMenu .mnShare .mnAv svg{display:block;width:26px;height:26px;color:inherit}
+#burgerMenu .mnShare .mnAv.est{background:url(/estetista/logo.png) center/cover no-repeat;color:transparent}
+#burgerMenu .mnShare .mnAv.car{background:url(/cartomanzia/logo.png) center/cover no-repeat;color:transparent}
+#burgerMenu .mnShare .mnAv.est svg,#burgerMenu .mnShare .mnAv.car svg{display:none}
+#burgerMenu .mnShare .mnShareTxt small{display:block;margin:0 0 2px;font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--mnh) 65% 68%)}
+:root[data-theme="light"] #burgerMenu .mnShare .mnShareTxt small{color:hsl(var(--mnh) 60% 32%)}
+#burgerMenu .mnShare .mnShareTxt small[hidden]{display:none}
 #burgerMenu .mnShare .mnShareTxt{flex:1;min-width:0}
-#burgerMenu .mnShare .mnShareTxt b{display:block;font-family:Manrope,inherit;font-size:.94rem;font-weight:800;line-height:1.2}
-#burgerMenu .mnShare .mnShareTxt span{display:block;margin-top:3px;font-size:.74rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#burgerMenu .mnShare .mnShareTxt b{display:block;font-family:Manrope,inherit;font-size:1rem;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#burgerMenu .mnShare .mnShareTxt span[hidden]{display:none}
+#burgerMenu .mnShare .mnShareTxt span{display:block;margin-top:4px;font-size:.76rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #burgerMenu .mnShare .mnShareAct{display:flex;gap:8px;margin-top:12px}
 #burgerMenu .mnShare .mnShareAct button{flex:1;min-height:40px;padding:0 8px;border-radius:11px;font:inherit;font-size:.84rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 #burgerMenu .mnShare .mnShareAct button svg{width:16px;height:16px;flex:none;color:inherit}
@@ -122,7 +132,26 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnHelp .mnT small{display:block;margin-top:2px;font-size:.76rem;font-weight:600;color:var(--muted)}
 .mnHelp > svg:last-child{flex:none;width:16px;height:16px;color:var(--muted)}
 
-/* "Mostra il QR": si apre solo il QR, senza link, azioni e testi */
-.mnQrOnly .mnSub,.mnQrOnly .mnLinkRow,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrHint{display:none}
-.mnQrOnly .mnQrCard{flex-direction:column;justify-content:center;text-align:center;gap:16px;padding:24px 18px}
-.mnQrOnly .mnQrBox{width:min(270px,72vw);height:min(270px,72vw);padding:12px}
+/* "Mostra il QR": una scheda centrata con il solo QR */
+.mnQrKick{display:none}
+.mnQrFrame{display:contents}
+.mnQrFrame i{display:none}
+.mnLayer.mnQrOnly:not([hidden]){display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.mnQrOnly .mnScrim{background:rgba(2,8,10,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.mnQrOnly .mnSheet{position:relative;left:auto;right:auto;bottom:auto;width:min(360px,100%);max-width:360px;margin:0;max-height:100%;padding:22px 22px 28px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line2));border-radius:30px;background:linear-gradient(165deg,color-mix(in srgb,var(--accent) 26%,var(--bg2)) 0%,var(--bg2) 62%);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);animation:mnPop .24s cubic-bezier(.2,.8,.2,1)}
+.mnQrOnly .mnGrab,.mnQrOnly .mnSub,.mnQrOnly .mnLinkRow,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrName{display:none}
+.mnQrOnly .mnSH{margin-top:0}
+.mnQrOnly .mnQrKick{display:block;font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)}
+.mnQrOnly .mnSheet h2{margin-top:6px;font-family:Manrope,inherit;font-size:1.3rem;line-height:1.2}
+.mnQrOnly .mnQrCard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;margin-top:18px;padding:0;background:transparent;border:0}
+.mnQrOnly .mnQrFrame{display:block;position:relative;padding:14px}
+.mnQrOnly .mnQrFrame i{display:block;position:absolute;width:28px;height:28px;border:3px solid var(--accent-ink);opacity:.9}
+.mnQrOnly .mnQrFrame i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-radius:12px 0 0 0}
+.mnQrOnly .mnQrFrame i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-radius:0 12px 0 0}
+.mnQrOnly .mnQrFrame i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-radius:0 0 0 12px}
+.mnQrOnly .mnQrFrame i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-radius:0 0 12px 0}
+.mnQrOnly .mnQrBox{width:min(240px,62vw);height:min(240px,62vw);padding:8px;border-radius:20px;background:#fff;box-shadow:0 18px 40px -14px rgba(0,0,0,.55)}
+.mnQrOnly .mnQrInfo{text-align:center}
+.mnQrOnly #mnQrHint{display:block;margin:0;font-size:.86rem;font-weight:600;color:var(--muted)}
+@keyframes mnPop{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.mnQrOnly .mnSheet{animation:none}}
