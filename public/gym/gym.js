@@ -95,7 +95,7 @@
     var b = document.getElementById(id); if (!b) return;
     for (var i = b.childNodes.length - 1; i >= 0; i--) { var n = b.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + MENU[id] + '\n  '; break; } }
   });
-  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', shop: 'Shop', other: 'Impostazioni', rent: 'Subaffitto' };
+  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', other: 'Impostazioni', rent: 'Subaffitto' };
   function setLabel(w) { var l = document.getElementById('sectionLabel'); if (l && LABELS[w]) l.textContent = LABELS[w]; }
   document.addEventListener('lia:section', function (e) { S.section = e.detail; setLabel(e.detail); showSection(e.detail); });
 
@@ -1310,7 +1310,7 @@
   setLabel('cal');
   var tries = 0, t = setInterval(function () { if (mountSettings() || ++tries > 20) clearInterval(t); }, 250);
   var current = 'cal';
-  try { var ap = document.querySelector('.tabPanel.on'); if (ap) current = ({ panelCal: 'cal', panelClients: 'clients', panelStats: 'stats', panelProfile: 'profile', panelShop: 'shop', panelOther: 'other' })[ap.id] || 'cal'; } catch (e) { /* si resta su cal */ }
+  try { var ap = document.querySelector('.tabPanel.on'); if (ap) current = ({ panelCal: 'cal', panelClients: 'clients', panelStats: 'stats', panelProfile: 'profile', panelOther: 'other' })[ap.id] || 'cal'; } catch (e) { /* si resta su cal */ }
   S.section = current; setLabel(current);
   showSection(current);
   (S.data ? Promise.resolve() : load().catch(function () {})).then(function () { pfPaint(); });

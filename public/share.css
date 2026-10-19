@@ -190,3 +190,12 @@ body.mnOn #burgerMenu #menuTabProfile{display:none}
 #burgerMenu .mnShare .mnShareGo{flex:none;margin-left:auto;display:grid;place-items:center;color:var(--muted)}
 #burgerMenu .mnShare .mnShareGo svg{width:18px;height:18px}
 #burgerMenu .mnShare.cur{box-shadow:inset 0 0 0 1.5px var(--accent)}
+
+/* guida: percorso in 3 passi alla prima apertura */
+.mnStart{margin-top:16px}
+.mnStart > b{display:block;font-size:.98rem;font-weight:800}
+.mnStart ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.mnStart li button{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;padding:10px 14px;border-radius:16px;text-align:left;cursor:pointer;color:var(--ink);background:color-mix(in srgb,var(--kc) 14%,var(--card));border:1px solid color-mix(in srgb,var(--kc) 34%,var(--line))}
+.mnStart li button .mnNum{width:34px;height:34px;font-size:1rem}
+.mnStart li button > svg{flex:none;color:var(--muted)}
+.mnAll{margin-top:16px;display:block;width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-weight:800;cursor:pointer}

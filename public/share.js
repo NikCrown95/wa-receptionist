@@ -11,7 +11,7 @@
 
   var obsOn = false;
   var menu = null, biz = null, loading = null, sheet = null, guide = null, cur = 0, lastFocus = null, msgT = null;
-  var NEWK = "lia:guide:seen:" + token;
+  var NEWK = "lia:guide:seen:" + token, FULLK = "lia:guide:full:" + token;
 
   function $(id) { return document.getElementById(id); }
   function ls(op, k, v) { try { if (op === "g") return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
@@ -341,6 +341,7 @@
       if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);
       t7q.push(["Come faccio prenotare dalla vetrina?", "Scarica la locandina con il tuo QR, stampala e attaccala in vetrina: chi passa inquadra e prenota anche a negozio chiuso.", M + "Scheda attività"]);
       return {
+        start: [["clock", "Controlla servizi e orari", "Cosa offri e quando ricevi", "t5"], ["link", "Condividi il link ai clienti", "Così possono prenotare da soli", "t1"], ["cal", "Guarda il calendario", "Qui vedi le prenotazioni", "t2"]],
         can: [
           ["link", "Ricevere prenotazioni a qualsiasi ora", "I clienti prenotano da soli dal tuo link o dal QR", "t1"],
           ["cal", "Tenere l’agenda sotto controllo", "Giorno, settimana e mese, con notifiche in tempo reale", "t2"],
@@ -418,6 +419,7 @@
     ];
     if (b.rental) tiers.push({ k: "Per approfondire", s: "Quando vuoi sfruttare di più Prenolia", topics: [{ id: "g4", ic: "clock", n: "Affitto della sala", d: "Ore libere dopo la chiusura", q: [["Come funziona l’affitto della sala?", "Chi vuole affittare la sala usa un link a parte: lo trovi in “Condividi la tua pagina”, nella scheda “Affitto sala”. Sceglie un’ora dopo la chiusura e lascia i suoi dati: tu ricevi una notifica e l’ora si blocca.", M + "Condividi la tua pagina"]] }] });
     return {
+      start: [["cli", "Aggiungi gli iscritti", "Solo loro potranno prenotare", "g2"], ["cal", "Prepara le lezioni", "Corsi, posti e orari", "g1"], ["link", "Condividi il link agli iscritti", "Prenotano da soli", "g1"]],
       can: [
         ["cli", "Gestire iscritti e abbonamenti", "Solo chi ha l’abbonamento valido può prenotare", "g2"],
         ["cal", "Far prenotare le lezioni da soli", "Gli iscritti scelgono da link o QR", "g1"]
@@ -427,7 +429,7 @@
   }
 
   function buildGuide(b) {
-    var d = guideFor(b), open = {}, term = "";
+    var d = guideFor(b), open = {}, term = "", full = !!ls("g", FULLK);
     if (d.tiers[0] && d.tiers[0].topics[0]) open[d.tiers[0].topics[0].id] = true;
     guide = mk("div", "mnLayer");
     guide.id = "mnGuide"; guide.hidden = true;
@@ -455,6 +457,14 @@
         }); }); });
         h = n ? '<div class="mnRes">' + r + "</div>" : '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>';
       } else {
+        if (d.start && !full) {
+          h += '<div class="mnStart"><b>Parti da qui: 3 passi</b><ol>';
+          d.start.forEach(function (c, i) {
+            h += '<li><button type="button" class="mnK' + (i + 1) + '" data-go="' + c[3] + '" data-full="1"><span class="mnNum">' + (i + 1) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span>" + I.chev + "</button></li>";
+          });
+          h += '</ol></div><button type="button" class="mnAll" data-all="1">Mostra tutta la guida</button>';
+          body.innerHTML = h; return;
+        }
         h += '<div class="mnCan"><b>Cosa puoi fare con Prenolia</b><ul>';
         d.can.forEach(function (c, i) {
           h += '<li><button type="button" class="mnK' + (i % 6 + 1) + '" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0], 20) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span></button></li>";
@@ -475,7 +485,9 @@
       body.innerHTML = h;
     }
     body.addEventListener("click", function (ev) {
-      var tp = ev.target.closest("[data-tp]"), go = ev.target.closest("[data-go]");
+      var tp = ev.target.closest("[data-tp]"), go = ev.target.closest("[data-go]"), al = ev.target.closest("[data-all]");
+      if (al) { full = true; ls("s", FULLK, "1"); render(); return; }
+      if (go && go.getAttribute("data-full")) { full = true; ls("s", FULLK, "1"); }
       if (tp) { var k = tp.getAttribute("data-tp"); open[k] = !open[k]; render(); return; }
       if (go) {
         var id = go.getAttribute("data-go"); open[id] = true; render();
