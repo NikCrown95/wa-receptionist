@@ -212,3 +212,14 @@ body.mnOn #burgerMenu #menuTabProfile{display:none}
 .mnChip .mnCi{width:34px;height:34px}
 @media(min-width:900px){.mnSc{display:none}}
 body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
+
+/* sfondo con l'immagine dell'attivita' (es. Style2): card bianca con il logo a destra */
+#burgerMenu .mnShare.mnSkin{background:#fff var(--skin) right 10px top 8px/auto 68px no-repeat;border-color:#fff;color:#111;box-shadow:0 14px 34px -20px rgba(0,0,0,.7)}
+#burgerMenu .mnShare.mnSkin .mnShareKick{color:#555;max-width:64%}
+#burgerMenu .mnShare.mnSkin .mnAv,#burgerMenu .mnShare.mnSkin .mnShareGo{display:none}
+#burgerMenu .mnShare.mnSkin .mnShareTxt{max-width:60%}
+#burgerMenu .mnShare.mnSkin .mnShareTxt b{color:#111}
+#burgerMenu .mnShare.mnSkin .mnShareTxt small,#burgerMenu .mnShare.mnSkin .mnShareTxt span{color:#555}
+#burgerMenu .mnShare.mnSkin .mnBtnA{background:#111;color:#fff}
+#burgerMenu .mnShare.mnSkin .mnBtnB{border-color:#111;color:#111;background:rgba(255,255,255,.85)}
+#burgerMenu .mnShare.mnSkin .mnBtnB:hover{background:#eee}

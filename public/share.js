@@ -50,7 +50,7 @@
   function writeCache(b) {
     try {
       var r = b.raw || {};
-      ls("s", CK, JSON.stringify({ raw: { name: r.name || b.name || "", business_type: r.business_type || (b.gym ? "palestra" : ""), address: r.address || "" }, name: b.name || "", plan: b.plan || "", gym: !!b.gym, classes: b.classes !== false, personal: b.personal !== false, rental: !!b.rental, links: b.links }));
+      ls("s", CK, JSON.stringify({ raw: { name: r.name || b.name || "", slug: r.slug || "", business_type: r.business_type || (b.gym ? "palestra" : ""), address: r.address || "" }, name: b.name || "", plan: b.plan || "", gym: !!b.gym, classes: b.classes !== false, personal: b.personal !== false, rental: !!b.rental, links: b.links }));
     } catch (e) {}
   }
   function planLabel(n) {
@@ -189,6 +189,8 @@
     var c = $("mnShareCard"), p = $("menuTabProfile");
     if (c) c.classList.toggle("cur", !!p && p.getAttribute("aria-current") === "true");
   }
+  /* immagine dell'attivita' come sfondo della card (per slug) */
+  var SKINS = { style2: "/brand/style2.jpg" };
   function syncProfile() {
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
@@ -200,6 +202,9 @@
       card.style.setProperty("--mnh", String(k.h));
       av.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" ' + S + ' stroke-width="1.7">' + k.icon + "</svg>";
     } else av.textContent = String(raw.name || biz.name || "A").charAt(0).toUpperCase();
+    var skinImg = SKINS[String(raw.slug || "").toLowerCase()] || "";
+    card.classList.toggle("mnSkin", !!skinImg);
+    if (skinImg) card.style.setProperty("--skin", "url(" + skinImg + ")"); else card.style.removeProperty("--skin");
     var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
     var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
     var nm = $("mnBizName"); if (nm) nm.textContent = name;
