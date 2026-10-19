@@ -124,9 +124,10 @@
       '<button type="button" class="mnBtnB" data-a="qr">' + I.qrs + "<span>Mostra il QR</span></button></div>");
     card.id = "mnShareCard"; card.hidden = true;
     card.addEventListener("click", function (ev) {
-      var b = ev.target.closest("[data-a]"); if (!b || !biz || !biz.links.length) return;
+      var b = ev.target.closest("[data-a]"); if (!b || !biz) return;
       var a = b.getAttribute("data-a");
       if (a === "profile") { var pf = $("menuTabProfile"); if (pf) pf.click(); return; }
+      if (!biz.links.length) return;
       if (a === "share") {
         var u = biz.links[0].url;
         if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: "Prenota da " + (biz.name || "noi"), url: u }).catch(function () {});
@@ -168,8 +169,13 @@
   }
   function paintMenu() {
     var c = $("mnShareCard");
-    if (c) c.hidden = !(biz && biz.links.length);
-    if (!c || !biz || !biz.links.length) return;
+    if (c) {
+      c.hidden = !biz;
+      var nl = !!biz && !biz.links.length;
+      c.classList.toggle("mnNoLink", nl);
+      var kk = c.querySelector(".mnShareKick"); if (kk) kk.textContent = nl ? "La tua attività" : "La tua pagina di prenotazione";
+    }
+    if (!c || !biz) return;
     syncProfile();
     if (window.MutationObserver && menu) new MutationObserver(syncProfile).observe(menu, { attributes: true, attributeFilter: ["class", "hidden"] });
   }
