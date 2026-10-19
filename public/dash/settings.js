@@ -209,6 +209,7 @@
   function liaDecorateHero(b,d){
     var k=HERO_KINDS[heroKindOf(b)],svg=function(sz,sw){return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+k.icon+'</svg>'};
     var hero=document.getElementById('pfHero');if(hero)hero.style.setProperty('--h',k.h);
+    var sk=({style2:'/brand/style2.jpg'})[String((b&&b.slug)||'').toLowerCase()]||'';if(hero){hero.classList.toggle('skinImg',!!sk);if(sk)hero.style.setProperty('--skin','url('+sk+')');else hero.style.removeProperty('--skin')}
     var av=document.getElementById('pfAvatar');if(av)av.innerHTML=svg(30,1.6);
     var wm=document.getElementById('pfWm');if(wm)wm.innerHTML=svg(200,1.1);
     var kd=document.getElementById('pfKind');if(kd)kd.textContent=k.label;

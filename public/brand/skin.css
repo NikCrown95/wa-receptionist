@@ -1,9 +1,0 @@
-/* Pagina di prenotazione con l'immagine dell'attivita' come sfondo della testata (classe skinImg su <html>, vedi script in testa) */
-html.skinImg .top{margin:0 0 4px;padding:16px 20px 16px;background:#fff var(--skin) right 66px top 6px/auto 76px no-repeat;color:#111;border-radius:0 0 26px 26px;box-shadow:0 18px 40px -26px rgba(0,0,0,.75)}
-html.skinImg .top h1{color:#111}
-html.skinImg .top .tagline{color:#444}
-html.skinImg .top .avatar{display:none}
-html.skinImg .top .sub .tg,html.skinImg .top .sub{color:#555}
-html.skinImg .top .grow{max-width:58%}
-html.skinImg .top .ibtn{position:relative;z-index:1;background:rgba(255,255,255,.9);color:#111;border-color:#111}
-html.skinImg .app.chatMode .top{background-size:auto 44px;background-position:right 60px top 4px}
