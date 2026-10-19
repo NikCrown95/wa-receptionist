@@ -1,7 +1,7 @@
-/* public/share.js  (Prenolia: menu laterale rifinito, "Condividi la tua pagina" e "Guida e domande")
-   - nel menu burger: identita' dell'attivita', card per condividere link e QR, voce "Guida e domande";
+/* public/share.js  (Prenolia: menu corto, barra "La tua pagina di prenotazione" e guida "Come si usa")
+   - nel menu burger: barra "La tua pagina di prenotazione" (QR piccolo, Condividi, Mostra il QR) e voce "Come si usa";
    - foglio "Condividi la tua pagina" (link, QR, WhatsApp, scarica il QR, locandina);
-   - pagina "Guida e domande", diversa per le attivita' con appuntamenti e per le palestre.
+   - pagina "Come si usa", ordinata per importanza e diversa per le attivita' con appuntamenti e per le palestre.
    Se qualcosa non va, il menu resta quello di prima (le regole grafiche valgono solo con body.mnOn). */
 (function () {
   "use strict";
@@ -33,6 +33,7 @@
     search: '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
     down2: '<svg viewBox="0 0 24 24" ' + S + ' stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>',
     chat: '<svg width="20" height="20" viewBox="0 0 24 24" ' + S + ' stroke-width="2"><path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-6.4A8 8 0 1121 12z"/></svg>',
+    qrs: '<svg width="16" height="16" viewBox="0 0 24 24" ' + S + ' stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v.01M14 21h.01M17 21h4v-4"/></svg>',
     burger: '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
   };
 
@@ -110,18 +111,15 @@
   /* ---------- menu ---------- */
   function buildMenu() {
     menu = $("burgerMenu");
-    var cal = $("menuTabCal"), other = $("menuTabOther");
+    var cal = $("menuTabCal"), other = $("menuTabOther"), out = $("logoutBtn");
     if (!menu || !cal || !other || menu.getAttribute("data-mn")) return false;
     menu.setAttribute("data-mn", "1");
 
-    var head = mk("div", "mnHead",
-      '<span class="mnLogo"><img src="/lia-a.png" alt="" draggable="false"></span>' +
-      '<span class="mnWho"><span class="mnName" id="mnName">La tua attività</span><span class="mnPlan" id="mnPlan" hidden></span></span>');
-
     var card = mk("div", "mnShare",
-      '<button type="button" class="mnShareTop" data-a="open"><span class="mnShareTxt"><b>Condividi la tua pagina</b></span></button>' +
+      '<button type="button" class="mnShareTop" data-a="open"><span class="mnThumb" id="mnThumb" aria-hidden="true">' + I.qr + '</span>' +
+      '<span class="mnShareTxt"><b>La tua pagina di prenotazione</b><span id="mnShareUrl"></span></span></button>' +
       '<div class="mnShareAct"><button type="button" class="mnBtnA" data-a="share">' + I.share + "<span>Condividi</span></button>" +
-      '<button type="button" class="mnBtnB" data-a="qr"><span>Mostra il QR</span>' + I.chev + "</button></div>");
+      '<button type="button" class="mnBtnB" data-a="qr">' + I.qrs + "<span>Mostra il QR</span></button></div>");
     card.id = "mnShareCard"; card.hidden = true;
     card.addEventListener("click", function (ev) {
       var b = ev.target.closest("[data-a]"); if (!b || !biz || !biz.links.length) return;
@@ -133,24 +131,36 @@
       } else openSheet(0, a === "qr");
     });
 
-    var sep = mk("div", "mnSep");
-    var g = mk("button", "", I.help + '<span>Guida e domande</span><span class="mnNew">Nuovo</span>');
+    var g = mk("button", "", I.help + '<span>Come si usa</span><span class="mnNew">Nuovo</span>');
     g.type = "button"; g.id = "menuTabGuide"; g.setAttribute("role", "menuitem"); g.setAttribute("aria-current", "false");
     g.querySelector("span:first-of-type").style.flex = "1";
     var nw = g.querySelector(".mnNew"); if (ls("g", NEWK)) nw.hidden = true;
     g.addEventListener("click", function () { closeMenu(); openGuide(); });
 
     menu.insertBefore(card, cal);
-    menu.insertBefore(sep, other);
-    menu.insertBefore(g, other);
+    /* ordine: ... Impostazioni, Come si usa, separatore, Esci */
+    var sep = mk("div", "mnSep");
+    if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
+    else { menu.appendChild(g); }
+    var oi = other.querySelector("svg");
+    if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     document.body.classList.add("mnOn");
     return true;
   }
+  function thumbSvg(q) {
+    if (!q || !q.M) return "";
+    var N = q.N, m = 1, d = "", x, y;
+    for (y = 0; y < N; y++) for (x = 0; x < N; x++) if (q.M[y][x]) d += "M" + (x + m) + " " + (y + m) + "h1v1h-1z";
+    var W = N + m * 2;
+    return '<svg viewBox="0 0 ' + W + " " + W + '" shape-rendering="crispEdges" aria-hidden="true"><rect width="' + W + '" height="' + W + '" fill="#fff"/><path d="' + d + '" fill="#0B1A20"/></svg>';
+  }
   function paintMenu() {
-    var n = $("mnName"), p = $("mnPlan"), c = $("mnShareCard");
-    if (n && biz && biz.name) n.textContent = biz.name;
-    if (p) { if (biz && biz.plan) { p.textContent = "Piano " + biz.plan; p.hidden = false; } else p.hidden = true; }
+    var c = $("mnShareCard");
     if (c) c.hidden = !(biz && biz.links.length);
+    if (!c || !biz || !biz.links.length) return;
+    var u = biz.links[0].url, t = $("mnThumb"), s = $("mnShareUrl");
+    if (s) s.textContent = u.replace(/^https?:\/\//, "");
+    if (t) { var q = qrFor(u), sv = thumbSvg(q); if (sv) t.innerHTML = sv; }
   }
 
   /* ---------- foglio "Condividi la tua pagina" ---------- */
@@ -240,96 +250,185 @@
     if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
   }
 
-  /* ---------- guida ---------- */
-  function faqsFor(b) {
-    var link = b.links.length > 0, out = [];
-    var HINT = "Menu in alto a destra › Condividi la tua pagina";
+  /* ---------- guida "Come si usa": dalle informazioni piu' importanti a quelle di approfondimento ---------- */
+  var GI = {
+    bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+    cal: '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/>',
+    bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+    cli: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.4"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    sta: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+    msg: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/>',
+    card: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/>',
+    ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+  };
+  function gi(k, s) { return '<svg width="' + (s || 19) + '" height="' + (s || 19) + '" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9">' + GI[k] + "</svg>"; }
+
+  function guideFor(b) {
+    var link = b.links.length > 0;
+    var M = "Menu › ";
     if (!b.gym) {
-      if (link) out.push({ id: "link", q: "Dove trovo il mio link e il QR?", a: "Apri il menu in alto a destra e tocca “Condividi la tua pagina”: trovi il link, il QR e i pulsanti per mandarlo ai clienti.", hint: HINT });
-      out.push(
-        { id: "prenota", q: "Come prenota un mio cliente?", a: "Apre il tuo link o inquadra il QR, sceglie il servizio, il giorno e l’orario, e lascia nome e telefono. Tu ricevi subito la notifica e l’appuntamento compare in calendario." },
-        { id: "ferie", q: "Come blocco ferie o giorni di chiusura?", a: "Apri “Impostazioni” dal menu e poi “Chiusure e ferie”. I giorni che segni non saranno prenotabili dai clienti." },
-        { id: "orari", q: "Come cambio servizi, prezzi e orari?", a: "Apri “Impostazioni” dal menu: nelle pagine dei servizi e degli orari modifichi tutto. Le modifiche valgono subito anche sulla pagina dei clienti." },
-        { id: "lia", q: "Cosa fa Lia?", a: "Lia è l’assistente che risponde ai clienti e li aiuta a prenotare in chat, anche quando sei occupato o l’attività è chiusa." }
-      );
-      return { faqs: out, steps: [["Servizi e orari", "orari"], ["Condividi il link", "link"], ["Ricevi le prenotazioni", "prenota"]] };
+      var t1 = [
+        ["Cosa devo fare per iniziare?", "Servono tre passi: inserisci i servizi con durata e prezzo, imposta gli orari in cui ricevi e condividi il link con i clienti. Dopo questi tre sei già operativo.", M + "Impostazioni › Servizi e prezzi"],
+        ["Come prenotano i miei clienti?", "Aprono il tuo link o inquadrano il QR, scelgono servizio, giorno e orario e lasciano nome e telefono. Tu ricevi subito la notifica e l’appuntamento compare nel calendario.", link ? M + "Condividi la tua pagina" : ""],
+        ["Quanto in anticipo si può prenotare?", "Fino a 90 giorni avanti. Il preavviso minimo è di 15 minuti e puoi aumentarlo nelle Regole di prenotazione.", M + "Impostazioni › Regole di prenotazione"]
+      ];
+      var t7q = [];
+      if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);
+      t7q.push(["Come faccio prenotare dalla vetrina?", "Ordina la locandina adesiva con il tuo QR: chi passa inquadra e prenota anche a negozio chiuso.", M + "Shop"]);
+      return {
+        can: [
+          ["link", "Ricevere prenotazioni a qualsiasi ora", "I clienti prenotano da soli dal tuo link o dal QR", "t1"],
+          ["cal", "Tenere l’agenda sotto controllo", "Giorno, settimana e mese, con notifiche in tempo reale", "t2"],
+          ["cli", "Conoscere i tuoi clienti", "Scheda, storico delle visite e note", "t4"],
+          ["clock", "Organizzare orari, ferie e collaboratori", "Decidi tu quando e con chi si può prenotare", "t5"],
+          ["sta", "Capire come va l’attività", "Incassi, giorni pieni e orari più richiesti", "t8"]
+        ],
+        tiers: [
+          { k: "Essenziale", s: "Parti da qui", topics: [{ id: "t1", ic: "bolt", n: "Mettere online la tua attività", d: "Le tre cose da fare subito", q: t1 }] },
+          { k: "Ogni giorno", s: "Quello che userai di più", topics: [
+            { id: "t2", ic: "cal", n: "Il calendario", d: "Vedere e gestire gli appuntamenti", q: [
+              ["Cosa vedo nelle tre viste?", "Giorno mostra la giornata ora per ora, Settimana l’intera settimana, Mese l’occupazione di ogni giorno con la percentuale di posti pieni.", M + "Calendario"],
+              ["Come aggiungo un appuntamento a mano?", "Tocca il pulsante + del calendario e scegli cliente, servizio, giorno e ora. Serve per chi prenota per telefono o di persona.", M + "Calendario"],
+              ["Come segno che un cliente non è venuto?", "Apri l’appuntamento e segnalo come non presentato. Il dato resta nella scheda del cliente.", M + "Calendario › tocca l’appuntamento"]
+            ] },
+            { id: "t3", ic: "bell", n: "Notifiche e avvisi", d: "Non perderti nessuna prenotazione", q: [
+              ["Cosa mi segnala la campanella?", "Le nuove prenotazioni e le cancellazioni. Restano finché non chiudi il pannello, poi risultano lette. Toccandone una vai dritto all’appuntamento.", "Campanella in alto a destra"],
+              ["A cosa serve l’icona con la “a”?", "Raccoglie gli avvisi di Prenolia: il promemoria del lunedì per ferie e chiusure, la scadenza del piano e il riepilogo di fine mese.", "Icona “a” in alto a destra"]
+            ] },
+            { id: "t4", ic: "cli", n: "I tuoi clienti", d: "Schede, note e contatti", q: [
+              ["Dove trovo la scheda di un cliente?", "Cerchi per nome o telefono e tocchi il cliente. Vedi prossimo appuntamento, storico delle visite e i pulsanti per chiamare, scrivere su WhatsApp o prenotare.", M + "Clienti"],
+              ["Posso scrivere note sui clienti?", "Sì, in due modi: una nota fissa sul cliente e una nota per ogni singola visita. Le vedi sia nella scheda sia nell’appuntamento.", M + "Clienti › scheda cliente"],
+              ["I clienti ricevono un promemoria?", "Se lasciano l’email in fase di prenotazione ricevono la conferma e un promemoria il giorno prima, con il link per annullare.", ""]
+            ] }
+          ] },
+          { k: "Quando ti serve", s: "Si imposta una volta e poi si aggiorna", topics: [
+            { id: "t5", ic: "clock", n: "Orari, ferie e collaboratori", d: "Quando e con chi si può prenotare", q: [
+              ["Come blocco ferie e giorni di chiusura?", "Segna i giorni: i clienti non potranno prenotarli. Ogni lunedì ti ricordiamo di controllarli.", M + "Impostazioni › Chiusure e ferie"],
+              ["Come cambio gli orari di apertura?", "Scegli i giorni e le ore in cui ricevi. La modifica vale subito anche sulla pagina dei clienti.", M + "Impostazioni › Orari di apertura"],
+              ["Come aggiungo un collaboratore?", "Aggiungi le persone con i loro orari e le loro ferie. I clienti potranno scegliere con chi prenotare.", M + "Impostazioni › Chi lavora da te"],
+              ["Posso decidere quando i clienti annullano?", "Sì: imposti il preavviso minimo per prenotare e il limite entro cui un cliente può annullare.", M + "Impostazioni › Regole di prenotazione"]
+            ] },
+            { id: "t6", ic: "tag", n: "Servizi e scheda attività", d: "Cosa offri e come ti presenti", q: [
+              ["Come cambio servizi e prezzi?", "Aggiungi, modifica o togli i servizi. Le modifiche valgono subito sulla pagina di prenotazione.", M + "Impostazioni › Servizi e prezzi"],
+              ["Cosa vedo in Scheda attività?", "Il riepilogo della tua attività: dati, canali dei clienti, servizi, orari e chi lavora da te.", M + "Scheda attività"]
+            ] },
+            { id: "t7", ic: "link", n: "Farsi trovare dai clienti", d: "Link, QR e locandina", q: t7q }
+          ] },
+          { k: "Per approfondire", s: "Quando vuoi sfruttare di più Prenolia", topics: [
+            { id: "t8", ic: "sta", n: "Statistiche", d: "Capire come va l’attività", q: [
+              ["Cosa mostrano le statistiche?", "Fatturato e proiezione, servizi più richiesti, occupazione media per giorno e gli orari più pieni. Tocca un grafico per vedere il dettaglio.", M + "Statistiche"]
+            ] },
+            { id: "t9", ic: "msg", n: "Lia e i canali", d: "L’assistente che risponde ai clienti", q: [
+              ["Cosa fa Lia?", "Risponde ai clienti in chat e li aiuta a prenotare, anche quando sei occupato o l’attività è chiusa. Funziona su webchat e Telegram.", M + "Scheda attività › Canali clienti"],
+              ["Come collego Telegram?", "Crei il tuo bot in un tocco e i clienti prenotano da lì. Ricevi l’agenda del giorno sul tuo Telegram e puoi spegnerla.", M + "Impostazioni › Telegram"],
+              ["E WhatsApp?", "Arriverà più avanti con un piano dedicato. Per ora i clienti usano il link, la webchat e Telegram.", ""]
+            ] },
+            { id: "t10", ic: "card", n: "Piano e account", d: "Costi, prova e disdetta", q: [
+              ["Quanto costa e cosa include?", "Il piano Smart costa 24,99 € al mese: calendario, prenotazione online dei clienti e Lia su webchat e Telegram.", M + "Impostazioni › Abbonamento"],
+              ["Come funzionano prova e scadenza?", "Hai 14 giorni di prova gratuita. Alla scadenza del piano ci sono 3 giorni di tolleranza prima della sospensione.", M + "Impostazioni › Abbonamento"],
+              ["Posso disdire?", "Sì, quando vuoi. Il servizio resta attivo fino alla fine del mese già pagato, senza rimborsi.", M + "Impostazioni › Abbonamento"]
+            ] }
+          ] }
+        ]
+      };
     }
+    /* palestre */
     var who = b.classes && b.personal ? "le lezioni libere e gli orari del Personal" : (b.classes ? "le lezioni libere e i posti rimasti" : "gli orari liberi per il Personal");
-    if (link) out.push({ id: "link", q: "Dove trovo il link per far prenotare gli iscritti?", a: "Apri il menu in alto a destra e tocca “Condividi la tua pagina”: trovi il link e il QR da mandare agli iscritti o da stampare per la palestra.", hint: HINT });
-    out.push({ id: "iscritto", q: "Come aggiungo un nuovo iscritto?", a: "Vai in Iscritti e tocca “Nuovo iscritto”. Scrivi nome, cognome e telefono e scegli subito l’abbonamento. Solo chi è in elenco può prenotare." });
-    if (link) out.push({ id: "prenota", q: "Come prenota un iscritto?", a: "Apre il link e scrive nome, cognome e telefono. Se corrispondono a un iscritto, vede " + who + " e prenota con un tocco." });
-    out.push(
-      { id: "blocco", q: "Perché un iscritto non riesce a prenotare?", a: "Controlla tre cose nella sua scheda: abbonamento valido, certificato medico non scaduto e ingressi ancora disponibili. Se manca una di queste, la prenotazione è bloccata." },
-      { id: "rinnovo", q: "Come rinnovo un abbonamento?", a: "In Iscritti tocca “Rinnova” accanto al nome. La nuova scadenza si aggiorna subito." },
-      { id: "cert", q: "Come registro il certificato medico?", a: "Nella scheda dell’iscritto scrivi quando è stato fatto e quando scade. Ti avvisiamo noi prima della scadenza." }
-    );
-    if (b.classes) {
-      out.push({ id: "lezioni", q: "Come creo o cambio le lezioni?", a: "Dal calendario tocca “Programma”: scegli corso, posti e durata, poi giorni e orari. Le lezioni si ripetono ogni settimana finché non le modifichi." });
-      out.push({ id: "disdetta", q: "Come gestisco una disdetta?", a: "L’iscritto ti avvisa entro i termini che hai stabilito. Tu apri la lezione e tocca “Togli” accanto al nome: il posto torna libero." });
+    var g1 = [["Come aggiungo un nuovo iscritto?", "Vai in Iscritti e tocca “Nuovo iscritto”. Scrivi nome, cognome e telefono e scegli subito l’abbonamento. Solo chi è in elenco può prenotare.", M + "Iscritti"]];
+    if (b.classes) g1.push(["Come creo o cambio le lezioni?", "Dal calendario tocca “Programma”: scegli corso, posti e durata, poi giorni e orari. Le lezioni si ripetono ogni settimana finché non le modifichi.", M + "Calendario › Programma"]);
+    if (link) {
+      g1.push(["Dove trovo il link per far prenotare gli iscritti?", "Puoi condividere il link, mostrare il QR da mandare agli iscritti o da stampare per la palestra.", M + "Condividi la tua pagina"]);
+      g1.push(["Come prenota un iscritto?", "Apre il link e scrive nome, cognome e telefono. Se corrispondono a un iscritto, vede " + who + " e prenota con un tocco.", ""]);
     }
-    if (b.rental) out.push({ id: "sala", q: "Come funziona l’affitto della sala?", a: "Chi vuole affittare la sala usa un link a parte: lo trovi in “Condividi la tua pagina”, nella scheda “Affitto sala”. Sceglie un’ora dopo la chiusura e lascia i suoi dati: tu ricevi una notifica e l’ora si blocca." });
-    var steps = [["Aggiungi gli iscritti", "iscritto"]];
-    if (b.classes) steps.push(["Imposta le lezioni", "lezioni"]);
-    if (link) steps.push(["Condividi il link", "link"]);
-    return { faqs: out, steps: steps };
+    var g2 = [
+      ["Perché un iscritto non riesce a prenotare?", "Controlla tre cose nella sua scheda: abbonamento valido, certificato medico non scaduto e ingressi ancora disponibili. Se manca una di queste, la prenotazione è bloccata.", M + "Iscritti › scheda iscritto"],
+      ["Come rinnovo un abbonamento?", "In Iscritti tocca “Rinnova” accanto al nome. La nuova scadenza si aggiorna subito.", M + "Iscritti"],
+      ["Come registro il certificato medico?", "Nella scheda dell’iscritto scrivi quando è stato fatto e quando scade. Ti avvisiamo noi prima della scadenza.", M + "Iscritti › scheda iscritto"]
+    ];
+    var topics2 = [{ id: "g2", ic: "cli", n: "Iscritti e abbonamenti", d: "Chi può prenotare e fino a quando", q: g2 }];
+    if (b.classes) topics2.push({ id: "g3", ic: "cal", n: "Disdette", d: "Liberare un posto in una lezione", q: [["Come gestisco una disdetta?", "L’iscritto ti avvisa entro i termini che hai stabilito. Tu apri la lezione e tocca “Togli” accanto al nome: il posto torna libero.", M + "Calendario › apri la lezione"]] });
+    var tiers = [
+      { k: "Essenziale", s: "Parti da qui", topics: [{ id: "g1", ic: "bolt", n: "Mettere online la palestra", d: "Iscritti, lezioni e link", q: g1 }] },
+      { k: "Ogni giorno", s: "Quello che userai di più", topics: topics2 }
+    ];
+    if (b.rental) tiers.push({ k: "Per approfondire", s: "Quando vuoi sfruttare di più Prenolia", topics: [{ id: "g4", ic: "clock", n: "Affitto della sala", d: "Ore libere dopo la chiusura", q: [["Come funziona l’affitto della sala?", "Chi vuole affittare la sala usa un link a parte: lo trovi in “Condividi la tua pagina”, nella scheda “Affitto sala”. Sceglie un’ora dopo la chiusura e lascia i suoi dati: tu ricevi una notifica e l’ora si blocca.", M + "Condividi la tua pagina"]] }] });
+    return {
+      can: [
+        ["cli", "Gestire iscritti e abbonamenti", "Solo chi ha l’abbonamento valido può prenotare", "g2"],
+        ["cal", "Far prenotare le lezioni da soli", "Gli iscritti scelgono da link o QR", "g1"]
+      ],
+      tiers: tiers
+    };
   }
+
   function buildGuide(b) {
-    var d = faqsFor(b);
+    var d = guideFor(b), open = {}, term = "";
+    if (d.tiers[0] && d.tiers[0].topics[0]) open[d.tiers[0].topics[0].id] = true;
     guide = mk("div", "mnLayer");
     guide.id = "mnGuide"; guide.hidden = true;
     guide.setAttribute("role", "dialog"); guide.setAttribute("aria-modal", "true"); guide.setAttribute("aria-labelledby", "mnGuideT");
-    var steps = d.steps.map(function (s, i) { return '<button type="button" class="mnStep" data-go="' + s[1] + '"><em>' + (i + 1) + "</em><span>" + s[0] + "</span></button>"; }).join("");
-    var faq = d.faqs.map(function (f) {
-      return '<div class="mnQ" data-id="' + f.id + '"><button type="button" aria-expanded="false"><span>' + f.q + "</span>" + I.down2 + "</button>" +
-        '<div class="mnA" hidden><p style="margin:0">' + f.a + "</p>" + (f.hint ? '<div class="mnHint">' + I.burger + "<span>" + f.hint + "</span></div>" : "") + "</div></div>";
-    }).join("");
     guide.innerHTML =
       '<div class="mnGuide"><div class="mnGuideIn">' +
-      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT">Guida e domande</h2></div>' +
-      '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca una domanda" aria-label="Cerca una domanda" autocomplete="off"></label>' +
-      '<div id="mnSteps"><p class="mnKick">Per iniziare</p><div class="mnSteps">' + steps + "</div></div>" +
-      '<div class="mnFaq" id="mnFaq">' + faq + "</div>" +
-      '<p class="mnEmpty" id="mnEmpty" hidden>Nessuna domanda trovata. Prova con un’altra parola.</p>' +
+      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT">Come si usa</h2></div>' +
+      '<p class="mnGSub">Tutto quello che serve per usare Prenolia, dalle cose essenziali a quelle di approfondimento.</p>' +
+      '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off"></label>' +
+      '<div id="mnGBody"></div>' +
       '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>" +
       "</div></div>";
     document.body.appendChild(guide);
+    var body = guide.querySelector("#mnGBody");
 
-    var qs = guide.querySelectorAll(".mnQ");
-    function setOpen(q, on) {
-      q.classList.toggle("open", on);
-      q.querySelector(":scope > button").setAttribute("aria-expanded", on ? "true" : "false");
-      q.querySelector(".mnA").hidden = !on;
+    function qa(q, tag) {
+      return '<div class="mnQa">' + (tag ? '<span class="mnTag">' + tag + "</span>" : "") + "<h4>" + q[0] + "</h4><p>" + q[1] + "</p>" + (q[2] ? '<span class="mnPath">' + q[2] + "</span>" : "") + "</div>";
     }
-    guide.querySelector("#mnFaq").addEventListener("click", function (ev) {
-      var btn = ev.target.closest(".mnQ > button"); if (!btn) return;
-      var q = btn.parentNode, on = !q.classList.contains("open");
-      qs.forEach(function (x) { setOpen(x, false); });
-      setOpen(q, on);
+    function render() {
+      var s = term.trim().toLowerCase(), h = "";
+      if (s) {
+        var n = 0, r = "";
+        d.tiers.forEach(function (t) { t.topics.forEach(function (x) { x.q.forEach(function (q) {
+          if ((q[0] + " " + q[1]).toLowerCase().indexOf(s) >= 0) { n++; r += qa(q, x.n); }
+        }); }); });
+        h = n ? '<div class="mnRes">' + r + "</div>" : '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>';
+      } else {
+        h += '<div class="mnCan"><b>Cosa puoi fare con Prenolia</b><ul>';
+        d.can.forEach(function (c) {
+          h += '<li><button type="button" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0]) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span>" + I.chev + "</button></li>";
+        });
+        h += "</ul></div>";
+        d.tiers.forEach(function (t) {
+          h += '<div class="mnTier"><div class="mnTh"><span class="mnTk">' + t.k + "</span><span>" + t.s + '</span></div><div class="mnTopics">';
+          t.topics.forEach(function (x) {
+            var o = !!open[x.id];
+            h += '<div class="mnTp' + (o ? " open" : "") + '" id="mnTp-' + x.id + '"><button type="button" data-tp="' + x.id + '" aria-expanded="' + (o ? "true" : "false") + '"><span class="mnCi">' + gi(x.ic) + '</span><span class="mnTt">' + x.n + "<small>" + x.d + '</small></span><span class="mnCv">' + I.down2 + "</span></button>";
+            if (o) { h += '<div class="mnQs">'; x.q.forEach(function (q) { h += qa(q); }); h += "</div>"; }
+            h += "</div>";
+          });
+          h += "</div></div>";
+        });
+      }
+      body.innerHTML = h;
+    }
+    body.addEventListener("click", function (ev) {
+      var tp = ev.target.closest("[data-tp]"), go = ev.target.closest("[data-go]");
+      if (tp) { var k = tp.getAttribute("data-tp"); open[k] = !open[k]; render(); return; }
+      if (go) {
+        var id = go.getAttribute("data-go"); open[id] = true; render();
+        var e = $("mnTp-" + id); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     });
-    guide.querySelector("#mnSteps").addEventListener("click", function (ev) {
-      var s = ev.target.closest("[data-go]"); if (!s) return;
-      var q = guide.querySelector('.mnQ[data-id="' + s.getAttribute("data-go") + '"]'); if (!q) return;
-      qs.forEach(function (x) { setOpen(x, false); });
-      setOpen(q, true);
-      if (q.scrollIntoView) q.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-    guide.querySelector("#mnGuideQ").addEventListener("input", function () {
-      var t = this.value.trim().toLowerCase(), n = 0;
-      qs.forEach(function (q) {
-        var hit = !t || q.textContent.toLowerCase().indexOf(t) >= 0;
-        q.hidden = !hit; if (hit) n++;
-      });
-      guide.querySelector("#mnSteps").hidden = !!t;
-      guide.querySelector("#mnEmpty").hidden = n > 0;
-    });
+    guide.querySelector("#mnGuideQ").addEventListener("input", function () { term = this.value; render(); });
     guide.querySelector("#mnGuideBack").addEventListener("click", closeGuide);
     guide.querySelector("#mnHelp").addEventListener("click", function () {
       closeGuide();
       var o = $("menuTabOther"); if (o) o.click();
       setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); }, 80);
     });
-    if (qs[0]) setOpen(qs[0], true);
+    render();
   }
+
   function openGuide() {
     ls("s", NEWK, "1");
     var nw = document.querySelector("#menuTabGuide .mnNew"); if (nw) nw.hidden = true;

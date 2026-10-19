@@ -2,54 +2,39 @@
    Usa le variabili di colore della dashboard (--card, --line2, --accent, ...), quindi segue tema chiaro/scuro.
    Se share.js non parte, il menu resta quello di prima (le regole del menu valgono solo con body.mnOn). */
 
-/* ---------- menu a lato ---------- */
+/* ---------- menu: pannello corto sotto i pulsanti in alto ---------- */
 body.mnOn #burgerMenu[hidden]{display:none}
-body.mnOn #burgerMenu{top:0;right:0;bottom:0;margin-top:0;width:min(324px,90vw);max-height:none;overflow-y:auto;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 62px) 14px calc(env(safe-area-inset-bottom,0px) + 14px);border-radius:0;border:0;border-left:1px solid var(--line2);background:var(--bg2);box-shadow:-18px 0 50px rgba(0,0,0,.4);transform:translateX(22px);opacity:0}
-body.mnOn #burgerMenu.on{transform:translateX(0);opacity:1}
-body.mnOn #burgerMenu > button{min-height:44px;padding:0 10px 0 8px;gap:14px;border-radius:14px;border:1px solid transparent;font-size:.96rem;font-weight:600;flex:none}
-body.mnOn #burgerMenu > button > svg{width:32px;height:32px;padding:7px;box-sizing:border-box;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
-body.mnOn #burgerMenu > button[aria-current="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--ink)}
-body.mnOn #burgerMenu > button[aria-current="true"] > svg{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
-body.mnOn #burgerMenu > .logoutBtn{margin-top:2px;padding-top:0;border-top:0;border-radius:14px;color:var(--danger)}
-body.mnOn #burgerMenu > .logoutBtn > svg{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,var(--card));border-color:color-mix(in srgb,var(--danger) 25%,transparent)}
+body.mnOn #burgerMenu{top:0;right:14px;bottom:auto;margin-top:calc(env(safe-area-inset-top,0px) + 62px);width:min(320px,calc(100vw - 28px));max-height:calc(100dvh - env(safe-area-inset-top,0px) - 76px);overflow-y:auto;display:flex;flex-direction:column;gap:0;box-sizing:border-box;padding:10px;border-radius:20px;border:1px solid var(--line2);background:var(--bg2);box-shadow:0 18px 40px rgba(0,0,0,.35);transform:translateY(-6px);opacity:0}
+body.mnOn #burgerMenu.on{transform:none;opacity:1}
+body.mnOn #burgerMenu > button{text-align:left;min-height:42px;padding:0 10px;gap:12px;border-radius:11px;border:0;font-size:.93rem;font-weight:600;flex:none}
+body.mnOn #burgerMenu > button > svg{width:19px;height:19px;padding:0;background:none;border:0;color:var(--muted)}
+body.mnOn #burgerMenu > button[aria-current="true"]{background:var(--accent-soft);color:var(--accent-ink)}
+body.mnOn #burgerMenu > button[aria-current="true"] > svg{background:none;color:var(--accent-ink)}
+body.mnOn #burgerMenu > .logoutBtn{margin-top:0;padding-top:0;border-top:0;border-radius:11px;color:var(--danger)}
+body.mnOn #burgerMenu > .logoutBtn > svg{color:var(--danger);background:none;border:0}
 body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 @media (prefers-reduced-motion: reduce){body.mnOn #burgerMenu{transition:none}}
-
-/* identita' dell'attivita' */
-#burgerMenu .mnHead{flex:none;display:flex;align-items:center;gap:12px;margin-bottom:16px}
-#burgerMenu .mnLogo{flex:none;width:46px;height:46px;border-radius:15px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);display:grid;place-items:center}
-#burgerMenu .mnLogo img{display:block;width:26px;height:auto}
-#burgerMenu .mnWho{flex:1;min-width:0}
-#burgerMenu .mnName{font-weight:800;font-size:1.06rem;letter-spacing:-0.01em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#burgerMenu .mnPlan{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:6px;background:var(--card);border:1px solid var(--line2);font-size:.62rem;font-weight:800;letter-spacing:.12em;color:var(--accent-ink);text-transform:uppercase}
-#burgerMenu .mnPlan[hidden]{display:none}
-
-/* card "Condividi la tua pagina" */
-#burgerMenu .mnShare{flex:none;position:relative;overflow:hidden;margin-bottom:10px;border-radius:18px;border:1px solid var(--accent);background:var(--accent-soft);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 34%,var(--bg2)) 0%,color-mix(in srgb,var(--accent) 12%,var(--bg2)) 100%);padding:12px}
-#burgerMenu .mnShare[hidden]{display:none}
-#burgerMenu .mnShare::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 105% -10%,rgba(127,220,220,.13) 0 1px,transparent 1px 15px);pointer-events:none}
-#burgerMenu .mnShare > *{position:relative}
-#burgerMenu .mnShare svg{color:inherit}
-#burgerMenu .mnShare .mnShareTop{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
-#burgerMenu .mnShare .mnShareTop:hover{background:transparent}
-#burgerMenu .mnShare .mnShareTxt{flex:1;min-width:0}
-#burgerMenu .mnShare .mnShareTxt b{display:block;font-size:1rem;font-weight:800;line-height:1.25}
-#burgerMenu .mnShare .mnShareTxt span{display:block;margin-top:4px;font-size:.82rem;font-weight:600;line-height:1.45;color:var(--ink);opacity:.8}
-#burgerMenu .mnShare .mnQrGlyph{flex:none;width:46px;height:46px;border-radius:12px;background:#fff;color:#0B1A20;display:grid;place-items:center}
-#burgerMenu .mnShare .mnQrGlyph svg{width:28px;height:28px}
-#burgerMenu .mnShare .mnShareAct{display:flex;gap:8px;margin-top:10px}
-#burgerMenu .mnShare .mnShareAct button{flex:1;min-height:40px;padding:0 8px;border-radius:12px;font:inherit;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
-#burgerMenu .mnShare .mnShareAct button svg{width:15px;height:15px;flex:none}
-#burgerMenu .mnShare .mnBtnA{border:0;background:#fff;color:#0B1A20}
-#burgerMenu .mnShare .mnBtnA:hover{background:#fff}
-#burgerMenu .mnShare .mnBtnB{border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);background:color-mix(in srgb,var(--bg) 35%,transparent);color:var(--ink)}
-#burgerMenu .mnShare .mnBtnB:hover{background:color-mix(in srgb,var(--bg) 35%,transparent)}
-
-/* gruppo in basso (guida, altro, logout) */
-#burgerMenu .mnSep{flex:none;margin:6px 6px;height:1px;background:var(--line);min-height:1px}
-#burgerMenu #menuTabGuide > svg{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent-ink)}
+#burgerMenu .mnSep{flex:none;height:1px;min-height:1px;margin:6px 4px;background:var(--line)}
 #burgerMenu #menuTabGuide .mnNew{margin-left:auto;padding:3px 8px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-ink);font-size:.68rem;font-weight:800}
 #burgerMenu #menuTabGuide .mnNew[hidden]{display:none}
+
+/* barra "La tua pagina di prenotazione" */
+#burgerMenu .mnShare{flex:none;position:relative;overflow:hidden;margin-bottom:8px;padding:12px;border-radius:16px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 24%,var(--bg2)) 0%,var(--bg2) 70%)}
+#burgerMenu .mnShare[hidden]{display:none}
+#burgerMenu .mnShare .mnShareTop{display:flex;align-items:center;gap:12px;width:100%;min-height:0;padding:0;border:0;border-radius:10px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+#burgerMenu .mnShare .mnShareTop:hover{background:transparent}
+#burgerMenu .mnShare .mnThumb{flex:none;width:52px;height:52px;border-radius:9px;background:#fff;color:#0B1A20;display:grid;place-items:center;overflow:hidden}
+#burgerMenu .mnShare .mnThumb svg{display:block;width:100%;height:100%;color:#0B1A20}
+#burgerMenu .mnShare .mnShareTxt{flex:1;min-width:0}
+#burgerMenu .mnShare .mnShareTxt b{display:block;font-family:Manrope,inherit;font-size:.94rem;font-weight:800;line-height:1.2}
+#burgerMenu .mnShare .mnShareTxt span{display:block;margin-top:3px;font-size:.74rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#burgerMenu .mnShare .mnShareAct{display:flex;gap:8px;margin-top:12px}
+#burgerMenu .mnShare .mnShareAct button{flex:1;min-height:40px;padding:0 8px;border-radius:11px;font:inherit;font-size:.84rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+#burgerMenu .mnShare .mnShareAct button svg{width:16px;height:16px;flex:none;color:inherit}
+#burgerMenu .mnShare .mnBtnA{border:0;background:var(--accent);color:var(--on-accent,#fff)}
+#burgerMenu .mnShare .mnBtnA:hover{background:var(--accent)}
+#burgerMenu .mnShare .mnBtnB{border:1px solid var(--line2);background:transparent;color:var(--ink)}
+#burgerMenu .mnShare .mnBtnB:hover{background:var(--card)}
 
 /* ---------- schermate sopra la dashboard ---------- */
 .mnLayer{position:fixed;inset:0;z-index:80}
@@ -88,41 +73,54 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnAct > svg{flex:none;width:16px;height:16px;color:var(--muted)}
 .mnMsg{min-height:1.2em;margin:10px 0 0;text-align:center;font-size:.82rem;font-weight:700;color:var(--accent-ink)}
 
-/* pagina "Guida e domande" */
+/* pagina "Come si usa" */
 .mnGuide{position:absolute;inset:0;overflow-y:auto;background:var(--bg);color:var(--ink);-webkit-overflow-scrolling:touch}
-.mnGuideIn{max-width:560px;margin:0 auto;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px calc(28px + env(safe-area-inset-bottom,0px))}
+.mnGuideIn{max-width:600px;margin:0 auto;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 20px) 18px calc(28px + env(safe-area-inset-bottom,0px))}
 .mnGH{display:flex;align-items:center;gap:12px}
 .mnGH h2{margin:0;font-size:1.4rem;font-weight:800;letter-spacing:-0.01em}
 .mnBack{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:grid;place-items:center;padding:0;cursor:pointer}
-.mnSearch{margin-top:16px;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.mnGSub{margin:10px 0 0;line-height:1.45;color:var(--muted);font-size:.92rem}
+.mnSearch{margin-top:14px;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
 .mnSearch svg{flex:none;color:var(--muted)}
 .mnSearch input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:.96rem;font-weight:600}
 .mnSearch:focus-within{border-color:var(--accent)}
-.mnKick{margin:18px 0 8px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.mnSteps{display:flex;gap:8px}
-.mnStep{flex:1;min-width:0;padding:10px 10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-align:left;cursor:pointer}
-.mnStep em{display:grid;place-items:center;width:22px;height:22px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-style:normal;font-size:.74rem;font-weight:800}
-.mnStep span{display:block;margin-top:8px;font-size:.8rem;font-weight:700;line-height:1.3}
-.mnFaq{margin-top:16px;display:flex;flex-direction:column;gap:8px}
-.mnQ{border-radius:16px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
-.mnQ.open{background:var(--card);border-color:var(--line2)}
-.mnQ > button{width:100%;display:flex;align-items:center;gap:12px;padding:0 16px;min-height:56px;border:0;background:transparent;color:var(--ink);text-align:left;font-size:.94rem;font-weight:700;line-height:1.3;cursor:pointer}
-.mnQ > button span{flex:1;padding:10px 0}
-.mnQ > button svg{flex:none;width:18px;height:18px;color:var(--muted);transition:transform .15s}
-.mnQ.open > button svg{transform:rotate(180deg)}
-.mnA{padding:0 16px 16px;font-size:.88rem;line-height:1.55;color:var(--ink);opacity:.86}
-.mnA[hidden]{display:none}
-.mnHint{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-ink);font-size:.8rem;font-weight:700;opacity:1}
-.mnHint svg{flex:none;width:18px;height:18px}
+.mnCan{margin-top:18px;padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.mnCan > b{font-size:1.02rem;font-weight:800}
+.mnCan ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.mnCan li button{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:6px;border:0;border-radius:11px;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.mnCan li button:hover{background:var(--bg2)}
+.mnCan li button > svg{flex:none;color:var(--muted)}
+.mnCi{flex:none;width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center}
+.mnCt{flex:1;min-width:0;font-size:.9rem;font-weight:700;line-height:1.25}
+.mnCt small{display:block;margin-top:1px;font-size:.76rem;font-weight:600;color:var(--muted)}
+.mnTier{margin-top:22px}
+.mnTh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-size:.78rem;font-weight:600;color:var(--muted)}
+.mnTk{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+.mnTopics{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.mnTp{border-radius:16px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
+.mnTp.open{background:var(--card);border-color:var(--line2)}
+.mnTp > button{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 14px;border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.mnTt{flex:1;min-width:0;font-size:.95rem;font-weight:800;line-height:1.25}
+.mnTt small{display:block;margin-top:1px;font-size:.76rem;font-weight:600;color:var(--muted)}
+.mnCv{flex:none;display:grid;place-items:center;color:var(--muted);transition:transform .15s}
+.mnCv svg{width:18px;height:18px}
+.mnTp.open .mnCv{transform:rotate(180deg)}
+.mnQs{padding:2px 16px 8px}
+.mnQa{padding:14px 0;border-top:1px solid var(--line)}
+.mnQs .mnQa:first-child{border-top:0;padding-top:6px}
+.mnQa h4{margin:0;font-size:.93rem;font-weight:800;line-height:1.35}
+.mnQa p{margin:6px 0 0;font-size:.88rem;line-height:1.55;opacity:.9}
+.mnPath{display:inline-block;margin-top:9px;padding:5px 10px;border-radius:9px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);color:var(--accent-ink);font-size:.74rem;font-weight:800}
+.mnTag{display:block;margin-bottom:3px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mnRes{margin-top:14px;padding:2px 16px 8px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.mnRes .mnQa:first-child{border-top:0;padding-top:14px}
 .mnEmpty{margin:20px 0 0;text-align:center;font-size:.9rem;font-weight:600;color:var(--muted)}
-.mnHelp{margin-top:16px;display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:0 16px;box-sizing:border-box;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-align:left;cursor:pointer}
+.mnHelp{margin-top:22px;display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:0 16px;box-sizing:border-box;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-align:left;cursor:pointer}
 .mnHelp svg:first-child{flex:none;width:20px;height:20px;color:var(--accent-ink)}
 .mnHelp .mnT{flex:1;min-width:0}
 .mnHelp .mnT b{display:block;font-size:.94rem;font-weight:700}
 .mnHelp .mnT small{display:block;margin-top:2px;font-size:.76rem;font-weight:600;color:var(--muted)}
 .mnHelp > svg:last-child{flex:none;width:16px;height:16px;color:var(--muted)}
-
-#burgerMenu .mnShare .mnShareTxt b{font-size:.98rem}
 
 /* "Mostra il QR": si apre solo il QR, senza link, azioni e testi */
 .mnQrOnly .mnSub,.mnQrOnly .mnLinkRow,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrHint{display:none}
