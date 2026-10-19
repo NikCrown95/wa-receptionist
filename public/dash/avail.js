@@ -50,6 +50,8 @@
     window.liaSettingsData = null; window.liaSettingsPromise = null;
     return getJson(url(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   }
+  /* apertura veloce: se i dati sono gia' scaricati (li legge anche Impostazioni all'avvio) li uso subito, senza aspettare la rete */
+  function cached() { var d = window.liaSettingsData; return d && d.hours ? d : null; }
   function fresh() {
     var p = window.liaSettingsRefresh ? window.liaSettingsRefresh() : Promise.resolve(null);
     return Promise.resolve(p).then(function (d) { return d && d.hours ? d : getJson(url()); });
@@ -530,14 +532,24 @@
     layer.hidden = false; place(); markMenu(true);
     var body = $("avBody");
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
-    fresh().then(function (d) { apply(d); pick(); render(); }).catch(function (e) { body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
+    var c = cached();
+    var shown = false;
+    if (c) { apply(c); pick(); render(); shown = true; }
+    else if (S) { pick(); render(); shown = true; }
+    var touched = false;
+    var mark = function () { touched = true; };
+    layer.addEventListener("pointerdown", mark, { once: true });
+    layer.addEventListener("keydown", mark, { once: true });
+    fresh().then(function (d) { apply(d); if (!shown || !touched) { if (!shown) pick(); render(); } }).catch(function (e) { if (shown) return; body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
   }
   /* editor degli orari dentro una pagina delle Impostazioni (stesse tessere della pagina Disponibilita') */
   window.liaAvailMount = function (el, id) {
     if (!el) return;
     emb = { el: el, id: id || "neg" }; el.classList.add("avEmbed");
     if (!S) { el.textContent = ""; el.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
-    fresh().then(function (d) { apply(d); renderEmb(); }).catch(function (e) { el.textContent = ""; el.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
+    var c2 = cached(), shown2 = false;
+    if (c2) { apply(c2); renderEmb(); shown2 = true; }
+    fresh().then(function (d) { apply(d); if (!shown2) renderEmb(); }).catch(function (e) { el.textContent = ""; el.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
   };
   window.liaAvailOpen = open;
   window.liaAvailClose = close;
