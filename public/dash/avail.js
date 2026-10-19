@@ -161,8 +161,9 @@
     days.forEach(function (d, i) {
       var er = mk("div", "avEr" + (d.open ? " on" : " off")), ln = mk("div", "avEl");
       ln.appendChild(mk("span", "avEd", DN[i]));
-      var sw = mk("button", "avSw"); sw.type = "button"; sw.setAttribute("role", "switch");
-      sw.setAttribute("aria-checked", d.open ? "true" : "false"); sw.setAttribute("aria-label", DN[i] + (d.open ? ": aperto" : ": chiuso"));
+      var sw = mk("button", "avPill" + (d.open ? " on" : "")); sw.type = "button";
+      sw.setAttribute("aria-pressed", d.open ? "true" : "false"); sw.setAttribute("aria-label", DN[i] + (d.open ? ": aperto, tocca per chiudere" : ": chiuso, tocca per aprire"));
+      sw.textContent = d.open ? "Aperto" : "+ Apri";
       sw.addEventListener("click", function () {
         if (d.open) days[i] = { open: false };
         else { var ref = shopRef && shopRef[i] && shopRef[i].open ? shopRef[i] : null; days[i] = ref ? copy(ref) : { open: true, from: "09:00", to: "19:00", pause: null }; }
@@ -170,7 +171,7 @@
       });
       ln.appendChild(sw);
       var tc = mk("div", "avEt");
-      if (!d.open) tc.appendChild(mk("span", "avClosed", "Chiuso"));
+      if (!d.open) tc.appendChild(mk("span", "avClosed", "Chiuso tutto il giorno"));
       else if (d.custom) {
         tc.appendChild(mk("span", "avInfo", "Fasce: " + d.custom.map(function (x) { return x.open + "–" + x.close; }).join(" · ")));
         var sp = mk("button", "avMini", "Semplifica"); sp.type = "button";

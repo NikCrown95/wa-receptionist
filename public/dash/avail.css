@@ -131,3 +131,31 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 }
 .avPzChip{border:1px solid color-mix(in srgb,var(--avPz) 50%,var(--line2));background:color-mix(in srgb,var(--avPz) 12%,var(--card));color:var(--avPz);border-radius:999px;padding:0 14px;height:40px;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap;margin-left:auto}
 .avPzChip.on{background:var(--accent);color:var(--on-accent)}
+
+/* v3: niente intestazione ripetuta, tessere giorno colorate, destra piu' viva */
+.avTop{display:none}
+.avIn{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
+.avPill{grid-area:s;border:1.5px solid var(--line2);background:transparent;color:var(--muted);border-radius:999px;padding:0 16px;height:38px;font:inherit;font-weight:800;font-size:.86rem;cursor:pointer;white-space:nowrap}
+.avPill.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:0 8px 18px -10px var(--accent)}
+.avDays{display:grid;grid-template-columns:1fr;gap:12px}
+.avEr{border-left:1px solid var(--line);border-radius:20px;padding:14px 16px;gap:12px}
+.avEr.on{background:linear-gradient(155deg,color-mix(in srgb,var(--accent) 24%,var(--card)),color-mix(in srgb,var(--accent) 8%,var(--card)));border-color:color-mix(in srgb,var(--accent) 55%,var(--line));border-left:1px solid color-mix(in srgb,var(--accent) 55%,var(--line))}
+.avEr.off{background:var(--card2);border:1px dashed var(--line2)}
+.avEl{grid-template-columns:1fr auto;grid-template-areas:"d s" "t t"}
+.avEd{font-family:Manrope,var(--font,system-ui),sans-serif;font-size:1.15rem}
+.avPane{background:linear-gradient(170deg,color-mix(in srgb,var(--accent) 16%,var(--card)),var(--card) 220px);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.avHd.flat{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 38%,var(--card)),color-mix(in srgb,var(--accent) 10%,var(--card)));border:1px solid color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:20px;padding:18px 20px}
+.avHd.flat .avHt p{color:var(--ink);opacity:.8}
+.avMain > .avCard{background:linear-gradient(175deg,color-mix(in srgb,var(--accent) 14%,var(--card)),var(--card) 180px);border-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
+.avMain .avChip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.avMain .avSeg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.avMain .avH{font-family:Manrope,var(--font,system-ui),sans-serif;font-size:1.15rem}
+.avMain .avField > label{color:var(--accent-ink)}
+.avCl{border-top:0;border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--card2));border-radius:14px;padding:12px 14px;margin-top:8px}
+.avCl:first-of-type{margin-top:0}
+.avTag{background:var(--accent);color:var(--on-accent)}
+.avTag.p{background:color-mix(in srgb,var(--accent) 30%,var(--card2));color:var(--ink)}
+@media (min-width:860px){
+  .avDays{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .avEl{grid-template-columns:1fr auto;grid-template-areas:"d s" "t t"}
+}
