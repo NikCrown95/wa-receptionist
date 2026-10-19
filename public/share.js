@@ -9,6 +9,7 @@
   try { token = (new URLSearchParams(location.search).get("t") || "").trim(); } catch (e) {}
   if (!token) return;
 
+  var obsOn = false;
   var menu = null, biz = null, loading = null, sheet = null, guide = null, cur = 0, lastFocus = null, msgT = null;
   var NEWK = "lia:guide:seen:" + token;
 
@@ -40,6 +41,17 @@
   /* ---------- dati dell'attivita' ---------- */
   function getJson(u) {
     return fetch(u, { cache: "no-store" }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error((d && d.error) || "Errore"); return d; }); });
+  }
+  var CK = "lia:mnbiz:" + token;
+  function readCache() {
+    try { var o = JSON.parse(ls("g", CK) || "null"); if (o && o.raw && Array.isArray(o.links)) return o; } catch (e) {}
+    return null;
+  }
+  function writeCache(b) {
+    try {
+      var r = b.raw || {};
+      ls("s", CK, JSON.stringify({ raw: { name: r.name || b.name || "", business_type: r.business_type || (b.gym ? "palestra" : ""), address: r.address || "" }, name: b.name || "", plan: b.plan || "", gym: !!b.gym, classes: b.classes !== false, personal: b.personal !== false, rental: !!b.rental, links: b.links }));
+    } catch (e) {}
   }
   function planLabel(n) {
     n = String(n || "");
@@ -77,7 +89,7 @@
         var gb = g && g.business; if (!gb) throw new Error("no");
         return fin({ name: gb.name || "", business_type: "palestra", public_link: gb.public_link || "", gym_offers: null }, g);
       });
-    }).then(function (res) { biz = res; return res; }).catch(function () { loading = null; biz = null; return null; });
+    }).then(function (res) { biz = res; return res; }).catch(function () { loading = null; if (!readCache()) biz = null; return null; });
     return loading;
   }
 
@@ -136,7 +148,8 @@
       '<button type="button" class="mnBtnB" data-a="qr">' + I.qrs + "<span>Mostra il QR</span></button></div>");
     card.id = "mnShareCard"; card.hidden = true;
     card.addEventListener("click", function (ev) {
-      var b = ev.target.closest("[data-a]"); if (!b || !biz) return;
+      var b = ev.target.closest("[data-a]"); if (!b) return;
+      if (!biz) { var bb = b; load().then(function () { if (biz) { biz.__w = 1; bb.click(); } }); return; }
       var a = b.getAttribute("data-a");
       if (a === "profile") { var pf = $("menuTabProfile"); if (pf) pf.click(); return; }
       if (!biz.links.length) return;
@@ -191,7 +204,7 @@
     }
     if (!c || !biz) return;
     syncProfile();
-    if (window.MutationObserver && menu) new MutationObserver(syncProfile).observe(menu, { attributes: true, attributeFilter: ["class", "hidden"] });
+    if (window.MutationObserver && menu && !obsOn) { obsOn = true; new MutationObserver(syncProfile).observe(menu, { attributes: true, attributeFilter: ["class", "hidden"] }); }
   }
 
   /* ---------- foglio "Condividi la tua pagina" ---------- */
@@ -505,7 +518,14 @@
   function init() {
     try {
       if (!buildMenu()) return;
-      load().then(paintMenu);
+      var cc = readCache();
+      if (cc) { biz = cc; paintMenu(); }
+      else {
+        var c0 = $("mnShareCard"), mb = document.querySelector(".mainBiz"), nm0 = $("mnBizName");
+        if (c0) c0.hidden = false;
+        if (nm0 && mb) { var t0 = String(mb.childNodes[0] ? mb.childNodes[0].textContent : mb.textContent).trim(); if (t0) nm0.textContent = t0; }
+      }
+      load().then(function (b) { if (b) writeCache(b); paintMenu(); });
     } catch (e) { document.body.classList.remove("mnOn"); }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
