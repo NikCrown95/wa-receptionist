@@ -146,6 +146,9 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnCan li button{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:9px;min-height:104px;padding:12px;border-radius:16px;background:color-mix(in srgb,var(--kc) 14%,var(--card));border:1px solid color-mix(in srgb,var(--kc) 34%,var(--line))}
 .mnCan li button:hover{background:color-mix(in srgb,var(--kc) 20%,var(--card))}
 .mnCan .mnCt{flex:none;width:100%}
+/* titoli su due righe riservate (tre su telefono): i sottotitoli partono alla stessa altezza in tutte le card */
+.mnCan .mnCtt{display:block;min-height:2.5em}
+@media (max-width:520px){.mnCan .mnCtt{min-height:3.75em}}
 .mnTier{margin-top:24px}
 .mnTh{display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
 .mnNum{flex:none;width:30px;height:30px;border-radius:50%;background:var(--kc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.9rem}

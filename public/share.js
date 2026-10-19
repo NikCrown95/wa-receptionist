@@ -348,7 +348,8 @@
           ["cal", "Tenere l’agenda sotto controllo", "Giorno, settimana e mese, con notifiche in tempo reale", "t2"],
           ["cli", "Conoscere i tuoi clienti", "Scheda, storico delle visite e note", "t4"],
           ["clock", "Organizzare orari, ferie e collaboratori", "Decidi tu quando e con chi si può prenotare", "t5"],
-          ["sta", "Capire come va l’attività", "Incassi, giorni pieni e orari più richiesti", "t8"]
+          ["sta", "Capire come va l’attività", "Incassi, giorni pieni e orari più richiesti", "t8"],
+          ["msg", "Avere Lia che risponde ai clienti", "In chat, anche quando sei occupato o chiuso", "t9"]
         ],
         tiers: [
           { k: "Essenziale", s: "Parti da qui", topics: [{ id: "t1", ic: "bolt", n: "Mettere online la tua attività", d: "Le tre cose da fare subito", q: t1 }] },
@@ -468,7 +469,7 @@
         }
         h += '<div class="mnCan"><b>Cosa puoi fare con Prenolia</b><ul>';
         d.can.forEach(function (c, i) {
-          h += '<li><button type="button" class="mnK' + (i % 6 + 1) + '" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0], 20) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span></button></li>";
+          h += '<li><button type="button" class="mnK' + (i % 6 + 1) + '" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0], 20) + '</span><span class="mnCt"><span class="mnCtt">' + c[1] + "</span><small>" + c[2] + "</small></span></button></li>";
         });
         h += "</ul></div>";
         d.tiers.forEach(function (t, ti) {
