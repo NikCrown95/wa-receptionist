@@ -38,7 +38,7 @@
   function hue(s) { var h = 0; s = String(s || ""); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; }
 
   function toast(msg, bad) {
-    var t = $("avToast"); if (!t) return;
+    var t = $("avToast"); if (!t) { t = mk("div", "avToast"); t.id = "avToast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
     t.textContent = msg; t.className = "avToast show" + (bad ? " bad" : "");
     clearTimeout(toastT); toastT = setTimeout(function () { t.className = "avToast"; }, 3200);
   }
@@ -127,7 +127,7 @@
   function step(val, n) { var i = TIMES.indexOf(val); return TIMES[Math.max(0, Math.min(TIMES.length - 1, (i < 0 ? 0 : i) + n))]; }
 
   /* ---------- selezione e modello condiviso ---------- */
-  var sel = "neg", pending = null, justSaved = null, pzOpen = {};
+  var sel = "neg", pending = null, justSaved = null, pzOpen = {}, curKey = "neg", emb = null;
   function person(id) { for (var i = 0; i < S.staff.length; i++) if (S.staff[i].id === id) return S.staff[i]; return null; }
   function daysOf(id) { return id === "neg" ? NEG.days : (TM[id] ? TM[id].days : null); }
   function dirty(id) {
@@ -186,7 +186,7 @@
           if (m(v) <= m(d.from)) return; d.to = v; if (d.pause && m(d.pause.to) >= m(v)) d.pause = null; render();
         })));
         if (d.pause) {
-          var pk = sel + ":" + i, pc = mk("button", "avPzChip" + (pzOpen[pk] ? " on" : ""), "Pausa " + d.pause.from + "–" + d.pause.to); pc.type = "button";
+          var pk = curKey + ":" + i, pc = mk("button", "avPzChip" + (pzOpen[pk] ? " on" : ""), "Pausa " + d.pause.from + "–" + d.pause.to); pc.type = "button";
           pc.addEventListener("click", function () { pzOpen[pk] = !pzOpen[pk]; render(); });
           tc.appendChild(pc);
         } else {
@@ -196,19 +196,19 @@
             var pf = pad(Math.floor(mid / 60)) + ":" + pad(mid % 60), pt = nudge(pf, 60);
             if (m(pf) <= a || m(pt) >= b) { pf = nudge(d.from, 30); pt = nudge(pf, 30); }
             if (m(pt) >= b) { toast("Orario troppo breve per una pausa.", true); return; }
-            d.pause = { from: pf, to: pt }; pzOpen[sel + ":" + i] = true; render();
+            d.pause = { from: pf, to: pt }; pzOpen[curKey + ":" + i] = true; render();
           });
           tc.appendChild(ap);
         }
       }
       ln.appendChild(tc);
       er.appendChild(ln);
-      if (d.open && !d.custom && d.pause && pzOpen[sel + ":" + i]) {
+      if (d.open && !d.custom && d.pause && pzOpen[curKey + ":" + i]) {
         var pl = mk("div", "avPz"); pl.appendChild(mk("b", null, "Pausa"));
         var pa = mk("div", "avTl"); pa.appendChild(mk("span", null, "Dalle")); pa.appendChild(tmr(d.pause.from, DN[i] + ", inizio pausa", function (v) { if (m(v) <= m(d.from) || m(v) >= m(d.pause.to)) return; d.pause.from = v; render(); })); pl.appendChild(pa);
         var pb = mk("div", "avTl"); pb.appendChild(mk("span", null, "Alle")); pb.appendChild(tmr(d.pause.to, DN[i] + ", fine pausa", function (v) { if (m(v) >= m(d.to) || m(v) <= m(d.pause.from)) return; d.pause.to = v; render(); })); pl.appendChild(pb);
         var rm = mk("button", "avRm", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Togli la pausa");
-        rm.addEventListener("click", function () { d.pause = null; pzOpen[sel + ":" + i] = false; render(); });
+        rm.addEventListener("click", function () { d.pause = null; pzOpen[curKey + ":" + i] = false; render(); });
         pl.appendChild(rm); er.appendChild(pl);
       }
       list.appendChild(er);
@@ -237,6 +237,7 @@
 
   /* ---------- editor di Negozio / persona ---------- */
   function editor(box, id) {
+    curKey = id;
     var isShop = id === "neg", st = isShop ? null : person(id), days = daysOf(id);
     var pane = mk("div", "avPane"); pane.style.setProperty("--c", colorOf(id));
     var w = weekHours(days);
@@ -458,7 +459,13 @@
       h.appendChild(go); nav.appendChild(h);
     }
   }
+  function renderEmb() {
+    if (!emb || !S || !emb.el.isConnected) return;
+    var y = emb.sc ? emb.sc.scrollTop : 0;
+    emb.el.textContent = ""; editor(emb.el, emb.id);
+  }
   function render() {
+    renderEmb();
     if (!layer || !S) return;
     if (sel !== "neg" && sel !== "chi" && (!S.team || !person(sel))) sel = "neg";
     paintSide();
@@ -480,7 +487,7 @@
       '<div class="avScroll"><div class="avIn">' +
       '<div class="avTop"><button type="button" class="mnBack" id="avBack" aria-label="Indietro">' + IC.back + '</button><div><h2 id="avT">Disponibilità</h2><p class="avSubT">Quando ricevi, chi lavora e quando sei chiuso.</p></div></div>' +
       '<div class="avApp"><nav id="avSide" class="avSide" aria-label="Orari di"></nav><section id="avBody" class="avMain"></section></div>' +
-      '</div></div><div class="avToast" id="avToast" role="status"></div>';
+      '</div></div>';
     document.body.appendChild(layer);
     $("avBack").addEventListener("click", function () { close(); });
     var menu = $("burgerMenu");
@@ -525,6 +532,13 @@
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     fresh().then(function (d) { apply(d); pick(); render(); }).catch(function (e) { body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
   }
+  /* editor degli orari dentro una pagina delle Impostazioni (stesse tessere della pagina Disponibilita') */
+  window.liaAvailMount = function (el, id) {
+    if (!el) return;
+    emb = { el: el, id: id || "neg" }; el.classList.add("avEmbed");
+    if (!S) { el.textContent = ""; el.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
+    fresh().then(function (d) { apply(d); renderEmb(); }).catch(function (e) { el.textContent = ""; el.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
+  };
   window.liaAvailOpen = open;
   window.liaAvailClose = close;
 })();

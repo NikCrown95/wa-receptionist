@@ -211,3 +211,8 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 .avHd{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 55%,#06141a));box-shadow:0 18px 34px -22px var(--c,var(--accent))}
 .avHd .avAv{background:rgba(255,255,255,.24)}
 .avDot{background:#fff;box-shadow:0 0 0 3px var(--c,var(--accent))}
+
+.avEmbed{--avOk:var(--accent);--avOkSoft:var(--accent-soft);--avPz:var(--accent-ink);--c:var(--accent)}
+.avEmbed .avHd,.avEmbed .avHint{display:none}
+.avEmbed .avPane{margin:0}
+.avToast{z-index:60}
