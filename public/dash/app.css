@@ -3023,3 +3023,6 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 @keyframes agFx{0%,100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent;transform:scale(1)}40%{box-shadow:0 0 0 5px color-mix(in srgb,var(--fxc) 38%,transparent),0 0 38px 8px color-mix(in srgb,var(--fxc) 50%,transparent);transform:scale(1.03)}}
 #calSubApp.fxOn .ag-card:not(.ag-focus){opacity:.35;transition:opacity .35s ease}
 @media (prefers-reduced-motion:reduce){#calSubApp .ag-card.ag-focus{animation:agFxStill 4.4s ease-out both;animation-delay:0ms}@keyframes agFxStill{0%,70%{box-shadow:0 0 0 4px color-mix(in srgb,var(--fxc) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}}
+
+/* ===== WhatsApp nascosto finché non è pronto: per riattivarlo basta togliere queste regole ===== */
+.stRow[data-st="whatsapp"],.stPage[data-st="whatsapp"]{display:none!important}

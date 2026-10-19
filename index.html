@@ -222,6 +222,8 @@ a{color:inherit;}
 /* card con icona: canali e affidabilità */
 .icard-grid{margin-top:56px;display:grid;gap:20px;}
 @media (min-width:820px){.icard-grid{grid-template-columns:repeat(3,1fr);}}
+.icard-grid.two{max-width:760px;margin-left:auto;margin-right:auto;}
+@media (min-width:720px){.icard-grid.two{grid-template-columns:repeat(2,1fr);}}
 .icard-grid.four{margin-top:52px;}
 @media (min-width:720px){.icard-grid.four{grid-template-columns:repeat(2,1fr);}}
 .icard{padding:28px;border-radius:24px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
@@ -523,7 +525,7 @@ a{color:inherit;}
   <div class="wrap">
     <h2 class="h2 reveal" id="t-canali">Lia parla dove sono i tuoi clienti.</h2>
     <p class="lead2 reveal" style="--rd:.08s">Niente app da scaricare, niente registrazioni per chi prenota.</p>
-    <div class="icard-grid">
+    <div class="icard-grid two">
       <div class="icard reveal" style="--rd:.05s">
         <span class="icard-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><line x1="14" y1="14" x2="14" y2="21"></line><line x1="21" y1="14" x2="21" y2="14.01"></line><line x1="17.5" y1="17.5" x2="21" y2="17.5"></line><line x1="14" y1="21" x2="17.5" y2="21"></line></svg></span>
         <h3>Link e QR</h3>
@@ -535,12 +537,6 @@ a{color:inherit;}
         <h3>Telegram</h3>
         <p>Per i clienti che lo usano già, prenotare richiede un minuto.</p>
         <span class="tag">Disponibile</span>
-      </div>
-      <div class="icard reveal" style="--rd:.27s">
-        <span class="icard-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-4.5 7.5 8.5 8.5 0 0 1-8.9-.4L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 8-8.5h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></span>
-        <h3>WhatsApp</h3>
-        <p>Il canale che usano tutti. Lo stiamo attivando.</p>
-        <span class="tag soon">In arrivo</span>
       </div>
     </div>
   </div>
@@ -579,12 +575,11 @@ a{color:inherit;}
           <li>Calendario e agenda del titolare</li>
           <li>Più persone in agenda, per saloni e studi</li>
           <li>Recap degli appuntamenti ogni mattina</li>
-          <li class="soon">WhatsApp<span class="tag">In arrivo</span></li>
         </ul>
         <a class="btn" href="#registrati">Scegli Smart</a>
       </div>
     </div>
-    <p class="fine">Quando WhatsApp sarà pronto lo troverai nel nuovo piano Premium. Prezzi indicativi, ancora da confermare.</p>
+    <p class="fine">Prezzi indicativi, ancora da confermare.</p>
   </div>
 </section>
 

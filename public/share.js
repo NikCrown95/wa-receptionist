@@ -394,8 +394,7 @@
             ] },
             { id: "t9", ic: "msg", n: "Lia e i canali", d: "L’assistente che risponde ai clienti", q: [
               ["Cosa fa Lia?", "Risponde ai clienti in chat e li aiuta a prenotare, anche quando sei occupato o l’attività è chiusa. Funziona su webchat e Telegram.", M + "Scheda attività › Canali clienti"],
-              ["Come collego Telegram?", "Crei il tuo bot in un tocco e i clienti prenotano da lì. Ricevi l’agenda del giorno sul tuo Telegram e puoi spegnerla.", M + "Impostazioni › Telegram"],
-              ["E WhatsApp?", "Arriverà più avanti con un piano dedicato. Per ora i clienti usano il link, la webchat e Telegram.", ""]
+              ["Come collego Telegram?", "Crei il tuo bot in un tocco e i clienti prenotano da lì. Ricevi l’agenda del giorno sul tuo Telegram e puoi spegnerla.", M + "Impostazioni › Telegram"]
             ] },
             { id: "t10", ic: "card", n: "Piano e account", d: "Costi, prova e disdetta", q: [
               ["Quanto costa e cosa include?", "Il piano Smart costa 24,99 € al mese: calendario, prenotazione online dei clienti e Lia su webchat e Telegram.", M + "Impostazioni › Abbonamento"],

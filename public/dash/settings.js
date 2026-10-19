@@ -480,7 +480,6 @@ var PL_GROUPS=[
   {t:'Lia, la tua assistente',lia:true,items:[
     ['chat','Lia sulla webchat','Nella tua pagina di prenotazione risponde ai clienti e li prenota al posto tuo.',0,0,'lia'],
     ['tg','Lia su Telegram','Ti manda gli appuntamenti e risponde ai clienti che le scrivono.',0,0,'sky'],
-    ['wa','Lia su WhatsApp','Presto anche sul numero WhatsApp della tua attività.',0,1,'wa'],
     ['moon','Sempre disponibile','Risponde anche a negozio chiuso e prenota solo negli orari liberi.',0,0,'night']
   ]}
 ];
@@ -494,7 +493,7 @@ function pfRenderPlan(top,cols,o){
   var head=pfMk('div','plHead');
   var hx=pfMk('div','plHx');
   var ttl=pfMk('h2','plTitle');if(o.known&&typeof PLAN_IMG!=='undefined'){ttl.appendChild(document.createTextNode('Il tuo piano è '));var im=document.createElement('img');im.className='planImg'+(prem?' prem':'');im.src=prem?PLAN_IMG.smart:PLAN_IMG.base;im.alt=prem?'Smart':'Base';ttl.appendChild(im)}else{ttl.textContent='Il tuo piano'}hx.appendChild(ttl);
-  hx.appendChild(pfMk('p','plLead',o.gym?'Il programma dei corsi, le prenotazioni degli iscritti e gli abbonamenti in un unico posto.':prem?'Agenda online, clienti e numeri, più Lia: l’assistente virtuale che prenota e gestisce gli appuntamenti per te sulla webchat e su Telegram. WhatsApp arriverà più avanti.':(o.known?'Agenda online, clienti e numeri in un unico posto.':'Il tuo piano non è ancora configurato.')));
+  hx.appendChild(pfMk('p','plLead',o.gym?'Il programma dei corsi, le prenotazioni degli iscritti e gli abbonamenti in un unico posto.':prem?'Agenda online, clienti e numeri, più Lia: l’assistente virtuale che prenota e gestisce gli appuntamenti per te sulla webchat e su Telegram.':(o.known?'Agenda online, clienti e numeri in un unico posto.':'Il tuo piano non è ancora configurato.')));
   head.appendChild(hx);
   if(o.known){var chip=pfMk('span','plChip');chip.innerHTML='<b>'+total+'</b><small>funzioni incluse</small>';head.appendChild(chip)}
   top.appendChild(head);
@@ -612,7 +611,6 @@ function pfRenderPoster(box,b,opts){
     if(ch){ch.innerHTML='';
       [[IC_CAL,'cal','Calendario online','Pagina di prenotazione per i clienti',link?'Attivo':'Non configurato',!!link],
        [IC_CHAT,'chat','Webchat','Chat con Lia sulla tua pagina',webOn?'Attivo':(pn==='Base'?'Non incluso nel piano Base':'Non configurato'),webOn],
-       [IC_WA,'wa','WhatsApp','',  'Da implementare',false],
        [IC_TG,'tg','Telegram',tele?'@'+(String(tele).match(/t\.me\/([^?\/]+)/)||['',''])[1]:'Crea il bot della tua attività',tele?'Attivo':'Non configurato',!!tele]].forEach(function(c){
         var r=pfMk('div','pf2Ch');var i=pfMk('div','pf2Ci'+(c[1]?' '+c[1]:''));i.innerHTML=c[0];r.appendChild(i);
         var t=pfMk('div','pf2Ct');t.appendChild(pfMk('b',null,c[2]));if(c[3])t.appendChild(pfMk('small',null,c[3]));
@@ -1169,14 +1167,13 @@ function pfRenderPoster(box,b,opts){
       now.appendChild(stMk('h3',null,'Piano non ancora configurato'));now.appendChild(stMk('p',null,'Scrivi all\u2019assistenza e lo sistemiamo insieme.'));
       if(chg)chg.hidden=true;if(cc)cc.hidden=true;stText('stSumSub','Piano non configurato');return;
     }
-    if(chg)chg.hidden=false;if(cc)cc.hidden=false;now.style.display='none';try{pfRenderPlan(stEl('plTop'),stEl('plCols'),{premium:D.prem,known:D.known,cd:pfCountdown(D.sub),sub:D.sub})}catch(e){}
+    if(chg)chg.hidden=true;if(cc)cc.hidden=false;now.style.display='none';try{pfRenderPlan(stEl('plTop'),stEl('plCols'),{premium:D.prem,known:D.known,cd:pfCountdown(D.sub),sub:D.sub})}catch(e){}
     if(typeof PLAN_IMG!=='undefined'){var im=document.createElement('img');im.className='planImg'+(D.prem?' prem':'');im.src=D.prem?PLAN_IMG.smart:PLAN_IMG.base;im.alt='';now.appendChild(im)}
     now.appendChild(stMk('h3',null,'Piano '+(D.prem?P.premium.name:P.base.name)));
     var price=(D.sub&&D.sub.price_eur!=null)?Number(D.sub.price_eur):(D.prem?P.premium.price:P.base.price);
     var line=stEur(price)+' al mese'+(end?(cancelled?' \u00b7 attivo fino al '+end:' \u00b7 si rinnova il '+end):'');
     now.appendChild(stMk('p',null,cancelled?'Disdetta registrata. Il piano resta attivo'+(end?' fino al '+end:'')+'.':line));
     stText('stSumSub',(D.prem?'Smart':'Base')+(end?(cancelled?' \u00b7 fino al ':' \u00b7 rinnovo il ')+end:''));
-    var soon=stMk('div','stPlan');var sh=stMk('h5',null,'Premium');sh.appendChild(stMk('span','stChip','In arrivo'));soon.appendChild(sh);soon.appendChild(stMk('p',null,'Arriverà con WhatsApp: Lia risponderà ai tuoi clienti anche sul numero della tua attività. Ti avvisiamo noi quando sarà pronto.'));plans.appendChild(soon);var h4=chg&&chg.querySelector('h4');if(h4)h4.textContent='Cosa arriva';
     var rd=stReqDate('plan_change');if(rd)stMsg('subMsg','Richiesta di cambio inviata il '+rd+'. Ti scriviamo per confermare.');
     var cb=stEl('subCancel'),cd=stReqDate('subscription_cancel');
     stText('subCancelTx',cancelled?'La disdetta \u00e8 gi\u00e0 registrata: il piano non si rinnover\u00e0.':'Il piano resta attivo'+(end?' fino al '+end:' fino alla scadenza')+', poi non si rinnova e la tua pagina di prenotazione smette di funzionare.');
@@ -1229,7 +1226,7 @@ function pfRenderPoster(box,b,opts){
   function stPlanChange(toPrem){
     var D=stD(),P=window.LIA_PLANS,end=stEnd(D.sub);
     stSheet({title:toPrem?'Passare a Premium?':'Passare a Base?',
-      text:toPrem?('Attivi Lia: risponde ai tuoi clienti sulla webchat, su Telegram e su WhatsApp. Il Premium parte '+(end?'dal prossimo rinnovo, il '+end:'dal prossimo rinnovo')+' e costa '+stEur(P.premium.price)+' al mese. Fino ad allora resti sul Base. Ti scriviamo per confermare.'):('Perdi Lia: webchat, Telegram e WhatsApp si spengono. Costa '+stEur(P.base.price)+' al mese'+(end?' e il passaggio avviene al rinnovo del '+end:'')+'. Ti scriviamo per confermare.'),
+      text:toPrem?('Attivi Lia: risponde ai tuoi clienti sulla webchat e su Telegram. Il Premium parte '+(end?'dal prossimo rinnovo, il '+end:'dal prossimo rinnovo')+' e costa '+stEur(P.premium.price)+' al mese. Fino ad allora resti sul Base. Ti scriviamo per confermare.'):('Perdi Lia: webchat e Telegram si spengono. Costa '+stEur(P.base.price)+' al mese'+(end?' e il passaggio avviene al rinnovo del '+end:'')+'. Ti scriviamo per confermare.'),
       ok:toPrem?'Richiedi Premium':'Richiedi il passaggio a Base',cancel:'Annulla',
       onOk:function(){return stSend('plan_change',{message:'Cambio piano: da '+(D.prem?'Premium':'Base')+' a '+(toPrem?'Premium':'Base'),meta:{from:D.prem?'premium':'base',to:toPrem?'premium':'base'}}).then(function(){stReqSet('plan_change');stRenderSub();stMsg('subMsg','Richiesta inviata. Ti scriviamo per confermare.')})}});
   }
