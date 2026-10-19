@@ -945,12 +945,12 @@ function pfRenderPoster(box,b,opts){
     var today=blkYmd(new Date());if(!SF.dFrom)SF.dFrom=today;if(!SF.dTo)SF.dTo=SF.dFrom;
     var two=sfMk('div','sfTwo');
     var f1=sfMk('div','sfField'),l1=sfMk('label',null,SF.offKind==='ferie'?'Dal':'Giorno');l1.setAttribute('for','sfDFrom');
-    var i1=sfMk('input','set-input');i1.id='sfDFrom';i1.type='date';i1.min=today;i1.value=SF.dFrom;i1.onchange=function(){SF.dFrom=i1.value;if(SF.dTo<SF.dFrom)SF.dTo=SF.dFrom};
+    var i1=window.liaDateField?window.liaDateField(SF.dFrom,today):sfMk('input','set-input');i1.id='sfDFrom';if(!window.liaDateField){i1.type='date';i1.min=today;i1.value=SF.dFrom}i1.onchange=function(){SF.dFrom=i1.value;if(SF.dTo<SF.dFrom)SF.dTo=SF.dFrom};
     f1.appendChild(l1);f1.appendChild(i1);two.appendChild(f1);
     var i2=null;
     if(SF.offKind==='ferie'){
       var f2=sfMk('div','sfField'),l2=sfMk('label',null,'Fino al');l2.setAttribute('for','sfDTo');
-      i2=sfMk('input','set-input');i2.id='sfDTo';i2.type='date';i2.min=today;i2.value=SF.dTo;i2.onchange=function(){SF.dTo=i2.value};
+      i2=window.liaDateField?window.liaDateField(SF.dTo,today):sfMk('input','set-input');i2.id='sfDTo';if(!window.liaDateField){i2.type='date';i2.min=today;i2.value=SF.dTo}i2.onchange=function(){SF.dTo=i2.value};
       f2.appendChild(l2);f2.appendChild(i2);two.appendChild(f2);
     }
     box.appendChild(two);

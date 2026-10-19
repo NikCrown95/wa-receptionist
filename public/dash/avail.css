@@ -216,3 +216,7 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 .avEmbed .avHd,.avEmbed .avHint{display:none}
 .avEmbed .avPane{margin:0}
 .avToast{z-index:60}
+
+.liaDate{display:grid;grid-template-columns:.8fr 1.5fr 1fr;gap:6px;min-width:0;width:100%}
+.liaDate select{background:var(--card2);color:var(--ink);border:1px solid var(--line2);border-radius:12px;padding:0 6px;font:inherit;font-weight:700;min-width:0;width:100%;min-height:46px;color-scheme:dark}
+.avRow > .avField{flex:1 1 220px}

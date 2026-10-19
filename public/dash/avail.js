@@ -119,6 +119,35 @@
   /* ---------- pezzi di interfaccia ---------- */
   var TIMES = [];
   (function () { for (var q = 5 * 60; q <= 23 * 60 + 45; q += 15) TIMES.push(pad(Math.floor(q / 60)) + ":" + pad(q % 60)); })();
+  // Campo data in italiano (giorno / mese / anno): l'input nativo segue la lingua del browser (mm/gg/aaaa)
+  var MESI = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  function dateField(val, min) {
+    var w = document.createElement("div"); w.className = "liaDate";
+    var sd = document.createElement("select"), sm = document.createElement("select"), sy = document.createElement("select");
+    sd.setAttribute("aria-label", "Giorno"); sm.setAttribute("aria-label", "Mese"); sy.setAttribute("aria-label", "Anno");
+    var y0 = new Date().getFullYear();
+    var i; for (i = 1; i <= 31; i++) sd.add(new Option(String(i), String(i)));
+    for (i = 0; i < 12; i++) sm.add(new Option(MESI[i], String(i + 1)));
+    for (i = y0; i <= y0 + 3; i++) sy.add(new Option(String(i), String(i)));
+    function pad(n) { return (n < 10 ? "0" : "") + n; }
+    function get() { return sy.value + "-" + pad(+sm.value) + "-" + pad(+sd.value); }
+    function set(v) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); if (!m) return;
+      if (min && v < min) { m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(min); }
+      if (!sy.querySelector('option[value="' + +m[1] + '"]')) sy.add(new Option(m[1], String(+m[1])));
+      sy.value = String(+m[1]); sm.value = String(+m[2]); sd.value = String(+m[3]); fit();
+    }
+    function fit() {
+      var n = new Date(+sy.value, +sm.value, 0).getDate();
+      Array.prototype.forEach.call(sd.options, function (o) { o.hidden = o.disabled = +o.value > n; });
+      if (+sd.value > n) sd.value = String(n);
+    }
+    [sd, sm, sy].forEach(function (x) { x.addEventListener("change", function () { fit(); if (min && get() < min) set(min); }); w.appendChild(x); });
+    Object.defineProperty(w, "value", { get: get, set: set });
+    set(val || min || today());
+    return w;
+  }
+  window.liaDateField = dateField;
   function selT(val, label, fn) {
     var s = document.createElement("select"); s.setAttribute("aria-label", label);
     var list = TIMES.slice(); if (list.indexOf(val) < 0) { list.push(val); list.sort(); }
@@ -312,8 +341,8 @@
     var persons = [["neg", "Tutto il negozio"]]; if (staffOk) S.staff.forEach(function (s) { persons.push([s.id, s.name]); });
     if (persons.length > 1) form.appendChild(field("Chi", who));
     var quick = mk("div", "avRow");
-    var d1 = document.createElement("input"); d1.type = "date"; d1.id = "avD1"; d1.min = today(); d1.value = C.from;
-    var d2 = document.createElement("input"); d2.type = "date"; d2.id = "avD2"; d2.min = today(); d2.value = C.to;
+    var d1 = dateField(C.from, today()); d1.id = "avD1";
+    var d2 = dateField(C.to, today()); d2.id = "avD2";
     var dur = mk("div", "avSeg");
     var hrsBox = mk("div", "avField"); hrsBox.hidden = true;
     var kindBox = mk("div", "avRow");
