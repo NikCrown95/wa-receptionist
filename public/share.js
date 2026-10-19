@@ -324,7 +324,8 @@
     sta: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
     msg: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/>',
     card: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/>',
-    ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+    ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>'
   };
   function gi(k, s) { return '<svg width="' + (s || 19) + '" height="' + (s || 19) + '" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9">' + GI[k] + "</svg>"; }
 
@@ -528,6 +529,31 @@
     guide.hidden = true;
     if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
   }
+
+
+  /* ---------- Impostazioni: riga di scorciatoie ---------- */
+  function mountSc() {
+    var nav = document.querySelector("#panelOther .stMenu"); if (!nav) return;
+    var gym = !!nav.querySelector("[data-gx]");
+    var defs = gym
+      ? [["cal", "Corsi", '[data-gx="corsi"]'], ["card", "Abbonamenti", '[data-gx="abb"]'], ["clock", "Orari", '[data-gx="orari"]'], ["sun", "Ferie", '[data-gx="chiusure"]'], ["tag", "Piano", '[data-st="subscription"]']]
+      : [["tag", "Servizi", '[data-st="services"]'], ["clock", "Orari", '[data-st="hours"]'], ["sun", "Ferie", '[data-st="blocks"]'], ["cli", "Collaboratori", '[data-st="staff"]'], ["card", "Abbonamento", '[data-st="subscription"]']];
+    var colors = gym ? [1, 2, 5, 3, 4] : [2, 5, 1, 3, 4], h = "", n = 0;
+    defs.forEach(function (d, i) {
+      var r = nav.querySelector(d[2]); if (!r || r.style.display === "none") return;
+      n++;
+      h += '<button type="button" class="mnChip mnK' + colors[i] + '" data-sel=\'' + d[2].replace(/'/g, "") + '\'><span class="mnCi">' + gi(d[0], 19) + "</span>" + d[1] + "</button>";
+    });
+    var old = nav.querySelector(".mnSc"); if (old) old.remove();
+    if (!n) return;
+    var box = mk("div", "mnSc", '<span class="mnScL">Vai subito a</span><div class="mnScR">' + h + "</div>");
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest("[data-sel]"); if (!b) return;
+      var t = nav.querySelector(b.getAttribute("data-sel")); if (t) t.click();
+    });
+    nav.insertBefore(box, nav.firstChild);
+  }
+  document.addEventListener("lia:section", function (e) { if (e.detail === "other") { setTimeout(mountSc, 60); setTimeout(mountSc, 600); } });
 
   /* ---------- avvio ---------- */
   document.addEventListener("keydown", function (e) {

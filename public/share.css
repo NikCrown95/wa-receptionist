@@ -199,3 +199,12 @@ body.mnOn #burgerMenu #menuTabProfile{display:none}
 .mnStart li button .mnNum{width:34px;height:34px;font-size:1rem}
 .mnStart li button > svg{flex:none;color:var(--muted)}
 .mnAll{margin-top:16px;display:block;width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-weight:800;cursor:pointer}
+
+/* Impostazioni: scorciatoie */
+.mnSc{margin:0 0 14px}
+.mnScL{display:block;margin:0 0 8px;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mnScR{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mnScR::-webkit-scrollbar{display:none}
+.mnChip{flex:none;display:flex;align-items:center;gap:9px;min-height:48px;padding:6px 14px 6px 8px;border-radius:14px;border:1px solid color-mix(in srgb,var(--kc) 34%,var(--line));background:color-mix(in srgb,var(--kc) 12%,var(--card));color:var(--ink);font:inherit;font-weight:800;font-size:.88rem;white-space:nowrap;cursor:pointer}
+.mnChip .mnCi{width:34px;height:34px}
+@media(min-width:900px){.mnSc{display:none}}
