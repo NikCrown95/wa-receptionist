@@ -213,9 +213,8 @@ body.mnOn #burgerMenu #menuTabProfile{display:none}
 @media(min-width:900px){.mnSc{display:none}}
 body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
 
-/* scheda attivita': immagine dell'attivita' (es. Style2) come sfondo, come per centro estetico e palestra */
-:root:root #panelProfile .pf2 .pfHero.skinImg{background:#fff var(--skin) right 14px center/auto 82% no-repeat;border-color:#fff;box-shadow:0 18px 44px -24px rgba(0,0,0,.8)}
-:root:root #panelProfile .pf2 .pfHero.skinImg .pfWm,:root:root #panelProfile .pf2 .pfHero.skinImg .pfAvatar{display:none}
-:root:root #panelProfile .pf2 .pfHero.skinImg .pfKind{color:#555;text-shadow:none}
-:root:root #panelProfile .pf2 .pfHero.skinImg h2{color:#111;text-shadow:none}
-:root:root #panelProfile .pf2 .pfHero.skinImg p,:root:root #panelProfile .pf2 .pfHero.skinImg p *{color:#444;text-shadow:none}
+/* logo dell'attivita' (es. Style2) al posto dell'icona: menu e scheda attivita' */
+#burgerMenu .mnShare .mnAv.skin{background:#fff var(--skin) center/contain no-repeat;color:transparent;border:0;box-shadow:0 0 0 1px rgba(255,255,255,.5)}
+#burgerMenu .mnShare .mnAv.skin svg{display:none}
+:root:root #panelProfile .pf2 .pfHero.skinImg .pfAvatar{background:#fff var(--skin) center/contain no-repeat;border:0;color:transparent;box-shadow:0 12px 28px -8px rgba(0,0,0,.6)}
+:root:root #panelProfile .pf2 .pfHero.skinImg .pfAvatar>*{display:none}
