@@ -51,22 +51,32 @@
   function load() {
     if (loading) return loading;
     var p = window.liaSettingsData ? Promise.resolve(window.liaSettingsData) : getJson("/api/agenda?t=" + encodeURIComponent(token) + "&settings=1");
-    loading = p.then(function (d) {
-      var b = (d && d.business) || {};
+    function fin(b, g0) {
       var gym = b.business_type === "palestra";
       var o = b.gym_offers || null;
       var res = { raw: b, name: b.name || "", plan: planLabel(b.plan_name), gym: gym, classes: !gym || !o || o.classes !== false, personal: !gym || !o || o.personal !== false, rental: false, links: [] };
       var main = String(b.public_link || "");
       if (main) res.links.push({ key: "main", seg: gym ? "Prenotazioni" : "Prenota", url: abs(main) });
       if (!gym) return res;
-      return getJson("/api/palestra?t=" + encodeURIComponent(token)).then(function (g) {
+      var gp = g0 ? Promise.resolve(g0) : getJson("/api/palestra?t=" + encodeURIComponent(token));
+      return gp.then(function (g) {
         var gl = g && g.business && g.business.public_link;
         if (!res.links.length && gl) res.links.push({ key: "main", seg: "Prenotazioni", url: abs(gl) });
+        if (!res.name && g && g.business && g.business.name) res.name = g.business.name;
         var on = !!(g && g.settings && g.settings.rental && g.settings.rental.on);
         var rl = g && g.business && g.business.rental_link;
         if (on && rl) { res.rental = true; res.links.push({ key: "rent", seg: "Affitto sala", url: abs(rl) }); }
         return res;
       }).catch(function () { return res; });
+    }
+    loading = p.catch(function () { return null; }).then(function (d) {
+      var b = d && d.business;
+      if (b) return fin(b, null);
+      /* palestre senza orari standard: le impostazioni rispondono con un errore, si usano i dati della palestra */
+      return getJson("/api/palestra?t=" + encodeURIComponent(token)).then(function (g) {
+        var gb = g && g.business; if (!gb) throw new Error("no");
+        return fin({ name: gb.name || "", business_type: "palestra", public_link: gb.public_link || "", gym_offers: null }, g);
+      });
     }).then(function (res) { biz = res; return res; }).catch(function () { loading = null; biz = null; return null; });
     return loading;
   }
