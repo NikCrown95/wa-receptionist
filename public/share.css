@@ -208,3 +208,4 @@ body.mnOn #burgerMenu #menuTabProfile{display:none}
 .mnChip{flex:none;display:flex;align-items:center;gap:9px;min-height:48px;padding:6px 14px 6px 8px;border-radius:14px;border:1px solid color-mix(in srgb,var(--kc) 34%,var(--line));background:color-mix(in srgb,var(--kc) 12%,var(--card));color:var(--ink);font:inherit;font-weight:800;font-size:.88rem;white-space:nowrap;cursor:pointer}
 .mnChip .mnCi{width:34px;height:34px}
 @media(min-width:900px){.mnSc{display:none}}
+body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
