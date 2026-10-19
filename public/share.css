@@ -26,12 +26,12 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 #burgerMenu .mnShare{--mnh:200}
 #burgerMenu .mnShare .mnShareKick{display:block;margin:0 0 10px;font-size:.66rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 #burgerMenu .mnShare .mnAv{flex:none;position:relative;width:54px;height:54px;border-radius:18px;display:grid;place-items:center;overflow:hidden;color:hsl(var(--mnh) 70% 72%);background:linear-gradient(150deg,hsl(var(--mnh) 50% 30%) 0%,hsl(var(--mnh) 45% 14%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh) 55% 55% / .45),0 8px 18px -8px rgba(0,0,0,.6);font-family:Manrope,inherit;font-size:1.4rem;font-weight:800}
-:root[data-theme="light"] #burgerMenu .mnShare .mnAv.gym{background:url(/gym/logo.png?v=73) center/78% no-repeat,linear-gradient(150deg,#1b130b,#0d0905);box-shadow:inset 0 0 0 1px rgba(214,160,80,.4)}
+:root[data-theme="light"] #burgerMenu .mnShare .mnAv.gym{background:url(/gym/logo.png?v=73) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))}
 :root[data-theme="light"] #burgerMenu .mnShare .mnAv:not(.gym){color:hsl(var(--mnh) 65% 32%);background:linear-gradient(150deg,hsl(var(--mnh) 75% 92%) 0%,hsl(var(--mnh) 60% 80%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh) 45% 62% / .6)}
 #burgerMenu .mnShare .mnAv svg{display:block;width:26px;height:26px;color:inherit}
 #burgerMenu .mnShare .mnAv.est{background:url(/estetista/logo.png) center/cover no-repeat;color:transparent}
 #burgerMenu .mnShare .mnAv.car{background:url(/cartomanzia/logo.png) center/cover no-repeat;color:transparent}
-#burgerMenu .mnShare .mnAv.gym{background:url(/gym/logo.png?v=73) center/78% no-repeat,linear-gradient(150deg,#1b130b,#0d0905);box-shadow:inset 0 0 0 1px rgba(214,160,80,.4);color:transparent}
+#burgerMenu .mnShare .mnAv.gym{background:url(/gym/logo.png?v=73) center/contain no-repeat;box-shadow:none;border:0;border-radius:0;overflow:visible;color:transparent;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
 #burgerMenu .mnShare .mnAv.est svg,#burgerMenu .mnShare .mnAv.car svg{display:none}
 #burgerMenu .mnShare .mnShareTxt small{display:block;margin:0 0 2px;font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--mnh) 65% 68%)}
 :root[data-theme="light"] #burgerMenu .mnShare .mnShareTxt small{color:hsl(var(--mnh) 60% 32%)}
