@@ -498,7 +498,8 @@
   function place() {
     if (!layer) return;
     var h = document.querySelector(".mainTop"), t = 0;
-    if (h) { t = Math.max(0, Math.round(h.getBoundingClientRect().bottom)); }
+    try { window.scrollTo(0, 0); } catch (e) {}
+    if (h) { t = Math.round(h.getBoundingClientRect().bottom); if (t <= 0) t = Math.round(h.offsetHeight || 0); t = Math.max(0, t); }
     layer.style.top = t + "px";
   }
   window.addEventListener("resize", function () { if (layer && !layer.hidden) place(); });

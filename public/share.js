@@ -518,7 +518,8 @@
   function guideTop() {
     if (!guide) return;
     var h = document.querySelector(".mainTop"), t = 0;
-    if (h) { var r = h.getBoundingClientRect(); t = Math.max(0, Math.round(r.bottom)); }
+    try { window.scrollTo(0, 0); } catch (e) {}
+    if (h) { var r = h.getBoundingClientRect(); t = Math.round(r.bottom); if (t <= 0) t = Math.round(h.offsetHeight || 0); t = Math.max(0, t); }
     guide.style.top = t + "px";
   }
   window.addEventListener("resize", function () { if (guide && !guide.hidden) guideTop(); });
