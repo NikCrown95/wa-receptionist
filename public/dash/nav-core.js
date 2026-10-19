@@ -62,6 +62,7 @@ function liaNavCore(D,H){
     ['qr',function(){var m=$('pfQrModal');return !!(m&&!m.hidden);},function(){click(q('#pfQrModal [data-qclose]'));}],
     ['chart',function(){return !!q('#statsSubApp .chartModal.on');},function(){click(q('#statsSubApp .chartModalHead button'));}],
     ['notif',function(){var p=$('notifPanel');return !!(p&&!p.hidden);},function(){click($('notifScrim'));}],
+    ['avail',function(){var o=$('avLayer');return !!(o&&!o.hidden);},function(){click($('avBack'));}],
     ['mnguide',function(){var o=$('mnGuide');return !!(o&&!o.hidden);},function(){click($('mnGuideBack'));}],
     ['mnshare',function(){var o=$('mnShareSheet');return !!(o&&!o.hidden);},function(){click($('mnShareScrim'));}],
     ['menu',function(){var m=$('burgerMenu');return !!(m&&m.classList.contains('on'));},function(){click($('menuBackdrop'));}]

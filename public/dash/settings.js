@@ -16,9 +16,9 @@
   var local=localLoad(); S.combos=[]; S.blocks=local.blocks||[];
 
   var themeButtons=document.querySelectorAll('#themePick button');
-  function themeChoice(){try{var t=localStorage.getItem('lia_theme');if(t==='light'||t==='dark'||t==='auto')return t}catch(e){}return 'auto'}
-  window.liaSetTheme=function(t){var resolved=t==='auto'?((window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'):t;document.documentElement.dataset.theme=resolved;document.body.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;try{localStorage.setItem('lia_theme',t)}catch(e){}themeButtons.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.theme===t?'true':'false')});};
-  window.liaSetTheme(themeChoice());
+  function themeChoice(){try{var t=localStorage.getItem('lia_theme_v2');if(t==='light'||t==='dark'||t==='auto')return t;var o=localStorage.getItem('lia_theme');if(o==='light'||o==='dark')return o}catch(e){}return 'dark'}
+  window.liaSetTheme=function(t,keep){var resolved=t==='auto'?((window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'):t;document.documentElement.dataset.theme=resolved;document.body.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;try{if(!keep)localStorage.setItem('lia_theme_v2',t)}catch(e){}themeButtons.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.theme===t?'true':'false')});};
+  window.liaSetTheme(themeChoice(),true);
 
   function api(method,body){
     if((method||'GET')!=='GET'){window.liaSettingsData=null;window.liaSettingsPromise=null}
@@ -675,6 +675,8 @@ function pfRenderPoster(box,b,opts){
       if(bizInput)bizInput.value=S.bizName;var be=document.getElementById('businessName');if(be)be.textContent=S.bizName;
       renderServices();renderHours();renderBlocks();renderBusinessProfile(d);staffApply(d);rulesApply(d);stReady=true;stSum();flash('Servizi, orari e chiusure sincronizzati con Prenolia.');return d;
     }
+  /* rilegge tutto dal server e riallinea le pagine (usato dalla pagina Disponibilita') */
+  window.liaSettingsRefresh=function(){window.liaSettingsData=null;window.liaSettingsPromise=null;return loadRemote()};
   /* ---- Impostazioni: lista di voci, pagine e riepiloghi ---- */
   var stReady=false;
   var ST_DAYS=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
@@ -715,7 +717,7 @@ function pfRenderPoster(box,b,opts){
     var wide=function(){return !!(window.matchMedia&&window.matchMedia('(min-width:900px)').matches)};
     function toTop(){var w=document.querySelector('#panelOther .otherWrap');if(w)w.scrollTop=0;var h=document.querySelector('.tabPanels');if(h)h.scrollTop=0;var po=stEl('panelOther');if(po)po.scrollTop=0}
     function mark(){rows.forEach(function(r){r.classList.toggle('on',wide()&&r.getAttribute('data-st')===cur)});pages.forEach(function(p){p.classList.toggle('on',p.getAttribute('data-st')===cur)})}
-    function openPage(k){cur=k;mark();if(!wide())shell.classList.add('inPage');toTop();if(k==='telegram'&&window.liaTgOpened)window.liaTgOpened()}
+    function openPage(k){if((k==='hours'||k==='blocks')&&window.liaAvailOpen){window.liaAvailOpen(k==='hours'?'neg':'chi');return}cur=k;mark();if(!wide())shell.classList.add('inPage');toTop();if(k==='telegram'&&window.liaTgOpened)window.liaTgOpened()}
     rows.forEach(function(r){r.addEventListener('click',function(){openPage(r.getAttribute('data-st'))})});
     shell.querySelectorAll('.stBack').forEach(function(b){b.addEventListener('click',function(){shell.classList.remove('inPage');toTop()})});
     window.liaSettingsOpen=function(k){openPage(k)};

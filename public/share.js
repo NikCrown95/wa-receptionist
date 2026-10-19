@@ -167,6 +167,11 @@
     g.addEventListener("click", function () { closeMenu(); openGuide(); });
 
     menu.insertBefore(card, cal);
+    /* Disponibilita': orari del negozio e del team, chiusure e assenze (non per le palestre, che hanno i loro orari) */
+    var av = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Disponibilità');
+    av.type = "button"; av.id = "menuTabAvail"; av.setAttribute("role", "menuitem"); av.setAttribute("aria-current", "false");
+    av.addEventListener("click", function () { closeMenu(); if (window.liaAvailOpen) window.liaAvailOpen(); });
+    menu.insertBefore(av, other);
     /* ordine: ... Impostazioni, Come si usa, separatore, Esci */
     var sep = mk("div", "mnSep");
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
@@ -203,6 +208,7 @@
   }
   function paintMenu() {
     var c = $("mnShareCard");
+    var avb = $("menuTabAvail"); if (avb) avb.style.display = biz && biz.gym ? "none" : "";
     if (c) {
       c.hidden = !biz;
       var nl = !!biz && !biz.links.length;
