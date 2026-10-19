@@ -1,0 +1,65 @@
+
+#pfRefCard{position:relative;overflow:hidden;display:block;padding:22px 24px;color:#F2FBFB;border-radius:24px;border:1px solid rgba(127,220,220,.28);box-shadow:0 10px 30px rgba(8,40,48,.28);
+ background:radial-gradient(120% 160% at 100% 0%,#2A9AA6 0%,rgba(42,154,166,0) 55%),radial-gradient(90% 140% at 0% 100%,#0F5560 0%,rgba(15,85,96,0) 60%),linear-gradient(135deg,#0C3A44,#0A2B33)}
+#pfRefCard[hidden]{display:none}
+:root[data-theme="light"] #panelProfile #pfRefCard{background:linear-gradient(135deg,#F3FBFC,#E4F3F6);border-color:#CDE5EA;color:#0F2A33;box-shadow:0 8px 24px rgba(20,60,70,.08)}
+:root[data-theme="light"] #panelProfile #pfRefCard::before,:root[data-theme="light"] #panelProfile #pfRefCard::after{display:none}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfIco{background:#CDE9EE;border-color:#A7D3DC;color:#0E5F6C}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfIco svg{stroke:#0E5F6C;stroke-width:2}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfHead h3{color:#0F2A33}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfHead p{color:#4B646C}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfStat{background:#fff;border-color:#CDE5EA}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfStat.hi{background:#D3EDF1;border-color:#9ED2DB}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfStat small{color:#4B646C}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfStat b{color:#0F2A33}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfLink{background:#fff;border-color:#CDE5EA;color:#0F2A33}
+:root[data-theme="light"] #panelProfile #pfRefCard .pfBtn{background:#fff;color:#0F2A33;border-color:#BCD8DE}
+:root[data-theme="light"] #panelProfile #pfRefCard .pfBtn.rfP{background:#16707E;color:#fff;border-color:#16707E}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfMore summary{color:#16707E}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfList{border-top-color:#CDE5EA}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfRow{color:#0F2A33;border-bottom-color:#DCEBEE}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfRow small{color:#5A747C}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfChip.trial{background:#E1EEF1;color:#0F2A33}
+:root[data-theme="light"] #panelProfile #pfRefCard .rfChip.paid{background:#16707E;color:#fff}
+#pfRefCard::before{content:"";position:absolute;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;border:1px solid rgba(255,255,255,.14);pointer-events:none}
+#pfRefCard::after{content:"";position:absolute;right:20px;top:-30px;width:140px;height:140px;border-radius:50%;border:1px solid rgba(255,255,255,.1);pointer-events:none}
+#pfRefCard .rfIn{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px 28px;align-items:center}
+#pfRefCard .rfTop{display:flex;gap:14px;align-items:flex-start}
+#pfRefCard .rfIco{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22)}
+#pfRefCard .rfIco svg{width:24px;height:24px}
+#pfRefCard .rfHead h3{margin:0;font-size:1.05rem;font-weight:800;letter-spacing:.01em;text-transform:none;color:#F2FBFB}
+#pfRefCard .rfHead p{margin:4px 0 0;font-size:.86rem;line-height:1.45;color:rgba(242,251,251,.78);max-width:44ch}
+#pfRefCard .rfStats{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px;margin-top:16px}
+#pfRefCard .rfStat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:10px 14px;min-width:0}
+#pfRefCard .rfStat.hi{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.34)}
+#pfRefCard .rfStat small{display:block;font-size:.58rem;font-weight:760;letter-spacing:.06em;text-transform:uppercase;color:rgba(242,251,251,.7);white-space:nowrap}
+#pfRefCard .rfStat b{font-size:1.7rem;line-height:1.15;font-weight:780;font-variant-numeric:tabular-nums;color:#F2FBFB}
+#pfRefCard .rfSide{display:grid;gap:10px;min-width:0}
+#pfRefCard .rfCodeBox{display:flex;flex-direction:column;gap:2px;background:rgba(4,22,27,.4);border:1.5px dashed rgba(255,255,255,.4);border-radius:14px;padding:10px 14px;margin-bottom:8px}#pfRefCard .rfCodeBox small{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(242,251,251,.7)}#pfRefCard .rfCodeBox b{font-size:1.2rem;letter-spacing:.03em;color:#F2FBFB;word-break:break-all}#pfRefCard .rfEdit[hidden]{display:none}#pfRefCard .rfEdit{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}#pfRefCard .rfEdit input{min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(4,22,27,.4);color:#F2FBFB;font:inherit;font-size:16px;padding:0 12px}#pfRefCard .rfEdit .rfHint{grid-column:1/-1;margin:0;font-size:.78rem;color:rgba(242,251,251,.75)}#pfRefCard .rfEdit .rfHint.bad{color:#FFC2B8}:root[data-theme="light"] #panelProfile #pfRefCard .rfCodeBox{background:#fff;border-color:#7FBFCA}:root[data-theme="light"] #panelProfile #pfRefCard .rfCodeBox small{color:#4B646C}:root[data-theme="light"] #panelProfile #pfRefCard .rfCodeBox b{color:#0F2A33}:root[data-theme="light"] #panelProfile #pfRefCard .rfEdit input{background:#fff;color:#0F2A33;border-color:#BCD8DE}:root[data-theme="light"] #panelProfile #pfRefCard .rfEdit .rfHint{color:#4B646C}:root[data-theme="light"] #panelProfile #pfRefCard .rfEdit .rfHint.bad{color:#B3382A}#pfRefCard .rfBtns{flex-wrap:wrap}#pfRefCard .rfLink{background:rgba(4,22,27,.4);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 14px;font-size:.84rem;font-weight:650;line-height:1.35;color:#F2FBFB;word-break:break-all}
+#pfRefCard .rfBtns{display:flex;gap:8px}
+#pfRefCard .pfBtn{flex:1;min-height:44px;border-radius:13px;font-size:.9rem;font-weight:760;color:#F2FBFB;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.28)}
+#pfRefCard .pfBtn.rfP{background:#EFFCFC;color:#0A3A44;border-color:#EFFCFC}
+#pfRefCard .rfMore{position:relative;z-index:1;margin-top:14px}
+#pfRefCard .rfMore summary{cursor:pointer;font-size:.86rem;font-weight:720;color:#BFF1F1;padding:2px 0}
+#pfRefCard .rfList{margin-top:8px;max-height:196px;overflow:auto;border-top:1px solid rgba(255,255,255,.16)}
+#pfRefCard .rfRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.12);font-size:.92rem;color:#F2FBFB}
+#pfRefCard .rfRow span.n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:650}
+#pfRefCard .rfRow small{display:block;font-weight:500;font-size:.74rem;color:rgba(242,251,251,.7)}
+#pfRefCard .rfChip{flex:none;padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:750}
+#pfRefCard .rfChip.trial{background:rgba(255,255,255,.16);color:#F2FBFB}
+#pfRefCard .rfChip.paid{background:#EFFCFC;color:#0A3A44}
+@media(max-width:899px){#pfRefCard .rfIn{grid-template-columns:minmax(0,1fr)}}
+
+/* ===== Mese su telefono: il bordo di ogni giorno si riempie con l'occupazione ===== */
+#calSubApp .month-ring{display:none}
+@media(max-width:699px){
+  #calSubApp .month-ring{display:block;position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  #calSubApp .month-ring rect{fill:none;stroke:color-mix(in srgb,var(--ink) 17%,transparent);stroke-width:3}
+  #calSubApp .month-ring path{fill:none;stroke:var(--teal);stroke-width:3.5;stroke-linecap:butt;stroke-linejoin:round}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell:not(.today):not(.sel):not(.is-closed):not(.outside){background:var(--card)!important}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell.past:not(.today):not(.sel) .dnum,#calSubApp#calSubApp.monthMode .month-grid .month-cell.past:not(.today):not(.sel) .month-appts{opacity:.7}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell{border-color:transparent!important}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell .month-occ{display:none!important}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell.today{box-shadow:none!important}
+  #calSubApp#calSubApp.monthMode .month-grid .month-cell.sel{box-shadow:none!important;background-color:color-mix(in srgb,var(--teal) 15%,transparent)!important}
+}
