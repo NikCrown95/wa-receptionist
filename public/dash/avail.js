@@ -171,20 +171,20 @@
       });
       ln.appendChild(sw);
       var tc = mk("div", "avEt");
-      if (!d.open) tc.appendChild(mk("span", "avClosed", "Chiuso tutto il giorno"));
+      if (!d.open) tc.appendChild(mk("span", "avClosed", "Chiuso"));
       else if (d.custom) {
         tc.appendChild(mk("span", "avInfo", "Fasce: " + d.custom.map(function (x) { return x.open + "–" + x.close; }).join(" · ")));
         var sp = mk("button", "avMini", "Semplifica"); sp.type = "button";
         sp.addEventListener("click", function () { var f = d.custom[0], l = d.custom[d.custom.length - 1]; days[i] = { open: true, from: f.open, to: l.close, pause: null }; render(); });
         tc.appendChild(sp);
       } else {
-        tc.appendChild(tmr(d.from, DN[i] + ", apertura", function (v) {
+        function tl(lab, node) { var r = mk("div", "avTl"); r.appendChild(mk("span", null, lab)); r.appendChild(node); return r; }
+        tc.appendChild(tl("Apre", tmr(d.from, DN[i] + ", apertura", function (v) {
           if (m(v) >= m(d.to)) return; d.from = v; if (d.pause && m(d.pause.from) <= m(v)) d.pause = null; render();
-        }));
-        tc.appendChild(mk("span", "avDash", "–"));
-        tc.appendChild(tmr(d.to, DN[i] + ", chiusura", function (v) {
+        })));
+        tc.appendChild(tl("Chiude", tmr(d.to, DN[i] + ", chiusura", function (v) {
           if (m(v) <= m(d.from)) return; d.to = v; if (d.pause && m(d.pause.to) >= m(v)) d.pause = null; render();
-        }));
+        })));
         if (d.pause) {
           var pk = sel + ":" + i, pc = mk("button", "avPzChip" + (pzOpen[pk] ? " on" : ""), "Pausa " + d.pause.from + "–" + d.pause.to); pc.type = "button";
           pc.addEventListener("click", function () { pzOpen[pk] = !pzOpen[pk]; render(); });
@@ -205,9 +205,8 @@
       er.appendChild(ln);
       if (d.open && !d.custom && d.pause && pzOpen[sel + ":" + i]) {
         var pl = mk("div", "avPz"); pl.appendChild(mk("b", null, "Pausa"));
-        pl.appendChild(tmr(d.pause.from, DN[i] + ", inizio pausa", function (v) { if (m(v) <= m(d.from) || m(v) >= m(d.pause.to)) return; d.pause.from = v; render(); }));
-        pl.appendChild(mk("span", "avDash", "–"));
-        pl.appendChild(tmr(d.pause.to, DN[i] + ", fine pausa", function (v) { if (m(v) >= m(d.to) || m(v) <= m(d.pause.from)) return; d.pause.to = v; render(); }));
+        var pa = mk("div", "avTl"); pa.appendChild(mk("span", null, "Dalle")); pa.appendChild(tmr(d.pause.from, DN[i] + ", inizio pausa", function (v) { if (m(v) <= m(d.from) || m(v) >= m(d.pause.to)) return; d.pause.from = v; render(); })); pl.appendChild(pa);
+        var pb = mk("div", "avTl"); pb.appendChild(mk("span", null, "Alle")); pb.appendChild(tmr(d.pause.to, DN[i] + ", fine pausa", function (v) { if (m(v) >= m(d.to) || m(v) <= m(d.pause.from)) return; d.pause.to = v; render(); })); pl.appendChild(pb);
         var rm = mk("button", "avRm", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Togli la pausa");
         rm.addEventListener("click", function () { d.pause = null; pzOpen[sel + ":" + i] = false; render(); });
         pl.appendChild(rm); er.appendChild(pl);
