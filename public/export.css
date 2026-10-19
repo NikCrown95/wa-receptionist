@@ -1,0 +1,48 @@
+/* public/export.css  (Prenolia: Impostazioni › "I tuoi dati"). Usa i colori della dashboard, quindi segue tema chiaro/scuro. */
+#panelOther .xpWrap{display:flex;flex-direction:column;gap:18px;padding:0;background:none;border:0;border-radius:0}
+#panelOther .xpWrap button{font-family:inherit}
+#panelOther .xpIntro{margin:0;font-size:.92rem;line-height:1.5;color:var(--muted)}
+#panelOther .xpHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+#panelOther .xpKick{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#panelOther .xpLink{border:0;background:none;padding:6px 0;color:var(--accent-ink);font-size:.84rem;font-weight:700;cursor:pointer}
+#panelOther .xpList{display:flex;flex-direction:column;gap:8px}
+
+#panelOther .xpRow,#panelOther .xpFmt{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:60px;border-radius:16px;text-align:left;color:var(--ink);background:var(--card);border:1px solid var(--line);cursor:pointer}
+#panelOther .xpRow.on,#panelOther .xpFmt.on{background:var(--card2,var(--card));border-color:var(--accent)}
+#panelOther .xpTx{flex:1;min-width:0}
+#panelOther .xpTx b{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:800}
+#panelOther .xpTx b em{font-style:normal;padding:2px 7px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-ink);font-size:.66rem;font-weight:800}
+#panelOther .xpTx small{display:block;margin-top:2px;font-size:.8rem;line-height:1.35;font-weight:600;color:var(--muted)}
+#panelOther .xpCount{flex:none;font-size:.84rem;font-weight:800;color:var(--accent-ink)}
+#panelOther .xpBox{flex:none;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;border:1.5px solid var(--line2);color:var(--on-accent,#06141A)}
+#panelOther .xpRow.on .xpBox{background:var(--accent);border-color:var(--accent)}
+#panelOther .xpBox.round{border-radius:999px}
+#panelOther .xpDot{display:block;width:8px;height:8px;border-radius:999px;background:var(--on-accent,#06141A)}
+#panelOther .xpExt{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);font-size:.66rem;font-weight:800;letter-spacing:.04em}
+#panelOther .xpRadio{flex:none;width:20px;height:20px;border-radius:999px;display:grid;place-items:center;border:1.5px solid var(--line2)}
+#panelOther .xpFmt.on .xpRadio{background:var(--accent);border-color:var(--accent)}
+
+#panelOther .xpSeg{display:flex;gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+#panelOther .xpSeg button{flex:1;min-height:40px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:.84rem;font-weight:700;cursor:pointer}
+#panelOther .xpSeg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent,#fff)}
+#panelOther .xpDates{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+#panelOther .xpDates label{display:flex;flex-direction:column;gap:4px;font-size:.78rem;font-weight:700;color:var(--muted)}
+#panelOther .xpDates input{min-height:44px;padding:0 10px;border-radius:12px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-size:.95rem}
+#panelOther .xpNote{margin:8px 2px 0;font-size:.8rem;line-height:1.45;color:var(--muted)}
+#panelOther .xpWarn{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--ink);font-size:.84rem;font-weight:650;line-height:1.45}
+#panelOther .xpPriv{display:flex;gap:10px;align-items:flex-start;margin:0 2px;font-size:.8rem;line-height:1.5;color:var(--muted)}
+#panelOther .xpPriv svg{flex:none;margin-top:2px}
+
+#panelOther .xpFoot{display:flex;flex-direction:column;gap:8px;padding:4px 0 8px}
+#panelOther .xpSum{margin:0;text-align:center;font-size:.82rem;font-weight:700;color:var(--muted)}
+#panelOther .xpGo{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;min-height:54px;border:0;border-radius:16px;background:var(--accent-grad,var(--accent));color:var(--on-accent,#fff);font:inherit;font-size:1rem;font-weight:800;text-decoration:none;cursor:pointer}
+#panelOther .xpGo[disabled]{opacity:.45;cursor:default}
+#panelOther .xpMsg{margin:0;min-height:1.2em;text-align:center;font-size:.84rem;font-weight:650;color:var(--accent-ink)}
+#panelOther .xpMsg.err{color:var(--danger)}
+#panelOther .xpGhost{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;min-height:48px;border-radius:16px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-size:.94rem;font-weight:700;text-decoration:none;cursor:pointer}
+
+#panelOther .xpDone{display:flex;flex-direction:column;align-items:stretch;gap:12px;text-align:center;padding-top:10px}
+#panelOther .xpDone h3{margin:6px 0 0;font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
+#panelOther .xpTick{align-self:center;width:72px;height:72px;border-radius:999px;display:grid;place-items:center;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-ink)}
+#panelOther .xpFile{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-align:left}
+#panelOther .xpFile .xpName{display:block;word-break:break-all;font-size:.9rem;line-height:1.3}
