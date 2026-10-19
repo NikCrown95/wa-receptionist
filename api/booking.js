@@ -555,6 +555,8 @@ module.exports = async (req, res) => {
         let r = await sb("POST", "appointments", apRow, "return=representation");
         if (!r.ok && r.status === 400 && (apRow.source || apRow.customer_email)) { delete apRow.source; delete apRow.customer_email; r = await sb("POST", "appointments", apRow, "return=representation"); } // colonna source o customer_email non ancora creata: salva comunque la prenotazione
         if (r.ok) {
+          // Avviso sul telefono del titolare (se ha attivato le notifiche). Non blocca mai la prenotazione.
+          await require("../lib/push.js").notifyNewBooking(biz.id, { name: name, service: service.name, startsAt: start.toISOString(), timezone: biz.timezone });
           // Email di conferma (solo se il cliente ha lasciato l'indirizzo). Non blocca mai la prenotazione.
           let emailSent = false;
           const newId = Array.isArray(r.data) && r.data[0] ? r.data[0].id : null;
