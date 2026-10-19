@@ -168,12 +168,14 @@
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
     var k = window.liaHeroKindOf ? window.liaHeroKindOf(raw) : null;
-    av.className = "mnAv" + (k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
-    if (k) {
+    var isGym = biz.gym || String(raw.business_type || "") === "palestra";
+    av.className = "mnAv" + (isGym ? " gym" : k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
+    if (isGym) { card.style.setProperty("--mnh", "36"); av.innerHTML = ""; }
+    else if (k) {
       card.style.setProperty("--mnh", String(k.h));
       av.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" ' + S + ' stroke-width="1.7">' + k.icon + "</svg>";
     } else av.textContent = String(raw.name || biz.name || "A").charAt(0).toUpperCase();
-    var kd = $("mnKind"); if (kd) { kd.textContent = k ? k.label : ""; kd.hidden = !k; }
+    var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
     var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
     var nm = $("mnBizName"); if (nm) nm.textContent = name;
     var ad = $("mnBizAddr"), addr = txt("pfAddr") || String(raw.address || "").trim();
@@ -260,9 +262,19 @@
       msg("QR scaricato.");
     });
   }
+  /* il link dell'affitto sala c'e' solo se e' attivo nelle impostazioni (dati vivi del modulo palestra, se gia' caricati) */
+  function syncRent() {
+    if (!biz || !biz.gym) return;
+    var D = window.liaGym && window.liaGym.S && window.liaGym.S.data; if (!D) return;
+    var on = !!(D.settings && D.settings.rental && D.settings.rental.on), rl = D.business && D.business.rental_link;
+    biz.links = biz.links.filter(function (k) { return k.key !== "rent"; });
+    biz.rental = !!(on && rl);
+    if (biz.rental) biz.links.push({ key: "rent", seg: "Affitto sala", url: abs(rl) });
+  }
   function openSheet(i, qrOnly) {
     closeMenu();
     load().then(function (b) {
+      syncRent();
       if (!b || !b.links.length) return;
       if (!sheet) buildSheet();
       cur = Math.min(Number(i) || 0, b.links.length - 1);
