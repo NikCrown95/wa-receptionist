@@ -127,7 +127,7 @@
   function step(val, n) { var i = TIMES.indexOf(val); return TIMES[Math.max(0, Math.min(TIMES.length - 1, (i < 0 ? 0 : i) + n))]; }
 
   /* ---------- selezione e modello condiviso ---------- */
-  var sel = "neg", pending = null, justSaved = null;
+  var sel = "neg", pending = null, justSaved = null, pzOpen = {};
   function person(id) { for (var i = 0; i < S.staff.length; i++) if (S.staff[i].id === id) return S.staff[i]; return null; }
   function daysOf(id) { return id === "neg" ? NEG.days : (TM[id] ? TM[id].days : null); }
   function dirty(id) {
@@ -184,28 +184,31 @@
         tc.appendChild(tmr(d.to, DN[i] + ", chiusura", function (v) {
           if (m(v) <= m(d.from)) return; d.to = v; if (d.pause && m(d.pause.to) >= m(v)) d.pause = null; render();
         }));
-        if (!d.pause) {
+        if (d.pause) {
+          var pk = sel + ":" + i, pc = mk("button", "avPzChip" + (pzOpen[pk] ? " on" : ""), "Pausa " + d.pause.from + "–" + d.pause.to); pc.type = "button";
+          pc.addEventListener("click", function () { pzOpen[pk] = !pzOpen[pk]; render(); });
+          tc.appendChild(pc);
+        } else {
           var ap = mk("button", "avAddP", "+ Pausa"); ap.type = "button";
           ap.addEventListener("click", function () {
             var a = m(d.from), b = m(d.to), mid = Math.round((a + b) / 2 / 30) * 30;
             var pf = pad(Math.floor(mid / 60)) + ":" + pad(mid % 60), pt = nudge(pf, 60);
             if (m(pf) <= a || m(pt) >= b) { pf = nudge(d.from, 30); pt = nudge(pf, 30); }
             if (m(pt) >= b) { toast("Orario troppo breve per una pausa.", true); return; }
-            d.pause = { from: pf, to: pt }; render();
+            d.pause = { from: pf, to: pt }; pzOpen[sel + ":" + i] = true; render();
           });
           tc.appendChild(ap);
         }
       }
       ln.appendChild(tc);
-      ln.appendChild(bar(d));
       er.appendChild(ln);
-      if (d.open && !d.custom && d.pause) {
+      if (d.open && !d.custom && d.pause && pzOpen[sel + ":" + i]) {
         var pl = mk("div", "avPz"); pl.appendChild(mk("b", null, "Pausa"));
         pl.appendChild(tmr(d.pause.from, DN[i] + ", inizio pausa", function (v) { if (m(v) <= m(d.from) || m(v) >= m(d.pause.to)) return; d.pause.from = v; render(); }));
         pl.appendChild(mk("span", "avDash", "–"));
         pl.appendChild(tmr(d.pause.to, DN[i] + ", fine pausa", function (v) { if (m(v) >= m(d.to) || m(v) <= m(d.pause.from)) return; d.pause.to = v; render(); }));
         var rm = mk("button", "avRm", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Togli la pausa");
-        rm.addEventListener("click", function () { d.pause = null; render(); });
+        rm.addEventListener("click", function () { d.pause = null; pzOpen[sel + ":" + i] = false; render(); });
         pl.appendChild(rm); er.appendChild(pl);
       }
       list.appendChild(er);
@@ -239,38 +242,6 @@
     if (isShop) pane.appendChild(mk("p", "avHint", "Gli orari di ogni settimana. Per ferie e giorni a parte usa «Chiusure e assenze»."));
     else pane.appendChild(mk("p", "avHint", "I clienti possono prenotare con " + st.name + " solo nei suoi giorni e orari."));
 
-    var act = mk("div", "avActs");
-    if (isShop) {
-      PRESETS.forEach(function (p) {
-        var b = mk("button", "avChip", p[0]); b.type = "button";
-        b.addEventListener("click", function () {
-          for (var i = 0; i < 7; i++) days[i] = p[1][i] ? { open: true, from: p[2], to: p[3], pause: null } : { open: false };
-          render(); toast("Orari impostati: " + p[0]);
-        });
-        act.appendChild(b);
-      });
-    } else {
-      var like = mk("button", "avChip", "Come il negozio"); like.type = "button";
-      like.addEventListener("click", function () { TM[id].days = copy(NEG.days); render(); toast(st.name + ": orari copiati dal negozio. Ricorda di salvare."); });
-      act.appendChild(like);
-    }
-    var same = mk("button", "avChip", "Stesso orario in tutti i giorni aperti"); same.type = "button";
-    same.addEventListener("click", function () {
-      var f = null; days.forEach(function (d) { if (!f && d.open && !d.custom) f = d; });
-      if (!f) { toast("Apri almeno un giorno.", true); return; }
-      var src = copy(f); days.forEach(function (d, k) { if (d.open) days[k] = copy(src); });
-      render(); toast("Orario copiato su tutti i giorni aperti.");
-    });
-    act.appendChild(same);
-    if (!isShop) {
-      var ab = mk("button", "avChip warn", "Segna assenza"); ab.type = "button";
-      ab.addEventListener("click", function () { C.who = id; C.part = false; sel = "chi"; render(); var sc = layer.querySelector(".avScroll"); if (sc) sc.scrollTop = 0; });
-      act.appendChild(ab);
-    }
-    pane.appendChild(act);
-
-    var ax = mk("div", "avAxis"), axl = mk("div", "avAxL"); ["6", "9", "12", "15", "18", "21", "24"].forEach(function (h) { axl.appendChild(mk("span", null, h)); });
-    ax.appendChild(axl); pane.appendChild(ax);
     var list = mk("div", "avDays"); pane.appendChild(list);
     dayRows(list, days, isShop ? null : NEG.days);
 
