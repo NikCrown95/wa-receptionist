@@ -4,10 +4,10 @@
 
 /* ---------- menu a lato ---------- */
 body.mnOn #burgerMenu[hidden]{display:none}
-body.mnOn #burgerMenu{top:0;right:0;bottom:0;margin-top:0;width:min(324px,90vw);max-height:none;overflow-y:auto;display:flex;flex-direction:column;gap:4px;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 20px);border-radius:0;border:0;border-left:1px solid var(--line2);background:var(--bg2);box-shadow:-18px 0 50px rgba(0,0,0,.4);transform:translateX(22px);opacity:0}
+body.mnOn #burgerMenu{top:0;right:0;bottom:0;margin-top:0;width:min(324px,90vw);max-height:none;overflow-y:auto;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 62px) 14px calc(env(safe-area-inset-bottom,0px) + 14px);border-radius:0;border:0;border-left:1px solid var(--line2);background:var(--bg2);box-shadow:-18px 0 50px rgba(0,0,0,.4);transform:translateX(22px);opacity:0}
 body.mnOn #burgerMenu.on{transform:translateX(0);opacity:1}
-body.mnOn #burgerMenu > button{min-height:52px;padding:0 10px 0 8px;gap:14px;border-radius:14px;border:1px solid transparent;font-size:.96rem;font-weight:600;flex:none}
-body.mnOn #burgerMenu > button > svg{width:36px;height:36px;padding:8.5px;box-sizing:border-box;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+body.mnOn #burgerMenu > button{min-height:44px;padding:0 10px 0 8px;gap:14px;border-radius:14px;border:1px solid transparent;font-size:.96rem;font-weight:600;flex:none}
+body.mnOn #burgerMenu > button > svg{width:32px;height:32px;padding:7px;box-sizing:border-box;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
 body.mnOn #burgerMenu > button[aria-current="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--ink)}
 body.mnOn #burgerMenu > button[aria-current="true"] > svg{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
 body.mnOn #burgerMenu > .logoutBtn{margin-top:2px;padding-top:0;border-top:0;border-radius:14px;color:var(--danger)}
@@ -23,15 +23,13 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 #burgerMenu .mnName{font-weight:800;font-size:1.06rem;letter-spacing:-0.01em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #burgerMenu .mnPlan{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:6px;background:var(--card);border:1px solid var(--line2);font-size:.62rem;font-weight:800;letter-spacing:.12em;color:var(--accent-ink);text-transform:uppercase}
 #burgerMenu .mnPlan[hidden]{display:none}
-#burgerMenu .mnX{flex:none;width:40px;height:40px;min-height:40px;padding:0;border-radius:999px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
-#burgerMenu .mnX svg{width:18px;height:18px}
 
 /* card "Condividi la tua pagina" */
-#burgerMenu .mnShare{flex:none;position:relative;overflow:hidden;margin-bottom:16px;border-radius:20px;border:1px solid var(--accent);background:var(--accent-soft);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 34%,var(--bg2)) 0%,color-mix(in srgb,var(--accent) 12%,var(--bg2)) 100%);padding:16px}
+#burgerMenu .mnShare{flex:none;position:relative;overflow:hidden;margin-bottom:10px;border-radius:18px;border:1px solid var(--accent);background:var(--accent-soft);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 34%,var(--bg2)) 0%,color-mix(in srgb,var(--accent) 12%,var(--bg2)) 100%);padding:12px}
 #burgerMenu .mnShare[hidden]{display:none}
 #burgerMenu .mnShare::before{content:"";position:absolute;inset:0;background:repeating-radial-gradient(circle at 105% -10%,rgba(127,220,220,.13) 0 1px,transparent 1px 15px);pointer-events:none}
 #burgerMenu .mnShare > *{position:relative}
-#burgerMenu .mnShare svg,#burgerMenu .mnX svg{color:inherit}
+#burgerMenu .mnShare svg{color:inherit}
 #burgerMenu .mnShare .mnShareTop{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
 #burgerMenu .mnShare .mnShareTop:hover{background:transparent}
 #burgerMenu .mnShare .mnShareTxt{flex:1;min-width:0}
@@ -39,8 +37,8 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 #burgerMenu .mnShare .mnShareTxt span{display:block;margin-top:4px;font-size:.82rem;font-weight:600;line-height:1.45;color:var(--ink);opacity:.8}
 #burgerMenu .mnShare .mnQrGlyph{flex:none;width:46px;height:46px;border-radius:12px;background:#fff;color:#0B1A20;display:grid;place-items:center}
 #burgerMenu .mnShare .mnQrGlyph svg{width:28px;height:28px}
-#burgerMenu .mnShare .mnShareAct{display:flex;gap:8px;margin-top:14px}
-#burgerMenu .mnShare .mnShareAct button{flex:1;min-height:42px;padding:0 8px;border-radius:12px;font:inherit;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+#burgerMenu .mnShare .mnShareAct{display:flex;gap:8px;margin-top:10px}
+#burgerMenu .mnShare .mnShareAct button{flex:1;min-height:40px;padding:0 8px;border-radius:12px;font:inherit;font-size:.82rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 #burgerMenu .mnShare .mnShareAct button svg{width:15px;height:15px;flex:none}
 #burgerMenu .mnShare .mnBtnA{border:0;background:#fff;color:#0B1A20}
 #burgerMenu .mnShare .mnBtnA:hover{background:#fff}
@@ -48,7 +46,7 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 #burgerMenu .mnShare .mnBtnB:hover{background:color-mix(in srgb,var(--bg) 35%,transparent)}
 
 /* gruppo in basso (guida, altro, logout) */
-#burgerMenu .mnSep{flex:none;margin:auto 6px 8px;height:1px;background:var(--line);min-height:1px}
+#burgerMenu .mnSep{flex:none;margin:6px 6px;height:1px;background:var(--line);min-height:1px}
 #burgerMenu #menuTabGuide > svg{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent-ink)}
 #burgerMenu #menuTabGuide .mnNew{margin-left:auto;padding:3px 8px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-ink);font-size:.68rem;font-weight:800}
 #burgerMenu #menuTabGuide .mnNew[hidden]{display:none}
@@ -123,3 +121,5 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnHelp .mnT b{display:block;font-size:.94rem;font-weight:700}
 .mnHelp .mnT small{display:block;margin-top:2px;font-size:.76rem;font-weight:600;color:var(--muted)}
 .mnHelp > svg:last-child{flex:none;width:16px;height:16px;color:var(--muted)}
+
+#burgerMenu .mnShare .mnShareTxt b{font-size:.98rem}

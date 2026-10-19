@@ -22,6 +22,7 @@
   var I = {
     x: '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     copy: '<svg width="16" height="16" viewBox="0 0 24 24" ' + S + ' stroke-width="2.3"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>',
+    share: '<svg width="16" height="16" viewBox="0 0 24 24" ' + S + ' stroke-width="2.3"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>',
     chev: '<svg width="14" height="14" viewBox="0 0 24 24" ' + S + ' stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>',
     down: '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="2"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>',
     print: '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="2"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M7 14h10v7H7z"/></svg>',
@@ -115,19 +116,21 @@
 
     var head = mk("div", "mnHead",
       '<span class="mnLogo"><img src="/lia-a.png" alt="" draggable="false"></span>' +
-      '<span class="mnWho"><span class="mnName" id="mnName">La tua attività</span><span class="mnPlan" id="mnPlan" hidden></span></span>' +
-      '<button type="button" class="mnX" aria-label="Chiudi il menu">' + I.x + "</button>");
-    head.querySelector(".mnX").addEventListener("click", closeMenu);
+      '<span class="mnWho"><span class="mnName" id="mnName">La tua attività</span><span class="mnPlan" id="mnPlan" hidden></span></span>');
 
     var card = mk("div", "mnShare",
-      '<button type="button" class="mnShareTop" data-a="open"><span class="mnShareTxt"><b>Condividi la tua pagina</b><span>Il link e il QR per far prenotare i tuoi clienti.</span></span><span class="mnQrGlyph">' + I.qr + "</span></button>" +
-      '<div class="mnShareAct"><button type="button" class="mnBtnA" data-a="copy">' + I.copy + "<span>Copia link</span></button>" +
+      '<button type="button" class="mnShareTop" data-a="open"><span class="mnShareTxt"><b>Condividi la tua pagina</b></span></button>' +
+      '<div class="mnShareAct"><button type="button" class="mnBtnA" data-a="share">' + I.share + "<span>Condividi</span></button>" +
       '<button type="button" class="mnBtnB" data-a="qr"><span>Mostra il QR</span>' + I.chev + "</button></div>");
     card.id = "mnShareCard"; card.hidden = true;
     card.addEventListener("click", function (ev) {
       var b = ev.target.closest("[data-a]"); if (!b || !biz || !biz.links.length) return;
       var a = b.getAttribute("data-a");
-      if (a === "copy") copyText(biz.links[0].url, b); else openSheet(0);
+      if (a === "share") {
+        var u = biz.links[0].url;
+        if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: "Prenota da " + (biz.name || "noi"), url: u }).catch(function () {});
+        else openSheet(0);
+      } else openSheet(0);
     });
 
     var sep = mk("div", "mnSep");
@@ -137,7 +140,6 @@
     var nw = g.querySelector(".mnNew"); if (ls("g", NEWK)) nw.hidden = true;
     g.addEventListener("click", function () { closeMenu(); openGuide(); });
 
-    menu.insertBefore(head, menu.firstChild);
     menu.insertBefore(card, cal);
     menu.insertBefore(sep, other);
     menu.insertBefore(g, other);
