@@ -1,5 +1,5 @@
 /* Pagina Disponibilità (menu › Disponibilità) — lista a sinistra, editor a destra; su telefono la lista diventa una fascia in alto */
-.mnLayer#avLayer{z-index:30;inset:auto 0 0 0;top:0;--avOk:#2DA77A;--avOkSoft:color-mix(in srgb,#2DA77A 13%,var(--card));--avPz:#E8B04B}
+.mnLayer#avLayer{z-index:30;inset:auto 0 0 0;top:0;--avOk:var(--accent);--avOkSoft:var(--accent-soft);--avPz:var(--accent-ink)}
 .avScroll{position:absolute;inset:0;overflow-y:auto;background:var(--bg);color:var(--ink);-webkit-overflow-scrolling:touch}
 .avIn{max-width:680px;margin:0 auto;box-sizing:border-box;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
 .avTop{display:flex;align-items:center;gap:12px}
@@ -16,9 +16,9 @@
 .avSt b{display:block;font-weight:800;font-size:.92rem;white-space:nowrap}
 .avSt small{display:none;color:var(--muted);font-weight:600;font-size:.78rem;margin-top:2px}
 .avDot{position:absolute;top:8px;right:8px;width:10px;height:10px;border-radius:50%;background:var(--avPz);box-shadow:0 0 0 3px var(--card)}
-.avAv{flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:1.02rem;color:#fff;background:hsl(var(--h,190) 45% 38%)}
+.avAv{flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:1.02rem;color:var(--on-accent);background:var(--accent)}
 .avAv.shop{background:var(--accent)}
-.avAv.chi{background:var(--avPz);color:#fff}
+.avAv.chi{background:var(--accent);color:var(--on-accent)}
 /* editor */
 .avPane{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .avHd{display:flex;align-items:center;gap:14px}
@@ -130,4 +130,4 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
   .avEl{grid-template-columns:110px 56px minmax(0,1fr);grid-template-areas:"d s t";gap:14px;align-items:center}
 }
 .avPzChip{border:1px solid color-mix(in srgb,var(--avPz) 50%,var(--line2));background:color-mix(in srgb,var(--avPz) 12%,var(--card));color:var(--avPz);border-radius:999px;padding:0 14px;height:40px;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap;margin-left:auto}
-.avPzChip.on{background:var(--avPz);color:#1a1405}
+.avPzChip.on{background:var(--accent);color:var(--on-accent)}

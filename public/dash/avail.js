@@ -236,10 +236,10 @@
     var head = mk("div", "avHd");
     head.appendChild(avatar(id));
     var tt = mk("div", "avHt");
-    tt.appendChild(mk("h2", null, isShop ? "Negozio · orari di apertura" : st.name + (st.is_owner ? " (tu)" : "")));
+    tt.appendChild(mk("h2", null, isShop ? "Negozio · orari di apertura" : st.name + (st.is_owner ? " · tu" : "")));
     tt.appendChild(mk("p", null, hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni") + (isShop ? "" : " di lavoro")));
     head.appendChild(tt); pane.appendChild(head);
-    if (isShop) pane.appendChild(mk("p", "avHint", "Gli orari di ogni settimana. Per ferie e giorni a parte usa «Chiusure e assenze»."));
+    if (isShop) pane.appendChild(mk("p", "avHint", "Gli orari di ogni settimana. Per ferie e giorni a parte usa Chiusure e assenze."));
     else pane.appendChild(mk("p", "avHint", "I clienti possono prenotare con " + st.name + " solo nei suoi giorni e orari."));
 
     var list = mk("div", "avDays"); pane.appendChild(list);
@@ -437,7 +437,7 @@
     item("neg", "Negozio", "Orari di apertura · " + hword(wn.h));
     if (S.team && S.staff.length) {
       nav.appendChild(mk("div", "avSl", "Team"));
-      S.staff.forEach(function (s) { var w = weekHours(TM[s.id].days); item(s.id, s.name + (s.is_owner ? " (tu)" : ""), hword(w.h) + " · " + w.n + (w.n === 1 ? " giorno" : " giorni")); });
+      S.staff.forEach(function (s) { var w = weekHours(TM[s.id].days); item(s.id, s.name + (s.is_owner ? " · tu" : ""), hword(w.h) + " · " + w.n + (w.n === 1 ? " giorno" : " giorni")); });
     }
     nav.appendChild(mk("div", "avSep"));
     var n = closureItems().length;
@@ -445,7 +445,7 @@
     if (!S.team || !S.staff.length) {
       var h = mk("div", "avSide-hint");
       h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
-      var go = mk("button", "avMini lnk", "Apri «Chi lavora da te»"); go.type = "button";
+      var go = mk("button", "avMini lnk", "Apri Chi lavora da te"); go.type = "button";
       go.addEventListener("click", function () { close(); var o = $("menuTabOther"); if (o) o.click(); setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("staff"); }, 90); });
       h.appendChild(go); nav.appendChild(h);
     }
