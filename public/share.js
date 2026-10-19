@@ -130,7 +130,7 @@
         var u = biz.links[0].url;
         if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: "Prenota da " + (biz.name || "noi"), url: u }).catch(function () {});
         else openSheet(0);
-      } else openSheet(0);
+      } else openSheet(0, a === "qr");
     });
 
     var sep = mk("div", "mnSep");
@@ -220,12 +220,14 @@
       msg("QR scaricato.");
     });
   }
-  function openSheet(i) {
+  function openSheet(i, qrOnly) {
     closeMenu();
     load().then(function (b) {
       if (!b || !b.links.length) return;
       if (!sheet) buildSheet();
       cur = Math.min(Number(i) || 0, b.links.length - 1);
+      sheet.classList.toggle("mnQrOnly", !!qrOnly);
+      var st = $("mnShT"); if (st) st.textContent = qrOnly ? "Il tuo QR code" : "Condividi la tua pagina";
       paintSheet();
       lastFocus = document.activeElement;
       sheet.hidden = false;

@@ -123,3 +123,8 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnHelp > svg:last-child{flex:none;width:16px;height:16px;color:var(--muted)}
 
 #burgerMenu .mnShare .mnShareTxt b{font-size:.98rem}
+
+/* "Mostra il QR": si apre solo il QR, senza link, azioni e testi */
+.mnQrOnly .mnSub,.mnQrOnly .mnLinkRow,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrHint{display:none}
+.mnQrOnly .mnQrCard{flex-direction:column;justify-content:center;text-align:center;gap:16px;padding:24px 18px}
+.mnQrOnly .mnQrBox{width:min(270px,72vw);height:min(270px,72vw);padding:12px}
