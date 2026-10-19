@@ -13,10 +13,11 @@
     clock: '<svg width="16" height="16" viewBox="0 0 24 24" ' + SV + ' stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     chev: '<svg width="18" height="18" viewBox="0 0 24 24" ' + SV + ' stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>',
     cal: '<svg width="19" height="19" viewBox="0 0 24 24" ' + SV + ' stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
+    shop: '<svg width="24" height="24" viewBox="0 0 24 24" ' + SV + ' stroke-width="2.1"><path d="M4 10l1.5-5h13L20 10M5 10v9h14v-9M9 19v-5h6v5"/></svg>',
     check: '<svg width="16" height="16" viewBox="0 0 24 24" ' + SV + ' stroke-width="2.6"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
   };
 
-  var layer = null, S = null, tab = "neg", openStaff = null, busy = false;
+  var layer = null, S = null, busy = false;
   var C = { who: "neg", from: "", to: "", part: false, tf: "14:00", tt: "16:00", kind: "ferie", conf: null };
   var NEG = { days: [], base: "" };
   var TM = {}; /* per collaboratore: { days, base } */
@@ -95,6 +96,9 @@
 
   /* ---------- dati ---------- */
   function apply(d) {
+    var keep = {};
+    if (S) { ["neg"].concat(S.staff.map(function (x) { return x.id; })).forEach(function (k) { if (k !== justSaved && dirty(k)) keep[k] = copy(daysOf(k)); }); }
+    justSaved = null;
     S = {
       team: d.team_mode === "team",
       staff: Array.isArray(d.staff) ? d.staff : [],
@@ -104,6 +108,7 @@
     NEG.days = modelFromList(S.hours); NEG.base = JSON.stringify(NEG.days);
     TM = {};
     S.staff.forEach(function (st) { var days = modelFromList(st.hours); TM[st.id] = { days: days, base: JSON.stringify(days) }; });
+    Object.keys(keep).forEach(function (k) { if (k === "neg") NEG.days = keep[k]; else if (TM[k]) TM[k].days = keep[k]; });
     if (!S.team && C.who !== "neg") C.who = "neg";
     if (C.who !== "neg" && !S.staff.some(function (x) { return x.id === C.who; })) C.who = "neg";
   }
@@ -112,7 +117,7 @@
   /* ---------- pezzi di interfaccia ---------- */
   var TIMES = [];
   (function () { for (var q = 5 * 60; q <= 23 * 60 + 45; q += 15) TIMES.push(pad(Math.floor(q / 60)) + ":" + pad(q % 60)); })();
-  function sel(val, label, fn) {
+  function selT(val, label, fn) {
     var s = document.createElement("select"); s.setAttribute("aria-label", label);
     var list = TIMES.slice(); if (list.indexOf(val) < 0) { list.push(val); list.sort(); }
     list.forEach(function (t) { var o = mk("option", null, t); o.value = t; if (t === val) o.selected = true; s.appendChild(o); });
@@ -121,79 +126,90 @@
   }
   function step(val, n) { var i = TIMES.indexOf(val); return TIMES[Math.max(0, Math.min(TIMES.length - 1, (i < 0 ? 0 : i) + n))]; }
 
-  /* elenco giorni: lo stesso per negozio e per ogni collaboratore */
-  function dayList(box, days, onChange, shopRef) {
-    box.textContent = "";
+  /* ---------- selezione e modello condiviso ---------- */
+  var sel = "neg", pending = null, justSaved = null;
+  function person(id) { for (var i = 0; i < S.staff.length; i++) if (S.staff[i].id === id) return S.staff[i]; return null; }
+  function daysOf(id) { return id === "neg" ? NEG.days : (TM[id] ? TM[id].days : null); }
+  function dirty(id) {
+    if (!S) return false;
+    if (id === "neg") return NEG.base !== "" && JSON.stringify(NEG.days) !== NEG.base;
+    var T = TM[id]; return !!T && JSON.stringify(T.days) !== T.base;
+  }
+  function nudge(val, dm) { var x = Math.max(300, Math.min(1425, m(val) + dm)); return pad(Math.floor(x / 60)) + ":" + pad(x % 60); }
+
+  /* − 09:00 + */
+  function tmr(val, label, fn) {
+    var r = mk("div", "avTmr"), a = mk("button", null, "−"), p = mk("button", null, "+"), o = mk("output", null, val);
+    a.type = p.type = "button";
+    a.setAttribute("aria-label", label + ", mezz'ora prima"); p.setAttribute("aria-label", label + ", mezz'ora dopo");
+    a.addEventListener("click", function () { var v = nudge(val, -30); if (v !== val) fn(v); });
+    p.addEventListener("click", function () { var v = nudge(val, 30); if (v !== val) fn(v); });
+    r.appendChild(a); r.appendChild(o); r.appendChild(p); return r;
+  }
+  function bar(d) {
+    var t = mk("div", "avTrk");
+    toIntervals(d).forEach(function (x) {
+      var s = (m(x.open) - 360) / 1080 * 100, w = (m(x.close) - m(x.open)) / 1080 * 100, e = mk("i");
+      e.style.left = Math.max(0, s) + "%"; e.style.width = Math.max(1.5, Math.min(100 - Math.max(0, s), w)) + "%"; t.appendChild(e);
+    });
+    return t;
+  }
+
+  /* una riga per giorno: interruttore, orari con − e +, pausa, barra colorata */
+  function dayRows(list, days, shopRef) {
+    list.textContent = "";
     days.forEach(function (d, i) {
-      var row = mk("div", "avDay" + (d.open ? "" : " off"));
-      var head = mk("div", "avDh");
-      var bd = mk("span", "avBd", DS[i]);
-      var nm = mk("span", "avDn", DN[i]);
-      var sw = mk("button", "avSw"); sw.type = "button"; sw.setAttribute("role", "switch"); sw.setAttribute("aria-checked", d.open ? "true" : "false"); sw.setAttribute("aria-label", DN[i] + (d.open ? ": aperto" : ": chiuso"));
+      var er = mk("div", "avEr" + (d.open ? " on" : " off")), ln = mk("div", "avEl");
+      ln.appendChild(mk("span", "avEd", DN[i]));
+      var sw = mk("button", "avSw"); sw.type = "button"; sw.setAttribute("role", "switch");
+      sw.setAttribute("aria-checked", d.open ? "true" : "false"); sw.setAttribute("aria-label", DN[i] + (d.open ? ": aperto" : ": chiuso"));
       sw.addEventListener("click", function () {
         if (d.open) days[i] = { open: false };
         else { var ref = shopRef && shopRef[i] && shopRef[i].open ? shopRef[i] : null; days[i] = ref ? copy(ref) : { open: true, from: "09:00", to: "19:00", pause: null }; }
-        onChange();
+        render();
       });
-      var wrap = mk("span", "avDl"); wrap.appendChild(bd); wrap.appendChild(nm);
-      head.appendChild(wrap);
-      if (!d.open) head.appendChild(mk("span", "avClosed", "Chiuso"));
-      head.appendChild(sw);
-      row.appendChild(head);
-      if (d.open && d.custom) {
-        var cu = mk("div", "avSub");
-        cu.appendChild(mk("span", "avInfo", "Fasce: " + d.custom.map(function (x) { return x.open + "–" + x.close; }).join(" · ")));
+      ln.appendChild(sw);
+      var tc = mk("div", "avEt");
+      if (!d.open) tc.appendChild(mk("span", "avClosed", "Chiuso"));
+      else if (d.custom) {
+        tc.appendChild(mk("span", "avInfo", "Fasce: " + d.custom.map(function (x) { return x.open + "–" + x.close; }).join(" · ")));
         var sp = mk("button", "avMini", "Semplifica"); sp.type = "button";
-        sp.addEventListener("click", function () { var f = d.custom[0], l = d.custom[d.custom.length - 1]; days[i] = { open: true, from: f.open, to: l.close, pause: null }; onChange(); });
-        cu.appendChild(sp); row.appendChild(cu);
-      } else if (d.open) {
-        var tm = mk("div", "avTimes");
-        tm.appendChild(mk("span", "avClk", "")); tm.lastChild.innerHTML = IC.clock;
-        tm.appendChild(sel(d.from, DN[i] + ", apertura", function (v) { d.from = v; if (m(d.to) <= m(v)) d.to = step(v, 4); onChange(); }));
-        tm.appendChild(mk("i", null, "–"));
-        tm.appendChild(sel(d.to, DN[i] + ", chiusura", function (v) { d.to = v; if (m(d.from) >= m(v)) d.from = step(v, -4); onChange(); }));
-        row.appendChild(tm);
-        var sub = mk("div", "avSub");
-        if (d.pause) {
-          var pw = mk("div", "avPause");
-          pw.appendChild(mk("span", "avPl", "Pausa"));
-          pw.appendChild(sel(d.pause.from, DN[i] + ", inizio pausa", function (v) { d.pause.from = v; if (m(d.pause.to) <= m(v)) d.pause.to = step(v, 2); onChange(); }));
-          pw.appendChild(mk("i", null, "–"));
-          pw.appendChild(sel(d.pause.to, DN[i] + ", fine pausa", function (v) { d.pause.to = v; if (m(d.pause.from) >= m(v)) d.pause.from = step(v, -2); onChange(); }));
-          var rm = mk("button", "avX", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Togli la pausa"); rm.addEventListener("click", function () { d.pause = null; onChange(); });
-          pw.appendChild(rm); sub.appendChild(pw);
-        } else {
-          var ap = mk("button", "avMini", "+ Pausa"); ap.type = "button";
+        sp.addEventListener("click", function () { var f = d.custom[0], l = d.custom[d.custom.length - 1]; days[i] = { open: true, from: f.open, to: l.close, pause: null }; render(); });
+        tc.appendChild(sp);
+      } else {
+        tc.appendChild(tmr(d.from, DN[i] + ", apertura", function (v) {
+          if (m(v) >= m(d.to)) return; d.from = v; if (d.pause && m(d.pause.from) <= m(v)) d.pause = null; render();
+        }));
+        tc.appendChild(mk("span", "avDash", "–"));
+        tc.appendChild(tmr(d.to, DN[i] + ", chiusura", function (v) {
+          if (m(v) <= m(d.from)) return; d.to = v; if (d.pause && m(d.pause.to) >= m(v)) d.pause = null; render();
+        }));
+        if (!d.pause) {
+          var ap = mk("button", "avAddP", "+ Pausa"); ap.type = "button";
           ap.addEventListener("click", function () {
-            var a = m(d.from), b = m(d.to), mid = Math.round((a + b) / 2 / 15) * 15;
-            var pf = pad(Math.floor(mid / 60)) + ":" + pad(mid % 60), pt = step(pf, 4);
-            if (m(pf) <= a || m(pt) >= b) { pf = step(d.from, 2); pt = step(pf, 2); }
+            var a = m(d.from), b = m(d.to), mid = Math.round((a + b) / 2 / 30) * 30;
+            var pf = pad(Math.floor(mid / 60)) + ":" + pad(mid % 60), pt = nudge(pf, 60);
+            if (m(pf) <= a || m(pt) >= b) { pf = nudge(d.from, 30); pt = nudge(pf, 30); }
             if (m(pt) >= b) { toast("Orario troppo breve per una pausa.", true); return; }
-            d.pause = { from: pf, to: pt }; onChange();
+            d.pause = { from: pf, to: pt }; render();
           });
-          sub.appendChild(ap);
+          tc.appendChild(ap);
         }
-        var cp = mk("button", "avMini lnk", "Copia su tutti i giorni aperti"); cp.type = "button";
-        cp.addEventListener("click", function () {
-          days.forEach(function (x, k) { if (x.open && k !== i) days[k] = copy(d); });
-          onChange(); toast("Orario copiato su tutti i giorni aperti.");
-        });
-        sub.appendChild(cp);
-        row.appendChild(sub);
       }
-      box.appendChild(row);
+      ln.appendChild(tc);
+      ln.appendChild(bar(d));
+      er.appendChild(ln);
+      if (d.open && !d.custom && d.pause) {
+        var pl = mk("div", "avPz"); pl.appendChild(mk("b", null, "Pausa"));
+        pl.appendChild(tmr(d.pause.from, DN[i] + ", inizio pausa", function (v) { if (m(v) <= m(d.from) || m(v) >= m(d.pause.to)) return; d.pause.from = v; render(); }));
+        pl.appendChild(mk("span", "avDash", "–"));
+        pl.appendChild(tmr(d.pause.to, DN[i] + ", fine pausa", function (v) { if (m(v) >= m(d.to) || m(v) <= m(d.pause.from)) return; d.pause.to = v; render(); }));
+        var rm = mk("button", "avRm", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Togli la pausa");
+        rm.addEventListener("click", function () { d.pause = null; render(); });
+        pl.appendChild(rm); er.appendChild(pl);
+      }
+      list.appendChild(er);
     });
-  }
-
-  function summary(days, caption) {
-    var w = weekHours(days);
-    var c = mk("div", "avSum");
-    var l = mk("div");
-    l.appendChild(mk("b", null, hword(w.h)));
-    l.appendChild(mk("span", null, caption));
-    c.appendChild(l);
-    c.appendChild(mk("em", null, w.n + (w.n === 1 ? " giorno aperto" : " giorni aperti")));
-    return c;
   }
 
   var PRESETS = [
@@ -201,115 +217,80 @@
     ["Lun–Sab 9–19", [1, 1, 1, 1, 1, 1, 0], "09:00", "19:00"],
     ["Tutti i giorni", [1, 1, 1, 1, 1, 1, 1], "09:00", "19:00"]
   ];
-  function presets(days, onChange) {
-    var r = mk("div", "avRow");
-    r.appendChild(mk("span", "avHint", "Parti da:"));
-    PRESETS.forEach(function (p) {
-      var b = mk("button", "avChip", p[0]); b.type = "button";
-      b.addEventListener("click", function () {
-        for (var i = 0; i < 7; i++) days[i] = p[1][i] ? { open: true, from: p[2], to: p[3], pause: null } : { open: false };
-        onChange(); toast("Orari impostati: " + p[0]);
+
+  function avatar(id) {
+    var a = mk("span", "avAv");
+    if (id === "neg") { a.classList.add("shop"); a.innerHTML = IC.shop; }
+    else { var s = person(id); a.textContent = String((s && s.name) || "?").charAt(0).toUpperCase(); a.style.setProperty("--h", hue(s && s.name)); }
+    return a;
+  }
+
+  /* ---------- editor di Negozio / persona ---------- */
+  function editor(box, id) {
+    var isShop = id === "neg", st = isShop ? null : person(id), days = daysOf(id);
+    var pane = mk("div", "avPane");
+    var w = weekHours(days);
+    var head = mk("div", "avHd");
+    head.appendChild(avatar(id));
+    var tt = mk("div", "avHt");
+    tt.appendChild(mk("h2", null, isShop ? "Negozio · orari di apertura" : st.name + (st.is_owner ? " (tu)" : "")));
+    tt.appendChild(mk("p", null, hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni") + (isShop ? "" : " di lavoro")));
+    head.appendChild(tt); pane.appendChild(head);
+    if (isShop) pane.appendChild(mk("p", "avHint", "Gli orari di ogni settimana. Per ferie e giorni a parte usa «Chiusure e assenze»."));
+    else pane.appendChild(mk("p", "avHint", "I clienti possono prenotare con " + st.name + " solo nei suoi giorni e orari."));
+
+    var act = mk("div", "avActs");
+    if (isShop) {
+      PRESETS.forEach(function (p) {
+        var b = mk("button", "avChip", p[0]); b.type = "button";
+        b.addEventListener("click", function () {
+          for (var i = 0; i < 7; i++) days[i] = p[1][i] ? { open: true, from: p[2], to: p[3], pause: null } : { open: false };
+          render(); toast("Orari impostati: " + p[0]);
+        });
+        act.appendChild(b);
       });
-      r.appendChild(b);
-    });
-    return r;
-  }
-
-  /* ---------- scheda Negozio ---------- */
-  function renderNeg(box) {
-    var card = mk("div", "avCard");
-    var sumBox = mk("div"); card.appendChild(sumBox);
-    card.appendChild(presets(NEG.days, redraw));
-    var list = mk("div", "avDays"); card.appendChild(list);
-    var save = mk("button", "avBtn pri"); save.type = "button"; card.appendChild(save);
-    var note = mk("div", "avErr"); note.hidden = true; card.appendChild(note);
-    function redraw() {
-      sumBox.textContent = ""; sumBox.appendChild(summary(NEG.days, "aperte a settimana"));
-      dayList(list, NEG.days, redraw, null);
-      var dirty = JSON.stringify(NEG.days) !== NEG.base;
-      save.textContent = dirty ? "Salva orari" : "Orari salvati"; save.disabled = !dirty || busy;
-      save.classList.toggle("done", !dirty);
-      var pr = problem(NEG.days); note.hidden = !pr; note.textContent = pr;
+    } else {
+      var like = mk("button", "avChip", "Come il negozio"); like.type = "button";
+      like.addEventListener("click", function () { TM[id].days = copy(NEG.days); render(); toast(st.name + ": orari copiati dal negozio. Ricorda di salvare."); });
+      act.appendChild(like);
     }
+    var same = mk("button", "avChip", "Stesso orario in tutti i giorni aperti"); same.type = "button";
+    same.addEventListener("click", function () {
+      var f = null; days.forEach(function (d) { if (!f && d.open && !d.custom) f = d; });
+      if (!f) { toast("Apri almeno un giorno.", true); return; }
+      var src = copy(f); days.forEach(function (d, k) { if (d.open) days[k] = copy(src); });
+      render(); toast("Orario copiato su tutti i giorni aperti.");
+    });
+    act.appendChild(same);
+    if (!isShop) {
+      var ab = mk("button", "avChip warn", "Segna assenza"); ab.type = "button";
+      ab.addEventListener("click", function () { C.who = id; C.part = false; sel = "chi"; render(); var sc = layer.querySelector(".avScroll"); if (sc) sc.scrollTop = 0; });
+      act.appendChild(ab);
+    }
+    pane.appendChild(act);
+
+    var ax = mk("div", "avAxis"), axl = mk("div", "avAxL"); ["6", "9", "12", "15", "18", "21", "24"].forEach(function (h) { axl.appendChild(mk("span", null, h)); });
+    ax.appendChild(axl); pane.appendChild(ax);
+    var list = mk("div", "avDays"); pane.appendChild(list);
+    dayRows(list, days, isShop ? null : NEG.days);
+
+    var pr = problem(days), dr = dirty(id);
+    var note = mk("div", "avErr"); note.hidden = !pr; note.textContent = pr; pane.appendChild(note);
+    var ft = mk("div", "avFt");
+    var stt = mk("span", "avState" + (dr ? " dirty" : " ok"));
+    stt.innerHTML = dr ? "Modifiche non salvate" : IC.check + " Tutto salvato";
+    ft.appendChild(stt);
+    var save = mk("button", "avBtn pri", isShop ? "Salva orari" : "Salva orari di " + st.name); save.type = "button"; save.disabled = !dr || busy;
     save.addEventListener("click", function () {
-      var pr = problem(NEG.days); if (pr) { toast(pr, true); return; }
-      busy = true; redraw();
-      post({ action: "hours_replace", hours: payload(NEG.days) }).then(function () { busy = false; toast("Orari salvati."); return reload(); })
-        .catch(function (e) { busy = false; redraw(); toast(e.message, true); });
+      var p2 = problem(days); if (p2) { toast(p2, true); return; }
+      busy = true; render();
+      var req = isShop ? post({ action: "hours_replace", hours: payload(days) })
+        : post({ action: "staff_save", id: id, name: st.name, service_ids: st.service_ids || [], hours: payload(days) });
+      req.then(function () { busy = false; justSaved = id; toast(isShop ? "Orari salvati." : "Orari di " + st.name + " salvati."); return reload(); })
+        .catch(function (e) { busy = false; render(); toast(e.message, true); });
     });
-    redraw();
-    box.appendChild(card);
-    box.appendChild(mk("p", "avFoot", "Questi sono gli orari in cui ricevi. Per ferie e giorni a parte usa la scheda Chiusure."));
-  }
-
-  /* ---------- scheda Team ---------- */
-  function weekStrip(days) {
-    var w = mk("div", "avWeek");
-    days.forEach(function (d, i) {
-      var x = mk("span", "avWd" + (d.open ? " on" : ""));
-      x.appendChild(mk("b", null, DS[i]));
-      var tx = "Libero";
-      if (d.open) { var iv = toIntervals(d); tx = iv[0].open.replace(":00", "") + "–" + iv[iv.length - 1].close.replace(":00", ""); }
-      x.appendChild(document.createTextNode(tx));
-      w.appendChild(x);
-    });
-    return w;
-  }
-  function renderTeam(box) {
-    if (!S.team || !S.staff.length) {
-      var e = mk("div", "avCard avEmpty");
-      e.appendChild(mk("b", null, "Al momento ricevi i clienti solo tu"));
-      e.appendChild(mk("p", null, "Gli orari sono quelli del negozio. Se hai collaboratori, aggiungili in «Chi lavora da te»: poi imposterai qui gli orari di ognuno."));
-      var go = mk("button", "avBtn", "Apri «Chi lavora da te»"); go.type = "button";
-      go.addEventListener("click", function () { close(); var o = $("menuTabOther"); if (o) o.click(); setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("staff"); }, 90); });
-      e.appendChild(go); box.appendChild(e); return;
-    }
-    S.staff.forEach(function (st) {
-      var T = TM[st.id], card = mk("div", "avCard avPers" + (openStaff === st.id ? " open" : ""));
-      var head = mk("button", "avPh"); head.type = "button"; head.setAttribute("aria-expanded", openStaff === st.id ? "true" : "false");
-      var av = mk("span", "avAv", String(st.name || "?").charAt(0).toUpperCase()); av.style.setProperty("--h", hue(st.name));
-      var tx = mk("span", "avPt");
-      tx.appendChild(mk("b", null, st.name + (st.is_owner ? " (tu)" : "")));
-      var w = weekHours(T.days);
-      tx.appendChild(mk("small", null, hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni")));
-      head.appendChild(av); head.appendChild(tx);
-      var cv = mk("span", "avCv"); cv.innerHTML = IC.chev; head.appendChild(cv);
-      head.addEventListener("click", function () { openStaff = openStaff === st.id ? null : st.id; render(); });
-      card.appendChild(head);
-      card.appendChild(weekStrip(T.days));
-      if (openStaff === st.id) {
-        var body = mk("div", "avPb");
-        var act = mk("div", "avRow");
-        var like = mk("button", "avChip", "Come il negozio"); like.type = "button";
-        like.addEventListener("click", function () { T.days = copy(NEG.days); render(); toast(st.name + ": orari copiati dal negozio. Ricorda di salvare."); });
-        var ab = mk("button", "avChip", "Segna assenza"); ab.type = "button";
-        ab.addEventListener("click", function () { C.who = st.id; C.part = false; setTab("chi"); });
-        act.appendChild(like); act.appendChild(ab); body.appendChild(act);
-        var list = mk("div", "avDays"); body.appendChild(list);
-        var save = mk("button", "avBtn pri"); save.type = "button"; body.appendChild(save);
-        var note = mk("div", "avErr"); note.hidden = true; body.appendChild(note);
-        (function (st, T, list, save, note) {
-          function redraw() {
-            dayList(list, T.days, redraw, NEG.days);
-            var dirty = JSON.stringify(T.days) !== T.base;
-            save.textContent = dirty ? "Salva orari di " + st.name : "Orari salvati"; save.disabled = !dirty || busy;
-            save.classList.toggle("done", !dirty);
-            var pr = problem(T.days); note.hidden = !pr; note.textContent = pr;
-          }
-          save.addEventListener("click", function () {
-            var pr = problem(T.days); if (pr) { toast(pr, true); return; }
-            busy = true; redraw();
-            post({ action: "staff_save", id: st.id, name: st.name, service_ids: st.service_ids || [], hours: payload(T.days) })
-              .then(function () { busy = false; toast("Orari di " + st.name + " salvati."); return reload(); })
-              .catch(function (e) { busy = false; redraw(); toast(e.message, true); });
-          });
-          redraw();
-        })(st, T, list, save, note);
-        card.appendChild(body);
-      }
-      box.appendChild(card);
-    });
-    box.appendChild(mk("p", "avFoot", "I clienti possono prenotare con una persona solo nei suoi giorni e orari."));
+    ft.appendChild(save); pane.appendChild(ft);
+    box.appendChild(pane);
   }
 
   /* ---------- scheda Chiusure ---------- */
@@ -387,9 +368,9 @@
         hrsBox.appendChild(r);
         var tr = mk("div", "avTimes");
         tr.appendChild(mk("span", "avHint", "Dalle"));
-        tr.appendChild(sel(C.tf, "Dalle ore", function (v) { C.tf = v; if (m(C.tt) <= m(v)) C.tt = step(v, 4); redrawDur(); }));
+        tr.appendChild(selT(C.tf, "Dalle ore", function (v) { C.tf = v; if (m(C.tt) <= m(v)) C.tt = step(v, 4); redrawDur(); }));
         tr.appendChild(mk("span", "avHint", "alle"));
-        tr.appendChild(sel(C.tt, "Alle ore", function (v) { C.tt = v; if (m(C.tf) >= m(v)) C.tf = step(v, -4); redrawDur(); }));
+        tr.appendChild(selT(C.tt, "Alle ore", function (v) { C.tt = v; if (m(C.tf) >= m(v)) C.tf = step(v, -4); redrawDur(); }));
         hrsBox.appendChild(tr);
         hrsBox.appendChild(mk("span", "avHint", "Vale per ogni giorno del periodo scelto."));
       }
@@ -469,14 +450,48 @@
   }
 
   /* ---------- struttura ---------- */
-  function setTab(t) { tab = t; render(); var sc = layer && layer.querySelector(".avScroll"); if (sc) sc.scrollTop = 0; }
+  function paintSide() {
+    var nav = $("avSide"); if (!nav) return; nav.textContent = "";
+    function item(id, title, sub, extra) {
+      var b = mk("button", "avSi" + (sel === id ? " on" : "") + (extra ? " " + extra : "")); b.type = "button";
+      b.setAttribute("aria-pressed", sel === id ? "true" : "false");
+      if (id === "chi") { var a = mk("span", "avAv chi"); a.innerHTML = IC.cal; b.appendChild(a); } else b.appendChild(avatar(id));
+      var t = mk("span", "avSt"); t.appendChild(mk("b", null, title)); t.appendChild(mk("small", null, sub)); b.appendChild(t);
+      if (dirty(id)) { var dt = mk("span", "avDot"); dt.setAttribute("title", "Modifiche non salvate"); b.appendChild(dt); }
+      b.addEventListener("click", function () { sel = id; render(); var sc = layer.querySelector(".avScroll"); if (sc) sc.scrollTop = 0; });
+      nav.appendChild(b);
+    }
+    var wn = weekHours(NEG.days);
+    nav.appendChild(mk("div", "avSl", "Negozio"));
+    item("neg", "Negozio", "Orari di apertura · " + hword(wn.h));
+    if (S.team && S.staff.length) {
+      nav.appendChild(mk("div", "avSl", "Team"));
+      S.staff.forEach(function (s) { var w = weekHours(TM[s.id].days); item(s.id, s.name + (s.is_owner ? " (tu)" : ""), hword(w.h) + " · " + w.n + (w.n === 1 ? " giorno" : " giorni")); });
+    }
+    nav.appendChild(mk("div", "avSep"));
+    var n = closureItems().length;
+    item("chi", "Chiusure e assenze", n ? n + " in programma" : "Nessuna in programma");
+    if (!S.team || !S.staff.length) {
+      var h = mk("div", "avSide-hint");
+      h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
+      var go = mk("button", "avMini lnk", "Apri «Chi lavora da te»"); go.type = "button";
+      go.addEventListener("click", function () { close(); var o = $("menuTabOther"); if (o) o.click(); setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("staff"); }, 90); });
+      h.appendChild(go); nav.appendChild(h);
+    }
+  }
   function render() {
     if (!layer || !S) return;
-    layer.querySelectorAll(".avTab").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-t") === tab ? "true" : "false"); });
-    var team = layer.querySelector('[data-t="team"]'); if (team) team.hidden = false;
+    if (sel !== "neg" && sel !== "chi" && (!S.team || !person(sel))) sel = "neg";
+    paintSide();
     var box = $("avBody"), sc = layer.querySelector(".avScroll"), y = sc ? sc.scrollTop : 0;
     box.textContent = "";
-    if (tab === "neg") renderNeg(box); else if (tab === "team") renderTeam(box); else renderChi(box);
+    if (sel === "chi") {
+      var hd = mk("div", "avHd flat"), tt = mk("div", "avHt");
+      tt.appendChild(mk("h2", null, "Chiusure e assenze"));
+      tt.appendChild(mk("p", null, "Ferie, festivi, permessi: un giorno, più giorni o solo alcune ore."));
+      hd.appendChild(tt); box.appendChild(hd);
+      renderChi(box);
+    } else editor(box, sel);
     if (sc) sc.scrollTop = y;
   }
   function build() {
@@ -485,12 +500,10 @@
     layer.innerHTML =
       '<div class="avScroll"><div class="avIn">' +
       '<div class="avTop"><button type="button" class="mnBack" id="avBack" aria-label="Indietro">' + IC.back + '</button><div><h2 id="avT">Disponibilità</h2><p class="avSubT">Quando ricevi, chi lavora e quando sei chiuso.</p></div></div>' +
-      '<div class="avTabs" role="tablist"><button type="button" class="avTab" role="tab" data-t="neg">Negozio</button><button type="button" class="avTab" role="tab" data-t="team">Team</button><button type="button" class="avTab" role="tab" data-t="chi">Chiusure</button></div>' +
-      '<div id="avBody" class="avBody"></div>' +
+      '<div class="avApp"><nav id="avSide" class="avSide" aria-label="Orari di"></nav><section id="avBody" class="avMain"></section></div>' +
       '</div></div><div class="avToast" id="avToast" role="status"></div>';
     document.body.appendChild(layer);
     $("avBack").addEventListener("click", close);
-    layer.querySelectorAll(".avTab").forEach(function (b) { b.addEventListener("click", function () { setTab(b.getAttribute("data-t")); }); });
     var menu = $("burgerMenu");
     if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabAvail") close(); });
   }
@@ -502,13 +515,19 @@
   }
   window.addEventListener("resize", function () { if (layer && !layer.hidden) place(); });
   function close() { if (layer && !layer.hidden) layer.hidden = true; }
+  function pick() {
+    if (pending === "chi") sel = "chi";
+    else if (pending === "neg") sel = "neg";
+    else if (pending === "team") sel = S.team && S.staff.length ? S.staff[0].id : "neg";
+    pending = null;
+  }
   function open(t) {
     if (!layer) build();
-    if (t === "neg" || t === "team" || t === "chi") tab = t;
+    pending = t === "neg" || t === "team" || t === "chi" ? t : null;
     layer.hidden = false; place();
     var body = $("avBody");
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
-    fresh().then(function (d) { apply(d); render(); }).catch(function (e) { body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
+    fresh().then(function (d) { apply(d); pick(); render(); }).catch(function (e) { body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
   }
   window.liaAvailOpen = open;
   window.liaAvailClose = close;
