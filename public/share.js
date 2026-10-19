@@ -111,6 +111,7 @@
   /* ---------- menu ---------- */
   function buildMenu() {
     menu = $("burgerMenu");
+    if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabGuide") closeGuide(); });
     var cal = $("menuTabCal"), other = $("menuTabOther"), out = $("logoutBtn");
     if (!menu || !cal || !other || menu.getAttribute("data-mn")) return false;
     menu.setAttribute("data-mn", "1");
@@ -384,7 +385,7 @@
     guide.innerHTML =
       '<div class="mnGuide"><div class="mnGuideIn">' +
       '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT">Come si usa</h2></div>' +
-      '<p class="mnGSub">Tutto quello che serve per usare Prenolia, dalle cose essenziali a quelle di approfondimento.</p>' +
+      '<p class="mnGSub">Dalle cose essenziali a quelle di approfondimento: segui i numeri.</p>' +
       '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off"></label>' +
       '<div id="mnGBody"></div>' +
       '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>" +
@@ -405,12 +406,13 @@
         h = n ? '<div class="mnRes">' + r + "</div>" : '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>';
       } else {
         h += '<div class="mnCan"><b>Cosa puoi fare con Prenolia</b><ul>';
-        d.can.forEach(function (c) {
-          h += '<li><button type="button" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0]) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span>" + I.chev + "</button></li>";
+        d.can.forEach(function (c, i) {
+          h += '<li><button type="button" class="mnK' + (i % 6 + 1) + '" data-go="' + c[3] + '"><span class="mnCi">' + gi(c[0], 20) + '</span><span class="mnCt">' + c[1] + "<small>" + c[2] + "</small></span></button></li>";
         });
         h += "</ul></div>";
-        d.tiers.forEach(function (t) {
-          h += '<div class="mnTier"><div class="mnTh"><span class="mnTk">' + t.k + "</span><span>" + t.s + '</span></div><div class="mnTopics">';
+        d.tiers.forEach(function (t, ti) {
+          var kc = "mnK" + ({ "Essenziale": 1, "Ogni giorno": 2, "Quando ti serve": 3, "Per approfondire": 4 }[t.k] || (ti % 4 + 1));
+          h += '<div class="mnTier ' + kc + '"><div class="mnTh"><span class="mnNum">' + (ti + 1) + '</span><span class="mnThT"><span class="mnTk">' + t.k + "</span><small>" + t.s + '</small></span></div><div class="mnTopics">';
           t.topics.forEach(function (x) {
             var o = !!open[x.id];
             h += '<div class="mnTp' + (o ? " open" : "") + '" id="mnTp-' + x.id + '"><button type="button" data-tp="' + x.id + '" aria-expanded="' + (o ? "true" : "false") + '"><span class="mnCi">' + gi(x.ic) + '</span><span class="mnTt">' + x.n + "<small>" + x.d + '</small></span><span class="mnCv">' + I.down2 + "</span></button>";
@@ -440,6 +442,13 @@
     render();
   }
 
+  function guideTop() {
+    if (!guide) return;
+    var h = document.querySelector(".mainTop"), t = 0;
+    if (h) { var r = h.getBoundingClientRect(); t = Math.max(0, Math.round(r.bottom)); }
+    guide.style.top = t + "px";
+  }
+  window.addEventListener("resize", function () { if (guide && !guide.hidden) guideTop(); });
   function openGuide() {
     ls("s", NEWK, "1");
     var nw = document.querySelector("#menuTabGuide .mnNew"); if (nw) nw.hidden = true;
@@ -447,7 +456,7 @@
       b = b || { name: "", plan: "", gym: false, classes: true, personal: true, rental: false, links: [] };
       if (!guide) buildGuide(b);
       lastFocus = document.activeElement;
-      guide.hidden = false;
+      guide.hidden = false; guideTop();
       var sc = guide.querySelector(".mnGuide"); if (sc) sc.scrollTop = 0;
       var bk = $("mnGuideBack"); if (bk) bk.focus();
     });
