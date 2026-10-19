@@ -60,6 +60,8 @@
       if (main) res.links.push({ key: "main", seg: gym ? "Prenotazioni" : "Prenota", url: abs(main) });
       if (!gym) return res;
       return getJson("/api/palestra?t=" + encodeURIComponent(token)).then(function (g) {
+        var gl = g && g.business && g.business.public_link;
+        if (!res.links.length && gl) res.links.push({ key: "main", seg: "Prenotazioni", url: abs(gl) });
         var on = !!(g && g.settings && g.settings.rental && g.settings.rental.on);
         var rl = g && g.business && g.business.rental_link;
         if (on && rl) { res.rental = true; res.links.push({ key: "rent", seg: "Affitto sala", url: abs(rl) }); }
