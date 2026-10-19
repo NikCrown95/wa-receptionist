@@ -58,7 +58,7 @@
       var main = String(b.public_link || "");
       if (main) res.links.push({ key: "main", seg: gym ? "Prenotazioni" : "Prenota", url: abs(main) });
       if (!gym) return res;
-      var gp = g0 ? Promise.resolve(g0) : getJson("/api/palestra?t=" + encodeURIComponent(token));
+      var gp = g0 ? Promise.resolve(g0) : getJson("/api/palestra?t=" + encodeURIComponent(token) + "&data=1");
       return gp.then(function (g) {
         var gl = g && g.business && g.business.public_link;
         if (!res.links.length && gl) res.links.push({ key: "main", seg: "Prenotazioni", url: abs(gl) });
@@ -73,7 +73,7 @@
       var b = d && d.business;
       if (b) return fin(b, null);
       /* palestre senza orari standard: le impostazioni rispondono con un errore, si usano i dati della palestra */
-      return getJson("/api/palestra?t=" + encodeURIComponent(token)).then(function (g) {
+      return getJson("/api/palestra?t=" + encodeURIComponent(token) + "&data=1").then(function (g) {
         var gb = g && g.business; if (!gb) throw new Error("no");
         return fin({ name: gb.name || "", business_type: "palestra", public_link: gb.public_link || "", gym_offers: null }, g);
       });
