@@ -717,7 +717,7 @@ function pfRenderPoster(box,b,opts){
     var wide=function(){return !!(window.matchMedia&&window.matchMedia('(min-width:900px)').matches)};
     function toTop(){var w=document.querySelector('#panelOther .otherWrap');if(w)w.scrollTop=0;var h=document.querySelector('.tabPanels');if(h)h.scrollTop=0;var po=stEl('panelOther');if(po)po.scrollTop=0}
     function mark(){rows.forEach(function(r){r.classList.toggle('on',wide()&&r.getAttribute('data-st')===cur)});pages.forEach(function(p){p.classList.toggle('on',p.getAttribute('data-st')===cur)})}
-    function openPage(k){if((k==='hours'||k==='blocks')&&window.liaAvailOpen){window.liaAvailOpen(k==='hours'?'neg':'chi');return}cur=k;mark();if(!wide())shell.classList.add('inPage');toTop();if(k==='telegram'&&window.liaTgOpened)window.liaTgOpened()}
+    function openPage(k){cur=k;mark();if(!wide())shell.classList.add('inPage');toTop();if(k==='telegram'&&window.liaTgOpened)window.liaTgOpened()}
     rows.forEach(function(r){r.addEventListener('click',function(){openPage(r.getAttribute('data-st'))})});
     shell.querySelectorAll('.stBack').forEach(function(b){b.addEventListener('click',function(){shell.classList.remove('inPage');toTop()})});
     window.liaSettingsOpen=function(k){openPage(k)};

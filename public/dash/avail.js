@@ -446,7 +446,7 @@
       var h = mk("div", "avSide-hint");
       h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
       var go = mk("button", "avMini lnk", "Apri Chi lavora da te"); go.type = "button";
-      go.addEventListener("click", function () { close(); var o = $("menuTabOther"); if (o) o.click(); setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("staff"); }, 90); });
+      go.addEventListener("click", function () { close(false); var o = $("menuTabOther"); if (o) o.click(); setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("staff"); }, 90); });
       h.appendChild(go); nav.appendChild(h);
     }
   }
@@ -474,9 +474,9 @@
       '<div class="avApp"><nav id="avSide" class="avSide" aria-label="Orari di"></nav><section id="avBody" class="avMain"></section></div>' +
       '</div></div><div class="avToast" id="avToast" role="status"></div>';
     document.body.appendChild(layer);
-    $("avBack").addEventListener("click", close);
+    $("avBack").addEventListener("click", function () { close(); });
     var menu = $("burgerMenu");
-    if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabAvail") close(); });
+    if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabAvail") close(false); });
   }
   function place() {
     if (!layer) return;
@@ -485,7 +485,24 @@
     layer.style.top = t + "px";
   }
   window.addEventListener("resize", function () { if (layer && !layer.hidden) place(); });
-  function close() { if (layer && !layer.hidden) layer.hidden = true; }
+  /* voce del menu burger evidenziata mentre la pagina e' aperta */
+  var prevCur = [];
+  function markMenu(on) {
+    var av = $("menuTabAvail"), menu = $("burgerMenu");
+    if (on) {
+      prevCur = [];
+      if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (b) { if (b !== av) { prevCur.push(b); b.setAttribute("aria-current", "false"); } });
+      if (av) av.setAttribute("aria-current", "true");
+    } else {
+      if (av) av.setAttribute("aria-current", "false");
+    }
+  }
+  function close(keepMenu) {
+    if (layer && !layer.hidden) layer.hidden = true;
+    markMenu(false);
+    if (keepMenu !== false) { prevCur.forEach(function (b) { b.setAttribute("aria-current", "true"); }); }
+    prevCur = [];
+  }
   function pick() {
     if (pending === "chi") sel = "chi";
     else if (pending === "neg") sel = "neg";
@@ -494,8 +511,8 @@
   }
   function open(t) {
     if (!layer) build();
-    pending = t === "neg" || t === "team" || t === "chi" ? t : null;
-    layer.hidden = false; place();
+    pending = t === "neg" || t === "team" || t === "chi" ? t : "chi";
+    layer.hidden = false; place(); markMenu(true);
     var body = $("avBody");
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     fresh().then(function (d) { apply(d); pick(); render(); }).catch(function (e) { body.textContent = ""; body.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
