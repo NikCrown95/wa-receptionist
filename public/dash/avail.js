@@ -221,8 +221,15 @@
     ["Tutti i giorni", [1, 1, 1, 1, 1, 1, 1], "09:00", "19:00"]
   ];
 
+  var PAL = ["#8B7BE8", "#E58AA8", "#4FA3E0", "#E8A04B", "#4FBF8F", "#C97BD6"];
+  function colorOf(id) {
+    if (id === "neg") return "#2B8A94";
+    if (id === "chi") return "#E5826A";
+    for (var i = 0; i < S.staff.length; i++) if (S.staff[i].id === id) return PAL[i % PAL.length];
+    return "#2B8A94";
+  }
   function avatar(id) {
-    var a = mk("span", "avAv");
+    var a = mk("span", "avAv"); a.style.setProperty("--c", colorOf(id));
     if (id === "neg") { a.classList.add("shop"); a.innerHTML = IC.shop; }
     else { var s = person(id); a.textContent = String((s && s.name) || "?").charAt(0).toUpperCase(); a.style.setProperty("--h", hue(s && s.name)); }
     return a;
@@ -231,7 +238,7 @@
   /* ---------- editor di Negozio / persona ---------- */
   function editor(box, id) {
     var isShop = id === "neg", st = isShop ? null : person(id), days = daysOf(id);
-    var pane = mk("div", "avPane");
+    var pane = mk("div", "avPane"); pane.style.setProperty("--c", colorOf(id));
     var w = weekHours(days);
     var head = mk("div", "avHd");
     head.appendChild(avatar(id));
@@ -426,7 +433,8 @@
     function item(id, title, sub, extra) {
       var b = mk("button", "avSi" + (sel === id ? " on" : "") + (extra ? " " + extra : "")); b.type = "button";
       b.setAttribute("aria-pressed", sel === id ? "true" : "false");
-      if (id === "chi") { var a = mk("span", "avAv chi"); a.innerHTML = IC.cal; b.appendChild(a); } else b.appendChild(avatar(id));
+      b.style.setProperty("--c", colorOf(id));
+      if (id === "chi") { var a = mk("span", "avAv chi"); a.style.setProperty("--c", colorOf(id)); a.innerHTML = IC.cal; b.appendChild(a); } else b.appendChild(avatar(id));
       var t = mk("span", "avSt"); t.appendChild(mk("b", null, title)); t.appendChild(mk("small", null, sub)); b.appendChild(t);
       if (dirty(id)) { var dt = mk("span", "avDot"); dt.setAttribute("title", "Modifiche non salvate"); b.appendChild(dt); }
       b.addEventListener("click", function () { sel = id; render(); var sc = layer.querySelector(".avScroll"); if (sc) sc.scrollTop = 0; });
@@ -457,7 +465,7 @@
     var box = $("avBody"), sc = layer.querySelector(".avScroll"), y = sc ? sc.scrollTop : 0;
     box.textContent = "";
     if (sel === "chi") {
-      var hd = mk("div", "avHd flat"), tt = mk("div", "avHt");
+      var hd = mk("div", "avHd flat"), tt = mk("div", "avHt"); hd.style.setProperty("--c", colorOf("chi"));
       tt.appendChild(mk("h2", null, "Chiusure e assenze"));
       tt.appendChild(mk("p", null, "Ferie, festivi, permessi: un giorno, più giorni o solo alcune ore."));
       hd.appendChild(tt); box.appendChild(hd);
