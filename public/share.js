@@ -244,8 +244,8 @@
       if (link) out.push({ id: "link", q: "Dove trovo il mio link e il QR?", a: "Apri il menu in alto a destra e tocca “Condividi la tua pagina”: trovi il link, il QR e i pulsanti per mandarlo ai clienti.", hint: HINT });
       out.push(
         { id: "prenota", q: "Come prenota un mio cliente?", a: "Apre il tuo link o inquadra il QR, sceglie il servizio, il giorno e l’orario, e lascia nome e telefono. Tu ricevi subito la notifica e l’appuntamento compare in calendario." },
-        { id: "ferie", q: "Come blocco ferie o giorni di chiusura?", a: "Apri “Altro” dal menu e poi “Chiusure e ferie”. I giorni che segni non saranno prenotabili dai clienti." },
-        { id: "orari", q: "Come cambio servizi, prezzi e orari?", a: "Apri “Altro” dal menu: nelle pagine dei servizi e degli orari modifichi tutto. Le modifiche valgono subito anche sulla pagina dei clienti." },
+        { id: "ferie", q: "Come blocco ferie o giorni di chiusura?", a: "Apri “Impostazioni” dal menu e poi “Chiusure e ferie”. I giorni che segni non saranno prenotabili dai clienti." },
+        { id: "orari", q: "Come cambio servizi, prezzi e orari?", a: "Apri “Impostazioni” dal menu: nelle pagine dei servizi e degli orari modifichi tutto. Le modifiche valgono subito anche sulla pagina dei clienti." },
         { id: "lia", q: "Cosa fa Lia?", a: "Lia è l’assistente che risponde ai clienti e li aiuta a prenotare in chat, anche quando sei occupato o l’attività è chiusa." }
       );
       return { faqs: out, steps: [["Servizi e orari", "orari"], ["Condividi il link", "link"], ["Ricevi le prenotazioni", "prenota"]] };
