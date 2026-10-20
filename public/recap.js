@@ -292,7 +292,18 @@
       el.style.setProperty("font-size", s + "px", "important");
     }
   }
-  function reset(el) { if (el) el.style.removeProperty("font-size"); }
+  /* nome attivita' nell'intestazione: si misura il testo vero contro lo spazio fino ai pulsanti, cosi' non viene mai tagliato */
+  function fitName(el, maxPx) {
+    var row = el.closest(".mainTopRow"), left = el.getBoundingClientRect().left, lim = window.innerWidth - 12;
+    if (row) Array.prototype.forEach.call(row.querySelectorAll("button"), function (b) {
+      var r = b.getBoundingClientRect(); if (r.width > 0 && r.left > left) lim = Math.min(lim, r.left);
+    });
+    var room = lim - left - 12, s = maxPx;
+    el.style.setProperty("display", "inline-block", "important");
+    el.style.setProperty("font-size", s + "px", "important");
+    while (el.getBoundingClientRect().width > room && s > MIN) { s -= 0.5; el.style.setProperty("font-size", s + "px", "important"); }
+  }
+  function reset(el) { if (el) { el.style.removeProperty("font-size"); el.style.removeProperty("display"); } }
 
   function run() {
     queued = false;
@@ -303,7 +314,7 @@
     /* la dimensione di partenza e' quella del CSS (stessa formula); si riduce solo se la data e' troppo lunga */
     if (inCal) { var rr = document.body.classList.contains("liaRecapOn") ? 176 : 126; fit(range, Math.min(30, Math.max(MIN, (window.innerWidth - rr) / 9.2))); }
     else reset(range);
-    if (!inCal && biz && biz.offsetParent !== null) fit(biz, 22.4);
+    if (!inCal && biz && biz.offsetParent !== null) fitName(biz, 22.4);
   }
   function queue() { if (queued) return; queued = true; requestAnimationFrame(run); }
 
