@@ -21,18 +21,21 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .shell{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:64px;align-items:start}
 .side{position:sticky;top:28px;display:flex;flex-direction:column;gap:30px;padding-top:6px}
 .side .logo{margin:0;width:150px}
-.ringcard{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
-.ring{position:relative;width:184px;height:184px;flex:none}
-.ring svg{width:100%;height:100%;display:block}
+.side h2{font-size:1.9rem;line-height:1.12;font-weight:800;letter-spacing:-.03em;text-wrap:balance;margin:0}
+.side .lead{max-width:30ch;margin:0}
+.hud{position:fixed;left:max(24px,env(safe-area-inset-left,0px));bottom:max(24px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:row-reverse;align-items:center;gap:14px;z-index:5;pointer-events:none}
+.legend{background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:12px 18px;display:flex;flex-direction:column;gap:2px;text-align:left;box-shadow:0 18px 40px -18px rgba(0,0,0,.8);animation:legin .45s cubic-bezier(.3,.7,.2,1)}
+.legend small{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.legend b{font-size:1.1rem;letter-spacing:-.01em;font-weight:800}
+.legend span{font-size:.86rem;color:var(--muted)}
+@keyframes legin{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+.ring{position:relative;width:96px;height:96px;flex:none;border-radius:50%;background:var(--card);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)}
+.ring svg{width:100%;height:100%;display:block;padding:5px}
 .ring .trk{fill:none;stroke:var(--line2);stroke-width:10}
 .ring .arc{fill:none;stroke:url(#rg);stroke-width:10;stroke-linecap:round;stroke-dasharray:402.12;stroke-dashoffset:402.12;transition:stroke-dashoffset .6s cubic-bezier(.3,.7,.2,1)}
-.ring .pc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring .pc b{font-size:2.3rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.ring .pc span{font-size:.78rem;color:var(--muted)}
-.ringtxt{display:flex;flex-direction:column;gap:3px}
-.ringtxt b{font-size:1.45rem;letter-spacing:-.02em;font-weight:800}
-.ringtxt span:last-child{color:var(--muted);font-size:.95rem}
-@media (prefers-reduced-motion:reduce){.ring .arc{transition:none}}
+.ring .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.ring .pc b{font-size:1.2rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.ring .arc{transition:none}.legend{animation:none}}
 .rail{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .rail li{display:flex;align-items:center;gap:14px;padding:9px 0;color:var(--muted);font-weight:600;font-size:.95rem}
 .rail .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line2);font-size:.8rem;flex:none;background:var(--card)}
@@ -45,12 +48,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 @media (max-width:900px){
   .shell{display:block;max-width:460px}
   .side{position:static;gap:16px;margin-bottom:24px}
-  .rail{display:none}
+  .side h2,.side .lead,.rail{display:none}
   .side .logo{margin:0 auto}
-  .ringcard{flex-direction:row;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 16px}
-  .ring{width:68px;height:68px}
-  .ring .pc b{font-size:1rem}.ring .pc span{display:none}
-  .ringtxt b{font-size:1.1rem}
+  body{padding-bottom:110px}
+  .hud{left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));gap:10px}
+  .ring{width:68px;height:68px}.ring .pc b{font-size:.95rem}
+  .legend{padding:8px 14px}.legend small,.legend span{display:none}.legend b{font-size:1rem}
 }
 h1,h2,p{margin:0}
 .logo{display:block;width:140px;height:34px;margin:0 auto;background:url("/brand/prenolia-dark.png") center/contain no-repeat}
@@ -164,18 +167,20 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 <main class="shell">
   <aside class="side">
     <span class="logo" role="img" aria-label="Prenolia"></span>
-    <div class="ringcard" aria-live="polite">
-      <div class="ring">
-        <svg viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD2DC"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient></defs>
-          <circle cx="80" cy="80" r="64" class="trk"/><circle cx="80" cy="80" r="64" class="arc" id="arc" transform="rotate(-90 80 80)"/></svg>
-        <div class="pc"><b id="pct">0%</b><span>completato</span></div>
-      </div>
-      <div class="ringtxt"><span class="stepl" id="stepn">Passo 1</span><b id="now">Tipo di attività</b><span id="nowsub">Che attività hai</span></div>
-    </div>
+    <h2>La tua agenda, pronta in pochi minuti</h2>
+    <p class="lead" style="color:var(--muted)">Rispondi a poche domande: alla fine i clienti possono già prenotare.</p>
     <ol class="rail" id="rail"></ol>
   </aside>
   <div id="view" class="pane"></div>
 </main>
+<div class="hud" aria-live="polite">
+  <div class="legend" id="legend"><small id="stepn">Passo 1</small><b id="now">Tipo di attività</b><span id="nowsub">Che attività hai</span></div>
+  <div class="ring" role="img" aria-label="Avanzamento">
+    <svg viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD2DC"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient></defs>
+      <circle cx="80" cy="80" r="64" class="trk"/><circle cx="80" cy="80" r="64" class="arc" id="arc" transform="rotate(-90 80 80)"/></svg>
+    <div class="pc"><b id="pct">0%</b></div>
+  </div>
+</div>
 
 <script>
 var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
@@ -287,6 +292,7 @@ function render(){
   document.getElementById("pct").textContent=pct+"%";
   document.getElementById("now").textContent=NAMES[k];document.getElementById("nowsub").textContent=SUBT[k];
   document.getElementById("stepn").textContent="Passo "+(S.step+1)+" di "+np;
+  var lg=document.getElementById("legend");if(lg.dataset.k!==k){lg.dataset.k=k;lg.style.animation="none";void lg.offsetWidth;lg.style.animation=""}
   var rail=document.getElementById("rail");rail.textContent="";
   (S.v?flow():["tipo"]).forEach(function(n,i){rail.appendChild(h("li",{class:i<S.step?"done":i===S.step?"on":""},[h("span",{class:"n",text:i<S.step?"✓":String(i+1)}),h("span",{text:NAMES[n]})]))});
   var lab=S.v?"Passo "+(S.step+1)+" di "+f.length:"Passo 1";
