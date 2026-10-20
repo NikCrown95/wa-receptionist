@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
     if (doc === "cliente") {
       const slug = String(q.b || "").toLowerCase();
       if (!/^[a-z0-9-]{1,60}$/.test(slug)) return res.status(404).send(notFoundPage());
-      const r = await sb("GET", "businesses?slug=eq." + encodeURIComponent(slug) + "&active=eq.true&select=name,address,public_phone,legal_name,vat_number,privacy_email&limit=1");
+      const r = await sb("GET", "businesses?slug=eq." + encodeURIComponent(slug) + "&active=eq.true&select=name,address,public_phone,legal_name,vat_number,privacy_email,business_type&limit=1");
       if (!r.ok || !Array.isArray(r.data) || !r.data.length) return res.status(404).send(notFoundPage());
       return res.status(200).send(customerPage(r.data[0]));
     }
