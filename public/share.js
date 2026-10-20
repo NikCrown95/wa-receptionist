@@ -529,15 +529,17 @@
       b = b || { name: "", plan: "", gym: false, classes: true, personal: true, rental: false, links: [] };
       if (!guide) buildGuide(b);
       lastFocus = document.activeElement;
-      guide.hidden = false; guideTop(); markGuide(true);
+      guide.hidden = false; markGuide(true); guideTop();
       var sc = guide.querySelector(".mnGuide"); if (sc) sc.scrollTop = 0;
       var bk = $("mnGuideBack"); if (bk) bk.focus();
     });
   }
-  var guidePrev = [];
+  var guidePrev = [], guidePrevLbl = "";
   function markGuide(on) {
     var g = $("menuTabGuide"), menu = $("burgerMenu");
     document.body.classList.toggle("mnGOn", !!on);
+    var sl = $("sectionLabel");
+    if (sl) { if (on) { if (sl.textContent !== "Guida") guidePrevLbl = sl.textContent; sl.textContent = "Guida"; } else if (sl.textContent === "Guida" && guidePrevLbl) sl.textContent = guidePrevLbl; }
     if (on) {
       guidePrev = [];
       if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (x) { if (x !== g) { guidePrev.push(x); x.setAttribute("aria-current", "false"); } });

@@ -534,9 +534,12 @@
   window.addEventListener("resize", function () { if (layer && !layer.hidden) place(); });
   /* voce del menu burger evidenziata mentre la pagina e' aperta */
   var prevCur = [];
+  var avPrevLbl = "";
   function markMenu(on) {
     var av = $("menuTabAvail"), menu = $("burgerMenu");
     document.body.classList.toggle("mnAOn", !!on);
+    var sl = $("sectionLabel");
+    if (sl) { if (on) { if (sl.textContent !== "Disponibilità") avPrevLbl = sl.textContent; sl.textContent = "Disponibilità"; } else if (sl.textContent === "Disponibilità" && avPrevLbl) sl.textContent = avPrevLbl; }
     if (on) {
       prevCur = [];
       if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (b) { if (b !== av) { prevCur.push(b); b.setAttribute("aria-current", "false"); } });
@@ -560,7 +563,7 @@
   function open(t) {
     if (!layer) build();
     pending = t === "neg" || t === "team" || t === "chi" ? t : "chi";
-    layer.hidden = false; place(); markMenu(true);
+    layer.hidden = false; markMenu(true); place();
     var body = $("avBody");
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     var c = cached();

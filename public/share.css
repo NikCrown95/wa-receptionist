@@ -247,3 +247,13 @@ body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > s
 /* guida: nessuna riga di testata (indietro e frase), il tasto resta nel DOM per il tasto Indietro del telefono */
 .mnGuide .mnGH{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .mnGuideIn{padding-top:calc(env(safe-area-inset-top,0px) + 18px)}
+
+/* Calendario su telefono: l'intestazione e' ridotta a zero; sopra Disponibilita' e Guida torna quella normale */
+@media(max-width:699px){
+  body.lia-sec-cal.mnAOn .mainTop,body.lia-sec-cal.mnGOn .mainTop{height:auto!important;min-height:0!important;border-bottom:1px solid var(--line)!important;overflow:hidden!important;background:transparent!important}
+  body.lia-sec-cal.mnAOn .mainTopRow,body.lia-sec-cal.mnGOn .mainTopRow{height:auto!important;min-height:60px!important;padding:12px 16px 8px!important}
+  body.lia-sec-cal.mnAOn .mainBiz,body.lia-sec-cal.mnGOn .mainBiz{display:block!important}
+  body.lia-sec-cal.mnAOn .mainTop #burgerBtn,body.lia-sec-cal.mnGOn .mainTop #burgerBtn,
+  body.lia-sec-cal.mnAOn .mainTop #bellBtn,body.lia-sec-cal.mnGOn .mainTop #bellBtn,
+  body.lia-sec-cal.mnAOn .mainTop #liaRecapBtn,body.lia-sec-cal.mnGOn .mainTop #liaRecapBtn{position:static!important;top:auto!important;right:auto!important}
+}
