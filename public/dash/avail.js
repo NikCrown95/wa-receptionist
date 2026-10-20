@@ -52,9 +52,15 @@
   }
   /* apertura veloce: se i dati sono gia' scaricati (li legge anche Impostazioni all'avvio) li uso subito, senza aspettare la rete */
   function cached() { var d = window.liaSettingsData; return d && d.hours ? d : null; }
-  function fresh() {
+  /* i dati letti da meno di un minuto e non toccati da nessun salvataggio (ogni salvataggio li azzera) si riusano senza altra richiesta */
+  function recent() { return !!(window.liaSettingsAt && cached() && Date.now() - window.liaSettingsAt < 60000); }
+  function stamp(d) { window.liaSettingsAt = Date.now(); return d; }
+  function usable(d) { return d && d.hours ? stamp(d) : getJson(url()).then(stamp); }
+  /* force = true dopo un salvataggio: rilegge sempre. Senza force, se una lettura e' gia' in corso (anche quella anticipata in background) ci si aggancia invece di farne un'altra */
+  function fresh(force) {
+    if (!force && window.liaSettingsPromise) return Promise.resolve(window.liaSettingsPromise).then(usable);
     var p = window.liaSettingsRefresh ? window.liaSettingsRefresh() : Promise.resolve(null);
-    return Promise.resolve(p).then(function (d) { return d && d.hours ? d : getJson(url()); });
+    return Promise.resolve(p).then(usable);
   }
 
   /* ---------- modello orari ---------- */
@@ -114,7 +120,7 @@
     if (!S.team && C.who !== "neg") C.who = "neg";
     if (C.who !== "neg" && !S.staff.some(function (x) { return x.id === C.who; })) C.who = "neg";
   }
-  function reload() { return fresh().then(function (d) { apply(d); render(); }); }
+  function reload() { return fresh(true).then(function (d) { apply(d); render(); }); }
 
   /* ---------- pezzi di interfaccia ---------- */
   var TIMES = [];
@@ -570,6 +576,7 @@
     var shown = false;
     if (c) { apply(c); pick(); render(); shown = true; }
     else if (S) { pick(); render(); shown = true; }
+    if (shown && recent()) return;
     var touched = false;
     var mark = function () { touched = true; };
     layer.addEventListener("pointerdown", mark, { once: true });
@@ -583,6 +590,7 @@
     if (!S) { el.textContent = ""; el.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     var c2 = cached(), shown2 = false;
     if (c2) { apply(c2); renderEmb(); shown2 = true; }
+    if (shown2 && recent()) return;
     fresh().then(function (d) { apply(d); if (!shown2) renderEmb(); }).catch(function (e) { el.textContent = ""; el.appendChild(mk("p", "avErr", e.message || "Non riesco a leggere gli orari. Riprova.")); });
   };
   window.liaAvailOpen = open;

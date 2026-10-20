@@ -62,7 +62,7 @@
   }
   function load() {
     if (loading) return loading;
-    var p = window.liaSettingsData ? Promise.resolve(window.liaSettingsData) : getJson("/api/agenda?t=" + encodeURIComponent(token) + "&settings=1");
+    var p = window.liaSettingsData ? Promise.resolve(window.liaSettingsData) : (window.liaSettingsShared ? window.liaSettingsShared() : getJson("/api/agenda?t=" + encodeURIComponent(token) + "&settings=1"));
     function fin(b, g0) {
       var gym = b.business_type === "palestra";
       var o = b.gym_offers || null;
