@@ -2,7 +2,18 @@
 // Non salva pagine in cache: la dashboard si apre sempre aggiornata.
 self.addEventListener("install", function () { self.skipWaiting(); });
 self.addEventListener("activate", function (e) { e.waitUntil(self.clients.claim()); });
-self.addEventListener("fetch", function () { /* tutto passa dalla rete */ });
+// Tutto passa dalla rete (la dashboard e' sempre aggiornata). Solo se manca la connessione si mostra una pagina semplice.
+var OFFLINE = '<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prenolia</title></head>'
+  + '<body style="margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a1a20;color:#e8f1f3;font-family:system-ui,sans-serif;text-align:center;padding:24px">'
+  + '<div><img src="/icons/icon-192.png" width="72" height="72" alt="" style="border-radius:18px"><h1 style="font-size:1.25rem;margin:18px 0 8px">Sei offline</h1>'
+  + '<p style="margin:0 0 20px;opacity:.75;line-height:1.45">Controlla la connessione e riprova.</p>'
+  + '<button onclick="location.reload()" style="font:inherit;font-weight:700;padding:12px 22px;border:0;border-radius:12px;background:#338594;color:#fff">Riprova</button></div></body></html>';
+self.addEventListener("fetch", function (e) {
+  if (e.request.mode !== "navigate") return;
+  e.respondWith(fetch(e.request).catch(function () {
+    return new Response(OFFLINE, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
+  }));
+});
 
 self.addEventListener("push", function (e) {
   var d = {};

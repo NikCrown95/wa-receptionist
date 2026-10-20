@@ -111,3 +111,13 @@
   });
   setTimeout(function(){refresh();sync();},1500);
 })();
+
+// --- App installabile (Android/Chrome): il service worker va registrato subito all'apertura, non solo per le notifiche ---
+(function(){
+  try{
+    if(!('serviceWorker' in navigator))return;
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+  }catch(e){}
+})();
