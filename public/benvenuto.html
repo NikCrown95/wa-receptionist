@@ -36,19 +36,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .ring .pc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .ring .pc b{font-size:1.2rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.ring .arc{transition:none}.legend{animation:none}}
-.rail{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
-.rail li{display:flex;align-items:center;gap:14px;padding:9px 0;color:var(--muted);font-weight:600;font-size:.95rem}
-.rail .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line2);font-size:.8rem;flex:none;background:var(--card)}
-.rail li.on{color:var(--ink)}
-.rail li.on .n{background:var(--grad);border-color:transparent;color:var(--on-accent)}
-.rail li.done .n{border-color:var(--accent);color:var(--accent)}
-.rail li.done{color:var(--ink)}
 .pane{max-width:600px;width:100%;display:flex;flex-direction:column;gap:22px;padding-top:6px}
 .steps.bar{display:none}
 @media (max-width:900px){
   .shell{display:block;max-width:460px}
   .side{position:static;gap:16px;margin-bottom:24px}
-  .side h2,.side .lead,.rail{display:none}
+  .side h2,.side .lead{display:none}
   .side .logo{margin:0 auto}
   body{padding-bottom:110px}
   .hud{left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));gap:10px}
@@ -169,7 +162,6 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
     <span class="logo" role="img" aria-label="Prenolia"></span>
     <h2>La tua agenda, pronta in pochi minuti</h2>
     <p class="lead" style="color:var(--muted)">Rispondi a poche domande: alla fine i clienti possono già prenotare.</p>
-    <ol class="rail" id="rail"></ol>
   </aside>
   <div id="view" class="pane"></div>
 </main>
@@ -293,8 +285,6 @@ function render(){
   document.getElementById("now").textContent=NAMES[k];document.getElementById("nowsub").textContent=SUBT[k];
   document.getElementById("stepn").textContent="Passo "+(S.step+1)+" di "+np;
   var lg=document.getElementById("legend");if(lg.dataset.k!==k){lg.dataset.k=k;lg.style.animation="none";void lg.offsetWidth;lg.style.animation=""}
-  var rail=document.getElementById("rail");rail.textContent="";
-  (S.v?flow():["tipo"]).forEach(function(n,i){rail.appendChild(h("li",{class:i<S.step?"done":i===S.step?"on":""},[h("span",{class:"n",text:i<S.step?"✓":String(i+1)}),h("span",{text:NAMES[n]})]))});
   var lab=S.v?"Passo "+(S.step+1)+" di "+f.length:"Passo 1";
   if(!S.ready){v.appendChild(h("p",{class:"lead",text:"Un attimo…"}));return}
   if(k==="tipo"){
