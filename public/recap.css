@@ -192,5 +192,5 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 .lr-it .tx small{display:block;font-size:.72rem;color:var(--muted);margin-top:5px}
 .lr-it .ch{color:var(--muted);padding:12px 0 0;display:block;width:auto;min-width:0;height:auto;min-height:0;border:0;border-radius:0;background:none;box-shadow:none}
 
-/* il nome dell'attivita' nell'intestazione non viene mai tagliato: se e' lungo va a capo */
-.mainTopRow .mainBiz #businessName{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.1;overflow-wrap:anywhere}
+/* il nome dell'attivita' nell'intestazione sta sempre su una riga e non viene mai tagliato: recap.js ne riduce la dimensione */
+.mainTopRow .mainBiz #businessName{white-space:nowrap!important;overflow:hidden;text-overflow:clip!important}
