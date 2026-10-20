@@ -236,3 +236,10 @@ body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
   .mnHelp{max-width:380px;margin-top:26px}
 }
 @media (min-width:1300px){.mnGuideIn{max-width:1240px}#mnGBody{grid-template-columns:420px minmax(0,1fr)}}
+
+/* pagina aperta sopra la dashboard: nel menu resta evidenziata solo la sua voce */
+body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide),body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail){background:transparent;color:var(--ink)}
+body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > svg,body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail) > svg{color:var(--muted)}
+/* guida: niente titolo ripetuto, accanto al tasto indietro c'e' la frase di spiegazione */
+.mnSr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mnGH .mnGSub{margin:0;flex:1;min-width:0}

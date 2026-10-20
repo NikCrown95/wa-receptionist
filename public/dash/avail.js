@@ -536,6 +536,7 @@
   var prevCur = [];
   function markMenu(on) {
     var av = $("menuTabAvail"), menu = $("burgerMenu");
+    document.body.classList.toggle("mnAOn", !!on);
     if (on) {
       prevCur = [];
       if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (b) { if (b !== av) { prevCur.push(b); b.setAttribute("aria-current", "false"); } });

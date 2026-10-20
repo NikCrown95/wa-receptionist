@@ -447,8 +447,7 @@
     guide.setAttribute("role", "dialog"); guide.setAttribute("aria-modal", "true"); guide.setAttribute("aria-labelledby", "mnGuideT");
     guide.innerHTML =
       '<div class="mnGuide"><div class="mnGuideIn">' +
-      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT">Come si usa</h2></div>' +
-      '<p class="mnGSub">Dalle cose essenziali a quelle di approfondimento: segui i numeri.</p>' +
+      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT" class="mnSr">Come si usa</h2><p class="mnGSub">Dalle cose essenziali a quelle di approfondimento: segui i numeri.</p></div>' +
       '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off"></label>' +
       '<div id="mnGBody"></div>' +
       '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>" +
@@ -538,6 +537,7 @@
   var guidePrev = [];
   function markGuide(on) {
     var g = $("menuTabGuide"), menu = $("burgerMenu");
+    document.body.classList.toggle("mnGOn", !!on);
     if (on) {
       guidePrev = [];
       if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (x) { if (x !== g) { guidePrev.push(x); x.setAttribute("aria-current", "false"); } });
