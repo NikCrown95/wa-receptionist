@@ -160,7 +160,7 @@
       } else openSheet(0, a === "qr");
     });
 
-    var g = mk("button", "", I.help + '<span>Come si usa</span><span class="mnNew">Nuovo</span>');
+    var g = mk("button", "", I.help + '<span>Guida</span><span class="mnNew">Nuovo</span>');
     g.type = "button"; g.id = "menuTabGuide"; g.setAttribute("role", "menuitem"); g.setAttribute("aria-current", "false");
     g.querySelector("span:first-of-type").style.flex = "1";
     var nw = g.querySelector(".mnNew"); if (ls("g", NEWK)) nw.hidden = true;
@@ -447,7 +447,7 @@
     guide.setAttribute("role", "dialog"); guide.setAttribute("aria-modal", "true"); guide.setAttribute("aria-labelledby", "mnGuideT");
     guide.innerHTML =
       '<div class="mnGuide"><div class="mnGuideIn">' +
-      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT" class="mnSr">Come si usa</h2><p class="mnGSub">Dalle cose essenziali a quelle di approfondimento: segui i numeri.</p></div>' +
+      '<div class="mnGH"><button type="button" class="mnBack" id="mnGuideBack" aria-label="Indietro">' + I.back + '</button><h2 id="mnGuideT" class="mnSr">Guida</h2><p class="mnGSub">Dalle cose essenziali a quelle di approfondimento: segui i numeri.</p></div>' +
       '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off"></label>' +
       '<div id="mnGBody"></div>' +
       '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>" +
