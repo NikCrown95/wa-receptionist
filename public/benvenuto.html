@@ -20,9 +20,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 .shell{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:64px;align-items:start}
 .side{position:sticky;top:28px;display:flex;flex-direction:column;gap:30px;padding-top:6px}
-.side h2{font-size:1.9rem;line-height:1.12;font-weight:800;letter-spacing:-.03em;text-wrap:balance;margin:0}
 .side .logo{margin:0;width:150px}
-.side .lead{max-width:30ch}
+.ringcard{display:flex;flex-direction:column;gap:20px;align-items:flex-start}
+.ring{position:relative;width:184px;height:184px;flex:none}
+.ring svg{width:100%;height:100%;display:block}
+.ring .trk{fill:none;stroke:var(--line2);stroke-width:10}
+.ring .arc{fill:none;stroke:url(#rg);stroke-width:10;stroke-linecap:round;stroke-dasharray:402.12;stroke-dashoffset:402.12;transition:stroke-dashoffset .6s cubic-bezier(.3,.7,.2,1)}
+.ring .pc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .pc b{font-size:2.3rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.ring .pc span{font-size:.78rem;color:var(--muted)}
+.ringtxt{display:flex;flex-direction:column;gap:3px}
+.ringtxt b{font-size:1.45rem;letter-spacing:-.02em;font-weight:800}
+.ringtxt span:last-child{color:var(--muted);font-size:.95rem}
+@media (prefers-reduced-motion:reduce){.ring .arc{transition:none}}
 .rail{display:flex;flex-direction:column;gap:4px;margin:0;padding:0;list-style:none}
 .rail li{display:flex;align-items:center;gap:14px;padding:9px 0;color:var(--muted);font-weight:600;font-size:.95rem}
 .rail .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line2);font-size:.8rem;flex:none;background:var(--card)}
@@ -35,9 +45,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 @media (max-width:900px){
   .shell{display:block;max-width:460px}
   .side{position:static;gap:16px;margin-bottom:24px}
-  .side h2,.side .lead,.rail{display:none}
+  .rail{display:none}
   .side .logo{margin:0 auto}
-  .steps.bar{display:flex}
+  .ringcard{flex-direction:row;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 16px}
+  .ring{width:68px;height:68px}
+  .ring .pc b{font-size:1rem}.ring .pc span{display:none}
+  .ringtxt b{font-size:1.1rem}
 }
 h1,h2,p{margin:0}
 .logo{display:block;width:140px;height:34px;margin:0 auto;background:url("/brand/prenolia-dark.png") center/contain no-repeat}
@@ -114,16 +127,52 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .sum:first-child{border-top:0}
 .sum span:last-child{color:var(--muted);text-align:right}
 .tag{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+.sugs{display:flex;flex-direction:column;gap:10px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.lh,.lr,.addrow{display:grid;gap:10px;align-items:center;padding:10px 14px}
+.lh{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:14px;padding-bottom:6px}
+.lr{border-top:1px solid var(--line)}
+.c-svc{grid-template-columns:minmax(0,1fr) 120px 112px 44px}
+.c-dom{grid-template-columns:minmax(0,1fr) 120px 112px 56px 44px}
+.c-gym{grid-template-columns:minmax(0,1fr) 120px 96px 44px}
+.lr .inp{height:46px;border-radius:12px;padding:0 12px;font-size:.96rem}
+.lr .eur .inp{padding-left:28px}
+.lr .eur span{left:12px}
+.lr .rm{flex:none;width:44px;height:44px}
+.home{all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--muted);justify-self:center}
+.home svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.home[aria-pressed="true"]{background:var(--grad);color:var(--on-accent);border-color:transparent}
+.empty{margin:0;padding:22px 16px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+.addrow{grid-template-columns:minmax(0,1fr) auto;border-top:1px solid var(--line);background:rgba(255,255,255,.015);padding-top:12px;padding-bottom:12px}
+.addrow .inp{height:46px;border-radius:12px;padding:0 14px}
+.chip.add{min-height:46px}
+@media (max-width:640px){
+  .lh{display:none}
+  .c-svc.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+  .c-svc.lr .f-n{grid-column:1/3}.c-svc.lr .f-x{grid-column:3;grid-row:1}
+  .c-svc.lr .f-d{grid-column:1}.c-svc.lr .f-p{grid-column:2/4}
+  .c-dom.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+  .c-dom.lr .f-n{grid-column:1/3}.c-dom.lr .f-x{grid-column:3;grid-row:1}
+  .c-dom.lr .f-d{grid-column:1}.c-dom.lr .f-p{grid-column:2}.c-dom.lr .f-h{grid-column:3}
+  .c-gym.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+  .c-gym.lr .f-n{grid-column:1/3}.c-gym.lr .f-x{grid-column:3;grid-row:1}
+  .c-gym.lr .f-d{grid-column:1}.c-gym.lr .f-p{grid-column:2/4}
+}
 </style>
 </head>
 <body>
 <main class="shell">
   <aside class="side">
     <span class="logo" role="img" aria-label="Prenolia"></span>
-    <h2>La tua agenda, pronta in pochi minuti</h2>
-    <p class="lead muted" style="color:var(--muted)">Rispondi a poche domande: alla fine i clienti possono già prenotare.</p>
+    <div class="ringcard" aria-live="polite">
+      <div class="ring">
+        <svg viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD2DC"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient></defs>
+          <circle cx="80" cy="80" r="64" class="trk"/><circle cx="80" cy="80" r="64" class="arc" id="arc" transform="rotate(-90 80 80)"/></svg>
+        <div class="pc"><b id="pct">0%</b><span>completato</span></div>
+      </div>
+      <div class="ringtxt"><span class="stepl" id="stepn">Passo 1</span><b id="now">Tipo di attività</b><span id="nowsub">Che attività hai</span></div>
+    </div>
     <ol class="rail" id="rail"></ol>
-    <div class="steps bar" id="bar" aria-hidden="true"></div>
   </aside>
   <div id="view" class="pane"></div>
 </main>
@@ -136,20 +185,22 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
 var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e simili. Ricevi nel tuo locale"],
  ["domicilio","Servizi anche a domicilio","Ricevi in sede e vai dai clienti, nelle zone che scegli tu"],
  ["palestra","Palestra","Corsi di gruppo e personal training"]];
-var M1={"Parrucchiere":["Taglio donna","Taglio uomo","Piega","Colore"],"Barbiere":["Taglio","Barba","Taglio e barba"],"Estetista":["Pulizia viso","Manicure","Ceretta","Massaggio"],
- "Nail artist":["Manicure","Ricostruzione unghie","Refill","Pedicure"],"Centro massaggi":["Massaggio rilassante","Massaggio decontratturante","Massaggio schiena"],
- "Tatuatore":["Consulenza","Tatuaggio piccolo","Seduta tatuaggio"],"Make-up artist":["Trucco giorno","Trucco sposa","Prova trucco"],
- "Toelettatore":["Bagno e tosatura","Bagno","Taglio unghie"],"Cartomante":["Lettura breve","Lettura completa"],"Altro":[]};
-var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":M1["Estetista"],"Massaggiatore":["Massaggio rilassante","Massaggio decontratturante"],
- "Personal trainer":["Allenamento 1 a 1","Prima consulenza"],"Idraulico":["Sopralluogo","Riparazione perdita","Intervento urgente"],"Elettricista":["Sopralluogo","Riparazione guasto","Installazione"],
- "Fabbro":["Apertura porta","Cambio serratura","Sopralluogo"],"Imbianchino":["Sopralluogo","Preventivo","Tinteggiatura stanza"],"Giardiniere":["Sopralluogo","Manutenzione giardino","Potatura"],
- "Tuttofare":["Piccole riparazioni","Montaggio mobili","Sopralluogo"],"Pulizie":["Pulizia casa","Pulizia straordinaria"],"Tecnico climatizzatori":["Sopralluogo","Manutenzione","Installazione"],
- "Dog sitter":["Passeggiata","Visita a casa"],"Ripetizioni":["Lezione di 1 ora","Lezione di prova"],"Altro":[]};
+function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
+var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
+ "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
+ "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Make-up artist":Q("Trucco giorno|45,Trucco sposa|90,Prova trucco|60"),
+ "Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),"Altro":[]};
+var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":M1["Estetista"],"Massaggiatore":Q("Massaggio rilassante|50,Massaggio decontratturante|50"),
+ "Personal trainer":Q("Allenamento 1 a 1|60,Prima consulenza|30"),"Idraulico":Q("Sopralluogo|30,Riparazione perdita|60,Intervento urgente|90"),"Elettricista":Q("Sopralluogo|30,Riparazione guasto|60,Installazione|90"),
+ "Fabbro":Q("Apertura porta|30,Cambio serratura|60,Sopralluogo|30"),"Imbianchino":Q("Sopralluogo|30,Preventivo|30,Tinteggiatura stanza|180"),"Giardiniere":Q("Sopralluogo|30,Manutenzione giardino|120,Potatura|120"),
+ "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Tecnico climatizzatori":Q("Sopralluogo|30,Manutenzione|60,Installazione|120"),
+ "Dog sitter":Q("Passeggiata|45,Visita a casa|30"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),"Altro":[]};
 var SOLOCASA={"Idraulico":1,"Elettricista":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tuttofare":1,"Pulizie":1,"Tecnico climatizzatori":1,"Dog sitter":1};
 function MESTIERI(){return S.v==="domicilio"?M2:M1}
-var GYMSUG=["Corso di gruppo","Personal training 1 a 1","Prima consulenza"];
+var GYMSUG=Q("Corso di gruppo|60,Personal training 1 a 1|60,Prima consulenza|30");
 var DAYN=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
 var DAYS=["L","M","M","G","V","S","D"];
+var SUBT={tipo:"Che attività hai",attivita:"Nome e mestiere",servizi:"Cosa offri e quanto costa",lezioni:"Corsi e personal training",calendario:"Giorni e orari delle lezioni",zona:"Dove vai a domicilio",orari:"Quando ricevi",fine:"Controllo finale"};
 var NAMES={tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
@@ -179,25 +230,40 @@ function validate(k){
   if(k==="orari"){if(!S.hours.some(function(x){return x.on}))return"Scegli almeno un giorno di apertura.";
     if(S.hours.some(function(x){return x.on&&(!x.from||!x.to||x.from>=x.to)}))return"Controlla gli orari: l'apertura deve venire prima della chiusura."}
   return""}
-function newItem(n){
+function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
-  return{n:n||"",d:S.v==="palestra"?60:30,p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"&&!!SOLOCASA[S.mestiere]}}
-function addItem(n){S.items.push(newItem(n));render()}
-function itemRow(it,gym,dom){
-  var c=h("div",{class:"card"});
-  var top=h("div",{class:"top"});
-  top.appendChild(field(gym?"Nome della lezione":"Nome del servizio",inp(it.n,"",function(v){it.n=v},{maxlength:"80"})));
-  top.appendChild(h("button",{class:"rm",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){S.items.splice(S.items.indexOf(it),1);render()}}));
-  c.appendChild(top);
-  var g=h("div",{class:gym?"g2":"g2"});
-  var sel=h("select",{class:"inp"});[15,20,30,45,60,75,90,120,150,180].forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
-  sel.onchange=function(){it.d=+sel.value};
-  g.appendChild(field("Durata",sel));
-  if(gym)g.appendChild(field("Posti",inp(it.k,"12",function(v){it.k=v},{inputmode:"numeric"})));
-  else g.appendChild(field("Prezzo (facoltativo)",h("div",{class:"eur"},[h("span",{text:"€"}),inp(it.p,"0",function(v){it.p=v},{inputmode:"decimal"})])));
-  c.appendChild(g);
-  if(dom){var l=h("label",{class:"tgl"});var cb=h("input",{type:"checkbox"});cb.checked=!!it.h;cb.onchange=function(){it.h=cb.checked};l.appendChild(cb);l.appendChild(document.createTextNode("Lo faccio anche a casa del cliente"));c.appendChild(l)}
-  return c}
+  return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"&&!!SOLOCASA[S.mestiere]}}
+function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;render()}
+var DURS=[15,20,30,40,45,50,60,75,90,120,150,180];
+function listBox(gym,dom){
+  var kind=gym?"gym":(dom?"dom":"svc");
+  var box=h("div",{class:"list"});
+  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:(gym?"Lezione":"Servizio")+(S.items.length?" · "+S.items.length:"")}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
+  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Ancora nessuna lezione. Tocca un suggerimento qui sopra o scrivi la tua qui sotto.":"Ancora nessun servizio. Tocca un suggerimento qui sopra o scrivi il tuo qui sotto."}));
+  S.items.forEach(function(it,idx){
+    var r=h("div",{class:"lr c-"+kind});
+    var ni=h("input",{class:"inp f-n",value:it.n,placeholder:gym?"Nome della lezione":"Nome del servizio",maxlength:"80","aria-label":"Nome"});ni.oninput=function(){it.n=ni.value};
+    var sel=h("select",{class:"inp f-d","aria-label":"Durata"});
+    (DURS.indexOf(it.d)<0?DURS.concat([it.d]).sort(function(a,b){return a-b}):DURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
+    sel.onchange=function(){it.d=+sel.value};
+    r.appendChild(ni);r.appendChild(sel);
+    if(gym){var ki=h("input",{class:"inp f-p",value:it.k,placeholder:"Posti",inputmode:"numeric","aria-label":"Posti"});ki.oninput=function(){it.k=ki.value};r.appendChild(ki)}
+    else{var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};
+      r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
+    if(dom){var tg=h("button",{class:"home f-h",type:"button","aria-pressed":it.h?"true":"false","aria-label":"Lo faccio a casa del cliente",title:"Lo faccio a casa del cliente"});tg.innerHTML='<svg viewBox="0 0 24 24">'+ICONS.domicilio+'</svg>';
+      tg.onclick=function(){it.h=!it.h;tg.setAttribute("aria-pressed",it.h?"true":"false")};r.appendChild(tg)}
+    r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){S.items.splice(idx,1);render()}}));
+    box.appendChild(r);
+    if(S.focusLast&&idx===S.items.length-1){setTimeout(function(){ni.focus()},0)}
+  });
+  S.focusLast=false;
+  var ar=h("div",{class:"addrow"});
+  var ai=h("input",{class:"inp",placeholder:gym?"Scrivi una lezione e premi Invio":"Scrivi un servizio e premi Invio",maxlength:"80","aria-label":"Nuova voce"});
+  var doAdd=function(){var t=ai.value.trim();if(t){addItem(t,0,true)}else{addItem("",0,true)}};
+  ai.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();doAdd()}};
+  ar.appendChild(ai);ar.appendChild(h("button",{class:"chip add",type:"button",text:"+ Aggiungi",onclick:doAdd}));
+  box.appendChild(ar);
+  return box}
 function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};
   if(S.v==="palestra"){base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
@@ -216,7 +282,11 @@ function save(){
    .catch(function(){S.busy=false;S.err="Non c'è connessione. Controlla la rete e riprova.";render()})}
 function render(){
   var k=flow()[S.step],f=S.v?flow():["tipo","a","b","c","d"],v=document.getElementById("view");v.textContent="";
-  var bar=document.getElementById("bar");bar.textContent="";f.forEach(function(_,i){bar.appendChild(h("i",{class:i<=S.step?"on":""}))});
+  var np=S.v?f.length:5,pct=S.ready?Math.round(100*S.step/(np-1)):0,C=2*Math.PI*64;
+  document.getElementById("arc").style.strokeDashoffset=String(C*(1-pct/100));
+  document.getElementById("pct").textContent=pct+"%";
+  document.getElementById("now").textContent=NAMES[k];document.getElementById("nowsub").textContent=SUBT[k];
+  document.getElementById("stepn").textContent="Passo "+(S.step+1)+" di "+np;
   var rail=document.getElementById("rail");rail.textContent="";
   (S.v?flow():["tipo"]).forEach(function(n,i){rail.appendChild(h("li",{class:i<S.step?"done":i===S.step?"on":""},[h("span",{class:"n",text:i<S.step?"✓":String(i+1)}),h("span",{text:NAMES[n]})]))});
   var lab=S.v?"Passo "+(S.step+1)+" di "+f.length:"Passo 1";
@@ -240,11 +310,12 @@ function render(){
   }
   if(k==="servizi"||k==="lezioni"){
     var gym=k==="lezioni";
-    v.appendChild(head(lab,gym?"Cosa offri?":"Quali servizi fai?",gym?"Tocca un suggerimento o scrivi le tue. Nome, durata e posti li decidi tu. Prezzi e abbonamenti li imposti dopo.":"Tocca un suggerimento per aggiungerlo, poi metti durata e prezzo. Il prezzo puoi anche lasciarlo vuoto."));
-    var sug=gym?GYMSUG:(MESTIERI()[S.mestiere]||[]),ch2=h("div",{class:"chips"});
-    sug.forEach(function(n){if(!S.items.some(function(i){return i.n===n}))ch2.appendChild(chip("+ "+n,false,function(){addItem(n)}))});
-    var a=h("button",{class:"chip add",type:"button",text:"+ Altro"});a.onclick=function(){addItem("")};ch2.appendChild(a);v.appendChild(ch2);
-    S.items.forEach(function(it){v.appendChild(itemRow(it,gym,S.v==="domicilio"))});
+    v.appendChild(head(lab,gym?"Cosa offri?":"Quali servizi fai?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Prezzi e abbonamenti li imposti dopo.":"Tocca un suggerimento o scrivi il tuo servizio. Controlla durata e prezzo: il prezzo puoi anche lasciarlo vuoto."));
+    var sug=gym?GYMSUG:(MESTIERI()[S.mestiere]||[]),left=sug.filter(function(x){return!S.items.some(function(i){return i.n===x[0]})});
+    if(left.length){var sb=h("div",{class:"sugs"});sb.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));
+      var ch2=h("div",{class:"chips"});left.forEach(function(x){ch2.appendChild(chip("+ "+x[0]+" · "+x[1]+" min",false,function(){addItem(x[0],x[1],false)}))});sb.appendChild(ch2);v.appendChild(sb)}
+    v.appendChild(listBox(gym,S.v==="domicilio"));
+    if(S.v==="domicilio")v.appendChild(h("p",{class:"hint",text:"L'icona della casa segna i servizi che fai a casa del cliente. Quelli senza icona li fai nel tuo locale."}));
   }
   if(k==="calendario"){
     v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio. Altri orari li aggiungi dopo da Corsi e programma."));
