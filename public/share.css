@@ -243,3 +243,7 @@ body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > s
 /* guida: niente titolo ripetuto, accanto al tasto indietro c'e' la frase di spiegazione */
 .mnSr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .mnGH .mnGSub{margin:0;flex:1;min-width:0}
+
+/* guida: nessuna riga di testata (indietro e frase), il tasto resta nel DOM per il tasto Indietro del telefono */
+.mnGuide .mnGH{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.mnGuideIn{padding-top:calc(env(safe-area-inset-top,0px) + 18px)}
