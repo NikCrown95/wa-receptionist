@@ -535,7 +535,19 @@
       var bk = $("mnGuideBack"); if (bk) bk.focus();
     });
   }
-  function markGuide(on) { var g = $("menuTabGuide"); if (g) g.setAttribute("aria-current", on ? "true" : "false"); }
+  var guidePrev = [];
+  function markGuide(on) {
+    var g = $("menuTabGuide"), menu = $("burgerMenu");
+    if (on) {
+      guidePrev = [];
+      if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (x) { if (x !== g) { guidePrev.push(x); x.setAttribute("aria-current", "false"); } });
+      if (g) g.setAttribute("aria-current", "true");
+    } else {
+      if (g) g.setAttribute("aria-current", "false");
+      guidePrev.forEach(function (x) { if (!menu || !menu.querySelector('[aria-current="true"]')) x.setAttribute("aria-current", "true"); });
+      guidePrev = [];
+    }
+  }
   function closeGuide() {
     if (!guide || guide.hidden) return;
     guide.hidden = true; markGuide(false);
