@@ -164,6 +164,37 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .feed li.new{animation:feedin .7s cubic-bezier(.3,.7,.2,1)}
 @keyframes feedin{from{opacity:0;transform:translateX(-12px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:reduce){.orb .spin{animation:none}.orb .arc,.orb .dot{transition:none}.feed li.new{animation:none}}
+.hero{display:flex;align-items:center;gap:16px;padding:18px;border-radius:22px;border:1px solid transparent;background:linear-gradient(135deg,#102430,#0E1A2A) padding-box,var(--grad) border-box;box-shadow:0 14px 40px -16px rgba(45,210,220,.45)}
+.hero .ic{background:var(--grad);color:var(--on-accent);border-color:transparent;flex:none}
+.hero div{min-width:0}
+.hero b{display:block;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
+.hero span:not(.ic){display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.rcard .sh{display:flex;align-items:center;gap:10px}
+.rcard h3{margin:0;font-size:1rem;font-weight:700;letter-spacing:-.01em}
+.rcard .cnt{font-size:.74rem;font-weight:700;color:var(--accent);background:rgba(45,210,220,.12);border-radius:20px;padding:2px 9px}
+.rcard .edit{all:unset;cursor:pointer;margin-left:auto;color:var(--accent);font-size:.88rem;font-weight:600;padding:8px 4px}
+.rows{display:flex;flex-direction:column}
+.rr{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 0;border-top:1px solid var(--line);min-width:0}
+.rr:first-child{border-top:0}
+.rr>div{min-width:0}
+.rr b{display:block;font-weight:600;font-size:.97rem;overflow-wrap:anywhere}
+.rr small{display:block;color:var(--muted);font-size:.8rem;margin-top:1px}
+.rr small.home-tag{color:var(--gold)}
+.rv{color:var(--ink);font-size:.88rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rv.dim{color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px;border-radius:14px;background:var(--card2);border:1px solid var(--line);color:var(--muted);min-width:0}
+.wd .dl{font-size:.78rem;font-weight:800;margin-bottom:3px}
+.wd .tm{font-size:.74rem;font-variant-numeric:tabular-nums}
+.wd .tm.e{font-size:.68rem;opacity:.8}
+.wd.on{background:rgba(45,210,220,.08);border-color:rgba(45,210,220,.4);color:var(--ink)}
+.wd.on .dl{color:var(--accent)}
+.next{display:flex;flex-direction:column;gap:8px;padding:4px 4px 0}
+.next b{font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.next ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.next li{position:relative;padding-left:22px;font-size:.9rem;color:var(--muted)}
+.next li::before{content:"";position:absolute;left:3px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--grad);transform:rotate(45deg)}
 </style>
 </head>
 <body>
@@ -364,17 +395,34 @@ function render(){
     v.appendChild(c4);v.appendChild(h("p",{class:"hint",text:"Pause, ferie e orari diversi per collaboratore li aggiungi dopo da Disponibilità."}));
   }
   if(k==="fine"){
-    v.appendChild(head(lab,"Tutto pronto","Controlla il riepilogo. Puoi cambiare ogni cosa dalle Impostazioni."));
-    var c5=h("div",{class:"card"});
+    v.appendChild(head(lab,"Controlla e conferma","Ecco la tua agenda. Se vuoi cambiare qualcosa, tocca Modifica."));
     var vn=VERT.filter(function(x){return x[0]===S.v})[0][1];
-    function sm(a,b){c5.appendChild(h("div",{class:"sum"},[h("span",{text:a}),h("span",{text:b})]))}
-    sm("Attività",S.nome.trim()+" · "+(S.v==="palestra"?vn:tradeName()));
-    sm(S.v==="palestra"?"Lezioni":"Servizi",S.items.map(function(x){return x.n.trim()+(x.p&&String(x.p).trim()?" "+String(x.p).trim()+" €":"")}).join(", "));
-    if(S.v==="domicilio")sm("Zone a domicilio",S.cities.join(", "));
-    if(S.v==="palestra")sm("Calendario",S.items.map(function(x){return x.n.trim()+": "+x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" ")+" "+x.time}).join(" · "));
-    else sm("Orari",S.hours.map(function(d,i){return d.on?DAYN[i].slice(0,3)+" "+d.from+"–"+d.to:null}).filter(Boolean).join(" · "));
-    v.appendChild(c5);
-    v.appendChild(h("p",{class:"hint",text:"I clienti non vedono la pagina di prenotazione finché non la pubblichi. La prova gratuita dura 14 giorni."}));
+    var hero=h("div",{class:"hero"},[h("span",{class:"ic"},[svg(S.v)]),h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:vn+" · "+tradeName()})])]);
+    v.appendChild(hero);
+    function sec(title,stepName,body,count){
+      var idx=flow().indexOf(stepName);
+      var hd=h("div",{class:"sh"},[h("h3",{text:title}),count!=null?h("span",{class:"cnt",text:String(count)}):null]);
+      var eb=h("button",{class:"edit",type:"button",text:"Modifica"});eb.onclick=function(){S.step=idx;S.err="";render()};hd.appendChild(eb);
+      return h("section",{class:"rcard"},[hd,body])}
+    var fmtMin=function(m){return m>=60&&m%60===0?(m/60)+" h":m+" min"};
+    if(S.v==="palestra"){
+      var lb=h("div",{class:"rows"});
+      S.items.forEach(function(x){lb.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" · ")+" alle "+x.time})]),h("span",{class:"rv",text:fmtMin(x.d)+" · "+x.k+(Number(x.k)===1?" posto":" posti")})]))});
+      v.appendChild(sec("Lezioni","lezioni",lb,S.items.length));
+    } else {
+      var sb2=h("div",{class:"rows"});
+      S.items.forEach(function(x){var p=String(x.p).trim().replace(",",".");
+        var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio"&&x.h)?h("small",{class:"home-tag",text:"A casa del cliente"}):(S.v==="domicilio"?h("small",{text:"Nel tuo locale"}):null)]);
+        sb2.appendChild(h("div",{class:"rr"},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
+      v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
+      var wk=h("div",{class:"week"});
+      S.hours.forEach(function(d,i){var c=h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),d.on?h("span",{class:"tm",text:d.from}):h("span",{class:"tm",text:"–"}),d.on?h("span",{class:"tm e",text:d.to}):h("span",{class:"tm e",text:"chiuso"})]);wk.appendChild(c)});
+      if(S.v==="domicilio"){var ch5=h("div",{class:"chips"});S.cities.forEach(function(c){ch5.appendChild(h("span",{class:"chip city",text:c}))});v.appendChild(sec("Zone a domicilio","zona",ch5,S.cities.length))}
+      v.appendChild(sec("Orari di apertura","orari",wk));
+    }
+    var nx=h("div",{class:"next"},[h("b",{text:"Cosa succede dopo"}),
+      h("ul",null,[h("li",{text:"La tua prova gratuita dura 14 giorni."}),h("li",{text:"La pagina di prenotazione è pronta ma resta privata finché non la pubblichi."}),h("li",{text:"Servizi, orari e prezzi si cambiano quando vuoi dalle Impostazioni."})])]);
+    v.appendChild(nx);
   }
   if(S.err)v.appendChild(h("div",{class:"err",role:"alert",text:S.err}));
   var nav=h("div",{class:"nav"});
