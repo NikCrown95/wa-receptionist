@@ -275,7 +275,7 @@
     var head = mk("div", "avHd");
     head.appendChild(avatar(id));
     var tt = mk("div", "avHt");
-    tt.appendChild(mk("h2", null, isShop ? "Negozio · orari di apertura" : st.name + (st.is_owner ? " · tu" : "")));
+    tt.appendChild(mk("h2", null, isShop ? "Attività · orari di apertura" : st.name + (st.is_owner ? " · tu" : "")));
     tt.appendChild(mk("p", null, hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni") + (isShop ? "" : " di lavoro")));
     head.appendChild(tt); pane.appendChild(head);
     if (isShop) pane.appendChild(mk("p", "avHint", "Gli orari di ogni settimana. Per ferie e giorni a parte usa Chiusure e assenze."));
@@ -338,7 +338,7 @@
     form.appendChild(mk("h3", "avH", "Nuova chiusura"));
     var staffOk = S.team && S.staff.length > 0;
     var who = mk("div", "avRow");
-    var persons = [["neg", "Tutto il negozio"]]; if (staffOk) S.staff.forEach(function (s) { persons.push([s.id, s.name]); });
+    var persons = [["neg", "Tutta l'attività"]]; if (staffOk) S.staff.forEach(function (s) { persons.push([s.id, s.name]); });
     if (persons.length > 1) form.appendChild(field("Chi", who));
     var quick = mk("div", "avRow");
     var d1 = dateField(C.from, today()); d1.id = "avD1";
@@ -440,7 +440,7 @@
       t.appendChild(mk("b", null, plabel(it.from, it.to)));
       var s = mk("small");
       if (it.type === "neg") {
-        s.appendChild(mk("span", "avTag", "Negozio"));
+        s.appendChild(mk("span", "avTag", "Attività"));
         s.appendChild(document.createTextNode(it.t1 && it.t2 ? "dalle " + it.t1 + " alle " + it.t2 : "tutto il giorno" + (it.days > 1 ? " · " + it.days + " giorni" : "")));
       } else {
         s.appendChild(mk("span", "avTag p", it.who));
@@ -473,8 +473,8 @@
       nav.appendChild(b);
     }
     var wn = weekHours(NEG.days);
-    nav.appendChild(mk("div", "avSl", "Negozio"));
-    item("neg", "Negozio", "Orari di apertura · " + hword(wn.h));
+    nav.appendChild(mk("div", "avSl", "Attività"));
+    item("neg", "Attività", "Orari di apertura · " + hword(wn.h));
     if (S.team && S.staff.length) {
       nav.appendChild(mk("div", "avSl", "Team"));
       S.staff.forEach(function (s) { var w = weekHours(TM[s.id].days); item(s.id, s.name + (s.is_owner ? " · tu" : ""), hword(w.h) + " · " + w.n + (w.n === 1 ? " giorno" : " giorni")); });
