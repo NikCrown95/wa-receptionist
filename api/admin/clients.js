@@ -13,7 +13,7 @@
 //   GET  /api/admin/clients?view=referrals               -> sezione Referral (attivita' arrivate da un link, crediti, persone esterne)
 //   POST /api/admin/clients {action:'partner_create'|'partner_update'|'partner_payout', ...} -> persone esterne con link referral
 //   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
-//   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan
+//   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan | apply_plan (piano + stato + durata)
 //   POST /api/admin/clients  -> crea attività + abbonamento
 //        body: { name, type, plan: 'base'|'ai', status: 'active'|'trial', phone }
 //
@@ -272,7 +272,7 @@ async function listClients() {
       plan = sub.plans && sub.plans.name === 'Base+Lia' ? 'ai' : 'base';
       status = sub.status;
       if (status === 'cancelled') renew = new Date(sub.cancelled_at || sub.started_at);
-      else if (status === 'trial') renew = new Date(sub.trial_ends_at ? sub.trial_ends_at : new Date(sub.started_at).getTime() + 30 * 86400000);
+      else if (status === 'trial') renew = new Date(sub.trial_ends_at ? sub.trial_ends_at : new Date(sub.started_at).getTime() + 14 * 86400000);
       else renew = nextMonthlyRenewal(sub.started_at, today);
       const av = access[b.id];
       if (av && av.paid_until && status !== 'cancelled') renew = new Date(av.paid_until); // data reale salvata
@@ -977,6 +977,65 @@ async function runAction(body, ctx) {
       to_plan: plan.name, to_price: plan.price,
     }, ctx && ctx.actor);
     return { ok: true, state: (await accessRow(id) || {}).state };
+  }
+
+  if (action === 'apply_plan') {
+    // Pannello "Gestisci piano": piano + stato + durata, anche per chi ha gia' un abbonamento.
+    const planKey = body.plan === 'ai' ? 'ai' : body.plan === 'base' ? 'base' : null;
+    if (!planKey) throw fail('Scegli un piano (Base o Smart).');
+    const status = body.status === 'trial' ? 'trial' : body.status === 'active' ? 'active' : null;
+    if (!status) throw fail('Scegli lo stato: in prova o attivo.');
+    const plan = await planInfo(planKey);
+    let days = null, months = null, trialEnd = null, periodEnd = null;
+    if (status === 'trial') {
+      days = parseInt(body.days, 10);
+      if (!days || days < 1 || days > 365) throw fail('La prova deve durare tra 1 e 365 giorni.');
+      trialEnd = new Date(now.getTime() + days * 86400000);
+    } else {
+      months = parseInt(body.months, 10);
+      if (!months || months < 1 || months > 12) throw fail('Il periodo pagato deve essere tra 1 e 12 mesi.');
+      periodEnd = addMonths(now, months);
+    }
+    const fromPlan = sub && sub.plans ? sub.plans.name : null;
+    const fromPrice = sub ? subPrice(sub) : null;
+    const wasCancelled = !!(sub && sub.status === 'cancelled');
+    const wasTrial = !!(sub && sub.status === 'trial');
+    if (sub && sub.status === 'active' && !wasCancelled && status === 'trial') {
+      throw fail('Un\'attivita\' gia\' attiva non puo\' tornare in prova: scegli "Attivo" oppure annulla l\'abbonamento.');
+    }
+    if (!sub) {
+      await sb('subscriptions', {
+        method: 'POST',
+        body: {
+          business_id: id, plan_id: plan.id, status, started_at: now.toISOString(),
+          current_period_end: periodEnd ? periodEnd.toISOString() : null,
+          trial_ends_at: trialEnd ? trialEnd.toISOString() : null,
+        },
+      });
+    } else {
+      await patchSub(sub.id, {
+        plan_id: plan.id, status,
+        trial_ends_at: trialEnd ? trialEnd.toISOString() : sub.trial_ends_at,
+        current_period_end: periodEnd ? periodEnd.toISOString() : null,
+        courtesy_until: null, suspended_manually: false, suspended_at: null,
+        cancelled_at: null, cancel_at_period_end: false,
+      });
+    }
+    // Registro: stessi eventi dei pulsanti singoli, cosi' la pagina dei ricavi resta coerente.
+    if (!sub) {
+      await audit('assign_plan', id, { plan: planKey, status, was_new: true, from_plan: null, from_price: null, to_plan: plan.name, to_price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+    } else {
+      if (wasCancelled) await audit('reactivate', id, { was_cancelled: true, price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+      if (fromPlan !== plan.name) await audit('assign_plan', id, { plan: planKey, status, was_new: false, from_plan: fromPlan, from_price: fromPrice, to_plan: plan.name, to_price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+      if (status === 'active' && wasTrial) await audit('mark_paid', id, { months, paid_until: periodEnd.toISOString(), was_trial: true, price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+      else if (status === 'active') await audit('mark_paid', id, { months, paid_until: periodEnd.toISOString(), was_trial: false, price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+    }
+    const hasStripe = !!(sub && sub.stripe_subscription_id && !wasCancelled);
+    return {
+      ok: true, state: (await accessRow(id) || {}).state,
+      until: (trialEnd || periodEnd).toISOString(),
+      note: hasStripe ? 'Attenzione: questa attivita\' ha un abbonamento Stripe collegato, che non viene modificato da qui.' : undefined,
+    };
   }
 
   if (!sub) throw fail('Questa attivita\' non ha un abbonamento: assegna prima un piano.');

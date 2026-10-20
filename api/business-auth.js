@@ -213,10 +213,10 @@ function mailButton(link, label) {
 }
 function confirmMail(name, link) {
   const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Benvenuto in Prenolia</h2>'
-    + '<p style="line-height:1.5">Ciao ' + esc(name) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>30 giorni</b> parte subito.</p>'
+    + '<p style="line-height:1.5">Ciao ' + esc(name) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>14 giorni</b> parte subito.</p>'
     + mailButton(link, "Conferma e inizia")
     + '<p style="line-height:1.5;color:#55627a;font-size:14px">Il link vale 24 ore. Non sei stato tu? Ignora questa email: non verrà creato nessun account.</p>');
-  const text = "Benvenuto in Prenolia.\nConferma il tuo indirizzo e la prova gratuita di 30 giorni parte subito (il link vale 24 ore):\n" + link + "\n\nNon sei stato tu? Ignora questa email: non verrà creato nessun account.";
+  const text = "Benvenuto in Prenolia.\nConferma il tuo indirizzo e la prova gratuita di 14 giorni parte subito (il link vale 24 ore):\n" + link + "\n\nNon sei stato tu? Ignora questa email: non verrà creato nessun account.";
   return { html, text };
 }
 function alreadyMail(name) {

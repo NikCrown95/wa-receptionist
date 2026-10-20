@@ -103,6 +103,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 </style>
 <link rel="icon" type="image/png" href="/brand/favicon.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/admin/mobile.css">
 </head>
 <body>
 <header class="top">
@@ -160,8 +161,8 @@ nav a.on{background:var(--card2);color:var(--ink);}
     </button>
   </div>
 
-  <div class="tablewrap">
-    <table>
+  <div class="tablewrap cards-wrap">
+    <table class="cards">
       <thead><tr>
         <th>Attività</th><th>Piano e stato</th><th>Rinnovo</th><th>Servizio</th><th>Incasso</th><th>Appuntamenti (30gg)</th><th>Stato</th><th>Contatti</th><th>Azioni</th>
       </tr></thead>
@@ -308,6 +309,7 @@ window.startClients = function(){
         '<td class="health"></td>' +
         '<td class="contact"></td>' +
         '<td class="act"></td>';
+      ['Attività','Piano e stato','Rinnovo','Servizio','Incasso','Appuntamenti (30gg)','Stato','Contatti','Azioni'].forEach(function(l, i){ tr.children[i].setAttribute('data-l', l); });
 
       tr.querySelector('.avatar').textContent = initials(c.name);
       var nameEl = tr.querySelector('.who b');
@@ -441,6 +443,10 @@ window.startClients = function(){
       box.appendChild(b);
     }
 
+    var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'btn act-btn'; pb.textContent = 'Gestisci piano…';
+    pb.addEventListener('click', function(){ openPlanForm(c); });
+    box.appendChild(pb);
+
     if (c.status === 'none') {
       add('Assegna piano Base (39,99 €/mese)', 'ghost', { action: 'assign_plan', plan: 'base' });
       add('Assegna piano Smart (24,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
@@ -459,6 +465,70 @@ window.startClients = function(){
       add('Annulla abbonamento', 'danger', { action: 'cancel' }, 'Annullare l\'abbonamento di ' + c.name + '? Il servizio si ferma subito.');
     }
     actBg.classList.add('on'); actSheet.classList.add('on');
+  }
+
+  // ===== "Gestisci piano": piano + stato + durata, anche per chi ha già un abbonamento
+  function openPlanForm(c){
+    var box = document.getElementById('actBtns'); box.innerHTML = '';
+    document.getElementById('actTitle').textContent = 'Piano di ' + c.name;
+    var locked = c.status === 'active'; // un cliente già attivo non torna in prova
+    document.getElementById('actSub').textContent = (c.plan ? PLAN_LABEL[c.plan] : 'Nessun piano') + ' · ' + (STATUS_LABEL[c.status] || '') + '. Scegli come deve essere da adesso.';
+
+    function field(label, el){
+      var w = document.createElement('div'); w.className = 'field'; w.style.marginTop = '4px';
+      var l = document.createElement('label'); l.textContent = label; w.appendChild(l); w.appendChild(el); return w;
+    }
+    function sel(opts, val){
+      var s = document.createElement('select'); s.className = 'inp';
+      opts.forEach(function(o){ var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; s.appendChild(op); });
+      s.value = String(val); return s;
+    }
+    var selPlan = sel([['ai', 'Smart (24,99 €/mese)'], ['base', 'Base (non più in vendita)']], c.plan || 'ai');
+    var statusOpts = locked ? [['active', 'Attivo (pagato)']] : [['trial', 'In prova gratuita'], ['active', 'Attivo (pagato)']];
+    var selStatus = sel(statusOpts, locked ? 'active' : ('trial'));
+    var selDur = document.createElement('select'); selDur.className = 'inp';
+    var note = document.createElement('p'); note.style.cssText = 'margin:2px 0 0;font-size:.9rem;line-height:1.45;color:var(--muted);';
+
+    function fillDur(){
+      var trial = selStatus.value === 'trial';
+      var opts = trial ? [[7,'7 giorni'],[14,'14 giorni (standard)'],[30,'30 giorni'],[60,'60 giorni'],[90,'90 giorni']] : [[1,'1 mese'],[3,'3 mesi'],[6,'6 mesi'],[12,'12 mesi']];
+      selDur.innerHTML = '';
+      opts.forEach(function(o){ var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; selDur.appendChild(op); });
+      selDur.value = trial ? '14' : '1';
+      durLabel.textContent = trial ? 'Durata della prova' : 'Periodo pagato';
+      upd();
+    }
+    function endDate(){
+      var t = new Date(); var n = parseInt(selDur.value, 10);
+      if (selStatus.value === 'trial') t.setDate(t.getDate() + n); else t.setMonth(t.getMonth() + n);
+      return t;
+    }
+    function upd(){
+      var dt = endDate();
+      note.textContent = (selStatus.value === 'trial' ? 'La prova finisce il ' : 'Il servizio è coperto fino al ') + dt.getDate() + ' ' + ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][dt.getMonth()] + ' ' + dt.getFullYear() + '. Il conto parte da oggi e toglie sospensioni e proroghe già date.';
+    }
+    var durWrap = field('', selDur); var durLabel = durWrap.querySelector('label');
+    selStatus.addEventListener('change', fillDur); selDur.addEventListener('change', upd);
+
+    box.appendChild(field('Piano', selPlan));
+    box.appendChild(field('Stato', selStatus));
+    box.appendChild(durWrap);
+    box.appendChild(note);
+    fillDur();
+
+    var apply = document.createElement('button'); apply.type = 'button'; apply.className = 'btn act-btn'; apply.textContent = 'Applica piano'; apply.style.marginTop = '8px';
+    apply.addEventListener('click', function(){
+      var trial = selStatus.value === 'trial';
+      var payload = { action: 'apply_plan', plan: selPlan.value, status: selStatus.value };
+      if (trial) payload.days = parseInt(selDur.value, 10); else payload.months = parseInt(selDur.value, 10);
+      var txt = 'Applicare a ' + c.name + ': ' + (selPlan.value === 'ai' ? 'Smart' : 'Base') + ', ' + (trial ? 'in prova per ' + selDur.value + ' giorni' : 'attivo per ' + selDur.value + (selDur.value === '1' ? ' mese' : ' mesi')) + '?';
+      if (c.status === 'cancelled') txt += ' L\'abbonamento annullato verrà riattivato.';
+      runAction(c, payload, txt, apply);
+    });
+    box.appendChild(apply);
+    var back = document.createElement('button'); back.type = 'button'; back.className = 'btn ghost act-btn'; back.textContent = 'Indietro';
+    back.addEventListener('click', function(){ openActions(c); });
+    box.appendChild(back);
   }
 
   window.setClients = function(list){

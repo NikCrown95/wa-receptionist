@@ -1,0 +1,76 @@
+/* mobile.css - la super dashboard sul telefono. Un solo file per tutte le pagine admin.
+   Sopra i 760px non cambia nulla: tutto e' dentro la media query (tranne le finestre a comparsa). */
+
+/* finestre a comparsa: con piu' pulsanti non devono uscire dallo schermo */
+.sheet{max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+
+@media (max-width:760px){
+  html{-webkit-text-size-adjust:100%;}
+
+  /* intestazione: logo + Esci sopra, menu a scorrimento sotto */
+  .top-row{flex-wrap:wrap;gap:8px 12px;padding:10px 14px 0;}
+  .logo{width:104px;height:26px;}
+  .top-row nav{order:3;flex:0 0 100%;margin:0 -14px;padding:2px 14px 10px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;}
+  .top-row nav::-webkit-scrollbar{display:none;}
+  .top-row nav a{flex:none;min-height:40px;display:inline-flex;align-items:center;padding:0 14px;font-size:.9rem;background:var(--card);border:1px solid var(--line);}
+  .top-row nav a.on{background:var(--accent-soft);border-color:transparent;color:var(--accent-ink);font-weight:600;}
+  #liaLogout{min-height:38px;}
+
+  .wrap{padding:16px 14px calc(90px + env(safe-area-inset-bottom,0px));}
+  .pagehd h1{font-size:1.45rem;line-height:1.2;}
+  .pagehd p{font-size:.9rem;}
+
+  /* numeri in alto */
+  .kpis{gap:10px;}
+  .kpi{padding:14px;border-radius:16px;}
+  .kpi .lbl{font-size:.78rem;}
+  .kpi .val{font-size:1.45rem;margin-top:6px;}
+  .kpi .sub{font-size:.74rem;}
+
+  /* barra di ricerca e filtri: 16px per non far zoomare iOS */
+  .toolbar{margin-top:18px;gap:8px;}
+  .search{flex:1 1 100%;min-width:0;}
+  .search input,.filter,.inp,select.inp{font-size:16px;}
+  .filter{flex:1 1 calc(50% - 4px);min-width:0;}
+  .toolbar .btn{flex:1 1 100%;justify-content:center;}
+
+  /* finestre a comparsa a tutta larghezza, campi in colonna */
+  .sheet{padding-left:18px;padding-right:18px;border-radius:22px 22px 0 0;}
+  .sheet .row2{grid-template-columns:1fr;}
+  .sheet-actions .btn{min-height:50px;}
+
+  /* tabelle generiche: scorrono di lato, ma meno larghe */
+  .tablewrap{border-radius:16px;margin-left:-2px;margin-right:-2px;}
+  table{min-width:640px;}
+  th,td{padding:12px 14px;}
+
+  /* barre e griglie dei grafici */
+  .barrow{grid-template-columns:96px 1fr 40px;gap:8px;font-size:.86rem;}
+  .hbar-row{grid-template-columns:84px 1fr 66px;gap:8px;}
+  .tw{-webkit-overflow-scrolling:touch;}
+  .card,.panel{max-width:100%;}
+
+  /* lista clienti a schede (la tabella a 9 colonne non e' leggibile sul telefono) */
+  .tablewrap.cards-wrap{border:0;background:transparent;overflow:visible;margin:0;border-radius:0;}
+  table.cards{min-width:0;display:block;}
+  table.cards thead{display:none;}
+  table.cards tbody{display:grid;gap:12px;}
+  table.cards tr{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;}
+  table.cards tr.empty-row{display:block;text-align:center;}
+  table.cards td{display:block;padding:0;border:0;min-width:0;}
+  table.cards td[data-l]::before{content:attr(data-l);display:block;margin-bottom:3px;font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+  table.cards td[data-l="Attività"]::before,table.cards td[data-l="Azioni"]::before{display:none;}
+  table.cards td[data-l="Attività"],table.cards td[data-l="Contatti"],table.cards td[data-l="Azioni"]{grid-column:1 / -1;}
+  table.cards td.act{display:flex;gap:8px;padding-top:4px;border-top:1px solid var(--line);margin-top:2px;padding-top:12px;}
+  table.cards td.act .btn{flex:1;justify-content:center;margin:0 !important;min-height:44px;}
+  table.cards .who b{white-space:normal;}
+  table.cards .who .avatar{display:grid;place-items:center;width:40px;height:40px;font-size:.9rem;color:var(--accent-ink);}
+  table.cards .health-reasons,table.cards .svc-sub{max-width:none;}
+  table.cards .contact a{display:inline-block;margin-right:14px;}
+}
+
+@media (max-width:380px){
+  .kpis{grid-template-columns:1fr 1fr;}
+  .kpi .val{font-size:1.3rem;}
+  .filter{flex-basis:100%;}
+}
