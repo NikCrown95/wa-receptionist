@@ -218,3 +218,21 @@ body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
 #burgerMenu .mnShare .mnAv.skin svg{display:none}
 :root:root #panelProfile .pf2 .pfHero.skinImg .pfAvatar{background:#fff var(--skin) center/contain no-repeat;border:0;color:transparent;box-shadow:0 12px 28px -8px rgba(0,0,0,.6)}
 :root:root #panelProfile .pf2 .pfHero.skinImg .pfAvatar>*{display:none}
+
+/* guida su schermi grandi (iPad / desktop): due colonne, indice fisso a sinistra e argomenti a destra */
+@media (min-width:900px){
+  .mnGuideIn{max-width:1120px;padding-left:32px;padding-right:32px}
+  .mnGH h2{font-size:1.7rem}
+  .mnGSub{font-size:1rem}
+  .mnSearch{max-width:560px;min-height:52px}
+  #mnGBody{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);column-gap:36px;align-items:start}
+  #mnGBody > .mnCan{grid-column:1;grid-row:1 / span 20;position:sticky;top:16px;margin-top:22px}
+  #mnGBody > .mnCan ul{grid-template-columns:1fr 1fr;gap:10px}
+  #mnGBody > .mnTier{grid-column:2;margin-top:22px}
+  #mnGBody > .mnTier:first-of-type,#mnGBody > .mnCan + .mnTier{margin-top:22px}
+  #mnGBody > .mnRes,#mnGBody > .mnEmpty{grid-column:1 / -1;max-width:760px}
+  .mnTopics{margin-left:14px}
+  .mnQa p{font-size:.94rem}
+  .mnHelp{max-width:380px;margin-top:26px}
+}
+@media (min-width:1300px){.mnGuideIn{max-width:1240px}#mnGBody{grid-template-columns:420px minmax(0,1fr)}}
