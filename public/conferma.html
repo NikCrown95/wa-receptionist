@@ -75,7 +75,7 @@ go.addEventListener("click",function(){
   er.style.display="none";go.disabled=true;go.textContent="Un attimo…";
   fetch("/api/business-auth?action=confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:token})})
     .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok||!j.agenda_token)throw new Error(j.error||"Qualcosa non ha funzionato. Riprova.");return j})})
-    .then(function(j){go.textContent="Benvenuto!";location.replace("/api/agenda?t="+encodeURIComponent(j.agenda_token))})
+    .then(function(j){go.textContent="Benvenuto!";location.replace("/benvenuto.html?t="+encodeURIComponent(j.agenda_token))})
     .catch(function(x){show(x.message);go.disabled=false;go.textContent="Riprova";document.getElementById("again").classList.remove("hide")});
 });
 })();

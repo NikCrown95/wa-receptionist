@@ -544,6 +544,10 @@ module.exports = async (req, res) => {
       if (service.at_customer_place && !String(body.address || "").trim()) {
         return res.status(400).json({ error: "Indirizzo mancante" });
       }
+      if (service.at_customer_place) {
+        const zoneErr = require("../lib/areas.js").areaProblem(biz, body.address);
+        if (zoneErr) return res.status(400).json({ error: zoneErr });
+      }
 
       const rules = partyRules(biz);
       let party = null;

@@ -72,15 +72,23 @@ const bizTypeCache = new Map();
 const BIZ_TYPE_TTL = 10 * 60 * 1000;
 async function businessTypeCached(token) {
   const hit = bizTypeCache.get(token);
-  if (hit && Date.now() - hit.t < BIZ_TYPE_TTL) return hit.type;
-  const gr = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=business_type&limit=1");
+  if (hit && !hit.pending && Date.now() - hit.t < BIZ_TYPE_TTL) return hit.type;
+  const info = await businessInfoFresh(token);
+  if (info && info.pending) bizTypeCache.set(token, { t: Date.now(), type: info.type, pending: true });
+  return info ? info.type : null;
+}
+// Tipo di attivita' e stato del percorso guidato. Se la colonna onboarded_at non esiste ancora si usa la lettura di prima.
+async function businessInfoFresh(token) {
+  let gr = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=business_type,onboarded_at&limit=1");
+  let hasCol = true;
+  if (!gr.ok) { hasCol = false; gr = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=business_type&limit=1"); }
   if (!gr.ok || !Array.isArray(gr.data)) return null;
-  const type = gr.data[0] ? gr.data[0].business_type || "" : null;
-  if (type !== null) {
-    if (bizTypeCache.size > 500) bizTypeCache.clear();
-    bizTypeCache.set(token, { t: Date.now(), type: type });
-  }
-  return type;
+  if (!gr.data[0]) return null;
+  const type = gr.data[0].business_type || "";
+  const pending = hasCol && gr.data[0].onboarded_at === null;
+  if (bizTypeCache.size > 500) bizTypeCache.clear();
+  if (!pending) bizTypeCache.set(token, { t: Date.now(), type: type, pending: false });
+  return { type: type, pending: pending };
 }
 
 function sbHeaders(extra) {
@@ -352,6 +360,11 @@ module.exports = async (req, res) => {
       const gt = String(q.t || "").trim();
       if (/^[a-f0-9]{32,128}$/.test(gt) && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
         const bt = await businessTypeCached(gt);
+        const ent0 = bizTypeCache.get(gt);
+        if (ent0 && ent0.pending) {
+          res.statusCode = 302; res.setHeader("Cache-Control", "no-store");
+          res.setHeader("Location", "/benvenuto.html?t=" + encodeURIComponent(gt)); return res.end();
+        }
         if (require("../lib/verticals.js").areaOf(bt) === "palestra") {
           variantKey = "gym";
           html = patchGymBell(PAGE_READY).replace("function openSheet(e){", "function openSheet(e){ if(e&&String(e.id).indexOf('gym:')===0&&window.liaGymOpen){window.liaGymOpen(e);return;}").replace("<body>", '<link rel="preload" as="image" href="/gym/hero.jpg"><link rel="preload" as="image" href="/gym/logo.png?v=73"><link rel="stylesheet" href="/gym/gym.css?v=3bf7887c"><link rel="stylesheet" href="/gym/members.css?v=08722f0f"><link rel="stylesheet" href="/gym/cal-core.css?v=79cc4ee1"><link rel="stylesheet" href="/gym/cal.css?v=93128e8c"><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=2e55ab13"><body>').replace("</body>", '<script src="/gym/qr.js?v=0965b983"></script><script src="/gym/gym.js?v=964d36b0"></script><script src="/gym/cal.js?v=cce13903"></script><script src="/gym/stats.js?v=a3cb6f89"></script></body>');
@@ -530,7 +543,7 @@ module.exports = async (req, res) => {
           },
           staff_choice: biz.staff_choice === true,
           capacity_hours: capacityHours(biz),
-          business: { name: biz.name, slug: biz.slug || null, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: gymNoOnline(biz) ? "" : (biz.public_link || biz.booking_url || site.bookingUrl(biz.slug, biz.business_type, reqBase(req))), gym_offers: biz.business_type === "palestra" ? gymOffers(biz) : null, telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
+          business: { name: biz.name, onboarded: biz.onboarded_at !== null, service_areas: Array.isArray(biz.service_areas) ? biz.service_areas : [], slug: biz.slug || null, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: gymNoOnline(biz) ? "" : (biz.public_link || biz.booking_url || site.bookingUrl(biz.slug, biz.business_type, reqBase(req))), gym_offers: biz.business_type === "palestra" ? gymOffers(biz) : null, telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
           services: biz.services.filter(s => !isPackage(s)).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place })),
           packages: biz.services.filter(isPackage).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, price_eur:s.price_eur, service_ids:s.package_service_ids })),
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
@@ -552,6 +565,95 @@ module.exports = async (req, res) => {
         const r = await sb("PATCH","businesses?id=eq."+biz.id,{name},"return=representation");
         if (!r.ok) return res.status(500).json({ error:"Errore nel salvataggio del nome" });
         return res.status(200).json({ok:true});
+      }
+
+      if (action === "onboarding_save") {
+        if (biz.onboarded_at) return res.status(409).json({ error: "La configurazione è già completata." });
+        const kind = String(body.kind || "");
+        if (!["persona", "domicilio", "palestra"].includes(kind)) return res.status(400).json({ error: "Scegli il tipo di attività." });
+        const bname = String(body.name || "").trim().replace(/\s+/g, " ");
+        if (bname.length < 2 || bname.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività." });
+        const HM = /^([01]\d|2[0-3]):[0-5]\d$/;
+        const btype = kind === "palestra" ? "palestra" : (String(body.trade || "").trim().toLowerCase().replace(/[^a-z0-9\u00e0\u00e8\u00e9\u00ec\u00f2\u00f9' -]/g, "").slice(0, 40) || "altro");
+        const patch = { name: bname, business_type: btype };
+
+        if (kind === "palestra") {
+          const courses = Array.isArray(body.courses) ? body.courses : [];
+          if (!courses.length || courses.length > 20) return res.status(400).json({ error: "Aggiungi almeno una lezione." });
+          const cl = [];
+          for (const c of courses) {
+            const cn = String((c && c.name) || "").trim().slice(0, 80), dur = Number(c && c.duration_min), cap = Number(c && c.capacity);
+            const cat = c && c.category === "personal" ? "personal" : "corsi";
+            if (!cn || !Number.isInteger(dur) || dur < 5 || dur > 480 || !Number.isInteger(cap) || cap < 1 || cap > 200) return res.status(400).json({ error: "Controlla nome, durata e posti di ogni lezione." });
+            const slots = [];
+            for (const sl of (Array.isArray(c.slots) ? c.slots : []).slice(0, 14)) {
+              const wd = Number(sl && sl.weekday), tm = String((sl && sl.time) || "");
+              if (!Number.isInteger(wd) || wd < 1 || wd > 7 || !HM.test(tm)) return res.status(400).json({ error: "Giorno o ora di una lezione non validi." });
+              slots.push({ weekday: wd, time: tm });
+            }
+            cl.push({ name: cn, duration_min: dur, capacity: cap, category: cat, slots });
+          }
+          const p1 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
+          if (!p1.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
+          // La palestra non ha una "risorsa" come gli altri: quella creata alla registrazione si toglie.
+          await sb("DELETE", "opening_hours?resource_id=in.(" + biz.resources.map((r) => r.id).join(",") + ")", null, "return=minimal").catch(() => {});
+          await sb("DELETE", "resources?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
+          await sb("DELETE", "gym_schedule?business_id=eq." + biz.id, null, "return=minimal");
+          await sb("DELETE", "gym_courses?business_id=eq." + biz.id, null, "return=minimal");
+          const ins = await sb("POST", "gym_courses", cl.map((c) => ({ business_id: biz.id, name: c.name, category: c.category, duration_min: c.duration_min, capacity: c.capacity })), "return=representation");
+          if (!ins.ok || !Array.isArray(ins.data) || ins.data.length !== cl.length) return res.status(500).json({ error: "Non siamo riusciti a salvare le lezioni. Riprova." });
+          const rows = [];
+          cl.forEach((c, i) => c.slots.forEach((sl) => rows.push({ business_id: biz.id, course_id: ins.data[i].id, weekday: sl.weekday, starts_at_time: sl.time, capacity: c.capacity })));
+          if (rows.length) {
+            const sr2 = await sb("POST", "gym_schedule", rows, "return=minimal");
+            if (!sr2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare il calendario. Riprova." });
+          }
+        } else {
+          const svcs = Array.isArray(body.services) ? body.services : [];
+          if (!svcs.length || svcs.length > 40) return res.status(400).json({ error: "Aggiungi almeno un servizio." });
+          const sl2 = [];
+          for (const x of svcs) {
+            const sn = String((x && x.name) || "").trim().slice(0, 80), dur = Number(x && x.duration_min);
+            const pr = x && x.price_eur !== null && x.price_eur !== undefined && String(x.price_eur).trim() !== "" ? Number(String(x.price_eur).replace(",", ".")) : null;
+            if (!sn || !Number.isInteger(dur) || dur < 5 || dur > 480 || (pr !== null && (!Number.isFinite(pr) || pr < 0 || pr > 100000))) return res.status(400).json({ error: "Controlla nome, durata e prezzo di ogni servizio." });
+            sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true });
+          }
+          const hrs = Array.isArray(body.hours) ? body.hours : [];
+          if (!hrs.length || hrs.length > 28) return res.status(400).json({ error: "Scegli almeno un giorno di apertura." });
+          const hc = [];
+          for (const h of hrs) {
+            const wd = Number(h && h.weekday), op = String((h && h.opens) || ""), cl2 = String((h && h.closes) || "");
+            if (!Number.isInteger(wd) || wd < 1 || wd > 7 || !HM.test(op) || !HM.test(cl2) || op >= cl2) return res.status(400).json({ error: "Controlla gli orari: l'apertura deve venire prima della chiusura." });
+            hc.push({ resource_id: resource.id, weekday: wd, opens: op, closes: cl2 });
+          }
+          let areas = [];
+          if (kind === "domicilio") {
+            areas = (Array.isArray(body.areas) ? body.areas : []).map((a) => String(a || "").trim().replace(/\s+/g, " ").slice(0, 60)).filter((a) => a.length >= 2);
+            areas = areas.filter((a, i) => areas.findIndex((b) => b.toLowerCase() === a.toLowerCase()) === i).slice(0, 20);
+            if (!areas.length) return res.status(400).json({ error: "Aggiungi almeno una città dove vai a domicilio." });
+            if (!sl2.some((x) => x.at_customer_place)) return res.status(400).json({ error: "Segna almeno un servizio che fai a casa del cliente." });
+          }
+          patch.service_areas = areas;
+          const p2 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
+          if (!p2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
+          await sb("DELETE", "services?business_id=eq." + biz.id, null, "return=minimal");
+          const si = await sb("POST", "services", sl2, "return=minimal");
+          if (!si.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare i servizi. Riprova." });
+          await sb("DELETE", "opening_hours?resource_id=eq." + resource.id, null, "return=minimal");
+          const hi = await sb("POST", "opening_hours", hc, "return=minimal");
+          if (!hi.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare gli orari. Riprova." });
+        }
+        const done = await sb("PATCH", "businesses?id=eq." + biz.id, { onboarded_at: new Date().toISOString() }, "return=minimal");
+        if (!done.ok) return res.status(500).json({ error: "Non siamo riusciti a concludere. Riprova." });
+        bizTypeCache.delete(String(q.t || ""));
+        return res.status(200).json({ ok: true });
+      }
+
+      if (action === "service_areas_set") {
+        const list = (Array.isArray(body.areas) ? body.areas : []).map((a) => String(a || "").trim().replace(/\s+/g, " ").slice(0, 60)).filter((a) => a.length >= 2).slice(0, 20);
+        const r = await sb("PATCH", "businesses?id=eq." + biz.id, { service_areas: list }, "return=minimal");
+        if (!r.ok) return res.status(500).json({ error: "Errore nel salvataggio delle zone" });
+        return res.status(200).json({ ok: true });
       }
 
       if (action === "service_create") {

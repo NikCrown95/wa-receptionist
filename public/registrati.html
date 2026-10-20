@@ -52,22 +52,6 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
       <label for="name">Nome della tua attività</label>
       <input class="inp" id="name" type="text" autocomplete="organization" maxlength="80" required>
 
-      <label for="type">Che attività hai?</label>
-      <select class="inp" id="type">
-        <optgroup label="Servizi su appuntamento">
-          <option value="parrucchiere">Parrucchiere</option>
-          <option value="barbiere">Barbiere</option>
-          <option value="estetista">Centro estetico / Estetista</option>
-          <option value="dentista">Dentista</option>
-          <option value="studio medico">Studio medico</option>
-          <option value="fisioterapista">Fisioterapista</option>
-          <option value="cartomante">Cartomanzia e astrologia</option>
-          <option value="idraulico">Idraulico</option>
-          <option value="personal trainer">Personal trainer</option>
-          <option value="altro">Altro</option>
-        </optgroup>
-      </select>
-
       <label for="refcode">Hai un codice invito? (facoltativo)</label>
       <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
       <p class="hint" id="refmsg"></p>
@@ -146,7 +130,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: document.getElementById('name').value,
-        type: document.getElementById('type').value,
+        type: 'altro',
         phone: document.getElementById('phone').value,
         email: document.getElementById('email').value,
         password: document.getElementById('pw').value,
