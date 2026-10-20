@@ -54,8 +54,8 @@
 #calSubApp .month-ring{display:none}
 @media(max-width:699px){
   #calSubApp .month-ring{display:block;position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
-  #calSubApp .month-ring rect{fill:none;stroke:color-mix(in srgb,var(--ink) 17%,transparent);stroke-width:3}
-  #calSubApp .month-ring path{fill:none;stroke:var(--teal);stroke-width:3.5;stroke-linecap:butt;stroke-linejoin:round}
+  #calSubApp .month-ring rect{fill:none;stroke:color-mix(in srgb,var(--ink) 7%,transparent);stroke-width:1}
+  #calSubApp .month-ring path{fill:none;stroke:color-mix(in srgb,var(--teal) 45%,transparent);stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:round}
   #calSubApp#calSubApp.monthMode .month-grid .month-cell:not(.today):not(.sel):not(.is-closed):not(.outside){background:var(--card)!important}
   #calSubApp#calSubApp.monthMode .month-grid .month-cell.past:not(.today):not(.sel) .dnum,#calSubApp#calSubApp.monthMode .month-grid .month-cell.past:not(.today):not(.sel) .month-appts{opacity:.7}
   #calSubApp#calSubApp.monthMode .month-grid .month-cell{border-color:transparent!important}

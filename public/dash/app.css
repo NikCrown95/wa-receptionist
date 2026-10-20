@@ -3026,13 +3026,3 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 
 /* ===== WhatsApp nascosto finché non è pronto: per riattivarlo basta togliere queste regole ===== */
 .stRow[data-st="whatsapp"],.stPage[data-st="whatsapp"]{display:none!important}
-
-/* vista mese: anello di occupazione piu' sottile e sobrio */
-#calSubApp .month-cell:not(.outside):not(.is-closed)::after{padding:1.5px!important;background:conic-gradient(from -45deg,rgba(99,215,192,.42) calc(var(--occ,0)*1%),rgba(255,255,255,.05) 0)!important}
-#calSubApp .month-cell.italian-holiday:not(.outside)::after{background:conic-gradient(from -45deg,rgba(217,104,111,.45) calc(var(--occ,0)*1%),rgba(217,104,111,.12) 0)!important}
-:root[data-theme="light"] #calSubApp .month-cell:not(.outside):not(.is-closed)::after{background:conic-gradient(from -45deg,rgba(14,143,128,.45) calc(var(--occ,0)*1%),rgba(0,0,0,.06) 0)!important}
-
-/* vista mese: anello ancora piu' discreto (1px, appena accennato) */
-#calSubApp .month-cell:not(.outside):not(.is-closed)::after{padding:1px!important;background:conic-gradient(from -45deg,rgba(99,215,192,.26) calc(var(--occ,0)*1%),rgba(255,255,255,.03) 0)!important}
-#calSubApp .month-cell.italian-holiday:not(.outside)::after{background:conic-gradient(from -45deg,rgba(217,104,111,.3) calc(var(--occ,0)*1%),rgba(217,104,111,.07) 0)!important}
-:root[data-theme="light"] #calSubApp .month-cell:not(.outside):not(.is-closed)::after{background:conic-gradient(from -45deg,rgba(14,143,128,.28) calc(var(--occ,0)*1%),rgba(0,0,0,.04) 0)!important}
