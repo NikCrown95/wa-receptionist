@@ -23,7 +23,12 @@ function cancelLimitH(biz) {
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? Math.min(n, 168) : CANCEL_LIMIT_DEFAULT_H;
 }
-const MAX_DAYS_AHEAD = 90; // anticipo massimo di prenotazione, uguale per tutte le attività (circa 3 mesi)
+const MAX_DAYS_AHEAD = 90; // anticipo massimo di default (circa 3 mesi); il titolare puo' cambiarlo nelle Regole di prenotazione
+const ADVANCE_CHOICES = [7, 14, 30, 60, 90, 180];
+function maxAdvance(biz) {
+  const v = Number(biz && biz.max_advance_days);
+  return ADVANCE_CHOICES.includes(v) ? v : MAX_DAYS_AHEAD;
+}
 
 // Regole di prenotazione particolari di un'attività (colonna booking_rules, impostata solo per il circolo di tennis).
 // Senza regola tutto funziona come sempre.
@@ -235,7 +240,7 @@ async function monthAvailability(biz, service, ym) {
   const y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7));
   const tz = biz.timezone;
   const today = todayStr(tz);
-  const maxExcl = addDays(today, MAX_DAYS_AHEAD + 1);
+  const maxExcl = addDays(today, maxAdvance(biz) + 1);
   const first = ym + "-01";
   const next = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 10);
   const from = first < today ? today : first;
@@ -272,7 +277,7 @@ function checkDate(biz, dateStr) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr || ""))) return "Data non valida.";
   const today = todayStr(biz.timezone);
   if (dateStr < today) return "Quella data è già passata.";
-  if (dateStr > addDays(today, MAX_DAYS_AHEAD)) return "Data troppo lontana.";
+  if (dateStr > addDays(today, maxAdvance(biz))) return "Data troppo lontana.";
   return null;
 }
 
@@ -429,7 +434,7 @@ module.exports = async (req, res) => {
     if (req.method === "GET" && q.info === "1") {
       return res.status(200).json({
         lia_allowed: acc.lia_allowed !== false,
-        max_days: MAX_DAYS_AHEAD,
+        max_days: maxAdvance(biz),
         booking_rules: { min_notice_min: leadMin(biz), cancel_limit_hours: cancelLimitH(biz) },
         team: (biz.__teamMode && biz.staff_choice === true)
           ? { staff: biz.resources.map((r) => ({ id: r.id, name: r.name, service_ids: (biz.__svc && biz.__svc[r.id]) || [] })) }

@@ -346,7 +346,7 @@
       var t1 = [
         ["Cosa devo fare per iniziare?", "Servono tre passi: inserisci i servizi con durata e prezzo, imposta gli orari in cui ricevi e condividi il link con i clienti. Dopo questi tre sei già operativo.", M + "Impostazioni › Servizi e prezzi"],
         ["Come prenotano i miei clienti?", "Aprono il tuo link o inquadrano il QR, scelgono servizio, giorno e orario e lasciano nome e telefono. Tu ricevi subito la notifica e l’appuntamento compare nel calendario.", link ? M + "Condividi la tua pagina" : ""],
-        ["Quanto in anticipo si può prenotare?", "Fino a 90 giorni avanti. Il preavviso minimo è di 15 minuti e puoi aumentarlo nelle Regole di prenotazione.", M + "Impostazioni › Regole di prenotazione"]
+        ["Quanto in anticipo si può prenotare?", "Lo decidi tu: da 1 settimana fino a 6 mesi avanti (di base 3 mesi). Il preavviso minimo è di 15 minuti e puoi aumentarlo, sempre nelle Regole di prenotazione.", M + "Impostazioni › Regole di prenotazione"]
       ];
       var t7q = [];
       if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);

@@ -466,7 +466,7 @@ var PL_GROUPS=[
   {t:'Prenotazioni',items:[
     ['page','Pagina di prenotazione tutta tua','I clienti scelgono servizio, giorno e orario da soli, a qualsiasi ora.',0,0,'teal'],
     ['qr','Link e QR code personali','Li metti nella bio, su WhatsApp o in vetrina con la locandina pronta da stampare.',0,0,'violet'],
-    ['ahead','Prenotazioni fino a 90 giorni prima','Chi vuole assicurarsi un posto lo fa con largo anticipo.',0,0,'indigo'],
+    ['ahead','Prenotazioni con largo anticipo','Scegli tu fino a quando si può prenotare, da 1 settimana a 6 mesi.',0,0,'indigo'],
     ['save','Promemoria nel telefono del cliente','Chi prenota può salvare l’appuntamento nel calendario con un tocco.',0,0,'coral']
   ]},
   {t:'La tua giornata',cls:'g-day',items:[
@@ -768,27 +768,29 @@ function pfRenderPoster(box,b,opts){
   function sfChoiceHint(){return SF.choice?'I clienti possono prenotare con una persona precisa oppure con chiunque sia libero.':'I clienti non vedono i nomi: Lia assegna la prima persona libera.'}
 
   /* ---- Regole di prenotazione ---- */
-  var RL={notice:15,cancel:2};
+  var RL={notice:15,cancel:2,advance:90};
+  var RL_A=[[7,'1 settimana'],[14,'2 settimane'],[30,'1 mese'],[60,'2 mesi'],[90,'3 mesi'],[180,'6 mesi']];
   var RL_N=[[15,'15 minuti'],[30,'30 minuti'],[60,'1 ora'],[120,'2 ore'],[180,'3 ore'],[360,'6 ore'],[720,'12 ore'],[1440,'1 giorno'],[2880,'2 giorni']];
   var RL_C=[[0,'Sempre'],[1,'1 ora prima'],[2,'2 ore prima'],[4,'4 ore prima'],[12,'12 ore prima'],[24,'1 giorno prima'],[48,'2 giorni prima']];
   function rlLabel(list,v){for(var i=0;i<list.length;i++)if(list[i][0]===v)return list[i][1];return String(v)}
   function rlRender(){
-    [['rlNotice',RL_N,RL.notice,15],['rlCancel',RL_C,RL.cancel,2]].forEach(function(c){
+    [['rlNotice',RL_N,RL.notice,15],['rlAdvance',RL_A,RL.advance,90],['rlCancel',RL_C,RL.cancel,2]].forEach(function(c){
       var g=stEl(c[0]);if(!g)return;g.innerHTML='';
       c[1].forEach(function(o){var b=document.createElement('button');b.type='button';b.setAttribute('data-v',o[0]);b.setAttribute('aria-pressed',o[0]===c[2]?'true':'false');b.appendChild(document.createTextNode(o[1]));
         if(o[0]===c[3]){var i=document.createElement('i');i.textContent='iniziale';b.appendChild(i)}g.appendChild(b)});
     });
     stText('rlNoticeHint',RL.notice===15?'I clienti possono prenotare fino a 15 minuti prima dell\u2019orario.':'I clienti vedono solo gli orari che iniziano tra almeno '+rlLabel(RL_N,RL.notice).replace(/^1 ora$/,'1 ora')+' da adesso.');
+    stText('rlAdvanceHint','I clienti vedono i giorni da oggi fino a '+rlLabel(RL_A,RL.advance)+' avanti.');
     stText('rlCancelHint',RL.cancel===0?'I clienti possono annullare in qualsiasi momento, anche pochi minuti prima.':'Se mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' all\u2019appuntamento, il cliente non può annullare da solo e vede il tuo numero di telefono.');
     stText('stSumRules','Preavviso '+rlLabel(RL_N,RL.notice)+' \u00b7 annullo '+(RL.cancel===0?'sempre':rlLabel(RL_C,RL.cancel).replace(' prima','')));
   }
-  function rulesApply(d){var r=d&&d.booking_rules;if(r){RL.notice=Number(r.min_notice_min)||15;RL.cancel=r.cancel_limit_hours===0?0:(Number(r.cancel_limit_hours)||2)}rlRender()}
+  function rulesApply(d){var r=d&&d.booking_rules;if(r){RL.notice=Number(r.min_notice_min)||15;RL.cancel=r.cancel_limit_hours===0?0:(Number(r.cancel_limit_hours)||2);RL.advance=Number(r.max_advance_days)||90}rlRender()}
   function rlSave(prev){
-    api('POST',{action:'booking_rules',min_notice_min:RL.notice,cancel_limit_hours:RL.cancel}).then(function(){flash('Regole salvate.')}).catch(function(e){RL=prev;rlRender();alert(e.message)});
+    api('POST',{action:'booking_rules',min_notice_min:RL.notice,cancel_limit_hours:RL.cancel,max_advance_days:RL.advance}).then(function(){flash('Regole salvate.')}).catch(function(e){RL=prev;rlRender();alert(e.message)});
   }
-  ['rlNotice','rlCancel'].forEach(function(id){var g=stEl(id);if(!g)return;
+  ['rlNotice','rlAdvance','rlCancel'].forEach(function(id){var g=stEl(id);if(!g)return;
     g.addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b)return;var v=Number(b.getAttribute('data-v'));
-      var prev={notice:RL.notice,cancel:RL.cancel};if(id==='rlNotice'){if(v===RL.notice)return;RL.notice=v}else{if(v===RL.cancel)return;RL.cancel=v}
+      var prev={notice:RL.notice,cancel:RL.cancel,advance:RL.advance};if(id==='rlNotice'){if(v===RL.notice)return;RL.notice=v}else if(id==='rlAdvance'){if(v===RL.advance)return;RL.advance=v}else{if(v===RL.cancel)return;RL.cancel=v}
       rlRender();rlSave(prev)})});
   rlRender();
 
