@@ -370,7 +370,9 @@ module.exports = async (req, res) => {
       if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
       await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch(() => {});
       const m = confirmMail(name, PUBLIC_URL + "/conferma.html?token=" + raw);
-      await sendMail(email, "Conferma la tua email per iniziare con Prenolia", m.html, m.text);
+      const sent = await sendMail(email, "Conferma la tua email per iniziare con Prenolia", m.html, m.text);
+      // Se l'email non parte lo si dice subito: altrimenti la persona aspetta un messaggio che non arriverà. Riprovando si riceve un link nuovo.
+      if (!sent) return res.status(502).json({ error: "Non siamo riusciti a inviarti l'email di conferma. Riprova tra qualche minuto." });
       return res.status(200).json({ ok: true });
     }
 

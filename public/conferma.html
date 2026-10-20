@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia – Conferma il tuo indirizzo</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,p{margin:0}button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.loginbox{max-width:420px;margin:12vh auto 0;padding:0 20px}
+.card{border-radius:24px;border:1px solid var(--line);background:var(--card);padding:28px 24px}
+.logo{display:block;width:176px;height:42px;margin:0 auto 18px;background:var(--logo) center / contain no-repeat}
+h1{font-size:1.3rem;text-align:center;margin:0 0 4px;letter-spacing:-0.01em}
+.sub{text-align:center;color:var(--muted);font-size:.92rem;margin:0 0 20px}
+label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
+.inp{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{width:100%;min-height:48px;margin-top:20px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.btn:disabled{opacity:.65;cursor:default}
+.err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;font-size:.88rem}
+.chk{display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:.9rem;cursor:pointer;min-height:44px}
+.chk input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;background:none;border:0;padding:0;cursor:pointer;font-family:inherit;min-height:44px;display:inline-flex;align-items:center}
+.code{letter-spacing:.35em;text-align:center;font-size:1.4rem;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:.85rem;margin-top:10px;text-align:center}
+.hide{display:none}
+@media(max-width:520px){.loginbox{margin-top:9vh}.card{padding:26px 20px}}
+
+.rules{list-style:none;margin:10px 0 0;padding:0;font-size:.84rem;color:var(--muted)}
+.rules li{display:flex;gap:8px;align-items:center;min-height:24px}
+.rules li::before{content:"○";color:var(--line2)}
+.rules li.ok{color:var(--ink)}.rules li.ok::before{content:"✓";color:var(--accent)}
+.okbox{margin-top:14px;background:#10301f;color:#a9f0c4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
+</style>
+<link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2"><link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon.png?v=2">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+</head>
+<body>
+<div class="loginbox">
+  <div class="card">
+    <span class="logo" role="img" aria-label="Prenolia"></span>
+    <section id="ok">
+      <h1>Conferma il tuo indirizzo</h1>
+      <p class="sub">Un ultimo tocco e la tua prova gratuita di 14 giorni parte subito.</p>
+      <button class="btn" id="go" type="button">Conferma e inizia</button>
+      <div class="err" id="err" role="alert"></div>
+      <p class="hint hide" id="again"><a class="lnk" href="/login.html">Vai all'accesso</a></p>
+    </section>
+    <section id="bad" class="hide">
+      <h1>Link non valido</h1>
+      <p class="sub">Questo link di conferma non funziona. Controlla di aver aperto l'ultima email che ti abbiamo inviato, oppure registrati di nuovo per riceverne una nuova.</p>
+      <p class="hint"><a class="lnk" href="/registrati.html">Torna alla registrazione</a></p>
+      <p class="hint"><a class="lnk" href="/login.html">Ho già un account</a></p>
+    </section>
+    <p class="hint"><a href="/privacy" style="color:inherit">Privacy</a> · <a href="/termini" style="color:inherit">Termini</a></p>
+  </div>
+</div>
+<script>
+(function(){
+var token=(new URLSearchParams(location.search).get("token")||"").trim();
+var go=document.getElementById("go"),er=document.getElementById("err");
+function show(m){er.textContent=m;er.style.display="block"}
+if(!/^[0-9a-f]{64}$/.test(token)){document.getElementById("ok").classList.add("hide");document.getElementById("bad").classList.remove("hide")}
+else{try{history.replaceState(null,"","/conferma.html")}catch(e){}}
+go.addEventListener("click",function(){
+  er.style.display="none";go.disabled=true;go.textContent="Un attimo…";
+  fetch("/api/business-auth?action=confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:token})})
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok||!j.agenda_token)throw new Error(j.error||"Qualcosa non ha funzionato. Riprova.");return j})})
+    .then(function(j){go.textContent="Benvenuto!";location.replace("/api/agenda?t="+encodeURIComponent(j.agenda_token))})
+    .catch(function(x){show(x.message);go.disabled=false;go.textContent="Riprova";document.getElementById("again").classList.remove("hide")});
+});
+})();
+</script></body></html>
