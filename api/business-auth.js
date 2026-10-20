@@ -450,7 +450,52 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: "Errore temporaneo. Riprova." });
   }
 };
+/* ---------- reset password dalla super dashboard ---------- */
+function maskEmail(e) {
+  const [u, d] = String(e).split("@");
+  return (u.length <= 2 ? u[0] + "*" : u.slice(0, 2) + "***") + "@" + d;
+}
+function tempPassword() {
+  const L = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ", D = "23456789", S = "!?@#%+=";
+  const pick = (set) => set[crypto.randomInt(set.length)];
+  for (let i = 0; i < 20; i++) {
+    const chars = [pick(D), pick(D), pick(S)];
+    while (chars.length < 12) chars.push(pick(L + D));
+    for (let j = chars.length - 1; j > 0; j--) { const k = crypto.randomInt(j + 1); [chars[j], chars[k]] = [chars[k], chars[j]]; }
+    const pw = chars.join("");
+    if (!passwordProblem(pw)) return pw;
+  }
+  throw new Error("Non sono riuscito a generare una password valida.");
+}
+// mode "link": manda al titolare l'email con il link per scegliere la nuova password (come "Password dimenticata").
+// mode "temp": imposta subito una password provvisoria e la restituisce una sola volta all'admin.
+async function adminPasswordReset(businessId, mode) {
+  const fail = (m) => { const e = new Error(m); e.validation = true; return e; };
+  const u = await sb("GET", "business_users?business_id=eq." + enc(businessId) + "&select=email,active&limit=1");
+  const row = u.ok && Array.isArray(u.data) ? u.data[0] : null;
+  if (!row || !row.email) throw fail("Questa attività non ha un accesso con email e password: non c'è nessuna password da reimpostare.");
+  if (row.active === false) throw fail("L'accesso di questa attività è disattivato.");
+  const b = await sb("GET", "businesses?id=eq." + enc(businessId) + "&select=name&limit=1");
+  const name = b.ok && Array.isArray(b.data) && b.data[0] ? b.data[0].name : "";
+  const closeTokens = () => sb("PATCH", "auth_tokens?business_id=eq." + enc(businessId) + "&kind=eq.reset&used_at=is.null", { used_at: new Date().toISOString() });
+  if (mode === "temp") {
+    const pw = tempPassword();
+    const s = await rpc("business_set_password", { p_business: businessId, p_password: pw });
+    if (!s.ok || s.data !== true) throw new Error("Non sono riuscito a cambiare la password. Riprova.");
+    await closeTokens();
+    return { mode, email: row.email, password: pw };
+  }
+  await closeTokens();
+  const raw = crypto.randomBytes(32).toString("hex");
+  const ins = await sb("POST", "auth_tokens", { business_id: businessId, kind: "reset", token_hash: sha(raw), expires_at: new Date(Date.now() + RESET_MS).toISOString() }, "return=minimal");
+  if (!ins.ok) throw new Error("Non sono riuscito a preparare il link. Riprova.");
+  const m = resetMail(name, PUBLIC_URL + "/reset.html?token=" + raw);
+  const sent = await sendMail(row.email, "La tua nuova password per Prenolia", m.html, m.text);
+  if (!sent) throw new Error("Il link è pronto ma l'email non è partita (controlla Resend). Riprova tra poco.");
+  return { mode: "link", email: maskEmail(row.email) };
+}
 module.exports.verifyBusinessSession = verify;
+module.exports.adminPasswordReset = adminPasswordReset;
 module.exports.readBusinessCookie = cookie;
 module.exports.passwordProblem = passwordProblem;
 module.exports._test = { slugify, b32enc, b32dec, hotp, totpOk, encrypt, decrypt, sign, unsign };

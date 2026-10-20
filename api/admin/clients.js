@@ -13,7 +13,7 @@
 //   GET  /api/admin/clients?view=referrals               -> sezione Referral (attivita' arrivate da un link, crediti, persone esterne)
 //   POST /api/admin/clients {action:'partner_create'|'partner_update'|'partner_payout', ...} -> persone esterne con link referral
 //   GET  /api/admin/clients?view=conversation&id=UUID&contact=REF -> conversazione (registrata)
-//   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan | apply_plan (piano + stato + durata)
+//   POST /api/admin/clients {action, id, ...} -> mark_paid | extend | suspend | reactivate | cancel | assign_plan | apply_plan (piano + stato + durata) | reset_password (link via email o password provvisoria)
 //   POST /api/admin/clients  -> crea attività + abbonamento
 //        body: { name, type, plan: 'base'|'ai', status: 'active'|'trial', phone }
 //
@@ -1036,6 +1036,14 @@ async function runAction(body, ctx) {
       until: (trialEnd || periodEnd).toISOString(),
       note: hasStripe ? 'Attenzione: questa attivita\' ha un abbonamento Stripe collegato, che non viene modificato da qui.' : undefined,
     };
+  }
+
+  if (action === 'reset_password') {
+    const mode = body.mode === 'temp' ? 'temp' : body.mode === 'link' ? 'link' : null;
+    if (!mode) throw fail('Scegli come reimpostare la password.');
+    const r = await require('../business-auth.js').adminPasswordReset(id, mode);
+    await audit('reset_password', id, { mode, email: mode === 'link' ? r.email : undefined }, ctx && ctx.actor);
+    return Object.assign({ ok: true }, r);
   }
 
   if (!sub) throw fail('Questa attivita\' non ha un abbonamento: assegna prima un piano.');

@@ -446,6 +446,9 @@ window.startClients = function(){
     var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'btn act-btn'; pb.textContent = 'Gestisci piano…';
     pb.addEventListener('click', function(){ openPlanForm(c); });
     box.appendChild(pb);
+    var rb = document.createElement('button'); rb.type = 'button'; rb.className = 'btn ghost act-btn'; rb.textContent = 'Reset password…';
+    rb.addEventListener('click', function(){ openPasswordForm(c); });
+    box.appendChild(rb);
 
     if (c.status === 'none') {
       add('Assegna piano Base (39,99 €/mese)', 'ghost', { action: 'assign_plan', plan: 'base' });
@@ -529,6 +532,47 @@ window.startClients = function(){
     var back = document.createElement('button'); back.type = 'button'; back.className = 'btn ghost act-btn'; back.textContent = 'Indietro';
     back.addEventListener('click', function(){ openActions(c); });
     box.appendChild(back);
+  }
+
+  // ===== "Reset password": link via email oppure password provvisoria
+  function openPasswordForm(c){
+    var box = document.getElementById('actBtns'); box.innerHTML = '';
+    document.getElementById('actTitle').textContent = 'Password di ' + c.name;
+    var sub = document.getElementById('actSub');
+    sub.textContent = 'Scegli come aiutare il titolare ad entrare di nuovo.';
+    function btn(label, cls, fn){ var b = document.createElement('button'); b.type = 'button'; b.className = 'btn act-btn ' + (cls || 'ghost'); b.textContent = label; b.addEventListener('click', fn); box.appendChild(b); return b; }
+    function hint(t){ var p = document.createElement('p'); p.style.cssText = 'margin:0 0 6px;font-size:.88rem;line-height:1.45;color:var(--muted);'; p.textContent = t; box.appendChild(p); }
+    function call(mode, done, b){
+      var all = box.querySelectorAll('button'); all.forEach(function(x){ x.disabled = true; });
+      window.liaApi('/api/admin/clients', { method: 'POST', body: JSON.stringify({ action: 'reset_password', id: c.id, mode: mode }) })
+        .then(done)
+        .catch(function(e){ all.forEach(function(x){ x.disabled = false; }); alert('Non riuscito: ' + e.message); });
+    }
+    hint('Consigliato: il titolare riceve un\'email con un link (vale 30 minuti) e sceglie lui la nuova password.');
+    btn('Invia link di reset via email', '', function(){
+      if (!window.confirm('Mandare a ' + c.name + ' l\'email per scegliere una nuova password?')) return;
+      call('link', function(r){
+        box.innerHTML = ''; document.getElementById('actTitle').textContent = 'Email inviata';
+        sub.textContent = 'Il link è partito verso ' + r.email + '. Vale 30 minuti e funziona una sola volta.';
+      });
+    });
+    hint('Se non ha accesso all\'email: genero una password provvisoria e te la mostro una sola volta. Poi gliela comunichi tu e lui la cambia da Impostazioni.');
+    btn('Genera password provvisoria', 'ghost', function(){
+      if (!window.confirm('Cambiare subito la password di ' + c.name + '? Quella vecchia smette di funzionare.')) return;
+      call('temp', function(r){
+        box.innerHTML = ''; document.getElementById('actTitle').textContent = 'Nuova password';
+        sub.textContent = 'Account: ' + r.email + '. Questa password si vede solo adesso: copiala e mandala al titolare.';
+        var pw = document.createElement('div'); pw.textContent = r.password;
+        pw.style.cssText = 'font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.35rem;font-weight:700;letter-spacing:.04em;text-align:center;padding:18px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line2);user-select:all;-webkit-user-select:all;word-break:break-all;';
+        box.appendChild(pw);
+        var cp = btn('Copia password', '', function(){
+          function ok(){ cp.textContent = 'Copiata ✓'; }
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(r.password).then(ok, function(){ window.prompt('Copia la password:', r.password); });
+          else window.prompt('Copia la password:', r.password);
+        });
+      });
+    });
+    btn('Indietro', 'ghost', function(){ openActions(c); });
   }
 
   window.setClients = function(list){
