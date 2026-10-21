@@ -375,8 +375,7 @@
 .gxRent .rl{display:flex;flex-direction:column;gap:2px;font-size:.9rem}.gxRent .rl a{color:var(--accent);text-decoration:none;word-break:break-all}
 .gxRent .rb{display:flex;margin-top:4px}
 /* Campanella: l'affitto sala ha un aspetto suo, per non confonderlo con i corsi */
-.np-ic.rent{background:linear-gradient(145deg,#8E5CE6,#5B34B5);color:#fff;box-shadow:0 4px 14px rgba(142,92,230,.4)}
-.np-it.rent{background:color-mix(in srgb,#8E5CE6 14%,transparent);border-color:color-mix(in srgb,#8E5CE6 40%,transparent)}
+/* Affitti sala: stessa riga delle altre notifiche, colore ambra (vedi dash/app.css) */
 
 /* Subaffitto: sezione e locandine insieme */
 .gxRentTop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
