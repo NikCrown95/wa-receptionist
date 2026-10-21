@@ -1399,7 +1399,38 @@ function pfRenderPoster(box,b,opts){
     else pfCopyText(link,btn,'Condividi');
   }
 
-  function stRenderAccount(){stRenderChannels();stRenderSub();stRenderInfo();stRenderContacts();stRenderDelete();stRenderHelp()}
+  /* Zone a domicilio: le citta' scelte in registrazione si cambiano qui */
+  function stAreasList(){var sd=window.liaSettingsData&&window.liaSettingsData.business,D=stD(),a=sd&&Array.isArray(sd.service_areas)?sd.service_areas:D.b.service_areas;return Array.isArray(a)?a.slice():[]}
+  function stRenderAreas(){
+    var D=stD(),row=stEl('stRowAreas'),box=stEl('arList');if(!row||!box)return;
+    var sv=(window.liaSettingsData&&window.liaSettingsData.services)||[],home=sv.some(function(x){return x.at_customer_place});
+    var list=stAreasList();row.hidden=!(home||list.length);
+    stText('stSumAreas',list.length?list.join(', '):'Le città dove vai dai clienti');
+    box.textContent='';
+    list.forEach(function(c,i){
+      var chip=document.createElement('span');chip.className='arChip';chip.appendChild(document.createTextNode(c));
+      var x=document.createElement('button');x.type='button';x.setAttribute('aria-label','Togli '+c);x.textContent='×';
+      x.addEventListener('click',function(){var l=stAreasList();l.splice(i,1);stAreasSave(l)});
+      chip.appendChild(x);box.appendChild(chip)});
+    if(!list.length){var e=document.createElement('p');e.className='stHint';e.textContent='Nessuna città: vale ovunque.';box.appendChild(e)}
+  }
+  function stAreasSave(l){
+    stMsg('arMsg','Salvo…');
+    api('POST',{action:'service_areas_set',areas:l}).then(function(){
+      try{var d=window.liaProfileData;if(d&&d.business){d.business.service_areas=l;writeProfileCache(d)}}catch(e){}
+      try{var sd=window.liaSettingsData;if(sd&&sd.business)sd.business.service_areas=l}catch(e){}
+      stRenderAreas();stMsg('arMsg','Salvato.');setTimeout(function(){stMsg('arMsg','')},3000);
+    }).catch(function(e){stMsg('arMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.',true)});
+  }
+  (function(){
+    var inp=stEl('arIn'),add=stEl('arAdd');if(!inp||!add)return;
+    function go(){var v=(inp.value||'').trim().replace(/\s+/g,' ');if(v.length<2){stMsg('arMsg','Scrivi il nome della città.',true);return}
+      var l=stAreasList();if(l.some(function(c){return c.toLowerCase()===v.toLowerCase()})){stMsg('arMsg','Questa città c’è già.',true);return}
+      if(l.length>=20){stMsg('arMsg','Puoi inserire al massimo 20 città.',true);return}
+      l.push(v);inp.value='';stAreasSave(l)}
+    add.addEventListener('click',go);inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();go()}});
+  })();
+  function stRenderAccount(){stRenderAreas();stRenderChannels();stRenderSub();stRenderInfo();stRenderContacts();stRenderDelete();stRenderHelp()}
   (function stBind(){
     var q=function(id){return stEl(id)};
     if(q('supSend'))q('supSend').onclick=function(){
