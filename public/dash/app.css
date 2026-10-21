@@ -3234,3 +3234,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 @media(max-width:699px){
 :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #dayPanel{margin:-20px -8px 0!important}
 }
+/* Smartphone: una sola riga sotto l'intestazione (toglie quella vicina alla card "La tua giornata") */
+@media(max-width:699px){
+:root:root:root:root:root:root #calSubApp > header.top{border-bottom:0!important}
+}
