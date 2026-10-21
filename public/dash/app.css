@@ -3083,7 +3083,7 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 
 /* Calendario da smartphone: la data in una card con il numero in evidenza */
 @media(max-width:699px){
-:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .range{display:none!important}
+:root:root:root:root:root body.lia-sec-cal:not(.lia-week):not(.lia-month) #calSubApp .controls .range{display:none!important}
 #liaDateCard{display:flex;align-items:center;gap:14px;width:100%;flex:0 0 100%;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 24px -16px rgba(0,0,0,.28)}
 #liaDateCard[hidden]{display:none}
 #liaDateCard .dcN{flex:none;width:58px;height:58px;border-radius:16px;background:var(--accent);color:var(--on-accent,#fff);display:grid;place-items:center;text-align:center;line-height:1;align-content:center}
