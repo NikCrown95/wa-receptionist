@@ -1172,7 +1172,7 @@ function pfRenderPoster(box,b,opts){
     try{var d=window.liaProfileData;if(d&&d.business){d.business.logo_url=url||null;writeProfileCache(d)}}catch(e){}
     try{var sd=window.liaSettingsData;if(sd&&sd.business)sd.business.logo_url=url||null}catch(e){}
     stLogoShow(url||'');
-    try{var d2=window.liaProfileData;if(d2&&d2.business)liaDecorateHero(d2.business,d2)}catch(e){}
+    try{var d2=window.liaProfileData;if(d2&&d2.business)liaDecorateHero(d2.business,d2)}catch(e){}try{if(window.liaMenuSync)window.liaMenuSync()}catch(e){}
   }
   /* Riduce la foto a 256x256 (intera, su fondo bianco) cosi' pesa pochi KB. */
   function stLogoPrep(file,cb){

@@ -202,14 +202,16 @@
       card.style.setProperty("--mnh", String(k.h));
       av.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" ' + S + ' stroke-width="1.7">' + k.icon + "</svg>";
     } else av.textContent = String(raw.name || biz.name || "A").charAt(0).toUpperCase();
-    var skinImg = SKINS[String(raw.slug || "").toLowerCase()] || "";
-    if (skinImg) { av.className = "mnAv skin"; av.innerHTML = ""; av.style.setProperty("--skin", "url(" + skinImg + ")"); } else av.style.removeProperty("--skin");
+    var pdat = window.liaProfileData && window.liaProfileData.business, logoImg = (pdat && pdat.logo_url) || (live && live.logo_url) || "";
+    var skinImg = logoImg || SKINS[String(raw.slug || "").toLowerCase()] || "";
+    if (skinImg) { av.className = "mnAv skin" + (logoImg ? " lg" : ""); av.innerHTML = ""; av.style.setProperty("--skin", "url(" + skinImg + ")"); } else av.style.removeProperty("--skin");
     var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
     var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
     var nm = $("mnBizName"); if (nm) nm.textContent = name;
     var ad = $("mnBizAddr"), addr = txt("pfAddr") || String(raw.address || "").trim();
     if (ad) { ad.textContent = addr; ad.hidden = !addr; }
   }
+  window.liaMenuSync = syncProfile;
   function paintMenu() {
     var c = $("mnShareCard");
     var avb = $("menuTabAvail"); if (avb) avb.style.display = biz && biz.gym ? "none" : "";

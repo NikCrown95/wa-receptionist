@@ -257,3 +257,5 @@ body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > s
   body.lia-sec-cal.mnAOn .mainTop #bellBtn,body.lia-sec-cal.mnGOn .mainTop #bellBtn,
   body.lia-sec-cal.mnAOn .mainTop #liaRecapBtn,body.lia-sec-cal.mnGOn .mainTop #liaRecapBtn{position:static!important;top:auto!important;right:auto!important}
 }
+
+.mnAv.skin.lg{background-size:cover}
