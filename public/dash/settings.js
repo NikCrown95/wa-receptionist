@@ -1454,7 +1454,7 @@ function pfRenderPoster(box,b,opts){
     };
     if(q('expBtn'))q('expBtn').onclick=function(){
        var b=this,old=b.textContent;b.disabled=true;b.textContent='Preparo il file…';stMsg('expMsg','');
-       fetch(location.pathname+'?t='+encodeURIComponent(token)+'&export=1',{cache:'no-store'}).then(function(r){
+       fetch('/api/agenda?t='+encodeURIComponent(token)+'&export=1',{cache:'no-store'}).then(function(r){
          if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error(j.error||'Non siamo riusciti a preparare il file. Riprova tra poco.')});
          var cd=r.headers.get('Content-Disposition')||'',m=cd.match(/filename="([^"]+)"/);
          return r.blob().then(function(bl){return {blob:bl,name:m?m[1]:'prenolia-dati.zip'}});
