@@ -915,6 +915,16 @@ function addMonths(date, n) {
 
 const fail = (msg) => { const e = new Error(msg); e.validation = true; return e; };
 
+// numero di righe di una tabella (senza scaricarle)
+async function countOf(table, filter) {
+  try {
+    const { url, key } = cfg();
+    const r = await fetch(`${url}/rest/v1/${table}?select=id&${filter}`, { method: 'HEAD', headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: 'count=exact' } });
+    const n = Number((r.headers.get('content-range') || '').split('/')[1]);
+    return r.ok && Number.isFinite(n) ? n : 0;
+  } catch (e) { return 0; }
+}
+
 async function latestSub(businessId) {
   const rows = await sb(`subscriptions?business_id=eq.${businessId}&select=*,plans(name,price_eur)&order=started_at.desc&limit=1`);
   return rows && rows[0] ? rows[0] : null;
@@ -1044,6 +1054,30 @@ async function runAction(body, ctx) {
     const r = await require('../business-auth.js').adminPasswordReset(id, mode);
     await audit('reset_password', id, { mode, email: mode === 'link' ? r.email : undefined }, ctx && ctx.actor);
     return Object.assign({ ok: true }, r);
+  }
+
+  if (action === 'delete_business') {
+    // Eliminazione definitiva: il database cancella a cascata appuntamenti, clienti, servizi, chat, abbonamento e accesso del titolare.
+    const rows = await sb(`businesses?id=eq.${id}&select=id,name,slug,business_type`);
+    if (!rows || !rows.length) throw notFound('Attivita\' non trovata: forse e\' gia\' stata eliminata.');
+    const biz = rows[0];
+    const norm = (s) => String(s == null ? '' : s).trim().replace(/\s+/g, ' ').toLowerCase();
+    if (!norm(body.confirm_name) || norm(body.confirm_name) !== norm(biz.name)) {
+      throw fail('Il nome scritto non coincide: scrivi esattamente "' + biz.name + '" per confermare.');
+    }
+    if (sub && sub.stripe_subscription_id && sub.status !== 'cancelled') {
+      throw fail('Ha ancora un abbonamento Stripe attivo: annullalo prima su Stripe e poi con "Annulla abbonamento", altrimenti continuerebbe ad addebitare. Poi riprova a eliminarla.');
+    }
+    const counts = {
+      appuntamenti: await countOf('appointments', `business_id=eq.${id}`),
+      messaggi: await countOf('chat_messages', `business_id=eq.${id}`),
+      iscritti_palestra: await countOf('gym_members', `business_id=eq.${id}`),
+    };
+    await sb(`businesses?id=eq.${id}`, { method: 'DELETE' });
+    // lo storico resta (senza collegamento all'attivita', che non esiste piu'): nome e numeri servono a ricordare cosa e' stato tolto
+    await audit('delete_business', null, Object.assign({ name: biz.name, slug: biz.slug, type: biz.business_type }, counts), ctx && ctx.actor);
+    authCacheClear();
+    return { ok: true, deleted: biz.name, counts };
   }
 
   if (!sub) throw fail('Questa attivita\' non ha un abbonamento: assegna prima un piano.');

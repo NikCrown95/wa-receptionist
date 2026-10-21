@@ -458,7 +458,45 @@ window.startClients = function(){
       if (c.plan === 'base') add('Passa a Smart', 'ghost', { action: 'assign_plan', plan: 'ai' }, 'Passare ' + c.name + ' a Smart?');
       add('Annulla abbonamento', 'danger', { action: 'cancel' }, 'Annullare l\'abbonamento di ' + c.name + '? Il servizio si ferma subito.');
     }
+    var del = document.createElement('button'); del.type = 'button'; del.className = 'btn act-btn danger'; del.textContent = 'Elimina attività…'; del.style.marginTop = '14px';
+    del.addEventListener('click', function(){ openDeleteForm(c); });
+    box.appendChild(del);
     actBg.classList.add('on'); actSheet.classList.add('on');
+  }
+
+  // ===== elimina attività: definitivo, si conferma scrivendo il nome
+  function openDeleteForm(c){
+    var box = document.getElementById('actBtns'); box.innerHTML = '';
+    document.getElementById('actTitle').textContent = 'Elimina ' + c.name;
+    var sub = document.getElementById('actSub');
+    sub.textContent = 'Operazione definitiva: non si può annullare.';
+    function el(tag, css, text){ var e = document.createElement(tag); if (css) e.style.cssText = css; if (text != null) e.textContent = text; return e; }
+    box.appendChild(el('p', 'margin:0 0 4px;font-size:.92rem;line-height:1.5;color:var(--ink);', 'Spariscono per sempre: appuntamenti e storico, clienti e note, servizi, orari, collaboratori, chat con Lia, abbonamento e accesso del titolare.' + (c.appts ? ' Questa attività ha ' + c.appts + ' appuntamenti.' : '')));
+    box.appendChild(el('p', 'margin:0 0 10px;font-size:.88rem;line-height:1.5;color:var(--muted);', 'Se al titolare servono i suoi dati, fai prima l\'esportazione dalla sua dashboard. Se ha un abbonamento Stripe, annullalo prima su Stripe.'));
+    var lab = el('label', 'display:block;font-size:.84rem;color:var(--muted);margin:4px 0 6px;', 'Per confermare scrivi esattamente: ');
+    lab.appendChild(el('b', 'color:var(--ink);', c.name)); lab.htmlFor = 'delName'; box.appendChild(lab);
+    var inp = document.createElement('input'); inp.id = 'delName'; inp.type = 'text'; inp.className = 'inp'; inp.autocomplete = 'off'; inp.autocapitalize = 'off'; inp.spellcheck = false; inp.placeholder = c.name; inp.style.cssText = 'width:100%;font-size:16px;min-height:48px;';
+    box.appendChild(inp);
+    var err = el('div', 'min-height:1.3em;margin:8px 0 2px;font-size:.88rem;color:#FF8A8A;line-height:1.4;'); err.setAttribute('role', 'alert'); box.appendChild(err);
+    function norm(s){ return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase(); }
+    var go = document.createElement('button'); go.type = 'button'; go.className = 'btn act-btn'; go.textContent = 'Elimina definitivamente'; go.disabled = true;
+    go.style.cssText = 'background:#FF8A8A;color:#2a0a0a;';
+    inp.addEventListener('input', function(){ go.disabled = norm(inp.value) !== norm(c.name); err.textContent = ''; });
+    go.addEventListener('click', function(){
+      go.disabled = true; inp.disabled = true; go.textContent = 'Elimino…';
+      window.liaApi('/api/admin/clients', { method: 'POST', body: JSON.stringify({ action: 'delete_business', id: c.id, confirm_name: inp.value }) })
+        .then(function(res){
+          box.innerHTML = ''; document.getElementById('actTitle').textContent = 'Attività eliminata';
+          var n = res && res.counts ? res.counts : {};
+          sub.textContent = (res && res.deleted ? res.deleted : c.name) + ' non esiste più' + (n.appuntamenti ? ' (tolti ' + n.appuntamenti + ' appuntamenti)' : '') + '.';
+          var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'btn act-btn'; ok.textContent = 'Chiudi'; ok.addEventListener('click', closeActions); box.appendChild(ok);
+          window.liaReload();
+        })
+        .catch(function(e){ err.textContent = e.message; inp.disabled = false; go.textContent = 'Elimina definitivamente'; go.disabled = norm(inp.value) !== norm(c.name); });
+    });
+    box.appendChild(go);
+    var back = document.createElement('button'); back.type = 'button'; back.className = 'btn ghost act-btn'; back.textContent = 'Indietro'; back.addEventListener('click', function(){ openActions(c); }); box.appendChild(back);
+    setTimeout(function(){ try { inp.focus(); } catch (e) {} }, 60);
   }
 
   // ===== "Gestisci piano": piano + stato + durata, anche per chi ha già un abbonamento
