@@ -283,5 +283,10 @@ body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
 :root:root #mbAv.skin{background:#fff var(--skin) center/contain no-repeat;color:transparent;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
 :root:root #mbAv.skin.lg{background-size:cover}
 #mbAv + .mainBiz{min-width:0;flex:0 1 auto}
-#mbAv + .mainBiz #businessName{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden!important;white-space:normal!important;text-overflow:clip!important;font-size:1.2rem;line-height:1.1}
+#mbAv + .mainBiz #businessName{display:block!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;font-size:1.2rem;line-height:1.15}
 #mbAv + .mainBiz small{white-space:nowrap}
+
+.mainTopRow:has(#mbAv){flex-wrap:nowrap!important}
+#mbAv{flex:none!important}
+#mbAv + .mainBiz{flex:1 1 0!important;min-width:0!important}
+#mbAv + .mainBiz + .spacer{display:none}

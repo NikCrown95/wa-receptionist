@@ -218,6 +218,7 @@
         ma.innerHTML = av.innerHTML;
         ma.style.cssText = av.style.cssText;
         ma.style.setProperty("--mnh", card.style.getPropertyValue("--mnh") || "200");
+        setTimeout(function () { if (window.liaFitBizName) window.liaFitBizName(); }, 0);
       }
     } catch (e) {}
     var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
@@ -226,6 +227,19 @@
     var ad = $("mnBizAddr"), addr = txt("pfAddr") || String(raw.address || "").trim();
     if (ad) { ad.textContent = addr; ad.hidden = !addr; }
   }
+  /* il nome nell'intestazione resta su una riga: se non entra si rimpicciolisce, poi si accorcia con i puntini */
+  function fitBizName() {
+    var n = document.getElementById("businessName"); if (!n || !document.getElementById("mbAv")) return;
+    n.style.fontSize = ""; var fs = parseFloat(getComputedStyle(n).fontSize) || 19, min = 13;
+    while (n.scrollWidth > n.clientWidth + 1 && fs > min) { fs -= 0.5; n.style.fontSize = fs + "px"; }
+  }
+  try {
+    var bn = document.getElementById("businessName");
+    if (bn && window.MutationObserver) new MutationObserver(function () { fitBizName(); }).observe(bn, { childList: true, characterData: true, subtree: true });
+    window.addEventListener("resize", fitBizName);
+    window.addEventListener("load", function () { setTimeout(fitBizName, 50); });
+  } catch (e) {}
+  window.liaFitBizName = fitBizName;
   window.liaMenuSync = syncProfile;
   function paintMenu() {
     var c = $("mnShareCard");
