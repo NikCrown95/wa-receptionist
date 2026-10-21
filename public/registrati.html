@@ -28,7 +28,11 @@ h1,h2,p{margin:0}button{font-family:inherit}
 .path li::before{content:"";position:absolute;left:21px;top:44px;bottom:2px;width:2px;background:linear-gradient(var(--line2),transparent)}
 .path li:last-child::before{display:none}
 .path .n{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--card2);border:1px solid var(--line2);color:var(--accent)}
-.path li.now .n{background:var(--grad);color:var(--on-accent);border-color:transparent;box-shadow:0 0 0 6px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}
+.path .n{animation:pls 2.6s ease-in-out infinite}
+.path li:nth-child(2) .n{animation-delay:.5s}.path li:nth-child(3) .n{animation-delay:1s}
+@keyframes pls{0%,100%{box-shadow:0 0 0 0 rgba(45,210,220,.0)}50%{box-shadow:0 0 0 7px rgba(45,210,220,.16)}}
+@media (prefers-reduced-motion:reduce){.path .n,.path li.now .n{animation:none}}
+.path li.now .n{animation-name:plsnow;background:var(--grad);color:var(--on-accent);border-color:transparent;box-shadow:0 0 0 6px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}
 .path b{display:block;font-size:1.02rem;font-weight:700;margin-top:2px}
 .path span{display:block;font-size:.88rem;color:var(--muted)}
 .card{border-radius:28px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card),#0B1017);padding:34px 32px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
@@ -65,6 +69,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}
   .card{padding:26px 20px}.row2{grid-template-columns:1fr}
 }
+@keyframes plsnow{0%,100%{box-shadow:0 0 0 4px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}50%{box-shadow:0 0 0 12px rgba(45,210,220,.04),0 8px 34px -6px rgba(45,210,220,.9)}}
 </style>
 </head>
 <body>
@@ -72,7 +77,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   <aside class="side">
     <div class="logo" role="img" aria-label="Prenolia"></div>
     <h2>La tua agenda, pronta in pochi minuti</h2>
-    <p class="lead">Crea l'account e ti guidiamo passo passo: servizi, prezzi e orari. Alla fine Lia è già al lavoro per te.</p>
+    <p class="lead">Crea l'account e ti guidiamo passo passo: servizi, prezzi e orari. Alla fine la tua agenda è pronta a ricevere le prime prenotazioni.</p>
     <ol class="path">
       <li class="now"><div class="n">1</div><div><b>Crea l'account</b><span>Bastano email, telefono e password.</span></div></li>
       <li><div class="n">2</div><div><b>Conferma l'email</b><span>Un click sul link e la prova gratuita di 14 giorni parte.</span></div></li>
