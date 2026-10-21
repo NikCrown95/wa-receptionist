@@ -3160,25 +3160,25 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 }
 /* telefono, solo calendario: selettore Giorno/Settimana/Mese al posto di logo e nome, tutto su una superficie pulita */
 @media(max-width:699px){
-  :root:root:root:root:root:root body.lia-sec-cal .mainTop{background:var(--bg)!important;box-shadow:none!important;border:0!important}
-  :root:root:root:root:root:root body.lia-sec-cal .mainTopRow{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important;padding:12px 16px 4px!important;min-height:0!important;border:0!important;margin:0!important}
-  :root:root:root:root:root:root body.lia-sec-cal .mainTopRow #mbAv,:root:root:root:root:root:root body.lia-sec-cal .mainTopRow .mainBiz,:root:root:root:root:root:root body.lia-sec-cal .mainTopRow .spacer{display:none!important}
-  :root:root:root:root:root:root body.lia-sec-cal .mainTop #burgerBtn,:root:root:root:root:root:root body.lia-sec-cal .mainTop #bellBtn,:root:root:root:root:root:root body.lia-sec-cal .mainTop #liaRecapBtn{flex:none!important;background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
-  :root:root:root:root:root:root body.lia-sec-cal .mainTop #liaRecapBtn{margin-left:auto!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTop{background:var(--bg)!important;box-shadow:none!important;border:0!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTopRow{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important;padding:12px 16px 4px!important;min-height:0!important;border:0!important;margin:0!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTopRow #mbAv,:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTopRow .mainBiz,:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTopRow .spacer{display:none!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTop #burgerBtn,:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTop #bellBtn,:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTop #liaRecapBtn{flex:none!important;background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) .mainTop #liaRecapBtn{margin-left:auto!important}
   :root:root:root:root:root:root .mainTopRow > .seg{flex:1 1 0!important;min-width:0!important;max-width:244px!important;display:flex!important;margin:0 auto 0 0!important;padding:3px!important;gap:2px!important;height:40px!important;border-radius:14px!important;background:transparent!important;border:1px solid var(--line)!important;box-shadow:none!important}
   :root:root:root:root:root:root .mainTopRow > .seg button{flex:1 1 auto!important;min-width:0!important;padding:0 8px!important;font-size:.76rem!important;font-weight:700!important;white-space:nowrap!important;height:100%!important;min-height:0!important;border:0!important;border-radius:11px!important;background:transparent!important;color:var(--muted)!important;box-shadow:none!important}
   :root:root:root:root:root:root .mainTopRow > .seg button[aria-pressed="true"]{background:var(--accent)!important;color:var(--on-accent)!important}
-  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTopRow > .seg{display:none!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls{background:var(--bg)!important;box-shadow:none!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;padding:6px 16px 10px!important;margin:0 0 10px!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls::after{display:none!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls #liaDateCard{flex:1 1 0!important;min-width:0!important;order:0!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .range{flex:1 1 0!important;width:auto!important;min-width:0!important;order:0!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .arrow,:root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .jumpToday{order:2!important;flex:none!important;background:none!important;border:0!important;box-shadow:none!important}
-  :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .jumpToday{padding:0 8px!important}
+  :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTopRow > .seg{display:none!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls{background:var(--bg)!important;box-shadow:none!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;padding:6px 16px 10px!important;margin:0 0 10px!important;flex-wrap:nowrap!important;align-items:center!important;gap:6px!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls::after{display:none!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls #liaDateCard{flex:1 1 0!important;min-width:0!important;order:0!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls .range{flex:1 1 0!important;width:auto!important;min-width:0!important;order:0!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls .arrow,:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls .jumpToday{order:2!important;flex:none!important;background:none!important;border:0!important;box-shadow:none!important}
+  :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls .jumpToday{padding:0 8px!important}
 }
 /* telefono, altre sezioni: stessa intestazione pulita del calendario */
 @media(max-width:699px){
-  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop{background:var(--bg)!important;box-shadow:none!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important}
-  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTopRow{align-items:center!important;gap:6px!important}
-  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #burgerBtn,:root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #bellBtn,:root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #liaRecapBtn{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
+  :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop{background:var(--bg)!important;box-shadow:none!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important}
+  :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTopRow{align-items:center!important;gap:6px!important}
+  :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #burgerBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #bellBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #liaRecapBtn{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
 }

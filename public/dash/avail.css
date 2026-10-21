@@ -220,3 +220,31 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 .liaDate{display:grid;grid-template-columns:.8fr 1.5fr 1fr;gap:6px;min-width:0;width:100%}
 .liaDate select{background:var(--card2);color:var(--ink);border:1px solid var(--line2);border-radius:12px;padding:0 6px;font:inherit;font-weight:700;min-width:0;width:100%;min-height:46px;color-scheme:dark}
 .avRow > .avField{flex:1 1 220px}
+
+/* v6: sobrio, coerente col resto dell'app — superfici piatte, un solo colore d'accento, niente sfumature e aloni */
+:root:root .avLayer .avSi{background:var(--card)!important;border:1px solid var(--line)!important;box-shadow:none!important;color:var(--ink)!important}
+:root:root .avLayer .avSi:hover{background:var(--card2)!important}
+:root:root .avLayer .avSi.on{background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--ink)!important;box-shadow:none!important}
+:root:root .avLayer .avSi.on small,:root:root .avLayer .avSi small{color:var(--muted)!important;opacity:1!important}
+:root:root .avLayer .avAv,:root:root .avLayer .avSi.on .avAv{background:color-mix(in srgb,var(--c,var(--accent)) 22%,var(--card2))!important;color:var(--c,var(--accent-ink))!important;box-shadow:none!important}
+:root:root .avLayer .avDot{background:var(--accent)!important;box-shadow:0 0 0 3px var(--card)!important}
+:root:root .avLayer .avPane,:root:root .avLayer .avMain > .avCard{background:var(--card)!important;border:1px solid var(--line)!important;box-shadow:none!important;border-radius:20px}
+:root:root .avLayer .avHd,:root:root .avLayer .avHd.flat{background:none!important;border:0!important;box-shadow:none!important;padding:2px 2px 4px!important;color:var(--ink)!important;border-radius:0}
+:root:root .avLayer .avHd .avHt h2,:root:root .avLayer .avHd.flat .avHt h2{color:var(--ink)!important}
+:root:root .avLayer .avHd .avHt p,:root:root .avLayer .avHd.flat .avHt p{color:var(--muted)!important;opacity:1!important}
+:root:root .avLayer .avHd .avAv{background:color-mix(in srgb,var(--c,var(--accent)) 22%,var(--card2))!important;color:var(--c,var(--accent-ink))!important}
+:root:root .avLayer .avEr,:root:root .avLayer .avEr.on{background:var(--card2)!important;border:1px solid var(--line)!important;box-shadow:none!important}
+:root:root .avLayer .avEr.on{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))!important}
+:root:root .avLayer .avEr.off{background:transparent!important;border:1px dashed var(--line2)!important}
+:root:root .avLayer .avPill{border:1px solid var(--line2)!important;background:transparent!important;color:var(--muted)!important;box-shadow:none!important}
+:root:root .avLayer .avPill.on{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--on-accent)!important}
+:root:root .avLayer .avMain .avChip{background:transparent!important;border:1px solid var(--line2)!important;color:var(--ink)!important}
+:root:root .avLayer .avMain .avChip[aria-pressed="true"]{background:var(--accent-soft)!important;border-color:var(--accent)!important;color:var(--accent-ink)!important}
+:root:root .avLayer .avMain .avField > label{color:var(--muted)!important}
+:root:root .avLayer .avCl{background:var(--card2)!important;border:1px solid var(--line)!important;border-left:1px solid var(--line)!important;border-radius:14px}
+:root:root .avLayer .avTag{background:var(--accent-soft)!important;color:var(--accent-ink)!important}
+:root:root .avLayer .avTag.p{background:var(--card)!important;color:var(--muted)!important;border:1px solid var(--line)}
+:root:root .avLayer .avPz{background:var(--card)!important;border:1px solid var(--line)!important}
+:root:root .avLayer .avPz b{color:var(--muted)!important}
+:root:root .avLayer .avPzChip,:root:root .avLayer .avAddP{background:transparent!important;border:1px dashed var(--line2)!important;color:var(--muted)!important}
+:root:root .avLayer .avPzChip.on{background:var(--accent-soft)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important}
