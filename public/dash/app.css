@@ -3218,3 +3218,8 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .wkp-d b{margin:2px 0 6px!important}
 .wkp-n{display:block;margin-top:5px;font-size:.62rem;font-weight:700;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
 .wkp-d.sel .wkp-n{color:rgba(255,255,255,.85)}
+/* giorni della settimana su telefono: senza barretta, caselle piu' corte */
+.wkp-bar{display:none!important}
+.wkp-d{padding:7px 0 7px!important;min-height:0!important}
+.wkp-d b{margin:2px 0 0!important}
+.wkp-n{margin-top:3px}
