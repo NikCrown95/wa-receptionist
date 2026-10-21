@@ -6,7 +6,7 @@
   --accent:#1E8F9C; --on-accent:#FFFFFF; --accent-soft:#DDF3F5; --accent-ink:#13707C;
   --accent-grad:linear-gradient(135deg,#2DC3CF 0%,#1F8AA8 55%,#2F6FD6 130%);
   --sec:#2F6FD6; --sec-soft:#E8F0FD; --danger:#D2454E;
-  --lg-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 12px 32px -14px rgba(18,86,108,.28),0 2px 6px -2px rgba(18,86,108,.08);
+  --lg-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 12px 32px -14px rgba(20,20,15,.28),0 2px 6px -2px rgba(20,20,15,.08);
   --lg-glow:0 10px 26px -8px rgba(31,160,176,.55);
 }
 :root[data-theme="light"] body,html[data-theme="light"] body{
@@ -17,22 +17,22 @@
   background-attachment:fixed;
 }
 /* testata e barra superiore: vetro chiaro */
-:root[data-theme="light"] .mainTop{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom-color:rgba(18,86,108,.10)}
+:root[data-theme="light"] .mainTop{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom-color:rgba(20,20,15,.10)}
 :root[data-theme="light"] .mainTopRow .mainBiz{background:linear-gradient(120deg,#0C1F29 30%,#13707C);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-theme="light"] .mainTopRow .mainBiz small{-webkit-text-fill-color:var(--muted)}
-:root[data-theme="light"] .burgerBtn,:root[data-theme="light"] .mainTopRow button:not(.burgerBtn){background:rgba(255,255,255,.85);border-color:rgba(18,86,108,.14);box-shadow:0 6px 16px -8px rgba(18,86,108,.35)}
+:root[data-theme="light"] .burgerBtn,:root[data-theme="light"] .mainTopRow button:not(.burgerBtn){background:rgba(255,255,255,.85);border-color:rgba(20,20,15,.14);box-shadow:0 6px 16px -8px rgba(20,20,15,.35)}
 :root[data-theme="light"] .burgerBtn[aria-expanded="true"]{background:var(--accent-grad);border-color:transparent;box-shadow:var(--lg-glow)}
 /* titolo della data e comandi */
 :root[data-theme="light"] .range{background:linear-gradient(110deg,#13707C 0%,#1F8AA8 60%,#2F6FD6 120%);-webkit-background-clip:text;background-clip:text}
-:root[data-theme="light"] .seg{background:rgba(255,255,255,.7);border-color:rgba(18,86,108,.12);box-shadow:0 6px 18px -10px rgba(18,86,108,.3)}
+:root[data-theme="light"] .seg{background:rgba(255,255,255,.7);border-color:rgba(20,20,15,.12);box-shadow:0 6px 18px -10px rgba(20,20,15,.3)}
 :root[data-theme="light"] .seg button[aria-pressed="true"],:root[data-theme="light"] .seg button.on{background:var(--accent-grad);box-shadow:var(--lg-glow);color:#fff}
-:root[data-theme="light"] .arrow{background:rgba(255,255,255,.85);border-color:rgba(18,86,108,.14)}
+:root[data-theme="light"] .arrow{background:rgba(255,255,255,.85);border-color:rgba(20,20,15,.14)}
 /* schede */
 :root[data-theme="light"] .ag-card,:root[data-theme="light"] .day-hero-main,:root[data-theme="light"] .day-hero-next,:root[data-theme="light"] .stCard,:root[data-theme="light"] .stList,:root[data-theme="light"] .pfCard,:root[data-theme="light"] .set-section,
 :root[data-theme="light"] #panelStats [class*="card" i],:root[data-theme="light"] #panelClients [class*="card" i]{
-  background:linear-gradient(180deg,#FFFFFF 0%,#FAFDFE 100%);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAFDFE 100%);border-color:rgba(20,20,15,.10);box-shadow:var(--lg-shadow)}
 :root[data-theme="light"] .ag-card{transition:transform .15s ease,box-shadow .15s ease}
-:root[data-theme="light"] .ag-card:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 16px 36px -14px rgba(18,86,108,.34)}
+:root[data-theme="light"] .ag-card:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 16px 36px -14px rgba(20,20,15,.34)}
 :root[data-theme="light"] .ag-card.upcoming{border-color:rgba(30,143,156,.55);box-shadow:var(--lg-shadow),0 0 0 3px rgba(45,195,207,.14)}
 :root[data-theme="light"] .ag-tag.next-tag,:root[data-theme="light"] .ag-pill{background:var(--accent-grad);color:#fff;box-shadow:0 6px 14px -6px rgba(31,160,176,.6)}
 :root[data-theme="light"] .fab{background:var(--accent-grad);box-shadow:0 14px 30px -8px rgba(31,138,168,.65)}
@@ -40,7 +40,7 @@
 :root[data-theme="light"] .stBtn:not(.ghost):not(.danger):not(.outline-danger){background:var(--accent-grad);box-shadow:var(--lg-glow)}
 /* menu burger: vetro */
 :root[data-theme="light"] .menuBackdrop{background:rgba(12,31,41,.28);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-:root[data-theme="light"] .burgerMenu{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(18,86,108,.14);box-shadow:0 30px 70px -20px rgba(12,40,56,.45),0 1px 0 rgba(255,255,255,.9) inset}
+:root[data-theme="light"] .burgerMenu{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(20,20,15,.14);box-shadow:0 30px 70px -20px rgba(12,40,56,.45),0 1px 0 rgba(255,255,255,.9) inset}
 :root[data-theme="light"] body.mnOn #burgerMenu > button[aria-current="true"]{background:linear-gradient(135deg,rgba(45,195,207,.18),rgba(47,111,214,.10));color:var(--accent-ink)}
 /* impostazioni: icone piu' luminose */
 :root[data-theme="light"] #panelOther .stRow:hover,:root[data-theme="light"] #panelOther .stRow[aria-current="true"]{background:linear-gradient(90deg,rgba(45,195,207,.10),transparent)}
@@ -56,10 +56,10 @@
 :root[data-theme="light"] .avHd.flat{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 62%,#1F4FB8));border:0;box-shadow:0 18px 36px -18px color-mix(in srgb,var(--c,var(--accent)) 70%,transparent)}
 :root[data-theme="light"] .avHd.flat .avHt h2,:root[data-theme="light"] .avHd.flat .avHt p{color:#fff}
 :root[data-theme="light"] .avSi.on{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 76%,#2F6FD6));box-shadow:0 14px 28px -14px color-mix(in srgb,var(--c,var(--accent)) 80%,transparent)}
-:root[data-theme="light"] .avPane,:root[data-theme="light"] .avSi:not(.on){background:linear-gradient(180deg,#fff,#FAFDFE);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
+:root[data-theme="light"] .avPane,:root[data-theme="light"] .avSi:not(.on){background:linear-gradient(180deg,#fff,#FAFDFE);border-color:rgba(20,20,15,.10);box-shadow:var(--lg-shadow)}
 /* Mese da telefono: l'anello di occupazione ha la parte vuota visibile anche su fondo chiaro */
 @media(max-width:699px){
-:root[data-theme="light"] #calSubApp .month-cell:not(.outside):not(.is-closed)::after{background:conic-gradient(from -45deg,#1E9AA8 calc(var(--occ,0)*1%),rgba(18,86,108,.14) 0)!important}
+:root[data-theme="light"] #calSubApp .month-cell:not(.outside):not(.is-closed)::after{background:conic-gradient(from -45deg,#1E9AA8 calc(var(--occ,0)*1%),rgba(20,20,15,.14) 0)!important}
 :root[data-theme="light"] #calSubApp .month-cell.italian-holiday:not(.outside)::after{background:conic-gradient(from -45deg,#D2454E calc(var(--occ,0)*1%),rgba(210,69,78,.22) 0)!important}
 }
 /* Calendario da telefono: i pulsanti in alto sono fissi, quindi la testata non deve avere il vetro sfocato (lo rende contenitore e li nasconde) */
@@ -67,3 +67,20 @@
 /* Menu: la foto dell'attività (es. Style2) si vede anche col tema chiaro, non resta il quadrato lilla vuoto */
 :root[data-theme="light"] #burgerMenu .mnShare .mnAv.skin:not(.lg){background:#fff var(--skin) center/contain no-repeat!important;color:transparent!important;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)!important}
 :root[data-theme="light"] #burgerMenu .mnShare .mnAv.skin svg{display:none}
+/* Look chiaro v2, piu' sobrio: bianco caldo, schede bianche, bordi sottili, turchese solo come accento */
+:root[data-theme="light"],body[data-theme="light"]{
+  --bg:#F6F5F2; --bg2:#FBFAF8; --card:#FFFFFF; --card2:#FAF9F6; --line:#ECEAE5; --line2:#DDDAD3;
+  --ink:#161A1D; --muted:#6B706F;
+  --accent:#1B8795; --accent-soft:#E6F2F3; --accent-ink:#146673;
+  --accent-grad:linear-gradient(#1B8795,#1B8795); --sec:#1B8795; --sec-soft:#E6F2F3;
+  --lg-shadow:0 1px 2px rgba(20,20,15,.05),0 10px 26px -14px rgba(20,20,15,.16);
+  --lg-glow:0 6px 16px -8px rgba(27,135,149,.45);
+}
+:root[data-theme="light"] body,html[data-theme="light"] body{background:#F6F5F2}
+:root[data-theme="light"] .mainTop{background:rgba(246,245,242,.88);border-bottom-color:rgba(20,20,15,.07)}
+:root[data-theme="light"] .mainTopRow .mainBiz{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--ink)}
+:root[data-theme="light"] .range{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--accent-ink)}
+:root[data-theme="light"] .ag-card,:root[data-theme="light"] .day-hero-main,:root[data-theme="light"] .day-hero-next,:root[data-theme="light"] .stCard,:root[data-theme="light"] .stList,:root[data-theme="light"] .pfCard,:root[data-theme="light"] .set-section,
+:root[data-theme="light"] #panelStats [class*="card" i],:root[data-theme="light"] #panelClients [class*="card" i]{background:#fff}
+:root[data-theme="light"] .ag-card.upcoming{box-shadow:var(--lg-shadow),0 0 0 3px rgba(27,135,149,.10)}
+:root[data-theme="light"] .fab{box-shadow:0 10px 24px -8px rgba(27,135,149,.55)}
