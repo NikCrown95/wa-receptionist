@@ -267,3 +267,7 @@ body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
 #burgerMenu .mnShare .mnAv{width:62px;height:62px;border-radius:20px}
 #burgerMenu .mnShare .mnAv svg{width:30px;height:30px}
 #burgerMenu .mnShare .mnShareKick{font-size:.7rem}
+/* logo: vale anche con il tema chiaro */
+:root:root #burgerMenu .mnShare .mnAv.skin.lg{background:#fff var(--skin) center/cover no-repeat;color:transparent;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
+:root:root #panelProfile .pf2 .pfHero .pfAvatar.hasLogo{padding:0;overflow:hidden;filter:none;background:#fff;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
+:root:root #panelProfile .pf2 .pfHero .pfAvatar.hasLogo::before{display:none}
