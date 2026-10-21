@@ -3042,3 +3042,41 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #panelOther .arChip button:hover{background:rgba(0,0,0,.12)}
 
 .stIc.c-rose{background:linear-gradient(145deg,#F5719F,#D63F7C)}
+
+/* Settimana da smartphone: striscia dei giorni + dettaglio del giorno scelto */
+@media(max-width:699px){
+#weekGrid.wkp{display:block!important;padding:0 14px 96px;gap:0}
+#weekSummary:has(+ #weekGrid.wkp){display:none}
+.wkp-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wkp-d{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:8px 0 9px;text-align:center;font:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06);-webkit-tap-highlight-color:transparent}
+.wkp-d small{display:block;font-size:.62rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.wkp-d b{display:block;font-size:1.06rem;margin:2px 0 6px;font-weight:700}
+.wkp-bar{display:block;height:4px;margin:0 9px;border-radius:3px;background:var(--line);overflow:hidden}
+.wkp-bar i{display:block;height:100%;background:var(--accent)}
+.wkp-d.today:not(.sel) b{color:var(--accent-ink,var(--accent))}
+.wkp-d.sel{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+.wkp-d.sel small{color:rgba(255,255,255,.82)}
+.wkp-d.sel .wkp-bar{background:rgba(255,255,255,.3)}
+.wkp-d.sel .wkp-bar i{background:#fff}
+.wkp-d.off{background:transparent;border-style:dashed;box-shadow:none;opacity:.55}
+.wkp-sum{display:flex;gap:10px;margin:14px 0 2px}
+.wkp-sum div{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.wkp-sum small{display:block;font-size:.62rem;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+.wkp-sum b{display:block;font-size:1.25rem;margin-top:2px;font-weight:800}
+.wkp-sum em{font-style:normal;font-size:.74rem;color:var(--muted);font-weight:600}
+.wkp-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:14px 4px 8px}
+.wkp-h b{font-size:1rem;font-weight:700}
+.wkp-h span{font-size:.76rem;color:var(--muted);font-weight:600;text-align:right}
+.wkp-msg{text-align:center;color:var(--muted);padding:28px 0;font-size:.9rem}
+}
+
+/* Calendario da smartphone: la prima riga e' sempre il nome dell'attivita' con i pulsanti, sotto titolo e comandi */
+@media(max-width:699px){
+.wkp-d.sel.off{background:var(--accent);border-style:solid;opacity:.85}
+:root:root:root:root:root body.lia-sec-cal .mainTop{height:auto!important;min-height:0!important;padding:0!important;overflow:hidden!important;border-bottom:1px solid var(--line)!important}
+:root:root:root:root:root body.lia-sec-cal .mainTopRow{height:auto!important;min-height:60px!important;padding:12px 16px 8px!important}
+:root:root:root:root:root body.lia-sec-cal .mainBiz{display:block!important}
+:root:root:root:root:root body.lia-sec-cal .mainTop #burgerBtn,:root:root:root:root:root body.lia-sec-cal .mainTop #bellBtn,:root:root:root:root:root body.lia-sec-cal .mainTop #liaRecapBtn{position:static!important;top:auto!important;right:auto!important}
+:root:root:root:root:root body.lia-sec-cal #calSubApp .controls{padding-top:14px!important;position:relative!important;flex-wrap:wrap!important;row-gap:10px!important}
+:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .range{position:static!important;top:auto!important;left:auto!important;right:auto!important;height:auto!important;line-height:1.1!important;padding:0!important;margin:0!important;max-width:100%!important;width:100%!important;flex:0 0 100%!important;font-size:clamp(1.3rem,6.4vw,1.8rem)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
