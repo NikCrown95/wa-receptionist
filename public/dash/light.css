@@ -84,3 +84,8 @@
 :root[data-theme="light"] #panelStats [class*="card" i],:root[data-theme="light"] #panelClients [class*="card" i]{background:#fff}
 :root[data-theme="light"] .ag-card.upcoming{box-shadow:var(--lg-shadow),0 0 0 3px rgba(27,135,149,.10)}
 :root[data-theme="light"] .fab{box-shadow:0 10px 24px -8px rgba(27,135,149,.55)}
+/* Menu: anche il logo caricato dal titolare (non solo la foto predefinita) si vede col tema chiaro */
+:root[data-theme="light"] #burgerMenu .mnShare .mnAv.skin.lg{background:#fff var(--skin) center/cover no-repeat!important;color:transparent!important;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)!important}
+/* Menu burger: scheda della pagina di prenotazione e voce attiva senza sfumature azzurre */
+:root[data-theme="light"] #burgerMenu .mnShare{background:#fff;border-color:rgba(27,135,149,.35)}
+:root[data-theme="light"] body.mnOn #burgerMenu > button[aria-current="true"]{background:var(--accent-soft)}
