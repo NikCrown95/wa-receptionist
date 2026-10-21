@@ -57,3 +57,10 @@
 :root[data-theme="light"] .avHd.flat .avHt h2,:root[data-theme="light"] .avHd.flat .avHt p{color:#fff}
 :root[data-theme="light"] .avSi.on{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 76%,#2F6FD6));box-shadow:0 14px 28px -14px color-mix(in srgb,var(--c,var(--accent)) 80%,transparent)}
 :root[data-theme="light"] .avPane,:root[data-theme="light"] .avSi:not(.on){background:linear-gradient(180deg,#fff,#FAFDFE);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
+/* Mese da telefono: l'anello di occupazione ha la parte vuota visibile anche su fondo chiaro */
+@media(max-width:699px){
+:root[data-theme="light"] #calSubApp .month-cell:not(.outside):not(.is-closed)::after{background:conic-gradient(from -45deg,#1E9AA8 calc(var(--occ,0)*1%),rgba(18,86,108,.14) 0)!important}
+:root[data-theme="light"] #calSubApp .month-cell.italian-holiday:not(.outside)::after{background:conic-gradient(from -45deg,#D2454E calc(var(--occ,0)*1%),rgba(210,69,78,.22) 0)!important}
+}
+/* Calendario da telefono: i pulsanti in alto sono fissi, quindi la testata non deve avere il vetro sfocato (lo rende contenitore e li nasconde) */
+:root[data-theme="light"] body.lia-sec-cal .mainTop{-webkit-backdrop-filter:none;backdrop-filter:none;background:transparent;border-bottom-color:transparent}
