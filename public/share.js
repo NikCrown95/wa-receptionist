@@ -240,6 +240,21 @@
     window.addEventListener("load", function () { setTimeout(fitBizName, 50); });
   } catch (e) {}
   window.liaFitBizName = fitBizName;
+
+  /* telefono: il selettore Giorno/Settimana/Mese del calendario sale nella riga in alto */
+  function placeSeg() {
+    var row = document.querySelector(".mainTopRow"), ctr = document.querySelector("#calSubApp .controls");
+    if (!row || !ctr) return;
+    var seg = ctr.querySelector(".seg") || row.querySelector(".seg");
+    if (!seg) return;
+    var ph = window.matchMedia("(max-width:699px)").matches;
+    if (ph && seg.parentNode !== row) row.insertBefore(seg, row.firstChild);
+    else if (!ph && seg.parentNode === row) ctr.insertBefore(seg, ctr.firstChild);
+  }
+  window.addEventListener("resize", placeSeg);
+  document.addEventListener("DOMContentLoaded", placeSeg);
+  window.addEventListener("load", placeSeg);
+  setTimeout(placeSeg, 300); setTimeout(placeSeg, 1200);
   window.liaMenuSync = syncProfile;
   function paintMenu() {
     var c = $("mnShareCard");
