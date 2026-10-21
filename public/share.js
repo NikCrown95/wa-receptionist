@@ -205,6 +205,21 @@
     var pdat = window.liaProfileData && window.liaProfileData.business, logoImg = (pdat && pdat.logo_url) || (live && live.logo_url) || "";
     var skinImg = logoImg || SKINS[String(raw.slug || "").toLowerCase()] || "";
     if (skinImg) { av.className = "mnAv skin" + (logoImg ? " lg" : ""); av.innerHTML = ""; av.style.setProperty("--skin", "url(" + skinImg + ")"); } else av.style.removeProperty("--skin");
+    try {
+      var mbEl = document.querySelector(".mainBiz"), mbRow = mbEl && mbEl.parentNode;
+      if (mbRow) {
+        var ma = $("mbAv");
+        if (!ma) {
+          ma = document.createElement("span"); ma.id = "mbAv"; ma.setAttribute("aria-hidden", "true");
+          mbRow.insertBefore(ma, mbEl);
+          ma.addEventListener("click", function () { mbEl.click(); });
+        }
+        ma.className = av.className.replace(/\bmnAv\b/, "mbAv");
+        ma.innerHTML = av.innerHTML;
+        ma.style.cssText = av.style.cssText;
+        ma.style.setProperty("--mnh", card.style.getPropertyValue("--mnh") || "200");
+      }
+    } catch (e) {}
     var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
     var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
     var nm = $("mnBizName"); if (nm) nm.textContent = name;

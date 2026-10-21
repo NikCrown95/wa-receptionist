@@ -271,3 +271,17 @@ body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
 :root:root #burgerMenu .mnShare .mnAv.skin.lg{background:#fff var(--skin) center/cover no-repeat;color:transparent;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
 :root:root #panelProfile .pf2 .pfHero .pfAvatar.hasLogo{padding:0;overflow:hidden;filter:none;background:#fff;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
 :root:root #panelProfile .pf2 .pfHero .pfAvatar.hasLogo::before{display:none}
+
+/* intestazione: logo (o icona) dell'attivita' accanto al nome */
+#mbAv{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;overflow:hidden;margin-right:10px;font:800 1.15rem Manrope,inherit;cursor:pointer;color:hsl(var(--mnh,200) 70% 72%);background:linear-gradient(150deg,hsl(var(--mnh,200) 50% 30%) 0%,hsl(var(--mnh,200) 45% 14%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh,200) 55% 55% / .45)}
+#mbAv svg{display:block;width:22px;height:22px;color:inherit}
+:root[data-theme="light"] #mbAv:not(.gym):not(.est):not(.car):not(.skin){color:hsl(var(--mnh,200) 65% 32%);background:linear-gradient(150deg,hsl(var(--mnh,200) 75% 92%) 0%,hsl(var(--mnh,200) 60% 80%) 100%);box-shadow:inset 0 0 0 1px hsl(var(--mnh,200) 45% 62% / .6)}
+#mbAv.est{background:url(/estetista/logo.png) center/cover no-repeat;color:transparent}
+#mbAv.car{background:url(/cartomanzia/logo.png) center/cover no-repeat;color:transparent}
+#mbAv.gym{background:url(/gym/logo.png?v=73) center/contain no-repeat;border-radius:0;overflow:visible;box-shadow:none;color:transparent}
+#mbAv.est svg,#mbAv.car svg,#mbAv.skin svg{display:none}
+:root:root #mbAv.skin{background:#fff var(--skin) center/contain no-repeat;color:transparent;box-shadow:0 0 0 1px rgba(128,140,155,.35)}
+:root:root #mbAv.skin.lg{background-size:cover}
+#mbAv + .mainBiz{min-width:0;flex:0 1 auto}
+#mbAv + .mainBiz #businessName{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden!important;white-space:normal!important;text-overflow:clip!important;font-size:1.2rem;line-height:1.1}
+#mbAv + .mainBiz small{white-space:nowrap}
