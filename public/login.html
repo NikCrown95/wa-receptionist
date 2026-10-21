@@ -47,6 +47,28 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
 .ov .bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--accent),#E6C77A)}
 .ov .msg{color:var(--muted);font-size:.9rem;text-align:center;min-height:1.4em;transition:opacity .25s}
 @media(prefers-reduced-motion:reduce){.mk::after,.mk img{animation-duration:3s}}
+/* look premium */
+html{background:radial-gradient(520px 340px at 50% 0%,rgba(45,210,220,.15),transparent 70%),radial-gradient(420px 300px at 100% 100%,rgba(230,199,122,.08),transparent 70%),#050608;background-attachment:fixed}
+body{background:transparent}
+.card{position:relative;border:0;border-radius:28px;padding:30px 24px 22px;background:linear-gradient(180deg,#121A25 0%,#0B1118 100%);box-shadow:0 34px 80px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.07) inset;animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(160deg,rgba(45,210,220,.6),rgba(255,255,255,.07) 38%,rgba(230,199,122,.4) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.logo{width:196px;height:46px;margin-bottom:22px;filter:drop-shadow(0 0 14px rgba(45,210,220,.35));animation:glow 3.8s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 28px rgba(45,210,220,.7))}}
+h1{font-size:1.45rem;font-weight:650;letter-spacing:-.025em}
+.sub{margin-bottom:22px}
+.sub::after{content:"";display:block;width:34px;height:2px;border-radius:2px;margin:16px auto 0;background:linear-gradient(90deg,var(--accent),#E6C77A)}
+label{font-size:.7rem;font-weight:650;letter-spacing:.09em;text-transform:uppercase;margin:16px 0 7px}
+.chk{font-size:.9rem;font-weight:400;letter-spacing:0;text-transform:none;margin:0}
+.inp{min-height:52px;border-radius:14px;background:#0A1017;border-color:#243044;transition:border-color .2s,box-shadow .2s}
+.inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(45,210,220,.16)}
+.btn{min-height:52px;border-radius:14px;letter-spacing:.01em;background:linear-gradient(180deg,#43E3EB 0%,#22BCC8 100%);box-shadow:0 10px 28px rgba(45,210,220,.28),0 1px 0 rgba(255,255,255,.4) inset;transition:transform .15s,box-shadow .2s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 14px 34px rgba(45,210,220,.36),0 1px 0 rgba(255,255,255,.4) inset}
+.btn:active{transform:none}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.card>.hint{margin-top:18px;padding-top:16px;border-top:1px solid transparent;border-image:linear-gradient(90deg,transparent,#2A3648,transparent) 1;font-size:.8rem}
+.card>.hint a{text-decoration:none}
+@media(prefers-reduced-motion:reduce){.logo,.card{animation:none}}
 </style>
 <link rel="preload" as="image" href="/brand/mark.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2"><link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon.png?v=2">
@@ -57,7 +79,7 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
   <div class="card">
     <span class="logo" role="img" aria-label="Prenolia"></span>
     <h1>Bentornato</h1>
-    <p class="sub">La tua agenda ti aspetta.</p>
+    <p class="sub">Accedi al tuo spazio di lavoro.</p>
     <form id="f" autocomplete="on">
       <label for="email">Email</label>
       <input class="inp" id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
@@ -105,7 +127,7 @@ if(j.need_code){loading(false);challenge=j.challenge;f.classList.add("hide");f2.
 enter(j)}).catch(function(e){loading(false);show(err,e.message)}).then(function(){go.disabled=false;go.textContent="Entra"})});
 f2.addEventListener("submit",function(e){e.preventDefault();err2.style.display="none";go2.disabled=true;go2.textContent="Un attimo…";loading(true);
 post("/api/business-auth?action=verify2fa",{challenge:challenge,code:document.getElementById("code").value}).then(enter).catch(function(e){loading(false);show(err2,e.message);if(e.restart)setTimeout(back,1800)}).then(function(){go2.disabled=false;go2.textContent="Conferma"})});
-function back(){challenge="";f2.classList.add("hide");f.classList.remove("hide");sub.textContent="La tua agenda ti aspetta.";document.getElementById("code").value="";err2.style.display="none"}
+function back(){challenge="";f2.classList.add("hide");f.classList.remove("hide");sub.textContent="Accedi al tuo spazio di lavoro.";document.getElementById("code").value="";err2.style.display="none"}
 document.getElementById("back").addEventListener("click",back);
 })();
 </script></body></html>
