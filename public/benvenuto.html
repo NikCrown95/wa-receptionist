@@ -227,6 +227,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 </main>
 
 
+<script src="/dash/logo-crop.js"></script>
 <script>
 var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
  domicilio:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
@@ -274,7 +275,7 @@ function prepLogo(file,cb){
 function logoRow(){
   var pv=h("div",{class:"logoprev"});if(S.logo){var im=h("img");im.src=S.logo;im.alt="";pv.appendChild(im)}else pv.textContent="+";
   var f=h("input",{type:"file",accept:"image/*",hidden:"hidden"});
-  f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;prepLogo(file,function(d){if(!d){S.err="Non riesco a leggere questa immagine. Prova con un'altra foto.";render();return}S.err="";S.logo=d;render()})};
+  f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;(window.PrenoliaCrop?function(f2,cb){window.PrenoliaCrop.open(f2,cb)}:prepLogo)(file,function(d){if(!d){render();return}S.err="";S.logo=d;render()})};
   var pick=chip(S.logo?"Cambia logo":"Carica logo",false,function(){f.click()});
   var bt=h("div",{class:"chips"},[pick]);if(S.logo)bt.appendChild(chip("Rimuovi",false,function(){S.logo="";render()}));
   return h("div",{class:"logorow"},[pv,h("div",{class:"logotx"},[h("b",{text:"Logo (facoltativo)"}),h("span",{text:"Lo vedranno i clienti nella pagina di prenotazione e sarà la tua foto del profilo."}),bt]),f])}

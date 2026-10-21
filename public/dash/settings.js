@@ -1189,9 +1189,9 @@ function pfRenderPoster(box,b,opts){
     pk.addEventListener('click',function(){fl.click()});
     fl.addEventListener('change',function(){
       var f=fl.files&&fl.files[0];fl.value='';if(!f)return;
-      stMsg('biLogoMsg','Carico…');pk.disabled=true;
-      stLogoPrep(f,function(err,data){
-        if(err){stMsg('biLogoMsg','Non riesco a leggere questa immagine. Prova con un’altra foto.',true);pk.disabled=false;return}
+      pk.disabled=true;
+      (window.PrenoliaCrop?function(f2,cb){window.PrenoliaCrop.open(f2,function(d){cb(d?null:new Error('cancel'),d)})}:stLogoPrep)(f,function(err,data){
+        if(err){stMsg('biLogoMsg',err.message==='cancel'?'':'Non riesco a leggere questa immagine. Prova con un’altra foto.',true);pk.disabled=false;return}
         api('POST',{action:'logo_set',data:data}).then(function(r){stLogoSet(r.logo_url);stMsg('biLogoMsg','Logo aggiornato.')}).catch(function(e){stMsg('biLogoMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.',true)}).then(function(){pk.disabled=false;setTimeout(function(){stMsg('biLogoMsg','')},4000)});
       });
     });
