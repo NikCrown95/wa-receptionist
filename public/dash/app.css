@@ -3182,3 +3182,4 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
   :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTopRow{align-items:center!important;gap:6px!important}
   :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #burgerBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #bellBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #liaRecapBtn{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
 }
+#panelOther .stThemes{grid-template-columns:repeat(2,minmax(0,1fr))}

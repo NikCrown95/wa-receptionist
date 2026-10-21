@@ -16,8 +16,8 @@
   var local=localLoad(); S.combos=[]; S.blocks=local.blocks||[];
 
   var themeButtons=document.querySelectorAll('#themePick button');
-  function themeChoice(){try{var t=localStorage.getItem('lia_theme_v2');if(t==='light'||t==='dark'||t==='auto')return t;var o=localStorage.getItem('lia_theme');if(o==='light'||o==='dark')return o}catch(e){}return 'dark'}
-  window.liaSetTheme=function(t,keep){var resolved=t==='auto'?((window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'):t;document.documentElement.dataset.theme=resolved;document.body.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;try{if(!keep)localStorage.setItem('lia_theme_v2',t)}catch(e){}themeButtons.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.theme===t?'true':'false')});};
+  function themeChoice(){try{var t=localStorage.getItem('lia_theme_v2');if(t==='light'||t==='dark')return t;var o=localStorage.getItem('lia_theme');if(o==='light'||o==='dark')return o}catch(e){}return 'dark'}
+  window.liaSetTheme=function(t,keep){var resolved=t==='light'?'light':'dark';document.documentElement.dataset.theme=resolved;document.body.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;try{if(!keep)localStorage.setItem('lia_theme_v2',t)}catch(e){}themeButtons.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.theme===t?'true':'false')});};
   window.liaSetTheme(themeChoice(),true);
 
   function api(method,body){
@@ -705,7 +705,7 @@ function pfRenderPoster(box,b,opts){
     var d=new Date(),today=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
     var b=blockGroups().filter(function(g){return g.to>=today}).length;
     stText('stSumBlocks',b?b+(b===1?' chiusura programmata':' chiusure programmate'):'Nessuna chiusura programmata');
-    var tb=document.querySelector('#themePick button[aria-pressed="true"] b');stText('stSumTheme',tb?tb.textContent:'Automatico');
+    var tb=document.querySelector('#themePick button[aria-pressed="true"] b');stText('stSumTheme',tb?tb.textContent:'Scuro');
     stText('hlpBiz',S.bizName||'\u2014');
     var pn=(window.liaProfileData&&window.liaProfileData.business&&window.liaProfileData.business.plan_name)||'';
     stText('hlpPlan',pn==='Base+Lia'?'Smart':(pn==='Base'?'Base':'\u2014'));
