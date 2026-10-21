@@ -444,7 +444,7 @@ else{render();
   fetch(API).then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,j:j}})}).then(function(o){
     if(!o.ok||!o.j||!o.j.business){fail("Il link non è più valido. Accedi con la tua email e password.");return}
     if(o.j.business.onboarded){location.replace("/api/agenda?t="+encodeURIComponent(TOKEN));return}
-    S.nome=String(o.j.business.name||"");S.ready=true;render()
+    S.nome=String(o.j.business.name||"");if(S.nome==="Nuova attività")S.nome="";S.ready=true;render()
   }).catch(function(){fail("Non c'è connessione. Ricarica la pagina.")})}
 </script>
 </body>

@@ -9,62 +9,105 @@
 <title>Prenolia – Registrati</title>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
-/* ABBOZZO: la pagina di registrazione vera la rifiniamo insieme. Serve a far arrivare il codice referral. */
-:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;color-scheme:dark}
+:root{--logo:url("/brand/prenolia-dark.png");--bg:#050608;--card:#0E131B;--card2:#161D29;--line:#1C2532;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--blue:#2F7BFF;--on-accent:#031016;--grad:linear-gradient(135deg,#2DD2DC,#2F7BFF);color-scheme:dark}
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
-h1,p{margin:0}button{font-family:inherit}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(620px 380px at 88% -60px,rgba(45,210,220,.2),transparent 70%),radial-gradient(560px 420px at -8% 110px,rgba(47,123,255,.14),transparent 70%);background-repeat:no-repeat;
+  padding:28px max(20px,env(safe-area-inset-right,0px)) 48px max(20px,env(safe-area-inset-left,0px))}
+h1,h2,p{margin:0}button{font-family:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
-.box{max-width:440px;margin:8vh auto 40px;padding:0 20px}
-.card{border-radius:24px;border:1px solid var(--line);background:var(--card);padding:28px 24px}
-.logo{display:block;width:176px;height:42px;margin:0 auto 18px;background:var(--logo) center / contain no-repeat}
-h1{font-size:1.3rem;text-align:center;margin:0 0 4px;letter-spacing:-0.01em}
-.sub{text-align:center;color:var(--muted);font-size:.92rem;margin:0 0 6px}
-.invite{margin:14px 0 0;padding:10px 14px;border-radius:12px;background:#0B2C33;color:#A5EDF2;font-size:.9rem;text-align:center}
-label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
-.inp{width:100%;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
-.inp:focus{outline:2px solid var(--accent);outline-offset:1px}
-.btn{width:100%;min-height:48px;margin-top:22px;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,480px);gap:72px;align-items:center;min-height:calc(100vh - 100px)}
+.side{display:flex;flex-direction:column;gap:30px}
+.logo{display:block;width:150px;height:36px;background:var(--logo) left center / contain no-repeat}
+.side h2{font-size:2.5rem;line-height:1.08;font-weight:800;letter-spacing:-.035em;text-wrap:balance;max-width:15ch}
+.side .lead{color:var(--muted);font-size:1.05rem;max-width:36ch}
+.path{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:0;position:relative}
+.path li{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:start;padding-bottom:22px;position:relative}
+.path li:last-child{padding-bottom:0}
+.path li::before{content:"";position:absolute;left:21px;top:44px;bottom:2px;width:2px;background:linear-gradient(var(--line2),transparent)}
+.path li:last-child::before{display:none}
+.path .n{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--card2);border:1px solid var(--line2);color:var(--accent)}
+.path li.now .n{background:var(--grad);color:var(--on-accent);border-color:transparent;box-shadow:0 0 0 6px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}
+.path b{display:block;font-size:1.02rem;font-weight:700;margin-top:2px}
+.path span{display:block;font-size:.88rem;color:var(--muted)}
+.card{border-radius:28px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card),#0B1017);padding:34px 32px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.95rem;margin:0 0 4px}
+.invite{margin:14px 0 0;padding:10px 14px;border-radius:12px;background:#0B2C33;color:#A5EDF2;font-size:.9rem}
+label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-weight:500}
+.inp{width:100%;min-height:50px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:1rem}
+.inp:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pwbox{position:relative}.pwbox .inp{padding-right:78px}
+.eye{position:absolute;right:6px;top:6px;height:38px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--accent);font-weight:600;font-size:.85rem;cursor:pointer}
+.btn{width:100%;min-height:54px;margin-top:22px;border:0;border-radius:14px;background:var(--grad);color:var(--on-accent);font:inherit;font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 12px 32px -12px rgba(45,210,220,.6)}
 .btn:disabled{opacity:.65;cursor:default}
 .err{margin-top:14px;background:#3a1c1c;color:#ffb4b4;padding:10px 14px;border-radius:12px;font-size:.9rem;line-height:1.4;display:none}
-.ok{display:none;text-align:center}
-.ok h1{margin-bottom:10px}
+.ok{display:none;text-align:center;padding:14px 0}
+.ok .mail{width:72px;height:72px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:var(--grad);color:var(--on-accent)}
+.ok .mail svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ok h1{margin-bottom:8px}
 .hint{margin-top:6px;font-size:.8rem;color:var(--muted)}
-.chk{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:.86rem;line-height:1.45;color:var(--muted)}
+.more{all:unset;cursor:pointer;display:inline-block;margin-top:14px;font-size:.88rem;color:var(--accent);font-weight:600}
+.more:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+#refwrap{display:none}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:.84rem;line-height:1.45;color:var(--muted)}
 .chk input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--accent)}
 .chk a{color:var(--accent)}
 .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
 .foot{margin-top:18px;text-align:center;font-size:.88rem;color:var(--muted)}
 .foot a{color:var(--accent)}
+@media (max-width:900px){
+  .shell{display:block;max-width:480px;min-height:0}
+  .side{gap:14px;margin-bottom:24px;align-items:center;text-align:center}
+  .logo{background-position:center;margin:0 auto}
+  .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}
+  .card{padding:26px 20px}.row2{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="card">
+<div class="shell">
+  <aside class="side">
     <div class="logo" role="img" aria-label="Prenolia"></div>
+    <h2>La tua agenda, pronta in pochi minuti</h2>
+    <p class="lead">Crea l'account e ti guidiamo passo passo: servizi, prezzi e orari. Alla fine Lia è già al lavoro per te.</p>
+    <ol class="path">
+      <li class="now"><div class="n">1</div><div><b>Crea l'account</b><span>Bastano email, telefono e password.</span></div></li>
+      <li><div class="n">2</div><div><b>Conferma l'email</b><span>Un click sul link e la prova gratuita di 14 giorni parte.</span></div></li>
+      <li><div class="n">3</div><div><b>Configura la tua agenda</b><span>Percorso guidato: attività, servizi, orari. Poi sei pronto.</span></div></li>
+    </ol>
+  </aside>
 
+  <main>
+  <div class="card">
     <form id="form" novalidate>
       <h1>Prova Prenolia</h1>
-      <p class="sub">Registrati e inizia la prova gratuita.</p>
+      <p class="sub">14 giorni gratis, senza carta di credito.</p>
       <div class="invite" id="invite" hidden>Sei stato invitato: la tua registrazione verrà collegata al link che hai ricevuto.</div>
-
-      <label for="name">Nome della tua attività</label>
-      <input class="inp" id="name" type="text" autocomplete="organization" maxlength="80" required>
-
-      <label for="refcode">Hai un codice invito? (facoltativo)</label>
-      <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
-      <p class="hint" id="refmsg"></p>
-
-      <label for="phone">Telefono</label>
-      <input class="inp" id="phone" type="tel" autocomplete="tel" inputmode="tel" required>
 
       <label for="email">Email</label>
       <input class="inp" id="email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" required>
 
-      <label for="pw">Password</label>
-      <input class="inp" id="pw" type="password" autocomplete="new-password" required>
-      <p class="hint">Almeno 8 caratteri, un numero e un carattere speciale.</p>
+      <div class="row2">
+        <div>
+          <label for="phone">Telefono</label>
+          <input class="inp" id="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+        </div>
+        <div>
+          <label for="pw">Password</label>
+          <div class="pwbox"><input class="inp" id="pw" type="password" autocomplete="new-password" required><button type="button" class="eye" id="eye" aria-label="Mostra la password">Mostra</button></div>
+        </div>
+      </div>
+      <p class="hint">Password: almeno 8 caratteri, un numero e un carattere speciale.</p>
+
+      <button type="button" class="more" id="refopen">Hai un codice invito?</button>
+      <div id="refwrap">
+        <label for="refcode">Codice invito (facoltativo)</label>
+        <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
+        <p class="hint" id="refmsg"></p>
+      </div>
 
       <input class="hp" id="hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -75,12 +118,14 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
     </form>
 
     <div class="ok" id="done">
+      <div class="mail"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div>
       <h1>Controlla la tua email</h1>
-      <p class="sub">Ti abbiamo scritto un link per confermare l'indirizzo. Appena lo apri, la prova parte.</p>
+      <p class="sub">Ti abbiamo scritto un link per confermare l'indirizzo. Appena lo apri, la prova parte e ti guidiamo nella configurazione.</p>
     </div>
   </div>
   <p class="foot">Hai già un account? <a href="/login.html">Accedi</a></p>
   <p class="foot"><a href="/privacy">Privacy</a> · <a href="/termini">Termini</a></p>
+  </main>
 </div>
 
 <script>
@@ -114,6 +159,11 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
       }).catch(function () {});
     }, 350);
   }
+  function openRef() { document.getElementById('refwrap').style.display = 'block'; document.getElementById('refopen').style.display = 'none'; }
+  document.getElementById('refopen').addEventListener('click', function () { openRef(); refInp.focus(); });
+  if (ref) openRef();
+  var pwI = document.getElementById('pw'), eye = document.getElementById('eye');
+  eye.addEventListener('click', function () { var h = pwI.type === 'password'; pwI.type = h ? 'text' : 'password'; eye.textContent = h ? 'Nascondi' : 'Mostra'; });
   refInp.value = ref;
   refInp.addEventListener('input', function () { saveRef(clean(refInp.value)); checkRef(); });
   if (ref) { document.getElementById('invite').hidden = false; checkRef(); }
@@ -129,7 +179,6 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: document.getElementById('name').value,
         type: 'altro',
         phone: document.getElementById('phone').value,
         email: document.getElementById('email').value,
@@ -145,6 +194,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:14px 0 6px}
         try { localStorage.removeItem(KEY); } catch (e) {}
         form.style.display = 'none';
         document.getElementById('done').style.display = 'block';
+        window.scrollTo(0, 0);
         return;
       }
       show((res.j && res.j.error) || 'Non siamo riusciti a registrarti. Riprova tra poco.');

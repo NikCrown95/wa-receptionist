@@ -213,7 +213,7 @@ function mailButton(link, label) {
 }
 function confirmMail(name, link) {
   const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Benvenuto in Prenolia</h2>'
-    + '<p style="line-height:1.5">Ciao ' + esc(name) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>14 giorni</b> parte subito.</p>'
+    + '<p style="line-height:1.5">Ciao' + (name === "Nuova attività" ? "" : " " + esc(name)) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>14 giorni</b> parte subito.</p>'
     + mailButton(link, "Conferma e inizia")
     + '<p style="line-height:1.5;color:#55627a;font-size:14px">Il link vale 24 ore. Non sei stato tu? Ignora questa email: non verrà creato nessun account.</p>');
   const text = "Benvenuto in Prenolia.\nConferma il tuo indirizzo e la prova gratuita di 14 giorni parte subito (il link vale 24 ore):\n" + link + "\n\nNon sei stato tu? Ignora questa email: non verrà creato nessun account.";
@@ -222,7 +222,7 @@ function confirmMail(name, link) {
 function alreadyMail(name) {
   const login = PUBLIC_URL + "/login.html", reset = PUBLIC_URL + "/reset.html";
   const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Hai già un account</h2>'
-    + '<p style="line-height:1.5">Ciao, qualcuno ha provato a registrare ' + esc(name) + ' con questo indirizzo, ma un account Prenolia esiste già.</p>'
+    + '<p style="line-height:1.5">Ciao, qualcuno ha provato a registrare ' + (name === "Nuova attività" ? "un account" : esc(name)) + ' con questo indirizzo, ma un account Prenolia esiste già.</p>'
     + mailButton(login, "Accedi")
     + '<p style="line-height:1.5;color:#55627a;font-size:14px">Non ricordi la password? <a href="' + reset + '" style="color:#0aa6b4">Recuperala qui</a>. Non sei stato tu? Puoi ignorare questa email.</p>');
   const text = "Esiste già un account Prenolia con questo indirizzo.\nAccedi: " + login + "\nPassword dimenticata: " + reset + "\n\nNon sei stato tu? Ignora questa email.";
@@ -343,13 +343,14 @@ module.exports = async (req, res) => {
     if (req.method === "POST" && action === "signup") {
       if (!signupOpen) return res.status(403).json({ error: "Le registrazioni aprono a breve." });
       if (body.hp) return res.status(200).json({ ok: true }); // campo trappola per i bot
-      const name = String(body.name || "").trim().replace(/\s+/g, " ");
+      // Il nome dell'attività si chiede nel percorso guidato dopo la conferma: qui basta un segnaposto.
+      const name = String(body.name || "").trim().replace(/\s+/g, " ") || "Nuova attività";
       const phone = String(body.phone || "").trim();
       const email = String(body.email || "").trim().toLowerCase();
       const password = String(body.password || "");
       const rawType = String(body.type || "").trim().toLowerCase();
       const type = SIGNUP_TYPES.includes(rawType) ? rawType : "altro";
-      if (name.length < 2 || name.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività (da 2 a 80 caratteri)." });
+      if (name.length < 2 || name.length > 80) return res.status(400).json({ error: "Il nome dell'attività non è valido." });
       if (!EMAIL_RE.test(email) || email.length > 200) return res.status(400).json({ error: "Controlla l'indirizzo email." });
       if (!/^[+\d][\d\s().-]{4,29}$/.test(phone)) return res.status(400).json({ error: "Controlla il numero di telefono." });
       if (body.accept_terms !== true) return res.status(400).json({ error: "Per registrarti devi accettare l'Informativa privacy e i Termini di servizio." });
@@ -365,7 +366,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({ ok: true });
       }
       const raw = crypto.randomBytes(32).toString("hex");
-      const slug = slugify(name) + "-" + crypto.randomBytes(2).toString("hex");
+      const slug = (name === "Nuova attività" ? "attivita" : slugify(name)) + "-" + crypto.randomBytes(2).toString("hex");
       const r = await rpc("signup_start", { p_email: email, p_password: password, p_name: name, p_slug: slug, p_type: type, p_phone: phone, p_token_hash: sha(raw), p_expires: new Date(Date.now() + CONFIRM_MS).toISOString(), p_ref: String(body.ref || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || null });
       if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
       await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch(() => {});
