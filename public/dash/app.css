@@ -3193,3 +3193,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #panelProfile #pfServices{max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;padding-right:0!important;margin-right:0!important}
 :root[data-theme="light"]:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) .mainTopRow .mainBiz small#sectionLabel{-webkit-text-fill-color:var(--ink)!important}
 @media(max-width:699px){#statsSubApp .revenue-legend{max-height:none!important;overflow:visible!important}}
+/* campanella: il numero delle notifiche resta agganciato al pulsante (prima volava nell'angolo dello schermo) */
+:root:root:root:root:root:root body .mainTop #bellBtn{position:relative!important;overflow:visible!important}
+:root:root:root:root:root:root body .mainTop #bellBtn .bellBadge{top:-3px!important;right:-3px!important;min-width:18px!important;height:18px!important;font-size:.64rem!important}
+:root:root:root:root:root:root body .mainTop #bellBtn.has{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
