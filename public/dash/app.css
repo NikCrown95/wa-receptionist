@@ -3224,3 +3224,16 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .wkp-d.sel::before{background:rgba(255,255,255,.3)}
 .wkp-d.off::before{display:none}
 .wkp-d.sel.off{background:color-mix(in srgb,var(--accent) 72%,#06141a)}
+/* riempimento piu' leggibile: colore pieno e linea sul livello, cosi' si distinguono giorni piu' o meno carichi */
+.wkp-d{background:color-mix(in srgb,var(--card) 88%,#000)}
+.wkp-d::before{background:color-mix(in srgb,var(--accent) 68%,var(--card))!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.38)}
+.wkp-d.sel{background:color-mix(in srgb,var(--accent) 38%,#06141a)}
+.wkp-d.sel::before{background:color-mix(in srgb,var(--accent) 90%,#fff)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.55)}
+.wkp-d.off{background:transparent}
+.wkp-d.today:not(.sel) b{color:var(--ink)}
+.wkp-d b,.wkp-d small{text-shadow:0 1px 2px rgba(0,0,0,.35)}
+:root[data-theme="light"] .wkp-d{background:var(--card)}
+:root[data-theme="light"] .wkp-d.off{background:transparent}
+:root[data-theme="light"] .wkp-d::before{background:color-mix(in srgb,var(--accent) 55%,#fff)!important}
+.wkp-d:not(.sel) small{color:var(--ink);opacity:.7}
+:root[data-theme="light"] .wkp-d b,:root[data-theme="light"] .wkp-d small{text-shadow:none}
