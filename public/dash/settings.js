@@ -583,9 +583,14 @@ function pfRenderPoster(box,b,opts){
 
   function renderBusinessProfile(d){
     var b=d.business||{},pn=b.plan_name||'',premium=(pn==='Base+Lia'),known=(pn==='Base'||premium),sub=b.subscription||null;
-    var bd=document.getElementById('pfBadge'),cd0=pfCountdown(sub);
-    if(bd){if(!known){bd.hidden=true;bd.innerHTML=''}else{bd.hidden=false;bd.innerHTML='';var pb=document.createElement('button');pb.type='button';pb.className='pfPlanBtn'+(cd0&&cd0.cls?' '+cd0.cls:'');pb.setAttribute('aria-label','Apri il tuo piano');var pim=document.createElement('img');pim.className='planImg'+(premium?' prem':'');pim.src=premium?PLAN_IMG.smart:PLAN_IMG.base;pim.alt='Piano '+(premium?'Smart':'Base');pb.appendChild(pim);
-      if(cd0){var sm=document.createElement('small');sm.textContent=cd0.txt+' ›';pb.appendChild(sm);var br=document.createElement('span');br.className='pfPlanBar';var fi=document.createElement('i');fi.style.width=cd0.pct.toFixed(1)+'%';br.appendChild(fi);pb.appendChild(br)}
+    var bd=document.getElementById('pfPlanCard'),cd0=pfCountdown(sub);
+    if(bd){if(!known){bd.hidden=true;bd.innerHTML=''}else{bd.hidden=false;bd.innerHTML='';
+      var pb=document.createElement('button');pb.type='button';pb.className='pfPlan'+(cd0&&cd0.cls?' '+cd0.cls:'');pb.setAttribute('aria-label','Apri il tuo piano');
+      var pim=document.createElement('img');pim.className='planImg pfPlanImg'+(premium?' prem':'');pim.src=premium?PLAN_IMG.smart:PLAN_IMG.base;pim.alt='Piano '+(premium?'Smart':'Base');pb.appendChild(pim);
+      var ptx=document.createElement('span');ptx.className='pfPlanTx';
+      var psm=document.createElement('small');psm.textContent=cd0?cd0.txt:'Piano attivo';ptx.appendChild(psm);
+      if(cd0){var br=document.createElement('span');br.className='pfPlanBar';var fi=document.createElement('i');fi.style.width=cd0.pct.toFixed(1)+'%';br.appendChild(fi);ptx.appendChild(br)}
+      pb.appendChild(ptx);var chv=document.createElement('span');chv.className='pfPlanGo';chv.setAttribute('aria-hidden','true');chv.textContent='\u203A';pb.appendChild(chv);
       pb.addEventListener('click',function(){var m=document.getElementById('menuTabOther');if(m)m.click();setTimeout(function(){if(window.liaSettingsOpen)window.liaSettingsOpen('subscription')},0)});bd.appendChild(pb)}}
     var nm=document.getElementById('pfName');if(nm)nm.textContent=b.name||'La tua attività';
     try{liaDecorateHero(b,d)}catch(e){}try{liaPackGate(b)}catch(e){}

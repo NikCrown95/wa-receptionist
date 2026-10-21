@@ -3197,3 +3197,20 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 :root:root:root:root:root:root body .mainTop #bellBtn{position:relative!important;overflow:visible!important}
 :root:root:root:root:root:root body .mainTop #bellBtn .bellBadge{top:-3px!important;right:-3px!important;min-width:18px!important;height:18px!important;font-size:.64rem!important}
 :root:root:root:root:root:root body .mainTop #bellBtn.has{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
+/* Scheda attivita': il piano e' una card a se', subito sotto la testata */
+#panelProfile .pfPlanCard{padding:0;margin:14px 0 0;overflow:hidden}
+#panelProfile .pfPlanCard[hidden]{display:none}
+#panelProfile .pfPlan{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:14px 16px;border:0;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#panelProfile .pfPlan .pfPlanImg{display:block;height:40px;width:auto;flex:none}
+#panelProfile .pfPlanTx{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:9px}
+#panelProfile .pfPlan small{display:block;font-size:.98rem;font-weight:800;line-height:1.2;color:var(--ink);padding:0;border:0;background:none}
+#panelProfile .pfPlan.warn small{color:#E8A04A}
+#panelProfile .pfPlan.exp small{color:#E5726A}
+#panelProfile .pfPlanBar{display:block;height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+#panelProfile .pfPlanBar i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+#panelProfile .pfPlan.warn .pfPlanBar i{background:#E8A04A}
+#panelProfile .pfPlan.exp .pfPlanBar i{background:#E5726A}
+#panelProfile .pfPlanGo{flex:none;font-size:1.6rem;line-height:1;color:var(--muted)}
+#panelProfile .pfPlan:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:16px}
+/* nome ripetuto nell'intestazione della Scheda: nascosto in modo definitivo */
+:root:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) #businessHome #businessName{display:none!important;font-size:0!important;height:0!important;margin:0!important;padding:0!important}
