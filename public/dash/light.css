@@ -118,3 +118,6 @@
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .jumpToday{background:transparent!important;color:#17808C!important;-webkit-text-fill-color:#17808C!important;font-weight:700}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .range{color:#0F5F6B!important}
 }
+/* Settimana da smartphone: il giorno corrente risalta anche nel tema chiaro */
+:root:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.today:not(.sel){background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent) inset,0 8px 18px -10px var(--accent)!important}
+:root:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.past:not(.sel){opacity:.5}

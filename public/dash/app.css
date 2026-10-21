@@ -3286,3 +3286,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 :root[data-theme="light"] #statsSubApp .kpi .delta.down{color:#C0392B}
 #statsSubApp .growthchart .line2{stroke:var(--accent)}
 #statsSubApp .growthchart .dot2{stroke:var(--accent)}
+/* Settimana da smartphone: il giorno corrente risalta, i giorni passati sono leggermente oscurati, quelli futuri restano normali */
+.wkp-d.past:not(.sel){opacity:.5}
+.wkp-d.today:not(.sel){border-color:var(--accent)!important;box-shadow:0 0 0 1.5px var(--accent) inset,0 6px 16px -8px var(--accent)!important;background:var(--accent-soft)!important}
+.wkp-d.today:not(.sel) small,.wkp-d.today:not(.sel) b{color:var(--accent-ink,var(--accent))!important}

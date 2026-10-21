@@ -80,7 +80,7 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
   var CHAN_LABEL = {manuale:'Manuale (tu)', whatsapp:'WhatsApp', telegram:'Telegram', web:'Chat sul sito', selfservice:'Prenotazione online'};
   var CHAN_COLOR = {manuale:'var(--muted)', whatsapp:'var(--accent)', telegram:'var(--sec)', web:'var(--ter)', selfservice:'var(--ter)'};
   var MONTHS = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  var eur = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+  var eur = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0, useGrouping:'always'});
 
   var period = 'month';
 
@@ -397,7 +397,7 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
       var y = padT + innerH * t;
       svg.appendChild(svgEl('line', {class:'grid-l', x1:padL, x2:W-padR, y1:y, y2:y}));
       var lab = svgEl('text', {class:'axis', x:4, y:y+4});
-      lab.textContent = Math.round(max * (1-t));
+      lab.textContent = new Intl.NumberFormat('it-IT',{useGrouping:'always',maximumFractionDigits:0}).format(Math.round(max * (1-t)));
       svg.appendChild(lab);
     });
 
