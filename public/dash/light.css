@@ -28,8 +28,7 @@
 :root[data-theme="light"] .seg button[aria-pressed="true"],:root[data-theme="light"] .seg button.on{background:var(--accent-grad);box-shadow:var(--lg-glow);color:#fff}
 :root[data-theme="light"] .arrow{background:rgba(255,255,255,.85);border-color:rgba(18,86,108,.14)}
 /* schede */
-:root[data-theme="light"] .ag-card,:root[data-theme="light"] .day-hero-main,:root[data-theme="light"] .day-hero-next,:root[data-theme="light"] .ag-summary > *,
-:root[data-theme="light"] .stCard,:root[data-theme="light"] .stList,:root[data-theme="light"] .pfCard,:root[data-theme="light"] .set-section,
+:root[data-theme="light"] .ag-card,:root[data-theme="light"] .day-hero-main,:root[data-theme="light"] .day-hero-next,:root[data-theme="light"] .stCard,:root[data-theme="light"] .stList,:root[data-theme="light"] .pfCard,:root[data-theme="light"] .set-section,
 :root[data-theme="light"] #panelStats [class*="card" i],:root[data-theme="light"] #panelClients [class*="card" i]{
   background:linear-gradient(180deg,#FFFFFF 0%,#FAFDFE 100%);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
 :root[data-theme="light"] .ag-card{transition:transform .15s ease,box-shadow .15s ease}
@@ -48,3 +47,8 @@
 /* campi */
 :root[data-theme="light"] .set-input,:root[data-theme="light"] .nw-in,:root[data-theme="light"] input.inp{background:#F4F9FB;border-color:#D3E1E8}
 :root[data-theme="light"] .set-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(45,195,207,.25)}
+
+/* scheda principale del giorno: tinta turchese-blu come nel tema scuro */
+:root[data-theme="light"] .day-hero-main{background:linear-gradient(135deg,#DDF5F7 0%,#E7F0FD 100%);border-color:rgba(30,143,156,.28)}
+:root[data-theme="light"] .day-hero-title{color:#0C1F29}
+:root[data-theme="light"] .ag-summary{color:var(--muted)}
