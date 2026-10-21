@@ -6,11 +6,13 @@ window.liaServiceSheet=function(v,onSave,onDelete){
   sh.innerHTML='<div class="grab"></div><h2>Modifica servizio</h2><p class="lsub">Prezzo e durata valgono per le nuove prenotazioni.</p>'+
    '<div class="lf"><label for="lsName">Nome</label><input id="lsName" type="text" autocomplete="off"></div>'+
    '<div class="lrow"><div class="lf"><label for="lsPrice">Prezzo (€)</label><input id="lsPrice" type="text" inputmode="decimal"></div><div class="lf"><label for="lsMin">Durata (min)</label><input id="lsMin" type="text" inputmode="numeric"></div></div>'+
+   (v.showHome?'<div class="lswrow"><div><b>A domicilio</b><span>Lo fai a casa del cliente</span></div><button type="button" class="sw2" id="lsHome" role="switch" aria-label="A domicilio"></button></div>':'')+
    '<div class="lerr" role="alert" hidden></div>'+
    '<button type="button" class="lb lsave">Salva</button><button type="button" class="lb ldel">Disattiva servizio</button><button type="button" class="lb lcancel">Annulla</button>';
   document.body.appendChild(bg);document.body.appendChild(sh);
   var $=function(q){return sh.querySelector(q)};
   $('#lsName').value=v.name||'';$('#lsPrice').value=String(v.price==null?'':v.price).replace('.',',');$('#lsMin').value=v.min==null?'':v.min;
+  var home=!!v.home,hb=$('#lsHome');if(hb){hb.setAttribute('aria-checked',home?'true':'false');hb.addEventListener('click',function(){home=!home;hb.setAttribute('aria-checked',home?'true':'false')})}
   var err=$('.lerr');function fail(m){err.textContent=m;err.hidden=false}
   function close(){bg.classList.remove('on');sh.classList.remove('on');document.removeEventListener('keydown',esc);setTimeout(function(){bg.remove();sh.remove()},300)}
   function esc(e){if(e.key==='Escape')close()}
@@ -22,7 +24,7 @@ window.liaServiceSheet=function(v,onSave,onDelete){
     if(!(p>=0))return fail('Il prezzo deve essere un numero, per esempio 18 o 12,50.');
     if(!(d>=5))return fail('La durata deve essere di almeno 5 minuti.');
     var b=$('.lsave');b.disabled=true;b.textContent='Salvo…';err.hidden=true;
-    Promise.resolve(onSave({name:n,price:p,min:d})).then(close).catch(function(e){b.disabled=false;b.textContent='Salva';fail((e&&e.message)||'Non sono riuscito a salvare. Riprova.')});
+    Promise.resolve(onSave({name:n,price:p,min:d,home:home,showHome:!!v.showHome})).then(close).catch(function(e){b.disabled=false;b.textContent='Salva';fail((e&&e.message)||'Non sono riuscito a salvare. Riprova.')});
   });
   $('.ldel').addEventListener('click',function(){
     var box=document.createElement('div');box.className='lconf';
