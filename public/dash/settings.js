@@ -37,7 +37,7 @@
       row.innerHTML='<span class="swatch"></span><span class="info"><b></b><span></span></span><button type="button" class="iconbtn2 svcChev" data-act="edit" title="Modifica" aria-label="Modifica servizio">›</button>';
       row.querySelector('.swatch').style.background='var(--'+({a:'accent',s:'sec',t:'ter',u:'qua',v:'qui'})[window.liaSvcColor(s.name)]+')';
       row.querySelector('.info b').textContent=s.name;row.querySelector('.info span').textContent=eur.format(s.price)+' · '+s.duration_min+' min';
-      row.onclick=function(){window.liaServiceSheet({name:s.name,price:s.price,min:s.duration_min,home:s.home,showHome:svcHomeOn()},function(v){var u={action:'service_update',id:s.id,name:v.name,price_eur:v.price,duration_min:v.min};if(v.showHome)u.at_customer_place=!!v.home;return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:s.id}).then(loadRemote)});};
+      row.onclick=function(){window.liaServiceSheet({name:s.name,price:s.price,min:s.duration_min,home:s.home,showHome:svcHomeOn(),showUnits:true,maxUnits:s.maxUnits||1},function(v){var u={action:'service_update',id:s.id,name:v.name,price_eur:v.price,duration_min:v.min};if(v.showHome)u.at_customer_place=!!v.home;if((v.maxUnits||1)!==(s.maxUnits||1))u.max_units=v.maxUnits;return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:s.id}).then(loadRemote)});};
       box.appendChild(row);
     });
     var hwp=document.getElementById('svcNewHomeWrap');if(hwp)hwp.hidden=!svcHomeOn();
@@ -675,7 +675,7 @@ function pfRenderPoster(box,b,opts){
   function applyRemote(d){
       var pv=window.liaProfileData;if(pv&&pv.business&&d.business&&d.business.subscription===undefined&&pv.business.subscription!==undefined){d.business.subscription=pv.business.subscription;d.business.public_phone=pv.business.public_phone;d.business.public_instagram=pv.business.public_instagram;d.business.public_facebook=pv.business.public_facebook}
       window.liaProfileData=d;writeProfileCache(d);
-      S.bizName=d.business.name;S.services=d.services.map(function(x){return {id:x.id,name:x.name,price:Number(x.price_eur||0),duration_min:x.duration_min,home:!!x.at_customer_place}});S.combos=(d.packages||[]).map(function(x){return {id:x.id,name:x.name,serviceIds:x.service_ids||[],price:Number(x.price_eur||0),duration_min:x.duration_min}});S.blocks=(d.blocks||[]).map(function(x){return {id:x.id,date:x.date,from:x.full_day?null:x.from,to:x.full_day?null:x.to}});S.hours={};
+      S.bizName=d.business.name;S.services=d.services.map(function(x){return {id:x.id,name:x.name,price:Number(x.price_eur||0),duration_min:x.duration_min,home:!!x.at_customer_place,maxUnits:x.max_units||1}});S.combos=(d.packages||[]).map(function(x){return {id:x.id,name:x.name,serviceIds:x.service_ids||[],price:Number(x.price_eur||0),duration_min:x.duration_min}});S.blocks=(d.blocks||[]).map(function(x){return {id:x.id,date:x.date,from:x.full_day?null:x.from,to:x.full_day?null:x.to}});S.hours={};
       (d.hours||[]).forEach(function(h){var wd=Number(h.weekday),op=String(h.opens||'').slice(0,5),cl=String(h.closes||'').slice(0,5);if(wd<0||wd>7||!op||!cl)return;var k=String(wd===0?6:(wd-1));if(!S.hours[k])S.hours[k]=[];S.hours[k].push({open:op,close:cl})});
       for(var i=0;i<7;i++)if(!S.hours[i])S.hours[i]=[];
       if(bizInput)bizInput.value=S.bizName;var be=document.getElementById('businessName');if(be)be.textContent=S.bizName;

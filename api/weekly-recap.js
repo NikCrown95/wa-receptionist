@@ -12,6 +12,7 @@
 
 const { sb } = require("../lib/owner.js");
 const { getAccess } = require("../lib/access.js");
+const { apptUnits } = require("../lib/staff.js");
 
 // Canali con cui prenota Lia (calendario online "selfservice" e inserimenti "manuale" restano fuori)
 const LIA_CHANNELS = ["whatsapp", "telegram", "web", "webchat"];
@@ -58,14 +59,14 @@ module.exports = async (req, res) => {
           "appointments?business_id=eq." + biz.id +
             "&status=eq.confirmed&channel=in.(" + LIA_CHANNELS.join(",") + ")" +
             "&created_at=gte." + encodeURIComponent(sinceIso) +
-            "&select=id,services(price_eur)&limit=2000"
+            "&select=id,units,services(price_eur)&limit=2000"
         );
         if (!ap.ok || !Array.isArray(ap.data)) { out.failed++; continue; }
 
         const count = ap.data.length;
         if (!count) { out.skipped_zero++; continue; }
         const amount = Math.round(
-          ap.data.reduce((sum, a) => sum + (Number(a.services && a.services.price_eur) || 0), 0)
+          ap.data.reduce((sum, a) => sum + (Number(a.services && a.services.price_eur) || 0) * apptUnits(a), 0)
         );
         const tz = biz.timezone || "Europe/Rome";
         const week = weekKey(now, tz);
