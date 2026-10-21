@@ -64,3 +64,6 @@
 }
 /* Calendario da telefono: i pulsanti in alto sono fissi, quindi la testata non deve avere il vetro sfocato (lo rende contenitore e li nasconde) */
 :root[data-theme="light"] body.lia-sec-cal .mainTop{-webkit-backdrop-filter:none;backdrop-filter:none;background:transparent;border-bottom-color:transparent}
+/* Menu: la foto dell'attività (es. Style2) si vede anche col tema chiaro, non resta il quadrato lilla vuoto */
+:root[data-theme="light"] #burgerMenu .mnShare .mnAv.skin:not(.lg){background:#fff var(--skin) center/contain no-repeat!important;color:transparent!important;border:0;box-shadow:0 0 0 1px rgba(128,140,155,.35)!important}
+:root[data-theme="light"] #burgerMenu .mnShare .mnAv.skin svg{display:none}
