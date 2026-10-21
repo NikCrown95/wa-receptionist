@@ -3263,3 +3263,26 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 }
 /* Statistiche: le sezioni nascoste (Nuovi vs abituali, Occupazione per giorno, Fasce orarie) restano nascoste anche se hanno un display proprio */
 #panelStats .row2[hidden],#panelStats .panel[hidden]{display:none!important}
+/* Statistiche piu' curate: riquadri con numeri grandi e il primo in evidenza, grafici nei colori del marchio, linee guida leggere */
+#statsSubApp .kpi{position:relative;overflow:hidden;padding:18px 18px 16px;border-radius:22px;background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 90%,var(--accent) 10%));box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 24px -16px rgba(0,0,0,.35)}
+#statsSubApp .kpi .lbl{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#statsSubApp .kpi .val{margin-top:10px;font-size:2.05rem;font-weight:800;letter-spacing:-.035em;line-height:1.05;font-variant-numeric:tabular-nums}
+#statsSubApp .kpi .delta{margin-top:8px;font-size:.8rem;line-height:1.35}
+#statsSubApp .kpi:nth-child(1){background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 62%,#06222a));border-color:transparent;color:#fff;box-shadow:0 16px 30px -16px color-mix(in srgb,var(--accent) 80%,#000)}
+#statsSubApp .kpi:nth-child(1) .lbl,#statsSubApp .kpi:nth-child(1) .val,#statsSubApp .kpi:nth-child(1) .delta{color:#fff}
+#statsSubApp .kpi:nth-child(1) .lbl{opacity:.82}
+#statsSubApp .kpi:nth-child(1) .delta{opacity:.88;font-weight:500}
+#statsSubApp .kpi:nth-child(1) .range{background:rgba(255,255,255,.16);border-color:transparent;color:#fff}
+#statsSubApp .kpi:nth-child(2) .val{color:var(--accent-ink,var(--accent))}
+#statsSubApp .panel{border-radius:22px;padding:20px 18px 18px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 26px -18px rgba(0,0,0,.35)}
+#statsSubApp .panel h2{font-size:1.02rem;font-weight:750;letter-spacing:-.01em}
+#statsSubApp .panel .sub{margin-top:3px;font-size:.78rem;color:var(--muted)}
+#statsSubApp .linechart .grid-l{stroke:var(--line);stroke-dasharray:3 5;opacity:.9}
+#statsSubApp .linechart .line,#statsSubApp .growthchart .line2{stroke-width:3}
+#statsSubApp .minibar .bar,#statsSubApp .barchart .bar{fill:var(--accent);rx:4px;ry:4px}
+#statsSubApp .linechart .axis,#statsSubApp .growthchart .axis,#statsSubApp .minibar .axis,#statsSubApp .barchart .axis{font-size:10.5px;font-weight:500}
+@media(max-width:699px){#statsSubApp .kpi .lbl{min-height:2.5em;display:flex;align-items:flex-start}#statsSubApp .kpi .val{margin-top:6px}}
+:root[data-theme="light"] #statsSubApp .kpi .delta.up{color:#12805A}
+:root[data-theme="light"] #statsSubApp .kpi .delta.down{color:#C0392B}
+#statsSubApp .growthchart .line2{stroke:var(--accent)}
+#statsSubApp .growthchart .dot2{stroke:var(--accent)}
