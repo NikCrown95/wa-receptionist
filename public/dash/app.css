@@ -3121,3 +3121,21 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 :root:root:root:root:root body.lia-sec-cal #calSubApp .controls{padding-top:10px!important;row-gap:10px!important;padding-bottom:12px!important;margin-bottom:10px!important}
 :root:root:root:root:root body.lia-sec-cal .mainTopRow{min-height:0!important;padding:10px 16px 6px!important}
 }
+
+/* Settimana da smartphone: piu' compatta, il totale settimanale sta accanto al titolo */
+@media(max-width:699px){
+#liaWeekTotal{flex:none;align-self:center;font-size:.74rem;font-weight:800;color:var(--accent-ink,var(--accent));background:var(--accent-soft,rgba(45,210,220,.12));border-radius:20px;padding:5px 10px;white-space:nowrap}
+#liaWeekTotal[hidden]{display:none}
+:root:root:root:root:root body.lia-sec-cal.lia-week #calSubApp .controls .range{flex:1 1 0!important;width:auto!important;min-width:0!important}
+#weekGrid.wkp{padding-top:2px}
+.wkp-det{margin-top:12px}
+}
+@media(max-width:699px){
+:root:root:root:root:root body.lia-sec-cal.lia-week #calSubApp .controls .range{order:0;flex:1 1 0!important}
+body.lia-sec-cal.lia-week #liaWeekTotal{order:1}
+body.lia-sec-cal.lia-week #calSubApp .controls::after{content:"";order:2;flex:0 0 100%;height:0}
+body.lia-sec-cal.lia-week #calSubApp .controls > :not(.range):not(#liaWeekTotal):not(.seg){order:3}
+}
+@media(max-width:699px){
+body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
+}
