@@ -52,3 +52,8 @@
 :root[data-theme="light"] .day-hero-main{background:linear-gradient(135deg,#DDF5F7 0%,#E7F0FD 100%);border-color:rgba(30,143,156,.28)}
 :root[data-theme="light"] .day-hero-title{color:#0C1F29}
 :root[data-theme="light"] .ag-summary{color:var(--muted)}
+/* Disponibilita': testata colorata con testo bianco leggibile e voce attiva piu' luminosa */
+:root[data-theme="light"] .avHd.flat{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 62%,#1F4FB8));border:0;box-shadow:0 18px 36px -18px color-mix(in srgb,var(--c,var(--accent)) 70%,transparent)}
+:root[data-theme="light"] .avHd.flat .avHt h2,:root[data-theme="light"] .avHd.flat .avHt p{color:#fff}
+:root[data-theme="light"] .avSi.on{background:linear-gradient(135deg,var(--c,var(--accent)),color-mix(in srgb,var(--c,var(--accent)) 76%,#2F6FD6));box-shadow:0 14px 28px -14px color-mix(in srgb,var(--c,var(--accent)) 80%,transparent)}
+:root[data-theme="light"] .avPane,:root[data-theme="light"] .avSi:not(.on){background:linear-gradient(180deg,#fff,#FAFDFE);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
