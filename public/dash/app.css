@@ -3229,3 +3229,8 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .wkp-d{padding:7px 0 7px!important;min-height:0!important}
 .wkp-d b{margin:2px 0 0!important}
 .wkp-n{margin-top:3px}
+
+/* Giorno da smartphone: la card "La tua giornata" e l'elenco partono piu' in alto e hanno il bordo sinistro allineato al "21" (e a destra ai pulsanti) */
+@media(max-width:699px){
+:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #dayPanel{margin:-20px -8px 0!important}
+}
