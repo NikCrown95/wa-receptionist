@@ -96,3 +96,26 @@
 @media(max-width:699px){
 :root[data-theme="light"] body.lia-sec-cal #calSubApp .controls{background:#fff!important;box-shadow:0 12px 28px -20px rgba(20,20,15,.35)!important}
 }
+
+/* Look chiaro v3 (scelto da Nico, variante "H"): testata petrolio come il tema scuro, scheda del giorno turchese piena, schede bianche con ombra netta su fondo ghiaccio */
+:root[data-theme="light"],body[data-theme="light"]{--bg:#E8EEEF;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F3F7F7;--line:#D5E0E1;--line2:#D5E0E1;--ink:#10252A;--muted:#55686B;--accent:#17808C;--on-accent:#FFFFFF;--accent-soft:#DDEFF0;--accent-ink:#0F5F6B;--accent-grad:linear-gradient(135deg,#17808C,#0F5F6B);--sec:#17808C;--sec-soft:#DDEFF0;--lg-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14);--lg-glow:0 8px 18px -8px #17808C}
+:root[data-theme="light"] body,html[data-theme="light"] body{background:#E8EEEF!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card:not(.is-past),:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d:not(.sel){background:#fff!important;border-color:transparent!important;box-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14)!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card.is-past{background:#F4F7F7!important;border-color:transparent!important;box-shadow:0 2px 6px -3px rgba(8,52,60,.18)!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.sel{background:linear-gradient(135deg,#17808C,#0F5F6B)!important;border-color:transparent!important;box-shadow:0 10px 22px -8px #17808C!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main{background:linear-gradient(135deg,#17808C 0%,#0F5F6B 100%)!important;border-color:transparent!important;box-shadow:0 14px 28px -14px #0F5F6B!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:rgba(255,255,255,.82)!important;-webkit-text-fill-color:rgba(255,255,255,.82)!important}
+/* Smartphone: testata petrolio con testi chiari */
+@media(max-width:699px){
+:root:root:root:root:root:root:root:root:root[data-theme="light"] body .mainTop,:root:root:root:root:root:root:root:root:root[data-theme="light"] body.lia-sec-cal #calSubApp > header.top,:root:root:root:root:root:root:root:root:root[data-theme="light"] body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls{background:#0F2A30!important;--ink:#fff;--muted:rgba(255,255,255,.78);--line:rgba(255,255,255,.16);--line2:rgba(255,255,255,.16);color:#fff!important;box-shadow:none!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .range,:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .range *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .seg{background:rgba(255,255,255,.16)!important;border-color:transparent!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button{background:transparent!important;border-color:transparent!important;color:rgba(255,255,255,.78)!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button[aria-pressed="true"],:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button.on{background:#fff!important;color:#0F2A30!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .arrow,:root:root:root:root:root:root:root:root:root[data-theme="light"] .mainTopRow button{background:rgba(255,255,255,.16)!important;border-color:transparent!important;color:#fff!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN{background:#fff!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN,:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN *{color:#0F2A30!important;-webkit-text-fill-color:#0F2A30!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .jumpToday{background:transparent!important;color:#8EE0EA!important;-webkit-text-fill-color:#8EE0EA!important;font-weight:700}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .mainTopRow .mainBiz,:root:root:root:root:root:root:root:root:root[data-theme="light"] .mainTopRow .mainBiz small{color:#fff!important;-webkit-text-fill-color:#fff!important}
+}
