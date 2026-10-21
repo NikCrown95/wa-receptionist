@@ -104,7 +104,7 @@
 
   function download() {
     var ids = selIds(); if (!ids.length || busy) return;
-    var r = range(), url = location.pathname + "?t=" + encodeURIComponent(token) + "&export=1&fmt=" + S.fmt + "&s=" + encodeURIComponent(ids.join(","));
+    var r = range(), url = "/api/agenda?t=" + encodeURIComponent(token) + "&export=1&fmt=" + S.fmt + "&s=" + encodeURIComponent(ids.join(","));
     if (r.from) url += "&from=" + r.from; if (r.to) url += "&to=" + r.to;
     if (r.from && r.to && r.from > r.to) { msg("La data “Dal” è dopo la data “Al”.", true); return; }
     busy = true; render();
@@ -152,7 +152,7 @@
     if (loading) return;
     if (meta && !force && Date.now() - loadedAt < 60000) return;
     loading = true; if (!meta) render();
-    fetch(location.pathname + "?t=" + encodeURIComponent(token) + "&export=1&meta=1", { cache: "no-store" })
+    fetch("/api/agenda?t=" + encodeURIComponent(token) + "&export=1&meta=1", { cache: "no-store" })
       .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "errore"); return d; }); })
       .then(function (d) {
         var first = !meta;
