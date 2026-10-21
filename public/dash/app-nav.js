@@ -92,11 +92,11 @@
     window.liaClientsPromise=window.liaGetHistory().then(function(data){
       var now=new Date(),byPhone={},ns={};
       (data.appointments||[]).forEach(function(a){
-        if(a.status==='no_show'&&a.customer_phone){ns[a.customer_phone]=(ns[a.customer_phone]||0)+1;if(!byPhone[a.customer_phone])byPhone[a.customer_phone]={name:a.customer_name,phone:a.customer_phone,visits:0,lastDate:null,past:[],next:null,svc:{}};return}
+        if(a.status==='no_show'&&a.customer_phone){ns[a.customer_phone]=(ns[a.customer_phone]||0)+1;if(!byPhone[a.customer_phone])byPhone[a.customer_phone]={name:a.customer_name,phone:a.customer_phone,email:'',visits:0,lastDate:null,past:[],next:null,svc:{}};if(a.customer_email)byPhone[a.customer_phone].email=a.customer_email;return}
         if(a.status!=='confirmed'||!a.customer_phone)return;
         var key=a.customer_phone,st=new Date(a.starts_at),en=new Date(a.ends_at);
-        var c=byPhone[key]||(byPhone[key]={name:a.customer_name,phone:key,visits:0,lastDate:null,past:[],next:null,svc:{}});
-        c.name=a.customer_name;
+        var c=byPhone[key]||(byPhone[key]={name:a.customer_name,phone:key,email:'',visits:0,lastDate:null,past:[],next:null,svc:{}});
+        c.name=a.customer_name;if(a.customer_email)c.email=a.customer_email;
         if(st<=now){
           c.visits++;c.past.push({id:a.id,start:st,service:a.service||'',price:a.price_eur});
           if(!c.lastDate||st>c.lastDate)c.lastDate=st;
@@ -107,7 +107,7 @@
         var x=byPhone[k],top='',n=0;
         Object.keys(x.svc).forEach(function(s){if(x.svc[s]>n){n=x.svc[s];top=s;}});
         x.past.sort(function(p,q){return q.start-p.start;});
-        return {name:x.name,phone:x.phone,visits:x.visits,last:x.lastDate?humanAgo(x.lastDate):'',lastDate:x.lastDate,
+        return {name:x.name,phone:x.phone,email:x.email||'',visits:x.visits,last:x.lastDate?humanAgo(x.lastDate):'',lastDate:x.lastDate,
           ago:x.lastDate?Math.max(0,Math.round((now-x.lastDate)/86400000)):null,past:x.past,next:x.next,svc:top,noshow:ns[k]||0};
       }).sort(function(a,b){return b.visits-a.visits;});
       window.liaClients=CLIENTS;renderClients();return CLIENTS;
@@ -135,7 +135,7 @@
   function clLoadNotes(){ if(window.liaNotes)window.liaNotes.ensure(); }
   function clList(){
     var q=document.getElementById('clientSearch').value.trim().toLowerCase();
-    var l=CLIENTS.filter(function(c){return c.name.toLowerCase().indexOf(q)!==-1||String(c.phone).replace(/\s+/g,'').indexOf(q.replace(/\s+/g,''))!==-1&&q.length>2;});
+    var l=CLIENTS.filter(function(c){return c.name.toLowerCase().indexOf(q)!==-1||(c.email&&c.email.toLowerCase().indexOf(q)!==-1)||String(c.phone).replace(/\s+/g,'').indexOf(q.replace(/\s+/g,''))!==-1&&q.length>2;});
     if(clSort==='last')l.sort(function(a,b){return (a.ago===null?1e9:a.ago)-(b.ago===null?1e9:b.ago);});
     else if(clSort==='visits')l.sort(function(a,b){return b.visits-a.visits;});
     else l.sort(function(a,b){return a.name.localeCompare(b.name,'it');});
@@ -184,7 +184,7 @@
     var hist=c.past.slice(0,lim).map(function(h){return '<div class="cd-vh"><div class="cd-hr"><div class="t">'+esc(h.service||'Appuntamento')+'<small>'+clDate(h.start)+'</small></div><div class="pr">'+clMoney(h.price)+'</div></div>'+(h.id?'<div data-vn="'+esc(h.id)+'" data-vs="'+esc(h.start.toISOString())+'"></div>':'')+'</div>';}).join('')||'<div style="color:var(--muted);font-size:.92rem">Nessuna visita registrata</div>';
     var more=c.past.length>8?'<button type="button" class="cd-more" data-more="1">'+(clShowAll?'Mostra meno':'Mostra tutte ('+c.past.length+')')+'</button>':'';
     return '<div class="cd"><button type="button" class="cd-x" data-back="1" aria-label="Chiudi">'+ic.x+'</button>'+
-      '<div class="cd-hero"><div class="cd-av">'+esc(initials(c.name))+'</div><h2>'+esc(c.name)+'</h2><div class="p">'+esc(c.phone)+'</div></div>'+
+      '<div class="cd-hero"><div class="cd-av">'+esc(initials(c.name))+'</div><h2>'+esc(c.name)+'</h2><div class="p">'+esc(c.phone)+'</div>'+(c.email?'<div class="p cd-mail"><a href="mailto:'+esc(c.email)+'" style="color:inherit;text-decoration:none;overflow-wrap:anywhere">'+esc(c.email)+'</a></div>':'')+'</div>'+
       '<div class="cd-acts"><a class="cd-act" href="tel:'+esc(tel)+'">'+ic.call+'Chiama</a><a class="cd-act" href="https://wa.me/'+esc(clWa(c.phone))+'" target="_blank" rel="noopener">'+ic.chat+'WhatsApp</a><button type="button" class="cd-act main" data-book="1">'+ic.cal+'Prenota</button></div>'+
       '<div class="cd-stats"><div class="cd-st"><small>Visite</small><b>'+c.visits+'</b></div><div class="cd-st"><small>Ultima</small><b style="font-size:.9rem">'+(c.lastDate?esc(c.last):'\u2014')+'</b></div><div class="cd-st"><small>Abituale</small><b style="font-size:1rem;overflow-wrap:anywhere">'+(c.svc?esc(c.svc):'\u2014')+'</b></div></div>'+
       (c.noshow?'<p class="cd-ns">Non si \u00e8 presentato '+c.noshow+(c.noshow===1?' volta':' volte')+'</p>':'')+
