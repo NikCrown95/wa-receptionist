@@ -4,6 +4,17 @@
 
 var DATA = [];
 var STATS_WEEKLY_HOURS = {};
+var STATS_CLOSED_DATES = {};
+// Un appuntamento che cade in un giorno di chiusura (giorno senza orari di apertura, ferie o chiusura di giornata intera) non conta mai nel fatturato
+function statsIsClosedRow(r){
+  var d=new Date(r.startAt), key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(STATS_CLOSED_DATES[key])return true;
+  var any=Object.keys(STATS_WEEKLY_HOURS).some(function(k){return (STATS_WEEKLY_HOURS[k]||[]).length;});
+  if(!any)return false;
+  var wd=d.getDay()===0?7:d.getDay();
+  return !(STATS_WEEKLY_HOURS[wd]||[]).length;
+}
+function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
 
 ;
 
@@ -306,8 +317,8 @@ var STATS_WEEKLY_HOURS = {};
     var periodRows=rowsInKpiPeriod(period);
     var scheduled=periodRows.filter(function(r){return !r.cancelled;});
     var completed=scheduled.filter(function(r){var e=new Date(r.endAt||r.startAt);return e<=bounds.now;});
-    var revenue=completed.reduce(function(s,r){return s+r.price;},0);
-    var projectedRevenue=scheduled.reduce(function(s,r){return s+r.price;},0);
+    var revenue=completed.reduce(function(s,r){return s+statsRevenueOf(r);},0);
+    var projectedRevenue=scheduled.reduce(function(s,r){return s+statsRevenueOf(r);},0);
     var confirmed=rows.filter(function(r){return !r.cancelled;});
     var count=confirmed.length;
     var prevCount=prevRows.filter(function(r){return !r.cancelled;}).length;
@@ -349,7 +360,7 @@ var STATS_WEEKLY_HOURS = {};
         var nowM=new Date(), startM=new Date(nowM.getFullYear(),nowM.getMonth()-11,1);
         var parts=(r.dateKey||'').split('-'), rd=new Date(Number(parts[0]),Number(parts[1]||1)-1,1);
         var key=(rd.getFullYear()-startM.getFullYear())*12+(rd.getMonth()-startM.getMonth());
-        if(key>=0&&key<12) byMonth[key]=(byMonth[key]||0)+r.price;
+        if(key>=0&&key<12) byMonth[key]=(byMonth[key]||0)+statsRevenueOf(r);
       });
       var now = new Date();
       for (var i = 0; i < 12; i++){
@@ -359,7 +370,7 @@ var STATS_WEEKLY_HOURS = {};
     } else {
       var span = p === 'week' ? 7 : 30;
       var byDay = {};
-      confirmed.forEach(function(r){ byDay[r.day] = (byDay[r.day] || 0) + r.price; });
+      confirmed.forEach(function(r){ byDay[r.day] = (byDay[r.day] || 0) + statsRevenueOf(r); });
       for (var d2 = -(span-1); d2 <= 0; d2++){
         var dt = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + d2);
         out.push({label: dt.getDate() + ' ' + MONTHS[dt.getMonth()], value: byDay[d2] || 0});
@@ -728,7 +739,7 @@ rects.push(rect);
     var byName = {};
     confirmed.forEach(function(r){
       var k=r.customerKey; if(!k)return; byName[k] = byName[k] || {name:r.name,visits:0, spent:0};
-      byName[k].name=r.name; byName[k].visits++; byName[k].spent += r.price;
+      byName[k].name=r.name; byName[k].visits++; byName[k].spent += statsRevenueOf(r);
     });
     var list = Object.keys(byName).map(function(n){ return {name:byName[n].name, visits:byName[n].visits, spent:byName[n].spent}; });
     list.sort(function(a,b){ return b.spent - a.spent; });
@@ -782,7 +793,7 @@ rects.push(rect);
   function loadStatsHours(){
     var statsToken=(new URLSearchParams(location.search).get('t')||'').trim();
     if(!statsToken)return Promise.resolve();
-    return (window.liaSettingsShared?window.liaSettingsShared().catch(function(){return {};}):fetch('/api/agenda?t='+encodeURIComponent(statsToken)+'&settings=1').then(function(r){return r.json();})).then(function(d){var weekly={};((Array.isArray(d.capacity_hours)&&d.capacity_hours.length?d.capacity_hours:d.hours)||[]).forEach(function(h){var wd=Number(h.weekday);if(!weekly[wd])weekly[wd]=[];weekly[wd].push({open:String(h.opens||''),close:String(h.closes||'')});});STATS_WEEKLY_HOURS=weekly;render();}).catch(function(){});
+    return (window.liaSettingsShared?window.liaSettingsShared().catch(function(){return {};}):fetch('/api/agenda?t='+encodeURIComponent(statsToken)+'&settings=1').then(function(r){return r.json();})).then(function(d){var weekly={};((Array.isArray(d.capacity_hours)&&d.capacity_hours.length?d.capacity_hours:d.hours)||[]).forEach(function(h){var wd=Number(h.weekday);if(!weekly[wd])weekly[wd]=[];weekly[wd].push({open:String(h.opens||''),close:String(h.closes||'')});});STATS_WEEKLY_HOURS=weekly;var closed={};(Array.isArray(d.blocks)?d.blocks:[]).forEach(function(b){if(b&&b.full_day&&b.date)closed[String(b.date).slice(0,10)]=1;});STATS_CLOSED_DATES=closed;render();}).catch(function(){});
   }
 
   function render(){
@@ -803,7 +814,7 @@ rects.push(rect);
 
     var confirmed = rows.filter(function(r){ return !r.cancelled; });
     var bySvc = {};
-    confirmed.forEach(function(r){ bySvc[r.service] = bySvc[r.service] || {value:0, color:r.color}; bySvc[r.service].value += r.price; });
+    confirmed.forEach(function(r){ bySvc[r.service] = bySvc[r.service] || {value:0, color:r.color}; bySvc[r.service].value += statsRevenueOf(r); });
     var svcItems = Object.keys(bySvc).map(function(k){ return {label:k, value:bySvc[k].value, color:'var(--' + ({a:'accent',s:'sec',t:'ter',u:'qua',v:'qui'})[bySvc[k].color] + ')', amountLabel: eur.format(bySvc[k].value)}; });
     svcItems.sort(function(a,b){ return b.value - a.value; });
     renderRevenueDonut(svcItems);
