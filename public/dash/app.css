@@ -3238,3 +3238,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 @media(max-width:699px){
 :root:root:root:root:root:root #calSubApp > header.top{border-bottom:0!important}
 }
+/* Smartphone, settimana: la riga dei giorni parte piu' in alto (stesso spazio sotto la riga della vista Giorno) */
+@media(max-width:699px){
+:root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #weekGrid.wkp{margin-top:-14px!important}
+}
