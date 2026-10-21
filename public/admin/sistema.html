@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – Sistema</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --sec:#8CC6FF; --sec-soft:#0A2547;
+  --green:#3FE08A; --amber:#F5C15E; --red:#FF8A8A;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;flex:none;}
+.top-row nav{display:flex;gap:4px;}
+.top-row nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+.top-row nav a.on{background:var(--card2);color:var(--ink);}
+.spacer{flex:1;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--green);font-weight:600;}
+
+.panels{margin-top:16px;display:grid;gap:16px;}
+.panel{padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);}
+.panel h2{font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;}
+.panel .sub{margin-top:2px;font-size:.85rem;color:var(--muted);}
+.row2{display:grid;gap:16px;}
+@media (min-width:860px){.row2{grid-template-columns:1fr 1fr;}}
+
+.linechart{margin-top:18px;width:100%;height:auto;overflow:visible;}
+.linechart .grid-l{stroke:var(--line);stroke-width:1;}
+.linechart .area{fill:url(#areaGrad);}
+.linechart .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.linechart .dot{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+.linechart .axis{font-size:11px;fill:var(--muted);}
+
+.pairbars{margin-top:18px;width:100%;height:auto;}
+.pairbars .new{fill:var(--accent);}
+.pairbars .lost{fill:var(--red);}
+.pairbars .axis{font-size:10.5px;fill:var(--muted);}
+.legend2{margin-top:10px;display:flex;gap:18px;font-size:.85rem;color:var(--muted);}
+.legend2 span{display:inline-flex;align-items:center;gap:6px;}
+.legend2 i{width:9px;height:9px;border-radius:3px;}
+
+.hbars{margin-top:18px;display:grid;gap:14px;}
+.hbar-row{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:12px;}
+.hbar-row .lab{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:500;}
+.hbar-row .lab i{width:9px;height:9px;border-radius:50%;flex:none;}
+.track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.fill{height:100%;border-radius:6px;}
+.hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+.kpi .sub.m{color:var(--muted);font-weight:500;}
+.kpi .sub.warn{color:var(--amber);}
+.grid2c{display:grid;gap:16px;align-items:start;}
+@media (min-width:960px){.grid2c{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);}}
+.side{display:grid;gap:16px;}
+.rowh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;min-height:52px;}
+.rowh:last-child{border-bottom:0;}
+.rowh .n{font-weight:600;font-size:.94rem;}
+.rowh .a{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;}
+.rowh .a.ok{color:var(--green);}.rowh .a.warn{color:var(--amber);}.rowh .a.crit{color:var(--red);}
+.rowh .bar{grid-column:1/-1;height:8px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.rowh .bar i{display:block;height:100%;border-radius:6px;background:var(--accent);}
+.rowh .bar.warn i{background:var(--amber);}.rowh .bar.crit i{background:var(--red);}
+.rowh small{grid-column:1/-1;color:var(--muted);font-size:.8rem;margin-top:-2px;}
+.empty-s{color:var(--muted);font-size:.9rem;padding:10px 0;line-height:1.5;}
+.panel h2 .live-note{font-weight:500;color:var(--muted);font-size:.8rem;margin-left:8px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}}
+
+.field{display:grid;gap:6px;min-width:0;}
+.field label{font-size:.82rem;color:var(--muted);font-weight:500;}
+.field label b{color:var(--ink);font-variant-numeric:tabular-nums;}
+.inp{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-family:inherit;font-size:16px;width:100%;min-width:0;}
+.inp:focus{outline:none;border-color:var(--accent);}
+input[type=range]{width:100%;accent-color:var(--accent);height:34px;margin:0;}
+.fields{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.96rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2);}
+.btn.small{min-height:40px;padding:0 14px;font-size:.88rem;}
+.btn:disabled{opacity:.55;cursor:default;}
+.big{font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1;}
+.hint{color:var(--muted);font-size:.84rem;line-height:1.5;}
+.bar{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .3s;}
+.bar.warn i{background:var(--amber);}.bar.crit i{background:var(--red);}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);}
+.cols{display:grid;gap:16px;align-items:start;grid-template-columns:minmax(0,1fr);}
+.cols>*,.stack>*{min-width:0;}
+@media (min-width:960px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}
+.ok-t{color:var(--green);}.warn-t{color:var(--amber);}.crit-t{color:var(--red);}
+.msg{font-size:.88rem;margin-top:10px;min-height:1.2em;}
+.msg.err{color:var(--red);}.msg.good{color:var(--green);}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;}
+.stat3 div{background:var(--card2);border-radius:14px;padding:12px;min-width:0;}
+.stat3 b{display:block;font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.stat3 span{color:var(--muted);font-size:.76rem;}
+.exp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+.exp:last-child{border-bottom:0;}
+.exp b{display:block;font-weight:600;font-size:.96rem;overflow-wrap:anywhere;}
+.exp span.s{color:var(--muted);font-size:.82rem;}
+.days{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.exp .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.exp .acts .inp{width:auto;flex:1 1 150px;}
+.addrow{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));align-items:end;}
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}.big{font-size:1.7rem;}.panel .btn{width:100%;}.exp .acts .btn{width:auto;flex:1 1 auto;}}
+</style>
+<link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2"><link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon.png?v=2">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/admin/mobile.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav"></nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+
+<div class="wrap">
+  <div class="pagehd"><h1>Sistema</h1><p>Credito, scadenze e limiti. Ti avviso nella campanella prima che diventino un problema.</p></div>
+  <div class="banner" id="setup" hidden style="background:#3A2E12;color:#F5C15E;padding:12px 16px;border-radius:14px;margin-bottom:16px;font-size:.92rem;line-height:1.45">Alcune sezioni non sono leggibili: esegui in Supabase lo script <b>20261022_admin_system.sql</b> e ricarica la pagina.</div>
+
+  <div class="cols">
+    <div class="stack">
+      <div class="panel" id="credit">
+        <h2>Credito AI</h2>
+        <p class="sub">Anthropic non permette di leggere il saldo da solo. Scrivilo qui quando ricarichi: poi lo faccio scendere io, in base a quanto spende Lia.</p>
+        <div id="creditOut" style="margin-top:16px"></div>
+        <div class="fields" style="margin-top:16px;align-items:end">
+          <div class="field"><label for="bal">Saldo che vedi su Anthropic (€)</label><input class="inp" id="bal" type="text" inputmode="decimal" placeholder="Per esempio 25 o 12,50" autocomplete="off"></div>
+          <button class="btn" id="balSave" type="button">Aggiorna saldo</button>
+        </div>
+        <div class="msg" id="balMsg" role="status"></div>
+        <p class="hint" style="margin-top:6px">Il consumo medio è calcolato sugli ultimi 14 giorni. Ti avviso a 7 giorni dalla fine (attenzione) e a 3 giorni (urgente). Se Lia smette di rispondere ricevi subito anche l’avviso su Telegram.</p>
+      </div>
+
+      <div class="panel" id="resend">
+        <h2>Email Resend</h2>
+        <p class="sub">Quante ne sono partite e quando rischi di superare il piano.</p>
+        <div id="resendOut" style="margin-top:14px"></div>
+        <div class="fields" style="margin-top:6px;align-items:end">
+          <div class="field"><label for="limM">Limite al mese</label><input class="inp" id="limM" type="text" inputmode="numeric" autocomplete="off"></div>
+          <div class="field"><label for="limD">Limite al giorno</label><input class="inp" id="limD" type="text" inputmode="numeric" autocomplete="off"></div>
+          <button class="btn ghost" id="limSave" type="button">Salva limiti</button>
+        </div>
+        <div class="msg" id="limMsg" role="status"></div>
+        <p class="hint">Il piano gratuito di Resend ha 3.000 email al mese e 100 al giorno: controlla i numeri sul tuo account e correggili qui se sono diversi.</p>
+
+        <h2 style="margin-top:26px">Calcolatore</h2>
+        <p class="sub">Quante email servono se crescono le attività. Parte dai tuoi numeri reali degli ultimi 30 giorni.</p>
+        <div class="fields" style="margin-top:14px">
+          <div class="field"><label for="cBiz">Attività: <b id="vBiz"></b></label><input id="cBiz" type="range" min="1" max="500" value="30"></div>
+          <div class="field"><label for="cApp">Prenotazioni al mese per attività: <b id="vApp"></b></label><input id="cApp" type="range" min="5" max="600" step="5" value="100"></div>
+          <div class="field"><label for="cMail">Clienti che lasciano l’email: <b id="vMail"></b>%</label><input id="cMail" type="range" min="0" max="100" value="30"></div>
+          <div class="field"><label for="cOth">Altre email per attività al mese: <b id="vOth"></b></label><input id="cOth" type="range" min="0" max="20" value="3"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="big" id="rTot"></span><span class="hint" id="rPct"></span></div>
+        <div class="bar" id="rBar" style="margin-top:10px"><i></i></div>
+        <p id="rMsg" style="margin-top:12px;font-weight:600"></p>
+        <p class="hint" id="rDay" style="margin-top:4px"></p>
+        <p class="hint" style="margin-top:8px">Ogni prenotazione con email genera 2 messaggi: conferma e promemoria del giorno prima. Le “altre email” sono promemoria di rinnovo, recupero password e simili: è una stima, il contatore qui sopra mostra il numero vero.</p>
+      </div>
+    </div>
+
+    <div class="panel" id="expiries">
+      <h2>Registro scadenze</h2>
+      <p class="sub">Domini, chiavi API, abbonamenti. Inserisci la data una volta: ti avviso a 30 e a 7 giorni prima.</p>
+      <div id="expList" style="margin-top:8px"></div>
+      <form class="addrow" id="expForm" autocomplete="off">
+        <div class="field"><label for="eName">Cosa scade</label><input class="inp" id="eName" type="text" maxlength="80" placeholder="Per esempio Dominio prenolia.it"></div>
+        <div class="field"><label for="eNote">Nota (facoltativa)</label><input class="inp" id="eNote" type="text" maxlength="160" placeholder="Dove si rinnova"></div>
+        <div class="field"><label for="eDate">Data di scadenza</label><input class="inp" id="eDate" type="date"></div>
+        <button class="btn" type="submit" id="eAdd">Aggiungi</button>
+      </form>
+      <div class="msg" id="expMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  function $(s) { return document.getElementById(s); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var nf = new Intl.NumberFormat('it-IT');
+  function it(n) { return String(n).replace('.', ','); }
+  function post(body) { return window.liaApi('/api/admin/system', { method: 'POST', body: JSON.stringify(body) }); }
+  function say(id, text, kind) { var m = $(id); m.textContent = text || ''; m.className = 'msg' + (kind ? ' ' + kind : ''); }
+  function romeToday() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date()); }
+  function daysTo(s) { var a = romeToday().split('-').map(Number), b = String(s).slice(0, 10).split('-').map(Number); return Math.round((Date.UTC(b[0], b[1] - 1, b[2]) - Date.UTC(a[0], a[1] - 1, a[2])) / 86400000); }
+  function longDate(s) { var p = String(s).slice(0, 10).split('-').map(Number); return new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(p[0], p[1] - 1, p[2]))); }
+  var state = { credit: null, resend: null, expiries: [], calc: null };
+
+  // ---------- credito AI ----------
+  function paintCredit() {
+    var box = $('creditOut'); box.innerHTML = '';
+    var c = state.credit;
+    if (!c) { box.appendChild(el('p', 'hint', 'Non riesco a leggere i costi AI in questo momento.')); return; }
+    if (!c.configured) { box.appendChild(el('p', 'hint', 'Saldo non ancora impostato. Scrivilo qui sotto e da lì calcolo quanti giorni restano.')); return; }
+    var cls = c.remaining <= 0 || (c.days_left != null && c.days_left <= 3) ? 'crit' : (c.days_left != null && c.days_left <= 7 ? 'warn' : 'ok');
+    var big = el('div', 'big ' + cls + '-t', c.remaining <= 0 ? 'Esaurito' : (c.days_left == null ? it(c.remaining) + ' €' : (c.days_left === 0 ? 'Finisce oggi' : 'Circa ' + c.days_left + (c.days_left === 1 ? ' giorno' : ' giorni'))));
+    box.appendChild(big);
+    if (c.runs_out_on && c.remaining > 0) box.appendChild(el('p', 'hint', 'Al ritmo attuale finisce il ' + longDate(c.runs_out_on) + '.'));
+    var bar = el('div', 'bar ' + (cls === 'ok' ? '' : cls)); bar.style.marginTop = '12px'; var i = el('i'); i.style.width = Math.max(3, Math.min(100, c.days_left == null ? 100 : c.days_left / 30 * 100)) + '%'; bar.appendChild(i); box.appendChild(bar);
+    var st = el('div', 'stat3');
+    [[it(c.remaining) + ' €', 'residuo stimato'], [it(c.avg_daily) + ' €', 'consumo al giorno'], [it(c.spent_since) + ' €', 'speso dall\u2019ultimo saldo']].forEach(function (x) { var d = el('div'); d.appendChild(el('b', null, x[0])); d.appendChild(el('span', null, x[1])); st.appendChild(d); });
+    box.appendChild(st);
+  }
+  $('balSave').addEventListener('click', function () {
+    var v = $('bal').value.trim(); if (!v) { say('balMsg', 'Scrivi il saldo in euro, per esempio 25 o 12,50.', 'err'); return; }
+    var b = $('balSave'); b.disabled = true; say('balMsg', 'Salvo…');
+    post({ action: 'set_credit', balance: v }).then(function (j) { state.credit = j.credit; paintCredit(); $('bal').value = ''; say('balMsg', 'Saldo aggiornato.', 'good'); window.liaBellRefresh && window.liaBellRefresh(); })
+      .catch(function (e) { say('balMsg', e.message, 'err'); }).then(function () { b.disabled = false; });
+  });
+
+  // ---------- Resend ----------
+  function paintResend() {
+    var box = $('resendOut'); box.innerHTML = '';
+    var r = state.resend;
+    if (!r) { box.appendChild(el('p', 'hint', 'Il contatore parte con la prossima email inviata (serve lo script SQL 20261022_admin_system.sql).')); return; }
+    var cls = r.pct >= 100 ? 'crit' : r.pct >= 80 ? 'warn' : 'ok';
+    var line = el('div'); line.style.cssText = 'display:flex;align-items:baseline;gap:10px;flex-wrap:wrap';
+    line.appendChild(el('span', 'big ' + cls + '-t', nf.format(r.month_sent))); line.appendChild(el('span', 'hint', 'su ' + nf.format(r.limit_month) + ' questo mese (' + r.pct + '%)')); box.appendChild(line);
+    var bar = el('div', 'bar ' + (cls === 'ok' ? '' : cls)); bar.style.margin = '12px 0'; var i = el('i'); i.style.width = Math.min(100, r.pct) + '%'; bar.appendChild(i); box.appendChild(bar);
+    var st = el('div', 'stat3');
+    [[nf.format(r.today_sent) + ' / ' + nf.format(r.limit_day), 'oggi'], ['circa ' + nf.format(r.projected), 'previste a fine mese'], [r.exhaust_on ? longDate(r.exhaust_on).replace(/ \d{4}$/, '') : 'nessuno', 'quando finiscono']].forEach(function (x) { var d = el('div'); d.appendChild(el('b', null, x[0])); d.appendChild(el('span', null, x[1])); st.appendChild(d); });
+    box.appendChild(st);
+    $('limM').value = r.limit_month; $('limD').value = r.limit_day;
+    calc();
+  }
+  $('limSave').addEventListener('click', function () {
+    var b = $('limSave'); b.disabled = true; say('limMsg', 'Salvo…');
+    post({ action: 'set_resend', limit_month: $('limM').value.replace(/\D/g, ''), limit_day: $('limD').value.replace(/\D/g, '') })
+      .then(function (j) { state.resend = j.resend; paintResend(); say('limMsg', 'Limiti salvati.', 'good'); window.liaBellRefresh && window.liaBellRefresh(); })
+      .catch(function (e) { say('limMsg', e.message, 'err'); }).then(function () { b.disabled = false; });
+  });
+  function calc() {
+    var b = +$('cBiz').value, a = +$('cApp').value, m = +$('cMail').value, o = +$('cOth').value;
+    var lim = (state.resend && state.resend.limit_month) || 3000, limD = (state.resend && state.resend.limit_day) || 100;
+    $('vBiz').textContent = nf.format(b); $('vApp').textContent = nf.format(a); $('vMail').textContent = m; $('vOth').textContent = o;
+    var perBiz = a * (m / 100) * 2 + o, tot = Math.round(b * perBiz), pct = tot / lim * 100;
+    $('rTot').textContent = nf.format(tot) + ' email al mese';
+    $('rPct').textContent = Math.round(pct) + '% del limite di ' + nf.format(lim);
+    var bar = $('rBar'); bar.className = 'bar ' + (pct >= 100 ? 'crit' : pct >= 80 ? 'warn' : ''); bar.firstElementChild.style.width = Math.min(100, pct) + '%';
+    var maxBiz = perBiz > 0 ? Math.floor(lim / perBiz) : 0;
+    $('rMsg').textContent = pct >= 100 ? 'Con questi numeri superi il piano: serve passare a un piano a pagamento.' : (pct >= 80 ? 'Sei vicino al limite: reggi fino a circa ' + nf.format(maxBiz) + ' attività.' : 'Sei dentro il limite: con questi numeri reggi fino a circa ' + nf.format(maxBiz) + ' attività.');
+    var day = Math.round(tot / 30 * 1.6);
+    $('rDay').textContent = 'Giorno di punta stimato: circa ' + nf.format(day) + ' email' + (day > limD ? ', oltre il tetto di ' + nf.format(limD) + ' al giorno.' : ', sotto il tetto di ' + nf.format(limD) + ' al giorno.');
+  }
+  ['cBiz', 'cApp', 'cMail', 'cOth'].forEach(function (id) { $(id).addEventListener('input', calc); });
+  function seedCalc() {
+    var c = state.calc; if (!c) { calc(); return; }
+    if (c.businesses) $('cBiz').value = Math.min(500, Math.max(1, c.businesses));
+    if (c.per_business) $('cApp').value = Math.min(600, Math.max(5, Math.round(c.per_business / 5) * 5));
+    $('cMail').value = Math.min(100, Math.max(0, c.email_pct || 0));
+    calc();
+  }
+
+  // ---------- scadenze ----------
+  function paintExp() {
+    var box = $('expList'); box.innerHTML = '';
+    var list = state.expiries || [];
+    if (!list.length) { box.appendChild(el('p', 'hint', 'Ancora nessuna scadenza. Aggiungi il dominio, la chiave Anthropic, gli abbonamenti: te li ricordo io.')); return; }
+    list.forEach(function (e) {
+      var d = daysTo(e.due_date), cls = d <= 7 ? 'crit' : d <= 30 ? 'warn' : 'ok';
+      var row = el('div', 'exp');
+      var l = el('div'); l.appendChild(el('b', null, e.name)); l.appendChild(el('span', 's', longDate(e.due_date) + (e.note ? ' · ' + e.note : ''))); row.appendChild(l);
+      row.appendChild(el('div', 'days ' + cls + '-t', d < 0 ? 'scaduta' : d === 0 ? 'oggi' : d + (d === 1 ? ' giorno' : ' giorni')));
+      var acts = el('div', 'acts');
+      var di = el('input', 'inp'); di.type = 'date'; di.value = String(e.due_date).slice(0, 10); di.setAttribute('aria-label', 'Nuova data per ' + e.name); acts.appendChild(di);
+      var sv = el('button', 'btn small ghost', 'Aggiorna data'); sv.type = 'button';
+      sv.addEventListener('click', function () { if (!di.value) return; sv.disabled = true; post({ action: 'expiry_update', id: e.id, due_date: di.value }).then(function (j) { state.expiries = j.expiries; paintExp(); say('expMsg', 'Data aggiornata.', 'good'); window.liaBellRefresh && window.liaBellRefresh(); }).catch(function (er) { say('expMsg', er.message, 'err'); sv.disabled = false; }); });
+      acts.appendChild(sv);
+      var rm = el('button', 'btn small ghost', 'Rimuovi'); rm.type = 'button';
+      var armed = false;
+      rm.addEventListener('click', function () {
+        if (!armed) { armed = true; rm.textContent = 'Conferma rimozione'; setTimeout(function () { armed = false; rm.textContent = 'Rimuovi'; }, 3500); return; }
+        rm.disabled = true; post({ action: 'expiry_delete', id: e.id }).then(function (j) { state.expiries = j.expiries; paintExp(); say('expMsg', 'Scadenza rimossa.', 'good'); window.liaBellRefresh && window.liaBellRefresh(); }).catch(function (er) { say('expMsg', er.message, 'err'); rm.disabled = false; });
+      });
+      acts.appendChild(rm); row.appendChild(acts); box.appendChild(row);
+    });
+  }
+  $('expForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var n = $('eName').value.trim(), d = $('eDate').value;
+    if (!n) { say('expMsg', 'Scrivi cosa scade, per esempio "Dominio prenolia.it".', 'err'); return; }
+    if (!d) { say('expMsg', 'Scegli la data di scadenza.', 'err'); return; }
+    var b = $('eAdd'); b.disabled = true; say('expMsg', 'Salvo…');
+    post({ action: 'expiry_add', name: n, note: $('eNote').value.trim(), due_date: d }).then(function (j) { state.expiries = j.expiries; paintExp(); $('eName').value = ''; $('eNote').value = ''; $('eDate').value = ''; say('expMsg', 'Scadenza aggiunta.', 'good'); window.liaBellRefresh && window.liaBellRefresh(); })
+      .catch(function (e) { say('expMsg', e.message, 'err'); }).then(function () { b.disabled = false; });
+  });
+
+  // ---------- avvio ----------
+  window.liaApi('/api/admin/system?view=system').then(function (s) {
+    state = { credit: s.credit, resend: s.resend, expiries: s.expiries || [], calc: s.calc };
+    if ((s.warnings || []).some(function (w) { return w === 'scadenze' || w === 'email'; })) $('setup').hidden = false;
+    paintCredit(); paintExp(); paintResend(); seedCalc();
+  }).catch(function (e) { window.liaBanner('Non riesco a caricare la pagina: ' + e.message); });
+})();
+</script>
+</body>
+</html>

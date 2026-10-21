@@ -176,8 +176,8 @@ table.rt tr.off td{opacity:.55}
   </section>
 
   <section class="sec">
-    <h2>Mesi Premium accumulati dalle attività</h2>
-    <p class="lead">Ogni attività invitata che paga il primo mese vale un mese di piano Premium per chi l'ha invitata. Per ora il credito viene solo conteggiato, non scalato dalla fattura.</p>
+    <h2>Mesi di Smart accumulati dalle attività</h2>
+    <p class="lead">Ogni attività invitata che paga il primo mese vale un mese di Smart per chi l'ha invitata. Per ora il credito viene solo conteggiato, non scalato dalla fattura.</p>
     <div class="tablewrap"><table class="rt" id="tCredits"></table></div>
   </section>
 
@@ -185,7 +185,7 @@ table.rt tr.off td{opacity:.55}
     <div class="sec-top">
       <div>
         <h2>Persone con un link</h2>
-        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro link e paga il primo mese matura un premio in contanti (di base un mese di piano Base).</p>
+        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro link e paga il primo mese matura un premio in contanti (di base un mese di Smart).</p>
       </div>
       <button class="btn" id="addPerson" type="button">Nuova persona</button>
     </div>
@@ -237,7 +237,7 @@ table.rt tr.off td{opacity:.55}
     [['Registrate da un link', s.registered, 'in totale', ''],
      ['In prova', s.in_trial, 'non hanno ancora pagato', ''],
      ['Hanno pagato', s.paid, 'primo mese incassato', s.paid ? '' : ''],
-     ['Mesi Premium', s.credit_months, eur(s.credit_value_eur) + ' di credito', ''],
+     ['Mesi di Smart', s.credit_months, eur(s.credit_value_eur) + ' di credito', ''],
      ['Premi da pagare', eur(s.partners_due_eur), 'alle persone esterne', s.partners_due_eur > 0 ? 'warn' : '']
     ].forEach(function(k){ var d = el('div', 'kpi'); d.appendChild(el('div', 'lbl', k[0])); d.appendChild(el('div', 'val ' + k[3], String(k[1]))); d.appendChild(el('div', 'sub', k[2])); box.appendChild(d); });
   }
@@ -275,7 +275,7 @@ table.rt tr.off td{opacity:.55}
   function renderCredits(){
     var t = document.getElementById('tCredits'); t.innerHTML = '';
     var rows = (state.data && state.data.credits) || [];
-    th(t, [['Attività'], ['Invitate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Mesi Premium', 'num'], ['Valore', 'num'], ['Link', 'num']]);
+    th(t, [['Attività'], ['Invitate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Mesi di Smart', 'num'], ['Valore', 'num'], ['Link', 'num']]);
     if (!rows.length){ empty(t, 7, 'Nessuna attività ha ancora invitato qualcuno', 'Ogni attività ha il suo link nella Scheda attività.'); return; }
     var tb = el('tbody');
     rows.forEach(function(c){
@@ -340,9 +340,9 @@ table.rt tr.off td{opacity:.55}
     state.editing = p || null;
     document.getElementById('sheetTitle').textContent = p ? 'Modifica ' + p.name : 'Nuova persona';
     document.getElementById('pName').value = p ? p.name : '';
-    var base = state.data && state.data.settings ? state.data.settings.base_price : 0;
+    var base = state.data && state.data.settings ? (state.data.settings.premium_price || state.data.settings.base_price) : 0;
     document.getElementById('pReward').value = p ? String(p.reward_eur).replace('.', ',') : String(base).replace('.', ',');
-    document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di piano Base (' + eur(base) + '). Puoi cambiarlo.';
+    document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di Smart (' + eur(base) + '). Puoi cambiarlo.';
     document.getElementById('pNote').value = p ? (p.note || '') : '';
     document.getElementById('pActive').checked = p ? p.active : true;
     document.getElementById('pActiveRow').hidden = !p;

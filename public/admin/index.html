@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>Prenolia Admin – Andamento</title>
+<title>Prenolia Admin – Panoramica</title>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
 :root{--logo:url("/brand/prenolia-dark.png");
@@ -74,16 +74,32 @@ h1,h2,p{margin:0;}
 .fill{height:100%;border-radius:6px;}
 .hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
 
-.stackbars{margin-top:18px;width:100%;height:auto;}
-.stackbars .b1{fill:var(--sec);} .stackbars .b2{fill:var(--accent);}
-.stackbars .axis{font-size:10.5px;fill:var(--muted);}
-
-.cost-card{display:flex;gap:16px;align-items:flex-start;padding:4px 0 2px;}
-.cost-card .ic{flex:none;width:42px;height:42px;border-radius:13px;background:var(--card2);color:var(--muted);display:grid;place-items:center;}
-.cost-card p{color:var(--muted);font-size:.94rem;line-height:1.55;}
-.cost-card p b{color:var(--ink);}
-
 .note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.94rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2);}
+.btn.small{min-height:40px;padding:0 14px;font-size:.88rem;}
+.kpi .sub.m{color:var(--muted);font-weight:500;}
+.kpi .sub.warn{color:var(--amber);}
+.grid2c{display:grid;gap:16px;align-items:start;grid-template-columns:minmax(0,1fr);}
+.grid2c>*,.side>*{min-width:0;}
+@media (min-width:960px){.grid2c{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);}}
+.side{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);}
+.rowh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;min-height:52px;}
+.rowh:last-child{border-bottom:0;}
+.rowh .n{font-weight:600;font-size:.94rem;}
+.rowh .a{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;}
+.rowh .a.ok{color:var(--green);}.rowh .a.warn{color:var(--amber);}.rowh .a.crit{color:var(--red);}
+.rowh .bar{grid-column:1/-1;height:8px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.rowh .bar i{display:block;height:100%;border-radius:6px;background:var(--accent);}
+.rowh .bar.warn i{background:var(--amber);}.rowh .bar.crit i{background:var(--red);}
+.rowh small{grid-column:1/-1;color:var(--muted);font-size:.8rem;margin-top:-2px;}
+.empty-s{color:var(--muted);font-size:.9rem;padding:10px 0;line-height:1.5;}
+.panel h2 .live-note{font-weight:500;color:var(--muted);font-size:.8rem;margin-left:8px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}}
 </style>
 <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2"><link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon.png?v=2">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -93,232 +109,102 @@ h1,h2,p{margin:0;}
 <header class="top">
   <div class="top-row">
     <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
-    <nav id="mainNav">
-      <a href="/admin/clienti.html">I tuoi clienti</a>
-      <a href="/admin/">Andamento</a>
-      <a href="/admin/lia.html">Uso di Lia</a>
-      <a href="/admin/soldi.html">Stream of income</a>
-      <a href="/admin/costi.html">Costi</a>
-    </nav>
+    <nav id="mainNav"></nav>
     <div class="spacer"></div>
   </div>
 </header>
 <script src="/admin/auth.js"></script>
 <script src="/admin/nav.js"></script>
+<script src="/admin/live.js"></script>
 
 <div class="wrap">
+  <div class="pagehd"><h1>Panoramica</h1><p>Tutto quello che succede su Prenolia, in tempo reale.</p></div>
   <div class="kpis" id="kpis"></div>
 
-  <div class="panels">
+  <div class="grid2c" style="margin-top:16px">
     <div class="panel">
-      <h2>Incasso mensile (MRR) nel tempo</h2>
-      <p class="sub">Ultimi 12 mesi.</p>
-      <svg class="linechart" id="mrrChart" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Crescita dell'incasso mensile ricorrente negli ultimi 12 mesi"></svg>
+      <h2>Attività in diretta</h2>
+      <p class="sub">Nuovi account, appuntamenti, chat, pagamenti e richieste di tutte le attività.</p>
+      <div id="live" style="margin-top:14px"></div>
     </div>
-
-    <div class="panel">
-      <h2>Nuovi clienti vs persi</h2>
-      <p class="sub">Chi si iscrive e chi se ne va, mese per mese.</p>
-      <svg class="pairbars" id="paceChart" viewBox="0 0 640 190" preserveAspectRatio="none" role="img" aria-label="Nuovi clienti e clienti persi per mese"></svg>
-      <div class="legend2"><span><i style="background:var(--accent)"></i>Nuovi</span><span><i style="background:var(--red)"></i>Persi</span></div>
-    </div>
-
-    <div class="row2">
+    <div class="side">
       <div class="panel">
-        <h2>Base vs Smart</h2>
-        <p class="sub">Chi ha scelto cosa, oggi.</p>
-        <div class="hbars" id="planSplit"></div>
+        <h2>Salute del sistema</h2>
+        <p class="sub">Controllata di continuo. I problemi compaiono anche nella campanella.</p>
+        <div id="health" style="margin-top:6px"><div class="empty-s">Carico…</div></div>
       </div>
       <div class="panel">
-        <h2>Clienti per tipo di attività</h2>
-        <p class="sub">Da chi arriva la maggior parte dei clienti.</p>
-        <div class="hbars" id="byType"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Smart nel tempo</h2>
-      <p class="sub">Quanti clienti hanno anche l'assistente AI, mese per mese.</p>
-      <svg class="stackbars" id="mixChart" viewBox="0 0 640 190" preserveAspectRatio="none" role="img" aria-label="Composizione dei piani nel tempo"></svg>
-      <div class="legend2"><span><i style="background:var(--sec)"></i>Base</span><span><i style="background:var(--accent)"></i>Smart</span></div>
-    </div>
-
-    <div class="panel">
-      <h2>Consumo API per attività</h2>
-      <div class="cost-card">
-        <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12.5"></line><circle cx="12" cy="16" r="0.6" fill="currentColor" stroke="none"></circle></svg></span>
-        <p>Non ancora tracciato. Oggi tutte le conversazioni di Lia usano la stessa chiave API, senza segnare a quale attività appartengono. Per vederlo davvero servirebbe salvare, ad ogni risposta di Claude, quanti gettoni ha usato e per quale cliente — <b>una piccola modifica reale al programma</b>, non solo a questa pagina.</p>
+        <h2>Prenotazioni di oggi</h2>
+        <p class="sub">Per canale.</p>
+        <div id="channels" style="margin-top:6px"><div class="empty-s">Carico…</div></div>
       </div>
     </div>
   </div>
-
-  <p class="note">Bozza di prova: dati generati a scopo dimostrativo, non sono ancora i tuoi dati veri.</p>
 </div>
 
 <script>
-var MOCK_HISTORY = [];
-var MOCK_BY_TYPE = { "parrucchiere": 5, "barbiere": 4, "estetista": 3, "idraulico": 2, "personal trainer": 2 };
-var MOCK_PLAN_SPLIT = { "base": 6, "ai": 10 };
-
 (function () {
+  var eur = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function it(n) { return String(n).replace('.', ','); }
+  function itDay(s) { var p = String(s).slice(0, 10).split('-'); return Number(p[2]) + '/' + Number(p[1]); }
+  function romeToday() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date()); }
+  function daysTo(s) { var a = romeToday().split('-').map(Number), b = String(s).slice(0, 10).split('-').map(Number); return Math.round((Date.UTC(b[0], b[1] - 1, b[2]) - Date.UTC(a[0], a[1] - 1, a[2])) / 86400000); }
 
+  window.liaLive.mount(document.getElementById('live'), { max: 60 });
 
-  setTimeout(function(){
-    window.liaApi('/api/admin/clients?view=overview').then(function(j){
-      window.HISTORY = j.history;
-      window.renderDashboard(j.byType, j.planSplit);
-    }).catch(function(e){ window.liaBanner('Non riesco a caricare i dati: ' + e.message); });
-  }, 0);
+  // ---- numeri in alto
+  function kpi(l, v, s, cls) { var k = el('div', 'kpi'); k.appendChild(el('div', 'lbl', l)); k.appendChild(el('div', 'val', v)); k.appendChild(el('div', 'sub ' + (cls || 'm'), s || '')); return k; }
+  var kbox = document.getElementById('kpis');
+  [['Incasso mensile', '…'], ['Attività attive', '…'], ['Prenotazioni oggi', '…'], ['In prova gratuita', '…']].forEach(function (x) { kbox.appendChild(kpi(x[0], x[1], '')); });
+  function loadHome() {
+    window.liaApi('/api/admin/system?view=home').then(function (h) {
+      kbox.innerHTML = '';
+      kbox.appendChild(kpi('Incasso mensile', eur.format(h.mrr), 'abbonamenti attivi'));
+      kbox.appendChild(kpi('Attività attive', String(h.active), 'servizio acceso'));
+      kbox.appendChild(kpi('Prenotazioni oggi', String(h.bookings_today), 'create da stamattina'));
+      kbox.appendChild(kpi('In prova gratuita', String(h.trials), h.trials_soon ? h.trials_soon + (h.trials_soon === 1 ? ' finisce' : ' finiscono') + ' entro 3 giorni' : 'nessuna in scadenza', h.trials_soon ? 'warn' : 'm'));
+      var ch = document.getElementById('channels'); ch.innerHTML = '';
+      if (!h.channels_today.length) { ch.appendChild(el('div', 'empty-s', 'Ancora nessuna prenotazione oggi.')); return; }
+      var max = Math.max.apply(null, h.channels_today.map(function (x) { return x.n; })) || 1;
+      h.channels_today.forEach(function (x) {
+        var r = el('div', 'rowh'); r.appendChild(el('span', 'n', x.label)); r.appendChild(el('span', 'a', String(x.n)));
+        var b = el('div', 'bar'); var i = el('i'); i.style.width = Math.max(4, Math.round(x.n / max * 100)) + '%'; b.appendChild(i); r.appendChild(b); ch.appendChild(r);
+      });
+    }).catch(function (e) { window.liaBanner('Non riesco a caricare i numeri: ' + e.message); });
+  }
+  loadHome();
+
+  // ---- salute del sistema
+  function rowLink(name, val, cls, pct, sub) {
+    var r = el('a', 'rowh'); r.href = '/admin/sistema.html';
+    r.appendChild(el('span', 'n', name)); r.appendChild(el('span', 'a ' + (cls || ''), val));
+    if (pct != null) { var b = el('div', 'bar ' + (cls === 'crit' || cls === 'warn' ? cls : '')); var i = el('i'); i.style.width = Math.max(3, Math.min(100, pct)) + '%'; b.appendChild(i); r.appendChild(b); }
+    if (sub) r.appendChild(el('small', null, sub));
+    return r;
+  }
+  function loadHealth() {
+    window.liaApi('/api/admin/system?view=system').then(function (s) {
+      var box = document.getElementById('health'); box.innerHTML = '';
+      var c = s.credit;
+      if (!c) box.appendChild(rowLink('Credito AI', 'non leggibile', 'warn', null, 'Esegui lo script SQL della Super Dashboard e ricarica.'));
+      else if (!c.configured) box.appendChild(rowLink('Credito AI', 'da impostare', 'warn', null, 'Scrivi il saldo di Anthropic: ti avviso prima che finisca.'));
+      else {
+        var cls = c.remaining <= 0 || (c.days_left != null && c.days_left <= 3) ? 'crit' : (c.days_left != null && c.days_left <= 7 ? 'warn' : 'ok');
+        var txt = c.remaining <= 0 ? 'esaurito' : (c.days_left == null ? it(c.remaining) + ' €' : (c.days_left === 0 ? 'finisce oggi' : 'circa ' + c.days_left + (c.days_left === 1 ? ' giorno' : ' giorni')));
+        box.appendChild(rowLink('Credito AI', txt, cls, c.days_left == null ? 100 : c.days_left / 30 * 100, 'Restano ' + it(c.remaining) + ' € · consumo ' + it(c.avg_daily) + ' € al giorno'));
+      }
+      var r = s.resend;
+      if (!r) box.appendChild(rowLink('Email Resend', 'non leggibile', 'warn', null, 'Esegui lo script SQL della Super Dashboard e ricarica.'));
+      else box.appendChild(rowLink('Email Resend', r.pct + '%', r.pct >= 100 ? 'crit' : r.pct >= 80 ? 'warn' : 'ok', r.pct, r.month_sent + ' su ' + r.limit_month + ' questo mese'));
+      var ex = (s.expiries || [])[0];
+      if (ex) { var d = daysTo(ex.due_date); box.appendChild(rowLink('Prossima scadenza', d < 0 ? 'scaduta' : (d === 0 ? 'oggi' : d + (d === 1 ? ' giorno' : ' giorni')), d <= 7 ? 'crit' : d <= 30 ? 'warn' : 'ok', null, ex.name + ' · ' + itDay(ex.due_date))); }
+      else box.appendChild(rowLink('Scadenze', 'nessuna', '', null, 'Aggiungi domini, chiavi e abbonamenti da tenere d\u2019occhio.'));
+    }).catch(function (e) { var box = document.getElementById('health'); box.innerHTML = ''; box.appendChild(el('div', 'empty-s', 'Non riesco a leggere lo stato del sistema: ' + e.message)); });
+  }
+  loadHealth();
+  setInterval(function () { if (!document.hidden) { loadHome(); loadHealth(); } }, 60000);
 })();
-</script>
-<script>
-window.renderDashboard = function(byTypeData, planSplitData){
-  var eur = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
-  function el(tag, cls){ var e = document.createElement(tag); if (cls) e.className = cls; return e; }
-  function svgEl(tag, attrs){
-    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
-    return e;
-  }
-
-  var last = HISTORY[HISTORY.length - 1];
-  var prev = HISTORY[HISTORY.length - 2];
-  var mrrGrowth = prev ? Math.round((last.mrr - prev.mrr) / prev.mrr * 100) : 0;
-  var totalEver = HISTORY.reduce(function(s,h){ return s + h.new; }, 0);
-  var totalLost = HISTORY.reduce(function(s,h){ return s + h.lost; }, 0);
-  var retention = totalEver ? Math.round((1 - totalLost/totalEver) * 100) : 100;
-  var aiShare = Math.round(last.ai / last.active * 100);
-
-  function renderKpis(){
-    var cards = [
-      { lbl:'Incasso mensile (MRR)', val: eur.format(last.mrr), sub: '+' + mrrGrowth + '% rispetto al mese scorso' },
-      { lbl:'Clienti attivi', val: String(last.active), sub: '+' + last.new + ' questo mese' },
-      { lbl:'Clienti mantenuti', val: retention + '%', sub: totalEver + ' iscritti in totale, ' + totalLost + ' persi' },
-      { lbl:'Hanno scelto Lia (AI)', val: aiShare + '%', sub: last.ai + ' su ' + last.active + ' clienti' }
-    ];
-    var box = document.getElementById('kpis');
-    cards.forEach(function(c){
-      var k = el('div','kpi');
-      k.innerHTML = '<div class="lbl"></div><div class="val"></div><div class="sub"></div>';
-      k.querySelector('.lbl').textContent = c.lbl;
-      k.querySelector('.val').textContent = c.val;
-      k.querySelector('.sub').textContent = c.sub;
-      box.appendChild(k);
-    });
-  }
-
-  function renderMrrChart(){
-    var svg = document.getElementById('mrrChart');
-    var W=640,H=220,padL=42,padR=10,padT=14,padB=26;
-    var innerW=W-padL-padR, innerH=H-padT-padB;
-    var max = Math.ceil(Math.max.apply(null, HISTORY.map(function(h){return h.mrr;}))/100)*100;
-
-    var defs = svgEl('defs');
-    var grad = svgEl('linearGradient', {id:'areaGrad', x1:'0',y1:'0',x2:'0',y2:'1'});
-    grad.appendChild(svgEl('stop', {offset:'0%','stop-color':'var(--accent)','stop-opacity':'0.35'}));
-    grad.appendChild(svgEl('stop', {offset:'100%','stop-color':'var(--accent)','stop-opacity':'0'}));
-    defs.appendChild(grad); svg.appendChild(defs);
-
-    [0,0.5,1].forEach(function(t){
-      var y = padT + innerH*t;
-      svg.appendChild(svgEl('line', {class:'grid-l', x1:padL, x2:W-padR, y1:y, y2:y}));
-      var lab = svgEl('text', {class:'axis', x:0, y:y+4}); lab.textContent = eur.format(Math.round(max*(1-t)));
-      svg.appendChild(lab);
-    });
-
-    function X(i){ return padL + (i/(HISTORY.length-1))*innerW; }
-    function Y(v){ return padT + innerH - (v/max)*innerH; }
-    var d = HISTORY.map(function(h,i){ return (i===0?'M':'L') + X(i).toFixed(1) + ',' + Y(h.mrr).toFixed(1); }).join(' ');
-    var area = d + ' L' + X(HISTORY.length-1) + ',' + (padT+innerH) + ' L' + X(0) + ',' + (padT+innerH) + ' Z';
-    svg.appendChild(svgEl('path', {class:'area', d:area}));
-    svg.appendChild(svgEl('path', {class:'line', d:d}));
-    HISTORY.forEach(function(h,i){
-      var c = svgEl('circle', {class:'dot', cx:X(i), cy:Y(h.mrr), r:3.3});
-      var t = svgEl('title'); t.textContent = h.m + ': ' + eur.format(h.mrr); c.appendChild(t);
-      svg.appendChild(c);
-      if (i % 2 === 0 || i === HISTORY.length-1){
-        var lab = svgEl('text', {class:'axis', x:X(i), y:H-6, 'text-anchor': i===0?'start':(i===HISTORY.length-1?'end':'middle')});
-        lab.textContent = h.m; svg.appendChild(lab);
-      }
-    });
-  }
-
-  function renderPaceChart(){
-    var svg = document.getElementById('paceChart');
-    var W=640,H=190,padL=8,padR=8,padT=8,padB=24;
-    var innerW=W-padL-padR, innerH=H-padT-padB;
-    var max = Math.max.apply(null, HISTORY.map(function(h){return Math.max(h.new,h.lost);})) || 1;
-    var n = HISTORY.length, groupW = innerW/n, barW = groupW*0.32, gap = groupW*0.06;
-    HISTORY.forEach(function(h,i){
-      var gx = padL + i*groupW;
-      var hN = (h.new/max)*(innerH-4), hL = (h.lost/max)*(innerH-4);
-      var rn = svgEl('rect', {class:'new', x:gx+groupW*0.14, y:padT+innerH-hN, width:barW, height:Math.max(hN,1), rx:3});
-      var rl = svgEl('rect', {class:'lost', x:gx+groupW*0.14+barW+gap, y:padT+innerH-hL, width:barW, height:Math.max(hL,1), rx:3});
-      var t1=svgEl('title'); t1.textContent=h.m+': '+h.new+' nuovi'; rn.appendChild(t1);
-      var t2=svgEl('title'); t2.textContent=h.m+': '+h.lost+' persi'; rl.appendChild(t2);
-      svg.appendChild(rn); svg.appendChild(rl);
-      if (i % 2 === 0 || i === n-1){
-        var lab = svgEl('text', {class:'axis', x:gx+groupW/2, y:H-6, 'text-anchor':'middle'});
-        lab.textContent = h.m; svg.appendChild(lab);
-      }
-    });
-  }
-
-  function renderMixChart(){
-    var svg = document.getElementById('mixChart');
-    var W=640,H=190,padL=8,padR=8,padT=8,padB=24;
-    var innerW=W-padL-padR, innerH=H-padT-padB;
-    var max = Math.max.apply(null, HISTORY.map(function(h){return h.active;})) || 1;
-    var n = HISTORY.length, bw = innerW/n*0.62, gap = innerW/n*0.38;
-    HISTORY.forEach(function(h,i){
-      var x = padL + i*(innerW/n) + gap/2;
-      var hBase = (h.base/max)*(innerH-4), hAi = (h.ai/max)*(innerH-4);
-      var yAi = padT+innerH-hAi;
-      var yBase = yAi - hBase;
-      var rBase = svgEl('rect', {class:'b1', x:x, y:yBase, width:bw, height:Math.max(hBase,1), rx:2});
-      var rAi = svgEl('rect', {class:'b2', x:x, y:yAi, width:bw, height:Math.max(hAi,1), rx:2});
-      var t1=svgEl('title'); t1.textContent=h.m+': '+h.base+' Base'; rBase.appendChild(t1);
-      var t2=svgEl('title'); t2.textContent=h.m+': '+h.ai+' Smart'; rAi.appendChild(t2);
-      svg.appendChild(rBase); svg.appendChild(rAi);
-      if (i % 2 === 0 || i === n-1){
-        var lab = svgEl('text', {class:'axis', x:x+bw/2, y:H-6, 'text-anchor':'middle'});
-        lab.textContent = h.m; svg.appendChild(lab);
-      }
-    });
-  }
-
-  function renderHBars(id, items){
-    var box = document.getElementById(id);
-    var max = Math.max.apply(null, items.map(function(i){return i.value;})) || 1;
-    items.forEach(function(it){
-      var row = el('div','hbar-row');
-      row.innerHTML = '<div class="lab"><i></i><span></span></div><div class="track"><div class="fill"></div></div><div class="amt"></div>';
-      row.querySelector('.lab i').style.background = it.color;
-      row.querySelector('.lab span').textContent = it.label;
-      row.querySelector('.fill').style.cssText = 'width:' + Math.round(it.value/max*100) + '%;background:' + it.color;
-      row.querySelector('.amt').textContent = it.amt;
-      box.appendChild(row);
-    });
-  }
-
-  renderKpis();
-  renderMrrChart();
-  renderPaceChart();
-  renderMixChart();
-  renderHBars('planSplit', [
-    { label:'Smart', value: planSplitData.ai || 0, color:'var(--accent)', amt: (planSplitData.ai||0) + ' clienti' },
-    { label:'Base', value: planSplitData.base || 0, color:'var(--sec)', amt: (planSplitData.base||0) + ' clienti' }
-  ]);
-
-  var TYPE_LABELS = { 'parrucchiere':'Parrucchiere', 'barbiere':'Barbiere', 'estetista':'Estetista', 'cartomante':'Cartomanzia e astrologia', 'palestra':'Palestra', 'idraulico':'Idraulico', 'personal trainer':'Personal trainer' };
-  var TYPE_COLORS = ['var(--accent)', 'var(--sec)', 'var(--ter,#EFE9DC)', 'var(--muted)', '#6EE7A8', '#F5C15E', '#FF8A8A'];
-  var typeEntries = Object.keys(byTypeData || {}).map(function(k){ return { key:k, value: byTypeData[k] }; });
-  typeEntries.sort(function(a,b){ return b.value - a.value; });
-  renderHBars('byType', typeEntries.map(function(e, i){
-    var label = TYPE_LABELS[e.key] || (e.key.charAt(0).toUpperCase() + e.key.slice(1));
-    return { label: label, value: e.value, color: TYPE_COLORS[i % TYPE_COLORS.length], amt: String(e.value) };
-  }));
-};
 </script>
 </body>
 </html>

@@ -256,7 +256,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
     if (!d.clients.length) cl.appendChild(el('div','empty','Nessun dato.'));
     else cl.appendChild(table([
       { label:'Attività', render:function(td,r){ var a = el('a',null,r.name); a.href = '/admin/attivita.html?id=' + encodeURIComponent(r.id); td.appendChild(a); var s = el('div',null,r.type + (r.paying ? '' : ' · non paga')); s.style.cssText = 'color:var(--muted);font-size:.78rem;margin-top:2px;'; td.appendChild(s); } },
-      { label:'Piano', render:function(td,r){ td.textContent = PIANO[r.plan] || '—'; } },
       { label:'Incasso', num:true, render:function(td,r){ td.textContent = eur(r.revenue); } },
       { label:'Costo AI', num:true, render:function(td,r){ td.textContent = eur(r.ai_cost); } },
       { label:'Messaggi', num:true, render:function(td,r){ td.textContent = eur(r.msg_cost); } },

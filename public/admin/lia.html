@@ -254,7 +254,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
     if (!d.ranking.length) tp.appendChild(el('div','empty','Ancora nessuna attività con messaggi.'));
     else tp.appendChild(table([
       { label:'Attività', render:nameCell },
-      { label:'Piano', render:function(td,r){ td.textContent = r.plan === 'ai' ? 'Smart' : (r.plan === 'base' ? 'Base' : '—'); } },
       { label:'Messaggi', num:true, render:function(td,r){ td.textContent = String(r.messages); } },
       { label:'Clienti diversi', num:true, render:function(td,r){ td.textContent = String(r.contacts); } },
       { label:'Prenotate da Lia', num:true, render:function(td,r){ td.textContent = String(r.bookings); } },

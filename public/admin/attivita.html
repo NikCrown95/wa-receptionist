@@ -157,6 +157,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 </header>
 <script src="/admin/auth.js"></script>
 <script src="/admin/nav.js"></script>
+<script src="/admin/live.js"></script>
 
 <div class="wrap">
   <a class="back" href="/admin/clienti.html">← Tutti i clienti</a>
@@ -258,7 +259,12 @@ nav a.on{background:var(--card2);color:var(--ink);}
     // ---- griglia
     var g = el('div','grid2'); root.appendChild(g);
 
-    var cl = card('Uso di Lia · ultimi 30 giorni', s && s.plan !== 'Base+Lia' && !l.messages_from_customers ? 'Il piano Base non comprende Lia.' : 'Messaggi ricevuti e prenotazioni fatte dall\'assistente.');
+    // ---- in diretta: cosa sta succedendo adesso in questa attivita'
+    var lvc = card('In diretta', 'Appuntamenti, chat e annullamenti di questa attività.'); lvc.style.gridColumn = '1 / -1';
+    var lvh = el('div'); lvc.appendChild(lvh); g.appendChild(lvc);
+    window.liaLive.mount(lvh, { business: b.id, max: 40 });
+
+    var cl = card('Uso di Lia · ultimi 30 giorni', 'Messaggi ricevuti e prenotazioni fatte dall\'assistente.');
     var lk = el('div','kpis'); lk.style.cssText = 'grid-template-columns:repeat(2,1fr);margin-bottom:14px;';
     lk.appendChild(kpi('Messaggi dai clienti', String(l.messages_from_customers), l.messages_from_lia + ' risposte di Lia'));
     lk.appendChild(kpi('Clienti diversi', String(l.contacts), 'che hanno scritto'));
@@ -321,7 +327,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
     }
     if (R && R.invited){
       var li2 = el('div','li'); var lf2 = el('div'); lf2.appendChild(document.createTextNode('Ha invitato ' + R.invited + (R.invited === 1 ? ' attivita\'' : ' attivita\'')));
-      lf2.appendChild(el('small', null, R.paid + ' hanno pagato \u00b7 ' + R.credit_months + (R.credit_months === 1 ? ' mese Premium accumulato' : ' mesi Premium accumulati')));
+      lf2.appendChild(el('small', null, R.paid + ' hanno pagato \u00b7 ' + R.credit_months + (R.credit_months === 1 ? ' mese di Smart accumulato' : ' mesi di Smart accumulati')));
       li2.appendChild(lf2); rfl.appendChild(li2);
     }
     rf.appendChild(rfl); g.appendChild(rf);

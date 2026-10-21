@@ -1475,3 +1475,9 @@ module.exports.authCacheClear = authCacheClear;
 
 module.exports.listRequests = listRequests;
 module.exports.setRequestStatus = setRequestStatus;
+
+// usate da api/admin/system.js (stesso accesso, stesse funzioni di lettura)
+module.exports.authenticate = authenticate;
+module.exports.sb = sb;
+module.exports.sbAll = sbAll;
+module.exports.cfg = cfg;

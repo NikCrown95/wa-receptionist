@@ -130,11 +130,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <input id="search" type="text" placeholder="Cerca per nome attività…">
     </div>
-    <select class="filter" id="filterPlan">
-      <option value="">Tutti i piani</option>
-      <option value="base">Base</option>
-      <option value="ai">Smart</option>
-    </select>
     <select class="filter" id="filterStatus">
       <option value="">Tutti gli stati</option>
       <option value="active">Attivo</option>
@@ -193,7 +188,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
       </div>
       <div class="field"><label for="nPlan">Piano</label>
         <select class="inp" id="nPlan">
-          <option value="base">Base (non più in vendita) — 39,99 €/mese</option>
           <option value="ai">Smart — 24,99 €/mese</option>
         </select>
       </div>
@@ -274,7 +268,7 @@ window.startClients = function(){
 
   function renderRows(){
     var q = document.getElementById('search').value.trim().toLowerCase();
-    var fp = document.getElementById('filterPlan').value;
+    var fp = '';
     var fs = document.getElementById('filterStatus').value;
     var fh = document.getElementById('filterHealth').value;
     var fsv = document.getElementById('filterService').value;
@@ -388,7 +382,6 @@ window.startClients = function(){
   function renderAll(){ renderKpis(); renderRows(); }
 
   document.getElementById('search').addEventListener('input', renderRows);
-  document.getElementById('filterPlan').addEventListener('change', renderRows);
   document.getElementById('filterStatus').addEventListener('change', renderRows);
   document.getElementById('filterHealth').addEventListener('change', renderRows);
   document.getElementById('filterService').addEventListener('change', renderRows);
@@ -451,7 +444,6 @@ window.startClients = function(){
     box.appendChild(rb);
 
     if (c.status === 'none') {
-      add('Assegna piano Base (39,99 €/mese)', 'ghost', { action: 'assign_plan', plan: 'base' });
       add('Assegna piano Smart (24,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
       add('Smart in prova gratuita (14 giorni)', 'ghost', { action: 'assign_plan', plan: 'ai', status: 'trial' });
     } else if (c.status === 'cancelled') {
@@ -464,7 +456,6 @@ window.startClients = function(){
       if (st === 'suspended') add(manual ? 'Riattiva (toglie la sospensione)' : 'Riattiva (se scaduto serve pagamento o proroga)', 'ghost', { action: 'reactivate' });
       else add('Sospendi ora', 'danger', { action: 'suspend' }, 'Sospendere ' + c.name + ' adesso? Lia e le prenotazioni online smettono di funzionare.');
       if (c.plan === 'base') add('Passa a Smart', 'ghost', { action: 'assign_plan', plan: 'ai' }, 'Passare ' + c.name + ' a Smart?');
-      if (c.plan === 'ai') add('Passa a Base (spegne Lia)', 'ghost', { action: 'assign_plan', plan: 'base' }, 'Passare ' + c.name + ' a Base? Lia smette di rispondere.');
       add('Annulla abbonamento', 'danger', { action: 'cancel' }, 'Annullare l\'abbonamento di ' + c.name + '? Il servizio si ferma subito.');
     }
     actBg.classList.add('on'); actSheet.classList.add('on');
@@ -486,7 +477,7 @@ window.startClients = function(){
       opts.forEach(function(o){ var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; s.appendChild(op); });
       s.value = String(val); return s;
     }
-    var selPlan = sel([['ai', 'Smart (24,99 €/mese)'], ['base', 'Base (non più in vendita)']], c.plan || 'ai');
+    var selPlan = sel([['ai', 'Smart (24,99 €/mese)']], 'ai');
     var statusOpts = locked ? [['active', 'Attivo (pagato)']] : [['trial', 'In prova gratuita'], ['active', 'Attivo (pagato)']];
     var selStatus = sel(statusOpts, locked ? 'active' : ('trial'));
     var selDur = document.createElement('select'); selDur.className = 'inp';

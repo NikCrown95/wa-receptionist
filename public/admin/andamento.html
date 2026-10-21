@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – Andamento</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --sec:#8CC6FF; --sec-soft:#0A2547;
+  --green:#3FE08A; --amber:#F5C15E; --red:#FF8A8A;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;flex:none;}
+.top-row nav{display:flex;gap:4px;}
+.top-row nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+.top-row nav a.on{background:var(--card2);color:var(--ink);}
+.spacer{flex:1;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--green);font-weight:600;}
+
+.panels{margin-top:16px;display:grid;gap:16px;}
+.panel{padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);}
+.panel h2{font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;}
+.panel .sub{margin-top:2px;font-size:.85rem;color:var(--muted);}
+.row2{display:grid;gap:16px;}
+@media (min-width:860px){.row2{grid-template-columns:1fr 1fr;}}
+
+.linechart{margin-top:18px;width:100%;height:auto;overflow:visible;}
+.linechart .grid-l{stroke:var(--line);stroke-width:1;}
+.linechart .area{fill:url(#areaGrad);}
+.linechart .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.linechart .dot{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+.linechart .axis{font-size:11px;fill:var(--muted);}
+
+.pairbars{margin-top:18px;width:100%;height:auto;}
+.pairbars .new{fill:var(--accent);}
+.pairbars .lost{fill:var(--red);}
+.pairbars .axis{font-size:10.5px;fill:var(--muted);}
+.legend2{margin-top:10px;display:flex;gap:18px;font-size:.85rem;color:var(--muted);}
+.legend2 span{display:inline-flex;align-items:center;gap:6px;}
+.legend2 i{width:9px;height:9px;border-radius:3px;}
+
+.hbars{margin-top:18px;display:grid;gap:14px;}
+.hbar-row{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:12px;}
+.hbar-row .lab{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:500;}
+.hbar-row .lab i{width:9px;height:9px;border-radius:50%;flex:none;}
+.track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.fill{height:100%;border-radius:6px;}
+.hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+</style>
+<link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2"><link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon.png?v=2">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/admin/mobile.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav">
+      <a href="/admin/clienti.html">I tuoi clienti</a>
+      <a href="/admin/andamento.html">Andamento</a>
+      <a href="/admin/lia.html">Uso di Lia</a>
+      <a href="/admin/soldi.html">Stream of income</a>
+      <a href="/admin/costi.html">Costi</a>
+    </nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>Incasso mensile (MRR) nel tempo</h2>
+      <p class="sub">Ultimi 12 mesi.</p>
+      <svg class="linechart" id="mrrChart" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Crescita dell'incasso mensile ricorrente negli ultimi 12 mesi"></svg>
+    </div>
+
+    <div class="panel">
+      <h2>Nuovi clienti vs persi</h2>
+      <p class="sub">Chi si iscrive e chi se ne va, mese per mese.</p>
+      <svg class="pairbars" id="paceChart" viewBox="0 0 640 190" preserveAspectRatio="none" role="img" aria-label="Nuovi clienti e clienti persi per mese"></svg>
+      <div class="legend2"><span><i style="background:var(--accent)"></i>Nuovi</span><span><i style="background:var(--red)"></i>Persi</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Clienti per tipo di attività</h2>
+      <p class="sub">Da chi arriva la maggior parte dei clienti.</p>
+      <div class="hbars" id="byType"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+
+
+  setTimeout(function(){
+    window.liaApi('/api/admin/clients?view=overview').then(function(j){
+      window.HISTORY = j.history;
+      window.renderDashboard(j.byType);
+    }).catch(function(e){ window.liaBanner('Non riesco a caricare i dati: ' + e.message); });
+  }, 0);
+})();
+</script>
+<script>
+window.renderDashboard = function(byTypeData){
+  var eur = new Intl.NumberFormat('it-IT', {style:'currency', currency:'EUR', maximumFractionDigits:0});
+  function el(tag, cls){ var e = document.createElement(tag); if (cls) e.className = cls; return e; }
+  function svgEl(tag, attrs){
+    var e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  var last = HISTORY[HISTORY.length - 1];
+  var prev = HISTORY[HISTORY.length - 2];
+  var mrrGrowth = prev ? Math.round((last.mrr - prev.mrr) / prev.mrr * 100) : 0;
+  var totalEver = HISTORY.reduce(function(s,h){ return s + h.new; }, 0);
+  var totalLost = HISTORY.reduce(function(s,h){ return s + h.lost; }, 0);
+  var retention = totalEver ? Math.round((1 - totalLost/totalEver) * 100) : 100;
+
+  function renderKpis(){
+    var cards = [
+      { lbl:'Incasso mensile (MRR)', val: eur.format(last.mrr), sub: '+' + mrrGrowth + '% rispetto al mese scorso' },
+      { lbl:'Clienti attivi', val: String(last.active), sub: '+' + last.new + ' questo mese' },
+      { lbl:'Clienti mantenuti', val: retention + '%', sub: totalEver + ' iscritti in totale, ' + totalLost + ' persi' },
+      { lbl:'Persi questo mese', val: String(last.lost), sub: last.lost ? 'hanno disdetto' : 'nessuna disdetta' }
+    ];
+    var box = document.getElementById('kpis');
+    cards.forEach(function(c){
+      var k = el('div','kpi');
+      k.innerHTML = '<div class="lbl"></div><div class="val"></div><div class="sub"></div>';
+      k.querySelector('.lbl').textContent = c.lbl;
+      k.querySelector('.val').textContent = c.val;
+      k.querySelector('.sub').textContent = c.sub;
+      box.appendChild(k);
+    });
+  }
+
+  function renderMrrChart(){
+    var svg = document.getElementById('mrrChart');
+    var W=640,H=220,padL=42,padR=10,padT=14,padB=26;
+    var innerW=W-padL-padR, innerH=H-padT-padB;
+    var max = Math.ceil(Math.max.apply(null, HISTORY.map(function(h){return h.mrr;}))/100)*100;
+
+    var defs = svgEl('defs');
+    var grad = svgEl('linearGradient', {id:'areaGrad', x1:'0',y1:'0',x2:'0',y2:'1'});
+    grad.appendChild(svgEl('stop', {offset:'0%','stop-color':'var(--accent)','stop-opacity':'0.35'}));
+    grad.appendChild(svgEl('stop', {offset:'100%','stop-color':'var(--accent)','stop-opacity':'0'}));
+    defs.appendChild(grad); svg.appendChild(defs);
+
+    [0,0.5,1].forEach(function(t){
+      var y = padT + innerH*t;
+      svg.appendChild(svgEl('line', {class:'grid-l', x1:padL, x2:W-padR, y1:y, y2:y}));
+      var lab = svgEl('text', {class:'axis', x:0, y:y+4}); lab.textContent = eur.format(Math.round(max*(1-t)));
+      svg.appendChild(lab);
+    });
+
+    function X(i){ return padL + (i/(HISTORY.length-1))*innerW; }
+    function Y(v){ return padT + innerH - (v/max)*innerH; }
+    var d = HISTORY.map(function(h,i){ return (i===0?'M':'L') + X(i).toFixed(1) + ',' + Y(h.mrr).toFixed(1); }).join(' ');
+    var area = d + ' L' + X(HISTORY.length-1) + ',' + (padT+innerH) + ' L' + X(0) + ',' + (padT+innerH) + ' Z';
+    svg.appendChild(svgEl('path', {class:'area', d:area}));
+    svg.appendChild(svgEl('path', {class:'line', d:d}));
+    HISTORY.forEach(function(h,i){
+      var c = svgEl('circle', {class:'dot', cx:X(i), cy:Y(h.mrr), r:3.3});
+      var t = svgEl('title'); t.textContent = h.m + ': ' + eur.format(h.mrr); c.appendChild(t);
+      svg.appendChild(c);
+      if (i % 2 === 0 || i === HISTORY.length-1){
+        var lab = svgEl('text', {class:'axis', x:X(i), y:H-6, 'text-anchor': i===0?'start':(i===HISTORY.length-1?'end':'middle')});
+        lab.textContent = h.m; svg.appendChild(lab);
+      }
+    });
+  }
+
+  function renderPaceChart(){
+    var svg = document.getElementById('paceChart');
+    var W=640,H=190,padL=8,padR=8,padT=8,padB=24;
+    var innerW=W-padL-padR, innerH=H-padT-padB;
+    var max = Math.max.apply(null, HISTORY.map(function(h){return Math.max(h.new,h.lost);})) || 1;
+    var n = HISTORY.length, groupW = innerW/n, barW = groupW*0.32, gap = groupW*0.06;
+    HISTORY.forEach(function(h,i){
+      var gx = padL + i*groupW;
+      var hN = (h.new/max)*(innerH-4), hL = (h.lost/max)*(innerH-4);
+      var rn = svgEl('rect', {class:'new', x:gx+groupW*0.14, y:padT+innerH-hN, width:barW, height:Math.max(hN,1), rx:3});
+      var rl = svgEl('rect', {class:'lost', x:gx+groupW*0.14+barW+gap, y:padT+innerH-hL, width:barW, height:Math.max(hL,1), rx:3});
+      var t1=svgEl('title'); t1.textContent=h.m+': '+h.new+' nuovi'; rn.appendChild(t1);
+      var t2=svgEl('title'); t2.textContent=h.m+': '+h.lost+' persi'; rl.appendChild(t2);
+      svg.appendChild(rn); svg.appendChild(rl);
+      if (i % 2 === 0 || i === n-1){
+        var lab = svgEl('text', {class:'axis', x:gx+groupW/2, y:H-6, 'text-anchor':'middle'});
+        lab.textContent = h.m; svg.appendChild(lab);
+      }
+    });
+  }
+
+  function renderHBars(id, items){
+    var box = document.getElementById(id);
+    var max = Math.max.apply(null, items.map(function(i){return i.value;})) || 1;
+    items.forEach(function(it){
+      var row = el('div','hbar-row');
+      row.innerHTML = '<div class="lab"><i></i><span></span></div><div class="track"><div class="fill"></div></div><div class="amt"></div>';
+      row.querySelector('.lab i').style.background = it.color;
+      row.querySelector('.lab span').textContent = it.label;
+      row.querySelector('.fill').style.cssText = 'width:' + Math.round(it.value/max*100) + '%;background:' + it.color;
+      row.querySelector('.amt').textContent = it.amt;
+      box.appendChild(row);
+    });
+  }
+
+  renderKpis();
+  renderMrrChart();
+  renderPaceChart();
+  var TYPE_LABELS = { 'parrucchiere':'Parrucchiere', 'barbiere':'Barbiere', 'estetista':'Estetista', 'cartomante':'Cartomanzia e astrologia', 'palestra':'Palestra', 'idraulico':'Idraulico', 'personal trainer':'Personal trainer' };
+  var TYPE_COLORS = ['var(--accent)', 'var(--sec)', 'var(--ter,#EFE9DC)', 'var(--muted)', '#6EE7A8', '#F5C15E', '#FF8A8A'];
+  var typeEntries = Object.keys(byTypeData || {}).map(function(k){ return { key:k, value: byTypeData[k] }; });
+  typeEntries.sort(function(a,b){ return b.value - a.value; });
+  renderHBars('byType', typeEntries.map(function(e, i){
+    var label = TYPE_LABELS[e.key] || (e.key.charAt(0).toUpperCase() + e.key.slice(1));
+    return { label: label, value: e.value, color: TYPE_COLORS[i % TYPE_COLORS.length], amt: String(e.value) };
+  }));
+};
+</script>
+</body>
+</html>
