@@ -3214,3 +3214,13 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #panelProfile .pfPlan:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:16px}
 /* nome ripetuto nell'intestazione della Scheda: nascosto in modo definitivo */
 :root:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) #businessHome #businessName{display:none!important;font-size:0!important;height:0!important;margin:0!important;padding:0!important}
+/* giorni della settimana su telefono: il riquadro si riempie dal basso in base all'occupazione */
+.wkp-d{position:relative;overflow:hidden;min-height:74px;padding:9px 0 8px}
+.wkp-d::before{content:"";position:absolute;left:0;right:0;bottom:0;height:var(--p,0%);background:color-mix(in srgb,var(--accent) 46%,transparent);transition:height .35s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.wkp-d small,.wkp-d b{position:relative}
+.wkp-d b{margin:8px 0 0;font-size:1.15rem}
+.wkp-bar{display:none!important}
+.wkp-d.sel{background:color-mix(in srgb,var(--accent) 72%,#06141a)}
+.wkp-d.sel::before{background:rgba(255,255,255,.3)}
+.wkp-d.off::before{display:none}
+.wkp-d.sel.off{background:color-mix(in srgb,var(--accent) 72%,#06141a)}
