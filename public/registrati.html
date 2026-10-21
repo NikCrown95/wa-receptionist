@@ -179,7 +179,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
     ev.preventDefault();
     err.style.display = 'none';
     if (!document.getElementById('terms').checked) { show("Per continuare devi accettare l'Informativa privacy e i Termini di servizio."); return; }
-    go.disabled = true; go.textContent = 'Un attimo…';
+    go.disabled = true; go.textContent = 'Sto creando il tuo account…';
     fetch('/api/business-auth?action=signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
