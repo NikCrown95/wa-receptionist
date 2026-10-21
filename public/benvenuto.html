@@ -104,6 +104,10 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .times.off{opacity:.35;pointer-events:none}
 .err{background:#3a1c1c;color:var(--err);border-radius:12px;padding:10px 14px;font-size:.9rem}
 .nav{display:flex;gap:10px}
+.logorow{display:flex;gap:16px;align-items:center;padding-top:6px;border-top:1px solid var(--line);margin-top:4px;padding-top:16px}
+.logoprev{flex:none;width:76px;height:76px;border-radius:22px;display:grid;place-items:center;overflow:hidden;background:var(--card2);border:1px solid var(--line2);color:var(--muted);font-size:2rem;font-weight:300}
+.logoprev img{width:100%;height:100%;object-fit:cover;display:block}
+.logotx{display:flex;flex-direction:column;gap:4px;min-width:0}.logotx b{font-size:.95rem}.logotx span{font-size:.82rem;color:var(--muted)}.logotx .chips{margin-top:6px}
 .btn{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:var(--grad);color:var(--on-accent);font-weight:700;font-size:1rem}
 .btn.ghost{flex:0 0 auto;padding:0 20px;background:var(--card);color:var(--ink);border:1px solid var(--line2)}
 .sum{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.92rem}
@@ -250,7 +254,7 @@ var SUBT={tipo:"Scegli il tipo di attività: adatto tutto il resto.",attivita:"N
 var NAMES={tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
-var S={v:null,step:0,nome:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
+var S={v:null,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
   hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
   if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
@@ -261,6 +265,19 @@ function svg(k){var d=document.createElement("div");d.innerHTML='<svg viewBox="0
 function head(l,t,p){return h("div",{class:"head"},[h("span",{class:"stepl",text:l}),h("h1",{text:t}),p?h("p",{class:"lead",text:p}):null])}
 function field(l,inp){return h("div",null,[h("label",{text:l}),inp])}
 function inp(val,ph,on,extra){var i=h("input",Object.assign({class:"inp",placeholder:ph||"",value:val||""},extra||{}));i.oninput=function(){on(i.value)};return i}
+function prepLogo(file,cb){
+  var img=new Image(),u=URL.createObjectURL(file);
+  img.onload=function(){var N=256,c=document.createElement("canvas");c.width=c.height=N;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,N,N);
+    var k=Math.min(N/img.width,N/img.height),w=img.width*k,hh=img.height*k;x.imageSmoothingQuality="high";x.drawImage(img,(N-w)/2,(N-hh)/2,w,hh);URL.revokeObjectURL(u);
+    var d=c.toDataURL("image/webp",.9);if(d.indexOf("data:image/webp")!==0)d=c.toDataURL("image/jpeg",.9);cb(d)};
+  img.onerror=function(){URL.revokeObjectURL(u);cb("")};img.src=u}
+function logoRow(){
+  var pv=h("div",{class:"logoprev"});if(S.logo){var im=h("img");im.src=S.logo;im.alt="";pv.appendChild(im)}else pv.textContent="+";
+  var f=h("input",{type:"file",accept:"image/*",hidden:"hidden"});
+  f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;prepLogo(file,function(d){if(!d){S.err="Non riesco a leggere questa immagine. Prova con un'altra foto.";render();return}S.err="";S.logo=d;render()})};
+  var pick=chip(S.logo?"Cambia logo":"Carica logo",false,function(){f.click()});
+  var bt=h("div",{class:"chips"},[pick]);if(S.logo)bt.appendChild(chip("Rimuovi",false,function(){S.logo="";render()}));
+  return h("div",{class:"logorow"},[pv,h("div",{class:"logotx"},[h("b",{text:"Logo (facoltativo)"}),h("span",{text:"Lo vedranno i clienti nella pagina di prenotazione e sarà la tua foto del profilo."}),bt]),f])}
 function chip(t,pressed,fn){var b=h("button",{class:"chip",type:"button","aria-pressed":pressed?"true":"false",text:t});b.onclick=fn;return b}
 function go(n){S.step=Math.max(0,S.step+n);S.err="";render()}
 function tradeName(){return S.mestiere==="Altro"?S.altro.trim():S.mestiere}
@@ -311,7 +328,7 @@ function listBox(gym,dom){
   box.appendChild(ar);
   return box}
 function payload(){
-  var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};
+  var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   if(S.v==="palestra"){base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
     return{name:x.n.trim(),duration_min:x.d,capacity:Number(x.k),category:x.cat,slots:sl}});return base}
   base.trade=tradeName().toLowerCase();
@@ -353,6 +370,7 @@ function render(){
     if(S.v!=="palestra"){c.appendChild(h("label",{text:"Di che mestiere?"}));var ch=h("div",{class:"chips"});
       Object.keys(MESTIERI()).forEach(function(m){ch.appendChild(chip(m,S.mestiere===m,function(){if(S.mestiere!==m){S.mestiere=m;S.items=[]}render()}))});c.appendChild(ch);
       if(S.mestiere==="Altro")c.appendChild(field("Che mestiere fai?",inp(S.altro,"es. Sarta",function(x){S.altro=x},{maxlength:"40"})))}
+    c.appendChild(logoRow());
     v.appendChild(c);
   }
   if(k==="servizi"||k==="lezioni"){

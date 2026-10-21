@@ -210,7 +210,7 @@
     var k=HERO_KINDS[heroKindOf(b)],svg=function(sz,sw){return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+k.icon+'</svg>'};
     var hero=document.getElementById('pfHero');if(hero)hero.style.setProperty('--h',k.h);
     var sk=({style2:'/brand/style2.jpg'})[String((b&&b.slug)||'').toLowerCase()]||'';if(hero){hero.classList.toggle('skinImg',!!sk);if(sk)hero.style.setProperty('--skin','url('+sk+')');else hero.style.removeProperty('--skin')}
-    var av=document.getElementById('pfAvatar');if(av)av.innerHTML=svg(30,1.6);
+    var av=document.getElementById('pfAvatar');if(av){if(b&&b.logo_url){av.textContent='';var li=document.createElement('img');li.src=b.logo_url;li.alt='';av.appendChild(li);av.classList.add('hasLogo')}else{av.classList.remove('hasLogo');av.innerHTML=svg(30,1.6)}}
     var wm=document.getElementById('pfWm');if(wm)wm.innerHTML=svg(200,1.1);
     var kd=document.getElementById('pfKind');if(kd)kd.textContent=k.label;
     var on=document.getElementById('pfOpenNow');if(!on)return;
@@ -1160,7 +1160,46 @@ function pfRenderPoster(box,b,opts){
     if(n&&!n.getAttribute('data-dirty'))n.value=D.b.name||'';
     if(a&&!a.getAttribute('data-dirty'))a.value=D.b.address||'';
     stText('stSumInfo',D.b.address||D.b.name||'Nome e indirizzo');
+    stLogoShow(D.b.logo_url||'');
   }
+  function stLogoShow(url){
+    var pv=stEl('biLogoPrev'),dl=stEl('biLogoDel'),pk=stEl('biLogoPick');if(!pv)return;
+    pv.textContent='';
+    if(url){var im=document.createElement('img');im.src=url;im.alt='';pv.appendChild(im)}else{pv.textContent='+'}
+    if(dl)dl.hidden=!url;if(pk)pk.textContent=url?'Cambia logo':'Carica logo';
+  }
+  function stLogoSet(url){
+    try{var d=window.liaProfileData;if(d&&d.business){d.business.logo_url=url||null;writeProfileCache(d)}}catch(e){}
+    try{var sd=window.liaSettingsData;if(sd&&sd.business)sd.business.logo_url=url||null}catch(e){}
+    stLogoShow(url||'');
+    try{var d2=window.liaProfileData;if(d2&&d2.business)liaDecorateHero(d2.business,d2)}catch(e){}
+  }
+  /* Riduce la foto a 256x256 (intera, su fondo bianco) cosi' pesa pochi KB. */
+  function stLogoPrep(file,cb){
+    var img=new Image(),u=URL.createObjectURL(file);
+    img.onload=function(){
+      var S=256,c=document.createElement('canvas');c.width=c.height=S;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,S,S);
+      var k=Math.min(S/img.width,S/img.height),w=img.width*k,h=img.height*k;x.imageSmoothingQuality='high';x.drawImage(img,(S-w)/2,(S-h)/2,w,h);URL.revokeObjectURL(u);
+      var d=c.toDataURL('image/webp',.9);if(d.indexOf('data:image/webp')!==0)d=c.toDataURL('image/jpeg',.9);cb(null,d)
+    };
+    img.onerror=function(){URL.revokeObjectURL(u);cb(new Error('bad'))};img.src=u
+  }
+  (function(){
+    var pk=stEl('biLogoPick'),fl=stEl('biLogoFile'),dl=stEl('biLogoDel');if(!pk||!fl)return;
+    pk.addEventListener('click',function(){fl.click()});
+    fl.addEventListener('change',function(){
+      var f=fl.files&&fl.files[0];fl.value='';if(!f)return;
+      stMsg('biLogoMsg','Carico…');pk.disabled=true;
+      stLogoPrep(f,function(err,data){
+        if(err){stMsg('biLogoMsg','Non riesco a leggere questa immagine. Prova con un’altra foto.',true);pk.disabled=false;return}
+        api('POST',{action:'logo_set',data:data}).then(function(r){stLogoSet(r.logo_url);stMsg('biLogoMsg','Logo aggiornato.')}).catch(function(e){stMsg('biLogoMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.',true)}).then(function(){pk.disabled=false;setTimeout(function(){stMsg('biLogoMsg','')},4000)});
+      });
+    });
+    if(dl)dl.addEventListener('click',function(){
+      dl.disabled=true;stMsg('biLogoMsg','Rimuovo…');
+      api('POST',{action:'logo_clear'}).then(function(){stLogoSet('');stMsg('biLogoMsg','Logo rimosso.')}).catch(function(e){stMsg('biLogoMsg',(e&&e.message)||'Non sono riuscito a rimuoverlo. Riprova.',true)}).then(function(){dl.disabled=false;setTimeout(function(){stMsg('biLogoMsg','')},4000)});
+    });
+  })();
   function stRenderSub(){
     var D=stD(),now=stEl('subNow'),plans=stEl('subPlans');if(!now||!plans)return;
     now.innerHTML='';plans.innerHTML='';now.style.display='';
