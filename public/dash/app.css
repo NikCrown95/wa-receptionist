@@ -3242,3 +3242,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 @media(max-width:699px){
 :root:root:root:root:root:root body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #weekGrid.wkp{margin-top:-14px!important}
 }
+/* Scheda cliente: al posto di "Ultima" un tasto per scrivere un'email al cliente */
+.cd-st.cd-st-mail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:.78rem;font-weight:650;color:var(--ink);text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cd-st.cd-st-mail svg{color:var(--accent-ink)}
+.cd-st.cd-st-mail:active{background:var(--card2,var(--card))}
