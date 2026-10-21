@@ -259,3 +259,11 @@ body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > s
 }
 
 .mnAv.skin.lg{background-size:cover}
+/* menu burger un po' piu' grande */
+body.mnOn #burgerMenu{width:min(360px,calc(100vw - 28px))}
+body.mnOn #burgerMenu > button{min-height:48px;font-size:1rem;gap:14px;padding:0 12px}
+body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
+#burgerMenu .mnShare{padding:14px}
+#burgerMenu .mnShare .mnAv{width:62px;height:62px;border-radius:20px}
+#burgerMenu .mnShare .mnAv svg{width:30px;height:30px}
+#burgerMenu .mnShare .mnShareKick{font-size:.7rem}
