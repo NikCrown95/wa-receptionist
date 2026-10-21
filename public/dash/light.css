@@ -89,3 +89,10 @@
 /* Menu burger: scheda della pagina di prenotazione e voce attiva senza sfumature azzurre */
 :root[data-theme="light"] #burgerMenu .mnShare{background:#fff;border-color:rgba(27,135,149,.35)}
 :root[data-theme="light"] body.mnOn #burgerMenu > button[aria-current="true"]{background:var(--accent-soft)}
+/* Intestazione: superficie bianca sopra il fondo caldo */
+@media(max-width:699px){
+:root[data-theme="light"] body .mainTop,:root[data-theme="light"] body.lia-sec-cal .mainTop{background:#fff!important;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 12px 28px -20px rgba(20,20,15,.35)!important}
+}
+@media(max-width:699px){
+:root[data-theme="light"] body.lia-sec-cal #calSubApp .controls{background:#fff!important;box-shadow:0 12px 28px -20px rgba(20,20,15,.35)!important}
+}

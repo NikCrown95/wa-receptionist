@@ -3094,3 +3094,15 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #liaDateCard .dcT b{display:block;font-size:1.15rem;font-weight:800;line-height:1.15;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #liaDateCard .dcT span{display:block;font-size:.78rem;color:var(--muted);margin-top:3px;font-weight:600}
 }
+
+/* Intestazione con una superficie propria, distinta dallo sfondo della pagina */
+@media(max-width:699px){
+:root:root:root:root:root body .mainTop{background:var(--card)!important;border-bottom:1px solid var(--line)!important;box-shadow:0 10px 24px -18px rgba(0,0,0,.35)!important;border-radius:0 0 22px 22px;position:relative;z-index:5}
+}
+
+/* Calendario da telefono: intestazione e comandi formano un unico blocco */
+@media(max-width:699px){
+:root:root:root:root:root body.lia-sec-cal .mainTop{border-radius:0!important;box-shadow:none!important;border-bottom:0!important}
+:root:root:root:root:root body.lia-sec-cal #calSubApp .controls{background:var(--card)!important;border-radius:0 0 22px 22px!important;box-shadow:0 10px 24px -18px rgba(0,0,0,.35)!important;border-bottom:1px solid var(--line)!important;padding-bottom:14px!important;margin-bottom:12px!important}
+:root:root:root:root:root body.lia-sec-cal #liaDateCard{background:var(--bg)!important;box-shadow:none!important;border-color:transparent!important}
+}
