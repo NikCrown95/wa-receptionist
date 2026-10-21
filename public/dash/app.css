@@ -3183,3 +3183,13 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
   :root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #burgerBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #bellBtn,:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn) .mainTop #liaRecapBtn{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
 }
 #panelOther .stThemes{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Scheda attivita': logo e nome sono gia' nella scheda sotto, l'intestazione mostra solo il titolo della pagina */
+:root:root:root body.mnOn:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) #mbAv,
+:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) #mbAv,
+:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) .mainBiz #businessName{display:none!important}
+:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) .mainBiz #sectionLabel{font:800 1.3rem/1.15 Manrope,system-ui,sans-serif!important;color:var(--ink)!important;margin:0!important;letter-spacing:-.01em}
+:root:root:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) .mainBiz small#sectionLabel{color:var(--ink)!important;opacity:1!important}
+/* Scheda attivita': l'elenco servizi non ha uno scroll interno, scorre solo la pagina */
+#panelProfile #pfServices{max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;padding-right:0!important;margin-right:0!important}
+:root[data-theme="light"]:root:root:root body:not(.mnAOn):not(.mnGOn):has(#panelProfile.on) .mainTopRow .mainBiz small#sectionLabel{-webkit-text-fill-color:var(--ink)!important}
+@media(max-width:699px){#statsSubApp .revenue-legend{max-height:none!important;overflow:visible!important}}
