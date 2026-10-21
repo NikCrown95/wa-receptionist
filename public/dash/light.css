@@ -1,0 +1,50 @@
+/* Look chiaro di Prenolia: stessa anima del tema scuro (turchese e blu, luce morbida, vetro), ma su fondo chiaro.
+   Vale solo con data-theme="light": il tema scuro non viene toccato. */
+:root[data-theme="light"],body[data-theme="light"]{
+  --bg:#EDF4F7; --bg2:#F5F9FB; --card:#FFFFFF; --card2:#F6FAFC; --line:#E2ECF0; --line2:#CDDDE5;
+  --ink:#0C1F29; --muted:#587080;
+  --accent:#1E8F9C; --on-accent:#FFFFFF; --accent-soft:#DDF3F5; --accent-ink:#13707C;
+  --accent-grad:linear-gradient(135deg,#2DC3CF 0%,#1F8AA8 55%,#2F6FD6 130%);
+  --sec:#2F6FD6; --sec-soft:#E8F0FD; --danger:#D2454E;
+  --lg-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 12px 32px -14px rgba(18,86,108,.28),0 2px 6px -2px rgba(18,86,108,.08);
+  --lg-glow:0 10px 26px -8px rgba(31,160,176,.55);
+}
+:root[data-theme="light"] body{
+  background:
+    radial-gradient(900px 520px at 92% -140px,rgba(45,210,220,.30),transparent 70%),
+    radial-gradient(760px 520px at -6% 8%,rgba(47,123,255,.15),transparent 70%),
+    linear-gradient(180deg,#F1F8FA 0%,#E9F1F5 100%);
+  background-attachment:fixed;
+}
+/* testata e barra superiore: vetro chiaro */
+:root[data-theme="light"] .mainTop{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom-color:rgba(18,86,108,.10)}
+:root[data-theme="light"] .mainTopRow .mainBiz{background:linear-gradient(120deg,#0C1F29 30%,#13707C);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-theme="light"] .mainTopRow .mainBiz small{-webkit-text-fill-color:var(--muted)}
+:root[data-theme="light"] .burgerBtn,:root[data-theme="light"] .mainTopRow button:not(.burgerBtn){background:rgba(255,255,255,.85);border-color:rgba(18,86,108,.14);box-shadow:0 6px 16px -8px rgba(18,86,108,.35)}
+:root[data-theme="light"] .burgerBtn[aria-expanded="true"]{background:var(--accent-grad);border-color:transparent;box-shadow:var(--lg-glow)}
+/* titolo della data e comandi */
+:root[data-theme="light"] .range{background:linear-gradient(110deg,#13707C 0%,#1F8AA8 60%,#2F6FD6 120%);-webkit-background-clip:text;background-clip:text}
+:root[data-theme="light"] .seg{background:rgba(255,255,255,.7);border-color:rgba(18,86,108,.12);box-shadow:0 6px 18px -10px rgba(18,86,108,.3)}
+:root[data-theme="light"] .seg button[aria-pressed="true"],:root[data-theme="light"] .seg button.on{background:var(--accent-grad);box-shadow:var(--lg-glow);color:#fff}
+:root[data-theme="light"] .arrow{background:rgba(255,255,255,.85);border-color:rgba(18,86,108,.14)}
+/* schede */
+:root[data-theme="light"] .ag-card,:root[data-theme="light"] .day-hero-main,:root[data-theme="light"] .day-hero-next,:root[data-theme="light"] .cal-card,
+:root[data-theme="light"] .stCard,:root[data-theme="light"] .stList,:root[data-theme="light"] .pfCard,:root[data-theme="light"] .set-section,
+:root[data-theme="light"] #panelStats [class*="card" i],:root[data-theme="light"] #panelClients [class*="card" i]{
+  background:linear-gradient(180deg,#FFFFFF 0%,#FAFDFE 100%);border-color:rgba(18,86,108,.10);box-shadow:var(--lg-shadow)}
+:root[data-theme="light"] .ag-card{transition:transform .15s ease,box-shadow .15s ease}
+:root[data-theme="light"] .ag-card:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 16px 36px -14px rgba(18,86,108,.34)}
+:root[data-theme="light"] .ag-card.upcoming{border-color:rgba(30,143,156,.55);box-shadow:var(--lg-shadow),0 0 0 3px rgba(45,195,207,.14)}
+:root[data-theme="light"] .ag-tag.next-tag,:root[data-theme="light"] .ag-pill{background:var(--accent-grad);color:#fff;box-shadow:0 6px 14px -6px rgba(31,160,176,.6)}
+:root[data-theme="light"] .fab{background:var(--accent-grad);box-shadow:0 14px 30px -8px rgba(31,138,168,.65)}
+/* pulsanti principali */
+:root[data-theme="light"] .stBtn:not(.ghost):not(.danger):not(.outline-danger){background:var(--accent-grad);box-shadow:var(--lg-glow)}
+/* menu burger: vetro */
+:root[data-theme="light"] .menuBackdrop{background:rgba(12,31,41,.28);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+:root[data-theme="light"] .burgerMenu{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-color:rgba(18,86,108,.14);box-shadow:0 30px 70px -20px rgba(12,40,56,.45),0 1px 0 rgba(255,255,255,.9) inset}
+:root[data-theme="light"] body.mnOn #burgerMenu > button[aria-current="true"]{background:linear-gradient(135deg,rgba(45,195,207,.18),rgba(47,111,214,.10));color:var(--accent-ink)}
+/* impostazioni: icone piu' luminose */
+:root[data-theme="light"] #panelOther .stRow:hover,:root[data-theme="light"] #panelOther .stRow[aria-current="true"]{background:linear-gradient(90deg,rgba(45,195,207,.10),transparent)}
+/* campi */
+:root[data-theme="light"] .set-input,:root[data-theme="light"] .nw-in,:root[data-theme="light"] input.inp{background:#F4F9FB;border-color:#D3E1E8}
+:root[data-theme="light"] .set-input:focus{background:#fff;box-shadow:0 0 0 3px rgba(45,195,207,.25)}
