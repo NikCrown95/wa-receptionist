@@ -3040,3 +3040,5 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #panelOther .arChip{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 6px 0 14px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-weight:700;font-size:.92rem;box-shadow:inset 0 0 0 1px var(--accent)}
 #panelOther .arChip button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:1.2rem;line-height:1}
 #panelOther .arChip button:hover{background:rgba(0,0,0,.12)}
+
+.stIc.c-rose{background:linear-gradient(145deg,#F5719F,#D63F7C)}
