@@ -3176,3 +3176,9 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
   :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .arrow,:root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .jumpToday{order:2!important;flex:none!important;background:none!important;border:0!important;box-shadow:none!important}
   :root:root:root:root:root:root body.lia-sec-cal #calSubApp .controls .jumpToday{padding:0 8px!important}
 }
+/* telefono, altre sezioni: stessa intestazione pulita del calendario */
+@media(max-width:699px){
+  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop{background:var(--bg)!important;box-shadow:none!important;border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important}
+  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTopRow{align-items:center!important;gap:6px!important}
+  :root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #burgerBtn,:root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #bellBtn,:root:root:root:root:root:root body:not(.lia-sec-cal) .mainTop #liaRecapBtn{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important}
+}
