@@ -1,4 +1,4 @@
-# Genera le icone della Super Dashboard (stile pulito: sfondo grafite, "a" argento, faccina nera, occhi azzurri).
+# Genera le icone della Super Dashboard (stile pulito: sfondo nero, "a" bianca, faccina nera, occhi azzurri).
 # Parte dal simbolo Lia in public/brand/favicon-512.png, ne ricostruisce le forme ad alta risoluzione e disegna a 2048px.
 # Uso: python3 scripts/make-admin-icon.py   (scrive in public/admin/icons/)
 import numpy as np, os, sys
@@ -57,7 +57,7 @@ def render_mark(w):
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     diag = np.clip((xx / w) * 0.45 + (yy / h) * 0.75, 0, 1)
     t = np.clip(0.55 * (1 - diag) + 0.45 * L, 0, 1)[..., None]
-    body = np.array([118, 125, 136]) / 255 * (1 - t) + np.array([236, 239, 244]) / 255 * t
+    body = np.array([206, 209, 215]) / 255 * (1 - t) + np.array([247, 248, 250]) / 255 * t
     face_c = np.array([9, 9, 11]) / 255
     et = np.clip((yy / h - 0.35) / 0.3, 0, 1)[..., None]
     eye_c = np.array([120, 236, 244]) / 255 * (1 - et) + np.array([40, 190, 215]) / 255 * et
@@ -65,7 +65,7 @@ def render_mark(w):
     col = col * (1 - E[..., None]) + eye_c * E[..., None]
     return Image.fromarray((np.clip(np.dstack([col, A]), 0, 1) * 255).astype(np.uint8), "RGBA")
 
-def build(ratio, S=2048, top=(44, 46, 52), bot=(22, 23, 27)):
+def build(ratio, S=2048, top=(12, 12, 14), bot=(12, 12, 14)):
     y = np.linspace(0, 1, S, dtype=np.float32)[:, None, None]
     bg = np.array(top, np.float32) * (1 - y) + np.array(bot, np.float32) * y
     img = Image.fromarray(np.broadcast_to(bg, (S, S, 3)).astype(np.uint8), "RGB").convert("RGBA")
@@ -74,7 +74,7 @@ def build(ratio, S=2048, top=(44, 46, 52), bot=(22, 23, 27)):
     ox, oy = (S - w) // 2, (S - h) // 2 + int(S * 0.01)
     sh = Image.new("L", (S, S), 0)
     sh.paste(m.split()[-1], (ox, oy + int(S * 0.014)))
-    sh = sh.filter(ImageFilter.GaussianBlur(S * 0.016)).point(lambda p: int(p * 0.45))
+    sh = sh.filter(ImageFilter.GaussianBlur(S * 0.016)).point(lambda p: int(p * 0.0))
     sl = Image.new("RGBA", (S, S), (0, 0, 0, 0)); sl.putalpha(sh)
     img = Image.alpha_composite(img, sl)
     layer = Image.new("RGBA", (S, S), (0, 0, 0, 0)); layer.paste(m, (ox, oy), m)
