@@ -1,0 +1,23 @@
+.regWrap{max-width:900px;margin:0 auto;width:100%;padding:16px 16px 60px;}
+.regHead{margin:0 2px 4px;}
+.regHead p{margin:2px 0 0;font-size:.86rem;color:var(--muted);}
+.regDay{margin:18px 2px 7px;font-size:.78rem;font-weight:700;letter-spacing:.02em;color:var(--muted);}
+.regRow{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 8px;}
+.regAv{flex:none;width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-size:.8rem;font-weight:800;}
+.regBd{flex:1;min-width:0;}
+.regL1{display:flex;gap:8px;align-items:baseline;justify-content:space-between;}
+.regNm{min-width:0;font-size:.97rem;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;}
+.regTm{flex:none;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+.regSv{margin-top:1px;font-size:.88rem;color:var(--ink);}
+.regWh{margin-top:3px;font-size:.84rem;color:var(--muted);}
+.regCh{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.78rem;color:var(--muted);}
+.regCh svg{flex:none;width:14px;height:14px;}
+.regTag{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:7px;font-size:.7rem;font-weight:700;vertical-align:2px;}
+.regTag.c{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger);}
+.regTag.n{background:var(--ter-soft);color:var(--ter);}
+.regRow.x .regNm,.regRow.x .regSv{opacity:.62;}
+.regMsg{margin:34px 8px;text-align:center;color:var(--muted);font-size:.92rem;line-height:1.5;}
+.regMsg b{display:block;margin-bottom:4px;font-size:1.02rem;color:var(--ink);}
+.regMsg button{margin-top:12px;min-height:42px;padding:0 18px;border-radius:12px;border:1.5px solid var(--accent);background:transparent;color:var(--accent-ink);font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;}
+.regFoot{margin:16px 2px 0;font-size:.78rem;color:var(--muted);text-align:center;}
+@media(max-width:640px){.regWrap{padding:12px 12px 72px;}}

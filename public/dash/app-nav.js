@@ -1,9 +1,9 @@
 
 (function(){
-  var panels = { cal: document.getElementById('panelCal'), clients: document.getElementById('panelClients'), stats: document.getElementById('panelStats'), profile: document.getElementById('panelProfile'), other: document.getElementById('panelOther') };
-  var LABELS = { cal: 'Calendario', clients: 'Clienti', stats: 'Statistiche', profile: 'Scheda attività', other: 'Impostazioni' };
+  var panels = { cal: document.getElementById('panelCal'), clients: document.getElementById('panelClients'), registry: document.getElementById('panelRegistry'), stats: document.getElementById('panelStats'), profile: document.getElementById('panelProfile'), other: document.getElementById('panelOther') };
+  var LABELS = { cal: 'Calendario', clients: 'Clienti', registry: 'Registro prenotazioni', stats: 'Statistiche', profile: 'Scheda attività', other: 'Impostazioni' };
 
-  var menuTabs = { cal: document.getElementById('menuTabCal'), clients: document.getElementById('menuTabClients'), stats: document.getElementById('menuTabStats'), profile: document.getElementById('menuTabProfile'), other: document.getElementById('menuTabOther') };
+  var menuTabs = { cal: document.getElementById('menuTabCal'), clients: document.getElementById('menuTabClients'), registry: document.getElementById('menuTabRegistry'), stats: document.getElementById('menuTabStats'), profile: document.getElementById('menuTabProfile'), other: document.getElementById('menuTabOther') };
   var burgerBtn = document.getElementById('burgerBtn');
   var burgerMenu = document.getElementById('burgerMenu');
   var menuBackdrop = document.getElementById('menuBackdrop');
@@ -39,6 +39,7 @@
   menuBackdrop.addEventListener('click', closeMenu);
   menuTabs.cal.addEventListener('click', function(){ show('cal'); closeMenu(); });
   menuTabs.clients.addEventListener('click', function(){ show('clients'); closeMenu(); });
+  menuTabs.registry.addEventListener('click', function(){ show('registry'); closeMenu(); });
   menuTabs.stats.addEventListener('click', function(){ show('stats'); closeMenu(); });
   menuTabs.profile.addEventListener('click', function(){ show('profile'); closeMenu(); });
   menuTabs.other.addEventListener('click', function(){ show('other'); closeMenu(); });
