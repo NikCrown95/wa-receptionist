@@ -571,11 +571,13 @@ module.exports = async (req, res) => {
         if (bname.length < 2 || bname.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività." });
         const HM = /^([01]\d|2[0-3]):[0-5]\d$/;
         const btype = kind === "palestra" ? "palestra" : (String(body.trade || "").trim().toLowerCase().replace(/[^a-z0-9\u00e0\u00e8\u00e9\u00ec\u00f2\u00f9' -]/g, "").slice(0, 40) || "altro");
+        // Chi non ha scelto "Studi sanitari" non può finire con un tipo sanitario (scrivendolo a mano in "Altro"): salterebbe l'Accordo.
+        if (kind !== "sanitario" && require("../lib/verticals.js").isMedical(btype)) return res.status(400).json({ error: "Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»." });
         const patch = { name: bname, business_type: btype };
 
         if (kind === "sanitario") {
           // Studi sanitari: il tipo deve essere uno di quelli protetti (altrimenti perderebbe le garanzie) e serve l'accettazione dell'Accordo.
-          if (!require("../lib/verticals.js").isMedical(btype)) return res.status(400).json({ error: "Scegli che tipo di studio sei: dentista, fisioterapista o studio medico." });
+          if (!require("../lib/verticals.js").isMedical(btype)) return res.status(400).json({ error: "Scegli che tipo di studio sei." });
           if (body.dpa !== true) return res.status(400).json({ error: "Per continuare serve accettare l'Accordo per gli studi sanitari." });
           const ue = await sb("GET", "business_users?business_id=eq." + biz.id + "&select=email&limit=1");
           const ownerEmail = ue.ok && Array.isArray(ue.data) && ue.data[0] ? String(ue.data[0].email || "") : "";

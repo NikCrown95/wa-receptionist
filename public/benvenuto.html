@@ -207,8 +207,8 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 <main class="shell">
   <aside class="side">
     <span class="logo" role="img" aria-label="Prenolia"></span>
-    <h2>La tua agenda, pronta in pochi minuti</h2>
-    <p class="lead" style="color:var(--muted)">Rispondi a poche domande: alla fine i clienti possono già prenotare.</p>
+    <h2>Configura la tua agenda</h2>
+    <p class="lead" style="color:var(--muted)">Quello che inserisci qui è ciò che i tuoi clienti vedranno sulla pagina di prenotazione.</p>
     <div class="orbrow">
       <div class="orb" role="img" aria-label="Avanzamento">
         <svg viewBox="0 0 240 240" aria-hidden="true"><defs>
@@ -236,27 +236,35 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
  palestra:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
  sanitari:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
  sanitario:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>'};
-var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e simili. Ricevi nel tuo locale"],
- ["domicilio","Servizi anche a domicilio","Ricevi in sede e vai dai clienti, nelle zone che scegli tu"],
- ["palestra","Palestra","Corsi di gruppo e personal training"],
- ["sanitario","Studi sanitari","Dentisti, fisioterapisti, studi medici. Privacy rafforzata: niente chat, niente note"]];
+var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi nel tuo locale"],
+ ["domicilio","Servizi anche a domicilio","Ricevi nel tuo locale e vai dai clienti, nelle città che scegli tu"],
+ ["palestra","Palestra","Lezioni di gruppo, personal training e iscritti"],
+ ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Solo calendario, senza chat e senza note"]];
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
  "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
  "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Make-up artist":Q("Trucco giorno|45,Trucco sposa|90,Prova trucco|60"),
- "Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),"Altro":[]};
+ "Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),
+ "Lash artist":Q("Extension ciglia|120,Laminazione ciglia|60,Ritocco ciglia|60"),"Centro benessere":Q("Massaggio|50,Percorso benessere|120,Trattamento viso|60"),
+ "Veterinario":Q("Visita|30,Vaccinazione|20,Visita di controllo|20"),"Officina":Q("Tagliando|120,Controllo|30,Cambio gomme|60"),
+ "Fotografo":Q("Consulenza|30,Servizio fotografico|60,Ritratti|90"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),
+ "Lezioni di musica":Q("Lezione|60,Lezione di prova|30"),"Consulente":Q("Prima consulenza|30,Consulenza|60"),"Altro":[]};
 var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":M1["Estetista"],"Massaggiatore":Q("Massaggio rilassante|50,Massaggio decontratturante|50"),
  "Personal trainer":Q("Allenamento 1 a 1|60,Prima consulenza|30"),"Idraulico":Q("Sopralluogo|30,Riparazione perdita|60,Intervento urgente|90"),"Elettricista":Q("Sopralluogo|30,Riparazione guasto|60,Installazione|90"),
  "Fabbro":Q("Apertura porta|30,Cambio serratura|60,Sopralluogo|30"),"Imbianchino":Q("Sopralluogo|30,Preventivo|30,Tinteggiatura stanza|180"),"Giardiniere":Q("Sopralluogo|30,Manutenzione giardino|120,Potatura|120"),
  "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Tecnico climatizzatori":Q("Sopralluogo|30,Manutenzione|60,Installazione|120"),
- "Dog sitter":Q("Passeggiata|45,Visita a casa|30"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),"Altro":[]};
-var SOLOCASA={"Idraulico":1,"Elettricista":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tuttofare":1,"Pulizie":1,"Tecnico climatizzatori":1,"Dog sitter":1};
-var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),"Studio medico":Q("Visita|30,Visita di controllo|20")};
+ "Dog sitter":Q("Passeggiata|45,Visita a casa|30"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),
+ "Tecnico informatico":Q("Sopralluogo|30,Assistenza|60,Installazione|90"),"Baby sitter":Q("Pomeriggio|180,Serata|180"),"Muratore":Q("Sopralluogo|30,Preventivo|30,Intervento|180"),
+ "Tecnico caldaie":Q("Manutenzione caldaia|60,Sopralluogo|30,Riparazione|90"),"Lezioni di musica":M1["Lezioni di musica"],"Fotografo":M1["Fotografo"],"Veterinario":M1["Veterinario"],"Altro":[]};
+var SOLOCASA={"Idraulico":1,"Elettricista":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tuttofare":1,"Pulizie":1,"Tecnico climatizzatori":1,"Dog sitter":1,"Baby sitter":1,"Muratore":1,"Tecnico caldaie":1};
+var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),
+ "Osteopata":Q("Prima visita|60,Seduta|45,Seduta di controllo|30"),"Nutrizionista":Q("Prima visita|60,Visita di controllo|30"),"Psicologo":Q("Primo colloquio|50,Colloquio|50"),
+ "Podologo":Q("Prima visita|45,Trattamento|45,Visita di controllo|30"),"Logopedista":Q("Prima valutazione|60,Seduta|45"),"Studio medico":Q("Visita|30,Visita di controllo|20")};
 function MESTIERI(){return S.v==="domicilio"?M2:(S.v==="sanitario"?M3:M1)}
 var GYMSUG=Q("Corso di gruppo|60,Personal training 1 a 1|60,Prima consulenza|30");
 var DAYN=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
 var DAYS=["L","M","M","G","V","S","D"];
-var SUBT={tipo:"Scegli il tipo di attività: adatto tutto il resto.",attivita:"Nome e mestiere: è quello che vedono i clienti.",servizi:"Cosa offri, per quanto tempo e a che prezzo.",lezioni:"Le lezioni che proponi e quanti posti hanno.",calendario:"Giorni e ora in cui si tengono le lezioni.",zona:"Le città dove vai a casa dei clienti.",orari:"I giorni e gli orari in cui ricevi.",privacy:"Le garanzie sui dati dei pazienti e il tuo consenso.",fine:"Ultimo controllo, poi la tua agenda è pronta."};
+var SUBT={tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Cosa cambia per il tuo studio e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
 var NAMES={tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
@@ -284,12 +292,13 @@ function logoRow(){
   f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;(window.PrenoliaCrop?function(f2,cb){window.PrenoliaCrop.open(f2,cb)}:prepLogo)(file,function(d){if(!d){render();return}S.err="";S.logo=d;render()})};
   var pick=chip(S.logo?"Cambia logo":"Carica logo",false,function(){f.click()});
   var bt=h("div",{class:"chips"},[pick]);if(S.logo)bt.appendChild(chip("Rimuovi",false,function(){S.logo="";render()}));
-  return h("div",{class:"logorow"},[pv,h("div",{class:"logotx"},[h("b",{text:"Logo (facoltativo)"}),h("span",{text:"Lo vedranno i clienti nella pagina di prenotazione e sarà la tua foto del profilo."}),bt]),f])}
+  return h("div",{class:"logorow"},[pv,h("div",{class:"logotx"},[h("b",{text:"Logo (facoltativo)"}),h("span",{text:"Compare sulla pagina di prenotazione e nel profilo della tua attività."}),bt]),f])}
 function chip(t,pressed,fn){var b=h("button",{class:"chip",type:"button","aria-pressed":pressed?"true":"false",text:t});b.onclick=fn;return b}
 function go(n){S.step=Math.max(0,S.step+n);S.err="";render()}
 function tradeName(){return S.mestiere==="Altro"?S.altro.trim():S.mestiere}
 function validate(k){
-  if(k==="attivita"){if(S.nome.trim().length<2)return"Scrivi il nome della tua attività.";if(S.v!=="palestra"&&S.mestiere==="Altro"&&S.altro.trim().length<2)return"Scrivi che mestiere fai."}
+  if(k==="attivita"){if(S.nome.trim().length<2)return"Scrivi il nome della tua attività.";if(S.v!=="palestra"&&S.mestiere==="Altro"&&S.altro.trim().length<2)return"Scrivi che mestiere fai.";
+    if(S.v!=="palestra"&&S.v!=="sanitario"){var tn=tradeName().toLowerCase();if(Object.keys(M3).some(function(x){return x.toLowerCase()===tn}))return"Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»."}}
   if(k==="servizi"||k==="lezioni"){
     if(!S.items.length||S.items.some(function(x){return!x.n.trim()}))return S.items.length?"Dai un nome a ogni voce, oppure rimuovila.":(k==="lezioni"?"Aggiungi almeno una lezione.":"Aggiungi almeno un servizio.");
     if(k==="servizi"&&S.items.some(function(x){var p=String(x.p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
@@ -310,7 +319,7 @@ function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
   var box=h("div",{class:"list"});
   box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:(gym?"Lezione":"Servizio")+(S.items.length?" · "+S.items.length:"")}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
-  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Ancora nessuna lezione. Tocca un suggerimento qui sopra o scrivi la tua qui sotto.":"Ancora nessun servizio. Tocca un suggerimento qui sopra o scrivi il tuo qui sotto."}));
+  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Nessuna lezione ancora. Tocca un suggerimento qui sopra o scrivine una qui sotto.":"Nessun servizio ancora. Tocca un suggerimento qui sopra o scrivine uno qui sotto."}));
   S.items.forEach(function(it,idx){
     var r=h("div",{class:"lr c-"+kind});
     var ni=h("input",{class:"inp f-n",value:it.n,placeholder:gym?"Nome della lezione":"Nome del servizio",maxlength:"80","aria-label":"Nome"});ni.oninput=function(){it.n=ni.value};
@@ -360,12 +369,12 @@ function render(){
   document.getElementById("pct").textContent=pct+"%";
   var feed=document.getElementById("feed"),seen=Number(feed.dataset.n||"-1");feed.textContent="";
   var fl=S.v?flow():["tipo"];
-  feed.appendChild(h("li",{class:"on"+(S.step!==seen?" new":"")},[h("span",{class:"fk",text:"Passo "+(S.step+1)+" di "+np}),h("span",{class:"ft",text:NAMES[k]}),h("span",{class:"fx",text:SUBT[k]})]));
+  feed.appendChild(h("li",{class:"on"+(S.step!==seen?" new":"")},[h("span",{class:"fk",text:"Passo "+(S.step+1)+(S.v?" di "+np:"")}),h("span",{class:"ft",text:NAMES[k]}),h("span",{class:"fx",text:SUBT[k]})]));
   feed.dataset.n=String(S.step);
   var lab=S.v?"Passo "+(S.step+1)+" di "+f.length:"Passo 1";
   if(!S.ready){v.appendChild(h("p",{class:"lead",text:"Un attimo…"}));return}
   if(k==="tipo"){
-    v.appendChild(head(lab,"Che attività hai?","Ti guidiamo in pochi passi: alla fine l'agenda è già pronta per ricevere prenotazioni."));
+    v.appendChild(head(lab,"Che attività hai?","Il tipo di attività decide quali domande ti faremo."));
     var st=h("div",{class:"stack"});
     VERT.forEach(function(x){
       var b=h("button",{class:"opt",type:"button","aria-pressed":S.v===x[0]?"true":"false"},[h("span",{class:"ic"},[svg(x[0])]),h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
@@ -373,9 +382,9 @@ function render(){
     v.appendChild(st);
   }
   if(k==="attivita"){
-    v.appendChild(head(lab,"Come si chiama la tua attività?","Lo vedranno i clienti sulla pagina di prenotazione."));
+    v.appendChild(head(lab,"Come si chiama la tua attività?","Il nome compare sulla pagina di prenotazione."));
     var c=h("div",{class:"card"});c.appendChild(field("Nome dell'attività",inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2"),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"})));
-    if(S.v!=="palestra"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Di che mestiere?"}));var ch=h("div",{class:"chips"});
+    if(S.v!=="palestra"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Che mestiere fai?"}));var ch=h("div",{class:"chips"});
       Object.keys(MESTIERI()).forEach(function(m){ch.appendChild(chip(m,S.mestiere===m,function(){if(S.mestiere!==m){S.mestiere=m;S.items=[]}render()}))});c.appendChild(ch);
       if(S.mestiere==="Altro")c.appendChild(field("Che mestiere fai?",inp(S.altro,"es. Sarta",function(x){S.altro=x},{maxlength:"40"})))}
     c.appendChild(logoRow());
@@ -383,15 +392,15 @@ function render(){
   }
   if(k==="servizi"||k==="lezioni"){
     var gym=k==="lezioni";
-    v.appendChild(head(lab,gym?"Cosa offri?":"Quali servizi fai?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Prezzi e abbonamenti li imposti dopo.":"Tocca un suggerimento o scrivi il tuo servizio. Controlla durata e prezzo: il prezzo puoi anche lasciarlo vuoto."));
+    v.appendChild(head(lab,gym?"Quali lezioni offri?":"Quali servizi offri?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Abbonamenti e iscritti li imposti dopo, dall'agenda.":"Tocca un suggerimento oppure scrivi i tuoi servizi. Durata e prezzo si possono cambiare, il prezzo può restare vuoto."));
     var sug=gym?GYMSUG:(MESTIERI()[S.mestiere]||[]),left=sug.filter(function(x){return!S.items.some(function(i){return i.n===x[0]})});
     if(left.length){var sb=h("div",{class:"sugs"});sb.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));
       var ch2=h("div",{class:"chips"});left.forEach(function(x){ch2.appendChild(chip("+ "+x[0]+" · "+x[1]+" min",false,function(){addItem(x[0],x[1],false)}))});sb.appendChild(ch2);v.appendChild(sb)}
     v.appendChild(listBox(gym,S.v==="domicilio"));
-    if(S.v==="domicilio")v.appendChild(h("p",{class:"hint",text:"L'icona della casa segna i servizi che fai a casa del cliente. Quelli senza icona li fai nel tuo locale."}));
+    if(S.v==="domicilio")v.appendChild(h("p",{class:"hint",text:"L'icona della casa segna i servizi che fai a casa del cliente. Gli altri li fai nel tuo locale."}));
   }
   if(k==="calendario"){
-    v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio. Altri orari li aggiungi dopo da Corsi e programma."));
+    v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio di ogni lezione. Altri orari li aggiungi dopo con il pulsante Programma."));
     S.items.forEach(function(it){var c6=h("div",{class:"card"});c6.appendChild(h("b",{text:it.n}));
       var dc=h("div",{class:"chips"});DAYS.forEach(function(l,i){var on=it.days.indexOf(i+1)>=0;var b=chip(l,on,function(){var p=it.days.indexOf(i+1);if(p>=0)it.days.splice(p,1);else it.days.push(i+1);render()});b.setAttribute("aria-label",DAYN[i]);b.style.minWidth="44px";b.style.justifyContent="center";dc.appendChild(b)});
       c6.appendChild(dc);
@@ -399,7 +408,7 @@ function render(){
       c6.appendChild(field("Ora di inizio",ti));v.appendChild(c6)});
   }
   if(k==="zona"){
-    v.appendChild(head(lab,"Dove vai a domicilio?","Il cliente può prenotare a casa solo se il suo indirizzo è in una di queste città."));
+    v.appendChild(head(lab,"In quali città vai a domicilio?","Il cliente può prenotare a domicilio solo con un indirizzo in una di queste città."));
     var c3=h("div",{class:"card"}),cc=h("div",{class:"chips"});
     S.cities.forEach(function(x,i){var s=h("span",{class:"chip city",text:x});s.appendChild(h("button",{type:"button","aria-label":"Togli "+x,text:"×",onclick:function(){S.cities.splice(i,1);render()}}));cc.appendChild(s)});
     c3.appendChild(cc);
@@ -407,27 +416,26 @@ function render(){
     var add=function(){var t=ci.value.trim().replace(/\s+/g," ");if(t.length>=2&&!S.cities.some(function(c){return c.toLowerCase()===t.toLowerCase()})&&S.cities.length<20){S.cities.push(t);S.err="";render()}};
     ci.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();add()}};
     row.appendChild(ci);row.appendChild(h("button",{class:"chip",type:"button",text:"Aggiungi",onclick:add}));c3.appendChild(row);
-    c3.appendChild(h("p",{class:"hint",text:"Fuori da queste città il cliente vede i servizi a casa ma non può prenotarli. I servizi in sede restano sempre prenotabili."}));v.appendChild(c3);
+    c3.appendChild(h("p",{class:"hint",text:"Con un indirizzo fuori da queste città i servizi a domicilio non si possono prenotare. Quelli nel tuo locale restano sempre prenotabili."}));v.appendChild(c3);
   }
   if(k==="privacy"){
-    v.appendChild(head(lab,"La privacy dei tuoi pazienti","Anche solo la data di una visita può dire qualcosa sulla salute di una persona. Per questo gli studi sanitari hanno regole più rigide."));
+    v.appendChild(head(lab,"La privacy dei tuoi pazienti","Anche la sola data di una visita può rivelare qualcosa sulla salute di una persona. Per questo gli studi sanitari hanno regole più rigide."));
     var cp=h("div",{class:"card"});
-    cp.appendChild(h("div",{class:"next"},[h("b",{text:"Cosa fa Prenolia per te"}),
-      h("ul",null,[h("li",{text:"Niente intelligenza artificiale, chat, Telegram o WhatsApp: i pazienti prenotano solo dal calendario."}),
-        h("li",{text:"Niente note e niente campi di testo libero: nessuno può scrivere diagnosi o sintomi."}),
-        h("li",{text:"Il paziente deve dare il consenso prima di prenotare, e noi lo registriamo."}),
-        h("li",{text:"Email e notifiche dicono solo giorno e ora, mai il tipo di visita."}),
-        h("li",{text:"Chi gestisce Prenolia non vede nomi, telefoni o servizi dei tuoi pazienti."}),
-        h("li",{text:"I dati personali delle prenotazioni diventano anonimi dopo 12 mesi."})])]));
+    cp.appendChild(h("div",{class:"next"},[h("b",{text:"Cosa cambia per il tuo studio"}),
+      h("ul",null,[h("li",{text:"Niente Lia, chat, Telegram o WhatsApp: i pazienti prenotano solo dal calendario."}),
+        h("li",{text:"Nessuna nota su pazienti e visite."}),
+        h("li",{text:"Prima di prenotare il paziente deve dare il consenso. Prenolia lo registra con data e versione."}),
+        h("li",{text:"Le email ai pazienti e le notifiche push riportano solo giorno e ora, mai il tipo di visita."}),
+        h("li",{text:"Nel pannello di gestione di Prenolia non compaiono nomi, telefoni o servizi dei tuoi pazienti."})])]));
     var l1=h("label",{class:"tgl long"}),c1=h("input",{type:"checkbox"});c1.checked=S.ok1;c1.onchange=function(){S.ok1=c1.checked};
     l1.appendChild(c1);var t1=h("span",null);t1.appendChild(document.createTextNode("Ho letto e accetto l'"));t1.appendChild(h("a",{href:"/accordo-sanitari",target:"_blank",rel:"noopener",text:"Accordo per gli studi sanitari"}));t1.appendChild(document.createTextNode(", che nomina Prenolia responsabile del trattamento."));l1.appendChild(t1);cp.appendChild(l1);
     var l2=h("label",{class:"tgl long"}),c2=h("input",{type:"checkbox"});c2.checked=S.ok2;c2.onchange=function(){S.ok2=c2.checked};
-    l2.appendChild(c2);l2.appendChild(h("span",{text:"Sono il titolare del trattamento: informerò i pazienti, userò Prenolia solo per le prenotazioni e non inserirò diagnosi, sintomi o altri dati sanitari (nemmeno nei nomi dei servizi)."}));cp.appendChild(l2);
+    l2.appendChild(c2);l2.appendChild(h("span",{text:"Sono il titolare del trattamento: informerò i pazienti, userò Prenolia solo per le prenotazioni e non inserirò diagnosi, sintomi o altri dati sanitari, nemmeno nei nomi dei servizi."}));cp.appendChild(l2);
     v.appendChild(cp);
-    v.appendChild(h("p",{class:"hint",text:"L'informativa per i pazienti viene creata da Prenolia e collegata alla tua pagina di prenotazione. Per le tue esigenze legali, fai rivedere questi documenti da un consulente."}));
+    v.appendChild(h("p",{class:"hint",text:"L'informativa per i pazienti è generata da Prenolia e collegata alla tua pagina di prenotazione. Per le tue esigenze legali, fai rivedere questi documenti da un consulente."}));
   }
   if(k==="orari"){
-    v.appendChild(head(lab,"Quando ricevi?","Scegli i giorni e gli orari di apertura."));
+    v.appendChild(head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare."));
     var c4=h("div",{class:"card"});
     S.hours.forEach(function(d,i){var r=h("div",{class:"day"});var l=h("label",{class:"tgl"});l.style.margin="0";var cb=h("input",{type:"checkbox"});cb.checked=d.on;
       l.appendChild(cb);l.appendChild(document.createTextNode(DAYN[i]));
@@ -435,10 +443,10 @@ function render(){
       a.oninput=function(){d.from=a.value};b.oninput=function(){d.to=b.value};
       cb.onchange=function(){d.on=cb.checked;t.className="times"+(d.on?"":" off")};
       t.appendChild(a);t.appendChild(h("span",{text:"–"}));t.appendChild(b);r.appendChild(l);r.appendChild(t);c4.appendChild(r)});
-    v.appendChild(c4);v.appendChild(h("p",{class:"hint",text:"Pause, ferie e orari diversi per collaboratore li aggiungi dopo da Disponibilità."}));
+    v.appendChild(c4);v.appendChild(h("p",{class:"hint",text:"Pause, ferie e orari diversi per ogni collaboratore li imposti dopo, da Disponibilità."}));
   }
   if(k==="fine"){
-    v.appendChild(head(lab,"Controlla e conferma","Ecco la tua agenda. Se vuoi cambiare qualcosa, tocca Modifica."));
+    v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
     var vn=VERT.filter(function(x){return x[0]===S.v})[0][1];
     var hero=h("div",{class:"hero"},[h("span",{class:"ic"},[svg(S.v)]),h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:vn+" · "+tradeName()})])]);
     v.appendChild(hero);
@@ -464,7 +472,9 @@ function render(){
       v.appendChild(sec("Orari di apertura","orari",wk));
     }
     var nx=h("div",{class:"next"},[h("b",{text:"Cosa succede dopo"}),
-      h("ul",null,[h("li",{text:"La tua prova gratuita dura 14 giorni."}),h("li",{text:"La pagina di prenotazione è pronta ma resta privata finché non la pubblichi."}),h("li",{text:"Servizi, orari e prezzi si cambiano quando vuoi dalle Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I tuoi pazienti vedranno il consenso privacy prima di prenotare."})]:[]))]);
+      h("ul",null,[h("li",{text:"La prova gratuita dura 14 giorni."}),
+        h("li",{text:S.v==="palestra"?"La pagina di prenotazione è già attiva: possono prenotare solo gli iscritti che registri tu.":"La pagina di prenotazione è già attiva. Dal menu dell'agenda puoi condividere il link o mostrare il QR code."}),
+        h("li",{text:S.v==="palestra"?"Lezioni e abbonamenti si modificano quando vuoi dall'agenda.":"Servizi, orari e prezzi si modificano quando vuoi da Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I pazienti vedono il consenso privacy prima di prenotare."})]:[]))]);
     v.appendChild(nx);
   }
   if(S.err)v.appendChild(h("div",{class:"err",role:"alert",text:S.err}));

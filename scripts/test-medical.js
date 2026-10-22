@@ -72,7 +72,7 @@ async function call(handler, req) { const res = mkRes(); await handler({ headers
   const verticals = require("../lib/verticals.js");
 
   // --- tipi
-  ["dentista", "studio medico", "fisioterapista", " Dentista "].forEach((t) => assert.ok(verticals.isMedical(t), t));
+  ["dentista", "studio medico", "fisioterapista", "osteopata", "nutrizionista", "psicologo", "podologo", "logopedista", " Dentista "].forEach((t) => assert.ok(verticals.isMedical(t), t));
   ["barbiere", "palestra", "altro", "", null, undefined, "medico generico"].forEach((t) => assert.ok(!verticals.isMedical(t), String(t)));
 
   const date = isoDay(3);
