@@ -6,8 +6,10 @@ var DATA = [];
 var STATS_WEEKLY_HOURS = {};
 var STATS_CLOSED_DATES = {};
 // Un appuntamento che cade in un giorno di chiusura (giorno senza orari di apertura, ferie o chiusura di giornata intera) non conta mai nel fatturato
-function statsIsClosedRow(r){
-  var d=new Date(r.startAt), key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function statsIsClosedRow(r){ return statsIsClosedDate(new Date(r.startAt)); }
+function statsOpenRows(){ return DATA.filter(function(r){ return !statsIsClosedRow(r); }); }
+function statsIsClosedDate(d){
+  var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   if(STATS_CLOSED_DATES[key])return true;
   var any=Object.keys(STATS_WEEKLY_HOURS).some(function(k){return (STATS_WEEKLY_HOURS[k]||[]).length;});
   if(!any)return false;
@@ -310,7 +312,7 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
   }
   function rowsInKpiPeriod(p){
     var bounds=kpiPeriodBounds(p);
-    return DATA.filter(function(r){var d=new Date(r.startAt);return d>=bounds.start&&d<bounds.end;});
+    return statsOpenRows().filter(function(r){var d=new Date(r.startAt);return d>=bounds.start&&d<bounds.end;});
   }
   function renderKpis(rows, prevRows){
     var bounds=kpiPeriodBounds(period);
@@ -373,6 +375,7 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
       confirmed.forEach(function(r){ byDay[r.day] = (byDay[r.day] || 0) + statsRevenueOf(r); });
       for (var d2 = -(span-1); d2 <= 0; d2++){
         var dt = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + d2);
+        if (statsIsClosedDate(dt)) continue; // i giorni di chiusura non compaiono mai nei grafici
         out.push({label: dt.getDate() + ' ' + MONTHS[dt.getMonth()], value: byDay[d2] || 0});
       }
     }
@@ -412,12 +415,13 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
 
     var step = Math.max(1, Math.round(points.length / 6));
     points.forEach(function(p,i){
-      if (i % step === 0 || i === points.length-1){
+      var lastI = points.length - 1, showLab = i === lastI || (i % step === 0 && lastI - i >= Math.max(2, step));
+      if (i % step === 0 || i === lastI){
         var c = svgEl('circle', {class:'dot', cx:X(i), cy:Y(p.value), r:3.5});
         svg.appendChild(c);
         var t = svgEl('text', {class:'axis', x:X(i), y:H-6, 'text-anchor': i===0?'start':(i===points.length-1?'end':'middle')});
         t.textContent = p.label;
-        svg.appendChild(t);
+        if (showLab) svg.appendChild(t);
       }
     });
     // un punto che pulsa piano sull'ultimo dato, per dare vita al grafico
@@ -451,6 +455,7 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
       confirmed.forEach(function(r){ byDay[r.day] = (byDay[r.day] || 0) + 1; });
       for (var d2 = -(span-1); d2 <= 0; d2++){
         var dt = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + d2);
+        if (statsIsClosedDate(dt)) continue; // i giorni di chiusura non compaiono mai nei grafici
         out.push({label: dt.getDate() + ' ' + MONTHS[dt.getMonth()], value: byDay[d2] || 0});
       }
     }
@@ -481,7 +486,8 @@ var gap = points.length > 40 ? 2 : 6;
       var rect = svgEl('rect', {class:'bar', x:x, y:y, width:Math.max(bw,1), height:Math.max(bh,1), rx:Math.min(4,bw/2)});
 rects.push(rect);
       svg.appendChild(rect);
-      if (i % step === 0 || i === points.length-1){
+      var lastI = points.length - 1;
+      if (i === lastI || (i % step === 0 && lastI - i >= Math.max(2, step))){
         var t = svgEl('text', {class:'axis', x:x+bw/2, y:H-6, 'text-anchor': i===0?'start':(i===points.length-1?'end':'middle')});
         t.textContent = p.label;
         svg.appendChild(t);
@@ -793,20 +799,21 @@ rects.push(rect);
   function loadStatsHours(){
     var statsToken=(new URLSearchParams(location.search).get('t')||'').trim();
     if(!statsToken)return Promise.resolve();
-    return (window.liaSettingsShared?window.liaSettingsShared().catch(function(){return {};}):fetch('/api/agenda?t='+encodeURIComponent(statsToken)+'&settings=1').then(function(r){return r.json();})).then(function(d){var weekly={};((Array.isArray(d.capacity_hours)&&d.capacity_hours.length?d.capacity_hours:d.hours)||[]).forEach(function(h){var wd=Number(h.weekday);if(!weekly[wd])weekly[wd]=[];weekly[wd].push({open:String(h.opens||''),close:String(h.closes||'')});});STATS_WEEKLY_HOURS=weekly;var closed={};(Array.isArray(d.blocks)?d.blocks:[]).forEach(function(b){if(b&&b.full_day&&b.date)closed[String(b.date).slice(0,10)]=1;});STATS_CLOSED_DATES=closed;render();}).catch(function(){});
+    return (window.liaSettingsShared?window.liaSettingsShared().catch(function(){return {};}):fetch('/api/agenda?t='+encodeURIComponent(statsToken)+'&settings=1').then(function(r){return r.json();})).then(function(d){var weekly={};((Array.isArray(d.capacity_hours)&&d.capacity_hours.length?d.capacity_hours:d.hours)||[]).forEach(function(h){var wd=Number(h.weekday);if(!weekly[wd])weekly[wd]=[];weekly[wd].push({open:String(h.opens||''),close:String(h.closes||'')});});STATS_WEEKLY_HOURS=weekly;var closed={};(Array.isArray(d.blocks)?d.blocks:[]).forEach(function(b){if(b&&b.full_day&&b.date)closed[String(b.date).slice(0,10)]=1;});(Array.isArray(d.closed_dates)?d.closed_dates:[]).forEach(function(k){closed[String(k).slice(0,10)]=1;});STATS_CLOSED_DATES=closed;render();}).catch(function(){});
   }
 
   function render(){
-    var rows = DATA.filter(function(r){ return inPeriod(r, period); });
-    var prevRows = DATA.filter(function(r){ return prevInPeriod(r, period); });
+    var OPEN = statsOpenRows();
+    var rows = OPEN.filter(function(r){ return inPeriod(r, period); });
+    var prevRows = OPEN.filter(function(r){ return prevInPeriod(r, period); });
 
     renderKpis(rows, prevRows);
 
     var subLabel = period === 'week' ? 'Ultimi 7 giorni' : (period === 'month' ? 'Ultimi 30 giorni' : 'Ultimi 12 mesi');
     document.getElementById('trend-sub').textContent = subLabel + ', solo appuntamenti confermati.';
     document.getElementById('count-sub').textContent = subLabel + '.';
-    renderLineChart(bucketsForPeriod(DATA, period));
-    renderCountChart(bucketsCount(DATA, period));
+    renderLineChart(bucketsForPeriod(OPEN, period));
+    renderCountChart(bucketsCount(OPEN, period));
     renderDonut(rows);
     renderGrowth();
     renderHeatmap(rows);
