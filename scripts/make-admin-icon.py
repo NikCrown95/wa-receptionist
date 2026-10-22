@@ -1,10 +1,11 @@
 # Genera l'icona nera lucida della Super Dashboard (la "a" di Lia su fondo nero con riflesso).
 # Uso: python3 scripts/make-admin-icon.py   (scrive in public/admin/icons/)
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
-import numpy as np, os
+import numpy as np, os, sys
 
 S = 1024
-mark_src = Image.open("public/brand/favicon-512.png").convert("RGBA")
+MARK = sys.argv[1] if len(sys.argv) > 1 else "public/brand/favicon-512.png"
+mark_src = Image.open(MARK).convert("RGBA")
 bb = mark_src.getbbox()
 mark_src = mark_src.crop(bb)
 
@@ -53,7 +54,7 @@ def build(mark_ratio):
 
     return img.convert("RGB")
 
-out = "public/admin/icons"
+out = sys.argv[2] if len(sys.argv) > 2 else "public/admin/icons"
 os.makedirs(out, exist_ok=True)
 anyi = build(0.66)
 anyi.resize((512, 512), Image.LANCZOS).save(f"{out}/admin-512.png", optimize=True)
