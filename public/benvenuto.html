@@ -243,20 +243,11 @@ var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
  "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
- "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Make-up artist":Q("Trucco giorno|45,Trucco sposa|90,Prova trucco|60"),
- "Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),
- "Lash artist":Q("Extension ciglia|120,Laminazione ciglia|60,Ritocco ciglia|60"),"Centro benessere":Q("Massaggio|50,Percorso benessere|120,Trattamento viso|60"),
- "Veterinario":Q("Visita|30,Vaccinazione|20,Visita di controllo|20"),"Officina":Q("Tagliando|120,Controllo|30,Cambio gomme|60"),
- "Fotografo":Q("Consulenza|30,Servizio fotografico|60,Ritratti|90"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),
- "Lezioni di musica":Q("Lezione|60,Lezione di prova|30"),"Consulente":Q("Prima consulenza|30,Consulenza|60"),"Altro":[]};
+ "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),"Altro":[]};
 var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":M1["Estetista"],"Massaggiatore":Q("Massaggio rilassante|50,Massaggio decontratturante|50"),
  "Personal trainer":Q("Allenamento 1 a 1|60,Prima consulenza|30"),"Idraulico":Q("Sopralluogo|30,Riparazione perdita|60,Intervento urgente|90"),"Elettricista":Q("Sopralluogo|30,Riparazione guasto|60,Installazione|90"),
- "Fabbro":Q("Apertura porta|30,Cambio serratura|60,Sopralluogo|30"),"Imbianchino":Q("Sopralluogo|30,Preventivo|30,Tinteggiatura stanza|180"),"Giardiniere":Q("Sopralluogo|30,Manutenzione giardino|120,Potatura|120"),
- "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Tecnico climatizzatori":Q("Sopralluogo|30,Manutenzione|60,Installazione|120"),
- "Dog sitter":Q("Passeggiata|45,Visita a casa|30"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),
- "Tecnico informatico":Q("Sopralluogo|30,Assistenza|60,Installazione|90"),"Baby sitter":Q("Pomeriggio|180,Serata|180"),"Muratore":Q("Sopralluogo|30,Preventivo|30,Intervento|180"),
- "Tecnico caldaie":Q("Manutenzione caldaia|60,Sopralluogo|30,Riparazione|90"),"Lezioni di musica":M1["Lezioni di musica"],"Fotografo":M1["Fotografo"],"Veterinario":M1["Veterinario"],"Altro":[]};
-var SOLOCASA={"Idraulico":1,"Elettricista":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tuttofare":1,"Pulizie":1,"Tecnico climatizzatori":1,"Dog sitter":1,"Baby sitter":1,"Muratore":1,"Tecnico caldaie":1};
+ "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),"Altro":[]};
+var SOLOCASA={"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1};
 var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),
  "Osteopata":Q("Prima visita|60,Seduta|45,Seduta di controllo|30"),"Nutrizionista":Q("Prima visita|60,Visita di controllo|30"),"Psicologo":Q("Primo colloquio|50,Colloquio|50"),
  "Podologo":Q("Prima visita|45,Trattamento|45,Visita di controllo|30"),"Logopedista":Q("Prima valutazione|60,Seduta|45"),"Studio medico":Q("Visita|30,Visita di controllo|20")};
