@@ -239,7 +239,7 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
 var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi nel tuo locale"],
  ["domicilio","Servizi anche a domicilio","Ricevi nel tuo locale e vai dai clienti, nelle città che scegli tu"],
  ["palestra","Palestra","Lezioni di gruppo, personal training e iscritti"],
- ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Solo calendario, senza chat e senza note"]];
+ ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Privacy rafforzata: si prenota solo dal calendario"]];
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
  "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
@@ -423,7 +423,6 @@ function render(){
     var cp=h("div",{class:"card"});
     cp.appendChild(h("div",{class:"next"},[h("b",{text:"Cosa cambia per il tuo studio"}),
       h("ul",null,[h("li",{text:"I pazienti prenotano solo dal calendario."}),
-        h("li",{text:"Nessuna nota su pazienti e visite."}),
         h("li",{text:"Prima di prenotare il paziente deve dare il consenso. Prenolia lo registra con data e versione."}),
         h("li",{text:"Le email ai pazienti e le notifiche push riportano solo giorno e ora, mai il tipo di visita."}),
         h("li",{text:"Nel pannello di gestione di Prenolia non compaiono nomi, telefoni o servizi dei tuoi pazienti."})])]));
