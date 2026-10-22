@@ -189,25 +189,63 @@
       '<span class="tx"><b>' + esc(t.title) + "</b><span>" + esc(t.text) + "</span></span>" + (t.time ? "<time>" + esc(t.time) + "</time>" : "") + (un ? '<i class="lr-dot"></i>' : "") + "</button>";
   }
 
+  /* palestre: abbonamenti e certificati nello stesso elenco, con filtri */
+  var GF = "all";
+  var GIC = {
+    sub: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4M7 3v4M3 11h16M18 16.496v1.504l1 1"/></svg>',
+    med: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 13.572l-7.5 7.428l-2.896 -2.868m-6.117 -8.104a5 5 0 0 1 9.013 -3.022a5 5 0 1 1 7.5 6.572"/><path d="M3 13h2l2 3l2 -6l1 3h3"/></svg>'
+  };
+  function gdays(d) { return d <= 0 ? "oggi" : d === 1 ? "domani" : "tra " + d + " giorni"; }
+  function gymRow(n, un) {
+    var m = n.meta || {}, dl = Number(m.days_left) || 0, isMed = n.type === "medical_expiring", bad = isMed && dl < 0, ds = "";
+    try { ds = new Date((isMed ? m.until : m.ends_on) + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) {}
+    var kind = bad ? "bad" : isMed ? "med" : "sub";
+    var desc = bad ? "Certificato scaduto da " + (-dl) + (dl === -1 ? " giorno" : " giorni")
+      : isMed ? "Certificato medico" + (ds ? " · " + ds : "")
+      : ((m.plan ? m.plan + " · " : "") + (ds || "Abbonamento"));
+    var pill = bad ? "Non prenota" : gdays(dl);
+    return '<button type="button" class="lr-it lr-g ' + kind + (un ? " un" : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(m.member_id || "") + '"><span class="ic">' + (isMed ? GIC.med : GIC.sub) + "</span>" +
+      '<span class="tx"><b>' + esc(m.name || "Iscritto") + "</b><span>" + esc(desc) + '</span></span><span class="lr-pill">' + pill + "</span>" + (un ? '<i class="lr-dot"></i>' : "") + "</button>";
+  }
+  function gymBlock(items) {
+    if (!items.length) return "";
+    var isMed = function (n) { return n.type === "medical_expiring"; };
+    var nSub = items.filter(function (n) { return !isMed(n); }).length, nMed = items.length - nSub;
+    var days = function (n) { return Number(n.meta && n.meta.days_left) || 0; };
+    if (GF === "sub" && !nSub) GF = "all";
+    if (GF === "med" && !nMed) GF = "all";
+    var out = "";
+    if (nSub && nMed) {
+      out += '<div class="lr-chips">' + [["all", "Tutti " + items.length], ["sub", "Abbonamenti " + nSub], ["med", "Certificati " + nMed]].map(function (c) {
+        return '<button type="button" class="lr-chip' + (GF === c[0] ? " on" : "") + '" data-f="' + c[0] + '">' + c[1] + "</button>";
+      }).join("") + "</div>";
+    }
+    var vis = items.filter(function (n) { return GF === "all" || (GF === "med" ? isMed(n) : !isMed(n)); }).sort(function (a, b) { return days(a) - days(b); });
+    var urgent = vis.filter(function (n) { return isMed(n) && days(n) < 0; }), soon = vis.filter(function (n) { return !(isMed(n) && days(n) < 0); });
+    var row = function (n) { return gymRow(n, !isSeen(kOf(n))); };
+    if (urgent.length) out += '<p class="lr-sec">Da risolvere subito</p>' + urgent.map(row).join("");
+    if (soon.length) out += '<p class="lr-sec">In scadenza</p>' + soon.map(row).join("");
+    return out;
+  }
+
   function render() {
     var h = '<div class="lr-head"><h2 id="liaRecapTitle">Avvisi</h2><button type="button" class="lr-x" aria-label="Chiudi">' + X + "</button></div>";
     var body = "", mi = monthItem(), list = visibleNotices();
     if (mi) body += monthCard(!isSeen(kOf(mi)));
     if (list.length) {
       if (mi && !data.gym) body += '<p class="lr-sec">Avvisi</p>';
-      var shownExp = false, shownMed = false;
-      body += list.map(function (n) {
-        var pre = "";
-        if (n.type === "member_expiring" && !shownExp) { shownExp = true; pre = '<p class="lr-sec">Abbonamenti in scadenza</p>'; }
-        if (n.type === "medical_expiring" && !shownMed) { shownMed = true; pre = '<p class="lr-sec lr-secmed">Certificati medici</p>'; }
-        return pre + noticeRow(n, !isSeen(kOf(n)));
-      }).join("");
+      var isG = function (n) { return n.type === "member_expiring" || n.type === "medical_expiring"; };
+      body += list.filter(function (n) { return !isG(n); }).map(function (n) { return noticeRow(n, !isSeen(kOf(n))); }).join("");
+      body += gymBlock(list.filter(isG));
     }
     if (!mi && !list.length) {
       body = '<div class="lr-empty"><b>Nessun avviso</b>Qui trovi i promemoria di Lia: chiusure, abbonamenti in scadenza e altro.</div>';
     }
     panel.innerHTML = h + '<div class="lr-body">' + body + "</div>" + (mi ? '<div class="lr-ft">Incasso stimato dai prezzi dei servizi.</div>' : "");
     panel.querySelector(".lr-x").addEventListener("click", closePanel);
+    panel.querySelectorAll(".lr-chip").forEach(function (c) {
+      c.addEventListener("click", function () { GF = c.getAttribute("data-f"); render(); });
+    });
     panel.querySelectorAll(".lr-it").forEach(function (b) {
       b.addEventListener("click", function () { go(b.getAttribute("data-type"), b.getAttribute("data-mid")); });
     });
