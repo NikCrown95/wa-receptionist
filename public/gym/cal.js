@@ -105,10 +105,10 @@
   };
   // in alto, al posto dei tre pulsanti della vista (che in palestra non servono), il giorno o i giorni della settimana
   function syncTop() {
-    var vd = document.getElementById('view-day'), sg = vd && vd.closest ? vd.closest('.seg') : null, par = sg && sg.parentNode; if (!par) return;
+    var par = document.querySelector('.mainTopRow'); if (!par) return;
     var t = document.getElementById('gymTopRange');
-    if (!t) { t = document.createElement('h1'); t.id = 'gymTopRange'; t.className = 'gymTopRange'; t.setAttribute('aria-live', 'polite'); par.insertBefore(t, sg); }
-    t.textContent = rangeTxt();
+    if (!t) { t = document.createElement('h1'); t.id = 'gymTopRange'; t.className = 'gymTopRange'; t.setAttribute('aria-live', 'polite'); par.insertBefore(t, par.firstChild); }
+    t.innerHTML = rangeTxt();
   }
   function render() {
     var of0 = G.OF ? G.OF() : null; if (of0) { if (!of0.cls && S.side === 'lez') S.side = 'pt'; if (!of0.pt && S.side === 'pt') S.side = 'lez'; if (S.flt !== 'all' && flist().every(function (x) { return x[0] !== S.flt; })) S.flt = 'all'; }
