@@ -37,7 +37,7 @@
     tip.style.left = l + 'px'; tip.style.top = t + 'px';
   }
   function tipHide() { tip.classList.remove('on'); }
-  document.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('.gcs [data-tip],.gcs svg.ch,.gcs .donut-css,.gcs .revenue-donut')) { tipHide(); clearOn(); } }, true);
+  document.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('.gcs [data-tip],.gcs svg.gch,.gcs .donut-css,.gcs .revenue-donut')) { tipHide(); clearOn(); } }, true);
   window.addEventListener('scroll', function () { if (tip.classList.contains('on')) { tipHide(); clearOn(); } }, true);
   function clearOn() { [].forEach.call(root.querySelectorAll('.on'), function (e) { e.classList.remove('on'); }); [].forEach.call(root.querySelectorAll('.dim'), function (e) { e.classList.remove('dim'); }); }
 
@@ -51,7 +51,7 @@
     s.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse' || e.buttons || e.pointerType === 'touch') move(e); });
     s.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { cur = -1; onOut(); } });
   }
-  function frame(host, H) { var W = Math.max(260, Math.round(host.clientWidth || 600)); var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'ch', role: 'img' }); s.style.height = 'auto'; host.appendChild(s); return { s: s, W: W, H: H }; }
+  function frame(host, H) { var W = Math.max(260, Math.round(host.clientWidth || 600)); var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'gch', role: 'img' }); s.style.height = 'auto'; host.appendChild(s); return { s: s, W: W, H: H }; }
   function xLabel(sr, i, n) { if (P === 'year') return G.MS[pd(sr.from).getMonth()]; if (P === 'week') return DAYS[(pd(sr.from).getDay() + 6) % 7] + ' ' + pd(sr.from).getDate(); var step = n > 14 ? 5 : 1; return (i === n - 1 || (i % step === 0 && n - 1 - i >= Math.max(2, step))) ? dShort(sr.from) : ''; }
   function titleOf(sr) { return P === 'year' ? mLong(sr.from) : DAYL[(pd(sr.from).getDay() + 6) % 7] + ' ' + dShort(sr.from); }
 
@@ -87,15 +87,16 @@
     s.appendChild(svg('path', { d: d + ' L' + X(n - 1).toFixed(1) + ',' + (pT + iH) + ' L' + X(0).toFixed(1) + ',' + (pT + iH) + ' Z', fill: 'url(#' + gid + ')' }));
     s.appendChild(svg('path', { class: 'ln' + (o.color ? ' ln2' : ''), d: d }));
     var cur = svg('line', { class: 'cur', y1: pT, y2: pT + iH, x1: 0, x2: 0 }); s.appendChild(cur);
-    var dots = pts.map(function (p, i) { var c = svg('circle', { class: 'dt', cx: p.x, cy: p.y, r: n > 20 ? 0 : 3.5 }); if (o.color) c.style.stroke = o.color; s.appendChild(c); return c; });
     var step = Math.max(1, Math.round(n / 6));
+    var showL = function (i) { return i === n - 1 || (i % step === 0 && n - 1 - i >= Math.max(2, step)); }, baseR = function (i) { return n <= 20 || showL(i) ? 3.5 : 0; };
+    var dots = pts.map(function (p, i) { var c = svg('circle', { class: 'dt', cx: p.x, cy: p.y, r: baseR(i) }); if (o.color) c.style.stroke = o.color; s.appendChild(c); return c; });
     items.forEach(function (x, i) { if (i % step === 0 || i === n - 1) { if (i !== n - 1 && n - 1 - i < Math.max(2, step)) return; var t = svg('text', { x: X(i), y: H - 8, 'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }); t.textContent = x.label; s.appendChild(t); } });
     var hi = null;
     scrub(s, n, pL - iW / n / 2 + (n > 1 ? iW / (n - 1) / 2 : 0), pR - iW / n / 2 + (n > 1 ? iW / (n - 1) / 2 : 0), W, function (i) {
-      if (hi != null) { dots[hi].classList.remove('on'); if (n > 20) dots[hi].setAttribute('r', 0); }
+      if (hi != null) { dots[hi].classList.remove('on'); dots[hi].setAttribute('r', baseR(hi)); }
       hi = i; dots[i].classList.add('on'); dots[i].setAttribute('r', 5); cur.setAttribute('x1', pts[i].x); cur.setAttribute('x2', pts[i].x); cur.classList.add('on');
       var r = s.getBoundingClientRect(); tipShow(items[i].tip, r.left + pts[i].x / W * r.width, r.top + pts[i].y / H * r.height);
-    }, function () { if (hi != null) { dots[hi].classList.remove('on'); if (n > 20) dots[hi].setAttribute('r', 0); } hi = null; cur.classList.remove('on'); tipHide(); });
+    }, function () { if (hi != null) { dots[hi].classList.remove('on'); dots[hi].setAttribute('r', baseR(hi)); } hi = null; cur.classList.remove('on'); tipHide(); });
   }
 
   // ciambella a settori (conic-gradient) con interazione
