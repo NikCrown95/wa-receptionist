@@ -426,3 +426,11 @@
 .gcx .gpC.gpc-pt::after{top:50%;transform:translateY(-50%);right:7px}
 .gcx .gpC.gpc-pt::after{display:none}
 .gcx .gpC.gpc-pt{padding-right:8px!important}
+
+/* palestra: via i tre pulsanti Giorno/Settimana/Mese della testata comune (non servono); in alto, al loro posto, compare il periodo */
+.gym .seg:has(#view-day){display:none!important}
+.gymTopRange{display:none}
+@media(max-width:699px){
+  .gym .gymTopRange{display:block;flex:1 1 auto;min-width:0;margin:0 4px 0 2px;font-size:1.28rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;order:-1}
+  .gym .gcx .controls h1.range{display:none}
+}

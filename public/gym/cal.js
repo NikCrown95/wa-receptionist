@@ -103,6 +103,13 @@
     x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     plus: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
   };
+  // in alto, al posto dei tre pulsanti della vista (che in palestra non servono), il giorno o i giorni della settimana
+  function syncTop() {
+    var std = document.getElementById('range'), par = std && std.parentNode; if (!par) return;
+    var t = document.getElementById('gymTopRange');
+    if (!t) { t = document.createElement('h1'); t.id = 'gymTopRange'; t.className = 'gymTopRange'; t.setAttribute('aria-live', 'polite'); par.insertBefore(t, par.firstChild); }
+    t.textContent = rangeTxt();
+  }
   function render() {
     var of0 = G.OF ? G.OF() : null; if (of0) { if (!of0.cls && S.side === 'lez') S.side = 'pt'; if (!of0.pt && S.side === 'pt') S.side = 'lez'; if (S.flt !== 'all' && flist().every(function (x) { return x[0] !== S.flt; })) S.flt = 'all'; }
     if (S.view === 'month') S.view = 'week';
@@ -112,7 +119,7 @@
     if (!G.S.data) G.load().catch(function () {});
     var r = range();
     root.innerHTML = controlsHTML() + '<div class="cal-wrap"><div class="cal-card" id="gcBody">' + skel() + '</div></div>';
-    bindControls();
+    bindControls(); syncTop();
     toggleFab();
     ensure(r.from, r.to, r.full, function () {
       prefetchNear();
@@ -467,6 +474,7 @@
   // ---------- lezione ----------
   function findSession(d, sid) { var day = getDay(d); return day ? (day.sessions || []).filter(function (s) { return s.schedule_id === sid; })[0] : null; }
   function openSession(d, sid) {
+    if (Date.now() < (window.__liaNoOpen || 0)) return;
     var go = function () {
       var s = findSession(d, sid); if (!s || !s.attendees) { G.toast('Lezione non trovata.', 'bad'); return; }
       var over = isEnded(d, s.time, s.duration_min), started = isStarted(d, s.time);
@@ -529,11 +537,13 @@
 
   // ---------- Personal 1:1 ----------
   function openPtBook(d, t) {
+    if (Date.now() < (window.__liaNoOpen || 0)) return;
     pickMember('Personal 1:1 · ' + fmtShort(d) + ' ' + t, noSub, function (m) {
       G.api({ action: 'pt_book', member_id: m.id, date: d, time: t }).then(function () { G.toast('Personal 1:1 prenotato per ' + m.first_name + ' ' + m.last_name + '.', 'ok'); bust(); refreshMembers(); render(); }).catch(function (e) { G.toast(e.message, 'bad'); });
     });
   }
   function openPtInfo(d, t) {
+    if (Date.now() < (window.__liaNoOpen || 0)) return;
     var go = function () {
       var day = getDay(d), p = day && Array.isArray(day.pt) ? day.pt.filter(function (x) { return x.time === t; })[0] : null;
       if (!p || p.free) { G.toast('Prenotazione non trovata.', 'bad'); return; }

@@ -240,6 +240,7 @@
     location.reload();
   }
   window.liaGymOpen = function (e) {
+    if (Date.now() < (window.__liaNoOpen || 0)) return;
     var p = String(e.id).split(':'), sid = p[1], date = p[2];
     var go = function () {
       api(null, API + '&day=' + date).then(function (j) {
