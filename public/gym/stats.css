@@ -33,3 +33,19 @@
 .gcs .panel .sub{margin-bottom:0}
 
 .gcs{--gsec:color-mix(in srgb,var(--accent) 42%,#fff)}
+
+/* Riquadri come nelle statistiche delle altre attivita': numeri grandi e il primo in evidenza */
+.gcs .kpi{position:relative;overflow:hidden;padding:18px 18px 16px;border-radius:22px;background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 90%,var(--accent) 10%));box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 24px -16px rgba(0,0,0,.35)}
+.gcs .kpi .lbl{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.gcs .kpi .val{margin-top:10px;font-size:2.05rem;font-weight:800;letter-spacing:-.035em;line-height:1.05;font-variant-numeric:tabular-nums}
+.gcs .kpi .delta{margin-top:8px;font-size:.8rem;line-height:1.35}
+.gcs .kpi:nth-child(1){background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 62%,#06222a));border-color:transparent;color:#fff;box-shadow:0 16px 30px -16px color-mix(in srgb,var(--accent) 80%,#000)}
+.gcs .kpi:nth-child(1) .lbl,.gcs .kpi:nth-child(1) .val,.gcs .kpi:nth-child(1) .delta,.gcs .kpi:nth-child(1) .sub2{color:#fff}
+.gcs .kpi:nth-child(1) .lbl{opacity:.82}
+.gcs .kpi:nth-child(1) .delta{opacity:.88;font-weight:500}
+.gcs .kpi:nth-child(1) .range{background:rgba(255,255,255,.16);border-color:transparent;color:#fff}
+.gcs .kpi:nth-child(2) .val{color:var(--accent-ink,var(--accent))}
+.gcs .panel{border-radius:22px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 10px 26px -18px rgba(0,0,0,.35)}
+@media(max-width:699px){.gcs .kpi .lbl{min-height:2.5em;display:flex;align-items:flex-start}.gcs .kpi .val{margin-top:6px}}
+:root[data-theme="light"] .gcs .kpi .delta.up{color:#12805A}
+:root[data-theme="light"] .gcs .kpi .delta.down{color:#C0392B}

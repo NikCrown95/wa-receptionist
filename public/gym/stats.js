@@ -52,7 +52,7 @@
     s.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { cur = -1; onOut(); } });
   }
   function frame(host, H) { var W = Math.max(260, Math.round(host.clientWidth || 600)); var s = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'ch', role: 'img' }); s.style.height = 'auto'; host.appendChild(s); return { s: s, W: W, H: H }; }
-  function xLabel(sr, i, n) { if (P === 'year') return G.MS[pd(sr.from).getMonth()]; if (P === 'week') return DAYS[(pd(sr.from).getDay() + 6) % 7] + ' ' + pd(sr.from).getDate(); var step = n > 14 ? 5 : 1; return (i % step === 0 || i === n - 1) && !(n > 14 && i > n - 3 && i !== n - 1) ? dShort(sr.from) : ''; }
+  function xLabel(sr, i, n) { if (P === 'year') return G.MS[pd(sr.from).getMonth()]; if (P === 'week') return DAYS[(pd(sr.from).getDay() + 6) % 7] + ' ' + pd(sr.from).getDate(); var step = n > 14 ? 5 : 1; return (i === n - 1 || (i % step === 0 && n - 1 - i >= Math.max(2, step))) ? dShort(sr.from) : ''; }
   function titleOf(sr) { return P === 'year' ? mLong(sr.from) : DAYL[(pd(sr.from).getDay() + 6) % 7] + ' ' + dShort(sr.from); }
 
   function stackedBars(host, series) {
@@ -89,7 +89,7 @@
     var cur = svg('line', { class: 'cur', y1: pT, y2: pT + iH, x1: 0, x2: 0 }); s.appendChild(cur);
     var dots = pts.map(function (p, i) { var c = svg('circle', { class: 'dt', cx: p.x, cy: p.y, r: n > 20 ? 0 : 3.5 }); if (o.color) c.style.stroke = o.color; s.appendChild(c); return c; });
     var step = Math.max(1, Math.round(n / 6));
-    items.forEach(function (x, i) { if (i % step === 0 || i === n - 1) { if (i !== n - 1 && n - 1 - i < step * .6) return; var t = svg('text', { x: X(i), y: H - 8, 'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }); t.textContent = x.label; s.appendChild(t); } });
+    items.forEach(function (x, i) { if (i % step === 0 || i === n - 1) { if (i !== n - 1 && n - 1 - i < Math.max(2, step)) return; var t = svg('text', { x: X(i), y: H - 8, 'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle' }); t.textContent = x.label; s.appendChild(t); } });
     var hi = null;
     scrub(s, n, pL - iW / n / 2 + (n > 1 ? iW / (n - 1) / 2 : 0), pR - iW / n / 2 + (n > 1 ? iW / (n - 1) / 2 : 0), W, function (i) {
       if (hi != null) { dots[hi].classList.remove('on'); if (n > 20) dots[hi].setAttribute('r', 0); }
