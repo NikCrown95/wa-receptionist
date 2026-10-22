@@ -200,7 +200,6 @@
     if (S.hl) {
       var hl = S.hl, hc = body.querySelector('.gcAc.hl');
       if (hc) {
-        hc.setAttribute('data-who', hl.who ? (hl.bad ? hl.who + ' ha disdetto' : hl.who + ' ha prenotato') : '');
         setTimeout(function () { try { hc.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { hc.scrollIntoView(); } }, 60);
       }
       setTimeout(function () { if (S.hl === hl) { S.hl = null; var x = document.querySelector('.gcAc.hl'); if (x) x.classList.remove('hl', 'bad'); } }, 6200);
