@@ -9,10 +9,10 @@
 .gcs svg.ch text{font-size:10px;fill:var(--muted)}
 .gcs svg.ch .gl{stroke:var(--line);stroke-width:1}
 .gcs svg.ch .b1{fill:var(--accent)}
-.gcs svg.ch .b2{fill:var(--sec,#6BD6D8)}
+.gcs svg.ch .b2{fill:var(--gsec)}
 .gcs svg.ch .hl{fill:var(--accent);opacity:.1}
 .gcs svg.ch .ln{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.gcs svg.ch .ln2{stroke:var(--sec,#6BD6D8)}
+.gcs svg.ch .ln2{stroke:var(--gsec)}
 .gcs svg.ch .dt{fill:var(--bg);stroke:var(--accent);stroke-width:2}
 .gcs svg.ch .dt.on{fill:var(--accent);r:5}
 .gcs svg.ch .cur{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:0}
@@ -31,3 +31,5 @@
 .gcs .hbar-row.on{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
 .gcs .wrap{max-width:1120px}
 .gcs .panel .sub{margin-bottom:0}
+
+.gcs{--gsec:color-mix(in srgb,var(--accent) 42%,#fff)}

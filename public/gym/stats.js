@@ -13,7 +13,8 @@
 
   // ---------- utilità ----------
   function esc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function eur(n) { n = Math.round((Number(n) || 0) * 100) / 100; return n.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: n % 1 ? 2 : 0 }) + ' €'; }
+  function grp(i) { return String(i).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  function eur(n) { n = Math.round((Number(n) || 0) * 100) / 100; var neg = n < 0 ? '-' : '', a = Math.abs(n), w = Math.floor(a), c = Math.round((a - w) * 100); return neg + grp(w) + (c ? ',' + (c < 10 ? '0' : '') + c : '') + ' €'; }
   function num(n) { return (Number(n) || 0).toLocaleString('it-IT'); }
   function pd(s) { var a = String(s).split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
   function dShort(s) { var d = pd(s); return d.getDate() + ' ' + G.MS[d.getMonth()]; }
@@ -55,9 +56,9 @@
   function titleOf(sr) { return P === 'year' ? mLong(sr.from) : DAYL[(pd(sr.from).getDay() + 6) % 7] + ' ' + dShort(sr.from); }
 
   function stackedBars(host, series) {
-    var f = frame(host, 230), s = f.s, W = f.W, H = f.H, pL = 40, pR = 6, pT = 10, pB = 26, iW = W - pL - pR, iH = H - pT - pB;
+    var f = frame(host, 230), s = f.s, W = f.W, H = f.H, pL = 46, pR = 6, pT = 10, pB = 26, iW = W - pL - pR, iH = H - pT - pB;
     var max = niceMax(Math.max.apply(null, series.map(function (x) { return x.subs + x.pt; }).concat([1])));
-    [0, .25, .5, .75, 1].forEach(function (t) { var y = pT + iH * t; s.appendChild(svg('line', { class: 'gl', x1: pL, x2: W - pR, y1: y, y2: y })); var l = svg('text', { x: pL - 6, y: y + 3, 'text-anchor': 'end' }); l.textContent = Math.round(max * (1 - t)) + (t === 0 ? '' : ''); s.appendChild(l); });
+    [0, .25, .5, .75, 1].forEach(function (t) { var y = pT + iH * t; s.appendChild(svg('line', { class: 'gl', x1: pL, x2: W - pR, y1: y, y2: y })); var l = svg('text', { x: pL - 6, y: y + 3, 'text-anchor': 'end' }); l.textContent = grp(Math.round(max * (1 - t))) + (t === 0 ? '' : ''); s.appendChild(l); });
     var n = series.length, bw = iW / n, w = Math.max(3, Math.min(34, bw * .62));
     var hl = svg('rect', { class: 'hl', y: pT, height: iH, width: bw, x: -100, rx: 6 }); s.appendChild(hl);
     series.forEach(function (x, i) {
@@ -69,18 +70,18 @@
     scrub(s, n, pL, pR, W, function (i, e) {
       var x = series[i]; hl.setAttribute('x', pL + bw * i);
       var r = s.getBoundingClientRect();
-      tipShow('<b>' + esc(titleOf(x)) + '</b><i style="background:var(--accent)"></i>Abbonamenti ' + eur(x.subs) + (x.subsN ? ' (' + x.subsN + ')' : '') + '<br><i style="background:var(--sec,#6BD6D8)"></i>Personal 1:1 ' + eur(x.pt) + (x.ptN ? ' (' + x.ptN + ')' : '') + '<br><b style="margin:3px 0 0">Totale ' + eur(x.subs + x.pt) + '</b>', r.left + (pL + bw * i + bw / 2) / W * r.width, r.top + (pT + iH * (1 - (x.subs + x.pt) / max)) / H * r.height);
+      tipShow('<b>' + esc(titleOf(x)) + '</b><i style="background:var(--accent)"></i>Abbonamenti ' + eur(x.subs) + (x.subsN ? ' (' + x.subsN + ')' : '') + '<br><i style="background:var(--gsec)"></i>Personal 1:1 ' + eur(x.pt) + (x.ptN ? ' (' + x.ptN + ')' : '') + '<br><b style="margin:3px 0 0">Totale ' + eur(x.subs + x.pt) + '</b>', r.left + (pL + bw * i + bw / 2) / W * r.width, r.top + (pT + iH * (1 - (x.subs + x.pt) / max)) / H * r.height);
     }, function () { hl.setAttribute('x', -100); tipHide(); });
   }
   function smooth(pts) { if (pts.length < 2) return 'M' + pts[0].x + ',' + pts[0].y; var d = 'M' + pts[0].x.toFixed(1) + ',' + pts[0].y.toFixed(1); for (var i = 0; i < pts.length - 1; i++) { var a = pts[i], b = pts[i + 1], mx = (a.x + b.x) / 2; d += ' C' + mx.toFixed(1) + ',' + a.y.toFixed(1) + ' ' + mx.toFixed(1) + ',' + b.y.toFixed(1) + ' ' + b.x.toFixed(1) + ',' + b.y.toFixed(1); } return d; }
   function lineChart(host, items, o) {
     // items: [{label, v, tip(html)}], o: {fmt, second}
-    var f = frame(host, 220), s = f.s, W = f.W, H = f.H, pL = 38, pR = 12, pT = 12, pB = 26, iW = W - pL - pR, iH = H - pT - pB;
+    var f = frame(host, 220), s = f.s, W = f.W, H = f.H, pL = 46, pR = 12, pT = 12, pB = 26, iW = W - pL - pR, iH = H - pT - pB;
     var max = niceMax(Math.max.apply(null, items.map(function (x) { return x.v; }).concat([1])));
     var gid = 'gcsG' + Math.floor(Math.random() * 1e6);
     var defs = svg('defs', {}), g = svg('linearGradient', { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
     g.appendChild(svg('stop', { offset: '0%', 'stop-color': o.color || 'var(--accent)', 'stop-opacity': .32 })); g.appendChild(svg('stop', { offset: '100%', 'stop-color': o.color || 'var(--accent)', 'stop-opacity': 0 })); defs.appendChild(g); s.appendChild(defs);
-    [0, .5, 1].forEach(function (t) { var y = pT + iH * t; s.appendChild(svg('line', { class: 'gl', x1: pL, x2: W - pR, y1: y, y2: y })); var l = svg('text', { x: pL - 6, y: y + 3, 'text-anchor': 'end' }); l.textContent = Math.round(max * (1 - t)); s.appendChild(l); });
+    [0, .5, 1].forEach(function (t) { var y = pT + iH * t; s.appendChild(svg('line', { class: 'gl', x1: pL, x2: W - pR, y1: y, y2: y })); var l = svg('text', { x: pL - 6, y: y + 3, 'text-anchor': 'end' }); l.textContent = grp(Math.round(max * (1 - t))); s.appendChild(l); });
     var n = items.length, X = function (i) { return pL + (n > 1 ? i / (n - 1) : .5) * iW; }, Y = function (v) { return pT + iH - v / max * iH; };
     var pts = items.map(function (x, i) { return { x: X(i), y: Y(x.v) }; }), d = smooth(pts);
     s.appendChild(svg('path', { d: d + ' L' + X(n - 1).toFixed(1) + ',' + (pT + iH) + ' L' + X(0).toFixed(1) + ',' + (pT + iH) + ' Z', fill: 'url(#' + gid + ')' }));
@@ -141,69 +142,26 @@
     var nsd = { text: d.noshow.of ? d.noshow.n + ' su ' + d.noshow.of + ' prenotazioni' : 'Nessun dato', cls: d.noshow.pct > 8 ? 'down' : 'flat' };
     wrap.innerHTML = '<div class="kpis">' +
       kpi('Incasso', eur(c.revenue), delta(c.revenue, p.revenue), '', PL[P]) +
-      kpi('Abbonamenti venduti', num(c.subsN), delta(c.subs, p.subs), eur(c.subs) + ' incassati') +
-      kpi('Personal 1:1', num(c.ptn), delta(c.ptn, p.ptn), eur(c.ptRev) + ' · ' + eur(d.pt_price) + ' a seduta') +
       kpi('Prenotazioni', num(c.bookings), delta(c.bookings, p.bookings), num(c.lessons) + ' lezioni · ' + num(c.ptn) + ' Personal') +
       kpi('Riempimento medio', c.fill + '%', delta(c.fill, p.fill, 'pt'), 'dei posti delle lezioni') +
       kpi('Iscritti attivi', num(act), { text: st.warn + (st.warn === 1 ? ' in scadenza' : ' in scadenza'), cls: st.warn ? 'down' : 'flat' }, num(d.members) + ' iscritti in tutto') +
-      kpi('Nuovi iscritti', num(d.news.cur), delta(d.news.cur, d.news.prev), num(d.renewals.cur) + ' rinnovi') +
-      kpi('Assenze', d.noshow.pct.toLocaleString('it-IT') + '%', nsd, 'di chi era prenotato') +
       '</div><div class="panels">' +
-      '<div class="row2"><div class="panel"><h2>Incassi nel tempo</h2><p class="sub">Abbonamenti e Personal 1:1. Tocca una barra per il dettaglio.</p><div id="gcsRev"></div><div class="legend"><span><i style="background:var(--accent)"></i>Abbonamenti</span><span><i style="background:var(--sec,#6BD6D8)"></i>Personal 1:1</span></div></div>' +
+      '<div class="row2"><div class="panel"><h2>Incassi nel tempo</h2><p class="sub">Abbonamenti e Personal 1:1. Tocca una barra per il dettaglio.</p><div id="gcsRev"></div><div class="legend"><span><i style="background:var(--accent)"></i>Abbonamenti</span><span><i style="background:var(--gsec)"></i>Personal 1:1</span></div></div>' +
       '<div class="panel"><h2>Prenotazioni nel tempo</h2><p class="sub">Lezioni e Personal prenotati ogni ' + (P === 'year' ? 'mese' : 'giorno') + '.</p><div id="gcsBk"></div></div></div>' +
-      '<div class="row2"><div class="panel"><h2>Da cosa arriva l\'incasso</h2><p class="sub">Abbonamenti e Personal 1:1 nel periodo.</p><div class="revenue-donut-wrap"><div id="gcsRd" class="revenue-donut" role="img" aria-label="Ripartizione incassi"><div class="revenue-hole"><strong></strong><span></span></div></div><div class="revenue-legend" id="gcsRl"></div></div></div>' +
-      '<div class="panel"><h2>Riempimento dei corsi</h2><p class="sub">Posti occupati sul totale, nel periodo.</p><div class="hbars" id="byservice"></div><p class="hint" id="gcsCh"></p></div></div>' +
-      '<div class="row2"><div class="panel occ-panel"><h2>Riempimento per giorno</h2><p class="sub">Percentuale media dei posti occupati, giorno per giorno.</p><div class="weekday-occ" id="gcsWd"></div></div>' +
+      '<div class="row2"><div class="panel"><h2>Riempimento dei corsi</h2><p class="sub">Posti occupati sul totale, nel periodo.</p><div class="hbars" id="byservice"></div><p class="hint" id="gcsCh"></p></div>' +
       '<div class="panel"><h2>Crescita iscritti</h2><p class="sub">Iscritti con abbonamento valido a fine mese, ultimi 12 mesi.</p><div id="gcsGr"></div></div></div>' +
-      '<div class="row2 row-full"><div class="panel"><h2>Le fasce orarie più piene</h2><p class="sub">Giorno e ora in cui arrivano più prenotazioni (lezioni e Personal).</p><div class="heatmap" id="gcsHm"></div><div class="heat-legend"><span>Meno</span><span class="sw" id="gcsSw"></span><span>Più prenotazioni</span></div></div></div>' +
-      '<div class="row2"><div class="panel"><h2>Stato degli abbonamenti</h2><p class="sub">Com\'è oggi la tua palestra.</p><div class="donut-wrap"><div id="gcsSd" class="donut-css" role="img" aria-label="Stato degli abbonamenti"><div class="donut-hole"><strong></strong><span></span></div></div><div class="donut-legend" id="gcsSl"></div></div></div>' +
-      '<div class="panel"><h2>Nuovi iscritti e rinnovi</h2><p class="sub">Chi si iscrive per la prima volta e chi rinnova, nel periodo.</p><div class="donut-wrap"><div id="gcsNd" class="donut-css" role="img" aria-label="Nuovi e rinnovi"><div class="donut-hole"><strong></strong><span></span></div></div><div class="donut-legend" id="gcsNl"></div></div></div></div>' +
-      '<div class="row2 row-full"><div class="panel"><h2>I più assidui</h2><p class="sub">Chi si è allenato di più nel periodo.</p><div class="clients" id="gcsTop"></div></div></div>' +
-      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi pagati per gli abbonamenti iniziati nel periodo, più il prezzo di ogni Personal 1:1 effettuato (' + eur(d.pt_price) + ' a seduta, modificabile).</p><p><strong>Riempimento</strong> Prenotazioni alle lezioni diviso i posti disponibili delle lezioni tenute (quelle annullate non contano).</p><p><strong>Iscritti attivi</strong> Iscritti con un abbonamento valido oggi, compresi quelli in scadenza.</p><p><strong>Nuovi iscritti</strong> Iscritti al primo abbonamento nel periodo; gli altri sono rinnovi.</p><p><strong>Assenze</strong> Prenotazioni segnate come "non si è presentato" sul totale delle prenotazioni già passate.</p></div></details>';
+      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi pagati per gli abbonamenti iniziati nel periodo, più il prezzo di ogni Personal 1:1 effettuato (' + eur(d.pt_price) + ' a seduta, modificabile).</p><p><strong>Riempimento</strong> Prenotazioni alle lezioni diviso i posti disponibili delle lezioni tenute (quelle annullate non contano).</p><p><strong>Iscritti attivi</strong> Iscritti con un abbonamento valido oggi, compresi quelli in scadenza.</p></div></details>';
     // grafici
     var C = { acc: css('--accent', '#2B8A94'), sec: css('--sec', '#6BD6D8'), bad: css('--danger', '#FF6B6B'), warn: '#E0A23A', mute: css('--line2', '#31404a') };
     stackedBars(wrap.querySelector('#gcsRev'), d.series);
     lineChart(wrap.querySelector('#gcsBk'), d.series.map(function (x) { return { label: xLabel(x, 0, d.series.length) && P !== 'month' ? xLabel(x, 0, 12) : dShort(x.from), v: x.lessons + x.ptN, tip: '<b>' + esc(titleOf(x)) + '</b>' + (x.lessons + x.ptN) + ' prenotazioni<br>' + x.lessons + ' lezioni · ' + x.ptN + ' Personal' }; }), {});
-    // donut incassi
-    var rl = wrap.querySelector('#gcsRl'), segR = [{ name: 'Abbonamenti', v: c.subs, color: C.acc, detail: eur(c.subs) + ' · ' + c.subsN + (c.subsN === 1 ? ' abbonamento' : ' abbonamenti') }, { name: 'Personal 1:1', v: c.ptRev, color: C.sec, detail: eur(c.ptRev) + ' · ' + c.ptn + (c.ptn === 1 ? ' seduta' : ' sedute') }];
-    var tr = c.subs + c.ptRev; rl.innerHTML = segR.map(function (s) { return '<div class="revenue-row"><span class="revenue-dot" style="background:' + s.color + '"></span><span class="revenue-name">' + s.name + '</span><span class="revenue-value"><b>' + eur(s.v) + '</b><br><small style="color:var(--muted)">' + (tr ? Math.round(s.v / tr * 100) : 0) + '%</small></span></div>'; }).join('');
-    var rd = wrap.querySelector('#gcsRd'); donut(null, rd, rd.querySelector('strong'), rd.querySelector('span'), rl, segR, eur(tr), 'incasso', function (s) { return eur(s.v); });
     // corsi
     var bs = wrap.querySelector('#byservice');
     bs.innerHTML = d.courses.length ? d.courses.map(function (x, i) { return '<div class="hbar-row" data-i="' + i + '" data-tip="1"><div class="lab"><i style="background:' + courseColor(x) + '"></i><span>' + esc(x.name) + '</span></div><div class="track"><div class="fill" style="width:' + x.pct + '%;background:' + courseColor(x) + '"></div></div><div class="amt">' + x.pct + '%</div></div>'; }).join('') : '<p class="hint">Ancora nessun dato: compare dopo le prime lezioni.</p>';
     var ch = wrap.querySelector('#gcsCh'); if (d.courses.length) ch.textContent = 'Un corso quasi sempre pieno si può raddoppiare; uno sotto la metà si può spostare di orario.';
     [].forEach.call(bs.querySelectorAll('.hbar-row'), function (r) { r.addEventListener('pointerdown', function () { var x = d.courses[+r.dataset.i]; clearOn(); r.classList.add('on'); var b = r.getBoundingClientRect(); tipShow('<b>' + esc(x.name) + ' · ' + x.pct + '%</b>' + num(x.booked) + ' prenotazioni su ' + num(x.seats) + ' posti<br>' + x.sessions + (x.sessions === 1 ? ' lezione' : ' lezioni') + ' nel periodo', b.left + b.width / 2, b.top); }); });
-    // giorni
-    var wd = wrap.querySelector('#gcsWd');
-    wd.innerHTML = d.weekday.map(function (x, i) { var closed = x.pct == null; return '<div class="occ-day' + (closed ? ' closed' : '') + '" data-i="' + i + '" data-tip="1"><div class="occ-pct">' + (closed ? 'Chiuso' : x.pct + '%') + '</div><div class="occ-track"><div class="occ-fill" style="height:' + (closed ? 0 : x.pct) + '%"></div></div><div class="occ-label">' + DAYS[i] + '</div></div>'; }).join('');
-    [].forEach.call(wd.children, function (r, i) { var f = function (e) { var x = d.weekday[i]; [].forEach.call(wd.children, function (y, j) { y.classList.toggle('on', j === i); y.classList.toggle('dim', j !== i); }); var b = r.getBoundingClientRect(); tipShow(x.pct == null ? '<b>' + DAYL[i] + '</b>Nessuna lezione' : '<b>' + DAYL[i] + ' · ' + x.pct + '%</b>' + num(x.booked) + ' prenotati su ' + num(x.cap) + ' posti<br>in ' + x.days + (x.days === 1 ? ' giornata' : ' giornate'), b.left + b.width / 2, b.top); }; r.addEventListener('pointerdown', f); r.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') f(e); }); r.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { clearOn(); tipHide(); } }); });
     // crescita
     lineChart(wrap.querySelector('#gcsGr'), d.growth.map(function (x) { return { label: G.MS[pd(x.date).getMonth()], v: x.active, tip: '<b>' + esc(mLong(x.date)) + '</b>' + x.active + (x.active === 1 ? ' iscritto attivo' : ' iscritti attivi') }; }), { color: C.sec });
-    // heatmap
-    var hm = wrap.querySelector('#gcsHm'), H = d.heat.hours;
-    if (!H.length) hm.innerHTML = '<div class="heat-msg">Ancora nessun dato per questo periodo.</div>';
-    else {
-      var cols = '38px repeat(' + H.length + ',minmax(0,1fr))', g = '<div class="heat-grid" style="min-width:' + Math.max(300, 38 + H.length * 38) + 'px"><div class="heat-hdr" style="grid-template-columns:' + cols + '"><span></span>' + H.map(function (r) { return '<span>' + String(r.h).padStart(2, '0') + '</span>'; }).join('') + '</div>';
-      for (var i = 0; i < 6; i++) { g += '<div class="heat-row" style="grid-template-columns:' + cols + '"><span class="dlab">' + DAYS[i] + '</span>' + H.map(function (r) { var v = r.v[i]; return '<div class="heat-cell' + (v ? '' : ' closed') + '" data-tip="1" data-v="' + v + '" data-w="' + DAYL[i] + ' ' + String(r.h).padStart(2, '0') + ':00–' + String(r.h + 1).padStart(2, '0') + ':00"' + (v ? ' style="background:color-mix(in srgb, var(--accent) ' + Math.round(15 + v / (d.heat.max || 1) * 75) + '%, var(--card2))"' : '') + '></div>'; }).join('') + '</div>'; }
-      hm.innerHTML = g + '</div>';
-      [].forEach.call(hm.querySelectorAll('.heat-cell'), function (cell) { var f = function () { clearOn(); cell.classList.add('on'); var b = cell.getBoundingClientRect(), v = +cell.dataset.v; tipShow(v ? '<b>' + v + (v === 1 ? ' prenotazione' : ' prenotazioni') + '</b>' + cell.dataset.w : '<b>Nessuna prenotazione</b>' + cell.dataset.w, b.left + b.width / 2, b.top); }; cell.addEventListener('pointerdown', f); cell.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') f(); }); cell.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') { clearOn(); tipHide(); } }); });
-    }
-    var sw = wrap.querySelector('#gcsSw'); sw.innerHTML = [15, 35, 55, 75, 90].map(function (a) { return '<i style="background:color-mix(in srgb, var(--accent) ' + a + '%, var(--card2))"></i>'; }).join('');
-    // stato abbonamenti
-    var sl = wrap.querySelector('#gcsSl'), tot = st.ok + st.warn + st.bad + st.none;
-    var segS = [{ name: 'Attivi', v: st.ok, color: C.acc }, { name: 'In scadenza', v: st.warn, color: C.warn }, { name: 'Scaduti', v: st.bad, color: C.bad }, { name: 'Senza abbonamento', v: st.none, color: C.mute }].filter(function (x) { return x.v > 0 || x.name !== 'Senza abbonamento'; });
-    segS.forEach(function (s) { s.detail = s.v + (s.v === 1 ? ' iscritto' : ' iscritti') + ' · ' + (tot ? Math.round(s.v / tot * 100) : 0) + '%'; });
-    sl.innerHTML = segS.map(function (s) { return '<div class="dl-row"><i style="background:' + s.color + '"></i><div><b>' + s.v + '</b><span>' + s.name + '</span></div></div>'; }).join('');
-    var sd = wrap.querySelector('#gcsSd'); donut(null, sd, sd.querySelector('strong'), sd.querySelector('span'), sl, segS, String(tot), 'iscritti', function (s) { return String(s.v); });
-    // nuovi vs rinnovi
-    var nl = wrap.querySelector('#gcsNl'), nt = d.news.cur + d.renewals.cur;
-    var segN = [{ name: 'Nuovi iscritti', v: d.news.cur, color: C.acc }, { name: 'Rinnovi', v: d.renewals.cur, color: C.sec }];
-    segN.forEach(function (s) { s.detail = s.v + (s.v === 1 ? ' abbonamento' : ' abbonamenti') + ' · ' + (nt ? Math.round(s.v / nt * 100) : 0) + '%'; });
-    nl.innerHTML = segN.map(function (s) { return '<div class="dl-row"><i style="background:' + s.color + '"></i><div><b>' + s.v + '</b><span>' + s.name + '</span></div></div>'; }).join('');
-    var nd = wrap.querySelector('#gcsNd'); donut(null, nd, nd.querySelector('strong'), nd.querySelector('span'), nl, segN, String(nt), 'abbonamenti', function (s) { return String(s.v); });
-    // assidui
-    var tp = wrap.querySelector('#gcsTop');
-    tp.innerHTML = d.top.length ? d.top.map(function (x) { var ini = x.name.split(' ').map(function (w) { return w.charAt(0); }).join('').slice(0, 2); return '<div class="crow"><div class="av">' + esc(ini) + '</div><div class="mid"><b>' + esc(x.name) + '</b><span>' + x.n + (x.n === 1 ? ' ingresso' : ' ingressi') + ' nel periodo</span></div><div class="spent">' + x.n + '</div></div>'; }).join('') : '<p class="hint">Ancora nessun dato.</p>';
   }
 
   // ---------- collegamenti ----------
