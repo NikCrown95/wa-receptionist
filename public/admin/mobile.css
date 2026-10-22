@@ -6,6 +6,8 @@
 
 @media (max-width:760px){
   html{-webkit-text-size-adjust:100%;}
+  /* la pagina non deve mai spostarsi di lato: solo il menu in alto scorre */
+  html,body{overflow-x:clip;max-width:100%;}
 
   /* intestazione: logo + Esci sopra, menu a scorrimento sotto */
   .top-row{flex-wrap:wrap;gap:8px 12px;padding:10px 14px 0;}

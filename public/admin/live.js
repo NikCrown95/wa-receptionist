@@ -29,7 +29,7 @@
     '.lv-b{color:var(--accent-ink,#A5EDF2);font-size:.8rem;font-weight:600;margin-top:2px;overflow-wrap:anywhere}' +
     '.lv-w{color:var(--muted,#9BA6B5);font-size:.76rem;white-space:nowrap;font-variant-numeric:tabular-nums;align-self:start;padding-top:2px}' +
     '.lv-empty{padding:26px 8px;text-align:center;color:var(--muted,#9BA6B5);font-size:.92rem;line-height:1.5}' +
-    '@media (max-width:760px){.lv-feed{max-height:none;overflow:visible;margin-right:0;padding-right:0}.lv-ev{padding:14px 0;gap:12px}.lv-ev .lv-w{font-size:.74rem}}' +
+    '@media (max-width:760px){.lv-chips{flex-wrap:wrap;overflow:visible;margin:0 0 12px;padding:0;gap:8px}.lv-chip{min-height:40px;padding:0 15px}.lv-feed{max-height:none;overflow:visible;margin-right:0;padding-right:0}.lv-ev{padding:14px 0;gap:12px}.lv-ev .lv-w{font-size:.74rem}}' +
     '@media (prefers-reduced-motion:reduce){.lv-live i,.lv-ev.new{animation:none}}';
 
   var ICONS = {
