@@ -3,7 +3,7 @@
 //   /termini         -> ?doc=termini
 //   /privacy/<slug>  -> ?doc=cliente&b=<slug>   (informativa della singola attività)
 const { sb } = require("../lib/owner.js");
-const { privacyPage, termsPage, customerPage, notFoundPage } = require("../lib/legal.js");
+const { privacyPage, termsPage, customerPage, medicalDpaPage, notFoundPage } = require("../lib/legal.js");
 
 module.exports = async function handler(req, res) {
   const q = req.query || {};
@@ -13,6 +13,7 @@ module.exports = async function handler(req, res) {
   res.setHeader("Referrer-Policy", "no-referrer");
   try {
     if (doc === "termini") return res.status(200).send(termsPage());
+    if (doc === "sanitari") return res.status(200).send(medicalDpaPage());
     if (doc === "cliente") {
       const slug = String(q.b || "").toLowerCase();
       if (!/^[a-z0-9-]{1,60}$/.test(slug)) return res.status(404).send(notFoundPage());

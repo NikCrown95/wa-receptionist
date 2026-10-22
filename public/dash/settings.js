@@ -491,12 +491,12 @@ function pfRenderPlan(top,cols,o){
   /* o: {premium, known, cd (countdown), sub}. top = riquadro del piano, cols = riquadri delle funzioni */
   top.innerHTML='';cols.innerHTML='';
   top.className='pfCard plTop'+(o.premium?' prem':'');
-  var prem=!!o.premium,total=0,PL_USE=o.gym?plGymGroups(o.gymOf):PL_GROUPS;
+  var prem=!!o.premium,total=0,PL_USE=o.gym?plGymGroups(o.gymOf):(window.__LIA_MED?PL_GROUPS.filter(function(g){return !g.lia}):PL_GROUPS);
   PL_USE.forEach(function(g){g.items.forEach(function(it){if((!it[3]||prem)&&!it[4])total++})});
   var head=pfMk('div','plHead');
   var hx=pfMk('div','plHx');
   var ttl=pfMk('h2','plTitle');if(o.known&&typeof PLAN_IMG!=='undefined'){ttl.appendChild(document.createTextNode('Il tuo piano è '));var im=document.createElement('img');im.className='planImg'+(prem?' prem':'');im.src=prem?PLAN_IMG.smart:PLAN_IMG.base;im.alt=prem?'Smart':'Base';ttl.appendChild(im)}else{ttl.textContent='Il tuo piano'}hx.appendChild(ttl);
-  hx.appendChild(pfMk('p','plLead',o.gym?'Il programma dei corsi, le prenotazioni degli iscritti e gli abbonamenti in un unico posto.':prem?'Agenda online, clienti e numeri, più Lia: l’assistente virtuale che prenota e gestisce gli appuntamenti per te sulla webchat e su Telegram.':(o.known?'Agenda online, clienti e numeri in un unico posto.':'Il tuo piano non è ancora configurato.')));
+  hx.appendChild(pfMk('p','plLead',o.gym?'Il programma dei corsi, le prenotazioni degli iscritti e gli abbonamenti in un unico posto.':window.__LIA_MED?'Agenda online, pazienti e numeri, con la privacy al primo posto: niente chat, niente note libere, notifiche e email senza dettagli sulla visita.':prem?'Agenda online, clienti e numeri, più Lia: l’assistente virtuale che prenota e gestisce gli appuntamenti per te sulla webchat e su Telegram.':(o.known?'Agenda online, clienti e numeri in un unico posto.':'Il tuo piano non è ancora configurato.')));
   head.appendChild(hx);
   if(o.known){var chip=pfMk('span','plChip');chip.innerHTML='<b>'+total+'</b><small>funzioni incluse</small>';head.appendChild(chip)}
   top.appendChild(head);
@@ -562,7 +562,7 @@ function pfRenderPoster(box,b,opts){
   var msg=pfMk('p','pstMsg');msg.setAttribute('role','status');side.appendChild(msg);
   wrap.appendChild(side);box.appendChild(wrap);
   var M=liaQr(window.liaQrLink(link,'vetrina')),busy=false;
-  var premium=(b.plan_name==='Base+Lia')&&b.business_type!=='palestra';function build(t,width){var dark=(t!=='light');return liaPosterFonts().then(function(){return liaPosterTpl(dark?'dark':'light')}).then(function(tpl){if(!tpl)throw new Error('tpl');return liaPosterCanvas({theme:dark?'dark':'light',name:name,link:link,M:M,tpl:tpl,lia:premium,width:width})})}
+  var premium=(b.plan_name==='Base+Lia')&&b.business_type!=='palestra'&&!window.__LIA_MED;function build(t,width){var dark=(t!=='light');return liaPosterFonts().then(function(){return liaPosterTpl(dark?'dark':'light')}).then(function(tpl){if(!tpl)throw new Error('tpl');return liaPosterCanvas({theme:dark?'dark':'light',name:name,link:link,M:M,tpl:tpl,lia:premium,width:width})})}
   function paint(){
     themes.forEach(function(t){btns[t].setAttribute('aria-pressed',t===cur?'true':'false')});
     var mine=cur;build(cur,Math.round(Math.min(360,(box.clientWidth||360)*0.5)*(window.devicePixelRatio||1))).then(function(cv){if(mine!==cur)return;cvHold.innerHTML='';cvHold.appendChild(cv)}).catch(function(){cvHold.textContent='Anteprima non disponibile'});
@@ -619,7 +619,7 @@ function pfRenderPoster(box,b,opts){
     if(ch){ch.innerHTML='';
       [[IC_CAL,'cal','Calendario online','Pagina di prenotazione per i clienti',link?'Attivo':'Non configurato',!!link],
        [IC_CHAT,'chat','Webchat','Chat con Lia sulla tua pagina',webOn?'Attivo':(pn==='Base'?'Non incluso nel piano Base':'Non configurato'),webOn],
-       [IC_TG,'tg','Telegram',tele?'@'+(String(tele).match(/t\.me\/([^?\/]+)/)||['',''])[1]:'Crea il bot della tua attività',tele?'Attivo':'Non configurato',!!tele]].forEach(function(c){
+       [IC_TG,'tg','Telegram',tele?'@'+(String(tele).match(/t\.me\/([^?\/]+)/)||['',''])[1]:'Crea il bot della tua attività',tele?'Attivo':'Non configurato',!!tele]].filter(function(c){return !window.__LIA_MED||c[1]==='cal'}).forEach(function(c){
         var r=pfMk('div','pf2Ch');var i=pfMk('div','pf2Ci'+(c[1]?' '+c[1]:''));i.innerHTML=c[0];r.appendChild(i);
         var t=pfMk('div','pf2Ct');t.appendChild(pfMk('b',null,c[2]));if(c[3])t.appendChild(pfMk('small',null,c[3]));
         if(c[1]==='tg'&&tele){var act=pfMk('div','pf2TgAct');[['Copia link',function(bt){pfCopyText(tele,bt,'Copia link')}],['Condividi',function(bt){tgShare(tele,b.name||'la mia attività',bt)}],['QR code',function(){pfQrModal(tele,'Il bot di '+(b.name||''))}]].forEach(function(x){var bt=document.createElement('button');bt.type='button';var sp=document.createElement('span');sp.textContent=x[0];bt.appendChild(sp);bt.addEventListener('click',function(ev){ev.stopPropagation();x[1](bt)});bt.addEventListener('keydown',function(ev){ev.stopPropagation()});act.appendChild(bt)});t.appendChild(act)}

@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
       "&starts_at=gte." + iso(now + 2 * 3600000) + "&starts_at=lt." + iso(now + 26 * 3600000) +
       "&created_at=lt." + iso(now - 3 * 3600000) +
       "&order=starts_at.asc&limit=" + MAX_PER_RUN +
-      "&select=id,customer_name,customer_email,customer_address,starts_at,ends_at,business_id,services(name),resources(name),businesses(name,slug,timezone,address,public_phone,team_mode,staff_choice,cancel_limit_hours)");
+      "&select=id,customer_name,customer_email,customer_address,starts_at,ends_at,business_id,services(name),resources(name),businesses(name,slug,timezone,address,public_phone,team_mode,staff_choice,cancel_limit_hours,business_type)");
     if (!r.ok) {
       if (r.status === 400 || r.status === 404) return res.status(200).json({ ...out, note: "Colonne email non ancora create: esegui prima lo SQL." });
       return res.status(500).json({ error: "Lettura appuntamenti non riuscita" });
@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
       const lim = b.cancel_limit_hours === null || b.cancel_limit_hours === undefined ? 2 : Number(b.cancel_limit_hours);
       const em = mail.appointmentEmail({
         kind: "reminder", slug: b.slug, apptId: a.id, bizName: b.name, bizPhone: b.public_phone || "", bizAddress: b.address || "",
-        customerName: a.customer_name, service: (a.services && a.services.name) || "Appuntamento",
+        customerName: a.customer_name, neutral: require("../lib/verticals.js").isMedical(b.business_type), service: (a.services && a.services.name) || "Appuntamento",
         staffName: (b.team_mode === "team" && b.staff_choice === true && a.resources) ? a.resources.name : "",
         startsAt: a.starts_at, endsAt: a.ends_at, tz, customerAddress: a.customer_address || "",
         cancelLimitH: Number.isFinite(lim) ? lim : 2, privacyUrl: mail.baseUrl() + "/privacy/" + b.slug,

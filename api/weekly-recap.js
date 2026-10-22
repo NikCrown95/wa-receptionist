@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
   const dry = String((req.query || {}).dry || "") === "1";
 
   try {
-    const r = await sb("GET", "businesses?active=eq.true&select=id,name,timezone");
+    const r = await sb("GET", "businesses?active=eq.true&select=id,name,timezone,business_type");
     if (!r.ok || !Array.isArray(r.data)) return res.status(500).json({ error: "Errore lettura attivita" });
 
     const now = new Date();
@@ -51,6 +51,7 @@ module.exports = async (req, res) => {
     for (const biz of r.data) {
       try {
         // Solo chi ha Lia e il servizio attivo. Se il controllo non riesce, non scrivo nulla.
+        if (require("../lib/verticals.js").isMedical(biz.business_type)) { out.skipped_no_lia++; continue; } // studi sanitari: niente Lia
         const acc = await getAccess(biz.id);
         if (!acc.checked || !acc.allowed || !acc.lia_allowed) { out.skipped_no_lia++; continue; }
 

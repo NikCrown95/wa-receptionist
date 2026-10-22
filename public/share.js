@@ -397,7 +397,7 @@
       var t7q = [];
       if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);
       t7q.push(["Come faccio prenotare dalla vetrina?", "Scarica la locandina con il tuo QR, stampala e attaccala in vetrina: chi passa inquadra e prenota anche a negozio chiuso.", M + "Scheda attività"]);
-      return {
+      var GUIDE = {
         start: [["clock", "Controlla servizi e orari", "Cosa offri e quando ricevi", "t5"], ["link", "Condividi il link ai clienti", "Così possono prenotare da soli", "t1"], ["cal", "Guarda il calendario", "Qui vedi le prenotazioni", "t2"]],
         can: [
           ["link", "Ricevere prenotazioni a qualsiasi ora", "I clienti prenotano da soli dal tuo link o dal QR", "t1"],
@@ -454,6 +454,7 @@
           ] }
         ]
       };
+      return window.__LIA_MED ? medGuide(GUIDE) : GUIDE;
     }
     /* palestre */
     var who = b.classes && b.personal ? "le lezioni libere e gli orari del Personal" : (b.classes ? "le lezioni libere e i posti rimasti" : "gli orari liberi per il Personal");
@@ -485,6 +486,26 @@
     };
   }
 
+  /* Studi sanitari: nella guida non compaiono Lia, Telegram e le note libere (queste funzioni per loro non esistono). */
+  function medGuide(G) {
+    G.can = G.can.filter(function (x) { return x[3] !== "t9"; }).map(function (x) {
+      return x[3] === "t4" ? [x[0], "Conoscere i tuoi pazienti", "Scheda e storico degli appuntamenti", x[3]] : x;
+    });
+    G.tiers.forEach(function (t) {
+      t.topics = t.topics.filter(function (tp) { return tp.id !== "t9"; });
+      t.topics.forEach(function (tp) {
+        if (tp.id === "t4") {
+          tp.n = "I tuoi pazienti"; tp.d = "Schede e contatti";
+          tp.q = [tp.q[0], ["Posso scrivere note sui pazienti?", "No, per scelta: negli studi sanitari Prenolia non ha note libere, così non raccoglie informazioni sulla salute. Cartelle e note cliniche restano nel tuo gestionale o nel tuo archivio.", ""], tp.q[2]];
+        }
+        if (tp.id === "t10") {
+          tp.q[0] = ["Quanto costa e cosa include?", "Il piano Smart costa 24,99 € al mese: calendario e prenotazione online dei pazienti, con la privacy rafforzata (niente chat, niente note libere).", M_SUB];
+        }
+      });
+    });
+    return G;
+  }
+  var M_SUB = "Menu › Impostazioni › Abbonamento";
   function buildGuide(b) {
     var d = guideFor(b), open = {}, term = "", full = true; /* niente percorso iniziale in 3 passi: la guida si apre subito completa */
     if (d.tiers[0] && d.tiers[0].topics[0]) open[d.tiers[0].topics[0].id] = true;

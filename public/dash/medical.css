@@ -1,0 +1,9 @@
+/* Studi sanitari (dentisti, fisioterapisti, studi medici): meno funzioni, meno dati.
+   Niente chat con l'IA, niente Telegram/WhatsApp, niente visite a domicilio, niente note libere.
+   La classe "med" viene messa su <html> dal server solo per questi studi. */
+html.med .stRow[data-st="telegram"],
+html.med .stRow[data-st="whatsapp"],
+html.med .stRow[data-st="areas"],
+html.med .stPage[data-st="telegram"],
+html.med .stPage[data-st="whatsapp"],
+html.med .stPage[data-st="areas"] { display: none !important; }

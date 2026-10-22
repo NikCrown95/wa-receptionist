@@ -4,6 +4,8 @@
 
 const { handleMessage, getBusiness, welcomeText } = require("../lib/lia.js");
 const { sb, agendaText } = require("../lib/owner.js");
+const { isMedical } = require("../lib/verticals.js");
+const { customerBlockedMessage } = require("../lib/access.js");
 const tb = require("../lib/tgbots.js");
 
 module.exports = async (req, res) => {
@@ -117,6 +119,7 @@ module.exports = async (req, res) => {
     if (m && fixed) {
       const fb = await getBusiness(fixed.slug);
       if (!fb) return reply("Questa attività non è al momento raggiungibile.");
+      if (isMedical(fb.business_type)) return reply(customerBlockedMessage(fb, { allowed: true }));
       await sb("POST", "contact_business", { contact_id: contactId, business_id: fb.id, updated_at: new Date().toISOString() }, "resolution=merge-duplicates");
       return reply(welcomeText(fb));
     }
@@ -125,6 +128,7 @@ module.exports = async (req, res) => {
       if (m[1]) {
         biz = await getBusiness(m[1].toLowerCase());
         if (!biz) return reply("Non trovo questa attività. Controlla il link o il QR che hai usato.");
+        if (isMedical(biz.business_type)) return reply(customerBlockedMessage(biz, { allowed: true }));
         await sb("POST", "contact_business", { contact_id: contactId, business_id: biz.id, updated_at: new Date().toISOString() }, "resolution=merge-duplicates");
       } else {
         biz = await getBusiness(process.env.BUSINESS_SLUG || "barbiere-mario");

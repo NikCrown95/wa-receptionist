@@ -144,6 +144,10 @@
       "destination": "/api/legal?doc=termini"
     },
     {
+      "source": "/accordo-sanitari",
+      "destination": "/api/legal?doc=sanitari"
+    },
+    {
       "source": "/privacy/:slug",
       "destination": "/api/legal?doc=cliente&b=:slug"
     },
@@ -160,7 +164,7 @@
       "destination": "/api/palestra?b=:slug"
     },
     {
-      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|reset|sicurezza|privacy|termini|palestra|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
+      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|reset|sicurezza|privacy|termini|accordo-sanitari|palestra|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
       "destination": "/api/booking?b=:slug"
     }
   ],

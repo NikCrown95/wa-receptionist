@@ -11,6 +11,7 @@
 
 const clients = require('./clients.js');
 const health = require('../../lib/system-health.js');
+const { isMedical } = require('../../lib/verticals.js');
 
 const { sb, sbAll, authenticate, cfg } = clients;
 
@@ -72,6 +73,7 @@ async function feed(query) {
   ]);
   const B = (bmap && bmap[0]) || {};
   const nameOf = (id) => (B[id] && B[id].name) || 'Un’attività';
+  const isMed = (id) => !!(B[id] && isMedical(B[id].business_type)); // studi sanitari: niente nomi dei pazienti ne' servizi
   const ev = [];
 
   apps.forEach((a) => {
@@ -79,7 +81,7 @@ async function feed(query) {
     const ch = a.source && SOURCE_LABEL[a.source] ? SOURCE_LABEL[a.source] : (CHANNEL_LABEL[a.channel] || 'Prenotazione');
     ev.push({ id: 'a' + a.id, type: manual ? 'app_manual' : 'app', at: iso(a.created_at), business_id: a.business_id, business: nameOf(a.business_id),
       title: manual ? 'Appuntamento inserito' : 'Nuovo appuntamento',
-      detail: shortName(a.customer_name) + ' · ' + ((a.services && a.services.name) || 'Servizio') + ' · ' + fmtWhen(a.starts_at), channel: ch });
+      detail: isMed(a.business_id) ? 'Appuntamento · ' + fmtWhen(a.starts_at) : shortName(a.customer_name) + ' · ' + ((a.services && a.services.name) || 'Servizio') + ' · ' + fmtWhen(a.starts_at), channel: ch });
   });
   gym.forEach((g) => {
     ev.push({ id: 'g' + g.id, type: 'app', at: iso(g.created_at), business_id: g.business_id, business: nameOf(g.business_id),
@@ -87,7 +89,7 @@ async function feed(query) {
   });
   cancels.forEach((c) => {
     ev.push({ id: 'c' + c.id, type: 'can', at: iso(c.created_at), business_id: c.business_id, business: nameOf(c.business_id),
-      title: 'Appuntamento annullato', detail: shortName(c.customer_name) + (c.service_name ? ' · ' + c.service_name : '') + (c.starts_at ? ' · ' + fmtWhen(c.starts_at) : '') });
+      title: 'Appuntamento annullato', detail: isMed(c.business_id) ? (c.starts_at ? fmtWhen(c.starts_at) : 'Appuntamento') : shortName(c.customer_name) + (c.service_name ? ' · ' + c.service_name : '') + (c.starts_at ? ' · ' + fmtWhen(c.starts_at) : '') });
   });
   // chat: i messaggi della stessa persona entro 30 minuti diventano un solo evento ("3 messaggi")
   const groups = [];

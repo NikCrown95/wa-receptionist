@@ -1,6 +1,7 @@
 
 // --- Note cliente (nota fissa) e note per visita: condivise tra scheda Clienti e foglio appuntamento ---
 (function(){
+  var MED=!!window.__LIA_MED; /* studi sanitari: nessuna nota libera, per non raccogliere dati sulla salute */
   var S={fixed:{},visits:{},okFixed:true,okVisits:true,loaded:false,p:null,focus:null};
   var drafts={},mounted=[];
   function tok(){return (new URLSearchParams(location.search).get('t')||'').trim();}
@@ -15,6 +16,7 @@
     mounted.push({box:box,fn:fn});
   }
   function ensure(){
+    if(MED){S.loaded=true;return Promise.resolve(S);}
     if(S.p)return S.p;
     if(!tok()){S.loaded=true;return Promise.resolve(S);}
     S.p=fetch(url(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('x');return r.json();}).then(function(d){
@@ -52,6 +54,7 @@
 
   // Nota fissa del cliente ("Da sapere prima di iniziare")
   function mountFixed(box,phone,opts){
+    if(MED){box.innerHTML='';return;}
     opts=opts||{};
     function draw(){
       box.innerHTML='';
@@ -88,6 +91,7 @@
 
   // Nota di una singola visita (un appuntamento)
   function mountVisit(box,id,opts){
+    if(MED){box.innerHTML='';return;}
     opts=opts||{};
     function draw(){
       box.innerHTML='';
@@ -120,6 +124,7 @@
 
   // Nota dell'ultima visita precedente (solo lettura), per il foglio appuntamento
   function mountLast(box,phone,beforeMs,excludeId){
+    if(MED){box.innerHTML='';return;}
     function draw(){
       box.innerHTML='';
       if(!S.loaded||!S.okVisits||!phone)return;

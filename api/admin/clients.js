@@ -422,7 +422,11 @@ async function businessDetail(id) {
   }));
   const hours = Object.keys(hoursByDay).map(Number).sort((x, y) => x - y).map((d) => ({ weekday: d, ranges: Array.from(new Set(hoursByDay[d])).sort() }));
 
-  const mapAppt = (a) => ({
+  // studi sanitari: chi gestisce Prenolia non vede ne' nome, ne' telefono, ne' servizio dei pazienti (minimizzazione)
+  const med = require('../../lib/verticals.js').isMedical(b.business_type);
+  const mapAppt = (a) => med ? ({
+    at: a.starts_at, service: 'Appuntamento', price: price(a), channel: a.channel || 'altro', status: a.status, customer: '—', phone: '',
+  }) : ({
     at: a.starts_at,
     service: (a.services && a.services.name) || '—',
     price: price(a),
@@ -479,6 +483,10 @@ async function readConversation(id, ref, ctx) {
   let contact = '';
   try { contact = Buffer.from(String(ref || ''), 'base64url').toString('utf8'); } catch (e) { contact = ''; }
   if (!contact || contact.length > 120 || /[\u0000-\u001f]/.test(contact)) throw fail('Conversazione non valida.');
+  try {
+    const bt = await sb(`businesses?id=eq.${id}&select=business_type&limit=1`);
+    if (bt && bt[0] && require('../../lib/verticals.js').isMedical(bt[0].business_type)) throw fail('Per gli studi sanitari non mostro mai le conversazioni.');
+  } catch (e) { if (e && e.validation) throw e; throw fail('Non riesco a verificare il tipo di attività: per privacy non mostro la conversazione.'); }
   try {
     await sb('audit_logs', { method: 'POST', body: { actor: (ctx && ctx.actor) || 'admin', action: 'view_conversation', business_id: id, details: { contact: maskContact(contact) } } });
   } catch (e) {
