@@ -173,5 +173,11 @@
       "destination": "/registrati.html?ref=:code",
       "permanent": false
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
   ]
 }
