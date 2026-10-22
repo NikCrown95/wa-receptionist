@@ -2692,6 +2692,7 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #panelOther .stList{border-radius:20px;background:var(--card);border:1px solid var(--line);overflow:hidden}
 #panelOther .stListCard{padding:6px 8px}
 #panelOther .stRow,#panelOther .stAct{display:flex;align-items:center;gap:13px;width:100%;padding:12px 14px;border:0;background:transparent;color:var(--ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+#panelOther .stRow[hidden],#panelOther .stAct[hidden]{display:none}
 #panelOther .stRow+.stRow,#panelOther .stAct+.stAct{border-top:1px solid var(--line)}
 #panelOther .stRow:hover,#panelOther .stAct:hover{background:color-mix(in srgb,var(--accent) 7%,transparent)}
 #panelOther .stRow.on{background:color-mix(in srgb,var(--accent) 12%,transparent)}
