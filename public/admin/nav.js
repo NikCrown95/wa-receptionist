@@ -28,7 +28,7 @@
   });
   // sul telefono il menu scorre: porto la voce attiva in vista
   var cur = nav.querySelector('a.on');
-  if (cur && cur.scrollIntoView) { try { nav.scrollLeft = Math.max(0, cur.offsetLeft - 14); } catch (e) {} }
+  if (cur) { try { var dx = cur.getBoundingClientRect().left - nav.getBoundingClientRect().left; nav.scrollLeft = Math.max(0, nav.scrollLeft + dx - (nav.clientWidth - cur.offsetWidth) / 2); } catch (e) {} }
 
   // numerino rosso con le richieste nuove (le pagine possono aggiornarlo con window.liaNavBadge)
   window.liaNavBadge = function (n) {
@@ -68,7 +68,34 @@
     '.lia-empty b{display:block;color:#3FE08A;font-size:1rem;margin-bottom:4px}' +
     '@media (max-width:760px){.lia-pop{left:12px;right:12px;width:auto;max-height:calc(100dvh - 120px)}.lia-bell{width:44px;height:44px}.top{transition:transform .25s ease}.top.lia-hide{transform:translateY(-100%)}}' +
     '@media (prefers-reduced-motion:reduce){.top{transition:none}}';
+  
+  // pulsante Esci uguale su tutte le pagine (alcune pagine non definiscono .btn.ghost)
+  css.textContent += '#liaLogout{flex:none;min-height:42px;padding:0 16px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}#liaLogout:hover{filter:brightness(1.12)}@media (max-width:760px){#liaLogout{min-height:44px}}';
   document.head.appendChild(css);
+
+  // tabelle sul telefono: ogni riga diventa una scheda con le etichette delle colonne (mobile.css fa il resto)
+  (function () {
+    var pending = false;
+    function run() {
+      pending = false;
+      Array.prototype.forEach.call(document.querySelectorAll('table:not(.cards)'), function (t) {
+        var heads = Array.prototype.map.call(t.querySelectorAll('thead th'), function (h) { return (h.textContent || '').trim(); });
+        if (!heads.length) return;
+        Array.prototype.forEach.call(t.querySelectorAll('tbody tr'), function (tr) {
+          Array.prototype.forEach.call(tr.children, function (td, i) {
+            if (td.colSpan > 1) { td.classList.add('mc-wide'); return; }
+            if (heads[i] && td.getAttribute('data-l') !== heads[i]) td.setAttribute('data-l', heads[i]);
+            if (td.querySelector('button,.rowbtns') && !td.textContent.replace(/\s+/g, '').match(/[0-9€]/)) td.classList.add('mc-act');
+          });
+        });
+        t.classList.add('mcards');
+        if (t.classList.contains('tbl')) t.classList.add('mlist');
+      });
+    }
+    function sched() { if (!pending) { pending = true; requestAnimationFrame(run); } }
+    new MutationObserver(sched).observe(document.body || document.documentElement, { childList: true, subtree: true });
+    run();
+  })();
 
   var bell, bn, pop;
   function mkBell() {

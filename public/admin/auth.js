@@ -1,6 +1,8 @@
 // auth.js - accesso alla dashboard admin (login di Supabase Auth). Un solo file per tutte le pagine.
 // La chiave qui sotto e' la chiave PUBBLICA di Supabase: e' fatta per stare nelle pagine. Non da' accesso a nulla da sola.
 (function () {
+  // l'app si puo' installare da Chrome: serve il service worker di Prenolia (non salva nulla in cache)
+  try { if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); } catch (e) {}
   var SUPA = 'https://trtjbktdvupckyayxqli.supabase.co', KEY = 'sb_publishable_phiqv5lfE4j_2ag2jLSsbA_NLSWm623', SKEY = 'lia_session';
 
   function read() { try { var s = JSON.parse(localStorage.getItem(SKEY) || 'null'); return s && s.access_token && s.refresh_token ? s : null; } catch (e) { return null; } }
