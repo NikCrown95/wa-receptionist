@@ -43,7 +43,7 @@ def build(mark_ratio):
     aura = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     a_mask = Image.new("L", (S, S), 0); a_mask.paste(m.split()[-1], (ox, oy))
     aura_col = Image.new("RGBA", (S, S), (30, 190, 235, 0))
-    aura_col.putalpha(a_mask.filter(ImageFilter.GaussianBlur(S * 0.05)).point(lambda p: int(p * 0.38)))
+    aura_col.putalpha(a_mask.filter(ImageFilter.GaussianBlur(S * 0.05)).point(lambda p: int(p * 0.55)))
     img = Image.alpha_composite(img, aura_col)
     shadow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
     sh_mask = Image.new("L", (S, S), 0); sh_mask.paste(m.split()[-1], (ox, oy + int(S * 0.02)))
@@ -56,11 +56,11 @@ def build(mark_ratio):
 
 out = sys.argv[2] if len(sys.argv) > 2 else "public/admin/icons"
 os.makedirs(out, exist_ok=True)
-anyi = build(0.66)
+anyi = build(0.72)
 anyi.resize((512, 512), Image.LANCZOS).save(f"{out}/admin-512.png", optimize=True)
 anyi.resize((192, 192), Image.LANCZOS).save(f"{out}/admin-192.png", optimize=True)
 anyi.resize((180, 180), Image.LANCZOS).save(f"{out}/admin-apple-180.png", optimize=True)
 anyi.resize((64, 64), Image.LANCZOS).save(f"{out}/admin-64.png", optimize=True)
-mk = build(0.52)  # piu' piccolo: resta nella zona sicura quando Android taglia l'icona a cerchio o squircle
+mk = build(0.60)  # piu' piccolo: resta nella zona sicura quando Android taglia l'icona a cerchio o squircle
 mk.resize((512, 512), Image.LANCZOS).save(f"{out}/admin-maskable-512.png", optimize=True)
 print("ok")
