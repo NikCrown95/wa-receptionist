@@ -185,7 +185,8 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 .lr-it.med.bad{background:color-mix(in srgb,#E2584A 7%,transparent)}
 .lr-it.med.bad .ic.k4{background:linear-gradient(145deg,#FF9484,#E2584A);color:#fff}
 /* palestre: elenco unico con filtri (abbonamento ambra, certificato in scadenza viola, scaduto rosso) */
-.lr-chips{display:flex;gap:8px;padding:2px 4px 4px;overflow-x:auto}
+.lr-chips{display:flex;flex:none;min-height:40px;gap:8px;padding:2px 4px 6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.lr-chips::-webkit-scrollbar{display:none}
 .lr-chip{flex:none;font:inherit;font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .lr-chip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 .lr-chip:focus-visible{outline:3px solid var(--accent-ink);outline-offset:2px}
