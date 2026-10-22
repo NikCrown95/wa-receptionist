@@ -95,7 +95,7 @@
     var b = document.getElementById(id); if (!b) return;
     for (var i = b.childNodes.length - 1; i >= 0; i--) { var n = b.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + MENU[id] + '\n  '; break; } }
   });
-  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', other: 'Impostazioni', rent: 'Subaffitto' };
+  var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', other: 'Impostazioni', rent: 'Subaffitto', registry: 'Registro prenotazioni' };
   function setLabel(w) { var l = document.getElementById('sectionLabel'); if (l && LABELS[w]) l.textContent = LABELS[w]; }
   document.addEventListener('lia:section', function (e) { S.section = e.detail; setLabel(e.detail); showSection(e.detail); });
 
@@ -639,7 +639,8 @@
     groups.forEach(function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'La tua palestra'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati palestra';
     var first = menu.querySelector('.stGroup .stList'); if (!first || first.querySelector('[data-gx]')) return true;
-    var anchor = menu.querySelector('[data-st="services"]');
+    var lists = menu.querySelectorAll('.stGroup .stList'), TARGET = { tipo: 0, corsi: 1, abb: 1, orari: 2, chiusure: 2, regole: 2 };
+    [[1, 'Corsi e abbonamenti'], [2, 'Orari e regole']].forEach(function (g) { var l = lists[g[0]], h = l && l.parentNode.querySelector('h3'); if (h) h.textContent = g[1]; });
     var rows = [
       ['tipo', 'c-teal', 'gear', 'Cosa offri', 'Corsi, Personal, prenotazione online'],
       ['orari', 'c-amber', 'clock', 'Orari di apertura', 'Quando la palestra è aperta'],
@@ -651,7 +652,7 @@
     rows.forEach(function (r) {
       var b = el('button', 'stRow'); b.type = 'button'; b.setAttribute('data-gx', r[0]);
       b.innerHTML = '<span class="stIc ' + r[1] + ' gxI">' + ic(r[2]) + '</span><span class="stTx"><b>' + r[3] + '</b><small>' + r[4] + '</small></span><span class="stCh" aria-hidden="true">›</span>';
-      b.addEventListener('click', function () { openSetting(r[0]); }); if (anchor && anchor.parentNode === first) first.insertBefore(b, anchor); else first.appendChild(b);
+      b.addEventListener('click', function () { openSetting(r[0]); }); (lists[TARGET[r[0]]] || first).appendChild(b);
     });
     if (S.data) applyOffers();
     return true;

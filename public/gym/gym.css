@@ -180,7 +180,7 @@
 /* Impostazioni: solo ciò che serve a una palestra (niente servizi, pacchetti, WhatsApp, Telegram, orari standard) */
 .gym #stShell .stRow[data-st="services"],.gym #stShell .stRow[data-st="combos"],.gym #stShell .stRow[data-st="hours"],.gym #stShell .stRow[data-st="blocks"],.gym #stShell .stRow[data-st="staff"],.gym #stShell .stRow[data-st="rules"],.gym #stShell .stRow[data-st="telegram"],.gym #stShell .stRow[data-st="whatsapp"],
 .gym #stShell .stPage[data-st="services"],.gym #stShell .stPage[data-st="combos"],.gym #stShell .stPage[data-st="hours"],.gym #stShell .stPage[data-st="blocks"],.gym #stShell .stPage[data-st="staff"],.gym #stShell .stPage[data-st="staffdetail"],.gym #stShell .stPage[data-st="rules"],.gym #stShell .stPage[data-st="telegram"],.gym #stShell .stPage[data-st="whatsapp"],
-.gym #stShell .stGroup:has([data-st="telegram"]),.gym #stShell .stGroup:has([data-st="services"]),.gym #stShell .stGroup:has([data-st="hours"]){display:none!important}
+.gym #stShell .stGroup:has([data-st="telegram"]){display:none!important}
 /* Smartphone: i fogli a due colonne diventano una colonna sola */
 .gxTi{flex:1;min-width:0;min-height:44px;padding:8px 10px;border:1px solid var(--line2);border-radius:12px;background:var(--bg2);color:var(--ink);font:inherit;font-size:16px}
 .gxTi:disabled{opacity:.4}

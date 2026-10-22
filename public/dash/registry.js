@@ -2,7 +2,7 @@
   var host=document.getElementById('regBody');
   if(!host)return;
   var token=(new URLSearchParams(location.search).get('t')||'').trim();
-  var loadedOnce=false,busy=false;
+  var loadedOnce=false,busy=false,isGym=false;
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
@@ -14,7 +14,9 @@
     telegram:['Telegram','tg',fill(TG)],
     whatsapp:['WhatsApp','wa',fill(WA)],
     webchat:['Chat sul sito','wc',line('<path d="M4 5h16v11H9l-5 4z"></path>')],
-    manuale:['Inserita da te','mn',line('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path>')]
+    manuale:['Inserita da te','mn',line('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"></path>')],
+    corso:['Corso','pg',line('<path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"></path>')],
+    personal:['Personal 1:1','wc',line('<circle cx="12" cy="8" r="3.5"></circle><path d="M5 20a7 7 0 0 1 14 0"></path>')]
   };
   CH.web=CH.selfservice;
 
@@ -37,7 +39,7 @@
   function render(d){
     var items=Array.isArray(d.items)?d.items:[],tz=d.timezone||'Europe/Rome';
     if(!items.length){
-      host.innerHTML='<div class="regMsg"><b>Ancora nessuna prenotazione</b>Appena un cliente prenota, la trovi qui.</div>';
+      host.innerHTML='<div class="regMsg"><b>Ancora nessuna prenotazione</b>'+(d.gym?'Appena un iscritto prenota un corso o un Personal, la trovi qui.':'Appena un cliente prenota, la trovi qui.')+'</div>';
       return;
     }
     var now=new Date(),todayK=dayKey(now,tz),yK=dayKey(new Date(now.getTime()-864e5),tz),thisYear=parts(now,tz,{year:'numeric'});
@@ -79,6 +81,11 @@
     if(!b)return;
     var id=b.getAttribute('data-id'),start=b.getAttribute('data-start');
     var cal=document.getElementById('menuTabCal');if(cal)cal.click();
+    if(isGym){
+      var nm=(b.querySelector('.regNm')||{}).textContent||'',sv=(b.querySelector('.regSv')||{}).textContent||'';
+      setTimeout(function(){if(window.liaOpenDate&&start){window.liaFocusEv={name:nm,svc:sv,start:start,exp:Date.now()+9000,first:0,bad:b.classList.contains('x')};window.liaOpenDate(start);}},80);
+      return;
+    }
     setTimeout(function(){if(window.liaOpenAppt&&start)window.liaOpenAppt(id,start);},80);
   });
 
@@ -95,7 +102,7 @@
     if(!loadedOnce)host.innerHTML='<div class="regMsg">Carico le prenotazioni…</div>';
     fetch('/api/agenda?t='+encodeURIComponent(token)+'&registry=1',{cache:'no-store'})
       .then(function(r){if(!r.ok)throw new Error('http');return r.json();})
-      .then(function(d){loadedOnce=true;render(d);})
+      .then(function(d){loadedOnce=true;isGym=!!d.gym;render(d);})
       .catch(fail)
       .then(function(){busy=false;});
   }
