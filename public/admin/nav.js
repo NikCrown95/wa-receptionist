@@ -173,4 +173,29 @@
     b.addEventListener('click', function () { if (window.liaLogout) window.liaLogout(); else location.href = '/admin/login.html'; });
     row.appendChild(b);
   }
+
+  // pulsante "Installa app": compare solo quando Chrome dice che l'app e' installabile (e non e' gia' installata)
+  (function () {
+    var deferred = null;
+    var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
+    if (standalone || onLogin) return;
+    var st = document.createElement('style');
+    st.textContent = '#liaInstall{flex:none;min-height:42px;padding:0 13px;border-radius:13px;border:1px solid transparent;background:var(--accent-soft,#0B2C33);color:var(--accent-ink,#A5EDF2);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}@media (max-width:760px){#liaInstall{min-height:44px}}';
+    document.head.appendChild(st);
+    function drop() { var x = document.getElementById('liaInstall'); if (x) x.remove(); deferred = null; }
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); deferred = e;
+      if (document.getElementById('liaInstall') || !row) return;
+      var b = document.createElement('button');
+      b.id = 'liaInstall'; b.type = 'button'; b.textContent = 'Installa'; b.setAttribute('aria-label', 'Installa l\u2019app');
+      b.addEventListener('click', function () {
+        if (!deferred) return;
+        deferred.prompt();
+        deferred.userChoice.then(function (c) { if (c && c.outcome === 'accepted') drop(); }).catch(function () {});
+      });
+      var out = document.getElementById('liaLogout');
+      if (out) row.insertBefore(b, out); else row.appendChild(b);
+    });
+    window.addEventListener('appinstalled', drop);
+  })();
 })();

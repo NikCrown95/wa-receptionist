@@ -10,12 +10,13 @@
   html,body{overflow-x:clip;max-width:100%;}
 
   /* intestazione: logo + Esci sopra, menu a scorrimento sotto */
-  .top-row{flex-wrap:wrap;gap:8px 12px;padding:10px 14px 0;}
+  .top-row{flex-wrap:wrap;gap:8px;padding:10px 14px 0;}
+  .top-row .spacer{display:none;}
   .logo{width:104px;height:26px;}
   .top-row nav{order:3;flex:0 0 100%;margin:0 -14px;padding:2px 14px 10px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;white-space:nowrap;}
   .top-row nav::-webkit-scrollbar{display:none;}
   .top-row nav{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 34px),transparent 100%);scroll-padding:0 40px;}
-  .top-row .brand{min-height:44px;}
+  .top-row .brand{min-height:44px;flex:1 1 auto;min-width:0;}
   .top-row nav a{flex:none;min-height:40px;display:inline-flex;align-items:center;padding:0 14px;font-size:.9rem;background:var(--card);border:1px solid var(--line);}
   .top-row nav a.on{background:var(--accent-soft);border-color:transparent;color:var(--accent-ink);font-weight:600;}
 
