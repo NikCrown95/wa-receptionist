@@ -150,6 +150,7 @@
       '<div class="panel"><h2>Prenotazioni nel tempo</h2><p class="sub">Lezioni e Personal prenotati ogni ' + (P === 'year' ? 'mese' : 'giorno') + '.</p><div id="gcsBk"></div></div></div>' +
       '<div class="row2"><div class="panel"><h2>Riempimento dei corsi</h2><p class="sub">Posti occupati sul totale, nel periodo.</p><div class="hbars" id="byservice"></div><p class="hint" id="gcsCh"></p></div>' +
       '<div class="panel"><h2>Crescita iscritti</h2><p class="sub">Iscritti con abbonamento valido a fine mese, ultimi 12 mesi.</p><div id="gcsGr"></div></div></div>' +
+      '<div class="row2 row-full"><div class="panel"><h2>I clienti più assidui</h2><p class="sub" id="gcsTopSub"></p><div id="gcsTop"></div></div></div>' +
       '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi pagati per gli abbonamenti iniziati nel periodo, più il prezzo di ogni Personal 1:1 effettuato (' + eur(d.pt_price) + ' a seduta, modificabile).</p><p><strong>Riempimento</strong> Prenotazioni alle lezioni diviso i posti disponibili delle lezioni tenute (quelle annullate non contano).</p><p><strong>Iscritti attivi</strong> Iscritti con un abbonamento valido oggi, compresi quelli in scadenza.</p></div></details>';
     // grafici
     var C = { acc: css('--accent', '#2B8A94'), sec: css('--sec', '#6BD6D8'), bad: css('--danger', '#FF6B6B'), warn: '#E0A23A', mute: css('--line2', '#31404a') };
@@ -160,6 +161,13 @@
     bs.innerHTML = d.courses.length ? d.courses.map(function (x, i) { return '<div class="hbar-row" data-i="' + i + '" data-tip="1"><div class="lab"><i style="background:' + courseColor(x) + '"></i><span>' + esc(x.name) + '</span></div><div class="track"><div class="fill" style="width:' + x.pct + '%;background:' + courseColor(x) + '"></div></div><div class="amt">' + x.pct + '%</div></div>'; }).join('') : '<p class="hint">Ancora nessun dato: compare dopo le prime lezioni.</p>';
     var ch = wrap.querySelector('#gcsCh'); if (d.courses.length) ch.textContent = 'Un corso quasi sempre pieno si può raddoppiare; uno sotto la metà si può spostare di orario.';
     [].forEach.call(bs.querySelectorAll('.hbar-row'), function (r) { r.addEventListener('pointerdown', function () { var x = d.courses[+r.dataset.i]; clearOn(); r.classList.add('on'); var b = r.getBoundingClientRect(); tipShow('<b>' + esc(x.name) + ' · ' + x.pct + '%</b>' + num(x.booked) + ' prenotazioni su ' + num(x.seats) + ' posti<br>' + x.sessions + (x.sessions === 1 ? ' lezione' : ' lezioni') + ' nel periodo', b.left + b.width / 2, b.top); }); });
+    // clienti più assidui
+    var top = (d.top || []).filter(function (x) { return x.n > 0; }), tb = wrap.querySelector('#gcsTop'), ts = wrap.querySelector('#gcsTopSub');
+    ts.textContent = top.length ? 'Chi ha prenotato di più negli ' + PL[P] + '.' : 'Ancora nessuna prenotazione negli ' + PL[P] + '.';
+    top.forEach(function (x) {
+      var row = el('div', 'crow'), av = el('div', 'av', String(x.name).split(' ').map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase()), mid = el('div', 'mid');
+      row.appendChild(av); mid.appendChild(el('b', null, x.name)); mid.appendChild(el('span', null, num(x.n) + (x.n === 1 ? ' prenotazione' : ' prenotazioni'))); row.appendChild(mid); tb.appendChild(row);
+    });
     // crescita
     lineChart(wrap.querySelector('#gcsGr'), d.growth.map(function (x) { return { label: G.MS[pd(x.date).getMonth()], v: x.active, tip: '<b>' + esc(mLong(x.date)) + '</b>' + x.active + (x.active === 1 ? ' iscritto attivo' : ' iscritti attivi') }; }), { color: C.sec });
   }
