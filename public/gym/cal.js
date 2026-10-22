@@ -105,9 +105,9 @@
   };
   // in alto, al posto dei tre pulsanti della vista (che in palestra non servono), il giorno o i giorni della settimana
   function syncTop() {
-    var std = document.getElementById('range'), par = std && std.parentNode; if (!par) return;
+    var vd = document.getElementById('view-day'), sg = vd && vd.closest ? vd.closest('.seg') : null, par = sg && sg.parentNode; if (!par) return;
     var t = document.getElementById('gymTopRange');
-    if (!t) { t = document.createElement('h1'); t.id = 'gymTopRange'; t.className = 'gymTopRange'; t.setAttribute('aria-live', 'polite'); par.insertBefore(t, par.firstChild); }
+    if (!t) { t = document.createElement('h1'); t.id = 'gymTopRange'; t.className = 'gymTopRange'; t.setAttribute('aria-live', 'polite'); par.insertBefore(t, sg); }
     t.textContent = rangeTxt();
   }
   function render() {
