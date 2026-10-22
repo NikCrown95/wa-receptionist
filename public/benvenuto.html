@@ -269,7 +269,7 @@ var NAMES={tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
 var S={ok1:false,ok2:false,v:null,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
-  hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
+  pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
   if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
   if(v==="palestra")return["tipo","attivita","lezioni","calendario","fine"];
@@ -308,7 +308,10 @@ function validate(k){
   if(k==="zona"&&!S.cities.length)return"Aggiungi almeno una città dove vai a domicilio.";
   if(k==="zona"&&!S.items.some(function(x){return x.h}))return"Torna ai servizi e segna almeno un servizio che fai a casa del cliente.";
   if(k==="orari"){if(!S.hours.some(function(x){return x.on}))return"Scegli almeno un giorno di apertura.";
-    if(S.hours.some(function(x){return x.on&&(!x.from||!x.to||x.from>=x.to)}))return"Controlla gli orari: l'apertura deve venire prima della chiusura."}
+    if(S.hours.some(function(x){return x.on&&(!x.from||!x.to||x.from>=x.to)}))return"Controlla gli orari: l'apertura deve venire prima della chiusura.";
+    if(S.pause.on){if(!S.pause.from||!S.pause.to||S.pause.from>=S.pause.to)return"Controlla la pausa: deve iniziare prima di finire.";
+      var out=null;S.hours.forEach(function(x,i){if(!out&&x.on&&!(x.from<S.pause.from&&S.pause.to<x.to))out=DAYN[i]});
+      if(out)return out+": la pausa deve stare dentro l'orario di apertura."}}
   return""}
 function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
@@ -350,7 +353,9 @@ function payload(){
     return{name:x.n.trim(),duration_min:x.d,capacity:Number(x.k),category:x.cat,slots:sl}});return base}
   base.trade=tradeName().toLowerCase();
   base.services=S.items.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:x.d,price_eur:p===""?null:Number(p),at_customer_place:S.v==="domicilio"&&!!x.h}});
-  base.hours=[];S.hours.forEach(function(d,i){if(d.on)base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
+  base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
+    if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
+    else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
   if(S.v==="domicilio")base.areas=S.cities.slice();
   if(S.v==="sanitario")base.dpa=true;
   return base}
@@ -406,6 +411,7 @@ function render(){
       c6.appendChild(dc);
       var ti=h("input",{class:"inp",type:"time",value:it.time,"aria-label":"Ora di inizio"});ti.oninput=function(){it.time=ti.value};
       c6.appendChild(field("Ora di inizio",ti));v.appendChild(c6)});
+    v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: con quanto anticipo gli iscritti possono prenotare e fino a quando possono disdire. Programma, chiusure e regole puoi cambiarli in ogni momento."]));
   }
   if(k==="zona"){
     v.appendChild(head(lab,"In quali città vai a domicilio?","Il cliente può prenotare a domicilio solo con un indirizzo in una di queste città."));
@@ -442,7 +448,15 @@ function render(){
       a.oninput=function(){d.from=a.value};b.oninput=function(){d.to=b.value};
       cb.onchange=function(){d.on=cb.checked;t.className="times"+(d.on?"":" off")};
       t.appendChild(a);t.appendChild(h("span",{text:"–"}));t.appendChild(b);r.appendChild(l);r.appendChild(t);c4.appendChild(r)});
-    v.appendChild(c4);v.appendChild(h("p",{class:"hint",text:"Pause, ferie e orari diversi per ogni collaboratore li imposti dopo, da Disponibilità."}));
+    var pauseRow=h("div",{class:"day"}),pauseLbl=h("label",{class:"tgl"});pauseLbl.style.margin="0";pauseRow.style.marginTop="6px";pauseRow.style.borderTopColor="var(--line2)";
+    var pauseCb=h("input",{type:"checkbox"});pauseCb.checked=S.pause.on;pauseLbl.appendChild(pauseCb);pauseLbl.appendChild(document.createTextNode("Pausa"));
+    var pauseT=h("div",{class:"times"+(S.pause.on?"":" off")}),pauseA=h("input",{type:"time",value:S.pause.from,"aria-label":"Inizio pausa"}),pauseB=h("input",{type:"time",value:S.pause.to,"aria-label":"Fine pausa"});
+    pauseA.oninput=function(){S.pause.from=pauseA.value};pauseB.oninput=function(){S.pause.to=pauseB.value};
+    pauseCb.onchange=function(){S.pause.on=pauseCb.checked;pauseT.className="times"+(S.pause.on?"":" off")};
+    pauseT.appendChild(pauseA);pauseT.appendChild(h("span",{text:"–"}));pauseT.appendChild(pauseB);pauseRow.appendChild(pauseLbl);pauseRow.appendChild(pauseT);c4.appendChild(pauseRow);
+    v.appendChild(c4);
+    v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni di apertura. Orari, pause, chiusure e ferie si possono cambiare in ogni momento da Disponibilità, anche per ogni collaboratore."}));
+    v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: di base i clienti prenotano fino a 3 mesi prima e fino a 15 minuti prima dell'orario, e possono annullare fino a 2 ore prima. Le cambi quando vuoi da Impostazioni."]));
   }
   if(k==="fine"){
     v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
@@ -468,7 +482,8 @@ function render(){
       var wk=h("div",{class:"week"});
       S.hours.forEach(function(d,i){var c=h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),d.on?h("span",{class:"tm",text:d.from}):h("span",{class:"tm",text:"–"}),d.on?h("span",{class:"tm e",text:d.to}):h("span",{class:"tm e",text:"chiuso"})]);wk.appendChild(c)});
       if(S.v==="domicilio"){var ch5=h("div",{class:"chips"});S.cities.forEach(function(c){ch5.appendChild(h("span",{class:"chip city",text:c}))});v.appendChild(sec("Zone a domicilio","zona",ch5,S.cities.length))}
-      v.appendChild(sec("Orari di apertura","orari",wk));
+      var wkb=S.pause.on?h("div",null,[wk,h("p",{class:"hint",text:"Pausa ogni giorno dalle "+S.pause.from+" alle "+S.pause.to+"."})]):wk;
+      v.appendChild(sec("Orari di apertura","orari",wkb));
     }
     var nx=h("div",{class:"next"},[h("b",{text:"Cosa succede dopo"}),
       h("ul",null,[h("li",{text:"La prova gratuita dura 14 giorni."}),
