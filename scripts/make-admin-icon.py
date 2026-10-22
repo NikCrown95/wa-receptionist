@@ -1,4 +1,4 @@
-# Genera le icone della Super Dashboard (stile pulito: sfondo nero, "a" bianca, faccina nera, occhi azzurri).
+# Genera le icone della Super Dashboard (stile pulito: sfondo nero, "a" bianca in 3D con ombra sul gambo, faccina nera, occhi azzurri).
 # Parte dal simbolo Lia in public/brand/favicon-512.png, ne ricostruisce le forme ad alta risoluzione e disegna a 2048px.
 # Uso: python3 scripts/make-admin-icon.py   (scrive in public/admin/icons/)
 import numpy as np, os, sys
@@ -41,29 +41,68 @@ def crisp(m, sigma):
     g = ndi.gaussian_filter(m, sigma)
     return np.clip((g - 0.5) / 0.22 + 0.5, 0, 1)
 
+ox0, oy0 = bb[0], bb[1]
+H0, W0 = alpha.shape
+def ss(x, e0, e1):
+    t = np.clip((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t)
+P = dict(soft=14, tube_w=60, r0=0.86, r1=1.0, s0=0.40, s1=1.0, crease=0.10, cw=60, rim=0.05, cast=0.45, sx=85, sy=95, cxs=365, cy=335, ao=0.10, aow=14, dk=150)
+
 def render_mark(w):
-    h = int(a.shape[0] * w / a.shape[1])
-    k = w / a.shape[1]
-    sg = max(1.0, 0.9 * k)
-    A = crisp(up(alpha, w, h), sg)
-    gy, gx = np.mgrid[0:h, 0:w].astype(np.float32)
-    px, py = gx / k - cx, gy / k - cy
-    u = (px * evec[0, 1] + py * evec[1, 1]) / semi[1]
-    v = (px * evec[0, 0] + py * evec[1, 0]) / semi[0]
-    dist = (np.sqrt(u * u + v * v) - 1.0) * min(semi) * k          # distanza in pixel dal bordo dell'ellisse
-    F = np.clip(0.5 - dist, 0, 1)
-    E = crisp(up(eyes.astype(np.float32), w, h), sg * 0.8) * F
-    L = np.clip((up(lum_s, w, h) - 0.35) / 0.6, 0, 1)
-    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-    diag = np.clip((xx / w) * 0.45 + (yy / h) * 0.75, 0, 1)
-    t = np.clip(0.55 * (1 - diag) + 0.45 * L, 0, 1)[..., None]
-    body = np.array([206, 209, 215]) / 255 * (1 - t) + np.array([247, 248, 250]) / 255 * t
-    face_c = np.array([9, 9, 11]) / 255
-    et = np.clip((yy / h - 0.35) / 0.3, 0, 1)[..., None]
-    eye_c = np.array([120, 236, 244]) / 255 * (1 - et) + np.array([40, 190, 215]) / 255 * et
-    col = body * (1 - F[..., None]) + face_c * F[..., None]
-    col = col * (1 - E[..., None]) + eye_c * E[..., None]
-    return Image.fromarray((np.clip(np.dstack([col, A]), 0, 1) * 255).astype(np.uint8), "RGBA")
+  h=int(H0*w/W0); k=w/W0; sg=max(1.0,0.9*k)
+  A=crisp(up(alpha,w,h),sg)
+  gy,gx=np.mgrid[0:h,0:w].astype(np.float32)
+  X=gx/k+ox0; Y=gy/k+oy0                      # coordinate del file originale 512
+  px,py=gx/k-cx,gy/k-cy
+  u=(px*evec[0,1]+py*evec[1,1])/semi[1]; v=(px*evec[0,0]+py*evec[1,0])/semi[0]
+  dist=(np.sqrt(u*u+v*v)-1.0)*min(semi)*k
+  F=np.clip(0.5-dist,0,1)
+  E=crisp(up(eyes.astype(np.float32),w,h),sg*0.8)*F
+  # distanza dal bordo (corpo senza faccia) per l'effetto "tubo"
+  bm=(alpha>0.5)&~face
+  dt=ndi.distance_transform_edt(bm).astype(np.float32)
+  DT=up(dt,w,h)
+  tube=np.clip(DT/ (P['tube_w']),0,1)
+  tubeS=ss(tube,0,1)
+  # luce da alto-sinistra
+  light=np.clip(1-((X-90)/420*0.55+(Y-40)/430*0.75),0,1)
+  ring=P['r0']+(P['r1']-P['r0'])*(0.55*tubeS+0.45*light)
+  # zona gambo (piegatura)
+  crease=(Y-185)-(X-355)*1.10               # >0 sotto la diagonale
+  stem=ss(X-368,-P["soft"],P["soft"])*ss(crease,-P["soft"]*1.3,P["soft"]*1.3)
+  right=np.where(bm)
+  # larghezza gambo per riga: da x=370 al bordo destro
+  rowmax=np.zeros(H0,np.float32)
+  for yy in range(H0):
+      xs_=np.nonzero(bm[yy])[0]
+      rowmax[yy]=xs_.max()+ox0 if len(xs_) else 500
+  RM=np.asarray(Image.fromarray(rowmax,"F").resize((1,h),Image.BICUBIC))[:,0][:,None]
+  RM=np.minimum(RM,507)
+  uu=np.clip((X-372)/np.maximum(RM-372,20),0,1)
+  s_base=P['s0']+(P['s1']-P['s0'])*ss(uu,0.0,0.75)**0.9
+  s_base=s_base*(0.82+0.18*ss((Y-250)/190,0,1))
+  # ombra a contatto lungo la piegatura
+  cd=np.clip(crease,0,None)
+  s_base=s_base*(1-P['crease']*np.exp(-cd/P['cw']))
+  # riflesso sul bordo destro del gambo
+  s_base=s_base+P['rim']*np.exp(-np.clip(RM-X,0,None)/6)
+  # ombra proiettata dal gambo sull'anello (a sinistra del gambo)
+  sh=np.exp(-(((X-P['cxs'])/P['sx'])**2+((Y-P['cy'])/P['sy'])**2))
+  ring=ring*(1-P['cast']*sh)
+  # ombra dell'anello sul gambo vicino al bordo sinistro
+  body=ring*(1-stem)+s_base*stem
+  # bordo interno piu' scuro attorno alla faccia (profondita')
+  ao=np.exp(-np.clip(dist,0,None)/P['aow'])*(1-F)
+  body=body*(1-P['ao']*ao)
+  body=np.clip(body,0,1)[...,None]
+  lt=np.array([248,249,251])/255; dk=np.array([P['dk']]*3)/255*np.array([0.97,0.98,1.0])
+  # palette: da scuro a chiaro
+  bc=dk*(1-body)+lt*body
+  face_c=np.array([9,9,11])/255
+  et=np.clip((gy/h-0.35)/0.3,0,1)[...,None]
+  eye_c=np.array([120,236,244])/255*(1-et)+np.array([40,190,215])/255*et
+  col=bc*(1-F[...,None])+face_c*F[...,None]
+  col=col*(1-E[...,None])+eye_c*E[...,None]
+  return Image.fromarray((np.clip(np.dstack([col,A]),0,1)*255).astype(np.uint8),"RGBA")
 
 def build(ratio, S=2048, top=(12, 12, 14), bot=(12, 12, 14)):
     y = np.linspace(0, 1, S, dtype=np.float32)[:, None, None]
