@@ -317,6 +317,7 @@
     $("mnQrHint").textContent = rent ? "Inquadra con la fotocamera per affittare la sala." : "Inquadra con la fotocamera per aprire la pagina di prenotazione.";
     if (sheet.classList.contains("mnQrOnly")) $("mnQrHint").textContent = rent ? "Inquadra per affittare la sala" : "Inquadra con la fotocamera per prenotare";
     $("mnLinkTxt").textContent = l.url.replace(/^https?:\/\//, "");
+    var cs = sheet.querySelector(".mnCopy span"); if (cs) cs.textContent = sheet.classList.contains("mnQrOnly") ? "Copia link" : "Copia";
     var q = qrFor(l.url);
     $("mnQrBox").innerHTML = q ? q.svg : "";
     $("mnDl").hidden = !(q && q.M);

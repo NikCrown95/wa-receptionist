@@ -168,8 +168,11 @@ body.mnOn #burgerMenu > .logoutBtn:hover{background:rgba(255,107,107,.10)}
 .mnLayer.mnQrOnly:not([hidden]){display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
 .mnQrOnly .mnScrim{background:rgba(2,8,10,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .mnQrOnly .mnSheet{position:relative;left:auto;right:auto;bottom:auto;width:min(360px,100%);max-width:360px;margin:0;max-height:100%;padding:22px 22px 28px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line2));border-radius:30px;background:linear-gradient(165deg,color-mix(in srgb,var(--accent) 26%,var(--bg2)) 0%,var(--bg2) 62%);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);animation:mnPop .24s cubic-bezier(.2,.8,.2,1)}
-.mnQrOnly .mnGrab,.mnQrOnly .mnSub,.mnQrOnly .mnLinkRow,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrName{display:none}
+.mnQrOnly .mnGrab,.mnQrOnly .mnSub,.mnQrOnly .mnActs,.mnQrOnly .mnMsg,.mnQrOnly #mnQrName{display:none}
 .mnQrOnly .mnSH{margin-top:0}
+.mnQrOnly .mnLinkRow{margin-top:18px;padding:0;background:transparent;border:0}
+.mnQrOnly .mnLinkRow code{display:none}
+.mnQrOnly .mnCopy{flex:1;justify-content:center;min-height:48px;border-radius:14px;font-size:.95rem}
 .mnQrOnly .mnQrKick{display:block;font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)}
 .mnQrOnly .mnSheet h2{margin-top:6px;font-family:Manrope,inherit;font-size:1.3rem;line-height:1.2}
 .mnQrOnly .mnQrCard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;margin-top:18px;padding:0;background:transparent;border:0}
