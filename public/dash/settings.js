@@ -305,9 +305,10 @@
   function pfQrModal(link,name,qrText){
     var m=document.getElementById('pfQrModal');
     if(!m){m=document.createElement('div');m.id='pfQrModal';m.hidden=true;document.body.appendChild(m);m.addEventListener('click',function(ev){if(ev.target===m||ev.target.closest('[data-qclose]'))m.hidden=true});}
-    m.innerHTML='<div class="pf2Qm"><h3></h3><p></p><div class="qrBox"></div><div class="row"><button type="button" class="pfBtn" data-qclose>Chiudi</button></div></div>';
+    m.innerHTML='<div class="pf2Qm"><h3></h3><p></p><div class="qrBox"></div><div class="row"><button type="button" class="qcCopy"><span>Copia link</span></button><button type="button" class="pfBtn" data-qclose>Chiudi</button></div></div>';
     m.querySelector('h3').textContent=name||'QR code';m.querySelector('p').textContent=link;
     m.querySelector('.qrBox').innerHTML=liaQrSvg(qrText||link);
+    var qcb=m.querySelector('.qcCopy');if(qcb)qcb.onclick=function(){pfCopyText(link,qcb,'Copia link')};
     m.hidden=false;
   }
   function pfRefPaint(d){
