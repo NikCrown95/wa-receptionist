@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageChops
 import numpy as np, os, sys
 
 S = 1024
-MARK = sys.argv[1] if len(sys.argv) > 1 else "public/brand/favicon-512.png"
+MARK = sys.argv[1] if len(sys.argv) > 1 else "scripts/admin-mark-metal.png"
 mark_src = Image.open(MARK).convert("RGBA")
 bb = mark_src.getbbox()
 mark_src = mark_src.crop(bb)
