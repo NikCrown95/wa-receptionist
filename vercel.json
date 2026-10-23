@@ -173,11 +173,15 @@
       "destination": "/api/palestra?r=:slug"
     },
     {
+      "source": "/circolo/:slug",
+      "destination": "/api/campi?b=:slug"
+    },
+    {
       "source": "/palestra/:slug",
       "destination": "/api/palestra?b=:slug"
     },
     {
-      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|reset|sicurezza|privacy|termini|accordo-sanitari|palestra|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
+      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|reset|sicurezza|privacy|termini|accordo-sanitari|palestra|circolo|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
       "destination": "/api/booking?b=:slug"
     }
   ],
