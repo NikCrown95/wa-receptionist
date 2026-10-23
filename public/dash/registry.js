@@ -62,7 +62,7 @@
         var off=it.status==='cancelled'||it.status==='no_show';
         var ch=CH[it.channel]||null;
         var tag=it.status==='cancelled'?'<span class="regTag c">Annullata</span>':it.status==='no_show'?'<span class="regTag n">Non presentata</span>':'';
-        var foot=tag+(ch?'<span class="regCh '+ch[1]+'"><i>'+ch[2]+'</i>'+esc(ch[0])+'</span>':'')+(off?'':'<span class="regBk">alle '+esc(parts(x.cr,tz,{hour:'2-digit',minute:'2-digit'}))+'</span>');
+        var foot=tag+(ch?'<span class="regCh '+ch[1]+'"><i>'+ch[2]+'</i>'+esc(ch[0])+'</span>':'')+((off&&!d.gym)?'':'<span class="regBk">'+(d.gym?'prenotata ':'')+'alle '+esc(parts(x.cr,tz,{hour:'2-digit',minute:'2-digit'}))+'</span>');
         html+='<button type="button" class="regRow'+(off?' x':'')+'" data-id="'+esc(it.id)+'" data-start="'+esc(it.starts_at||'')+'">'+
           '<div class="regTile"><small>'+esc(ok?parts(st,tz,{weekday:'short'}).replace('.',''):'')+'</small><b>'+esc(ok?parts(st,tz,{day:'numeric'}):'')+'</b></div>'+
           '<div class="regBd"><div class="regL1"><span class="regNm">'+esc(it.customer_name||'Cliente')+'</span><span class="regHr">'+esc(ok?parts(st,tz,{hour:'2-digit',minute:'2-digit'}):'')+'</span></div>'+
