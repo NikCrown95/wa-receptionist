@@ -204,7 +204,7 @@ async function problemsView() {
   const soft = async (p, fb) => { try { return await p; } catch (e) { console.error('system:problems', e && e.message); return fb; } };
   const sinceAi = new Date(now.getTime() - 12 * 3600000).toISOString();
   const since7 = new Date(now.getTime() - 7 * 86400000).toISOString();
-  const [credit, resend, exp, down, access, subs, failed] = await Promise.all([
+  const [credit, resend, exp, down, access, subs, failed, supportNew] = await Promise.all([
     soft(creditData(now), null),
     soft(resendData(now), null),
     soft(expiries(), []),
@@ -212,6 +212,7 @@ async function problemsView() {
     soft(sbAll('service_access_v?select=business_id,state,grace_ends,businesses(name)&order=business_id.asc'), []),
     soft(sbAll('subscriptions?select=id,business_id,status,trial_ends_at,current_period_end,businesses(name)&status=in.(trial,active)&order=id.asc'), []),
     soft(sbAll(`stripe_events?select=id,received_at&type=eq.invoice.payment_failed&received_at=gte.${q(since7)}`), []),
+    soft(sbAll('support_requests?select=id,created_at,business_name,topic,message&kind=eq.support&status=eq.new&order=created_at.desc'), []),
   ]);
   const aiDown = [];
   const seen = {};
@@ -221,7 +222,7 @@ async function problemsView() {
     if (!seen[kind]) { seen[kind] = 1; aiDown.push({ kind, at: d.sent_at }); }
   });
   const problems = health.buildProblems({
-    credit, resend, aiDown, expiries: exp, failedPayments: failed,
+    credit, resend, aiDown, expiries: exp, failedPayments: failed, supportNew,
     access: (access || []).map((a) => ({ id: a.business_id, name: (a.businesses && a.businesses.name) || 'Un’attività', state: a.state, grace_ends: a.grace_ends })),
     trials: (subs || []).filter((s) => s.status === 'trial' && s.trial_ends_at).map((s) => ({ id: s.business_id, name: (s.businesses && s.businesses.name) || 'Un’attività', trial_ends_at: s.trial_ends_at })),
     renewals: (subs || []).filter((s) => s.status === 'active' && s.current_period_end).map((s) => ({ id: s.business_id, name: (s.businesses && s.businesses.name) || 'Un’attività', current_period_end: s.current_period_end })),
