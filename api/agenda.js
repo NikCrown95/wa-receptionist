@@ -794,6 +794,7 @@ module.exports = async (req, res) => {
         if(cnt.ok&&Array.isArray(cnt.data)&&cnt.data.length>=5) return res.status(429).json({ error:"Hai gia' inviato diverse richieste: riprova tra un po'" });
         const r=await sb("POST","support_requests",{business_id:biz.id,business_name:biz.name||null,kind,topic,message:message||null,contact,meta},"return=representation");
         if(!r.ok) return res.status(500).json({ error:"Errore nell'invio della richiesta" });
+        if(kind==="support"){ const row=Array.isArray(r.data)?r.data[0]:null; await push.notifyAdminSupport({id:row&&row.id,businessName:biz.name,message,topic}); }
         if(kind==="feedback") await sb("PATCH","notification_events?business_id=eq."+biz.id+"&event_type=eq.feedback_ask",{meta:{done:true}},"return=minimal").catch(function(){});
         return res.status(200).json({ok:true});
       }

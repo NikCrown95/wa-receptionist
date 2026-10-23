@@ -29,6 +29,9 @@
     if (p.badge) a.id = 'navRichieste';
     menu.appendChild(a);
   });
+  var pushBtn = document.createElement('button');
+  pushBtn.type = 'button'; pushBtn.id = 'liaPush'; pushBtn.className = 'lia-out lia-push'; pushBtn.hidden = true;
+  menu.appendChild(pushBtn);
   var outLink = document.createElement('button');
   outLink.type = 'button'; outLink.id = 'liaLogout'; outLink.className = 'lia-out'; outLink.textContent = 'Esci';
   outLink.addEventListener('click', function () { if (window.liaLogout) window.liaLogout(); else location.href = '/admin/login.html'; });
@@ -60,6 +63,7 @@
     '.lia-menu a{display:flex;align-items:center;min-height:46px;padding:0 12px;border-radius:11px;color:var(--ink,#F9F6F0);text-decoration:none;font-weight:600;font-size:.96rem}' +
     '.lia-menu a:hover{background:var(--card,#0E131B)}.lia-menu a.on{color:var(--accent-ink,#A5EDF2);background:var(--card,#0E131B)}' +
     '.lia-menu .lia-out{display:flex;align-items:center;width:100%;min-height:46px;margin-top:6px;padding:0 12px;border:0;border-top:1px solid var(--line2,#2A3648);border-radius:0;background:transparent;color:#FF8A8A;font:inherit;font-weight:600;font-size:.96rem;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}' +
+    '.lia-menu .lia-push{margin-top:6px;color:var(--ink,#F9F6F0);font-size:.92rem;line-height:1.3;padding-top:8px;padding-bottom:8px}.lia-menu .lia-push small{display:block;color:var(--muted,#9BA6B5);font-weight:500;font-size:.78rem}.lia-menu .lia-push[hidden]{display:none}' +
     '.lia-menu .lia-out:hover{background:rgba(255,138,138,.1);border-radius:11px}' +
     '.lia-mback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .15s}.lia-mback.on{opacity:1;pointer-events:auto}.lia-mback[hidden]{display:none}' +
     '.lia-bell{position:relative;flex:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);display:grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}' +
@@ -178,6 +182,60 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menuOpen(false); });
     window.addEventListener('scroll', function () { if (burger.getAttribute('aria-expanded') === 'true') menuOpen(false); }, { passive: true });
   }
+  // ---------- notifiche push sul telefono (messaggi all'assistenza) ----------
+  (function () {
+    if (onLogin || !pushBtn) return;
+    var supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    var info = null, busy = false;
+    function keyBytes(k) { var p = '='.repeat((4 - k.length % 4) % 4), r = atob((k + p).replace(/-/g, '+').replace(/_/g, '/')), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+    function post(body) { return window.liaApi('/api/admin/system', { method: 'POST', body: JSON.stringify(body) }); }
+    function curSub() { return navigator.serviceWorker.getRegistration().then(function (g) { return g && g.pushManager ? g.pushManager.getSubscription() : null; }).catch(function () { return null; }); }
+    function paint(on, note) {
+      pushBtn.hidden = false;
+      pushBtn.innerHTML = (on ? 'Notifiche attive' : 'Attiva le notifiche') + '<small>' + (note || (on ? 'Tocca per spegnerle su questo telefono' : 'Ti avviso quando un\u2019attività scrive all\u2019assistenza')) + '</small>';
+      pushBtn.dataset.on = on ? '1' : '';
+    }
+    function refresh() {
+      if (!supported) return;
+      window.liaApi('/api/admin/system?view=push').then(function (j) {
+        info = j;
+        if (!j || !j.configured || j.table === false) return;
+        if (Notification.permission === 'denied') { paint(false, 'Bloccate: riattivale dalle impostazioni del telefono'); return; }
+        return curSub().then(function (sub) { paint(!!sub && Notification.permission === 'granted'); });
+      }).catch(function () {});
+    }
+    function enable() {
+      return Promise.resolve(Notification.requestPermission()).then(function (p) {
+        if (p !== 'granted') throw new Error('denied');
+        return navigator.serviceWorker.register('/sw.js');
+      }).then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+        function go() { return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(info.key) }); }
+        return go().catch(function () { return reg.pushManager.getSubscription().then(function (o) { if (!o) throw new Error('sub'); return o.unsubscribe().then(go); }); });
+      }).then(function (sub) {
+        return post({ action: 'push_subscribe', subscription: sub.toJSON(), ua: String(navigator.userAgent || '').slice(0, 200) });
+      }).then(function () { return post({ action: 'push_test' }).catch(function () {}); }).then(function () { paint(true, 'Attivate. Ti ho mandato una prova.'); });
+    }
+    function disable() {
+      return curSub().then(function (sub) {
+        if (!sub) return;
+        var ep = sub.endpoint;
+        return sub.unsubscribe().then(function () { return post({ action: 'push_unsubscribe', endpoint: ep }).catch(function () {}); });
+      }).then(function () { paint(false); });
+    }
+    pushBtn.addEventListener('click', function () {
+      if (busy || !info) return; busy = true;
+      var job = pushBtn.dataset.on ? disable() : enable();
+      job.catch(function (e) { paint(false, e && e.message === 'denied' ? 'Permesso non concesso: riprova' : 'Non sono riuscito ad attivarle: riprova'); }).then(function () { busy = false; });
+    });
+    // se il telefono e' gia' registrato, tengo allineato il server
+    function sync() {
+      if (!supported || Notification.permission !== 'granted') return;
+      navigator.serviceWorker.register('/sw.js').then(function () { return curSub(); }).then(function (sub) {
+        if (sub) return post({ action: 'push_subscribe', subscription: sub.toJSON(), ua: String(navigator.userAgent || '').slice(0, 200) });
+      }).catch(function () {});
+    }
+    setTimeout(function () { refresh(); sync(); }, 1200);
+  })();
   load();
   window.liaBellRefresh = load;
   setInterval(function () { if (!document.hidden) load(); }, 60000);

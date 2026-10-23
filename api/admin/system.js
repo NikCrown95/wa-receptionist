@@ -11,6 +11,7 @@
 
 const clients = require('./clients.js');
 const health = require('../../lib/system-health.js');
+const push = require('../../lib/push.js');
 const { isMedical } = require('../../lib/verticals.js');
 
 const { sb, sbAll, authenticate, cfg } = clients;
@@ -298,6 +299,25 @@ async function act(body, ctx) {
     await sb(`admin_expiries?id=eq.${body.id}`, { method: 'PATCH', body: { active: false }, prefer: 'return=minimal' });
     return { ok: true, expiries: await expiries() };
   }
+  if (a === 'push_subscribe') {
+    const sub = body.subscription || {}, keys = sub.keys || {};
+    const endpoint = String(sub.endpoint || '').trim(), p256dh = String(keys.p256dh || '').trim(), authKey = String(keys.auth || '').trim();
+    if (!/^https:\/\//.test(endpoint) || endpoint.length > 1500 || !p256dh || !authKey || p256dh.length > 200 || authKey.length > 100) throw bad('Dispositivo non valido.');
+    await sb('admin_push_subscriptions?on_conflict=endpoint', { method: 'POST', body: { endpoint, p256dh, auth: authKey, actor: String(ctx.actor || '').slice(0, 200), user_agent: String(body.ua || '').slice(0, 200) }, prefer: 'resolution=merge-duplicates,return=minimal' });
+    return { ok: true };
+  }
+  if (a === 'push_unsubscribe') {
+    const ep = String(body.endpoint || '').trim();
+    if (!ep || ep.length > 1500) throw bad('Dispositivo non valido.');
+    await sb(`admin_push_subscriptions?endpoint=eq.${q(ep)}`, { method: 'DELETE', prefer: 'return=minimal' });
+    return { ok: true };
+  }
+  if (a === 'push_test') {
+    if (!push.isConfigured()) throw bad('Le notifiche non sono configurate sul server.');
+    const sent = await push.sendToAdmins({ title: 'Notifica di prova', body: 'Prenolia Admin: le notifiche funzionano.', url: '/admin/', tag: 'lia-admin-test-' + Date.now(), kind: 'test' });
+    if (sent.error) throw bad('Notifiche non disponibili: manca la tabella dei dispositivi.');
+    return sent;
+  }
   throw bad('Azione non riconosciuta.');
 }
 
@@ -320,6 +340,13 @@ module.exports = async function handler(req, res) {
       if (view === 'feed') { res.status(200).json(await feed(req.query || {})); return; }
       if (view === 'problems') { res.status(200).json(await problemsView()); return; }
       if (view === 'system') { res.status(200).json(await systemView()); return; }
+      if (view === 'push') {
+        let devices = 0, table = true;
+        try { const rows = await sb('admin_push_subscriptions?select=id&limit=50'); devices = (rows || []).length; } catch (e) { table = !(e && (e.status === 404 || /admin_push_subscriptions/.test(String(e.message || '')))); }
+        const configured = push.isConfigured();
+        res.status(200).json({ configured, key: configured ? push.publicKey() : '', table, devices });
+        return;
+      }
       if (view === 'home') { res.status(200).json(await homeView()); return; }
       res.status(400).json({ error: 'bad_view' });
       return;

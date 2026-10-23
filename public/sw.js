@@ -34,7 +34,9 @@ self.addEventListener("notificationclick", function (e) {
   e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
     for (var i = 0; i < list.length; i++) {
       var c = list[i];
-      if (c.url.indexOf("/api/agenda") !== -1 && "focus" in c) return c.focus();
+      if (url.indexOf("/admin/") === 0) {
+        if (c.url.indexOf("/admin/") !== -1 && "focus" in c) return c.focus().then(function (w) { return w && "navigate" in w ? w.navigate(url) : w; });
+      } else if (c.url.indexOf("/api/agenda") !== -1 && "focus" in c) return c.focus();
     }
     return self.clients.openWindow(url);
   }));
