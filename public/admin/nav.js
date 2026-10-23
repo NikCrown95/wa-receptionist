@@ -17,25 +17,29 @@
   var path = location.pathname.replace(/\/+$/, '') || '/';
   function is(p) { return path === p.replace(/\/+$/, '') || (p === '/admin/' && path === '/admin'); }
   nav.innerHTML = '';
+  nav.hidden = true;
+  var menu = document.createElement('nav');
+  menu.id = 'liaMenu'; menu.className = 'lia-menu'; menu.hidden = true; menu.setAttribute('aria-label', 'Menu');
   PAGES.forEach(function (p) {
     var a = document.createElement('a');
     a.href = p.href;
     a.textContent = p.label;
     var on = is(p.href) || (p.also || []).some(is);
-    if (on) a.className = 'on';
+    if (on) { a.className = 'on'; a.setAttribute('aria-current', 'page'); }
     if (p.badge) a.id = 'navRichieste';
-    nav.appendChild(a);
+    menu.appendChild(a);
   });
-  // sul telefono il menu scorre: porto la voce attiva in vista
-  var cur = nav.querySelector('a.on');
-  if (cur) { try { var dx = cur.getBoundingClientRect().left - nav.getBoundingClientRect().left; nav.scrollLeft = Math.max(0, nav.scrollLeft + dx - (nav.clientWidth - cur.offsetWidth) / 2); } catch (e) {} }
+  var outLink = document.createElement('button');
+  outLink.type = 'button'; outLink.id = 'liaLogout'; outLink.className = 'lia-out'; outLink.textContent = 'Esci';
+  outLink.addEventListener('click', function () { if (window.liaLogout) window.liaLogout(); else location.href = '/admin/login.html'; });
+  menu.appendChild(outLink);
 
   // numerino rosso con le richieste nuove (le pagine possono aggiornarlo con window.liaNavBadge)
   window.liaNavBadge = function (n) {
     var a = document.getElementById('navRichieste'); if (!a) return;
     var b = a.querySelector('.nav-badge');
     if (!n) { if (b) b.remove(); return; }
-    if (!b) { b = document.createElement('span'); b.className = 'nav-badge'; b.style.cssText = 'display:inline-block;min-width:20px;height:20px;margin-left:7px;padding:0 6px;border-radius:999px;background:#FF8A8A;color:#2a0a0a;font-size:.74rem;font-weight:800;line-height:20px;text-align:center;vertical-align:1px'; a.appendChild(b); }
+    if (!b) { b = document.createElement('span'); b.className = 'nav-badge'; b.style.cssText = 'margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#FF8A8A;color:#2a0a0a;font-size:.76rem;font-weight:800;line-height:22px;text-align:center'; a.appendChild(b); }
     b.textContent = n > 99 ? '99+' : String(n);
   };
   var onLogin = /\/admin\/login/.test(location.pathname);
@@ -48,7 +52,16 @@
   // ---------- campanella dei problemi ----------
   var css = document.createElement('style');
   css.textContent =
-    '#mainNav{min-width:0;overflow-x:auto;scrollbar-width:none}#mainNav::-webkit-scrollbar{display:none}#mainNav a{white-space:nowrap;padding-left:11px;padding-right:11px}' +
+    '#mainNav{display:none !important}.top-row .spacer{display:block !important}' +
+    '.lia-burger{flex:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);display:grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}' +
+    '.lia-burger[aria-expanded="true"]{background:var(--accent,#2DD2DC);color:var(--on-accent,#031016);border-color:var(--accent,#2DD2DC)}' +
+    '.lia-menu{position:fixed;z-index:61;right:14px;top:0;margin-top:calc(env(safe-area-inset-top,0px) + 66px);width:min(260px,calc(100vw - 28px));max-height:calc(100dvh - 96px);overflow-y:auto;overscroll-behavior:contain;padding:8px;border-radius:16px;background:var(--card2,#161D29);border:1px solid var(--line2,#2A3648);box-shadow:0 20px 44px rgba(0,0,0,.5);transform:translateY(-8px) scale(.97);opacity:0;pointer-events:none;transition:transform .16s cubic-bezier(.2,.8,.2,1),opacity .14s ease}' +
+    '.lia-menu.on{transform:none;opacity:1;pointer-events:auto}.lia-menu[hidden]{display:none}' +
+    '.lia-menu a{display:flex;align-items:center;min-height:46px;padding:0 12px;border-radius:11px;color:var(--ink,#F9F6F0);text-decoration:none;font-weight:600;font-size:.96rem}' +
+    '.lia-menu a:hover{background:var(--card,#0E131B)}.lia-menu a.on{color:var(--accent-ink,#A5EDF2);background:var(--card,#0E131B)}' +
+    '.lia-menu .lia-out{display:flex;align-items:center;width:100%;min-height:46px;margin-top:6px;padding:0 12px;border:0;border-top:1px solid var(--line2,#2A3648);border-radius:0;background:transparent;color:#FF8A8A;font:inherit;font-weight:600;font-size:.96rem;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}' +
+    '.lia-menu .lia-out:hover{background:rgba(255,138,138,.1);border-radius:11px}' +
+    '.lia-mback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .15s}.lia-mback.on{opacity:1;pointer-events:auto}.lia-mback[hidden]{display:none}' +
     '.lia-bell{position:relative;flex:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);display:grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}' +
     '.lia-bell:hover{filter:brightness(1.12)}' +
     '.lia-bell .bn{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;font-weight:800;font-size:.72rem;line-height:20px;text-align:center;color:#2a0a0a;background:#FF8A8A;box-shadow:0 0 0 3px var(--bg,#050608)}' +
@@ -66,11 +79,10 @@
     '.lia-pr span{display:block;margin-top:2px;font-size:.83rem;line-height:1.4;color:var(--muted,#9BA6B5)}' +
     '.lia-empty{padding:22px 14px 24px;text-align:center;color:var(--muted,#9BA6B5);font-size:.92rem;line-height:1.5}' +
     '.lia-empty b{display:block;color:#3FE08A;font-size:1rem;margin-bottom:4px}' +
-    '@media (max-width:760px){.lia-pop{left:12px;right:12px;width:auto;max-height:calc(100dvh - 120px)}.lia-bell{width:44px;height:44px}.top{transition:transform .25s ease}.top.lia-hide{transform:translateY(-100%)}}' +
-    '@media (prefers-reduced-motion:reduce){.top{transition:none}}';
+    '@media (max-width:760px){.lia-pop{left:12px;right:12px;width:auto;max-height:calc(100dvh - 120px)}.lia-bell,.lia-burger{width:44px;height:44px}.lia-menu{right:12px}.top{transition:transform .25s ease}.top.lia-hide{transform:translateY(-100%)}}' +
+    '@media (prefers-reduced-motion:reduce){.top{transition:none}.lia-menu,.lia-mback{transition:none}}';
   
   // pulsante Esci uguale su tutte le pagine (alcune pagine non definiscono .btn.ghost)
-  css.textContent += '#liaLogout{flex:none;min-height:42px;padding:0 16px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}#liaLogout:hover{filter:brightness(1.12)}@media (max-width:760px){#liaLogout{min-height:44px}}';
   document.head.appendChild(css);
 
   // tabelle sul telefono: ogni riga diventa una scheda con le etichette delle colonne (mobile.css fa il resto)
@@ -145,6 +157,27 @@
     });
   }
   mkBell();
+  var burger, mback;
+  function menuOpen(o) {
+    if (!burger) return;
+    if (o) { close(); menu.hidden = false; mback.hidden = false; requestAnimationFrame(function () { menu.classList.add('on'); mback.classList.add('on'); }); }
+    else { menu.classList.remove('on'); mback.classList.remove('on'); setTimeout(function () { if (!menu.classList.contains('on')) { menu.hidden = true; mback.hidden = true; } }, 180); }
+    burger.setAttribute('aria-expanded', o ? 'true' : 'false');
+  }
+  if (row && !onLogin) {
+    burger = document.createElement('button');
+    burger.id = 'liaBurger'; burger.type = 'button'; burger.className = 'lia-burger'; burger.setAttribute('aria-label', 'Menu'); burger.setAttribute('aria-expanded', 'false');
+    burger.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+    mback = document.createElement('div'); mback.className = 'lia-mback'; mback.hidden = true;
+    row.appendChild(burger);
+    document.body.appendChild(mback);
+    document.body.appendChild(menu);
+    burger.addEventListener('click', function (e) { e.stopPropagation(); menuOpen(burger.getAttribute('aria-expanded') !== 'true'); });
+    mback.addEventListener('click', function () { menuOpen(false); });
+    bell.addEventListener('click', function () { if (burger.getAttribute('aria-expanded') === 'true') menuOpen(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menuOpen(false); });
+    window.addEventListener('scroll', function () { if (burger.getAttribute('aria-expanded') === 'true') menuOpen(false); }, { passive: true });
+  }
   load();
   window.liaBellRefresh = load;
   setInterval(function () { if (!document.hidden) load(); }, 60000);
@@ -166,14 +199,6 @@
     }, { passive: true });
   })();
 
-  // pulsante Esci
-  if (row && !document.getElementById('liaLogout')) {
-    var b = document.createElement('button');
-    b.id = 'liaLogout'; b.type = 'button'; b.className = 'btn ghost small'; b.textContent = 'Esci';
-    b.addEventListener('click', function () { if (window.liaLogout) window.liaLogout(); else location.href = '/admin/login.html'; });
-    row.appendChild(b);
-  }
-
   // pulsante "Installa app": compare solo quando Chrome dice che l'app e' installabile (e non e' gia' installata)
   (function () {
     var deferred = null;
@@ -193,8 +218,8 @@
         deferred.prompt();
         deferred.userChoice.then(function (c) { if (c && c.outcome === 'accepted') drop(); }).catch(function () {});
       });
-      var out = document.getElementById('liaLogout');
-      if (out) row.insertBefore(b, out); else row.appendChild(b);
+      var bg = document.getElementById('liaBurger');
+      if (bg) row.insertBefore(b, bg); else row.appendChild(b);
     });
     window.addEventListener('appinstalled', drop);
   })();
