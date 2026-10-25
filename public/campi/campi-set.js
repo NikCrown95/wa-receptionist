@@ -11,6 +11,7 @@
     court: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M12 6v12M3 12h18"/>',
     off: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M10 14l4 4M14 14l-4 4"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     chev: '<polyline points="6 9 12 15 18 9"></polyline>'
   };
   function svg(p, s) { return '<svg width="' + (s || 21) + '" height="' + (s || 21) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; }
@@ -93,6 +94,28 @@
     });
   }
 
+  // righe degli orari (da lunedi a domenica): usate per un campo e per tutto il circolo
+  function drawHours(hb, H) {
+          hb.textContent = '';
+          for (var d = 1; d <= 7; d++) (function (d) {
+            var rng = H[d] || (H[d] = []), row = el('div', 'cps-day');
+            row.appendChild(el('span', 'cps-dn', DAYS[d - 1].slice(0, 3)));
+            var col = el('div', 'cps-rg');
+            if (!rng.length) col.appendChild(el('span', 'cps-cl', 'Chiuso'));
+            rng.forEach(function (r, k) {
+              var line = el('div', 'cps-line'), a = input('time', r[0]), z = input('time', r[1]);
+              a.setAttribute('aria-label', DAYS[d - 1] + ' apre'); z.setAttribute('aria-label', DAYS[d - 1] + ' chiude');
+              a.onchange = function () { r[0] = a.value; }; z.onchange = function () { r[1] = z.value; };
+              var rm = el('button', 'cps-rm'); rm.type = 'button'; rm.setAttribute('aria-label', 'Togli la fascia'); rm.innerHTML = svg(IC.x, 16); rm.onclick = function () { rng.splice(k, 1); drawHours(hb, H); };
+              line.appendChild(a); line.appendChild(z); line.appendChild(rm); col.appendChild(line);
+            });
+            row.appendChild(col);
+            var ad = el('button', 'cps-add', '+'); ad.type = 'button'; ad.setAttribute('aria-label', 'Aggiungi una fascia di ' + DAYS[d - 1]);
+            ad.onclick = function () { if (rng.length >= 3) return; rng.push(rng.length ? [rng[rng.length - 1][1], '22:00'] : ['08:00', '22:00']); drawHours(hb, H); };
+            row.appendChild(ad); hb.appendChild(row);
+          })(d);
+        }
+
   // ---------- campi e orari ----------
   function sCourts() {
     withData(function () { courtsSheet(null); });
@@ -125,26 +148,7 @@
         w.appendChild(swRow('Campo coperto', null, ind));
         w.appendChild(el('b', 'cps-h', 'Orari di apertura'));
         var hb = el('div', 'cps-hrs'); w.appendChild(hb);
-        function drawH() {
-          hb.textContent = '';
-          for (var d = 1; d <= 7; d++) (function (d) {
-            var rng = F.hours[d] || (F.hours[d] = []), row = el('div', 'cps-day');
-            row.appendChild(el('span', 'cps-dn', DAYS[d - 1].slice(0, 3)));
-            var col = el('div', 'cps-rg');
-            if (!rng.length) col.appendChild(el('span', 'cps-cl', 'Chiuso'));
-            rng.forEach(function (r, k) {
-              var line = el('div', 'cps-line'), a = input('time', r[0]), z = input('time', r[1]);
-              a.setAttribute('aria-label', DAYS[d - 1] + ' apre'); z.setAttribute('aria-label', DAYS[d - 1] + ' chiude');
-              a.onchange = function () { r[0] = a.value; }; z.onchange = function () { r[1] = z.value; };
-              var rm = el('button', 'cps-rm'); rm.type = 'button'; rm.setAttribute('aria-label', 'Togli la fascia'); rm.innerHTML = svg(IC.x, 16); rm.onclick = function () { rng.splice(k, 1); drawH(); };
-              line.appendChild(a); line.appendChild(z); line.appendChild(rm); col.appendChild(line);
-            });
-            row.appendChild(col);
-            var ad = el('button', 'cps-add', '+'); ad.type = 'button'; ad.setAttribute('aria-label', 'Aggiungi una fascia di ' + DAYS[d - 1]);
-            ad.onclick = function () { if (rng.length >= 3) return; rng.push(rng.length ? [rng[rng.length - 1][1], '22:00'] : ['08:00', '22:00']); drawH(); };
-            row.appendChild(ad); hb.appendChild(row);
-          })(d);
-        }
+        function drawH() { drawHours(hb, F.hours); }
         drawH();
         w.appendChild(btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = F.hours[1] || []; for (var d = 2; d <= 7; d++) F.hours[d] = JSON.parse(JSON.stringify(m)); drawH(); }));
         var msg = msgBox(); w.appendChild(msg);
@@ -164,6 +168,33 @@
       }
       var first = openId && D.courts.filter(function (x) { return x.id === openId; })[0];
       if (first) edit(first); else list();
+    });
+  }
+
+
+  // ---------- orari del circolo: gli stessi orari per tutti i campi ----------
+  function sHours() {
+    withData(function () {
+      sheet('Orari del circolo', function (w, close) {
+        var act = D.courts.filter(function (c) { return c.active; });
+        if (!act.length) { w.appendChild(el('p', 'cps-help', 'Aggiungi prima un campo da "Campi e orari".')); return; }
+        var H = JSON.parse(JSON.stringify(act[0].hours || {}));
+        w.appendChild(el('p', 'cps-note2', 'Fuori da questi orari nessun campo si può prenotare, né dalla pagina né da Lia. Gli orari valgono per tutti i campi; un campo con orari diversi si cambia da "Campi e orari".'));
+        var hb = el('div', 'cps-hrs'); w.appendChild(hb); drawHours(hb, H);
+        w.appendChild(btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = H[1] || []; for (var d = 2; d <= 7; d++) H[d] = JSON.parse(JSON.stringify(m)); drawHours(hb, H); }));
+        var msg = msgBox(); w.appendChild(msg);
+        var sv = btn('Applica a tutti i campi', 'pri', function () {
+          sv.disabled = true; msg.textContent = '';
+          var i = 0;
+          (function next() {
+            if (i >= D.courts.length) { toast('Orari salvati per ' + D.courts.length + (D.courts.length === 1 ? ' campo' : ' campi')); close(); return; }
+            var c = D.courts[i++];
+            call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_eur: c.price_eur, active: c.active, hours: H }).then(next).catch(function (e) { sv.disabled = false; msg.textContent = (i > 1 ? 'Salvati solo i primi ' + (i - 1) + ' campi. ' : '') + e.message; });
+          })();
+        });
+        w.appendChild(sv);
+        w.appendChild(el('p', 'cps-help', 'Gli orari attuali di tutti i campi, anche di quelli spenti, vengono sostituiti da questi.'));
+      });
     });
   }
 
@@ -224,7 +255,7 @@
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il tuo circolo'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del circolo';
     var grp = el('div', 'stGroup'), h3 = el('h3', null, 'Campi e regole'), list = el('div', 'stList'); grp.appendChild(h3); grp.appendChild(list);
-    [['rules', 'c-amber', IC.rules, 'Regole del circolo', 'Soci, FIT e limite giornaliero', sRules], ['courts', 'c-teal', IC.court, 'Campi e orari', 'Nome, slot, prezzo e apertura', sCourts], ['closures', 'c-coral', IC.off, 'Chiusure', 'Tornei, manutenzione, giorni senza campi', sClosures]].forEach(function (r) {
+    [['hours', 'c-amber', IC.clock, 'Orari del circolo', 'Quando i campi si possono prenotare', sHours], ['rules', 'c-amber', IC.rules, 'Regole del circolo', 'Soci, FIT e limite giornaliero', sRules], ['courts', 'c-teal', IC.court, 'Campi e orari', 'Nome, slot, prezzo e apertura', sCourts], ['closures', 'c-coral', IC.off, 'Chiusure', 'Tornei, manutenzione, giorni senza campi', sClosures]].forEach(function (r) {
       var b = el('button', 'stRow'); b.type = 'button'; b.setAttribute('data-cx', r[0]);
       b.innerHTML = '<span class="stIc ' + r[1] + '">' + svg(r[2]) + '</span><span class="stTx"><b>' + r[3] + '</b><small>' + r[4] + '</small></span><span class="stCh" aria-hidden="true">›</span>';
       b.addEventListener('click', r[5]); list.appendChild(b);
@@ -234,7 +265,7 @@
   }
   document.addEventListener('lia:section', function (e) { if (e.detail === 'other') setTimeout(fixDefault, 0); });
   window.addEventListener('resize', function () { setTimeout(fixDefault, 0); });
-  window.liaCampiOpen = function (k) { ({ rules: sRules, courts: sCourts, closures: sClosures })[k](); };
+  window.liaCampiOpen = function (k) { ({ hours: sHours, rules: sRules, courts: sCourts, closures: sClosures })[k](); };
   if (!mount()) document.addEventListener('DOMContentLoaded', mount);
   window.addEventListener('load', mount);
 })();
