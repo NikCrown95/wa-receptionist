@@ -60,10 +60,12 @@
     hs.forEach(function (h) { for (var m = mins(h[0]); m + c.slot_min <= mins(h[1]); m += c.slot_min) out.push({ s: m, e: m + c.slot_min }); });
     return out;
   }
+  function closuresOf(c, date) { return ((S.data && S.data.closures) || []).filter(function (x) { return (!x.court_id || x.court_id === c.id) && date >= x.starts_on && date <= x.ends_on; }); }
+  function closedAt(c, date, a, b) { return closuresOf(c, date).some(function (x) { return (x.from ? mins(x.from) : 0) < b && (x.to ? mins(x.to) : 1440) > a; }); }
   function bookingsOn(date) { return (S.data.bookings || []).filter(function (b) { return b.date === date; }); }
   function stat(date) { // {occ, tot}: slot occupati e slot totali del giorno
     var occ = 0, tot = 0;
-    S.data.courts.forEach(function (c) { tot += slotsOf(c, date).length; });
+    S.data.courts.forEach(function (c) { tot += slotsOf(c, date).filter(function (sl) { return !closedAt(c, date, sl.s, sl.e); }).length; });
     bookingsOn(date).forEach(function (b) { var c = S.data.courts.filter(function (x) { return x.id === b.court_id; })[0]; if (c) occ += Math.max(1, Math.round((mins(b.end) - mins(b.start)) / c.slot_min)); });
     return { occ: Math.min(occ, tot), tot: tot };
   }
@@ -153,11 +155,16 @@
       slotsOf(c, S.day).forEach(function (sl) {
         if (S.day < now.date || (S.day === now.date && sl.e <= now.min)) return; // passato
         if (mine.some(function (b) { return mins(b.start) < sl.e && mins(b.end) > sl.s; })) return;
+        if (closedAt(c, S.day, sl.s, sl.e)) return;
         var f = el('button', 'cp-free' + (S.form && S.form.court_id === c.id && S.form.time === hhmm(sl.s) ? ' pick' : ''), '+'); f.type = 'button';
         f.setAttribute('aria-label', c.name + ' alle ' + hhmm(sl.s) + ', libero. Prenota a mano');
         f.style.top = ((sl.s - lo) * PPM + 2) + 'px'; f.style.height = ((sl.e - sl.s) * PPM - 4) + 'px';
         f.onclick = function () { S.sel = null; S.askCancel = false; S.form = { court_id: c.id, time: hhmm(sl.s), hours: 1, first_name: '', last_name: '', phone: '', players: '', members: '', notes: '', msg: '' }; draw(); focusForm(); };
         col.appendChild(f);
+      });
+      closuresOf(c, S.day).forEach(function (x) {
+        var a = Math.max(lo, x.from ? mins(x.from) : lo), z = Math.min(hi, x.to ? mins(x.to) : hi); if (z <= a) return;
+        var cl = el('div', 'cp-closed', x.reason || 'Chiuso'); cl.style.top = ((a - lo) * PPM + 2) + 'px'; cl.style.height = ((z - a) * PPM - 4) + 'px'; cl.setAttribute('role', 'note'); col.appendChild(cl);
       });
       mine.forEach(function (b) {
         var x = el('button', 'cp-b' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
@@ -249,5 +256,6 @@
       .catch(function (e) { S.busy = false; F.msg = e.message; draw(); });
   }
 
+  window.__cpReload = function () { S.data = null; S.strip = S.strip || null; load(); };
   load();
 })();

@@ -362,7 +362,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/verticals.js").areaOf(bt) === "campi") {
           // Circoli e centri sportivi: stessa dashboard, ma il calendario mostra i campi (public/campi/).
           variantKey = "campi";
-          html = PAGE_READY.replace("<head>", '<head><link rel="stylesheet" href="/campi/campi.css?v=a4f85068">').replace("</body>", '<script src="/campi/campi.js?v=9a1d20b8"></script></body>');
+          html = PAGE_READY.replace("<head>", '<head><link rel="stylesheet" href="/campi/campi.css?v=22905e24">').replace("</body>", '<script src="/campi/campi.js?v=c0c6bef2"></script><script src="/campi/campi-set.js?v=4ab8c224"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -420,10 +420,11 @@ module.exports = async (req, res) => {
       if (require("../lib/verticals.js").areaOf(biz.business_type) !== "campi") return res.status(404).json({ error: "Non disponibile per questa attività" });
       const courtsLib = require("../lib/courts.js");
       let out;
-      if (req.method === "GET") out = await courtsLib.week(sb, biz, q);
+      if (req.method === "GET") out = q.view === "settings" ? await courtsLib.settings(sb, biz) : await courtsLib.week(sb, biz, q);
       else {
         const cb = req.body || {}, act = String(cb.action || "");
-        out = act === "cancel" ? await courtsLib.cancel(sb, biz, cb) : act === "create" ? await courtsLib.create(sb, biz, cb) : { status: 400, body: { error: "Richiesta non valida" } };
+        const acts = { cancel: courtsLib.cancel, create: courtsLib.create, save_rules: courtsLib.saveRules, save_court: courtsLib.saveCourt, add_closure: courtsLib.addClosure, delete_closure: courtsLib.deleteClosure };
+        out = acts[act] ? await acts[act](sb, biz, cb) : { status: 400, body: { error: "Richiesta non valida" } };
       }
       return res.status(out.status).json(out.body);
     }
