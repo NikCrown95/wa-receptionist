@@ -3,7 +3,6 @@
 // Un solo file: serve la pagina (HTML) e i dati (JSON): ?info=1, ?date=AAAA-MM-GG, POST per prenotare.
 
 const courtsLib = require("../lib/courts.js");
-const mail = require("../lib/mail.js");
 const { getAccess, BOOKING_BLOCKED_MESSAGE } = require("../lib/access.js");
 
 function sbHeaders(extra) {
@@ -35,7 +34,27 @@ html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-block:calc(18px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,h3,p{margin:0}
 .w{max-width:640px;margin:0 auto;display:grid;gap:16px}
+.hd{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.hd>div{min-width:0}
 .hd h1{font-size:1.6rem;letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere}
+.lbtn{flex:none;min-height:44px;padding:0 14px;border-radius:14px;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent-ink);font:inherit;font-weight:700;font-size:.86rem;cursor:pointer;display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
+.chat{border:1px solid var(--line2);background:var(--card);border-radius:20px;display:grid;grid-template-rows:minmax(0,1fr) auto auto;height:min(72vh,600px);height:min(72dvh,600px);overflow:hidden}
+.msgs{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:86%;padding:10px 13px;border-radius:18px;font-size:.95rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.bub.lia{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:6px}
+.bub.me{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-bottom-right-radius:6px}
+.bub.err{border-color:var(--err);color:var(--err)}
+.bub.ok{border-color:color-mix(in srgb,var(--green) 50%,var(--line));background:color-mix(in srgb,var(--green) 10%,var(--card2))}
+.typ{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:var(--card2);border-radius:18px;border:1px solid var(--line)}
+.typ i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bl 1s infinite ease-in-out}
+.typ i:nth-child(2){animation-delay:.15s}.typ i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,80%,100%{opacity:.3}40%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.typ i{animation:none;opacity:.7}}
+.bar{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.bar input{flex:1;min-width:0;min-height:48px;border-radius:14px;border:1.5px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:16px;padding:0 14px}
+.send{flex:none;width:48px;height:48px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;cursor:pointer;padding:0}
+.send[disabled]{opacity:.5}
+.cnote{margin:0;padding:0 12px 10px;text-align:center;color:var(--muted);font-size:.74rem}
 .hd p{color:var(--muted);font-size:.92rem;margin-top:4px;overflow-wrap:anywhere}
 .note{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line2);background:var(--card);border-radius:16px;padding:12px 14px;font-size:.9rem;color:var(--ink)}
 .note b{font-weight:650}
@@ -90,7 +109,7 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
   var API='/api/campi?b='+encodeURIComponent(slug);
   var app=document.getElementById('app');
   var DN=['dom','lun','mar','mer','gio','ven','sab'],DL=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'],MO=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-  var S={auto:0,info:null,day:null,free:null,pick:null,busy:false,err:'',done:null,f:{first_name:'',last_name:'',phone:'',email:'',players:'',members:'',fit_ok:false}};
+  var S={mode:'book',auto:0,info:null,day:null,free:null,pick:null,busy:false,err:'',done:null,f:{first_name:'',last_name:'',phone:'',email:'',players:'',members:'',fit_ok:false}};
   function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
   function pd(s){var p=s.split('-');return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]))}
   function pad(n){return String(n).padStart(2,'0')}
@@ -102,6 +121,44 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
   function api(body,q){var o=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{};return fetch(API+(q||''),o).then(function(r){return r.json().catch(function(){return{}}).then(function(j){if(!r.ok)throw new Error(j.error||'Errore, riprova.');return j})})}
   function loadDay(){S.free=null;S.pick=null;S.err='';draw();api(null,'&date='+S.day).then(function(j){if(S.auto&&!j.courts.some(function(c){return c.slots.length})&&S.day<S.info.last_day){S.auto--;S.day=add(S.day,1);loadDay();return}S.auto=0;S.free=j.courts;draw()}).catch(function(e){S.auto=0;S.err=e.message;S.free=[];draw()})}
   function note(cls,ic,html){var n=el('div','note '+cls);n.appendChild(el('i',null,ic));var d=el('div');d.innerHTML=html;n.appendChild(d);return n}
+
+  var CH={sid:'',msgs:[],busy:false,box:null,list:null,input:null,btn:null};
+  function uuid(){if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();return'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g,function(){return(Math.random()*16|0).toString(16)})}
+  function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function chatInit(){
+    if(CH.sid)return;
+    CH.sid=lsGet('lia-sid-'+slug)||'';if(!/^[0-9a-f-]{36}$/.test(CH.sid)){CH.sid=uuid();lsSet('lia-sid-'+slug,CH.sid)}
+    try{CH.msgs=JSON.parse(lsGet('lia-msgs-'+slug)||'[]').slice(-40)}catch(e){CH.msgs=[]}
+    if(!CH.msgs.length){var h=new Date().getHours();CH.msgs.push({r:'lia',t:(h<13?'Buongiorno':h<18?'Buon pomeriggio':'Buonasera')+'! Sono Lia, l’assistente virtuale di '+S.info.name+'. Posso dirti i campi liberi e prenotarti un campo, dimmi pure.'})}
+  }
+  function saveChat(){lsSet('lia-msgs-'+slug,JSON.stringify(CH.msgs.slice(-40)))}
+  function bub(r,t,cls){var b=el('div','bub '+r+(cls?' '+cls:''),t);CH.list.appendChild(b);CH.list.scrollTop=CH.list.scrollHeight;return b}
+  function chatBox(){
+    chatInit();
+    if(CH.box){CH.list.scrollTop=CH.list.scrollHeight;return CH.box}
+    var box=el('div','chat'),list=el('div','msgs');list.setAttribute('aria-live','polite');box.appendChild(list);CH.list=list;
+    var f=el('form','bar'),inp=el('input');inp.type='text';inp.maxLength=300;inp.placeholder='Scrivi un messaggio…';inp.setAttribute('enterkeyhint','send');inp.setAttribute('aria-label','Scrivi a Lia');inp.autocomplete='off';
+    var sb=el('button','send');sb.type='submit';sb.setAttribute('aria-label','Invia');sb.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>';
+    f.appendChild(inp);f.appendChild(sb);box.appendChild(f);box.appendChild(el('p','cnote','Lia è un’intelligenza artificiale: controlla sempre i dati della prenotazione.'));
+    CH.input=inp;CH.btn=sb;CH.box=box;
+    CH.msgs.forEach(function(m){bub(m.r,m.t,m.ok?'ok':'')});
+    f.onsubmit=function(e){e.preventDefault();chatSend(inp.value)};
+    return box;
+  }
+  function chatSend(text){
+    text=(text||'').trim();if(!text||CH.busy)return;
+    CH.busy=true;CH.btn.disabled=true;CH.input.value='';
+    CH.msgs.push({r:'me',t:text});saveChat();bub('me',text);
+    var ty=el('div','typ');ty.innerHTML='<i></i><i></i><i></i>';CH.list.appendChild(ty);CH.list.scrollTop=CH.list.scrollHeight;
+    fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({b:slug,s:CH.sid,text:text})})
+      .then(function(r){return r.json().catch(function(){return{}}).then(function(d){return{ok:r.ok,d:d}})})
+      .then(function(x){ty.remove();
+        if(!x.ok||!x.d.reply){bub('lia','Scusa, ho avuto un problema. Riprova tra un attimo.','err')}
+        else{var booked=!!(x.d.calendar&&x.d.calendar.start);CH.msgs.push({r:'lia',t:x.d.reply,ok:booked});saveChat();bub('lia',x.d.reply,booked?'ok':'')}})
+      .catch(function(){ty.remove();bub('lia','Non riesco a collegarmi. Riprova tra poco.','err')})
+      .then(function(){CH.busy=false;CH.btn.disabled=false;try{CH.input.focus({preventScroll:true})}catch(e){}});
+  }
   function draw(){
     app.textContent='';var I=S.info;
     if(S.done){var d=S.done,o=el('div','ok');o.appendChild(el('h2',null,'Prenotazione confermata'));
@@ -112,7 +169,10 @@ input:focus{outline:3px solid var(--accent);outline-offset:1px;border-color:var(
       o.appendChild(el('p',null,'Il pagamento si fa direttamente al circolo.'+(S.done.email_sent?' Ti abbiamo mandato la conferma via email.':'')));
       if(I.phone){var a=el('p');a.appendChild(document.createTextNode('Per disdire o cambiare orario chiama il '));var l=el('a',null,I.phone);l.href='tel:'+I.phone.replace(/[^+\\d]/g,'');l.style.color='var(--accent-ink)';a.appendChild(l);a.appendChild(document.createTextNode('.'));o.appendChild(a)}
       var b=el('button','btn ghost','Prenota un altro campo');b.type='button';b.onclick=function(){S.done=null;S.pick=null;S.f.fit_ok=false;loadDay()};o.appendChild(b);app.appendChild(o);return}
-    var hd=el('div','hd');hd.appendChild(el('h1',null,I.name));var sub=[I.tagline,I.address].filter(Boolean).join(' · ');if(sub)hd.appendChild(el('p',null,sub));app.appendChild(hd);
+    var hd=el('div','hd'),hl=el('div');hl.appendChild(el('h1',null,I.name));var sub=[I.tagline,I.address].filter(Boolean).join(' · ');if(sub)hl.appendChild(el('p',null,sub));hd.appendChild(hl);
+    if(I.lia){var lb=el('button','lbtn');lb.type='button';lb.innerHTML=S.mode==='chat'?'':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-4.5 7.5 8.5 8.5 0 0 1-8.9-.4L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 8-8.5h.5a8.5 8.5 0 0 1 8 8v.5z"/></svg>';lb.appendChild(document.createTextNode(S.mode==='chat'?'Prenota da solo':'Chat con Lia'));lb.onclick=function(){S.mode=S.mode==='chat'?'book':'chat';if(S.mode==='book'){S.free=null;loadDay()}else draw()};hd.appendChild(lb)}
+    app.appendChild(hd);
+    if(S.mode==='chat'&&I.lia){app.appendChild(chatBox());return}
     app.appendChild(note('','i',I.club.open_to==='members'?'<b>Prenotano i soci.</b> Serve almeno un socio tra i giocatori.':'<b>Possono prenotare soci e non soci.</b> Ti chiederemo quanti dei giocatori sono soci.'));
     if(I.club.fit)app.appendChild(note('fit','!','<b>Circolo affiliato FIT.</b> Per giocare servono la tessera FIT e il certificato medico.'));
     app.appendChild(note('','€','Il pagamento si fa direttamente al circolo.'));
@@ -175,25 +235,13 @@ module.exports = async (req, res) => {
     const acc = await getAccess(biz.id);
     if (!acc.allowed) return res.status(503).json({ error: BOOKING_BLOCKED_MESSAGE });
 
-    if (req.method === "GET" && q.info === "1") { const o = await courtsLib.info(sb, biz); return res.status(o.status).json(o.body); }
+    if (req.method === "GET" && q.info === "1") { const o = await courtsLib.info(sb, biz); if (o.status === 200) o.body.lia = acc.lia_allowed !== false; return res.status(o.status).json(o.body); }
     if (req.method === "GET" && q.date) { const o = await courtsLib.freeDay(sb, biz, String(q.date)); return res.status(o.status).json(o.body); }
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
       const o = await courtsLib.book(sb, biz, body);
       if (o.status !== 200) return res.status(o.status).json(o.body);
-      const m = o._mail;
-      let emailSent = false;
-      try { await require("../lib/push.js").notifyNewBooking(biz.id, { name: m.first + " " + m.saved.last_name, service: m.court.name, startsAt: m.saved.starts_at, timezone: biz.timezone }); } catch (e) { /* non blocca */ }
-      if (m.email) {
-        try {
-          const b = o.body.booking, sport = { tennis: "Tennis", padel: "Padel", calcio: "Calcio", altro: "" }[m.court.sport] || "";
-          const extra = [["Giocatori", b.players + " (di cui " + b.members + (b.members === 1 ? " socio)" : " soci)")]];
-          if (m.rules.fit) extra.push(["Da portare", "Tessera FIT e certificato medico di tutti i giocatori"]);
-          extra.push(["Pagamento", "Al circolo" + (b.price_eur != null ? ", " + String(b.price_eur).replace(".", ",") + " €" : "")]);
-          const em = mail.appointmentEmail({ kind: "confirm", bizName: biz.name, bizPhone: biz.public_phone || "", bizAddress: biz.address || "", customerName: m.first, service: m.court.name + (sport ? " · " + sport : ""), startsAt: m.startsAt.toISOString(), endsAt: m.endsAt.toISOString(), tz: biz.timezone, extraRows: extra, cancelLimitH: 0 });
-          emailSent = await Promise.race([mail.sendMail(m.email, em.subject, em.html, em.text, biz.name), new Promise((ok) => setTimeout(() => ok(false), 4500))]);
-        } catch (e) { console.error("Email di conferma non inviata:", e && e.message); }
-      }
+      const emailSent = await courtsLib.afterBook(biz, o);
       return res.status(200).json({ ok: true, email_sent: !!emailSent, booking: o.body.booking });
     }
     return res.status(405).json({ error: "Metodo non consentito" });
