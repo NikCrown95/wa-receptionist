@@ -162,12 +162,16 @@
     root.appendChild(lg);
 
     if (S.view === 'grid') {
-      if (!courtOf(S.court)) S.court = D.courts[0].id;
+      if (S.court && !courtOf(S.court)) S.court = '';
       var ct = el('div', 'cp-ct'); ct.setAttribute('role', 'group'); ct.setAttribute('aria-label', 'Campo');
+      var all = el('button', 'all' + (!S.court ? ' on' : '')); all.type = 'button'; all.setAttribute('aria-pressed', !S.court ? 'true' : 'false');
+      all.innerHTML = '<span class="cp-cs tab allic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#2B8A94"/><rect x="14" y="14" width="15" height="15" rx="3" fill="#fff"/><rect x="35" y="14" width="15" height="15" rx="3" fill="#fff"/><rect x="14" y="35" width="15" height="15" rx="3" fill="#fff"/><rect x="35" y="35" width="15" height="15" rx="3" fill="#fff"/></svg></span><span><b>Tutti</b><small>tutti i campi</small></span>';
+      all.onclick = function () { S.court = ''; try { localStorage.setItem('cpCourt', ''); } catch (e) {} S.sel = null; S.form = null; draw(); };
+      ct.appendChild(all);
       D.courts.forEach(function (c) {
         var b = el('button', S.court === c.id ? 'on' : ''); b.type = 'button'; b.setAttribute('aria-pressed', S.court === c.id ? 'true' : 'false');
         b.appendChild(courtSvg(c, 0, null, 'tab')); var t = el('span'); t.appendChild(el('b', null, c.name)); t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); b.appendChild(t);
-        b.onclick = function () { S.court = c.id; try { localStorage.setItem('cpCourt', c.id); } catch (e) {} S.sel = null; S.form = null; draw(); };
+        b.onclick = function () { S.court = S.court === c.id ? '' : c.id; try { localStorage.setItem('cpCourt', S.court); } catch (e) {} S.sel = null; S.form = null; draw(); };
         ct.appendChild(b);
       });
       root.appendChild(ct);
@@ -187,7 +191,7 @@
     return a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()] : a.getUTCDate() + ' ' + MO[a.getUTCMonth()] + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()];
   }
   function board(bs, now) { // settimana: giorni in alto, ore a sinistra, prenotazioni di tutti i campi
-    var D = S.data, lo = 24 * 60, hi = 0, days = [], CC = [courtOf(S.court)];
+    var D = S.data, lo = 24 * 60, hi = 0, days = [], CC = S.court ? [courtOf(S.court)] : D.courts;
     for (var i = 0; i < 7; i++) days.push(addDays(S.strip, i));
     CC.forEach(function (c) { days.forEach(function (d) { slotsOf(c, d).forEach(function (s) { lo = Math.min(lo, s.s); hi = Math.max(hi, s.e); }); }); });
     var wrap = el('div', 'cp-board wk');
@@ -197,7 +201,7 @@
     g.style.gridTemplateColumns = '40px repeat(7,minmax(0,1fr))';
     g.appendChild(el('div'));
     days.forEach(function (d) {
-      var n = bookingsOn(d).filter(function (b) { return b.court_id === S.court; }).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
+      var n = bookingsOn(d).filter(function (b) { return !S.court || b.court_id === S.court; }).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
       h.setAttribute('aria-label', longDay(d) + ', ' + n + ' prenotazioni. Apri il giorno');
       h.appendChild(el('span', null, DN[parse(d).getUTCDay()])); h.appendChild(el('b', null, String(parse(d).getUTCDate()))); h.appendChild(el('i', null, n ? String(n) : ' '));
       h.onclick = function () { S.day = d; S.view = 'day'; try { localStorage.setItem('cpView', 'day'); } catch (e) {} S.sel = null; S.form = null; draw(); };
@@ -218,7 +222,7 @@
         var a = Math.max(lo, x.from ? mins(x.from) : lo), z = Math.min(hi, x.to ? mins(x.to) : hi); if (z <= a) return;
         var cl = el('div', 'cp-closed', x.reason || 'Chiuso'); cl.style.top = ((a - lo) * PPM + 2) + 'px'; cl.style.height = ((z - a) * PPM - 4) + 'px'; cl.setAttribute('role', 'note'); col.appendChild(cl);
       });
-      var items = bookingsOn(d).filter(function (b) { return b.court_id === S.court; }).map(function (b) { return { b: b, s: mins(b.start), e: mins(b.end), lane: 0, n: 1 }; }).sort(function (a, b) { return a.s - b.s || a.e - b.e; });
+      var items = bookingsOn(d).filter(function (b) { return !S.court || b.court_id === S.court; }).map(function (b) { return { b: b, s: mins(b.start), e: mins(b.end), lane: 0, n: 1 }; }).sort(function (a, b) { return a.s - b.s || a.e - b.e; });
       var cluster = [], cEnd = 0;
       function flush() { var n = 0; cluster.forEach(function (x) { n = Math.max(n, x.lane + 1); }); cluster.forEach(function (x) { x.n = n; }); cluster = []; }
       items.forEach(function (it) {
@@ -237,7 +241,7 @@
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
         x.appendChild(courtSvg(c, b.players || 0, b.members, 'wk'));
         var t = el('span', 'cp-bt'); t.appendChild(el('b', null, b.last_name || b.first_name || '—'));
-        t.appendChild(el('small', null, b.start + '–' + b.end)); x.appendChild(t);
+        t.appendChild(el('small', null, S.court ? b.start + '–' + b.end : b.start + ' · ' + c.name.replace(/^Campo\s*/i, 'C'))); x.appendChild(t);
         x.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); scrollDet(); };
         col.appendChild(x);
       });
