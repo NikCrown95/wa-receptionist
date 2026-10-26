@@ -262,3 +262,9 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-leg i.p2,.cpx .cp-leg i.p4{width:26px;height:12px;border-radius:5px;background:linear-gradient(135deg,color-mix(in srgb,var(--muted,#93A8AE) 14%,var(--card2,#132A32)),var(--card2,#132A32));border:1px solid var(--line2,#27414A)}
 .cpx .cp-leg i.p4{background:linear-gradient(135deg,color-mix(in srgb,var(--muted,#93A8AE) 60%,var(--card2,#132A32)),color-mix(in srgb,var(--muted,#93A8AE) 25%,var(--card2,#132A32)))}
 .cpx .cp-cn{display:inline-block;font-style:normal;font-weight:800;font-size:.68rem;color:#fff;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+
+/* sfondo solo in base ai giocatori: 2 neutro, 4 acceso (il campo si legge dalla barra e da C1..C4) */
+.cpx .cp-chip.p2,.cpx .cp-b.wk.p2{background:var(--card2,#132A32);border-color:var(--line2,#27414A)}
+.cpx .cp-chip.p4,.cpx .cp-b.wk.p4{background:color-mix(in srgb,var(--accent,#2B8A94) 42%,var(--card2,#132A32));border-color:color-mix(in srgb,var(--accent,#2B8A94) 75%,var(--line2,#27414A))}
+.cpx .cp-leg i.p2{background:var(--card2,#132A32);border:1px solid var(--line2,#27414A)}
+.cpx .cp-leg i.p4{background:color-mix(in srgb,var(--accent,#2B8A94) 42%,var(--card2,#132A32));border:1px solid color-mix(in srgb,var(--accent,#2B8A94) 75%,var(--line2,#27414A))}

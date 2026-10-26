@@ -171,7 +171,7 @@
       ct.appendChild(all);
       D.courts.forEach(function (c) {
         var b = el('button', S.court === c.id ? 'on' : ''); b.type = 'button'; b.setAttribute('aria-pressed', S.court === c.id ? 'true' : 'false');
-        b.appendChild(courtSvg(c, 0, null, 'tab')); var t = el('span'); var nb2 = el('b', null, c.name + ' '); var tg = el('i', 'cp-cn', c.name.replace(/^Campo\s*/i, 'C')); tg.style.background = courtColor(c); nb2.appendChild(tg); t.appendChild(nb2); t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); b.appendChild(t);
+        b.appendChild(courtSvg(c, 0, null, 'tab')); var t = el('span'); t.appendChild(el('b', null, c.name)); t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); b.appendChild(t);
         b.onclick = function () { S.court = S.court === c.id ? '' : c.id; try { localStorage.setItem('cpCourt', S.court); } catch (e) {} S.sel = null; S.form = null; draw(); };
         ct.appendChild(b);
       });
