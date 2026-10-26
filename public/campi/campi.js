@@ -40,7 +40,7 @@
   }
   function call(body) {
     var o = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
-    var u = body ? URL0 : (isPh() && S.strip ? URL0 + '&from=' + addDays(S.strip, -7) + '&days=28' : URL0 + '&from=' + S.strip + '&days=7');
+    var u = body ? URL0 : (isPh() && S.strip ? URL0 + '&from=' + addDays(S.strip, -28) + '&days=63' : URL0 + '&from=' + S.strip + '&days=7');
     return fetch(u, o).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Errore, riprova.'); return j; }); });
   }
   function load() {
@@ -226,48 +226,33 @@
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
     ar.appendChild(nb); top.appendChild(ar); root.appendChild(top);
-    if (wk) {
-      var st = el('div', 'cp-pstrip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
-      for (var i = -7; i < 21; i++) (function (date) {
-        var n = bookingsOn(date).length, b = el('button', 'cp-pd' + (date === S.day ? ' on' : '') + (date === D.today ? ' tod' : '') + (date < D.today ? ' past' : '')); b.type = 'button';
-        b.setAttribute('data-date', date); b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
-        b.appendChild(el('span', null, DN[parse(date).getUTCDay()])); b.appendChild(el('b', null, String(parse(date).getUTCDate()))); b.appendChild(el('i', null, n ? String(n) : '·'));
-        b.onclick = function () { S.day = date; S.pickAt = Date.now(); S.sel = null; S.form = null; S.askCancel = false; S.stripKeep = false; draw(); };
-        st.appendChild(b);
-      })(addDays(S.strip, i));
+    if (wk) { // come i parrucchieri: una settimana per pagina, si scorre di settimana in settimana e resta lo stesso giorno della settimana
+      var st = el('div', 'cp-pstrip'), NP = 2, wk0 = monday(S.day);
+      st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
+      for (var pg = -NP; pg <= NP; pg++) {
+        var page = el('div', 'cp-pwk');
+        for (var i = 0; i < 7; i++) (function (date) {
+          var n = bookingsOn(date).length, b = el('button', 'cp-pd' + (date === S.day ? ' on' : '') + (date === D.today ? ' tod' : '') + (date < D.today ? ' past' : '')); b.type = 'button';
+          b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
+          b.appendChild(el('span', null, DN[parse(date).getUTCDay()])); b.appendChild(el('b', null, String(parse(date).getUTCDate()))); b.appendChild(el('i', null, n ? String(n) : '·'));
+          b.onclick = function () { if (date === S.day) return; S.day = date; S.sel = null; S.form = null; S.askCancel = false; draw(); };
+          page.appendChild(b);
+        })(addDays(wk0, pg * 7 + i));
+        st.appendChild(page);
+      }
       root.appendChild(st);
-      st.addEventListener('scroll', function () { S.stripX = st.scrollLeft; }, { passive: true });
-      var onb = st.querySelector('.cp-pd.on');
-      if (S.stripKeep && S.stripX != null) st.scrollLeft = S.stripX; else if (onb) st.scrollLeft = onb.offsetLeft - (st.clientWidth - onb.offsetWidth) / 2;
-      S.stripKeep = true; S.pickAt = Date.now(); // lo scroll appena fatto dal codice non deve cambiare il giorno scelto
-      // il giorno al centro della riga e' quello selezionato, come nella settimana dei parrucchieri; un tocco su un giorno resta una scelta volontaria
-      var centerBtn = function () {
-        var r = st.getBoundingClientRect(), mid = r.left + r.width / 2, best = null, bd = 1e9;
-        Array.prototype.forEach.call(st.querySelectorAll('.cp-pd'), function (b) { var q = b.getBoundingClientRect(), d = Math.abs(q.left + q.width / 2 - mid); if (d < bd) { bd = d; best = b; } });
-        return best;
-      };
-      var raf = 0;
-      st.addEventListener('scroll', function () {
-        if (raf || Date.now() - S.pickAt < 350) return;
-        raf = requestAnimationFrame(function () {
-          raf = 0; var c = centerBtn(); if (!c) return;
-          Array.prototype.forEach.call(st.querySelectorAll('.cp-pd'), function (b) { var on = b === c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
-        });
-      }, { passive: true });
-      st.addEventListener('scroll', function () {
-        clearTimeout(S.edgeT);
-        S.edgeT = setTimeout(function () {
-          if (!st.isConnected) return;
-          var nearR = st.scrollWidth - st.scrollLeft - st.clientWidth < 40, nearL = st.scrollLeft < 40;
-          var c = Date.now() - S.pickAt < 350 ? null : centerBtn(), nd = c && c.getAttribute('data-date'), chg = !!nd && nd !== S.day;
-          if (chg) { S.day = nd; S.sel = null; S.form = null; S.askCancel = false; }
-          S.stripX = st.scrollLeft; S.stripKeep = true;
-          if (nearR || nearL) {
-            var dir = nearR ? 1 : -1, pitch = st.scrollWidth / 28; S.stripX = st.scrollLeft - dir * 14 * pitch;
-            S.strip = addDays(S.strip, 14 * dir); load();
-          } else if (chg) draw();
-        }, 160);
-      }, { passive: true });
+      st.scrollLeft = st.clientWidth * NP;
+      (function () {
+        var t = null;
+        st.addEventListener('scroll', function () {
+          clearTimeout(t);
+          t = setTimeout(function () {
+            var w = st.clientWidth; if (!w) return;
+            var p = Math.round(st.scrollLeft / w) - NP; if (!p) return;
+            S.day = addDays(S.day, p * 7); S.strip = monday(S.day); S.sel = null; S.form = null; S.askCancel = false; load();
+          }, 130);
+        }, { passive: true });
+      })();
     }
     if (!S.sel && !S.form) { var fab = el('button', 'cp-fab'); fab.type = 'button'; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'; fab.onclick = function () { openForm(S.day); }; root.appendChild(fab); }
   }
@@ -295,7 +280,7 @@
   function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
   function goDay(n) {
     var nd = addDays(S.day, n); S.sel = null; S.form = null; S.askCancel = false;
-    var lo = isPh() ? addDays(S.strip, -7) : S.strip, hi = addDays(S.strip, isPh() ? 20 : 6);
+    var lo = isPh() ? addDays(S.strip, -14) : S.strip, hi = addDays(S.strip, isPh() ? 20 : 6);
     S.stripKeep = false;
     if (nd < lo || nd > hi) { S.strip = monday(nd); S.day = nd; load(); } else { S.day = nd; draw(); }
   }

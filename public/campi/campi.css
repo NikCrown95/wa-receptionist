@@ -557,9 +557,10 @@ body.campiOn #view-month{display:none!important}
 }
 @media (max-width:699px){.cpx .cp-ptitle .cp-yr{color:var(--accent-ink,#7FDCDC)}.cpx .cp-pd.tod:not(.on){border-style:dashed}}
 @media (max-width:699px){
-  .cpx .cp-pstrip{display:flex;overflow-x:auto;gap:7px;margin:0 -14px;padding:2px 14px 4px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
+  .cpx .cp-pstrip{display:flex;overflow-x:auto;overflow-y:hidden;gap:0;margin:0 -14px;padding:2px 0 4px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x pan-y}
   .cpx .cp-pstrip::-webkit-scrollbar{display:none}
-  .cpx .cp-pd{flex:none;width:calc((100vw - 28px - 42px) / 7 + 2px);min-width:50px;scroll-snap-align:center}
+  .cpx .cp-pwk{flex:0 0 100%;box-sizing:border-box;scroll-snap-align:start;scroll-snap-stop:always;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;padding:0 14px}
+  .cpx .cp-pd{min-width:0}
 }
 /* telefono: testata del giorno compatta su una riga (misure dei parrucchieri) e barra colore dritta, non curva */
 @media (max-width:699px){
