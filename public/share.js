@@ -195,7 +195,7 @@
   function syncProfile() {
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
-    var k = window.liaHeroKindOf ? window.liaHeroKindOf(raw) : null;
+    var k = window.liaHeroKindOf ? window.liaHeroKindOf(window.__liaCampi ? { business_type: "centro_sportivo", name: "circolo tennis" } : raw) : null;
     var isGym = window.__liaCampi ? false : live && live.business_type ? String(live.business_type) === "palestra" : (biz.gym || String(raw.business_type || "") === "palestra"); // i dati freschi battono una copia vecchia salvata sul dispositivo
     av.className = "mnAv" + (isGym ? " gym" : k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
     if (isGym) { card.style.setProperty("--mnh", "36"); av.innerHTML = ""; }

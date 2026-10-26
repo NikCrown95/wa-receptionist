@@ -107,7 +107,7 @@
 
     // testata
     var top = el('div', 'cp-top');
-    var ti = el('div', 'cp-title', D.club.name || 'Circolo'); ti.appendChild(el('small', null, longDay(S.day)));
+    var ti = el('div', 'cp-title', longDay(S.day));
     top.appendChild(ti);
     var vw = el('div', 'cp-vw'); vw.setAttribute('role', 'group'); vw.setAttribute('aria-label', 'Vista');
     [['day', 'Giorno'], ['grid', 'Griglia']].forEach(function (v) {
