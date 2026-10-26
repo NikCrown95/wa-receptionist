@@ -3349,3 +3349,19 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 /* Dichiara il tema ai browser (Samsung Internet ecc.): evita lo scurimento automatico dei colori */
 :root,:root[data-theme="dark"]{color-scheme:dark;}
 :root[data-theme="light"]{color-scheme:light;}
+/* nuovo appuntamento: procedura guidata */
+.nx-hw{display:flex;align-items:flex-start;gap:10px}
+.nx-hw>div{min-width:0;flex:1}
+.nx-back{flex:none;width:38px;height:38px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer;font-family:inherit}
+.nx-dots{display:flex;gap:6px;margin:2px 0}
+.nx-dots i{flex:1;height:4px;border-radius:2px;background:var(--line2)}
+.nx-dots i.on{background:var(--accent)}
+.nx-step{display:flex;flex-direction:column;gap:14px}
+.nx-q{margin:0;font-family:'Manrope','Plus Jakarta Sans',system-ui,sans-serif;font-weight:800;font-size:1.25rem;letter-spacing:-.015em}
+.nx-qs{margin:-8px 0 0;font-size:.85rem;color:var(--muted)}
+.nx-nolb>.nx-lb{display:none}
+.nx-qd{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nx-qd .nx-tch{min-height:52px}
+.nx-qo{font-size:.78rem;font-weight:700;color:var(--muted)}
+.nx-next{width:100%}
+.nx-next:disabled{opacity:.45}
