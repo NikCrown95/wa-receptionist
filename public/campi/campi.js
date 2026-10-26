@@ -27,7 +27,7 @@
   function eur(n) { return n == null ? '' : (Math.round(n * 100) % 100 === 0 ? String(Math.round(n)) : Number(n).toFixed(2).replace('.', ',')) + ' €'; }
   function soc(n) { return n === 0 ? 'Nessun socio' : n === 1 ? '1 socio' : n + ' soci'; }
 
-  var S = { data: null, strip: null, day: null, sel: null, form: null, err: '', loading: true, busy: false, askCancel: false };
+  var S = { view: (function () { try { return localStorage.getItem('cpView') === 'grid' ? 'grid' : 'day'; } catch (e) { return 'day'; } })(), data: null, strip: null, day: null, sel: null, form: null, err: '', loading: true, busy: false, askCancel: false };
   var root = el('div', 'cpx');
   pCal.appendChild(root);
   var tick = 0;
@@ -46,6 +46,29 @@
     var my = ++tick; S.loading = !S.data; S.err = ''; draw();
     call().then(function (j) { if (my !== tick) return; S.data = j; S.loading = false; if (!S.day) S.day = j.today; draw(); })
       .catch(function (e) { if (my !== tick) return; S.loading = false; S.err = e.message; draw(); });
+  }
+
+  // ---------- disegno del campo ----------
+  function courtColor(c) {
+    var t = (String(c.surface || '') + ' ' + String(c.name || '')).toLowerCase();
+    if (/erba|grass|prato/.test(t)) return '#5DB07A';
+    if (/terra|rossa|clay|battuta/.test(t)) return '#D9784A';
+    if (/cement|hard|resina|sintetic|moquette|pvc|acrilic/.test(t)) return '#5B8DB8';
+    return '#4BB3D6';
+  }
+  function dotsAt(n, y) { // n giocatori in fila alla stessa altezza
+    var out = [], r = n > 6 ? 3 : 4.5;
+    for (var i = 0; i < n; i++) out.push([n === 1 ? 32 : 17 + i * (30 / (n - 1)), y, r]);
+    return out;
+  }
+  function courtSvg(c, players, members, cls) { // il campo visto dall'alto, con i giocatori
+    var col = courtColor(c), w = el('span', 'cp-cs' + (cls ? ' ' + cls : ''));
+    var d = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="' + col + '"/><rect x="9" y="9" width="46" height="46" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2"/><line x1="9" y1="32" x2="55" y2="32" stroke="#fff" stroke-opacity=".85" stroke-width="2"/><line x1="20" y1="9" x2="20" y2="55" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/><line x1="44" y1="9" x2="44" y2="55" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/>';
+    if (players > 0) {
+      var top = Math.ceil(players / 2), pts = dotsAt(top, 21).concat(dotsAt(players - top, 43)), m = members == null ? 0 : members;
+      pts.forEach(function (q, i) { d += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + q[2] + '" ' + (i < m ? 'fill="#fff" stroke="#fff"' : (members == null ? 'fill="#fff" stroke="#fff"' : 'fill="rgba(0,0,0,.35)" stroke="#fff"')) + ' stroke-width="1.6"/>'; });
+    }
+    w.innerHTML = d + '</svg>'; return w;
   }
 
   // ---------- calcoli ----------
@@ -86,6 +109,13 @@
     var top = el('div', 'cp-top');
     var ti = el('div', 'cp-title', D.club.name || 'Circolo'); ti.appendChild(el('small', null, longDay(S.day)));
     top.appendChild(ti);
+    var vw = el('div', 'cp-vw'); vw.setAttribute('role', 'group'); vw.setAttribute('aria-label', 'Vista');
+    [['day', 'Giorno'], ['grid', 'Griglia']].forEach(function (v) {
+      var b = el('button', S.view === v[0] ? 'on' : '', v[1]); b.type = 'button'; b.setAttribute('aria-pressed', S.view === v[0] ? 'true' : 'false');
+      b.onclick = function () { S.view = v[0]; try { localStorage.setItem('cpView', v[0]); } catch (e) {} S.sel = null; S.form = null; S.askCancel = false; draw(); };
+      vw.appendChild(b);
+    });
+    top.appendChild(vw);
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== D.today) { S.strip = D.today; S.data = null; load(); } else draw(); };
     top.appendChild(nb); root.appendChild(top);
@@ -125,8 +155,8 @@
     lg.innerHTML = '<span><i style="background:var(--accent,#2B8A94)"></i>Almeno un socio</span><span><i style="background:var(--sec,#3B9CFF)"></i>Solo non soci</span>';
     root.appendChild(lg);
 
-    root.appendChild(board(bs, now));
-    root.appendChild(detail(bs));
+    if (S.view === 'grid') { root.appendChild(board(bs, now)); root.appendChild(detail(bs)); }
+    else root.appendChild(dayList(bs, now));
   }
   function shift(n) { S.strip = addDays(S.strip, n); S.day = S.strip; S.sel = null; S.form = null; S.askCancel = false; load(); }
 
@@ -140,7 +170,7 @@
     g.style.gridTemplateColumns = '38px repeat(' + D.courts.length + ',minmax(' + (D.courts.length > 5 ? 88 : 0) + 'px,1fr))';
     g.appendChild(el('div'));
     D.courts.forEach(function (c) {
-      var h = el('div', 'cp-ch', c.name); h.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); g.appendChild(h);
+      var h = el('div', 'cp-ch'); h.appendChild(courtSvg(c, 0, null, 'hd')); h.appendChild(el('span', null, c.name)); h.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); g.appendChild(h);
     });
     var hr = el('div', 'cp-hrs'); hr.style.height = H + 'px';
     for (var m = lo; m <= hi; m += 60) { var l = el('em', m === lo ? 'first' : '', hhmm(m)); l.style.top = ((m - lo) * PPM) + 'px'; if (m === hi) l.style.display = 'none'; hr.appendChild(l); }
@@ -172,7 +202,7 @@
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
         x.appendChild(el('b', null, b.last_name || b.first_name || '—'));
         x.appendChild(el('small', null, b.members == null ? (b.players ? b.players + ' giocatori' : '') : (b.members === 0 ? 'Non soci' : soc(b.members))));
-        x.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); };
+        x.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); scrollDet(); };
         col.appendChild(x);
       });
       if (S.day === now.date && now.min > lo && now.min < hi) { var nl = el('div', 'cp-nowl'); nl.style.top = ((now.min - lo) * PPM) + 'px'; col.appendChild(nl); }
@@ -181,6 +211,34 @@
     wrap.appendChild(g); return wrap;
   }
 
+  function scrollDet() { setTimeout(function () { var d = root.querySelector('.cp-det'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30); }
+  function dayList(bs, now) {
+    var wrap = el('div', 'cp-list');
+    var list = bs.slice().sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
+    if (!list.length) {
+      wrap.appendChild(el('div', 'cp-load', S.day < now.date ? 'Nessuna prenotazione in questo giorno.' : 'Nessuna prenotazione per ora in questo giorno.'));
+    }
+    list.forEach(function (b) {
+      var c = courtOf(b.court_id) || { name: 'Campo' };
+      var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
+      var r = el('button', 'cp-li' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button';
+      r.setAttribute('aria-expanded', S.sel === b.id ? 'true' : 'false');
+      var t = el('span', 'cp-lt'); t.appendChild(el('b', null, b.start)); t.appendChild(el('small', null, 'fino alle ' + b.end)); r.appendChild(t);
+      r.appendChild(courtSvg(c, b.players || 0, b.members, 'li'));
+      var m = el('span', 'cp-lm'); m.appendChild(el('b', null, [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'));
+      var sub = [c.name, b.players ? b.players + ' giocatori' : '', b.members == null ? '' : (b.members === 0 ? 'nessun socio' : soc(b.members))].filter(Boolean).join(' · ');
+      m.appendChild(el('small', null, sub)); r.appendChild(m);
+      if (cur) r.appendChild(el('span', 'cp-live', 'In corso'));
+      r.onclick = function () { S.sel = S.sel === b.id ? null : b.id; S.form = null; S.askCancel = false; draw(); if (S.sel) scrollDet(); };
+      wrap.appendChild(r);
+      if (S.sel === b.id) wrap.appendChild(detail(bs));
+    });
+    var hint = el('div', 'cp-hint'); hint.appendChild(el('span', null, 'Per inserire una prenotazione a mano, apri la griglia e tocca un riquadro libero (+).'));
+    var gb = el('button', 'cp-btn', 'Apri la griglia'); gb.type = 'button'; gb.onclick = function () { S.view = 'grid'; try { localStorage.setItem('cpView', 'grid'); } catch (e) {} draw(); };
+    hint.appendChild(gb); wrap.appendChild(hint);
+    if (S.form) wrap.insertBefore(detail(bs), wrap.firstChild);
+    return wrap;
+  }
   function courtOf(id) { return S.data.courts.filter(function (c) { return c.id === id; })[0]; }
   function detail(bs) {
     var d = el('div', 'cp-det'); d.setAttribute('aria-live', 'polite');
@@ -188,7 +246,8 @@
     var b = bs.filter(function (x) { return x.id === S.sel; })[0];
     if (!b) { d.appendChild(el('p', null, 'Tocca una prenotazione per vedere chi l\'ha fatta, oppure un riquadro libero (+) per inserirne una a mano.')); return d; }
     var c = courtOf(b.court_id) || { name: 'Campo' };
-    d.appendChild(el('h3', null, [b.first_name, b.last_name].filter(Boolean).join(' ') + ' · ' + c.name + ', ' + b.start + '–' + b.end));
+    var hd = el('div', 'cp-dh'); hd.appendChild(courtSvg(c, b.players || 0, b.members, 'det'));
+    hd.appendChild(el('h3', null, [b.first_name, b.last_name].filter(Boolean).join(' ') + ' · ' + c.name + ', ' + b.start + '–' + b.end)); d.appendChild(hd);
     var parts = ['Referente della prenotazione.'];
     if (b.players != null) parts.push(b.players + (b.players === 1 ? ' giocatore' : ' giocatori') + (b.members != null ? ': ' + (b.members === 0 ? 'nessun socio' : b.members === 1 ? '1 socio' : b.members + ' soci') + ', ' + (b.players - b.members === 0 ? 'nessun non socio' : b.players - b.members === 1 ? '1 non socio' : (b.players - b.members) + ' non soci') + '.' : '.'));
     d.appendChild(el('p', null, parts.join(' ')));
