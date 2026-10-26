@@ -420,3 +420,9 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 .cpx .cp-opt.on{border-color:var(--cc,#2B8A94)}
 .cpx .cp-chips button{min-height:52px;font-size:1.02rem}
 .cpx .cp-fv .cp-frow .cp-btn[disabled]{opacity:.4}
+
+/* la finestra sta sotto la testata dell'app, mai tagliata */
+.cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{inset:auto;top:84px;bottom:12px;left:0;right:0;margin:auto;height:fit-content;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px)}
+.cpx .cp-wz{min-height:0}
+.cpx .cp-fv{padding:14px;gap:10px}
+@media (max-width:699px){.cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{top:70px}}
