@@ -277,17 +277,12 @@
       var l2 = el('div', 'stF'); l2.appendChild(el('span', null, 'Orario'));
       var t1 = input('time', ''), t2 = input('time', ''), hrs = row2(sf('Dalle', t1), sf('Alle', t2)); hrs.hidden = S.allday;
       l2.appendChild(chips([['1', 'Tutto il giorno'], ['0', 'Solo alcune ore']], S.allday ? '1' : '0', function (v) { S.allday = v === '1'; hrs.hidden = S.allday; })); c2.appendChild(l2); c2.appendChild(hrs);
-      var why = input('text', S.why, { maxlength: 120, placeholder: 'Scrivi il motivo (lo vedi solo tu)', autocomplete: 'off' });
-      var l3 = el('div', 'stF'); l3.appendChild(el('span', null, 'Motivo (lo vedi solo tu)'));
-      l3.appendChild(chips([['Torneo', 'Torneo'], ['Manutenzione', 'Manutenzione'], ['Lavori', 'Lavori'], ['Maltempo', 'Maltempo'], ['Evento privato', 'Evento privato']], '', function (v) { why.value = v; }));
-      l3.appendChild(why); c2.appendChild(l3);
       c2.appendChild(hint('Nei giorni e negli orari indicati il campo (o tutto il circolo) non si può prenotare e il calendario lo mostra chiuso.'));
       w.appendChild(c2);
       var msg = msgBox(); w.appendChild(msg);
       var sv = btn('Segnala e blocca le prenotazioni', '', function () {
-        S.why = why.value;
-        guard(sv, msg, call({ action: 'add_closure', court_id: S.who || null, starts_on: a.value, ends_on: z.value || a.value, from: S.allday ? '' : t1.value, to: S.allday ? '' : t2.value, reason: why.value }).then(load))
-          .then(function () { S.why = ''; toast('Segnalato: nel periodo indicato non si può prenotare'); changed(); draw(); }).catch(function () { });
+        guard(sv, msg, call({ action: 'add_closure', court_id: S.who || null, starts_on: a.value, ends_on: z.value || a.value, from: S.allday ? '' : t1.value, to: S.allday ? '' : t2.value, reason: '' }).then(load))
+          .then(function () { toast('Segnalato: nel periodo indicato non si può prenotare'); changed(); draw(); }).catch(function () { });
       });
       w.appendChild(sv);
     }
@@ -316,13 +311,33 @@
     w.appendChild(sv);
   }
 
+  function pPolicy(w) {
+    var C = D.club, st = { n: C.min_notice_min || 60, a: C.max_advance_days || 14, c: C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours };
+    function opt(list, fmt) { return list.map(function (v) { return [v, fmt(v)]; }); }
+    var c1 = card('Preavviso minimo');
+    c1.appendChild(hint('Quanto tempo prima della partita i clienti smettono di poter prenotare online.'));
+    c1.appendChild(chips(opt([15, 30, 60, 120, 180, 360, 720, 1440, 2880], function (v) { return v < 60 ? v + ' min' : v === 60 ? '1 ora' : v < 1440 ? v / 60 + ' ore' : v === 1440 ? '1 giorno' : '2 giorni'; }), st.n, function (v) { st.n = +v; })); w.appendChild(c1);
+    var c2 = card('Quanto in anticipo si può prenotare');
+    c2.appendChild(hint('Fino a quanti giorni da oggi i clienti vedono i campi liberi.'));
+    c2.appendChild(chips(opt([7, 14, 30, 60, 90, 180], function (v) { return v === 7 ? '1 settimana' : v === 14 ? '2 settimane' : v === 30 ? '1 mese' : v === 60 ? '2 mesi' : v === 90 ? '3 mesi' : '6 mesi'; }), st.a, function (v) { st.a = +v; })); w.appendChild(c2);
+    var c3 = card('Disdetta');
+    c3.appendChild(hint('Fino a quanto tempo prima il cliente può annullare da solo con il link dell\'email di conferma. Dopo, deve chiamare il circolo. L\'annullamento libera il campo e ti arriva una notifica.'));
+    c3.appendChild(chips(opt([0, 1, 2, 4, 12, 24, 48], function (v) { return v === 0 ? 'Sempre' : v === 1 ? '1 ora prima' : v < 24 ? v + ' ore prima' : v === 24 ? '1 giorno prima' : '2 giorni prima'; }), st.c, function (v) { st.c = +v; })); w.appendChild(c3);
+    var msg = msgBox(); w.appendChild(msg);
+    var sv = btn('Salva le regole', '', function () {
+      guard(sv, msg, call({ action: 'save_policy', min_notice_min: st.n, max_advance_days: st.a, cancel_limit_hours: st.c }).then(load)).then(function () { toast('Regole salvate'); changed(); }).catch(function () { });
+    });
+    w.appendChild(sv);
+  }
+
   // ---------- pagine e voci in Impostazioni ----------
   var PAGES = [
     ['courts', 'c-teal', IC.court, 'Campi', 'Nome, fondo e durata delle prenotazioni', 'I campi', 'I campi del circolo. Tocca un campo per modificarlo o aggiungine uno nuovo.', pCourts],
     ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.', pPrices],
     ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il circolo è aperto e i campi si possono prenotare.', pHours],
     ['closures', 'c-red', IC.off, 'Lavori e indisponibilità', 'Manutenzione, tornei, maltempo', 'Lavori e indisponibilità', 'Segnala un problema o dei lavori su un campo, o la chiusura del circolo: nei giorni e negli orari indicati non si può prenotare.', pClosures],
-    ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, FIT e limite giornaliero', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules]
+    ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, FIT e limite giornaliero', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules],
+    ['policy', 'c-teal', IC.clock, 'Prenotazione e disdetta', 'Preavviso, anticipo e annullamento', 'Prenotazione e disdetta', 'Come e fino a quando i clienti possono prenotare o annullare.', pPolicy]
   ];
   var made = {}, rowOf = {}, curKey = null;
   function shell() { return document.getElementById('stShell'); }
@@ -336,7 +351,7 @@
     var pr = [].concat.apply([], D.courts.map(function (c) { return [c.price_member_eur, c.price_guest_eur].concat((c.price_rules || []).reduce(function (a, r) { return a.concat([r.member, r.guest]); }, [])).filter(function (x) { return x != null; }); }));
     s('prices', pr.length ? 'Da ' + euro(Math.min.apply(null, pr)) + ' a ' + euro(Math.max.apply(null, pr)) + ' a testa' : 'Nessun prezzo impostato');
     s('closures', D.closures.length ? D.closures.length + (D.closures.length === 1 ? ' chiusura in programma' : ' chiusure in programma') : 'Nessuna in programma');
-    var C = D.club; s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.fit ? ' · FIT' : ''));
+    var C = D.club; s('policy', 'Disdetta ' + ((C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) === 0 ? 'sempre possibile' : 'fino a ' + (C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) + (C.cancel_limit_hours === 1 ? ' ora prima' : ' ore prima'))); s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.fit ? ' · FIT' : ''));
   }
   function label(t) { var sl = document.getElementById('sectionLabel'); if (sl) setTimeout(function () { sl.textContent = t; }, 30); }
   function openPane(k) {
@@ -362,7 +377,7 @@
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il circolo'; });
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var rows = g.querySelectorAll('.stRow'); if (rows.length && Array.prototype.every.call(rows, function (r) { return r.style.display === 'none'; })) g.style.display = 'none'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del circolo';
-    var groups = [['Campi e prezzi', ['courts', 'prices']], ['Disponibilità', ['hours', 'closures']], ['Regole', ['rules']]];
+    var groups = [['Campi e prezzi', ['courts', 'prices']], ['Disponibilità', ['hours', 'closures']], ['Regole', ['rules', 'policy']]];
     var bg = menu.querySelector('[data-st="bizinfo"]'); bg = bg && bg.closest('.stGroup'); var first = bg ? bg.nextSibling : menu.firstChild;
     var ph = el('div'); menu.insertBefore(ph, first); first = ph;
     var byK = {}; PAGES.forEach(function (p) { byK[p[0]] = p; });

@@ -27,6 +27,15 @@ module.exports = async (req, res) => {
     const q = req.query || {};
     const slug = String(q.b || "");
     const wantsData = req.method === "POST" || q.info === "1" || !!q.date || !!q.month;
+    if (req.method === "GET" && q.cancel) {
+      if (!/^[a-z0-9-]{1,60}$/.test(slug)) return res.status(404).send("Non trovato");
+      const r0 = await sb("GET", "businesses?slug=eq." + encodeURIComponent(slug) + "&active=eq.true&select=*&limit=1");
+      const b0 = r0.ok && Array.isArray(r0.data) && r0.data[0];
+      if (!b0) return res.status(404).send("Non trovato");
+      const st = await courtsLib.cancelByLink(sb, b0, String(q.cancel), String(q.k || ""), false);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.status(200).send(require("../lib/campi-cancel.js").page(Object.assign({ slug, bizName: b0.name, phone: b0.public_phone || "", tz: b0.timezone, id: String(q.cancel), k: String(q.k || "") }, st)));
+    }
     if (req.method === "GET" && !wantsData) {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       return res.status(200).send(PAGE);
@@ -43,6 +52,16 @@ module.exports = async (req, res) => {
     if (req.method === "GET" && q.date) { const o = await courtsLib.freeDay(sb, biz, String(q.date)); return res.status(o.status).json(o.body); }
     if (req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+      if (body.action === "cancel") {
+        const st = await courtsLib.cancelByLink(sb, biz, String(body.id || ""), String(body.k || ""), true);
+        if (st.state === "done") {
+          try { const row = st.row, sp = require("../lib/courts.js"); await sb("POST", "notification_events", { business_id: biz.id, event_type: "cancelled", customer_name: row.first_name + " " + row.last_name, service_name: st.court, starts_at: row.starts_at, channel: "selfservice" }, "return=minimal"); } catch (e) {}
+          return res.status(200).json({ ok: true });
+        }
+        if (st.state === "toolate") return res.status(409).json({ error: "Non si può più annullare online: mancano meno di " + st.limitText + " alla prenotazione." + (biz.public_phone ? " Chiama il " + biz.public_phone + "." : "") });
+        if (st.state === "past") return res.status(409).json({ error: "La prenotazione è già passata." });
+        return res.status(404).json({ error: "Prenotazione non trovata o già annullata." });
+      }
       const o = await courtsLib.book(sb, biz, body);
       if (o.status !== 200) return res.status(o.status).json(o.body);
       const emailSent = await courtsLib.afterBook(biz, o, sb);
