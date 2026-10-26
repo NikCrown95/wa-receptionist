@@ -177,7 +177,7 @@
       });
       root.appendChild(ct);
     }
-    if (S.view === 'grid') { var gs = el('div', 'cp-gs' + (S.sel || S.form ? ' open' : '')); gs.appendChild(board(bs, now)); if (S.sel || S.form) gs.appendChild(detail(bs)); root.appendChild(gs); root.classList.add('wide'); }
+    if (S.view === 'grid') { var gs = el('div', 'cp-gs' + (S.sel || S.form ? ' open' : '')); gs.appendChild(S.court ? board(bs, now) : boardAll(now)); if (S.sel || S.form) gs.appendChild(detail(bs)); root.appendChild(gs); root.classList.add('wide'); }
     else root.appendChild(dayList(bs, now));
   }
   function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
@@ -190,6 +190,43 @@
   function weekLabel() {
     var a = parse(S.strip), b = parse(addDays(S.strip, 6));
     return a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()] : a.getUTCDate() + ' ' + MO[a.getUTCMonth()] + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()];
+  }
+  function boardAll(now) { // tutti i campi: un'ora per riga, le prenotazioni della stessa ora una sotto l'altra
+    var D = S.data, days = [], lo = 24, hi = 0;
+    for (var i = 0; i < 7; i++) days.push(addDays(S.strip, i));
+    D.courts.forEach(function (c) { days.forEach(function (d) { slotsOf(c, d).forEach(function (sl) { lo = Math.min(lo, Math.floor(sl.s / 60)); hi = Math.max(hi, Math.ceil(sl.e / 60)); }); }); });
+    days.forEach(function (d) { bookingsOn(d).forEach(function (b) { lo = Math.min(lo, Math.floor(mins(b.start) / 60)); hi = Math.max(hi, Math.ceil(mins(b.end) / 60)); }); });
+    var wrap = el('div', 'cp-board wk all');
+    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
+    var g = el('div', 'cp-ga'); g.appendChild(el('div'));
+    days.forEach(function (d) {
+      var n = bookingsOn(d).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
+      h.setAttribute('aria-label', longDay(d) + ', ' + n + ' prenotazioni. Apri il giorno');
+      h.appendChild(el('span', null, DN[parse(d).getUTCDay()])); h.appendChild(el('b', null, String(parse(d).getUTCDate()))); h.appendChild(el('i', null, n ? String(n) : ' '));
+      h.onclick = function () { S.day = d; S.view = 'day'; try { localStorage.setItem('cpView', 'day'); } catch (e) {} S.sel = null; S.form = null; draw(); };
+      g.appendChild(h);
+    });
+    for (var hr = lo; hr < hi; hr++) {
+      var cells = days.map(function (d) { return bookingsOn(d).filter(function (b) { return Math.floor(mins(b.start) / 60) === hr; }).sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : (a.court_id < b.court_id ? -1 : 1); }); });
+      var mx = 1; cells.forEach(function (x) { mx = Math.max(mx, x.length); });
+      var lab = el('div', 'cp-ah', pad(hr) + ':00'); lab.style.minHeight = (mx * 31 + 8) + 'px'; g.appendChild(lab);
+      cells.forEach(function (list, di) {
+        var cell = el('div', 'cp-ac' + (days[di] === now.date && hr === Math.floor(now.min / 60) ? ' now' : ''));
+        list.forEach(function (b) {
+          var c = courtOf(b.court_id) || { name: 'Campo' }, ch = el('button', 'cp-chip' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); ch.type = 'button';
+          ch.style.setProperty('--cc', courtColor(c));
+          ch.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
+          var m = mins(b.start) % 60;
+          ch.appendChild(el('b', null, b.last_name || b.first_name || '—'));
+          if (m) ch.appendChild(el('u', null, ':' + pad(m)));
+          ch.appendChild(el('em', null, c.name.replace(/^Campo\s*/i, 'C')));
+          ch.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); scrollDet(); };
+          cell.appendChild(ch);
+        });
+        g.appendChild(cell);
+      });
+    }
+    wrap.appendChild(g); return wrap;
   }
   function board(bs, now) { // settimana: giorni in alto, ore a sinistra, prenotazioni di tutti i campi
     var D = S.data, lo = 24 * 60, hi = 0, days = [], CC = S.court ? [courtOf(S.court)] : D.courts;

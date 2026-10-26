@@ -239,3 +239,19 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-b.wk.mini .cp-bt b{font-size:.74rem}
 .cpx .cp-b.wk.mini .cp-bt small{font-size:.64rem}
 @media (max-width:699px){.cpx .cp-b.wk{padding:2px 4px;border-left-width:4px}.cpx .cp-b.wk .cp-bt b{font-size:.68rem}.cpx .cp-b.wk .cp-bt small{font-size:.6rem}}
+
+/* tutti i campi: righe per ora, prenotazioni impilate */
+.cpx .cp-board.all{padding:12px 10px 10px;overflow-x:auto}
+.cpx .cp-ga{display:grid;grid-template-columns:44px repeat(7,minmax(0,1fr));min-width:0}
+.cpx .cp-ah{color:var(--muted,#93A8AE);font-size:.72rem;font-weight:700;text-align:right;padding:6px 8px 0 0;border-top:1px solid var(--line,#1B2F36);font-variant-numeric:tabular-nums}
+.cpx .cp-ac{border-top:1px solid var(--line,#1B2F36);border-left:1px solid var(--line,#1B2F36);padding:4px;display:grid;gap:3px;align-content:start;min-width:0}
+.cpx .cp-ac.now{background:color-mix(in srgb,var(--accent,#2B8A94) 10%,transparent)}
+.cpx .cp-chip{position:relative;display:flex;align-items:center;gap:6px;min-width:0;height:28px;padding:0 8px 0 11px;border-radius:9px;border:1px solid color-mix(in srgb,var(--cc) 38%,var(--line2,#27414A));background:linear-gradient(135deg,color-mix(in srgb,var(--cc) 20%,var(--card2,#132A32)),var(--card2,#132A32) 80%);color:var(--ink,#F2F6F7);font-family:inherit;cursor:pointer;text-align:left;overflow:hidden}
+.cpx .cp-chip::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cc)}
+.cpx .cp-chip.ns{background:linear-gradient(135deg,color-mix(in srgb,var(--sec,#3B9CFF) 26%,var(--card2,#132A32)),var(--card2,#132A32) 80%);border-color:color-mix(in srgb,var(--sec,#3B9CFF) 55%,var(--line2,#27414A))}
+.cpx .cp-chip.on{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#2B8A94) 60%,transparent)}
+.cpx .cp-chip b{flex:1;min-width:0;font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpx .cp-chip u{text-decoration:none;font-size:.66rem;font-weight:600;color:var(--muted,#93A8AE)}
+.cpx .cp-chip em{font-style:normal;font-size:.72rem;font-weight:800;color:var(--cc)}
+.cpx .cp-board.all .cp-wh{border:0;background:transparent;color:var(--ink,#F2F6F7);display:flex;flex-direction:column;align-items:center;padding:2px 2px 8px;cursor:pointer;font-family:inherit}
+@media (max-width:699px){.cpx .cp-ga{grid-template-columns:34px repeat(7,minmax(0,1fr))}.cpx .cp-chip{padding:0 3px 0 7px;height:24px}.cpx .cp-chip em,.cpx .cp-chip u{display:none}.cpx .cp-chip b{font-size:.6rem}.cpx .cp-ac{padding:2px}}
