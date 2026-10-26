@@ -112,6 +112,8 @@
     if (!D.courts.length) { root.appendChild(el('div', 'cp-load', 'Non hai ancora nessun campo attivo. Aggiungili dalle Impostazioni.')); return; }
 
     // testata
+    var PH = isPh(); if (PH) { S.view = 'day'; phHead(D); }
+    if (!PH) {
     var top = el('div', 'cp-top');
     var ti = el('div', 'cp-title', S.view === 'grid' ? weekLabel() : longDay(S.day));
     top.appendChild(ti);
@@ -131,6 +133,7 @@
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
     var nw = el('button', 'cp-now new', '+ Nuova'); nw.type = 'button'; nw.onclick = function () { openForm(S.day); };
     top.appendChild(nw); top.appendChild(nb); root.appendChild(top);
+    }
     if (S.err) { var er = el('div', 'cp-err'); er.appendChild(el('span', null, S.err)); var r2 = el('button', 'cp-btn', 'Riprova'); r2.type = 'button'; r2.onclick = load; er.appendChild(r2); root.appendChild(er); }
 
     // giorni
@@ -188,6 +191,67 @@
     }
     if (S.view === 'grid') { var gs = el('div', 'cp-gs' + (S.sel || S.form ? ' open' : '')); gs.appendChild(S.court ? board(bs, now) : boardAll(now)); if (S.sel || S.form) gs.appendChild(detail(bs)); root.appendChild(gs); root.classList.add('wide'); }
     else root.appendChild(dayList(bs, now));
+    if (PH) phWrap();
+  }
+
+  // ---------- smartphone: come per le altre attività (Giorno / Settimana dal selettore in alto, riga dei giorni con swipe) ----------
+  var mq = window.matchMedia ? window.matchMedia('(max-width:699px)') : { matches: false };
+  function isPh() { return !!mq.matches; }
+  function phWeek() { var w = document.getElementById('view-week'); return !!(w && w.getAttribute('aria-pressed') === 'true'); }
+  ['view-day', 'view-week'].forEach(function (id) { var b = document.getElementById(id); if (b) b.addEventListener('click', function () { setTimeout(function () { S.sel = null; S.form = null; S.askCancel = false; if (S.data) draw(); }, 0); }); });
+  if (mq.addEventListener) mq.addEventListener('change', function () { if (S.data) draw(); });
+  function phHead(D) {
+    var wk = phWeek(), top = el('div', 'cp-ptop');
+    if (wk) {
+      var wa = parse(monday(S.day)), wb = parse(addDays(monday(S.day), 6)), sh = function (d) { return MO[d.getUTCMonth()].slice(0, 3); };
+      top.appendChild(el('div', 'cp-ptitle', wa.getUTCMonth() === wb.getUTCMonth() ? wa.getUTCDate() + ' – ' + wb.getUTCDate() + ' ' + sh(wb) + ' ' + wb.getUTCFullYear() : wa.getUTCDate() + ' ' + sh(wa) + ' – ' + wb.getUTCDate() + ' ' + sh(wb)));
+    } else {
+      var d = parse(S.day), card = el('div', 'cp-pcard');
+      var num = el('b', null, String(d.getUTCDate())); card.appendChild(num);
+      var tx = el('span'); tx.appendChild(el('strong', null, DL[d.getUTCDay()])); tx.appendChild(el('small', null, MO[d.getUTCMonth()] + ' ' + d.getUTCFullYear())); card.appendChild(tx);
+      top.appendChild(card);
+    }
+    var ar = el('div', 'cp-pact');
+    [[-1, SVG_L, 'Giorno prima'], [1, SVG_R, 'Giorno dopo']].forEach(function (v) {
+      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { goDay(v[0]); }; ar.appendChild(b);
+    });
+    var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
+    nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
+    ar.appendChild(nb); top.appendChild(ar); root.appendChild(top);
+    if (wk) {
+      var st = el('div', 'cp-pstrip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni della settimana');
+      var mo = monday(S.day);
+      for (var i = 0; i < 7; i++) (function (date) {
+        var n = bookingsOn(date).length, b = el('button', 'cp-pd' + (date === S.day ? ' on' : '') + (date === D.today ? ' tod' : '') + (date < D.today ? ' past' : '')); b.type = 'button';
+        b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
+        b.appendChild(el('span', null, DN[parse(date).getUTCDay()])); b.appendChild(el('b', null, String(parse(date).getUTCDate()))); b.appendChild(el('i', null, n ? String(n) : '·'));
+        b.onclick = function () { S.day = date; S.sel = null; S.form = null; S.askCancel = false; draw(); };
+        st.appendChild(b);
+      })(addDays(mo, i));
+      root.appendChild(st); swipe(st);
+    }
+    if (!S.sel && !S.form) { var fab = el('button', 'cp-fab', '+ Nuova'); fab.type = 'button'; fab.onclick = function () { openForm(S.day); }; root.appendChild(fab); }
+  }
+  function phWrap() {
+    var pb = el('div', 'cp-pbody' + (S.swDir ? ' in' + S.swDir : '')); S.swDir = '';
+    Array.prototype.slice.call(root.children).forEach(function (c) { if (c.classList.contains('cp-sum') || c.classList.contains('cp-list')) pb.appendChild(c); });
+    root.appendChild(pb); swipe(pb);
+  }
+  function swipe(box) { // il contenuto segue il dito; oltre la soglia cambia giorno
+    var x0 = 0, y0 = 0, dx = 0, on = false, lock = '';
+    var body = function () { return root.querySelector('.cp-pbody'); };
+    box.addEventListener('touchstart', function (e) { if (e.touches.length !== 1 || S.sel || S.form) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; on = true; lock = ''; }, { passive: true });
+    box.addEventListener('touchmove', function (e) {
+      if (!on) return; var t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
+      if (!lock) { if (Math.abs(mx) > 8 || Math.abs(my) > 8) lock = Math.abs(mx) > Math.abs(my) * 1.3 ? 'h' : 'v'; }
+      if (lock !== 'h') return; dx = mx; var b = body(); if (b) { b.style.transition = 'none'; b.style.transform = 'translateX(' + Math.max(-140, Math.min(140, dx * .8)) + 'px)'; b.style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 500)); }
+    }, { passive: true });
+    function end() {
+      if (!on) return; on = false; var b = body();
+      if (lock === 'h' && Math.abs(dx) > 70) { var dir = dx < 0 ? 1 : -1; S.swDir = dir > 0 ? 'R' : 'L'; if (b) { b.style.transition = 'transform .14s ease-out,opacity .14s'; b.style.transform = 'translateX(' + (dir > 0 ? -60 : 60) + 'px)'; b.style.opacity = '0'; } setTimeout(function () { goDay(dir); }, 120); }
+      else if (b) { b.style.transition = 'transform .18s ease-out,opacity .18s'; b.style.transform = ''; b.style.opacity = ''; }
+    }
+    box.addEventListener('touchend', end, { passive: true }); box.addEventListener('touchcancel', end, { passive: true });
   }
   function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
   function goDay(n) {
