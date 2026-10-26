@@ -147,15 +147,20 @@
 
     // riepilogo
     var bs = bookingsOn(S.day), s0 = stat(S.day), now = nowIn();
-    var nosoc = bs.filter(function (b) { return b.members === 0; }).length;
     var sum = el('div', 'cp-sum');
-    function tile(a, b) { var k = el('div', 'cp-k'); k.appendChild(el('span', null, a)); k.appendChild(el('b', null, b)); sum.appendChild(k); }
-    tile('Occupati', s0.occ + ' su ' + s0.tot);
-    if (S.day === now.date) {
-      var lib = D.courts.filter(function (c) { return slotsOf(c, S.day).some(function (sl) { return sl.s <= now.min && now.min < sl.e; }) && !bs.some(function (b) { return b.court_id === c.id && mins(b.start) <= now.min && now.min < mins(b.end); }); }).length;
-      tile('Liberi ora', lib === 1 ? '1 campo' : lib + ' campi');
-    } else tile('Slot liberi', String(s0.tot - s0.occ));
-    tile('Senza soci', String(nosoc));
+    function tile(a, b, c) { var k = el('div', 'cp-k'); k.appendChild(el('span', null, a)); k.appendChild(el('b', null, b)); if (c) k.appendChild(el('small', null, c)); sum.appendChild(k); }
+    var pct = s0.tot ? Math.round(s0.occ * 100 / s0.tot) : 0;
+    var ppl = bs.reduce(function (a, b) { return a + (+b.players || 0); }, 0), mem = bs.reduce(function (a, b) { return a + (+b.members || 0); }, 0);
+    var freeC = D.courts.filter(function (c) {
+      return slotsOf(c, S.day).some(function (sl) {
+        if (closedAt(c, S.day, sl.s, sl.e)) return false;
+        if (S.day < now.date || (S.day === now.date && sl.e <= now.min)) return false;
+        return !bs.some(function (b) { return b.court_id === c.id && mins(b.start) < sl.e && mins(b.end) > sl.s; });
+      });
+    }).length;
+    tile('Occupazione', pct + '%', s0.occ + ' slot su ' + s0.tot);
+    tile('Persone', String(ppl), mem + ' soci · ' + (ppl - mem) + ' non soci');
+    tile('Campi liberi', freeC + ' su ' + D.courts.length, S.day === now.date ? 'con posto libero' : 'con posto libero');
     if (S.view !== 'grid') root.appendChild(sum);
 
     var lg = el('div', 'cp-leg');
@@ -311,7 +316,7 @@
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
-      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button';
+      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button'; r.style.setProperty('--cc', courtColor(c));
       r.setAttribute('aria-expanded', S.sel === b.id ? 'true' : 'false');
       var t = el('span', 'cp-lt'); t.appendChild(el('b', null, b.start)); t.appendChild(el('small', null, 'fino alle ' + b.end)); r.appendChild(t);
       r.appendChild(courtSvg(c, b.players || 0, b.members, 'li'));
@@ -366,42 +371,56 @@
 
   function formView(d) {
     var F = S.form, c = courtOf(F.court_id), D = S.data;
-    d.appendChild(el('h3', null, 'Nuova prenotazione'));
-    d.appendChild(el('p', null, 'Per chi prenota al telefono o di persona.'));
+    d.style.setProperty('--cc', courtColor(c));
+    d.classList.add('cp-fv');
+    var hd = el('div', 'cp-fh'); hd.appendChild(courtSvg(c, +F.players || 0, +F.members || 0, 'li'));
+    var ht = el('div'); ht.appendChild(el('h3', null, 'Nuova prenotazione')); ht.appendChild(el('p', null, c.name + ' · ' + longDay(F.date) + (F.time ? ' · ' + F.time : ''))); hd.appendChild(ht); d.appendChild(hd);
     var f = el('div', 'cp-form');
     function fixTime() { var cc = courtOf(F.court_id); if (!slotsOf(cc, F.date).some(function (x) { return hhmm(x.s) === F.time && !closedAt(cc, F.date, x.s, x.e); })) F.time = firstTime(cc, F.date); F.hours = 1; F.msg = ''; }
+    function sec(t) { var h = el('div', 'cp-fs', t); f.appendChild(h); }
+    sec('Quando');
     var ra = el('div', 'cp-f2'), ld0 = el('label', null, 'Giorno'), di = el('input'); di.type = 'date'; di.value = F.date; di.min = D.today;
     di.onchange = function () { if (di.value) { F.date = di.value; fixTime(); draw(); } }; ld0.appendChild(di); ra.appendChild(ld0);
     var lc = el('label', null, 'Campo'), cs0 = el('select'); D.courts.forEach(function (x) { var o = el('option', null, x.name); o.value = x.id; if (x.id === F.court_id) o.selected = true; cs0.appendChild(o); });
     cs0.onchange = function () { F.court_id = cs0.value; fixTime(); draw(); }; lc.appendChild(cs0); ra.appendChild(lc); f.appendChild(ra);
+    var rt = el('div', 'cp-f2');
     var lt = el('label', null, 'Ora di inizio'), ts = el('select'), sls = slotsOf(c, F.date).filter(function (x) { return !closedAt(c, F.date, x.s, x.e); });
     if (!sls.length) { var o0 = el('option', null, 'Campo chiuso in questo giorno'); o0.value = ''; ts.appendChild(o0); }
     sls.forEach(function (x) { var busy = bookingsOn(F.date).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); var o = el('option', null, hhmm(x.s) + (busy ? ' (occupato)' : '')); o.value = hhmm(x.s); if (hhmm(x.s) === F.time) o.selected = true; ts.appendChild(o); });
-    ts.onchange = function () { F.time = ts.value; F.hours = 1; F.msg = ''; draw(); }; lt.appendChild(ts); f.appendChild(lt);
+    ts.onchange = function () { F.time = ts.value; F.hours = 1; F.msg = ''; draw(); }; lt.appendChild(ts); rt.appendChild(lt);
+    var ld = el('label', null, 'Durata'), sel = el('select');
+    var mx = F.time ? Math.max(1, Math.min(4, Math.floor((maxEnd(c) - mins(F.time)) / c.slot_min))) : 1;
+    for (var h = 1; h <= mx; h++) { var o = el('option', null, (h * c.slot_min >= 60 ? (h * c.slot_min / 60).toString().replace('.', ',') + (h * c.slot_min === 60 ? ' ora' : ' ore') : h * c.slot_min + ' min')); o.value = String(h); if (h === F.hours) o.selected = true; sel.appendChild(o); }
+    sel.onchange = function () { F.hours = +sel.value; }; ld.appendChild(sel); rt.appendChild(ld); f.appendChild(rt);
     function inp(label, key, type, extra) {
       var l = el('label', null, label), i = el('input'); i.type = type || 'text'; i.value = F[key]; if (extra) for (var k in extra) i.setAttribute(k, extra[k]);
       i.setAttribute('data-k', key); i.oninput = function () { F[key] = i.value; }; l.appendChild(i); return l;
     }
+    sec('Chi prenota');
     var r1 = el('div', 'cp-f2'); r1.appendChild(inp('Nome', 'first_name', 'text', { autocomplete: 'off', maxlength: 60 })); r1.appendChild(inp('Cognome', 'last_name', 'text', { autocomplete: 'off', maxlength: 60 })); f.appendChild(r1);
     f.appendChild(inp('Telefono', 'phone', 'tel', { inputmode: 'tel', maxlength: 30 }));
-    var r2 = el('div', 'cp-f2');
-    var ld = el('label', null, 'Durata'), sel = el('select');
-    var mx = F.time ? Math.max(1, Math.min(4, Math.floor((maxEnd(c) - mins(F.time)) / c.slot_min))) : 1;
-    for (var h = 1; h <= mx; h++) { var o = el('option', null, (h * c.slot_min >= 60 ? (h * c.slot_min / 60).toString().replace('.', ',') + (h * c.slot_min === 60 ? ' ora' : ' ore') : h * c.slot_min + ' min')); o.value = String(h); if (h === F.hours) o.selected = true; sel.appendChild(o); }
-    sel.onchange = function () { F.hours = +sel.value; }; ld.appendChild(sel); r2.appendChild(ld);
-    r2.appendChild(inp('Giocatori', 'players', 'number', { inputmode: 'numeric', min: 1, max: 22 })); f.appendChild(r2);
-    f.appendChild(inp('Di cui soci', 'members', 'number', { inputmode: 'numeric', min: 0, max: 22 }));
+    sec('Giocatori');
+    function stepper(label, key, min, max) {
+      var w = el('div', 'cp-st'); w.appendChild(el('span', 'cp-stl', label));
+      var bx = el('div', 'cp-stb'), mi = el('button', null, '−'), v = el('b', null, String(F[key] === '' ? 0 : F[key])), pl = el('button', null, '+');
+      mi.type = 'button'; pl.type = 'button'; mi.setAttribute('aria-label', 'Meno ' + label.toLowerCase()); pl.setAttribute('aria-label', 'Più ' + label.toLowerCase());
+      function set(n) { n = Math.max(min, Math.min(max, n)); F[key] = String(n); if (key === 'players' && +F.members > n) F.members = String(n); F.msg = ''; draw(); }
+      mi.onclick = function () { set((+F[key] || 0) - 1); }; pl.onclick = function () { set((+F[key] || 0) + 1); };
+      bx.appendChild(mi); bx.appendChild(v); bx.appendChild(pl); w.appendChild(bx); return w;
+    }
+    var gp = el('div', 'cp-f2 st'); gp.appendChild(stepper('Giocatori', 'players', 1, 22)); gp.appendChild(stepper('Di cui soci', 'members', 0, 22)); f.appendChild(gp);
+    var qk = el('div', 'cp-qk'); [2, 4].forEach(function (n) { var q = el('button', (+F.players === n ? 'on' : ''), n + ' giocatori'); q.type = 'button'; q.onclick = function () { F.players = String(n); if (+F.members > n) F.members = String(n); draw(); }; qk.appendChild(q); }); f.appendChild(qk);
     f.appendChild(inp('Note (facoltative)', 'notes', 'text', { maxlength: 300 }));
     if (F.msg) { var m = el('div', 'cp-msg', F.msg); m.setAttribute('role', 'alert'); f.appendChild(m); }
-    var row = el('div', 'cp-row');
+    var row = el('div', 'cp-row cp-frow');
     var sv = el('button', 'cp-btn pri', S.busy ? 'Salvo…' : 'Salva prenotazione'); sv.type = 'button'; sv.disabled = S.busy; sv.onclick = save;
     var cn = el('button', 'cp-btn', 'Annulla'); cn.type = 'button'; cn.onclick = function () { S.form = null; draw(); };
     row.appendChild(sv); row.appendChild(cn); f.appendChild(row); d.appendChild(f); return d;
   }
-  function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); return sl.length ? hhmm(sl[0].s) : ''; }
+  function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); var fr = sl.filter(function (x) { return !bookingsOn(d).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }); return fr.length ? hhmm(fr[0].s) : sl.length ? hhmm(sl[0].s) : ''; }
   function openForm(date, courtId, time) {
     var D = S.data, c = courtOf(courtId || D.courts[0].id), d = date || S.day; S.sel = null; S.askCancel = false;
-    S.form = { court_id: c.id, date: d, time: time || firstTime(c, d), hours: 1, first_name: '', last_name: '', phone: '', players: '', members: '', notes: '', msg: '' };
+    S.form = { court_id: c.id, date: d, time: time || firstTime(c, d), hours: 1, first_name: '', last_name: '', phone: '', players: '2', members: '0', notes: '', msg: '' };
     draw(); focusForm();
   }
   function maxEnd(c) { var m = 0; ((c.hours && c.hours[String(wd(S.form.date))]) || []).forEach(function (h) { if (mins(h[0]) <= mins(S.form.time) && mins(h[1]) > mins(S.form.time)) m = mins(h[1]); }); return m; }
@@ -419,6 +438,12 @@
       .catch(function (e) { S.busy = false; F.msg = e.message; draw(); });
   }
 
+  window.__cpOpen = function (id, iso) { // dal registro: apre quella prenotazione nel calendario
+    var tz = (S.data && S.data.timezone) || 'Europe/Rome', d;
+    try { d = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(iso)); } catch (e) { return; }
+    S.view = 'day'; S.day = d; S.strip = monday(d); S.sel = id; S.form = null; S.askCancel = false; S.data = null; load();
+    setTimeout(scrollDet, 700);
+  };
   window.__cpReload = function () { S.data = null; S.strip = S.strip || null; load(); };
   load();
 })();

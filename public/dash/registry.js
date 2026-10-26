@@ -86,6 +86,7 @@
       setTimeout(function(){if(window.liaOpenDate&&start){window.liaFocusEv={name:nm,svc:sv,start:start,exp:Date.now()+9000,first:0,bad:b.classList.contains('x')};window.liaOpenDate(start);}},80);
       return;
     }
+    if(window.__liaCampi){setTimeout(function(){if(window.__cpOpen&&start)window.__cpOpen(id,start);},80);return;}
     setTimeout(function(){if(window.liaOpenAppt&&start)window.liaOpenAppt(id,start);},80);
   });
 

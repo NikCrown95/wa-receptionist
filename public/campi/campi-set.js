@@ -255,6 +255,7 @@
     if (menu.querySelector('[data-cx]')) return true;
     HIDE.forEach(function (k) { var r = menu.querySelector('[data-st="' + k + '"]'); if (r) r.style.display = 'none'; });
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il tuo circolo'; });
+    Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var rows = g.querySelectorAll('.stRow'); if (rows.length && Array.prototype.every.call(rows, function (r) { return r.style.display === 'none'; })) g.style.display = 'none'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del circolo';
     var grp = el('div', 'stGroup'), h3 = el('h3', null, 'Campi e regole'), list = el('div', 'stList'); grp.appendChild(h3); grp.appendChild(list);
     [['hours', 'c-amber', IC.clock, 'Orari del circolo', 'Quando i campi si possono prenotare', sHours], ['rules', 'c-amber', IC.rules, 'Regole del circolo', 'Soci, FIT e limite giornaliero', sRules], ['courts', 'c-teal', IC.court, 'Campi e orari', 'Nome, slot, prezzo e apertura', sCourts], ['closures', 'c-coral', IC.off, 'Chiusure', 'Tornei, manutenzione, giorni senza campi', sClosures]].forEach(function (r) {

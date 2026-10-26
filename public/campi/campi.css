@@ -268,3 +268,44 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-chip.p4,.cpx .cp-b.wk.p4{background:color-mix(in srgb,var(--accent,#2B8A94) 42%,var(--card2,#132A32));border-color:color-mix(in srgb,var(--accent,#2B8A94) 75%,var(--line2,#27414A))}
 .cpx .cp-leg i.p2{background:var(--card2,#132A32);border:1px solid var(--line2,#27414A)}
 .cpx .cp-leg i.p4{background:color-mix(in srgb,var(--accent,#2B8A94) 42%,var(--card2,#132A32));border:1px solid color-mix(in srgb,var(--accent,#2B8A94) 75%,var(--line2,#27414A))}
+
+/* 4 giocatori: colore pieno e sicuro (senza dipendere da color-mix) */
+.cpx .cp-chip.p4,.cpx .cp-b.wk.p4{background:linear-gradient(135deg,#27909c,#17636e);border-color:#4fc3cf;color:#fff}
+.cpx .cp-chip.p4 u,.cpx .cp-b.wk.p4 small{color:#d5f3f6}
+.cpx .cp-leg i.p4{background:linear-gradient(135deg,#27909c,#17636e);border:1px solid #4fc3cf}
+
+/* riepilogo del giorno e barretta colorata per campo */
+.cpx .cp-k small{display:block;font-size:.68rem;color:var(--muted,#93A8AE);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpx .cp-li{border-left-color:var(--cc,var(--accent,#2B8A94));border-left-width:6px}
+.cpx .cp-li.ns{border-left-color:var(--cc,var(--sec,#3B9CFF))}
+
+/* modulo nuova prenotazione */
+.cpx .cp-fv{padding:16px;gap:12px;border-top:3px solid var(--cc,var(--accent,#2B8A94))}
+.cpx .cp-fh{display:flex;gap:12px;align-items:center;padding-right:40px}
+.cpx .cp-fh .cp-cs{flex:none;width:52px;height:52px}
+.cpx .cp-fh h3{padding-right:0}
+.cpx .cp-fh p{margin-top:2px}
+.cpx .cp-fs{font-size:.68rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--cc,var(--accent,#2B8A94));margin-top:6px;padding-top:12px;border-top:1px solid var(--line,#1B2F36)}
+.cpx .cp-fh+.cp-form .cp-fs:first-child{border-top:0;padding-top:0;margin-top:0}
+.cpx .cp-f2.st{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cpx .cp-st{display:grid;gap:4px;min-width:0}
+.cpx .cp-stl{font-size:.76rem;font-weight:600;color:var(--muted,#93A8AE)}
+.cpx .cp-stb{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line2,#27414A);background:var(--card2,#132A32);border-radius:12px;min-height:48px;padding:3px}
+.cpx .cp-stb button{width:42px;height:42px;border-radius:9px;border:0;background:color-mix(in srgb,var(--cc,#2B8A94) 22%,transparent);color:var(--ink,#F2F6F7);font:700 1.3rem/1 inherit;cursor:pointer}
+.cpx .cp-stb b{font-size:1.2rem;font-variant-numeric:tabular-nums}
+.cpx .cp-qk{display:flex;gap:8px}
+.cpx .cp-qk button{flex:1;min-height:38px;border-radius:10px;border:1px solid var(--line2,#27414A);background:transparent;color:var(--muted,#93A8AE);font:600 .84rem inherit;cursor:pointer}
+.cpx .cp-qk button.on{background:color-mix(in srgb,var(--cc,#2B8A94) 30%,transparent);border-color:var(--cc,#2B8A94);color:var(--ink,#F2F6F7)}
+.cpx .cp-frow{display:grid;grid-template-columns:1fr;gap:8px;margin-top:4px}
+.cpx .cp-frow .cp-btn{min-height:48px;width:100%}
+.cpx .cp-frow .cp-btn.pri{background:var(--cc,var(--accent,#2B8A94));border-color:var(--cc,var(--accent,#2B8A94))}
+
+/* statistiche del circolo: stile delle altre attivita', al posto di quelle standard */
+body.campiOn #statsSubApp{display:none!important}
+body.campiOn #panelStats>:not(.gcs){display:none!important}
+
+/* scheda attivita' del circolo: niente servizi, orari da appuntamenti e squadra */
+body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{display:none!important}
+
+/* telefono: il titolo del giorno su tutta la riga, poi i comandi */
+@media (max-width:560px){.cpx .cp-title{flex:1 1 100%;font-size:1.25rem}.cpx .cp-top .cp-vw{flex:1 1 auto}}
