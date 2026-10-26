@@ -36,9 +36,9 @@
 @media(max-width:699px){#liaRecapPanel{left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 62px);max-height:calc(100vh - env(safe-area-inset-top,0px) - 80px)}}
 @media(min-width:700px){#liaRecapPanel{right:16px;top:calc(env(safe-area-inset-top,0px) + 64px);width:420px;max-height:min(680px,calc(100vh - 90px))}}
 
-.lr-head{display:flex;align-items:center;gap:8px;padding:18px 14px 8px 18px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 15%,transparent),transparent)}
-.lr-head h2{flex:1;margin:0;font-family:'Manrope','Plus Jakarta Sans',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-.035em}
-.lr-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;transition:background .18s,color .18s,border-color .18s}
+.lr-head{display:flex;align-items:center;gap:6px;padding:10px 12px 2px 20px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,transparent),transparent)}
+.lr-head h2{flex:1;margin:0;font-family:'Manrope','Plus Jakarta Sans',sans-serif;font-size:1.05rem;font-weight:800;letter-spacing:-.035em}
+.lr-x{width:30px;height:30px;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0;transition:background .18s,color .18s,border-color .18s}
 .lr-x:hover{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
 .lr-x:focus-visible{outline:3px solid var(--accent-ink);outline-offset:2px}
 .lr-body{flex:1;overflow-y:auto;padding:0 14px 6px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch}
@@ -205,3 +205,4 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 
 /* il nome dell'attivita' nell'intestazione sta sempre su una riga e non viene mai tagliato: recap.js ne riduce la dimensione */
 .mainTopRow .mainBiz #businessName{white-space:nowrap!important;overflow:visible;text-overflow:clip!important}
+.lr-x svg{width:14px;height:14px}
