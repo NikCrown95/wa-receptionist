@@ -235,8 +235,8 @@
     var ask = null, S = { who: '', allday: true, why: '' };
     function draw() {
       w.textContent = '';
-      var c1 = card('In programma');
-      if (!D.closures.length) c1.appendChild(hint('Nessuna chiusura in programma: tutti i campi sono prenotabili negli orari di apertura.'));
+      var c1 = card('Segnalati');
+      if (!D.closures.length) c1.appendChild(hint('Nessun lavoro o problema segnalato: tutti i campi sono prenotabili negli orari di apertura.'));
       D.closures.forEach(function (c) {
         var r = el('div', 'cx-clo'), t = el('div', 'cx-t');
         var cn = c.court_id ? (D.courts.filter(function (x) { return x.id === c.court_id; })[0] || { name: 'Campo' }).name : null;
@@ -252,8 +252,8 @@
       });
       w.appendChild(c1);
 
-      var c2 = card('Nuova chiusura');
-      var l1 = el('div', 'stF'); l1.appendChild(el('span', null, 'Cosa non è disponibile'));
+      var c2 = card('Segnala un problema o dei lavori');
+      var l1 = el('div', 'stF'); l1.appendChild(el('span', null, 'Cosa non si può prenotare'));
       l1.appendChild(chips([['', 'Tutto il circolo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), S.who, function (v) { S.who = v; })); c2.appendChild(l1);
       var a = input('date', '', { min: D.today }), z = input('date', '', { min: D.today });
       c2.appendChild(row2(sf('Dal giorno', a), sf('Al giorno (vuoto = solo quel giorno)', z)));
@@ -267,10 +267,10 @@
       c2.appendChild(hint('Nei giorni e negli orari indicati il campo (o tutto il circolo) non si può prenotare e il calendario lo mostra chiuso.'));
       w.appendChild(c2);
       var msg = msgBox(); w.appendChild(msg);
-      var sv = btn('Aggiungi la chiusura', '', function () {
+      var sv = btn('Segnala e blocca le prenotazioni', '', function () {
         S.why = why.value;
         guard(sv, msg, call({ action: 'add_closure', court_id: S.who || null, starts_on: a.value, ends_on: z.value || a.value, from: S.allday ? '' : t1.value, to: S.allday ? '' : t2.value, reason: why.value }).then(load))
-          .then(function () { S.why = ''; toast('Chiusura aggiunta'); changed(); draw(); }).catch(function () { });
+          .then(function () { S.why = ''; toast('Segnalato: nel periodo indicato non si può prenotare'); changed(); draw(); }).catch(function () { });
       });
       w.appendChild(sv);
     }
@@ -304,7 +304,7 @@
     ['courts', 'c-teal', IC.court, 'Campi', 'Nome, fondo e durata delle prenotazioni', 'I campi', 'I campi del circolo. Tocca un campo per modificarlo o aggiungine uno nuovo.', pCourts],
     ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.', pPrices],
     ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il circolo è aperto e i campi si possono prenotare.', pHours],
-    ['closures', 'c-red', IC.off, 'Chiusure e lavori', 'Tornei, manutenzione, maltempo', 'Chiusure e lavori', 'Quando il circolo o un singolo campo non è disponibile: tornei, lavori, manutenzione, maltempo.', pClosures],
+    ['closures', 'c-red', IC.off, 'Lavori e indisponibilità', 'Manutenzione, tornei, maltempo', 'Lavori e indisponibilità', 'Segnala un problema o dei lavori su un campo, o la chiusura del circolo: nei giorni e negli orari indicati non si può prenotare.', pClosures],
     ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, FIT e limite giornaliero', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules]
   ];
   var made = {}, rowOf = {}, curKey = null;
@@ -321,12 +321,13 @@
     s('closures', D.closures.length ? D.closures.length + (D.closures.length === 1 ? ' chiusura in programma' : ' chiusure in programma') : 'Nessuna in programma');
     var C = D.club; s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.fit ? ' · FIT' : ''));
   }
+  function label(t) { var sl = document.getElementById('sectionLabel'); if (sl) setTimeout(function () { sl.textContent = t; }, 30); }
   function openPane(k) {
     var p = made[k]; if (!p) return;
     load().then(function () {
       p.body.textContent = ''; p.render(p.body);
       if (window.liaSettingsOpen) window.liaSettingsOpen('cx-' + k); // fa tornare "attivo" lo schema di navigazione (telefono: pagina intera)
-      unmark(); curKey = k; p.pane.classList.add('on'); rowOf[k].classList.add('on');
+      unmark(); curKey = k; p.pane.classList.add('on'); rowOf[k].classList.add('on'); label(k === 'hours' || k === 'closures' ? 'Disponibilità' : 'Impostazioni');
       var sh = shell(); if (sh && !wide()) sh.classList.add('inPage');
       var wrap = document.querySelector('#panelOther .otherWrap'); if (wrap) wrap.scrollTop = 0;
     }).catch(function (e) { toast(e.message, true); });
@@ -369,7 +370,8 @@
     var cp = sh.querySelector('.stPage[data-st="contacts"]'); if (cp) cp.classList.add('cx-native');
     if (bp) bp.classList.add('cx-native');
     // cliccando una voce normale, le mie pagine si spengono
-    menu.addEventListener('click', function (e) { var r = e.target.closest && e.target.closest('.stRow'); if (r && !r.hasAttribute('data-cx')) unmark(); }, true);
+    menu.addEventListener('click', function (e) { var r = e.target.closest && e.target.closest('.stRow'); if (r && !r.hasAttribute('data-cx')) { unmark(); label('Impostazioni'); } }, true);
+    window.liaAvailOpen = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); setTimeout(function () { openPane('closures'); }, 80); };
     var orig = window.liaSettingsOpen;
     if (typeof orig === 'function' && !orig.__cx) { var w2 = function (k) { if (String(k).indexOf('cx-') !== 0) unmark(); return orig(k); }; w2.__cx = 1; window.liaSettingsOpen = w2; }
     ph.remove(); load().catch(function () { });

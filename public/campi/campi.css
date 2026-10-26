@@ -511,7 +511,6 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 #panelOther .cx-lnk.bad{color:var(--danger)}
 #panelOther .cx-quick{display:flex;gap:16px}
 #panelOther .cx-rule .cx-sel{max-width:none;width:100%}
-body.campiOn #menuTabAvail{display:none!important}
 
 /* ===== smartphone: Giorno / Settimana come le altre attività ===== */
 body.campiOn #view-month{display:none!important}
