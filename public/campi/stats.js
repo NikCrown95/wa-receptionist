@@ -200,28 +200,17 @@
       '<div class="panel"><h2>Prenotazioni nel tempo</h2><p class="sub">Campi prenotati ogni ' + (P === 'year' ? 'mese' : 'giorno') + '.</p><div id="cgsBk"></div></div></div>' +
       '<div class="row2"><div class="panel"><h2>Occupazione per campo</h2><p class="sub">Ore giocate sulle ore di apertura, nel periodo.</p><div class="hbars" id="byservice"></div></div>' +
       '<div class="panel"><h2>Giorni più richiesti</h2><p class="sub">Prenotazioni per giorno della settimana.</p><div class="hbars" id="cgsWd"></div></div></div>' +
-      '<div class="row2"><div class="panel"><h2>Orari più richiesti</h2><p class="sub">A che ora si gioca di più.</p><div class="hbars" id="cgsHr"></div></div>' +
-      '<div class="panel"><h2>Chi gioca</h2><p class="sub">Soci e non soci, singolo e doppio. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div></div>' +
-      '<div class="row2 row-full"><div class="panel"><h2>I giocatori più assidui</h2><p class="sub" id="cgsTopSub"></p><div id="cgsTop"></div></div></div>' +
+      '<div class="row2"><div class="panel"><h2>Soci e non soci</h2><p class="sub">Chi gioca sui campi. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div>' +
+      '<div class="panel"><h2>Singolo o doppio</h2><p class="sub">Come si gioca. Tocca una fetta per il dettaglio.</p><div id="cgsTyp" class="cgs-pies"></div></div></div>' +
       '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p><p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
     bars(wrap.querySelector('#cgsRev'), d.series, function (x) { return x.rev; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + eur(x.rev) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni'); });
     line(wrap.querySelector('#cgsBk'), d.series, function (x) { return x.n; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + '<br>' + hrs(x.min) + ' di campo · ' + x.pl + ' giocatori'; });
     hbars(wrap.querySelector('#byservice'), d.byC.map(function (x) { return { name: x.c.name, color: courtColor(x.c), pct: x.pct, amt: x.pct + '%', tip: '<b>' + esc(x.c.name) + ' · ' + x.pct + '%</b>' + hrs(x.min) + ' su ' + hrs(x.cap) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + ' · ' + eur(x.rev) }; }), 'Aggiungi i campi da Impostazioni › Campi e orari.');
     var mx = Math.max.apply(null, d.wdc.concat([1]));
     hbars(wrap.querySelector('#cgsWd'), c.n ? d.wdc.map(function (n, i) { return { name: DAYL[i], color: 'var(--accent)', pct: Math.round(n / mx * 100), amt: String(n), tip: '<b>' + DAYL[i] + '</b>' + n + (n === 1 ? ' prenotazione' : ' prenotazioni') }; }) : [], 'Ancora nessuna prenotazione nel periodo.');
-    var hk = Object.keys(d.hc).map(Number).sort(function (a, b) { return a - b; }), hm = Math.max.apply(null, hk.map(function (k) { return d.hc[k]; }).concat([1]));
-    hbars(wrap.querySelector('#cgsHr'), hk.map(function (k) { var n = d.hc[k]; return { name: String(k).padStart(2, '0') + ':00', color: 'var(--accent)', pct: Math.round(n / hm * 100), amt: String(n), tip: '<b>' + String(k).padStart(2, '0') + ':00</b>' + n + (n === 1 ? ' prenotazione' : ' prenotazioni') }; }), 'Ancora nessuna prenotazione nel periodo.');
     var tp = nM + nG, tg = d.dbl + d.sgl;
-    var who = wrap.querySelector('#cgsWho');
-    pie(who, 'Giocatori', tp, [{ name: 'Soci', v: nM, color: css('--accent', '#2B8A94') }, { name: 'Non soci', v: nG, color: '#3B9CFF' }], 'giocatori');
-    pie(who, 'Tipo di partita', tg, [{ name: 'Doppio (3-4)', v: d.dbl, color: '#7FDCDC' }, { name: 'Singolo (1-2)', v: d.sgl, color: '#E0A23A' }], 'partite');
-    var tb = wrap.querySelector('#cgsTop'), ts = wrap.querySelector('#cgsTopSub');
-    ts.textContent = d.top.length ? 'Chi ha prenotato di più negli ' + PL[P] + '.' : 'Ancora nessuna prenotazione negli ' + PL[P] + '.';
-    d.top.forEach(function (x) {
-      var row = document.createElement('div'); row.className = 'crow';
-      row.innerHTML = '<div class="av">' + esc(String(x.name).split(' ').map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</div><div class="mid"><b>' + esc(x.name) + '</b><span>' + num(x.n) + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + ' · ' + hrs(x.min) + '</span></div>';
-      tb.appendChild(row);
-    });
+    pie(wrap.querySelector('#cgsWho'), 'Giocatori', tp, [{ name: 'Soci', v: nM, color: css('--accent', '#2B8A94') }, { name: 'Non soci', v: nG, color: '#3B9CFF' }], 'giocatori');
+    pie(wrap.querySelector('#cgsTyp'), 'Tipo di partita', tg, [{ name: 'Doppio (3-4)', v: d.dbl, color: '#7FDCDC' }, { name: 'Singolo (1-2)', v: d.sgl, color: '#E0A23A' }], 'partite');
   }
 
   document.addEventListener('lia:section', function (e) { active = e.detail === 'stats'; if (active) { shell(); load(); } else tipHide(); });
