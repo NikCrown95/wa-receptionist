@@ -153,23 +153,26 @@
     var c1 = card('Quando il circolo è aperto');
     c1.appendChild(hint('Fuori da questi orari nessun campo si può prenotare, né dalla pagina né da Lia. Valgono per tutti i campi.'));
     var box = el('div', 'cx-days'); c1.appendChild(box);
+    function sel(val, label) {
+      var o = []; for (var m = 0; m < 24 * 60; m += 30) { var t = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); o.push([t, t]); }
+      if (!o.some(function (x) { return x[0] === val; })) o.push([val, val]);
+      var e = el('select', 'set-input cx-sel'); e.setAttribute('aria-label', label);
+      o.forEach(function (x) { var op = el('option', null, x[1]); op.value = x[0]; if (x[0] === val) op.selected = true; e.appendChild(op); }); return e;
+    }
     function draw() {
       box.textContent = '';
       for (var d = 1; d <= 7; d++) (function (d) {
         var rng = H[d] || (H[d] = []), row = el('div', 'cx-day' + (rng.length ? '' : ' off'));
-        var top = el('div', 'cx-dayt'); top.appendChild(el('b', null, DAYS[d - 1]));
-        var st = el('span', 'cx-dst', rng.length ? 'Aperto' : 'Chiuso'); top.appendChild(st);
-        top.appendChild(sw(rng.length > 0, DAYS[d - 1] + ' aperto', function (v) { if (v) H[d] = [['08:00', '22:00']]; else H[d] = []; draw(); }));
-        row.appendChild(top);
-        rng.forEach(function (r, k) {
-          var line = el('div', 'cx-rg'), a = input('time', r[0]), z = input('time', r[1]);
-          a.setAttribute('aria-label', DAYS[d - 1] + ' apre'); z.setAttribute('aria-label', DAYS[d - 1] + ' chiude');
+        row.appendChild(el('b', 'cx-dn', DAYS[d - 1]));
+        var tm = el('div', 'cx-tm');
+        if (!rng.length) tm.appendChild(el('span', 'cx-cl', 'Chiuso'));
+        rng.forEach(function (r) {
+          var a = sel(r[0], DAYS[d - 1] + ' apre alle'), z = sel(r[1], DAYS[d - 1] + ' chiude alle');
           a.onchange = function () { r[0] = a.value; }; z.onchange = function () { r[1] = z.value; };
-          line.appendChild(sf(k ? 'Riapre alle' : 'Apre alle', a)); line.appendChild(sf('Chiude alle', z));
-          if (k) { var rm = el('button', 'cx-rm'); rm.type = 'button'; rm.setAttribute('aria-label', 'Togli la fascia'); rm.innerHTML = svg(IC.x, 16); rm.onclick = function () { rng.splice(k, 1); draw(); }; line.appendChild(rm); }
-          row.appendChild(line);
+          tm.appendChild(a); tm.appendChild(el('span', 'cx-to', '–')); tm.appendChild(z);
         });
-        if (rng.length && rng.length < 3) { var ad = el('button', 'cx-lnk', '+ Pausa pranzo o seconda fascia'); ad.type = 'button'; ad.onclick = function () { rng.push([rng[rng.length - 1][1], '22:00']); draw(); }; row.appendChild(ad); }
+        row.appendChild(tm);
+        row.appendChild(sw(rng.length > 0, DAYS[d - 1] + ' aperto', function (v) { H[d] = v ? [['08:00', '22:00']] : []; draw(); }));
         box.appendChild(row);
       })(d);
     }

@@ -481,3 +481,13 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 #panelOther .cx-rg .set-input{min-height:42px}
 #panelOther .cx-rg .stF>span{font-size:.74rem}
 @media(max-width:520px){#panelOther .cx-rg{grid-template-columns:1fr 1fr}#panelOther .cx-rm{grid-column:1/-1;width:100%}}
+/* orari: una riga per giorno */
+#panelOther .cx-days{gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+#panelOther .cx-day{display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:12px;padding:10px 14px;border:0;border-radius:0;border-bottom:1px solid var(--line);background:transparent}
+#panelOther .cx-day:last-child{border-bottom:0}
+#panelOther .cx-dn{font-size:1rem;font-weight:800}
+#panelOther .cx-tm{display:flex;align-items:center;gap:8px;min-width:0}
+#panelOther .cx-to{color:var(--muted);font-weight:700}
+#panelOther .cx-cl{color:var(--muted);font-weight:700;font-size:.92rem}
+#panelOther .cx-sel{flex:1;min-width:0;max-width:130px;min-height:44px;padding:0 10px;border-radius:12px;background:var(--bg2);font-size:1rem;text-align:center;text-align-last:center}
+@media(max-width:520px){#panelOther .cx-day{grid-template-columns:1fr auto;gap:8px 12px}#panelOther .cx-tm{grid-column:1/-1;order:3}#panelOther .cx-sel{max-width:none}}
