@@ -127,7 +127,7 @@
     if (S.err) { var er = el('div', 'cp-err'); er.appendChild(el('span', null, S.err)); var r2 = el('button', 'cp-btn', 'Riprova'); r2.type = 'button'; r2.onclick = load; er.appendChild(r2); root.appendChild(er); }
 
     // giorni
-    var st = el('div', 'cp-strip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
+    var st = el('div', 'cp-strip thin'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
     var pv = el('button', 'cp-arr'); pv.type = 'button'; pv.setAttribute('aria-label', 'Sette giorni prima'); pv.innerHTML = SVG_L;
     pv.onclick = function () { shift(-7); }; st.appendChild(pv);
     for (var i = 0; i < 7; i++) {
@@ -141,7 +141,7 @@
       })(addDays(S.strip, i));
     }
     var nx = el('button', 'cp-arr'); nx.type = 'button'; nx.setAttribute('aria-label', 'Sette giorni dopo'); nx.innerHTML = SVG_R;
-    nx.onclick = function () { shift(7); }; st.appendChild(nx); root.appendChild(st);
+    nx.onclick = function () { shift(7); }; st.appendChild(nx); if (S.view === 'grid') root.appendChild(st);
 
     // riepilogo
     var bs = bookingsOn(S.day), s0 = stat(S.day), now = nowIn();
@@ -160,7 +160,7 @@
     lg.innerHTML = '<span><i style="background:var(--accent,#2B8A94)"></i>Almeno un socio</span><span><i style="background:var(--sec,#3B9CFF)"></i>Solo non soci</span>';
     root.appendChild(lg);
 
-    if (S.view === 'grid') { root.appendChild(board(bs, now)); root.appendChild(detail(bs)); }
+    if (S.view === 'grid') { var gs = el('div', 'cp-gs'); gs.appendChild(board(bs, now)); gs.appendChild(detail(bs)); root.appendChild(gs); }
     else root.appendChild(dayList(bs, now));
   }
   function goDay(n) {
