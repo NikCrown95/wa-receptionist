@@ -1,6 +1,6 @@
 /* Calendario del circolo (campi sportivi) nella dashboard di Lia. Colori e caratteri sono quelli della dashboard (scuro/chiaro). */
 body.campiOn #calSubApp{display:none!important}
-.cpx{--cp-ok:var(--accent,#2B8A94);--cp-ns:var(--sec,#3B9CFF);display:grid;gap:14px;max-width:760px;margin:0 auto;padding:6px 0 28px;font-family:var(--fb,"Plus Jakarta Sans",system-ui,sans-serif);color:var(--ink,#F2F6F7)}
+.cpx{width:100%;--cp-ok:var(--accent,#2B8A94);--cp-ns:var(--sec,#3B9CFF);display:grid;gap:14px;max-width:760px;margin:0 auto;padding:6px 0 28px;font-family:var(--fb,"Plus Jakarta Sans",system-ui,sans-serif);color:var(--ink,#F2F6F7)}
 .cpx *{box-sizing:border-box}
 .cpx button{font-family:inherit}
 .cpx .cp-top{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line,#1B2F36)}
@@ -152,3 +152,6 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-dh{display:flex;gap:12px;align-items:center}
 .cpx .cp-list .cp-det{margin:0 0 4px}
 @media (max-width:480px){.cpx .cp-li{grid-template-columns:62px 52px minmax(0,1fr);gap:10px;padding:9px 10px}.cpx .cp-cs.li{width:52px;height:52px}.cpx .cp-live{display:none}.cpx .cp-top{flex-wrap:wrap}}
+
+.cpx .cp-dd{flex:none;display:flex;gap:6px}
+.cpx .cp-dd .cp-arr{width:44px;min-height:40px}

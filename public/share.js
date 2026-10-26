@@ -87,7 +87,7 @@
       /* palestre senza orari standard: le impostazioni rispondono con un errore, si usano i dati della palestra */
       return getJson("/api/palestra?t=" + encodeURIComponent(token) + "&data=1").then(function (g) {
         var gb = g && g.business; if (!gb) throw new Error("no");
-        if (document.body.classList.contains("campiOn")) throw new Error("no"); // un circolo non e' una palestra
+        if (window.__liaCampi || document.body.classList.contains("campiOn")) throw new Error("no"); // un circolo non e' una palestra
         return fin({ name: gb.name || "", business_type: "palestra", public_link: gb.public_link || "", gym_offers: null }, g);
       });
     }).then(function (res) { biz = res; return res; }).catch(function () { loading = null; if (!readCache()) biz = null; return null; });
@@ -196,7 +196,7 @@
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
     var k = window.liaHeroKindOf ? window.liaHeroKindOf(raw) : null;
-    var isGym = live && live.business_type ? String(live.business_type) === "palestra" : (biz.gym || String(raw.business_type || "") === "palestra"); // i dati freschi battono una copia vecchia salvata sul dispositivo
+    var isGym = window.__liaCampi ? false : live && live.business_type ? String(live.business_type) === "palestra" : (biz.gym || String(raw.business_type || "") === "palestra"); // i dati freschi battono una copia vecchia salvata sul dispositivo
     av.className = "mnAv" + (isGym ? " gym" : k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
     if (isGym) { card.style.setProperty("--mnh", "36"); av.innerHTML = ""; }
     else if (k) {

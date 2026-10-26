@@ -116,6 +116,11 @@
       vw.appendChild(b);
     });
     top.appendChild(vw);
+    var da = el('div', 'cp-dd');
+    [[-1, SVG_L, 'Giorno prima'], [1, SVG_R, 'Giorno dopo']].forEach(function (v) {
+      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { goDay(v[0]); }; da.appendChild(b);
+    });
+    top.appendChild(da);
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== D.today) { S.strip = D.today; S.data = null; load(); } else draw(); };
     top.appendChild(nb); root.appendChild(top);
@@ -157,6 +162,10 @@
 
     if (S.view === 'grid') { root.appendChild(board(bs, now)); root.appendChild(detail(bs)); }
     else root.appendChild(dayList(bs, now));
+  }
+  function goDay(n) {
+    var nd = addDays(S.day, n); S.sel = null; S.form = null; S.askCancel = false;
+    if (nd < S.strip || nd > addDays(S.strip, 6)) { S.strip = nd; S.day = nd; load(); } else { S.day = nd; draw(); }
   }
   function shift(n) { S.strip = addDays(S.strip, n); S.day = S.strip; S.sel = null; S.form = null; S.askCancel = false; load(); }
 
