@@ -309,3 +309,19 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 
 /* telefono: il titolo del giorno su tutta la riga, poi i comandi */
 @media (max-width:560px){.cpx .cp-title{flex:1 1 100%;font-size:1.25rem}.cpx .cp-top .cp-vw{flex:1 1 auto}}
+
+/* vista giornaliera: prenotazione in corso / prossima in evidenza */
+.cpx .cp-li.hl{background:linear-gradient(135deg,color-mix(in srgb,var(--cc,#2B8A94) 24%,var(--card,#0F2229)),var(--card,#0F2229) 70%);border-color:var(--cc,#2B8A94);box-shadow:0 0 0 1px var(--cc,#2B8A94),0 10px 26px -14px var(--cc,#2B8A94)}
+.cpx .cp-live.nx{background:transparent;color:var(--cc,var(--accent,#2B8A94));border:1px solid var(--cc,var(--accent,#2B8A94))}
+.cpx .cp-li.hl .cp-live{display:inline-block!important}
+.cpx .cp-pastbtn{justify-self:start;border:1px solid var(--line2,#27414A);background:transparent;color:var(--muted,#93A8AE);font:600 .8rem inherit;border-radius:999px;padding:7px 14px;cursor:pointer}
+@media (max-width:480px){.cpx .cp-li.hl{grid-template-columns:62px 52px minmax(0,1fr)}.cpx .cp-li.hl .cp-live{position:absolute;top:6px;right:8px;font-size:.62rem;padding:1px 7px}.cpx .cp-li{position:relative}}
+
+/* giorni della griglia: riquadri */
+.cpx .cp-board.wk .cp-g .cp-wh,.cpx .cp-board.all .cp-wh{background:var(--card2,#132A32);border:1px solid var(--line2,#27414A);border-radius:14px;margin:0 3px 8px;padding:6px 2px 7px}
+.cpx .cp-wh.tod{background:color-mix(in srgb,var(--accent,#2B8A94) 22%,var(--card2,#132A32))!important;border-color:var(--accent,#2B8A94)!important}
+.cpx .cp-wh.tod b{background:var(--accent,#2B8A94)}
+
+/* 2 giocatori: sfondo ben visibile (azzurro-grigio), diverso dai 4 (verde acqua) */
+.cpx .cp-chip.p2,.cpx .cp-b.wk.p2{background:linear-gradient(135deg,#3b5a73,#2a4357);border-color:#6f93ad;color:#fff}
+.cpx .cp-chip.p2 u,.cpx .cp-b.wk.p2 small{color:#cfe0ec}

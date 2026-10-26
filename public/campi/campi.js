@@ -165,7 +165,6 @@
 
     var lg = el('div', 'cp-leg');
     lg.innerHTML = '<span><i class="p2"></i>2 giocatori</span><span><i class="p4"></i>4 giocatori</span>';
-    if (S.view === 'grid') root.appendChild(lg);
 
     if (S.view === 'grid') {
       if (S.court && !courtOf(S.court)) S.court = '';
@@ -313,17 +312,27 @@
     if (!list.length) {
       wrap.appendChild(el('div', 'cp-load', S.day < now.date ? 'Nessuna prenotazione in questo giorno.' : 'Nessuna prenotazione per ora in questo giorno.'));
     }
+    var isToday = S.day === now.date;
+    var pastL = isToday ? list.filter(function (b) { return mins(b.end) <= now.min; }) : [];
+    var focus = isToday ? (list.filter(function (b) { return mins(b.start) <= now.min && now.min < mins(b.end); })[0] || list.filter(function (b) { return mins(b.start) > now.min; })[0]) : null;
+    if (pastL.length) {
+      var pb = el('button', 'cp-pastbtn' + (S.showPast ? ' on' : ''), (S.showPast ? 'Nascondi le ' : 'Mostra le ') + pastL.length + (pastL.length === 1 ? ' già conclusa' : ' già concluse')); pb.type = 'button';
+      pb.onclick = function () { S.showPast = !S.showPast; draw(); }; wrap.appendChild(pb);
+      if (!S.showPast && S.sel && pastL.some(function (b) { return b.id === S.sel; })) S.showPast = true;
+    }
+    if (isToday && !S.showPast) list = list.filter(function (b) { return pastL.indexOf(b) < 0; });
+    if (isToday && !S.showPast && !list.length && pastL.length) wrap.appendChild(el('div', 'cp-load', 'Per oggi non ci sono altre prenotazioni.'));
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
-      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button'; r.style.setProperty('--cc', courtColor(c));
+      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '') + (focus === b ? ' hl' : '')); r.type = 'button'; r.style.setProperty('--cc', courtColor(c));
       r.setAttribute('aria-expanded', S.sel === b.id ? 'true' : 'false');
       var t = el('span', 'cp-lt'); t.appendChild(el('b', null, b.start)); t.appendChild(el('small', null, 'fino alle ' + b.end)); r.appendChild(t);
       r.appendChild(courtSvg(c, b.players || 0, b.members, 'li'));
       var m = el('span', 'cp-lm'); m.appendChild(el('b', null, [b.first_name, b.last_name].filter(Boolean).join(' ') || '—'));
       var sub = [c.name, b.players ? b.players + ' giocatori' : '', b.members == null ? '' : (b.members === 0 ? 'nessun socio' : soc(b.members))].filter(Boolean).join(' · ');
       m.appendChild(el('small', null, sub)); r.appendChild(m);
-      if (cur) r.appendChild(el('span', 'cp-live', 'In corso'));
+      if (cur) r.appendChild(el('span', 'cp-live', 'In corso')); else if (focus === b) r.appendChild(el('span', 'cp-live nx', 'Prossima'));
       r.onclick = function () { S.sel = S.sel === b.id ? null : b.id; S.form = null; S.askCancel = false; draw(); if (S.sel) scrollDet(); };
       wrap.appendChild(r);
       if (S.sel === b.id) wrap.appendChild(detail(bs));
