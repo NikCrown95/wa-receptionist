@@ -169,6 +169,12 @@
     tile('Occupazione', pct + '%', s0.occ + ' slot su ' + s0.tot);
     tile('Persone', String(ppl), mem + ' soci · ' + (ppl - mem) + ' non soci');
     tile('Campi liberi', freeC + ' su ' + D.courts.length, S.day === now.date ? 'con posto libero' : 'con posto libero');
+    if (PH && !phWeek()) { // telefono: una sola card compatta, come l'agenda dei parrucchieri
+      sum.textContent = ''; sum.className = 'cp-sum cp-sum1';
+      var k1 = el('div', 'cp-k'); k1.appendChild(el('span', null, 'Agenda'));
+      k1.appendChild(el('b', null, bs.length === 0 ? 'Nessuna prenotazione' : bs.length === 1 ? '1 prenotazione' : bs.length + ' prenotazioni'));
+      k1.appendChild(el('small', null, 'Occupazione ' + pct + '% · ' + ppl + (ppl === 1 ? ' giocatore' : ' giocatori') + ' · ' + freeC + ' su ' + D.courts.length + ' campi con posto libero')); sum.appendChild(k1);
+    }
     if (S.view !== 'grid' && !(PH && phWeek())) root.appendChild(sum);
 
     var lg = el('div', 'cp-leg');
