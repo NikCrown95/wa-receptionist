@@ -577,7 +577,7 @@ body.campiOn #view-month{display:none!important}
   .cpx .cp-li{position:relative;border-left:1px solid var(--line2,#27414A)!important;padding-left:18px}
   .cpx .cp-li::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 3px 3px 0;background:var(--cc,var(--accent,#2B8A94))}
 }
-@media (max-width:699px){.cpx .cp-sum1{grid-template-columns:1fr}.cpx .cp-sum1 .cp-k{padding:12px 16px}.cpx .cp-sum1 .cp-k b{font-size:1.25rem}.cpx .cp-sum1 .cp-k small{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}}
+@media (max-width:699px){.cpx .cp-sum1{grid-template-columns:1fr}.cpx .cp-sum1 .cp-k{padding:14px 15px;border-radius:18px}.cpx .cp-sum1 .cp-k span{margin-bottom:4px;font-size:.60rem;font-weight:750;letter-spacing:.07em;text-transform:uppercase}.cpx .cp-sum1 .cp-k b{margin-top:0;font-size:1.32rem;font-weight:820;line-height:1.08;letter-spacing:-.045em}}
 /* card delle prenotazioni più compatte (stesso stile, ~20% più basse) e barra colore dritta su ogni schermo */
 .cpx .cp-list{gap:6px}
 .cpx .cp-li{position:relative;grid-template-columns:66px 46px minmax(0,1fr) auto;gap:12px;padding:7px 12px 7px 18px;border-radius:14px;border-left:1px solid var(--line2,#27414A)!important}
