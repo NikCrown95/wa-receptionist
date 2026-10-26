@@ -299,7 +299,7 @@
   function fixDefault() {
     var sh = shell(); if (!sh) return;
     var on = sh.querySelector('.stPage.on');
-    if (wide() && (!on || HIDE.indexOf(on.getAttribute('data-st')) >= 0) && !curKey) openPane('courts');
+    if (wide() && (!on || HIDE.indexOf(on.getAttribute('data-st')) >= 0) && !curKey && window.liaSettingsOpen) window.liaSettingsOpen('bizinfo');
   }
   function mount() {
     var menu = document.querySelector('#panelOther .stMenu'), sh = shell(), det = sh && sh.querySelector('.stDetail'); if (!menu || !det) return false;
@@ -308,7 +308,9 @@
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il circolo'; });
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var rows = g.querySelectorAll('.stRow'); if (rows.length && Array.prototype.every.call(rows, function (r) { return r.style.display === 'none'; })) g.style.display = 'none'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del circolo';
-    var groups = [['Campi e prezzi', ['courts', 'prices']], ['Disponibilità', ['hours', 'closures']], ['Regole', ['rules']]], first = menu.firstChild;
+    var groups = [['Campi e prezzi', ['courts', 'prices']], ['Disponibilità', ['hours', 'closures']], ['Regole', ['rules']]];
+    var bg = menu.querySelector('[data-st="bizinfo"]'); bg = bg && bg.closest('.stGroup'); var first = bg ? bg.nextSibling : menu.firstChild;
+    var ph = el('div'); menu.insertBefore(ph, first); first = ph;
     var byK = {}; PAGES.forEach(function (p) { byK[p[0]] = p; });
     groups.forEach(function (g) {
       var grp = el('div', 'stGroup'), list = el('div', 'stList'); grp.appendChild(el('h3', null, g[0])); grp.appendChild(list);
@@ -325,11 +327,16 @@
       });
       menu.insertBefore(grp, first);
     });
+    var bp = sh.querySelector('.stPage[data-st="bizinfo"]');
+    if (bp) { var bh = bp.querySelector('.stPh h2'), bpp = bp.querySelector('.stPh p'); if (bh) bh.textContent = 'Dati del circolo'; if (bpp) bpp.textContent = 'Nome, indirizzo e logo che i clienti vedono nella pagina di prenotazione.'; }
+    var bl = sh.querySelector('label[for="biName"]'); if (bl) bl.textContent = 'Nome del circolo';
+    var cp = sh.querySelector('.stPage[data-st="contacts"]'); if (cp) cp.classList.add('cx-native');
+    if (bp) bp.classList.add('cx-native');
     // cliccando una voce normale, le mie pagine si spengono
     menu.addEventListener('click', function (e) { var r = e.target.closest && e.target.closest('.stRow'); if (r && !r.hasAttribute('data-cx')) unmark(); }, true);
     var orig = window.liaSettingsOpen;
     if (typeof orig === 'function' && !orig.__cx) { var w2 = function (k) { if (String(k).indexOf('cx-') !== 0) unmark(); return orig(k); }; w2.__cx = 1; window.liaSettingsOpen = w2; }
-    load().catch(function () { });
+    ph.remove(); load().catch(function () { });
     fixDefault(); return true;
   }
   document.addEventListener('lia:section', function (e) { if (e.detail === 'other') setTimeout(fixDefault, 0); });

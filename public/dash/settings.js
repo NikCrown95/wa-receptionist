@@ -680,7 +680,7 @@ function pfRenderPoster(box,b,opts){
       (d.hours||[]).forEach(function(h){var wd=Number(h.weekday),op=String(h.opens||'').slice(0,5),cl=String(h.closes||'').slice(0,5);if(wd<0||wd>7||!op||!cl)return;var k=String(wd===0?6:(wd-1));if(!S.hours[k])S.hours[k]=[];S.hours[k].push({open:op,close:cl})});
       for(var i=0;i<7;i++)if(!S.hours[i])S.hours[i]=[];
       if(bizInput)bizInput.value=S.bizName;var be=document.getElementById('businessName');if(be)be.textContent=S.bizName;
-      renderServices();renderHours();renderBlocks();renderBusinessProfile(d);staffApply(d);rulesApply(d);stReady=true;stSum();flash('Servizi, orari e chiusure sincronizzati con Prenolia.');return d;
+      renderServices();renderHours();renderBlocks();renderBusinessProfile(d);staffApply(d);rulesApply(d);stReady=true;stSum();if(!window.__liaCampi)flash('Servizi, orari e chiusure sincronizzati con Prenolia.');return d;
     }
   /* rilegge tutto dal server e riallinea le pagine (usato dalla pagina Disponibilita') */
   window.liaSettingsRefresh=function(){window.liaSettingsData=null;window.liaSettingsPromise=null;return loadRemote()};

@@ -491,3 +491,16 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 #panelOther .cx-cl{color:var(--muted);font-weight:700;font-size:.92rem}
 #panelOther .cx-sel{flex:1;min-width:0;max-width:130px;min-height:44px;padding:0 10px;border-radius:12px;background:var(--bg2);font-size:1rem;text-align:center;text-align-last:center}
 @media(max-width:520px){#panelOther .cx-day{grid-template-columns:1fr auto;gap:8px 12px}#panelOther .cx-tm{grid-column:1/-1;order:3}#panelOther .cx-sel{max-width:none}}
+/* pagine native rese più curate per il circolo */
+#panelOther .stPage[data-st="bizinfo"] .stCard{display:flex;flex-direction:column;gap:18px;padding:22px}
+#panelOther .stPage[data-st="bizinfo"] .sfField{gap:8px}
+#panelOther .stPage[data-st="bizinfo"] .sfField label{font-size:.8rem}
+#panelOther .stPage[data-st="bizinfo"] .logoRow{display:flex;align-items:center;gap:16px}
+#panelOther .stPage[data-st="bizinfo"] .logoPrev{flex:none;width:84px;height:84px;border-radius:22px}
+#panelOther .stPage[data-st="bizinfo"] .logoBtns{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+#panelOther .stPage[data-st="bizinfo"] .logoBtns .stBtn{width:auto;min-width:170px;padding:0 20px}
+#panelOther .stPage[data-st="bizinfo"] .stHint{margin:0}
+#panelOther .stPage[data-st="bizinfo"] .stMsg{min-height:0}
+#panelOther .stPage[data-st="bizinfo"] .stMsg:empty{display:none}
+#panelOther .stPage[data-st="contacts"] .stCard{padding:22px}
+#panelOther .stPage[data-st="contacts"] .stMsg:empty{display:none}
