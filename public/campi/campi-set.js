@@ -84,7 +84,7 @@
     }
     function form(isNew) {
       var c = edit, F = c ? copy(c) : { id: null, name: 'Campo ' + (D.courts.length + 1), surface: '', indoor: false, slot_min: 60, price_member_eur: null, price_guest_eur: null, active: true, hours: null };
-      if (!F.hours) { var base = D.courts.filter(function (x) { return x.active; })[0] || D.courts[0]; F.hours = base ? copy(base.hours) : { 1: [['08:00', '22:00']], 2: [['08:00', '22:00']], 3: [['08:00', '22:00']], 4: [['08:00', '22:00']], 5: [['08:00', '22:00']], 6: [['08:00', '22:00']], 7: [['08:00', '22:00']] }; }
+      if (!F.hours) { var base = D.courts.filter(function (x) { return x.active && !x.custom_hours; })[0] || D.courts.filter(function (x) { return !x.custom_hours; })[0] || D.courts[0]; F.hours = base ? copy(base.hours) : { 1: [['08:00', '22:00']], 2: [['08:00', '22:00']], 3: [['08:00', '22:00']], 4: [['08:00', '22:00']], 5: [['08:00', '22:00']], 6: [['08:00', '22:00']], 7: [['08:00', '22:00']] }; }
       w.textContent = '';
       var back = el('button', 'cx-back', '‹ Tutti i campi'); back.type = 'button'; back.onclick = list; w.appendChild(back);
       var c1 = card(c ? 'Modifica ' + c.name : 'Nuovo campo');
@@ -185,18 +185,24 @@
   // ---------- 3. ORARI DI APERTURA ----------
   function pHours(w) {
     if (!D.courts.length) { var c0 = card(); c0.appendChild(hint('Aggiungi prima un campo da "Campi".')); w.appendChild(c0); return; }
-    var act = D.courts.filter(function (c) { return c.active; }), HS = { '': copy((act[0] || D.courts[0]).hours || {}) }, who = '', H = HS[''];
-    D.courts.forEach(function (c) { HS[c.id] = copy(c.hours || {}); });
-    var c0 = card('Per quale campo');
+    var fol = D.courts.filter(function (c) { return !c.custom_hours; }), baseC = fol.filter(function (c) { return c.active; })[0] || fol[0] || D.courts[0], HS = { '': copy(baseC.hours || {}) }, who = '', H = HS[''], CU = {};
+    D.courts.forEach(function (c) { HS[c.id] = copy(c.hours || {}); CU[c.id] = !!c.custom_hours; });
+    var saved0 = copy(HS['']);
+    var c0 = card('Quali orari');
     var chipBox = el('div'); c0.appendChild(chipBox);
     var c1 = card('Quando è aperto');
     var hh = hint(''); c1.appendChild(hh);
+    var swBox = el('div'); c1.appendChild(swBox);
     var box = el('div', 'cx-days'); c1.appendChild(box);
+    var cp = btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = H[1] || []; for (var d = 2; d <= 7; d++) H[d] = copy(m); draw(); });
     function pick() {
       chipBox.textContent = ''; H = HS[who];
-      if (D.courts.length > 1) chipBox.appendChild(chips([['', 'Tutti i campi']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), who, function (v) { who = v; pick(); draw(); }));
+      if (D.courts.length > 1) chipBox.appendChild(chips([['', 'Orari del circolo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), who, function (v) { who = v; pick(); draw(); }));
       var cc = D.courts.filter(function (c) { return c.id === who; })[0];
-      hh.textContent = !who ? 'Fuori da questi orari nessun campo si può prenotare, né dalla pagina né da Lia. Salvando, valgono per tutti i campi.' : cc.name + ' ha i suoi orari: ad esempio puoi tenere chiusi d\'inverno i campi esterni o aprire i coperti più a lungo. Gli altri campi non cambiano.';
+      hh.textContent = !who ? 'Sono gli orari di tutti i campi, tranne quelli a cui hai dato orari propri. Fuori da questi orari non si può prenotare, né dalla pagina né da Lia.' : CU[who] ? cc.name + ' ha orari propri, diversi da quelli del circolo. Gli altri campi non cambiano.' : cc.name + ' segue gli orari del circolo.';
+      swBox.textContent = '';
+      if (who) swBox.appendChild(swRow('Orari diversi da quelli del circolo', 'Ad esempio per tenere chiusi d\'inverno i campi esterni o aprire i coperti più a lungo.', CU[who], function (v) { CU[who] = v; if (v) HS[who] = copy(saved0); pick(); draw(); }));
+      box.hidden = !!who && !CU[who]; cp.hidden = box.hidden;
     }
     w.appendChild(c0);
     function sel(val, label) {
@@ -223,17 +229,17 @@
       })(d);
     }
     pick(); draw();
-    c1.appendChild(btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = H[1] || []; for (var d = 2; d <= 7; d++) H[d] = copy(m); draw(); }));
+    c1.appendChild(cp);
     w.appendChild(c1);
     var msg = msgBox(); w.appendChild(msg);
     var sv = btn('Salva gli orari', '', function () {
       var i = 0;
       guard(sv, msg, new Promise(function (ok, ko) {
         (function next() {
-          var list = who ? D.courts.filter(function (x) { return x.id === who; }) : D.courts;
+          var list = who ? D.courts.filter(function (x) { return x.id === who; }) : D.courts.filter(function (x) { return !CU[x.id]; });
           if (i >= list.length) return ok();
           var c = list[i++];
-          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: c.price_member_eur, price_guest_eur: c.price_guest_eur, active: c.active, hours: HS[who] }).then(next).catch(ko);
+          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: c.price_member_eur, price_guest_eur: c.price_guest_eur, active: c.active, hours: !who ? HS[''] : CU[c.id] ? HS[c.id] : saved0, custom_hours: !who ? false : CU[c.id] }).then(next).catch(ko);
         })();
       }).then(load)).then(function () { toast('Orari salvati'); changed(); }).catch(function () { });
     });
