@@ -226,6 +226,11 @@
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
     ar.appendChild(nb); top.appendChild(ar); root.appendChild(top);
+    var ptt = top.querySelector('.cp-ptitle');
+    if (ptt) { // come i parrucchieri: il titolo parte da 30px e si restringe finche' sta su una riga
+      var fitT = function () { var fs = 30; ptt.style.fontSize = fs + 'px'; while (ptt.scrollWidth > ptt.clientWidth + 1 && fs > 15) { fs--; ptt.style.fontSize = fs + 'px'; } };
+      fitT(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitT);
+    }
     if (wk) { // come i parrucchieri: una settimana per pagina, si scorre di settimana in settimana e resta lo stesso giorno della settimana
       var st = el('div', 'cp-pstrip'), NP = 2, wk0 = monday(S.day);
       st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
