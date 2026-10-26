@@ -37,11 +37,11 @@ begin
   insert into public.subscriptions (business_id, plan_id, status, started_at, trial_ends_at)
   values (v_biz, v_plan, 'trial', now(), now() + interval '60 days');
 
-  insert into public.courts (business_id, name, sport, surface, indoor, slot_min, price_eur, sort_order) values
-    (v_biz, 'Campo 1', 'tennis', 'Terra rossa', true, 60, 28.00, 1),
-    (v_biz, 'Campo 2', 'tennis', 'Terra rossa', false, 60, 16.00, 2),
-    (v_biz, 'Campo 3', 'tennis', 'Cemento', false, 60, 14.00, 3),
-    (v_biz, 'Campo 4', 'tennis', 'Terra rossa', false, 60, 16.00, 4);
+  insert into public.courts (business_id, name, sport, surface, indoor, slot_min, price_member_eur, price_guest_eur, sort_order) values
+    (v_biz, 'Campo 1', 'tennis', 'Terra rossa', true, 60, 3.00, 9.00, 1),
+    (v_biz, 'Campo 2', 'tennis', 'Terra rossa', false, 60, 2.00, 6.00, 2),
+    (v_biz, 'Campo 3', 'tennis', 'Cemento', false, 60, 2.00, 5.00, 3),
+    (v_biz, 'Campo 4', 'tennis', 'Terra rossa', false, 60, 2.00, 6.00, 4);
 
   -- orari: lunedi-venerdi 08-22, sabato e domenica 08-20, uguali per tutti i campi
   insert into public.court_hours (court_id, weekday, opens, closes)
@@ -49,7 +49,7 @@ begin
   from public.courts ct, generate_series(1, 7) d where ct.business_id = v_biz;
 
   -- prenotazioni inventate: due settimane indietro e due avanti
-  for c in select id, price_eur, indoor from public.courts where business_id = v_biz order by sort_order loop
+  for c in select id, price_member_eur, price_guest_eur, indoor from public.courts where business_id = v_biz order by sort_order loop
     busy_until := '-infinity';
     for v_day in select generate_series(current_date - 14, current_date + 14, interval '1 day')::date loop
       v_wd := extract(isodow from v_day)::integer;
@@ -84,7 +84,7 @@ begin
         v_players := case when random() < 0.32 then 4 else 2 end;
         if v_member_ref then v_members := 1 + floor(random() * v_players)::integer;
         else v_members := case when random() < 0.18 then 1 else 0 end; end if;
-        v_price := case when v_members >= v_players then 0 else c.price_eur * v_hours end;
+        v_price := (v_members * c.price_member_eur + (v_players - v_members) * c.price_guest_eur) * v_hours;
         v_r := random();
         v_chan := case when v_r < 0.55 then 'web' when v_r < 0.90 then 'chat' else 'manual' end;
         if v_day < current_date and random() < 0.04 then v_status := 'cancelled'; end if;

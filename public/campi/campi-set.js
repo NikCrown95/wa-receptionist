@@ -127,23 +127,25 @@
         D.courts.forEach(function (c) {
           var card = el('button', 'cps-card'); card.type = 'button';
           var t = el('div', 'cps-t'); t.appendChild(el('b', null, c.name));
-          t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : '', dur(c.slot_min), c.price_eur != null ? c.price_eur + ' €' : 'senza prezzo'].filter(Boolean).join(' · ')));
+          t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : '', dur(c.slot_min), (c.price_member_eur != null || c.price_guest_eur != null) ? 'socio ' + (c.price_member_eur || 0) + ' € · non socio ' + (c.price_guest_eur || 0) + ' €' : 'senza prezzo'].filter(Boolean).join(' · ')));
           card.appendChild(t); card.appendChild(el('span', 'cps-pill' + (c.active ? '' : ' off'), c.active ? 'Attivo' : 'Spento'));
           card.onclick = function () { edit(c); }; w.appendChild(card);
         });
         w.appendChild(btn('+ Aggiungi un campo', 'dash', function () { edit(null); }));
-        w.appendChild(el('p', 'cps-help', 'Durata dello slot e prezzo si scelgono per ogni campo. Il prezzo è facoltativo e il pagamento si fa sempre al circolo.'));
+        w.appendChild(el('p', 'cps-help', 'Durata dello slot e prezzi a testa si scelgono per ogni campo. I prezzi sono facoltativi e il pagamento si fa sempre al circolo.'));
       }
       function edit(c) {
-        var isNew = !c, F = c ? JSON.parse(JSON.stringify(c)) : { id: null, name: 'Campo ' + (D.courts.length + 1), surface: '', indoor: false, slot_min: 60, price_eur: null, active: true, hours: { 1: [['08:00', '22:00']], 2: [['08:00', '22:00']], 3: [['08:00', '22:00']], 4: [['08:00', '22:00']], 5: [['08:00', '22:00']], 6: [['08:00', '20:00']], 7: [['08:00', '20:00']] } };
+        var isNew = !c, F = c ? JSON.parse(JSON.stringify(c)) : { id: null, name: 'Campo ' + (D.courts.length + 1), surface: '', indoor: false, slot_min: 60, price_member_eur: null, price_guest_eur: null, active: true, hours: { 1: [['08:00', '22:00']], 2: [['08:00', '22:00']], 3: [['08:00', '22:00']], 4: [['08:00', '22:00']], 5: [['08:00', '22:00']], 6: [['08:00', '20:00']], 7: [['08:00', '20:00']] } };
         w.textContent = '';
         var back = el('button', 'cps-back2', '‹ Tutti i campi'); back.type = 'button'; back.onclick = function () { load().then(list).catch(function (e) { toast(e.message, true); }); }; w.appendChild(back);
         var n = input('text', F.name, { maxlength: 60, autocomplete: 'off' }), sf = input('text', F.surface, { maxlength: 40, placeholder: 'Terra, cemento, erba…', autocomplete: 'off' });
         var r1 = el('div', 'cps-f2'); r1.appendChild(field('Nome', n)); r1.appendChild(field('Fondo', sf)); w.appendChild(r1);
         var sl = select([[30, '30 minuti'], [45, '45 minuti'], [60, '1 ora'], [90, '1 ora e mezza'], [120, '2 ore']], F.slot_min);
         if (![30, 45, 60, 90, 120].includes(F.slot_min)) { var o = el('option', null, dur(F.slot_min)); o.value = F.slot_min; o.selected = true; sl.appendChild(o); }
-        var pr = input('number', F.price_eur, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'Nessuno' });
-        var r2 = el('div', 'cps-f2'); r2.appendChild(field('Durata di uno slot', sl)); r2.appendChild(field('Prezzo a slot, € (facoltativo)', pr)); w.appendChild(r2);
+        var pm = input('number', F.price_member_eur, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'Es. 2' }), pg = input('number', F.price_guest_eur, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'Es. 7' });
+        w.appendChild(field('Durata di uno slot', sl));
+        var r2 = el('div', 'cps-f2'); r2.appendChild(field('Prezzo a testa, socio (€)', pm)); r2.appendChild(field('Prezzo a testa, non socio (€)', pg)); w.appendChild(r2);
+        w.appendChild(el('p', 'cps-help', 'Il prezzo della prenotazione è la somma di quanto paga ogni giocatore: i soci il prezzo socio, gli altri il prezzo non socio. Lascia vuoto se non vuoi mostrare prezzi; 0 se i soci non pagano.'));
         var ind = toggle(F.indoor, 'Campo coperto'); ind.onclick = function () { F.indoor = !F.indoor; ind.setAttribute('aria-checked', F.indoor); };
         w.appendChild(swRow('Campo coperto', null, ind));
         w.appendChild(el('b', 'cps-h', 'Orari di apertura'));
@@ -152,7 +154,7 @@
         drawH();
         w.appendChild(btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = F.hours[1] || []; for (var d = 2; d <= 7; d++) F.hours[d] = JSON.parse(JSON.stringify(m)); drawH(); }));
         var msg = msgBox(); w.appendChild(msg);
-        function collect(active) { return { action: 'save_court', id: F.id, name: n.value, surface: sf.value, indoor: F.indoor, slot_min: +sl.value, price_eur: pr.value === '' ? null : +pr.value, active: active, hours: F.hours }; }
+        function collect(active) { return { action: 'save_court', id: F.id, name: n.value, surface: sf.value, indoor: F.indoor, slot_min: +sl.value, price_member_eur: pm.value === '' ? null : +pm.value, price_guest_eur: pg.value === '' ? null : +pg.value, active: active, hours: F.hours }; }
         var acts = el('div', 'cps-acts');
         var sv = btn('Salva', 'pri', function () {
           sv.disabled = true; msg.textContent = '';
@@ -189,7 +191,7 @@
           (function next() {
             if (i >= D.courts.length) { toast('Orari salvati per ' + D.courts.length + (D.courts.length === 1 ? ' campo' : ' campi')); close(); return; }
             var c = D.courts[i++];
-            call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_eur: c.price_eur, active: c.active, hours: H }).then(next).catch(function (e) { sv.disabled = false; msg.textContent = (i > 1 ? 'Salvati solo i primi ' + (i - 1) + ' campi. ' : '') + e.message; });
+            call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: c.price_member_eur, price_guest_eur: c.price_guest_eur, active: c.active, hours: H }).then(next).catch(function (e) { sv.disabled = false; msg.textContent = (i > 1 ? 'Salvati solo i primi ' + (i - 1) + ' campi. ' : '') + e.message; });
           })();
         });
         w.appendChild(sv);
