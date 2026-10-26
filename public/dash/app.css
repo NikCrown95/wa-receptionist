@@ -3365,3 +3365,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .nx-qo{font-size:.78rem;font-weight:700;color:var(--muted)}
 .nx-next{width:100%}
 .nx-next:disabled{opacity:.45}
+/* nuovo appuntamento: pulsante per chiudere sempre visibile (con la tastiera aperta fuori dal foglio non resta nulla da toccare) */
+.nx-hw{position:relative;padding-right:44px}
+.nx-x{position:absolute;top:0;right:0;width:36px;height:36px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.nx-x:active{transform:scale(.96)}
