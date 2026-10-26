@@ -325,3 +325,10 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 /* 2 giocatori: sfondo ben visibile (azzurro-grigio), diverso dai 4 (verde acqua) */
 .cpx .cp-chip.p2,.cpx .cp-b.wk.p2{background:linear-gradient(135deg,#3b5a73,#2a4357);border-color:#6f93ad;color:#fff}
 .cpx .cp-chip.p2 u,.cpx .cp-b.wk.p2 small{color:#cfe0ec}
+
+/* colori piu' morbidi e scritte leggibili sulle card */
+.cpx .cp-chip.p2,.cpx .cp-b.wk.p2{background:#1b2d3b;border-color:#3a5a72;color:#F2F6F7}
+.cpx .cp-chip.p4,.cpx .cp-b.wk.p4{background:#143a40;border-color:#2f7f89;color:#F2F6F7}
+.cpx .cp-b.wk.p2 b,.cpx .cp-b.wk.p4 b,.cpx .cp-chip.p2 b,.cpx .cp-chip.p4 b{color:#FFFFFF}
+.cpx .cp-b.wk.p2 small,.cpx .cp-b.wk.p4 small,.cpx .cp-b.wk.p2 span,.cpx .cp-b.wk.p4 span,.cpx .cp-chip.p2 u,.cpx .cp-chip.p4 u{color:#C5D6DC;opacity:1}
+.cpx .cp-leg i.p2,.cpx .cp-leg i.p4{display:none}
