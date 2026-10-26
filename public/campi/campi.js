@@ -24,7 +24,7 @@
   function hhmm(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
   function monday(s) { return addDays(s, -(wd(s) - 1)); }
   function wd(s) { var g = parse(s).getUTCDay(); return g === 0 ? 7 : g; }
-  function longDay(s) { var d = parse(s); return DL[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MO[d.getUTCMonth()]; }
+  function longDay(s) { var d = parse(s), m = MO[d.getUTCMonth()]; return DL[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + (window.matchMedia && window.matchMedia('(max-width:699px)').matches ? m.charAt(0).toUpperCase() + m.slice(1) : m); }
   function eur(n) { return n == null ? '' : (Math.round(n * 100) % 100 === 0 ? String(Math.round(n)) : Number(n).toFixed(2).replace('.', ',')) + ' €'; }
   function soc(n) { return n === 0 ? 'Nessun socio' : n === 1 ? '1 socio' : n + ' soci'; }
 
@@ -40,7 +40,7 @@
   }
   function call(body) {
     var o = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
-    var u = body ? URL0 : URL0 + '&from=' + S.strip + '&days=7';
+    var u = body ? URL0 : (isPh() && S.strip ? URL0 + '&from=' + addDays(S.strip, -7) + '&days=28' : URL0 + '&from=' + S.strip + '&days=7');
     return fetch(u, o).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Errore, riprova.'); return j; }); });
   }
   function load() {
@@ -169,7 +169,7 @@
     tile('Occupazione', pct + '%', s0.occ + ' slot su ' + s0.tot);
     tile('Persone', String(ppl), mem + ' soci · ' + (ppl - mem) + ' non soci');
     tile('Campi liberi', freeC + ' su ' + D.courts.length, S.day === now.date ? 'con posto libero' : 'con posto libero');
-    if (S.view !== 'grid') root.appendChild(sum);
+    if (S.view !== 'grid' && !(PH && phWeek())) root.appendChild(sum);
 
     var lg = el('div', 'cp-leg');
     lg.innerHTML = '<span><i class="p2"></i>2 giocatori</span><span><i class="p4"></i>4 giocatori</span>';
@@ -209,28 +209,39 @@
     } else {
       var d = parse(S.day), card = el('div', 'cp-pcard'), nbk = bookingsOn(S.day).length;
       var tile = el('b'); tile.appendChild(el('em', null, DN[d.getUTCDay()].toUpperCase())); tile.appendChild(el('u', null, String(d.getUTCDate()))); card.appendChild(tile);
-      var diff = Math.round((parse(S.day) - parse(D.today)) / 864e5), rel = diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : diff === -1 ? 'Ieri' : MO[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+      var diff = Math.round((parse(S.day) - parse(D.today)) / 864e5), rel = diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : diff === -1 ? 'Ieri' : MO[d.getUTCMonth()].charAt(0).toUpperCase() + MO[d.getUTCMonth()].slice(1, 3) + ' ' + d.getUTCFullYear();
       var tx = el('span'); tx.appendChild(el('strong', null, longDay(S.day))); tx.appendChild(el('small', null, rel + ' · ' + (nbk === 0 ? 'nessuna prenotazione' : nbk === 1 ? '1 prenotazione' : nbk + ' prenotazioni'))); card.appendChild(tx);
       top.appendChild(card);
     }
     var ar = el('div', 'cp-pact');
     [[-1, SVG_L, 'Giorno prima'], [1, SVG_R, 'Giorno dopo']].forEach(function (v) {
-      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { goDay(v[0]); }; ar.appendChild(b);
+      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { goDay(wk ? v[0] * 7 : v[0]); }; ar.appendChild(b);
     });
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
     nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
     ar.appendChild(nb); top.appendChild(ar); root.appendChild(top);
     if (wk) {
-      var st = el('div', 'cp-pstrip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni della settimana');
-      var mo = monday(S.day);
-      for (var i = 0; i < 7; i++) (function (date) {
+      var st = el('div', 'cp-pstrip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
+      for (var i = -7; i < 21; i++) (function (date) {
         var n = bookingsOn(date).length, b = el('button', 'cp-pd' + (date === S.day ? ' on' : '') + (date === D.today ? ' tod' : '') + (date < D.today ? ' past' : '')); b.type = 'button';
         b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
         b.appendChild(el('span', null, DN[parse(date).getUTCDay()])); b.appendChild(el('b', null, String(parse(date).getUTCDate()))); b.appendChild(el('i', null, n ? String(n) : '·'));
-        b.onclick = function () { S.day = date; S.sel = null; S.form = null; S.askCancel = false; draw(); };
+        b.onclick = function () { S.day = date; S.sel = null; S.form = null; S.askCancel = false; S.stripKeep = false; draw(); };
         st.appendChild(b);
-      })(addDays(mo, i));
-      root.appendChild(st); swipe(st);
+      })(addDays(S.strip, i));
+      root.appendChild(st);
+      st.addEventListener('scroll', function () { S.stripX = st.scrollLeft; }, { passive: true });
+      var onb = st.querySelector('.cp-pd.on');
+      if (S.stripKeep && S.stripX != null) st.scrollLeft = S.stripX; else if (onb) st.scrollLeft = onb.offsetLeft - (st.clientWidth - onb.offsetWidth) / 2;
+      S.stripKeep = true;
+      st.addEventListener('scroll', function () {
+        clearTimeout(S.edgeT);
+        S.edgeT = setTimeout(function () {
+          var nearR = st.scrollWidth - st.scrollLeft - st.clientWidth < 40, nearL = st.scrollLeft < 40; if (!nearR && !nearL) return;
+          var dir = nearR ? 1 : -1, pitch = st.scrollWidth / 28; S.stripX = st.scrollLeft - dir * 14 * pitch; S.stripKeep = true;
+          S.strip = addDays(S.strip, 14 * dir); load();
+        }, 160);
+      }, { passive: true });
     }
     if (!S.sel && !S.form) { var fab = el('button', 'cp-fab'); fab.type = 'button'; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'; fab.onclick = function () { openForm(S.day); }; root.appendChild(fab); }
   }
@@ -258,7 +269,9 @@
   function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
   function goDay(n) {
     var nd = addDays(S.day, n); S.sel = null; S.form = null; S.askCancel = false;
-    if (nd < S.strip || nd > addDays(S.strip, 6)) { S.strip = monday(nd); S.day = nd; load(); } else { S.day = nd; draw(); }
+    var lo = isPh() ? addDays(S.strip, -7) : S.strip, hi = addDays(S.strip, isPh() ? 20 : 6);
+    S.stripKeep = false;
+    if (nd < lo || nd > hi) { S.strip = monday(nd); S.day = nd; load(); } else { S.day = nd; draw(); }
   }
   function shift(n) { S.strip = addDays(S.strip, n); S.day = S.strip; S.sel = null; S.form = null; S.askCancel = false; load(); }
 
