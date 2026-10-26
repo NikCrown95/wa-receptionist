@@ -542,3 +542,18 @@ body.campiOn #view-month{display:none!important}
 }
 @keyframes cpInR{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
 @keyframes cpInL{from{transform:translateX(-40px);opacity:0}to{transform:none;opacity:1}}
+/* telefono: la pagina scorre (il pannello del calendario è bloccato dal contenitore) e la testata è come quella delle altre attività */
+@media (max-width:699px){
+  body.campiOn #panelCal{overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+  .cpx{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .cpx .cp-ptop{padding:2px 0 12px;border-bottom:1px solid var(--line,#1B2F36);margin:0 -14px;padding-left:14px;padding-right:14px}
+  .cpx .cp-pcard b{flex:none;width:58px;height:58px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;line-height:1}
+  .cpx .cp-pcard b em{font-style:normal;font-size:.62rem;font-weight:800;letter-spacing:.08em;opacity:.85}
+  .cpx .cp-pcard b u{text-decoration:none;font-size:1.55rem;font-weight:800;margin-top:2px}
+  .cpx .cp-pcard strong{font-size:1.05rem}
+  .cpx .cp-pact{gap:2px}
+  .cpx .cp-pact .cp-arr{background:transparent;border-color:transparent;width:38px}
+  .cpx .cp-pact .cp-now{border:0;background:transparent;color:var(--accent-ink,#7FDCDC);font-weight:800;padding:0 8px}
+  .cpx .cp-fab{width:58px;height:58px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center}
+}
+@media (max-width:699px){.cpx .cp-ptitle .cp-yr{color:var(--accent-ink,#7FDCDC)}.cpx .cp-pd.tod:not(.on){border-style:dashed}}

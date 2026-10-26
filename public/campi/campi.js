@@ -203,12 +203,14 @@
   function phHead(D) {
     var wk = phWeek(), top = el('div', 'cp-ptop');
     if (wk) {
-      var wa = parse(monday(S.day)), wb = parse(addDays(monday(S.day), 6)), sh = function (d) { return MO[d.getUTCMonth()].slice(0, 3); };
-      top.appendChild(el('div', 'cp-ptitle', wa.getUTCMonth() === wb.getUTCMonth() ? wa.getUTCDate() + ' – ' + wb.getUTCDate() + ' ' + sh(wb) + ' ' + wb.getUTCFullYear() : wa.getUTCDate() + ' ' + sh(wa) + ' – ' + wb.getUTCDate() + ' ' + sh(wb)));
+      var wa = parse(monday(S.day)), wb = parse(addDays(monday(S.day), 6)), sh = function (d) { var m = MO[d.getUTCMonth()].slice(0, 3); return m.charAt(0).toUpperCase() + m.slice(1); };
+      var pt = el('div', 'cp-ptitle', wa.getUTCMonth() === wb.getUTCMonth() ? wa.getUTCDate() + ' – ' + wb.getUTCDate() + ' ' + sh(wb) + ' ' : wa.getUTCDate() + ' ' + sh(wa) + ' – ' + wb.getUTCDate() + ' ' + sh(wb) + ' ');
+      pt.appendChild(el('span', 'cp-yr', String(wb.getUTCFullYear()))); top.appendChild(pt);
     } else {
-      var d = parse(S.day), card = el('div', 'cp-pcard');
-      var num = el('b', null, String(d.getUTCDate())); card.appendChild(num);
-      var tx = el('span'); tx.appendChild(el('strong', null, DL[d.getUTCDay()])); tx.appendChild(el('small', null, MO[d.getUTCMonth()] + ' ' + d.getUTCFullYear())); card.appendChild(tx);
+      var d = parse(S.day), card = el('div', 'cp-pcard'), nbk = bookingsOn(S.day).length;
+      var tile = el('b'); tile.appendChild(el('em', null, DN[d.getUTCDay()].toUpperCase())); tile.appendChild(el('u', null, String(d.getUTCDate()))); card.appendChild(tile);
+      var diff = Math.round((parse(S.day) - parse(D.today)) / 864e5), rel = diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : diff === -1 ? 'Ieri' : MO[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+      var tx = el('span'); tx.appendChild(el('strong', null, longDay(S.day))); tx.appendChild(el('small', null, rel + ' · ' + (nbk === 0 ? 'nessuna prenotazione' : nbk === 1 ? '1 prenotazione' : nbk + ' prenotazioni'))); card.appendChild(tx);
       top.appendChild(card);
     }
     var ar = el('div', 'cp-pact');
@@ -230,7 +232,7 @@
       })(addDays(mo, i));
       root.appendChild(st); swipe(st);
     }
-    if (!S.sel && !S.form) { var fab = el('button', 'cp-fab', '+ Nuova'); fab.type = 'button'; fab.onclick = function () { openForm(S.day); }; root.appendChild(fab); }
+    if (!S.sel && !S.form) { var fab = el('button', 'cp-fab'); fab.type = 'button'; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'; fab.onclick = function () { openForm(S.day); }; root.appendChild(fab); }
   }
   function phWrap() {
     var pb = el('div', 'cp-pbody' + (S.swDir ? ' in' + S.swDir : '')); S.swDir = '';
