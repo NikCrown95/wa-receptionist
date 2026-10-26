@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
       const o = await courtsLib.book(sb, biz, body);
       if (o.status !== 200) return res.status(o.status).json(o.body);
-      const emailSent = await courtsLib.afterBook(biz, o);
+      const emailSent = await courtsLib.afterBook(biz, o, sb);
       return res.status(200).json({ ok: true, email_sent: !!emailSent, booking: o.body.booking });
     }
     return res.status(405).json({ error: "Metodo non consentito" });
