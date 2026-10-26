@@ -426,3 +426,7 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 .cpx .cp-wz{min-height:0}
 .cpx .cp-fv{padding:14px;gap:10px}
 @media (max-width:699px){.cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{top:70px}}
+
+/* finestra ancorata in alto, alta quanto serve, con margine per la barra di iPad */
+.cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{top:84px;bottom:auto;margin:0 auto;height:auto;align-content:start;max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px)}
+.cpx .cp-fv .cp-q{margin-top:0}
