@@ -185,10 +185,20 @@
   // ---------- 3. ORARI DI APERTURA ----------
   function pHours(w) {
     if (!D.courts.length) { var c0 = card(); c0.appendChild(hint('Aggiungi prima un campo da "Campi".')); w.appendChild(c0); return; }
-    var act = D.courts.filter(function (c) { return c.active; }), H = copy((act[0] || D.courts[0]).hours || {});
-    var c1 = card('Quando il circolo è aperto');
-    c1.appendChild(hint('Fuori da questi orari nessun campo si può prenotare, né dalla pagina né da Lia. Valgono per tutti i campi.'));
+    var act = D.courts.filter(function (c) { return c.active; }), HS = { '': copy((act[0] || D.courts[0]).hours || {}) }, who = '', H = HS[''];
+    D.courts.forEach(function (c) { HS[c.id] = copy(c.hours || {}); });
+    var c0 = card('Per quale campo');
+    var chipBox = el('div'); c0.appendChild(chipBox);
+    var c1 = card('Quando è aperto');
+    var hh = hint(''); c1.appendChild(hh);
     var box = el('div', 'cx-days'); c1.appendChild(box);
+    function pick() {
+      chipBox.textContent = ''; H = HS[who];
+      if (D.courts.length > 1) chipBox.appendChild(chips([['', 'Tutti i campi']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), who, function (v) { who = v; pick(); draw(); }));
+      var cc = D.courts.filter(function (c) { return c.id === who; })[0];
+      hh.textContent = !who ? 'Fuori da questi orari nessun campo si può prenotare, né dalla pagina né da Lia. Salvando, valgono per tutti i campi.' : cc.name + ' ha i suoi orari: ad esempio puoi tenere chiusi d\'inverno i campi esterni o aprire i coperti più a lungo. Gli altri campi non cambiano.';
+    }
+    w.appendChild(c0);
     function sel(val, label) {
       var o = []; for (var m = 0; m < 24 * 60; m += 30) { var t = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); o.push([t, t]); }
       if (!o.some(function (x) { return x[0] === val; })) o.push([val, val]);
@@ -212,7 +222,7 @@
         box.appendChild(row);
       })(d);
     }
-    draw();
+    pick(); draw();
     c1.appendChild(btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = H[1] || []; for (var d = 2; d <= 7; d++) H[d] = copy(m); draw(); }));
     w.appendChild(c1);
     var msg = msgBox(); w.appendChild(msg);
@@ -220,14 +230,15 @@
       var i = 0;
       guard(sv, msg, new Promise(function (ok, ko) {
         (function next() {
-          if (i >= D.courts.length) return ok();
-          var c = D.courts[i++];
-          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: c.price_member_eur, price_guest_eur: c.price_guest_eur, active: c.active, hours: H }).then(next).catch(ko);
+          var list = who ? D.courts.filter(function (x) { return x.id === who; }) : D.courts;
+          if (i >= list.length) return ok();
+          var c = list[i++];
+          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: c.price_member_eur, price_guest_eur: c.price_guest_eur, active: c.active, hours: HS[who] }).then(next).catch(ko);
         })();
       }).then(load)).then(function () { toast('Orari salvati'); changed(); }).catch(function () { });
     });
     w.appendChild(sv);
-    w.appendChild(hint('Per chiudere un campo o il circolo solo per alcuni giorni (torneo, lavori, maltempo) usa "Chiusure e lavori": non serve cambiare gli orari.'));
+    w.appendChild(hint('Un campo che non vuoi far prenotare per un periodo (esterni in inverno, lavori) lo chiudi da "Disponibilità" indicando le date; per spegnerlo del tutto usa "Campo attivo" nella scheda del campo.'));
   }
 
   // ---------- 4. CHIUSURE E LAVORI ----------
