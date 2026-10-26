@@ -96,6 +96,11 @@
 
   // ---------- disegno ----------
   function draw() {
+    var fv0 = root.querySelector('.cp-fv'), ft = fv0 ? fv0.scrollTop : 0, py = window.pageYOffset;
+    draw0();
+    var fv1 = root.querySelector('.cp-fv'); if (fv1 && fv0) fv1.scrollTop = ft; if (window.pageYOffset !== py) window.scrollTo(0, py);
+  }
+  function draw0() {
     root.textContent = ''; root.classList.remove('wide');
     var openNow = !!(S.sel || S.form); S.animIn = openNow && !S.wasOpen; S.wasOpen = openNow;
     if (S.err && !S.data) {
@@ -358,6 +363,7 @@
     if (b.price_eur != null) row2('Incasso', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur));
     row2('Prenotata', b.channel === 'manual' ? 'Inserita a mano' : b.channel === 'chat' ? 'Tramite Lia' : 'Dal sito');
     if (b.phone) { var a = el('a', null, b.phone); a.href = 'tel:' + b.phone.replace(/[^+\d]/g, ''); row2('Telefono', a); }
+    if (b.email) { var ea = el('a', 'cp-em', b.email); ea.href = 'mailto:' + b.email; row2('Email', ea); }
     d.appendChild(kv);
     var r = el('div', 'cp-row');
     if (b.notes) d.appendChild(el('p', null, 'Note: ' + b.notes));
@@ -408,6 +414,7 @@
     sec('Chi prenota');
     var r1 = el('div', 'cp-f2'); r1.appendChild(inp('Nome', 'first_name', 'text', { autocomplete: 'off', maxlength: 60 })); r1.appendChild(inp('Cognome', 'last_name', 'text', { autocomplete: 'off', maxlength: 60 })); f.appendChild(r1);
     f.appendChild(inp('Telefono', 'phone', 'tel', { inputmode: 'tel', maxlength: 30 }));
+    f.appendChild(inp('Email (facoltativa)', 'email', 'email', { inputmode: 'email', autocomplete: 'off', maxlength: 120 }));
     sec('Giocatori');
     function stepper(label, key, min, max) {
       var w = el('div', 'cp-st'); w.appendChild(el('span', 'cp-stl', label));
@@ -429,11 +436,11 @@
   function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); var fr = sl.filter(function (x) { return !bookingsOn(d).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }); return fr.length ? hhmm(fr[0].s) : sl.length ? hhmm(sl[0].s) : ''; }
   function openForm(date, courtId, time) {
     var D = S.data, c = courtOf(courtId || D.courts[0].id), d = date || S.day; S.sel = null; S.askCancel = false;
-    S.form = { court_id: c.id, date: d, time: time || firstTime(c, d), hours: 1, first_name: '', last_name: '', phone: '', players: '2', members: '0', notes: '', msg: '' };
+    S.form = { court_id: c.id, date: d, time: time || firstTime(c, d), hours: 1, first_name: '', last_name: '', phone: '', email: '', players: '2', members: '0', notes: '', msg: '' };
     draw(); focusForm();
   }
   function maxEnd(c) { var m = 0; ((c.hours && c.hours[String(wd(S.form.date))]) || []).forEach(function (h) { if (mins(h[0]) <= mins(S.form.time) && mins(h[1]) > mins(S.form.time)) m = mins(h[1]); }); return m; }
-  function focusForm() { setTimeout(function () { var i = root.querySelector('.cp-form input'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, 30); }
+  function focusForm() { setTimeout(function () { var i = root.querySelector('.cp-form input'); if (i) { try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } } }, 30); }
   function save() {
     var F = S.form; if (S.busy) return;
     if (!F.time) { F.msg = 'Scegli un orario.'; draw(); return; }
@@ -442,7 +449,7 @@
     var p = F.players === '' ? null : +F.players, mm = F.members === '' ? null : +F.members;
     if (p !== null && mm !== null && mm > p) { F.msg = 'I soci non possono essere più dei giocatori.'; draw(); return; }
     F.msg = ''; S.busy = true; draw();
-    call({ action: 'create', court_id: F.court_id, date: F.date, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, players: p, members: mm, notes: F.notes })
+    call({ action: 'create', court_id: F.court_id, date: F.date, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, email: F.email, players: p, members: mm, notes: F.notes })
       .then(function (j) { S.busy = false; var fd = F.date; S.form = null; S.sel = j.booking && j.booking.id; S.day = fd; if (fd < S.strip || fd > addDays(S.strip, 6)) S.strip = monday(fd); toast('Prenotazione salvata'); S.data = null; load(); })
       .catch(function (e) { S.busy = false; F.msg = e.message; draw(); });
   }

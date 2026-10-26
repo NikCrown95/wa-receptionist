@@ -362,3 +362,13 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 
 @media (min-width:700px){.cpx .cp-gs .cp-det{top:126px;max-height:calc(100vh - 142px)}}
 .cpx .cp-det .cp-dt p.cp-dd{margin-top:0;opacity:.8}
+
+/* nuova prenotazione: finestra al centro dello schermo */
+.cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{position:fixed;inset:0;margin:auto;top:0;right:0;bottom:0;left:0;z-index:80;width:min(520px,calc(100vw - 24px));max-width:none;height:fit-content;max-height:calc(100vh - 40px);overflow:auto;border-radius:22px;box-shadow:0 0 0 100vmax rgba(2,10,13,.62),0 30px 80px -10px rgba(0,0,0,.7);overscroll-behavior:contain}
+.cpx .cp-det.cp-fv.enter,.cpx .cp-gs .cp-det.cp-fv.enter{animation:cpPop .22s cubic-bezier(.2,.8,.25,1) both}
+.cpx .cp-det.cp-fv.leave,.cpx .cp-gs .cp-det.cp-fv.leave{animation:cpPopOut .16s ease-in both}
+@keyframes cpPop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes cpPopOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.96)}}
+.cpx .cp-list .cp-det.cp-fv{margin:auto}
+
+.cpx .cp-kv a.cp-em{word-break:break-all;text-align:right;font-size:.86rem}
