@@ -230,22 +230,42 @@
       var st = el('div', 'cp-pstrip'); st.setAttribute('role', 'group'); st.setAttribute('aria-label', 'Giorni');
       for (var i = -7; i < 21; i++) (function (date) {
         var n = bookingsOn(date).length, b = el('button', 'cp-pd' + (date === S.day ? ' on' : '') + (date === D.today ? ' tod' : '') + (date < D.today ? ' past' : '')); b.type = 'button';
-        b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
+        b.setAttribute('data-date', date); b.setAttribute('aria-pressed', date === S.day ? 'true' : 'false'); b.setAttribute('aria-label', longDay(date) + ', ' + n + (n === 1 ? ' prenotazione' : ' prenotazioni'));
         b.appendChild(el('span', null, DN[parse(date).getUTCDay()])); b.appendChild(el('b', null, String(parse(date).getUTCDate()))); b.appendChild(el('i', null, n ? String(n) : '·'));
-        b.onclick = function () { S.day = date; S.sel = null; S.form = null; S.askCancel = false; S.stripKeep = false; draw(); };
+        b.onclick = function () { S.day = date; S.pickAt = Date.now(); S.sel = null; S.form = null; S.askCancel = false; S.stripKeep = false; draw(); };
         st.appendChild(b);
       })(addDays(S.strip, i));
       root.appendChild(st);
       st.addEventListener('scroll', function () { S.stripX = st.scrollLeft; }, { passive: true });
       var onb = st.querySelector('.cp-pd.on');
       if (S.stripKeep && S.stripX != null) st.scrollLeft = S.stripX; else if (onb) st.scrollLeft = onb.offsetLeft - (st.clientWidth - onb.offsetWidth) / 2;
-      S.stripKeep = true;
+      S.stripKeep = true; S.pickAt = Date.now(); // lo scroll appena fatto dal codice non deve cambiare il giorno scelto
+      // il giorno al centro della riga e' quello selezionato, come nella settimana dei parrucchieri; un tocco su un giorno resta una scelta volontaria
+      var centerBtn = function () {
+        var r = st.getBoundingClientRect(), mid = r.left + r.width / 2, best = null, bd = 1e9;
+        Array.prototype.forEach.call(st.querySelectorAll('.cp-pd'), function (b) { var q = b.getBoundingClientRect(), d = Math.abs(q.left + q.width / 2 - mid); if (d < bd) { bd = d; best = b; } });
+        return best;
+      };
+      var raf = 0;
+      st.addEventListener('scroll', function () {
+        if (raf || Date.now() - S.pickAt < 350) return;
+        raf = requestAnimationFrame(function () {
+          raf = 0; var c = centerBtn(); if (!c) return;
+          Array.prototype.forEach.call(st.querySelectorAll('.cp-pd'), function (b) { var on = b === c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        });
+      }, { passive: true });
       st.addEventListener('scroll', function () {
         clearTimeout(S.edgeT);
         S.edgeT = setTimeout(function () {
-          var nearR = st.scrollWidth - st.scrollLeft - st.clientWidth < 40, nearL = st.scrollLeft < 40; if (!nearR && !nearL) return;
-          var dir = nearR ? 1 : -1, pitch = st.scrollWidth / 28; S.stripX = st.scrollLeft - dir * 14 * pitch; S.stripKeep = true;
-          S.strip = addDays(S.strip, 14 * dir); load();
+          if (!st.isConnected) return;
+          var nearR = st.scrollWidth - st.scrollLeft - st.clientWidth < 40, nearL = st.scrollLeft < 40;
+          var c = Date.now() - S.pickAt < 350 ? null : centerBtn(), nd = c && c.getAttribute('data-date'), chg = !!nd && nd !== S.day;
+          if (chg) { S.day = nd; S.sel = null; S.form = null; S.askCancel = false; }
+          S.stripX = st.scrollLeft; S.stripKeep = true;
+          if (nearR || nearL) {
+            var dir = nearR ? 1 : -1, pitch = st.scrollWidth / 28; S.stripX = st.scrollLeft - dir * 14 * pitch;
+            S.strip = addDays(S.strip, 14 * dir); load();
+          } else if (chg) draw();
         }, 160);
       }, { passive: true });
     }
