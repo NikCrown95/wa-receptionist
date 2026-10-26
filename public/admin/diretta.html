@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – In diretta</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --sec:#8CC6FF; --sec-soft:#0A2547;
+  --green:#3FE08A; --amber:#F5C15E; --red:#FF8A8A;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;flex:none;}
+.top-row nav{display:flex;gap:4px;}
+.top-row nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+.top-row nav a.on{background:var(--card2);color:var(--ink);}
+.spacer{flex:1;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--green);font-weight:600;}
+
+.panels{margin-top:16px;display:grid;gap:16px;}
+.panel{padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);}
+.panel h2{font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;}
+.panel .sub{margin-top:2px;font-size:.85rem;color:var(--muted);}
+.row2{display:grid;gap:16px;}
+@media (min-width:860px){.row2{grid-template-columns:1fr 1fr;}}
+
+.linechart{margin-top:18px;width:100%;height:auto;overflow:visible;}
+.linechart .grid-l{stroke:var(--line);stroke-width:1;}
+.linechart .area{fill:url(#areaGrad);}
+.linechart .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.linechart .dot{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+.linechart .axis{font-size:11px;fill:var(--muted);}
+
+.pairbars{margin-top:18px;width:100%;height:auto;}
+.pairbars .new{fill:var(--accent);}
+.pairbars .lost{fill:var(--red);}
+.pairbars .axis{font-size:10.5px;fill:var(--muted);}
+.legend2{margin-top:10px;display:flex;gap:18px;font-size:.85rem;color:var(--muted);}
+.legend2 span{display:inline-flex;align-items:center;gap:6px;}
+.legend2 i{width:9px;height:9px;border-radius:3px;}
+
+.hbars{margin-top:18px;display:grid;gap:14px;}
+.hbar-row{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:12px;}
+.hbar-row .lab{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:500;}
+.hbar-row .lab i{width:9px;height:9px;border-radius:50%;flex:none;}
+.track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.fill{height:100%;border-radius:6px;}
+.hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.94rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2);}
+.btn.small{min-height:40px;padding:0 14px;font-size:.88rem;}
+.kpi .sub.m{color:var(--muted);font-weight:500;}
+.kpi .sub.warn{color:var(--amber);}
+.grid2c{display:grid;gap:16px;align-items:start;grid-template-columns:minmax(0,1fr);}
+.grid2c>*,.side>*{min-width:0;}
+@media (min-width:960px){.grid2c{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);}}
+.side{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);}
+.rowh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;min-height:52px;}
+.rowh:last-child{border-bottom:0;}
+.rowh .n{font-weight:600;font-size:.94rem;}
+.rowh .a{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;}
+.rowh .a.ok{color:var(--green);}.rowh .a.warn{color:var(--amber);}.rowh .a.crit{color:var(--red);}
+.rowh .bar{grid-column:1/-1;height:8px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.rowh .bar i{display:block;height:100%;border-radius:6px;background:var(--accent);}
+.rowh .bar.warn i{background:var(--amber);}.rowh .bar.crit i{background:var(--red);}
+.rowh small{grid-column:1/-1;color:var(--muted);font-size:.8rem;margin-top:-2px;}
+.empty-s{color:var(--muted);font-size:.9rem;padding:10px 0;line-height:1.5;}
+.panel h2 .live-note{font-weight:500;color:var(--muted);font-size:.8rem;margin-left:8px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}}
+</style>
+<link rel="manifest" href="/admin/manifest.webmanifest"><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Prenolia Admin"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" type="image/png" sizes="64x64" href="/admin/icons/admin-64.png?v=6"><link rel="icon" type="image/png" sizes="512x512" href="/admin/icons/admin-512.png?v=6"><link rel="apple-touch-icon" href="/admin/icons/admin-apple-180.png?v=6">
+<link rel="stylesheet" href="/admin/mobile.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav"></nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+<script src="/admin/live.js"></script>
+
+<div class="wrap">
+  <a id="back" href="/admin/" style="display:none;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;margin:4px 0 14px;align-items:center;gap:6px">← Torna alla scheda</a>
+  <div class="pagehd"><h1 id="ttl">In diretta</h1><p id="sub">Nuovi account, appuntamenti, chat, pagamenti e richieste di tutte le attività.</p></div>
+  <div class="panel" style="margin-top:16px"><div id="live"></div></div>
+</div>
+
+<script>
+(function () {
+  var id = new URLSearchParams(location.search).get('id') || '';
+  var valid = /^[0-9a-f-]{36}$/i.test(id);
+  if (valid) {
+    var back = document.getElementById('back');
+    back.href = '/admin/attivita.html?id=' + encodeURIComponent(id); back.style.display = 'inline-flex';
+    document.getElementById('sub').textContent = 'Appuntamenti, chat e annullamenti di questa attività.';
+    window.liaApi('/api/admin/clients?view=detail&id=' + encodeURIComponent(id)).then(function (d) {
+      if (d && d.business && d.business.name) { document.getElementById('ttl').textContent = 'In diretta · ' + d.business.name; document.title = d.business.name + ' · In diretta'; }
+    }).catch(function () {});
+  }
+  window.liaLive.mount(document.getElementById('live'), { business: valid ? id : '', max: 100 });
+})();
+</script>
+</body>
+</html>

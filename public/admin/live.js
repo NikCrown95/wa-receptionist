@@ -28,6 +28,7 @@
     '.lv-d{color:var(--muted,#9BA6B5);font-size:.83rem;line-height:1.4;margin-top:1px;overflow-wrap:anywhere}' +
     '.lv-b{color:var(--accent-ink,#A5EDF2);font-size:.8rem;font-weight:600;margin-top:2px;overflow-wrap:anywhere}' +
     '.lv-w{color:var(--muted,#9BA6B5);font-size:.76rem;white-space:nowrap;font-variant-numeric:tabular-nums;align-self:start;padding-top:2px}' +
+    '.lv-more{margin:12px auto 4px;min-height:44px;padding:0 20px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);font:inherit;font-weight:600;font-size:.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
     '.lv-empty{padding:26px 8px;text-align:center;color:var(--muted,#9BA6B5);font-size:.92rem;line-height:1.5}' +
     '@media (max-width:760px){.lv-chips{flex-wrap:wrap;overflow:visible;margin:0 0 12px;padding:0;gap:8px}.lv-chip{min-height:40px;padding:0 15px}.lv-feed{max-height:none;overflow:visible;margin-right:0;padding-right:0}.lv-ev{padding:14px 0;gap:12px}.lv-ev .lv-w{font-size:.74rem}}' +
     '@media (prefers-reduced-motion:reduce){.lv-live i,.lv-ev.new{animation:none}}';
@@ -68,8 +69,8 @@
   function mount(root, opts) {
     injectCss();
     opts = opts || {};
-    var biz = opts.business || '', max = opts.max || 60;
-    var events = [], seen = {}, filter = 'all', timer = null, newest = '', failed = 0, firstLoad = true;
+    var biz = opts.business || '', max = opts.max || 100;
+    var events = [], seen = {}, filter = 'all', timer = null, newest = '', failed = 0, firstLoad = true, shown = 30;
 
     root.innerHTML = '';
     var bar = el('div', 'lv-bar');
@@ -120,7 +121,12 @@
         feed.appendChild(el('div', 'lv-empty', filter === 'all' ? (biz ? 'Ancora nessuna attività recente per questa attività.' : 'Ancora nessuna attività: appena succede qualcosa la vedi qui.') : 'Nessun evento di questo tipo, per ora.'));
         return;
       }
-      list.forEach(function (e) { feed.appendChild(row(e, animateNew && e._new)); });
+      list.slice(0, shown).forEach(function (e) { feed.appendChild(row(e, animateNew && e._new)); });
+      if (list.length > shown) {
+        var more = el('button', 'lv-more', 'Mostra altri'); more.type = 'button';
+        more.addEventListener('click', function () { shown += 30; paint(false); });
+        feed.appendChild(more);
+      }
       events.forEach(function (e) { e._new = false; });
     }
     function setLive(ok) {

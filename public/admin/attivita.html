@@ -156,7 +156,6 @@ nav a.on{background:var(--card2);color:var(--ink);}
 </header>
 <script src="/admin/auth.js"></script>
 <script src="/admin/nav.js"></script>
-<script src="/admin/live.js"></script>
 
 <div class="wrap">
   <a class="back" href="/admin/clienti.html">← Tutti i clienti</a>
@@ -258,10 +257,10 @@ nav a.on{background:var(--card2);color:var(--ink);}
     // ---- griglia
     var g = el('div','grid2'); root.appendChild(g);
 
-    // ---- in diretta: cosa sta succedendo adesso in questa attivita'
-    var lvc = card('In diretta', 'Appuntamenti, chat e annullamenti di questa attività.'); lvc.style.gridColumn = '1 / -1';
-    var lvh = el('div'); lvc.appendChild(lvh); g.appendChild(lvc);
-    window.liaLive.mount(lvh, { business: b.id, max: 40 });
+    // ---- in diretta: sezione a parte, la apri tu
+    var lvc = el('a', 'card'); lvc.href = '/admin/diretta.html?id=' + encodeURIComponent(b.id); lvc.style.cssText = 'grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:14px;color:inherit;text-decoration:none;';
+    var lvt = el('div'); lvt.appendChild(el('h2', null, 'In diretta')); lvt.appendChild(el('p', 'hint', 'Appuntamenti, chat e annullamenti di questa attività, uno per uno.')); lvt.lastChild.style.margin = '0';
+    lvc.appendChild(lvt); lvc.appendChild(el('span', 'btn small', 'Apri')); g.appendChild(lvc);
 
     var cl = card('Uso di Lia · ultimi 30 giorni', 'Messaggi ricevuti e prenotazioni fatte dall\'assistente.');
     var lk = el('div','kpis'); lk.style.cssText = 'grid-template-columns:repeat(2,1fr);margin-bottom:14px;';

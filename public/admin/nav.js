@@ -4,6 +4,7 @@
   var PAGES = [
     { label: 'Panoramica', href: '/admin/', also: ['/admin/index.html'] },
     { label: 'Clienti', href: '/admin/clienti.html', also: ['/admin/attivita.html'] },
+    { label: 'In diretta', href: '/admin/diretta.html' },
     { label: 'Richieste', href: '/admin/richieste.html', badge: true },
     { label: 'Andamento', href: '/admin/andamento.html' },
     { label: 'Uso di Lia', href: '/admin/lia.html' },
@@ -63,7 +64,7 @@
     '.lia-menu a{display:flex;align-items:center;min-height:46px;padding:0 12px;border-radius:11px;color:var(--ink,#F9F6F0);text-decoration:none;font-weight:600;font-size:.96rem}' +
     '.lia-menu a:hover{background:var(--card,#0E131B)}.lia-menu a.on{color:var(--accent-ink,#A5EDF2);background:var(--card,#0E131B)}' +
     '.lia-menu .lia-out{display:flex;align-items:center;width:100%;min-height:46px;margin-top:6px;padding:0 12px;border:0;border-top:1px solid var(--line2,#2A3648);border-radius:0;background:transparent;color:#FF8A8A;font:inherit;font-weight:600;font-size:.96rem;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent}' +
-    '.lia-menu .lia-push{margin-top:6px;color:var(--ink,#F9F6F0);font-size:.92rem;line-height:1.3;padding-top:8px;padding-bottom:8px}.lia-menu .lia-push small{display:block;color:var(--muted,#9BA6B5);font-weight:500;font-size:.78rem}.lia-menu .lia-push[hidden]{display:none}' +
+    '.lia-menu .lia-push{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;flex:none;margin-top:6px;color:var(--ink,#F9F6F0);font-size:.92rem;line-height:1.3;padding-top:8px;padding-bottom:8px}.lia-menu .lia-push small{display:block;color:var(--muted,#9BA6B5);font-weight:500;font-size:.78rem}.lia-menu .lia-push[hidden]{display:none}' +
     '.lia-menu .lia-out:hover{background:rgba(255,138,138,.1);border-radius:11px}' +
     '.lia-mback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .15s}.lia-mback.on{opacity:1;pointer-events:auto}.lia-mback[hidden]{display:none}' +
     '.lia-bell{position:relative;flex:none;width:42px;height:42px;border-radius:13px;border:1px solid var(--line2,#2A3648);background:var(--card2,#161D29);color:var(--ink,#F9F6F0);display:grid;place-items:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}' +
@@ -161,11 +162,20 @@
     });
   }
   mkBell();
-  var burger, mback;
+  var burger, mback, hideTimer = null, openedAt = 0, openY = 0;
   function menuOpen(o) {
     if (!burger) return;
-    if (o) { close(); menu.hidden = false; mback.hidden = false; requestAnimationFrame(function () { menu.classList.add('on'); mback.classList.add('on'); }); }
-    else { menu.classList.remove('on'); mback.classList.remove('on'); setTimeout(function () { if (!menu.classList.contains('on')) { menu.hidden = true; mback.hidden = true; } }, 180); }
+    clearTimeout(hideTimer);
+    if (o) {
+      close(); menu.hidden = false; mback.hidden = false; menu.scrollTop = 0;
+      openedAt = Date.now(); openY = window.scrollY || 0;
+      // l'intestazione resta visibile finche' il menu e' aperto, cosi' il menu non resta staccato
+      var tp = document.querySelector('.top'); if (tp) tp.classList.remove('lia-hide');
+      requestAnimationFrame(function () { requestAnimationFrame(function () { menu.classList.add('on'); mback.classList.add('on'); }); });
+    } else {
+      menu.classList.remove('on'); mback.classList.remove('on');
+      hideTimer = setTimeout(function () { if (!menu.classList.contains('on')) { menu.hidden = true; mback.hidden = true; } }, 200);
+    }
     burger.setAttribute('aria-expanded', o ? 'true' : 'false');
   }
   if (row && !onLogin) {
@@ -180,7 +190,12 @@
     mback.addEventListener('click', function () { menuOpen(false); });
     bell.addEventListener('click', function () { if (burger.getAttribute('aria-expanded') === 'true') menuOpen(false); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menuOpen(false); });
-    window.addEventListener('scroll', function () { if (burger.getAttribute('aria-expanded') === 'true') menuOpen(false); }, { passive: true });
+    // il menu si chiude se scorri la pagina davvero (non per i piccoli scatti della barra del browser)
+    window.addEventListener('scroll', function () {
+      if (burger.getAttribute('aria-expanded') !== 'true') return;
+      if (Date.now() - openedAt < 500 || Math.abs((window.scrollY || 0) - openY) < 24) return;
+      menuOpen(false);
+    }, { passive: true });
   }
   // ---------- notifiche push sul telefono (messaggi all'assistenza) ----------
   (function () {
@@ -249,7 +264,7 @@
       if (ticking) return; ticking = true;
       requestAnimationFrame(function () {
         var y = window.scrollY || 0;
-        if (!phone.matches || y < 90 || (pop && !pop.hidden)) top.classList.remove('lia-hide');
+        if (!phone.matches || y < 90 || (pop && !pop.hidden) || (burger && burger.getAttribute('aria-expanded') === 'true')) top.classList.remove('lia-hide');
         else if (y > lastY + 6) top.classList.add('lia-hide');
         else if (y < lastY - 6) top.classList.remove('lia-hide');
         lastY = y; ticking = false;
