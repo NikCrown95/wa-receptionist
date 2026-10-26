@@ -123,3 +123,29 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-closed{position:absolute;left:3px;right:3px;z-index:1;border-radius:10px;border:1px dashed var(--line2,#27414A);background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--muted,#93A8AE) 14%,transparent) 6px 12px);color:var(--muted,#93A8AE);font-size:.64rem;font-weight:600;display:grid;place-items:center;text-align:center;padding:2px;overflow:hidden}
 .cps-line input[type=time]{padding:0 8px;font-size:14px}
 .cps-body input[type=time]::-webkit-calendar-picker-indicator{display:none}
+
+/* ---- iPad (orizzontale) e computer: pagina larga, giornata tutta in vista, dettaglio di lato ---- */
+@media (min-width:900px){
+  .cpx{max-width:1240px;grid-template-columns:minmax(0,1fr) 340px;column-gap:16px;row-gap:10px;padding-top:2px}
+  .cpx>*{grid-column:1/-1}
+  .cpx .cp-top{padding-bottom:8px}
+  .cpx .cp-strip{grid-column:1}
+  .cpx .cp-sum{grid-column:2;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .cpx .cp-k{padding:7px 9px}
+  .cpx .cp-k span{font-size:.66rem}
+  .cpx .cp-k b{font-size:1rem}
+  .cpx .cp-d{padding:6px 2px 5px}
+  .cpx .cp-leg{grid-column:1/-1}
+  .cpx .cp-board{grid-column:1}
+  .cpx .cp-det{grid-column:2;align-self:start;position:sticky;top:12px}
+  .cpx .cp-ch{font-size:.9rem}
+  .cpx .cp-ch small{font-size:.7rem}
+  .cpx .cp-hrs em{font-size:.78rem}
+  .cpx .cp-b b{font-size:.84rem}
+  .cpx .cp-b small{font-size:.72rem}
+}
+@media (min-width:700px) and (max-width:899px){
+  .cpx{max-width:820px}
+}
+.cpx .cp-b.tight{flex-direction:row;align-items:center;justify-content:flex-start;gap:6px;padding-top:0;padding-bottom:0}
+.cpx .cp-b.tight small{flex:none}

@@ -11,7 +11,14 @@
   var DN = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
   var DL = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
   var MO = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-  var PPM = 52 / 60; // pixel per minuto
+  var PPM = 52 / 60; // pixel per minuto (su iPad e computer si adatta all'altezza dello schermo, cosi' la giornata sta tutta in vista)
+  function fitPpm(span) {
+    var w = window.innerWidth || 0, h = window.innerHeight || 0;
+    if (w < 700 || !span) return 52 / 60;
+    var used = w >= 900 ? 280 : 400; // quanto occupano intestazione, giorni e riepilogo sopra la griglia
+    var p = (h - used) / span;
+    return Math.max(0.55, Math.min(1.25, p));
+  }
   var SVG_L = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>';
   var SVG_R = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>';
 
@@ -136,6 +143,7 @@
     var wrap = el('div', 'cp-board');
     if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questo giorno.')); return wrap; }
     lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60;
+    PPM = fitPpm(hi - lo);
     var H = (hi - lo) * PPM, g = el('div', 'cp-g');
     g.style.gridTemplateColumns = '38px repeat(' + D.courts.length + ',minmax(' + (D.courts.length > 5 ? 88 : 0) + 'px,1fr))';
     g.appendChild(el('div'));
@@ -168,7 +176,7 @@
       });
       mine.forEach(function (b) {
         var x = el('button', 'cp-b' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
-        x.style.top = ((mins(b.start) - lo) * PPM + 2) + 'px'; x.style.height = ((mins(b.end) - mins(b.start)) * PPM - 4) + 'px';
+        x.style.top = ((mins(b.start) - lo) * PPM + 2) + 'px'; x.style.height = ((mins(b.end) - mins(b.start)) * PPM - 4) + 'px'; if ((mins(b.end) - mins(b.start)) * PPM < 46) x.classList.add('tight');
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
         x.appendChild(el('b', null, b.last_name || b.first_name || '—'));
         x.appendChild(el('small', null, b.members == null ? (b.players ? b.players + ' giocatori' : '') : (b.members === 0 ? 'Non soci' : soc(b.members))));
