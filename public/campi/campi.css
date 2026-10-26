@@ -184,3 +184,4 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-b.wk.tight .cp-bt small{display:none}
 .cpx .cp-b.wk.mini.tight .cp-cs.wk{display:none}
 @media (max-width:699px){.cpx .cp-b.wk{flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;padding:2px 0}.cpx .cp-b.wk .cp-cs.wk{width:22px;height:22px}.cpx .cp-b.wk .cp-bt small{display:none}.cpx .cp-b.wk .cp-bt b{font-size:.55rem}}
+.cpx.wide{padding-left:14px;padding-right:14px}
