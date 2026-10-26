@@ -97,6 +97,7 @@
   // ---------- disegno ----------
   function draw() {
     root.textContent = ''; root.classList.remove('wide');
+    var openNow = !!(S.sel || S.form); S.animIn = openNow && !S.wasOpen; S.wasOpen = openNow;
     if (S.err && !S.data) {
       var e = el('div', 'cp-err'); e.appendChild(el('span', null, S.err));
       var rb = el('button', 'cp-btn', 'Riprova'); rb.type = 'button'; rb.onclick = load; e.appendChild(rb); root.appendChild(e); return;
@@ -239,9 +240,13 @@
         x.style.left = 'calc(' + (it.lane * 100 / it.n) + '% + 2px)'; x.style.width = 'calc(' + (100 / it.n) + '% - 4px)'; x.style.right = 'auto';
         if ((it.e - it.s) * PPM < 46) x.classList.add('tight');
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
-        x.appendChild(courtSvg(c, b.players || 0, b.members, 'wk'));
-        var t = el('span', 'cp-bt'); t.appendChild(el('b', null, b.last_name || b.first_name || '—'));
-        t.appendChild(el('small', null, S.court ? b.start + '–' + b.end : b.start + ' · ' + c.name.replace(/^Campo\s*/i, 'C'))); x.appendChild(t);
+        x.style.borderLeftColor = courtColor(c);
+        var short = c.name.replace(/^Campo\s*/i, 'C'), t = el('span', 'cp-bt');
+        t.appendChild(el('b', null, b.last_name || b.first_name || '—'));
+        t.appendChild(el('small', 'l1', S.court ? b.start + '–' + b.end : short + ' · ' + b.start));
+        var info = [b.players ? b.players + ' gioc.' : '', b.members == null ? '' : (b.members === 0 ? '0 soci' : soc(b.members))].filter(Boolean).join(' · ');
+        if (info) t.appendChild(el('small', 'l2', info));
+        x.appendChild(t);
         x.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); scrollDet(); };
         col.appendChild(x);
       });
@@ -251,6 +256,12 @@
     wrap.appendChild(g); return wrap;
   }
 
+  function closeDet() {
+    var d = root.querySelector('.cp-det'), go = function () { S.sel = null; S.form = null; S.askCancel = false; draw(); };
+    if (!d) return go();
+    d.classList.remove('enter'); d.classList.add('leave'); setTimeout(go, 170);
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && (S.sel || S.form) && !document.querySelector('.cps-back')) closeDet(); });
   function scrollDet() { setTimeout(function () { var d = root.querySelector('.cp-det'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30); }
   function dayList(bs, now) {
     var wrap = el('div', 'cp-list');
@@ -278,7 +289,8 @@
   }
   function courtOf(id) { return S.data.courts.filter(function (c) { return c.id === id; })[0]; }
   function detail(bs) {
-    var d = el('div', 'cp-det'); d.setAttribute('aria-live', 'polite');
+    var d = el('div', 'cp-det' + (S.animIn ? ' enter' : '')); d.setAttribute('aria-live', 'polite');
+    var xb = el('button', 'cp-x'); xb.type = 'button'; xb.setAttribute('aria-label', 'Chiudi'); xb.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'; xb.onclick = closeDet; d.appendChild(xb);
     if (S.form) return formView(d);
     var b = (S.data.bookings || []).filter(function (x) { return x.id === S.sel; })[0];
     if (!b) { d.appendChild(el('p', null, 'Tocca una prenotazione per vedere chi l\'ha fatta, oppure un riquadro libero (+) per inserirne una a mano.')); return d; }

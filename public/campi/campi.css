@@ -198,3 +198,28 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-b.wk .cp-bt small{font-size:.7rem}
 @media (max-width:699px){.cpx .cp-ct button{padding-right:10px}.cpx .cp-ct small{display:none}}
 .cpx{box-sizing:border-box}
+
+/* card della settimana: dati essenziali, niente disegno */
+.cpx .cp-b.wk{flex-direction:column;align-items:stretch;justify-content:center;gap:0;padding:3px 7px;border-left-width:5px;border-left-style:solid}
+.cpx .cp-b.wk .cp-bt b{font-size:.8rem;line-height:1.2}
+.cpx .cp-b.wk .cp-bt small{font-size:.66rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpx .cp-b.wk .cp-bt small.l1{font-weight:700;opacity:1}
+.cpx .cp-b.wk.mini{align-items:stretch;text-align:left;padding:3px 4px}
+.cpx .cp-b.wk.mini .cp-bt small{display:block}
+.cpx .cp-b.wk.mini .cp-bt small.l2,.cpx .cp-b.wk.tight .cp-bt small.l2{display:none}
+.cpx .cp-b.wk.mini .cp-bt b{font-size:.68rem}
+@media (max-width:699px){.cpx .cp-b.wk{align-items:stretch;padding:2px 3px;border-left-width:4px}.cpx .cp-b.wk .cp-bt small.l2{display:none}.cpx .cp-b.wk .cp-bt b{font-size:.6rem}.cpx .cp-b.wk .cp-bt small{display:block;font-size:.55rem}}
+/* scheda dettaglio: chiusura e animazione */
+.cpx .cp-det{position:relative}
+.cpx .cp-det>.cp-x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line2,#27414A);background:var(--card2,#132A32);color:var(--muted,#93A8AE);display:grid;place-items:center;cursor:pointer;padding:0}
+.cpx .cp-det h3{padding-right:42px}
+.cpx .cp-det.enter{animation:cpIn .26s cubic-bezier(.2,.8,.25,1) both}
+.cpx .cp-det.leave{animation:cpOut .17s ease-in both;pointer-events:none}
+@keyframes cpIn{from{opacity:0;transform:translateX(26px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes cpOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(26px) scale(.98)}}
+.cpx .cp-list .cp-det.enter{animation-name:cpInDown}
+.cpx .cp-list .cp-det.leave{animation-name:cpOutUp}
+@keyframes cpInDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes cpOutUp{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px)}}
+@media (max-width:899px){.cpx .cp-gs .cp-det.enter{animation-name:cpInDown}.cpx .cp-gs .cp-det.leave{animation-name:cpOutUp}}
+@media (prefers-reduced-motion:reduce){.cpx .cp-det.enter,.cpx .cp-det.leave{animation:none}}
