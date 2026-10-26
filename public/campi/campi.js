@@ -154,7 +154,7 @@
       tile('Liberi ora', lib === 1 ? '1 campo' : lib + ' campi');
     } else tile('Slot liberi', String(s0.tot - s0.occ));
     tile('Senza soci', String(nosoc));
-    root.appendChild(sum);
+    if (S.view !== 'grid') root.appendChild(sum);
 
     var lg = el('div', 'cp-leg');
     lg.innerHTML = '<span><i style="background:var(--accent,#2B8A94)"></i>Almeno un socio</span><span><i style="background:var(--sec,#3B9CFF)"></i>Solo non soci</span>';
