@@ -22,6 +22,7 @@
   function addDays(s, n) { var d = parse(s); d.setUTCDate(d.getUTCDate() + n); return fmt(d); }
   function mins(t) { return +t.slice(0, 2) * 60 + +t.slice(3, 5); }
   function hhmm(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  function monday(s) { return addDays(s, -(wd(s) - 1)); }
   function wd(s) { var g = parse(s).getUTCDay(); return g === 0 ? 7 : g; }
   function longDay(s) { var d = parse(s); return DL[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MO[d.getUTCMonth()]; }
   function eur(n) { return n == null ? '' : (Math.round(n * 100) % 100 === 0 ? String(Math.round(n)) : Number(n).toFixed(2).replace('.', ',')) + ' €'; }
@@ -44,7 +45,7 @@
   }
   function load() {
     var my = ++tick; S.loading = !S.data; S.err = ''; draw();
-    call().then(function (j) { if (my !== tick) return; S.data = j; S.loading = false; if (!S.day) S.day = j.today; draw(); })
+    call().then(function (j) { if (my !== tick) return; if (!S.strip) { var mo = monday(j.today); S.day = S.day || j.today; if (mo !== j.today) { S.strip = mo; S.data = j; load(); return; } S.strip = mo; } S.data = j; S.loading = false; if (!S.day) S.day = j.today; draw(); })
       .catch(function (e) { if (my !== tick) return; S.loading = false; S.err = e.message; draw(); });
   }
 
@@ -103,11 +104,10 @@
     if (!S.data) { root.appendChild(el('div', 'cp-load', 'Carico il calendario…')); return; }
     var D = S.data;
     if (!D.courts.length) { root.appendChild(el('div', 'cp-load', 'Non hai ancora nessun campo attivo. Aggiungili dalle Impostazioni.')); return; }
-    if (!S.strip) S.strip = D.today;
 
     // testata
     var top = el('div', 'cp-top');
-    var ti = el('div', 'cp-title', longDay(S.day));
+    var ti = el('div', 'cp-title', S.view === 'grid' ? weekLabel() : longDay(S.day));
     top.appendChild(ti);
     var vw = el('div', 'cp-vw'); vw.setAttribute('role', 'group'); vw.setAttribute('aria-label', 'Vista');
     [['day', 'Giorno'], ['grid', 'Griglia']].forEach(function (v) {
@@ -122,8 +122,9 @@
     });
     top.appendChild(da);
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
-    nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== D.today) { S.strip = D.today; S.data = null; load(); } else draw(); };
-    top.appendChild(nb); root.appendChild(top);
+    nb.onclick = function () { S.day = D.today; S.sel = null; S.form = null; if (S.strip !== monday(D.today)) { S.strip = monday(D.today); S.data = null; load(); } else draw(); };
+    var nw = el('button', 'cp-now new', '+ Nuova'); nw.type = 'button'; nw.onclick = function () { openForm(S.day); };
+    top.appendChild(nw); top.appendChild(nb); root.appendChild(top);
     if (S.err) { var er = el('div', 'cp-err'); er.appendChild(el('span', null, S.err)); var r2 = el('button', 'cp-btn', 'Riprova'); r2.type = 'button'; r2.onclick = load; er.appendChild(r2); root.appendChild(er); }
 
     // giorni
@@ -141,7 +142,7 @@
       })(addDays(S.strip, i));
     }
     var nx = el('button', 'cp-arr'); nx.type = 'button'; nx.setAttribute('aria-label', 'Sette giorni dopo'); nx.innerHTML = SVG_R;
-    nx.onclick = function () { shift(7); }; st.appendChild(nx); if (S.view === 'grid') root.appendChild(st);
+    nx.onclick = function () { shift(7); }; st.appendChild(nx); 
 
     // riepilogo
     var bs = bookingsOn(S.day), s0 = stat(S.day), now = nowIn();
@@ -166,56 +167,70 @@
   function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
   function goDay(n) {
     var nd = addDays(S.day, n); S.sel = null; S.form = null; S.askCancel = false;
-    if (nd < S.strip || nd > addDays(S.strip, 6)) { S.strip = nd; S.day = nd; load(); } else { S.day = nd; draw(); }
+    if (nd < S.strip || nd > addDays(S.strip, 6)) { S.strip = monday(nd); S.day = nd; load(); } else { S.day = nd; draw(); }
   }
   function shift(n) { S.strip = addDays(S.strip, n); S.day = S.strip; S.sel = null; S.form = null; S.askCancel = false; load(); }
 
-  function board(bs, now) {
-    var D = S.data, lo = 24 * 60, hi = 0;
-    D.courts.forEach(function (c) { slotsOf(c, S.day).forEach(function (s) { lo = Math.min(lo, s.s); hi = Math.max(hi, s.e); }); });
-    var wrap = el('div', 'cp-board');
-    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questo giorno.')); return wrap; }
+  function weekLabel() {
+    var a = parse(S.strip), b = parse(addDays(S.strip, 6));
+    return a.getUTCMonth() === b.getUTCMonth() ? a.getUTCDate() + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()] : a.getUTCDate() + ' ' + MO[a.getUTCMonth()] + ' – ' + b.getUTCDate() + ' ' + MO[b.getUTCMonth()];
+  }
+  function board(bs, now) { // settimana: giorni in alto, ore a sinistra, prenotazioni di tutti i campi
+    var D = S.data, lo = 24 * 60, hi = 0, days = [];
+    for (var i = 0; i < 7; i++) days.push(addDays(S.strip, i));
+    D.courts.forEach(function (c) { days.forEach(function (d) { slotsOf(c, d).forEach(function (s) { lo = Math.min(lo, s.s); hi = Math.max(hi, s.e); }); }); });
+    var wrap = el('div', 'cp-board wk');
+    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
     lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60;
     var H = (hi - lo) * PPM, g = el('div', 'cp-g');
-    g.style.gridTemplateColumns = '38px repeat(' + D.courts.length + ',minmax(' + (D.courts.length > 5 ? 88 : 0) + 'px,1fr))';
+    g.style.gridTemplateColumns = '40px repeat(7,minmax(0,1fr))';
     g.appendChild(el('div'));
-    D.courts.forEach(function (c) {
-      var h = el('div', 'cp-ch'); h.appendChild(courtSvg(c, 0, null, 'hd')); h.appendChild(el('span', null, c.name)); h.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); g.appendChild(h);
+    days.forEach(function (d) {
+      var n = bookingsOn(d).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
+      h.setAttribute('aria-label', longDay(d) + ', ' + n + ' prenotazioni. Apri il giorno');
+      h.appendChild(el('span', null, DN[parse(d).getUTCDay()])); h.appendChild(el('b', null, String(parse(d).getUTCDate()))); h.appendChild(el('i', null, n ? String(n) : ' '));
+      h.onclick = function () { S.day = d; S.view = 'day'; try { localStorage.setItem('cpView', 'day'); } catch (e) {} S.sel = null; S.form = null; draw(); };
+      g.appendChild(h);
     });
     var hr = el('div', 'cp-hrs'); hr.style.height = H + 'px';
     for (var m = lo; m <= hi; m += 60) { var l = el('em', m === lo ? 'first' : '', hhmm(m)); l.style.top = ((m - lo) * PPM) + 'px'; if (m === hi) l.style.display = 'none'; hr.appendChild(l); }
     g.appendChild(hr);
-    D.courts.forEach(function (c) {
+    days.forEach(function (d) {
       var col = el('div', 'cp-col'); col.style.height = H + 'px';
-      ((c.hours && c.hours[String(wd(S.day))]) || []).forEach(function (h) {
-        var o = el('div', 'cp-open'); o.style.top = ((mins(h[0]) - lo) * PPM) + 'px'; o.style.height = ((mins(h[1]) - mins(h[0])) * PPM) + 'px'; col.appendChild(o);
+      D.courts.forEach(function (c) {
+        ((c.hours && c.hours[String(wd(d))]) || []).forEach(function (h) {
+          var o = el('div', 'cp-open'); o.style.top = ((mins(h[0]) - lo) * PPM) + 'px'; o.style.height = ((mins(h[1]) - mins(h[0])) * PPM) + 'px'; col.appendChild(o);
+        });
       });
       for (var m2 = lo + 60; m2 < hi; m2 += 60) { var ln = el('div', 'cp-ln'); ln.style.top = ((m2 - lo) * PPM) + 'px'; col.appendChild(ln); }
-      var mine = bs.filter(function (b) { return b.court_id === c.id; });
-      slotsOf(c, S.day).forEach(function (sl) {
-        if (S.day < now.date || (S.day === now.date && sl.e <= now.min)) return; // passato
-        if (mine.some(function (b) { return mins(b.start) < sl.e && mins(b.end) > sl.s; })) return;
-        if (closedAt(c, S.day, sl.s, sl.e)) return;
-        var f = el('button', 'cp-free' + (S.form && S.form.court_id === c.id && S.form.time === hhmm(sl.s) ? ' pick' : ''), '+'); f.type = 'button';
-        f.setAttribute('aria-label', c.name + ' alle ' + hhmm(sl.s) + ', libero. Prenota a mano');
-        f.style.top = ((sl.s - lo) * PPM + 2) + 'px'; f.style.height = ((sl.e - sl.s) * PPM - 4) + 'px';
-        f.onclick = function () { S.sel = null; S.askCancel = false; S.form = { court_id: c.id, time: hhmm(sl.s), hours: 1, first_name: '', last_name: '', phone: '', players: '', members: '', notes: '', msg: '' }; draw(); focusForm(); };
-        col.appendChild(f);
-      });
-      closuresOf(c, S.day).forEach(function (x) {
+      ((D.closures || []).filter(function (x) { return !x.court_id && d >= x.starts_on && d <= x.ends_on; })).forEach(function (x) {
         var a = Math.max(lo, x.from ? mins(x.from) : lo), z = Math.min(hi, x.to ? mins(x.to) : hi); if (z <= a) return;
         var cl = el('div', 'cp-closed', x.reason || 'Chiuso'); cl.style.top = ((a - lo) * PPM + 2) + 'px'; cl.style.height = ((z - a) * PPM - 4) + 'px'; cl.setAttribute('role', 'note'); col.appendChild(cl);
       });
-      mine.forEach(function (b) {
-        var x = el('button', 'cp-b' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
-        x.style.top = ((mins(b.start) - lo) * PPM + 2) + 'px'; x.style.height = ((mins(b.end) - mins(b.start)) * PPM - 4) + 'px';
+      var items = bookingsOn(d).map(function (b) { return { b: b, s: mins(b.start), e: mins(b.end), lane: 0, n: 1 }; }).sort(function (a, b) { return a.s - b.s || a.e - b.e; });
+      var cluster = [], cEnd = 0;
+      function flush() { var n = 0; cluster.forEach(function (x) { n = Math.max(n, x.lane + 1); }); cluster.forEach(function (x) { x.n = n; }); cluster = []; }
+      items.forEach(function (it) {
+        if (cluster.length && it.s >= cEnd) flush();
+        var used = cluster.filter(function (x) { return x.e > it.s; }).map(function (x) { return x.lane; }), ln2 = 0;
+        while (used.indexOf(ln2) >= 0) ln2++;
+        it.lane = ln2; cluster.push(it); cEnd = cluster.length === 1 ? it.e : Math.max(cEnd, it.e);
+      });
+      flush();
+      items.forEach(function (it) {
+        var b = it.b, c = courtOf(b.court_id) || { name: 'Campo' };
+        var x = el('button', 'cp-b wk' + (it.n >= 3 ? ' mini' : '') + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
+        x.style.top = ((it.s - lo) * PPM + 2) + 'px'; x.style.height = ((it.e - it.s) * PPM - 4) + 'px';
+        x.style.left = 'calc(' + (it.lane * 100 / it.n) + '% + 2px)'; x.style.width = 'calc(' + (100 / it.n) + '% - 4px)'; x.style.right = 'auto';
+        if ((it.e - it.s) * PPM < 46) x.classList.add('tight');
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
-        x.appendChild(el('b', null, b.last_name || b.first_name || '—'));
-        x.appendChild(el('small', null, b.members == null ? (b.players ? b.players + ' giocatori' : '') : (b.members === 0 ? 'Non soci' : soc(b.members))));
+        x.appendChild(courtSvg(c, b.players || 0, b.members, 'wk'));
+        var t = el('span', 'cp-bt'); t.appendChild(el('b', null, b.last_name || b.first_name || '—'));
+        t.appendChild(el('small', null, b.start + ' · ' + (c.name.replace(/^Campo\s*/i, 'C') ))); x.appendChild(t);
         x.onclick = function () { S.sel = b.id; S.form = null; S.askCancel = false; draw(); scrollDet(); };
         col.appendChild(x);
       });
-      if (S.day === now.date && now.min > lo && now.min < hi) { var nl = el('div', 'cp-nowl'); nl.style.top = ((now.min - lo) * PPM) + 'px'; col.appendChild(nl); }
+      if (d === now.date && now.min > lo && now.min < hi) { var nl = el('div', 'cp-nowl'); nl.style.top = ((now.min - lo) * PPM) + 'px'; col.appendChild(nl); }
       g.appendChild(col);
     });
     wrap.appendChild(g); return wrap;
@@ -243,9 +258,6 @@
       wrap.appendChild(r);
       if (S.sel === b.id) wrap.appendChild(detail(bs));
     });
-    var hint = el('div', 'cp-hint'); hint.appendChild(el('span', null, 'Per inserire una prenotazione a mano, apri la griglia e tocca un riquadro libero (+).'));
-    var gb = el('button', 'cp-btn', 'Apri la griglia'); gb.type = 'button'; gb.onclick = function () { S.view = 'grid'; try { localStorage.setItem('cpView', 'grid'); } catch (e) {} draw(); };
-    hint.appendChild(gb); wrap.appendChild(hint);
     if (S.form) wrap.insertBefore(detail(bs), wrap.firstChild);
     return wrap;
   }
@@ -253,7 +265,7 @@
   function detail(bs) {
     var d = el('div', 'cp-det'); d.setAttribute('aria-live', 'polite');
     if (S.form) return formView(d);
-    var b = bs.filter(function (x) { return x.id === S.sel; })[0];
+    var b = (S.data.bookings || []).filter(function (x) { return x.id === S.sel; })[0];
     if (!b) { d.appendChild(el('p', null, 'Tocca una prenotazione per vedere chi l\'ha fatta, oppure un riquadro libero (+) per inserirne una a mano.')); return d; }
     var c = courtOf(b.court_id) || { name: 'Campo' };
     var hd = el('div', 'cp-dh'); hd.appendChild(courtSvg(c, b.players || 0, b.members, 'det'));
@@ -288,9 +300,18 @@
 
   function formView(d) {
     var F = S.form, c = courtOf(F.court_id), D = S.data;
-    d.appendChild(el('h3', null, 'Nuova prenotazione · ' + c.name));
-    d.appendChild(el('p', null, longDay(S.day) + ', dalle ' + F.time + '. Per chi prenota al telefono o di persona.'));
+    d.appendChild(el('h3', null, 'Nuova prenotazione'));
+    d.appendChild(el('p', null, 'Per chi prenota al telefono o di persona.'));
     var f = el('div', 'cp-form');
+    function fixTime() { var cc = courtOf(F.court_id); if (!slotsOf(cc, F.date).some(function (x) { return hhmm(x.s) === F.time && !closedAt(cc, F.date, x.s, x.e); })) F.time = firstTime(cc, F.date); F.hours = 1; F.msg = ''; }
+    var ra = el('div', 'cp-f2'), ld0 = el('label', null, 'Giorno'), di = el('input'); di.type = 'date'; di.value = F.date; di.min = D.today;
+    di.onchange = function () { if (di.value) { F.date = di.value; fixTime(); draw(); } }; ld0.appendChild(di); ra.appendChild(ld0);
+    var lc = el('label', null, 'Campo'), cs0 = el('select'); D.courts.forEach(function (x) { var o = el('option', null, x.name); o.value = x.id; if (x.id === F.court_id) o.selected = true; cs0.appendChild(o); });
+    cs0.onchange = function () { F.court_id = cs0.value; fixTime(); draw(); }; lc.appendChild(cs0); ra.appendChild(lc); f.appendChild(ra);
+    var lt = el('label', null, 'Ora di inizio'), ts = el('select'), sls = slotsOf(c, F.date).filter(function (x) { return !closedAt(c, F.date, x.s, x.e); });
+    if (!sls.length) { var o0 = el('option', null, 'Campo chiuso in questo giorno'); o0.value = ''; ts.appendChild(o0); }
+    sls.forEach(function (x) { var busy = bookingsOn(F.date).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); var o = el('option', null, hhmm(x.s) + (busy ? ' (occupato)' : '')); o.value = hhmm(x.s); if (hhmm(x.s) === F.time) o.selected = true; ts.appendChild(o); });
+    ts.onchange = function () { F.time = ts.value; F.hours = 1; F.msg = ''; draw(); }; lt.appendChild(ts); f.appendChild(lt);
     function inp(label, key, type, extra) {
       var l = el('label', null, label), i = el('input'); i.type = type || 'text'; i.value = F[key]; if (extra) for (var k in extra) i.setAttribute(k, extra[k]);
       i.setAttribute('data-k', key); i.oninput = function () { F[key] = i.value; }; l.appendChild(i); return l;
@@ -299,7 +320,7 @@
     f.appendChild(inp('Telefono', 'phone', 'tel', { inputmode: 'tel', maxlength: 30 }));
     var r2 = el('div', 'cp-f2');
     var ld = el('label', null, 'Durata'), sel = el('select');
-    var mx = Math.max(1, Math.min(4, Math.floor((maxEnd(c) - mins(F.time)) / c.slot_min)));
+    var mx = F.time ? Math.max(1, Math.min(4, Math.floor((maxEnd(c) - mins(F.time)) / c.slot_min))) : 1;
     for (var h = 1; h <= mx; h++) { var o = el('option', null, (h * c.slot_min >= 60 ? (h * c.slot_min / 60).toString().replace('.', ',') + (h * c.slot_min === 60 ? ' ora' : ' ore') : h * c.slot_min + ' min')); o.value = String(h); if (h === F.hours) o.selected = true; sel.appendChild(o); }
     sel.onchange = function () { F.hours = +sel.value; }; ld.appendChild(sel); r2.appendChild(ld);
     r2.appendChild(inp('Giocatori', 'players', 'number', { inputmode: 'numeric', min: 1, max: 22 })); f.appendChild(r2);
@@ -311,17 +332,24 @@
     var cn = el('button', 'cp-btn', 'Annulla'); cn.type = 'button'; cn.onclick = function () { S.form = null; draw(); };
     row.appendChild(sv); row.appendChild(cn); f.appendChild(row); d.appendChild(f); return d;
   }
-  function maxEnd(c) { var m = 0; ((c.hours && c.hours[String(wd(S.day))]) || []).forEach(function (h) { if (mins(h[0]) <= mins(S.form.time) && mins(h[1]) > mins(S.form.time)) m = mins(h[1]); }); return m; }
+  function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); return sl.length ? hhmm(sl[0].s) : ''; }
+  function openForm(date, courtId, time) {
+    var D = S.data, c = courtOf(courtId || D.courts[0].id), d = date || S.day; S.sel = null; S.askCancel = false;
+    S.form = { court_id: c.id, date: d, time: time || firstTime(c, d), hours: 1, first_name: '', last_name: '', phone: '', players: '', members: '', notes: '', msg: '' };
+    draw(); focusForm();
+  }
+  function maxEnd(c) { var m = 0; ((c.hours && c.hours[String(wd(S.form.date))]) || []).forEach(function (h) { if (mins(h[0]) <= mins(S.form.time) && mins(h[1]) > mins(S.form.time)) m = mins(h[1]); }); return m; }
   function focusForm() { setTimeout(function () { var i = root.querySelector('.cp-form input'); if (i) { i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }, 30); }
   function save() {
     var F = S.form; if (S.busy) return;
+    if (!F.time) { F.msg = 'Scegli un orario.'; draw(); return; }
     if (!F.first_name.trim() || !F.last_name.trim()) { F.msg = 'Scrivi nome e cognome.'; draw(); return; }
     if (!F.phone.trim()) { F.msg = 'Scrivi il telefono.'; draw(); return; }
     var p = F.players === '' ? null : +F.players, mm = F.members === '' ? null : +F.members;
     if (p !== null && mm !== null && mm > p) { F.msg = 'I soci non possono essere più dei giocatori.'; draw(); return; }
     F.msg = ''; S.busy = true; draw();
-    call({ action: 'create', court_id: F.court_id, date: S.day, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, players: p, members: mm, notes: F.notes })
-      .then(function (j) { S.busy = false; S.form = null; S.sel = j.booking && j.booking.id; toast('Prenotazione salvata'); S.data = null; load(); })
+    call({ action: 'create', court_id: F.court_id, date: F.date, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, players: p, members: mm, notes: F.notes })
+      .then(function (j) { S.busy = false; var fd = F.date; S.form = null; S.sel = j.booking && j.booking.id; S.day = fd; if (fd < S.strip || fd > addDays(S.strip, 6)) S.strip = monday(fd); toast('Prenotazione salvata'); S.data = null; load(); })
       .catch(function (e) { S.busy = false; F.msg = e.message; draw(); });
   }
 

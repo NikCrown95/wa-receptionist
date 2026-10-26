@@ -362,7 +362,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/verticals.js").areaOf(bt) === "campi") {
           // Circoli e centri sportivi: stessa dashboard, ma il calendario mostra i campi (public/campi/).
           variantKey = "campi";
-          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/campi/campi.css?v=c65de61b">').replace("</body>", '<script src="/campi/campi.js?v=0987f659"></script><script src="/campi/campi-set.js?v=b5a3e349"></script></body>');
+          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/campi/campi.css?v=e30bb3b3">').replace("</body>", '<script src="/campi/campi.js?v=aec9ab53"></script><script src="/campi/campi-set.js?v=b5a3e349"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).

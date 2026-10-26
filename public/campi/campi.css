@@ -163,3 +163,24 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-gs{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);align-items:start}
 @media (min-width:900px){.cpx .cp-gs.open{grid-template-columns:minmax(0,1fr) 320px}.cpx .cp-gs .cp-det{position:sticky;top:12px}}
 @media (min-width:700px){.cpx .cp-cs.hd{width:76px;height:76px;margin-bottom:6px}.cpx .cp-ch{font-size:.9rem}.cpx .cp-ch small{font-size:.72rem}}
+
+/* griglia settimanale */
+.cpx .cp-now.new{background:var(--accent,#2B8A94);border-color:var(--accent,#2B8A94);color:#fff}
+.cpx .cp-board.wk .cp-g .cp-wh{border:0;background:transparent;color:var(--ink,#F2F6F7);display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 2px 8px;cursor:pointer;font-family:inherit;border-radius:10px}
+.cpx .cp-wh span{font-size:.72rem;font-weight:700;color:var(--muted,#93A8AE);text-transform:uppercase;letter-spacing:.04em}
+.cpx .cp-wh b{font-family:var(--fd,inherit);font-weight:800;font-size:1.25rem;line-height:1.1}
+.cpx .cp-wh i{font-style:normal;font-size:.68rem;font-weight:600;color:var(--muted,#93A8AE);min-height:1em}
+.cpx .cp-wh.tod b{background:var(--accent,#2B8A94);color:#fff;border-radius:10px;padding:0 9px}
+.cpx .cp-b.wk{flex-direction:row;align-items:center;justify-content:flex-start;gap:6px;padding:3px 4px;overflow:hidden;right:auto}
+.cpx .cp-b.wk .cp-cs.wk{width:30px;height:30px;flex:none}
+.cpx .cp-bt{min-width:0;display:flex;flex-direction:column}
+.cpx .cp-b.wk .cp-bt b{font-size:.74rem}
+.cpx .cp-b.wk .cp-bt small{font-size:.62rem}
+.cpx .cp-b.wk.mini{flex-direction:column;justify-content:flex-start;align-items:center;gap:2px;padding:3px 1px;text-align:center}
+.cpx .cp-b.wk.mini .cp-bt{width:100%;align-items:center}
+.cpx .cp-b.wk.mini .cp-bt b{font-size:.6rem;max-width:100%}
+.cpx .cp-b.wk.mini .cp-bt small{display:none}
+.cpx .cp-b.wk.tight .cp-cs.wk{width:22px;height:22px}
+.cpx .cp-b.wk.tight .cp-bt small{display:none}
+.cpx .cp-b.wk.mini.tight .cp-cs.wk{display:none}
+@media (max-width:699px){.cpx .cp-b.wk{flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;padding:2px 0}.cpx .cp-b.wk .cp-cs.wk{width:22px;height:22px}.cpx .cp-b.wk .cp-bt small{display:none}.cpx .cp-b.wk .cp-bt b{font-size:.55rem}}
