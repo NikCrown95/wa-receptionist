@@ -255,3 +255,10 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-chip em{font-style:normal;font-size:.72rem;font-weight:800;color:var(--cc)}
 .cpx .cp-board.all .cp-wh{border:0;background:transparent;color:var(--ink,#F2F6F7);display:flex;flex-direction:column;align-items:center;padding:2px 2px 8px;cursor:pointer;font-family:inherit}
 @media (max-width:699px){.cpx .cp-ga{grid-template-columns:34px repeat(7,minmax(0,1fr))}.cpx .cp-chip{padding:0 3px 0 7px;height:24px}.cpx .cp-chip em,.cpx .cp-chip u{display:none}.cpx .cp-chip b{font-size:.6rem}.cpx .cp-ac{padding:2px}}
+
+/* sfumatura in base ai giocatori (2 chiara, 4 piena) */
+.cpx .cp-chip.p2,.cpx .cp-b.wk.p2{background:linear-gradient(135deg,color-mix(in srgb,var(--cc) 14%,var(--card2,#132A32)),var(--card2,#132A32) 85%);border-color:color-mix(in srgb,var(--cc) 30%,var(--line2,#27414A))}
+.cpx .cp-chip.p4,.cpx .cp-b.wk.p4{background:linear-gradient(135deg,color-mix(in srgb,var(--cc) 62%,var(--card2,#132A32)),color-mix(in srgb,var(--cc) 26%,var(--card2,#132A32)) 90%);border-color:color-mix(in srgb,var(--cc) 70%,var(--line2,#27414A))}
+.cpx .cp-leg i.p2,.cpx .cp-leg i.p4{width:26px;height:12px;border-radius:5px;background:linear-gradient(135deg,color-mix(in srgb,var(--muted,#93A8AE) 14%,var(--card2,#132A32)),var(--card2,#132A32));border:1px solid var(--line2,#27414A)}
+.cpx .cp-leg i.p4{background:linear-gradient(135deg,color-mix(in srgb,var(--muted,#93A8AE) 60%,var(--card2,#132A32)),color-mix(in srgb,var(--muted,#93A8AE) 25%,var(--card2,#132A32)))}
+.cpx .cp-cn{display:inline-block;font-style:normal;font-weight:800;font-size:.68rem;color:#fff;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}

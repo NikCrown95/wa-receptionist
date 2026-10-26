@@ -159,8 +159,8 @@
     if (S.view !== 'grid') root.appendChild(sum);
 
     var lg = el('div', 'cp-leg');
-    lg.innerHTML = '<span><i style="background:var(--accent,#2B8A94)"></i>Almeno un socio</span><span><i style="background:var(--sec,#3B9CFF)"></i>Solo non soci</span>';
-    root.appendChild(lg);
+    lg.innerHTML = '<span><i class="p2"></i>2 giocatori</span><span><i class="p4"></i>4 giocatori</span>';
+    if (S.view === 'grid') root.appendChild(lg);
 
     if (S.view === 'grid') {
       if (S.court && !courtOf(S.court)) S.court = '';
@@ -171,7 +171,7 @@
       ct.appendChild(all);
       D.courts.forEach(function (c) {
         var b = el('button', S.court === c.id ? 'on' : ''); b.type = 'button'; b.setAttribute('aria-pressed', S.court === c.id ? 'true' : 'false');
-        b.appendChild(courtSvg(c, 0, null, 'tab')); var t = el('span'); t.appendChild(el('b', null, c.name)); t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); b.appendChild(t);
+        b.appendChild(courtSvg(c, 0, null, 'tab')); var t = el('span'); var nb2 = el('b', null, c.name + ' '); var tg = el('i', 'cp-cn', c.name.replace(/^Campo\s*/i, 'C')); tg.style.background = courtColor(c); nb2.appendChild(tg); t.appendChild(nb2); t.appendChild(el('small', null, [c.surface, c.indoor ? 'coperto' : ''].filter(Boolean).join(' · ') || ' ')); b.appendChild(t);
         b.onclick = function () { S.court = S.court === c.id ? '' : c.id; try { localStorage.setItem('cpCourt', S.court); } catch (e) {} S.sel = null; S.form = null; draw(); };
         ct.appendChild(b);
       });
@@ -213,7 +213,7 @@
       cells.forEach(function (list, di) {
         var cell = el('div', 'cp-ac' + (days[di] === now.date && hr === Math.floor(now.min / 60) ? ' now' : ''));
         list.forEach(function (b) {
-          var c = courtOf(b.court_id) || { name: 'Campo' }, ch = el('button', 'cp-chip' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); ch.type = 'button';
+          var c = courtOf(b.court_id) || { name: 'Campo' }, ch = el('button', 'cp-chip' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '')); ch.type = 'button';
           ch.style.setProperty('--cc', courtColor(c));
           ch.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
           var m = mins(b.start) % 60;
@@ -272,7 +272,7 @@
       flush();
       items.forEach(function (it) {
         var b = it.b, c = courtOf(b.court_id) || { name: 'Campo' };
-        var x = el('button', 'cp-b wk' + (it.n >= 3 ? ' mini' : '') + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
+        var x = el('button', 'cp-b wk' + (it.n >= 3 ? ' mini' : '') + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '')); x.type = 'button';
         x.style.top = ((it.s - lo) * PPM + 2) + 'px'; x.style.height = ((it.e - it.s) * PPM - 4) + 'px';
         x.style.left = 'calc(' + (it.lane * 100 / it.n) + '% + 2px)'; x.style.width = 'calc(' + (100 / it.n) + '% - 4px)'; x.style.right = 'auto';
         if ((it.e - it.s) * PPM < 46) x.classList.add('tight');
@@ -311,7 +311,7 @@
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
-      var r = el('button', 'cp-li' + (b.members === 0 ? ' ns' : '') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button';
+      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '')); r.type = 'button';
       r.setAttribute('aria-expanded', S.sel === b.id ? 'true' : 'false');
       var t = el('span', 'cp-lt'); t.appendChild(el('b', null, b.start)); t.appendChild(el('small', null, 'fino alle ' + b.end)); r.appendChild(t);
       r.appendChild(courtSvg(c, b.players || 0, b.members, 'li'));
