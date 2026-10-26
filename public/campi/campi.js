@@ -366,7 +366,6 @@
     if (b.email) { var ea = el('a', 'cp-em', b.email); ea.href = 'mailto:' + b.email; row2('Email', ea); }
     d.appendChild(kv);
     var r = el('div', 'cp-row');
-    if (b.notes) d.appendChild(el('p', null, 'Note: ' + b.notes));
     var act = el('div', 'cp-row');
     if (!S.askCancel) {
       var cb = el('button', 'cp-btn bad', 'Annulla prenotazione'); cb.type = 'button'; cb.onclick = function () { S.askCancel = true; draw(); }; act.appendChild(cb);
@@ -426,7 +425,6 @@
     }
     var gp = el('div', 'cp-f2 st'); gp.appendChild(stepper('Giocatori', 'players', 1, 22)); gp.appendChild(stepper('Di cui soci', 'members', 0, 22)); f.appendChild(gp);
     var qk = el('div', 'cp-qk'); [2, 4].forEach(function (n) { var q = el('button', (+F.players === n ? 'on' : ''), n + ' giocatori'); q.type = 'button'; q.onclick = function () { F.players = String(n); if (+F.members > n) F.members = String(n); draw(); }; qk.appendChild(q); }); f.appendChild(qk);
-    f.appendChild(inp('Note (facoltative)', 'notes', 'text', { maxlength: 300 }));
     if (F.msg) { var m = el('div', 'cp-msg', F.msg); m.setAttribute('role', 'alert'); f.appendChild(m); }
     var row = el('div', 'cp-row cp-frow');
     var sv = el('button', 'cp-btn pri', S.busy ? 'Salvo…' : 'Salva prenotazione'); sv.type = 'button'; sv.disabled = S.busy; sv.onclick = save;
@@ -449,7 +447,7 @@
     var p = F.players === '' ? null : +F.players, mm = F.members === '' ? null : +F.members;
     if (p !== null && mm !== null && mm > p) { F.msg = 'I soci non possono essere più dei giocatori.'; draw(); return; }
     F.msg = ''; S.busy = true; draw();
-    call({ action: 'create', court_id: F.court_id, date: F.date, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, email: F.email, players: p, members: mm, notes: F.notes })
+    call({ action: 'create', court_id: F.court_id, date: F.date, time: F.time, hours: F.hours, first_name: F.first_name, last_name: F.last_name, phone: F.phone, email: F.email, players: p, members: mm })
       .then(function (j) { S.busy = false; var fd = F.date; S.form = null; S.sel = j.booking && j.booking.id; S.day = fd; if (fd < S.strip || fd > addDays(S.strip, 6)) S.strip = monday(fd); toast('Prenotazione salvata'); S.data = null; load(); })
       .catch(function (e) { S.busy = false; F.msg = e.message; draw(); });
   }
