@@ -362,7 +362,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/verticals.js").areaOf(bt) === "campi") {
           // Circoli e centri sportivi: stessa dashboard, ma il calendario mostra i campi (public/campi/).
           variantKey = "campi";
-          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=da95ebee"><link rel="stylesheet" href="/campi/campi.css?v=08cac6ef">').replace("</body>", '<script src="/campi/campi.js?v=c0aa5c87"></script><script src="/campi/stats.js?v=d382838b"></script><script src="/campi/campi-set.js?v=5ac9af49"></script></body>');
+          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=da95ebee"><link rel="stylesheet" href="/campi/campi.css?v=08cac6ef">').replace("</body>", '<script src="/campi/campi.js?v=481bb3f8"></script><script src="/campi/stats.js?v=d382838b"></script><script src="/campi/campi-set.js?v=5ac9af49"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -425,6 +425,7 @@ module.exports = async (req, res) => {
         const cb = req.body || {}, act = String(cb.action || "");
         const acts = { cancel: courtsLib.cancel, create: courtsLib.create, save_rules: courtsLib.saveRules, save_court: courtsLib.saveCourt, add_closure: courtsLib.addClosure, delete_closure: courtsLib.deleteClosure };
         out = acts[act] ? await acts[act](sb, biz, cb) : { status: 400, body: { error: "Richiesta non valida" } };
+        if (act === "create" && out.status === 200 && out._mail) out.body.email_sent = !!(await courtsLib.afterBook(biz, out, null));
       }
       return res.status(out.status).json(out.body);
     }
