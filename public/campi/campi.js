@@ -356,7 +356,6 @@
     var kv = el('div', 'cp-kv');
     function row2(l, v, cls) { var r0 = el('div'); r0.appendChild(el('span', null, l)); var x = typeof v === 'string' ? el('b', cls || null, v) : v; r0.appendChild(x); kv.appendChild(r0); }
     if (b.price_eur != null) row2('Incasso', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur));
-    if (S.data.club.fit) row2('Tessera FIT', b.fit_declared ? 'Dichiarata' : (b.channel === 'manual' ? 'Da controllare' : 'Non dichiarata'), b.fit_declared ? 'ok' : 'warn');
     row2('Prenotata', b.channel === 'manual' ? 'Inserita a mano' : b.channel === 'chat' ? 'Tramite Lia' : 'Dal sito');
     if (b.phone) { var a = el('a', null, b.phone); a.href = 'tel:' + b.phone.replace(/[^+\d]/g, ''); row2('Telefono', a); }
     d.appendChild(kv);
