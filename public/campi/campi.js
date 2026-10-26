@@ -343,18 +343,24 @@
     var b = (S.data.bookings || []).filter(function (x) { return x.id === S.sel; })[0];
     if (!b) { d.appendChild(el('p', null, 'Tocca una prenotazione per vedere chi l\'ha fatta, oppure un riquadro libero (+) per inserirne una a mano.')); return d; }
     var c = courtOf(b.court_id) || { name: 'Campo' };
+    d.style.setProperty('--cc', courtColor(c));
     var hd = el('div', 'cp-dh'); hd.appendChild(courtSvg(c, b.players || 0, b.members, 'det'));
-    hd.appendChild(el('h3', null, [b.first_name, b.last_name].filter(Boolean).join(' ') + ' · ' + c.name + ', ' + b.start + '–' + b.end)); d.appendChild(hd);
-    var parts = ['Referente della prenotazione.'];
-    if (b.players != null) parts.push(b.players + (b.players === 1 ? ' giocatore' : ' giocatori') + (b.members != null ? ': ' + (b.members === 0 ? 'nessun socio' : b.members === 1 ? '1 socio' : b.members + ' soci') + ', ' + (b.players - b.members === 0 ? 'nessun non socio' : b.players - b.members === 1 ? '1 non socio' : (b.players - b.members) + ' non soci') + '.' : '.'));
-    d.appendChild(el('p', null, parts.join(' ')));
+    var ht = el('div', 'cp-dt'); ht.appendChild(el('h3', null, [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Prenotazione'));
+    ht.appendChild(el('p', null, c.name + ' · ' + b.start + '–' + b.end)); if (b.date) ht.appendChild(el('p', 'cp-dd', longDay(b.date))); hd.appendChild(ht); d.appendChild(hd);
+    var tl = el('div', 'cp-tiles');
+    function tile2(l, v) { var t = el('div', 'cp-tile'); t.appendChild(el('span', null, l)); t.appendChild(el('b', null, v)); tl.appendChild(t); }
+    tile2('Giocatori', b.players != null ? String(b.players) : '—');
+    tile2('Soci', b.members != null ? String(b.members) : '—');
+    tile2('Non soci', b.players != null && b.members != null ? String(Math.max(0, b.players - b.members)) : '—');
+    d.appendChild(tl);
+    var kv = el('div', 'cp-kv');
+    function row2(l, v, cls) { var r0 = el('div'); r0.appendChild(el('span', null, l)); var x = typeof v === 'string' ? el('b', cls || null, v) : v; r0.appendChild(x); kv.appendChild(r0); }
+    if (b.price_eur != null) row2('Incasso', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur));
+    if (S.data.club.fit) row2('Tessera FIT', b.fit_declared ? 'Dichiarata' : (b.channel === 'manual' ? 'Da controllare' : 'Non dichiarata'), b.fit_declared ? 'ok' : 'warn');
+    row2('Prenotata', b.channel === 'manual' ? 'Inserita a mano' : b.channel === 'chat' ? 'Tramite Lia' : 'Dal sito');
+    if (b.phone) { var a = el('a', null, b.phone); a.href = 'tel:' + b.phone.replace(/[^+\d]/g, ''); row2('Telefono', a); }
+    d.appendChild(kv);
     var r = el('div', 'cp-row');
-    if (b.members != null) r.appendChild(el('span', 'cp-tag', soc(b.members)));
-    if (S.data.club.fit) r.appendChild(el('span', 'cp-tag ' + (b.fit_declared ? 'f' : 'w'), b.fit_declared ? 'Tessera FIT e certificato dichiarati' : (b.channel === 'manual' ? 'Tessera FIT da controllare' : 'Tessera FIT non dichiarata')));
-    if (b.price_eur != null) r.appendChild(el('span', 'cp-tag', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur) + ' al circolo'));
-    r.appendChild(el('span', 'cp-tag', b.channel === 'manual' ? 'Inserita a mano' : b.channel === 'chat' ? 'Da Lia' : 'Dal sito'));
-    if (b.phone) { var a = el('a', 'cp-tag', b.phone); a.href = 'tel:' + b.phone.replace(/[^+\d]/g, ''); r.appendChild(a); }
-    d.appendChild(r);
     if (b.notes) d.appendChild(el('p', null, 'Note: ' + b.notes));
     var act = el('div', 'cp-row');
     if (!S.askCancel) {

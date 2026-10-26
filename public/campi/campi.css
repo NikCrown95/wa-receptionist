@@ -332,3 +332,33 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 .cpx .cp-b.wk.p2 b,.cpx .cp-b.wk.p4 b,.cpx .cp-chip.p2 b,.cpx .cp-chip.p4 b{color:#FFFFFF}
 .cpx .cp-b.wk.p2 small,.cpx .cp-b.wk.p4 small,.cpx .cp-b.wk.p2 span,.cpx .cp-b.wk.p4 span,.cpx .cp-chip.p2 u,.cpx .cp-chip.p4 u{color:#C5D6DC;opacity:1}
 .cpx .cp-leg i.p2,.cpx .cp-leg i.p4{display:none}
+
+/* dettaglio prenotazione: scheda sovrapposta, la griglia resta a tutta larghezza */
+.cpx .cp-gs.open{grid-template-columns:minmax(0,1fr)!important}
+.cpx .cp-gs .cp-det{position:fixed;z-index:60;top:76px;right:16px;bottom:auto;width:372px;max-width:calc(100vw - 32px);max-height:calc(100vh - 92px);overflow:auto;margin:0;box-shadow:0 24px 60px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.04);background:var(--card,#0F2229);border-radius:20px}
+.cpx .cp-gs .cp-det.enter{animation-name:cpInR}
+.cpx .cp-gs .cp-det.leave{animation-name:cpOutR}
+@keyframes cpInR{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes cpOutR{from{opacity:1;transform:none}to{opacity:0;transform:translateX(40px)}}
+@media (max-width:699px){.cpx .cp-gs .cp-det{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-width:none;max-height:78vh}.cpx .cp-gs .cp-det.enter{animation-name:cpInU}.cpx .cp-gs .cp-det.leave{animation-name:cpOutD}}
+@keyframes cpInU{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes cpOutD{from{opacity:1;transform:none}to{opacity:0;transform:translateY(40px)}}
+.cpx .cp-det .cp-dh{align-items:center;padding-right:44px}
+.cpx .cp-det .cp-dt{min-width:0}
+.cpx .cp-det .cp-dt h3{font-size:1.2rem;padding-right:0}
+.cpx .cp-det .cp-dt p{margin-top:2px;font-size:.84rem}
+.cpx .cp-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cpx .cp-tile{border-radius:14px;background:var(--card2,#132A32);border:1px solid var(--line2,#27414A);padding:9px 10px;text-align:center}
+.cpx .cp-tile span{display:block;font-size:.7rem;color:var(--muted,#93A8AE);font-weight:600}
+.cpx .cp-tile b{display:block;font-family:var(--fd,inherit);font-size:1.45rem;font-weight:800;line-height:1.15;margin-top:2px}
+.cpx .cp-kv{display:grid;border:1px solid var(--line,#1B2F36);border-radius:14px;overflow:hidden}
+.cpx .cp-kv>div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;font-size:.9rem}
+.cpx .cp-kv>div+div{border-top:1px solid var(--line,#1B2F36)}
+.cpx .cp-kv span{color:var(--muted,#93A8AE)}
+.cpx .cp-kv b,.cpx .cp-kv a{font-weight:700;color:var(--ink,#F2F6F7);text-decoration:none}
+.cpx .cp-kv a{color:var(--accent-ink,#7FDCDC)}
+.cpx .cp-kv b.ok{color:#7fdcdc}.cpx .cp-kv b.warn{color:#e8bb62}
+.cpx .cp-det .cp-btn.bad{width:100%;min-height:46px;background:transparent}
+
+@media (min-width:700px){.cpx .cp-gs .cp-det{top:126px;max-height:calc(100vh - 142px)}}
+.cpx .cp-det .cp-dt p.cp-dd{margin-top:0;opacity:.8}
