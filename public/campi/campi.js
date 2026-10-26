@@ -190,12 +190,12 @@
     var c = courtOf(b.court_id) || { name: 'Campo' };
     d.appendChild(el('h3', null, [b.first_name, b.last_name].filter(Boolean).join(' ') + ' · ' + c.name + ', ' + b.start + '–' + b.end));
     var parts = ['Referente della prenotazione.'];
-    if (b.players != null) parts.push(b.players + (b.players === 1 ? ' giocatore' : ' giocatori') + (b.members != null ? ', di cui ' + (b.members === 0 ? 'nessun socio' : b.members === 1 ? '1 socio' : b.members + ' soci') + '.' : '.'));
+    if (b.players != null) parts.push(b.players + (b.players === 1 ? ' giocatore' : ' giocatori') + (b.members != null ? ': ' + (b.members === 0 ? 'nessun socio' : b.members === 1 ? '1 socio' : b.members + ' soci') + ', ' + (b.players - b.members === 0 ? 'nessun non socio' : b.players - b.members === 1 ? '1 non socio' : (b.players - b.members) + ' non soci') + '.' : '.'));
     d.appendChild(el('p', null, parts.join(' ')));
     var r = el('div', 'cp-row');
     if (b.members != null) r.appendChild(el('span', 'cp-tag', soc(b.members)));
     if (S.data.club.fit) r.appendChild(el('span', 'cp-tag ' + (b.fit_declared ? 'f' : 'w'), b.fit_declared ? 'Tessera FIT e certificato dichiarati' : (b.channel === 'manual' ? 'Tessera FIT da controllare' : 'Tessera FIT non dichiarata')));
-    if (b.price_eur != null) r.appendChild(el('span', 'cp-tag', b.price_eur === 0 ? 'Gratis (soci)' : eur(b.price_eur) + ' al circolo'));
+    if (b.price_eur != null) r.appendChild(el('span', 'cp-tag', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur) + ' al circolo'));
     r.appendChild(el('span', 'cp-tag', b.channel === 'manual' ? 'Inserita a mano' : b.channel === 'chat' ? 'Da Lia' : 'Dal sito'));
     if (b.phone) { var a = el('a', 'cp-tag', b.phone); a.href = 'tel:' + b.phone.replace(/[^+\d]/g, ''); r.appendChild(a); }
     d.appendChild(r);
