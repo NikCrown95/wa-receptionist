@@ -185,3 +185,16 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-b.wk.mini.tight .cp-cs.wk{display:none}
 @media (max-width:699px){.cpx .cp-b.wk{flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;padding:2px 0}.cpx .cp-b.wk .cp-cs.wk{width:22px;height:22px}.cpx .cp-b.wk .cp-bt small{display:none}.cpx .cp-b.wk .cp-bt b{font-size:.55rem}}
 .cpx.wide{padding-left:14px;padding-right:14px}
+
+/* un campo alla volta */
+.cpx .cp-ct{display:flex;gap:8px;flex-wrap:wrap}
+.cpx .cp-ct button{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 16px 6px 7px;border-radius:14px;border:1.5px solid var(--line2,#27414A);background:var(--card,#0F2229);color:var(--ink,#F2F6F7);cursor:pointer;font-family:inherit;text-align:left}
+.cpx .cp-ct button.on{border-color:var(--accent,#2B8A94);background:var(--accent-soft,#12343B)}
+.cpx .cp-ct b{display:block;font-family:var(--fd,inherit);font-weight:800;font-size:.92rem}
+.cpx .cp-ct small{display:block;font-size:.72rem;color:var(--muted,#93A8AE)}
+.cpx .cp-cs.tab{width:38px;height:38px}
+.cpx .cp-b.wk .cp-cs.wk{width:34px;height:34px}
+.cpx .cp-b.wk .cp-bt b{font-size:.84rem}
+.cpx .cp-b.wk .cp-bt small{font-size:.7rem}
+@media (max-width:699px){.cpx .cp-ct button{padding-right:10px}.cpx .cp-ct small{display:none}}
+.cpx{box-sizing:border-box}
