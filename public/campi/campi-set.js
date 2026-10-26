@@ -407,7 +407,7 @@
     var orig = window.liaSettingsOpen;
     if (typeof orig === 'function' && !orig.__cx) { var w2 = function (k) { if (String(k).indexOf('cx-') !== 0) unmark(); return orig(k); }; w2.__cx = 1; window.liaSettingsOpen = w2; }
     ph.remove(); load().catch(function () { });
-    fixDefault(); return true;
+    fixDefault(); if (typeof window.liaMountSc === 'function') { try { window.liaMountSc(); } catch (e) { } } return true;
   }
   document.addEventListener('lia:section', function (e) { if (e.detail === 'other') setTimeout(fixDefault, 0); });
   window.addEventListener('resize', function () { setTimeout(fixDefault, 0); });

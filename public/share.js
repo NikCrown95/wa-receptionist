@@ -383,7 +383,11 @@
     msg: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/>',
     card: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/>',
     ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>'
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
+    court: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14M3 12h18"/>',
+    euro: '<path d="M17.5 7.5A6 6 0 1 0 17.5 16.5M5 10.5h9M5 13.5h9"/>',
+    off: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+    rules: '<path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5L15.5 9.5"/>'
   };
   function gi(k, s) { return '<svg width="' + (s || 19) + '" height="' + (s || 19) + '" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9">' + GI[k] + "</svg>"; }
 
@@ -630,10 +634,13 @@
   function mountSc() {
     var nav = document.querySelector("#panelOther .stMenu"); if (!nav) return;
     var gym = !!nav.querySelector("[data-gx]");
+    var club = !gym && !!nav.querySelector("[data-cx]");
     var defs = gym
       ? [["cal", "Corsi", '[data-gx="corsi"]'], ["card", "Abbonamenti", '[data-gx="abb"]'], ["clock", "Orari", '[data-gx="orari"]'], ["sun", "Ferie", '[data-gx="chiusure"]'], ["tag", "Piano", '[data-st="subscription"]']]
-      : [["tag", "Servizi", '[data-st="services"]'], ["clock", "Orari", '[data-st="hours"]'], ["sun", "Ferie", '[data-st="blocks"]'], ["cli", "Collaboratori", '[data-st="staff"]'], ["card", "Abbonamento", '[data-st="subscription"]']];
-    var colors = gym ? [1, 2, 5, 3, 4] : [2, 5, 1, 3, 4], h = "", n = 0;
+      : club
+        ? [["court", "Campi", '[data-cx="courts"]'], ["euro", "Prezzi", '[data-cx="prices"]'], ["clock", "Orari", '[data-cx="hours"]'], ["off", "Chiusure", '[data-cx="closures"]'], ["rules", "Regole", '[data-cx="rules"]'], ["card", "Abbonamento", '[data-st="subscription"]']]
+        : [["tag", "Servizi", '[data-st="services"]'], ["clock", "Orari", '[data-st="hours"]'], ["sun", "Ferie", '[data-st="blocks"]'], ["cli", "Collaboratori", '[data-st="staff"]'], ["card", "Abbonamento", '[data-st="subscription"]']];
+    var colors = gym ? [1, 2, 5, 3, 4] : club ? [2, 5, 4, 1, 3, 6] : [2, 5, 1, 3, 4], h = "", n = 0;
     defs.forEach(function (d, i) {
       var r = nav.querySelector(d[2]); if (!r || r.style.display === "none") return;
       n++;
@@ -648,6 +655,7 @@
     });
     nav.insertBefore(box, nav.firstChild);
   }
+  window.liaMountSc = mountSc; // i circoli (campi-set.js) creano le loro voci dopo: richiamano questa per aggiornare le scorciatoie
   document.addEventListener("lia:section", function (e) { if (e.detail === "other") { setTimeout(mountSc, 60); setTimeout(mountSc, 600); } });
 
   /* ---------- avvio ---------- */
