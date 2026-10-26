@@ -2323,7 +2323,7 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #notifPanel .np-x svg{width:14px;height:14px}
 #notifPanel .np-list{padding:0 14px 16px}
 #notifPanel .np-grp{padding:8px 6px 8px}
-#notifPanel .np-it.np-v{display:grid;grid-template-columns:58px minmax(0,1fr);gap:15px;align-items:center;padding:14px;margin-bottom:10px;border-radius:18px;background:var(--card2);border:1px solid var(--line2)}
+#notifPanel .np-it.np-v{display:grid;grid-template-columns:58px minmax(0,1fr);gap:15px;align-items:center;padding:10px 14px;margin-bottom:8px;border-radius:18px;background:var(--card2);border:1px solid var(--line2)}
 #notifPanel .np-it.np-v:hover{background:var(--accent-soft)}
 #notifPanel .np-it.np-v.un{background:color-mix(in srgb,var(--accent) 9%,var(--card2))}
 #notifPanel .np-v .np-dt.b,#notifPanel .np-v .np-lb.b{--c:var(--n-ok);--cb:var(--n-ok-bg)}
@@ -2343,7 +2343,7 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 .np-r1 em{font-style:normal;flex:none;font-size:.74rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .np-sv{font-size:.87rem;color:var(--muted);margin-top:3px;line-height:1.35}
 .np-sv b{color:var(--ink);font-weight:600}
-.np-lb{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin-top:8px}
+.np-lb{display:inline-flex;align-items:center;gap:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c);background:var(--cb);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);padding:2px 10px;border-radius:999px;margin-top:5px}
 .np-lb:empty{display:none}
 .np-lb u{flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent);text-decoration:none}
 /* Banner nuova notifica: stessa tessera data, barra piu sottile */
