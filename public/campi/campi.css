@@ -401,3 +401,22 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 .cpx .cp-fv .cp-frow .pri[hidden]{display:none}
 .cpx .cp-qk{display:none}
 .cpx .cp-det.cp-fv,.cpx .cp-gs .cp-det.cp-fv{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
+
+/* nuova prenotazione: un passo alla volta */
+.cpx .cp-fh{position:relative}
+.cpx .cp-back{flex:none;width:46px;height:46px;border-radius:14px;border:1px solid var(--line2,#27414A);background:var(--card2,#132A32);color:var(--ink,#F2F6F7);display:grid;place-items:center;cursor:pointer;padding:0}
+.cpx .cp-fht{min-width:0}
+.cpx .cp-dots{display:flex;gap:6px;margin-top:2px}
+.cpx .cp-dots i{flex:1;height:4px;border-radius:2px;background:var(--line2,#27414A)}
+.cpx .cp-dots i.on{background:var(--cc,#2B8A94)}
+.cpx .cp-wz{gap:14px;min-height:150px;align-content:start}
+.cpx .cp-q{margin:6px 0 0;font-family:var(--fd,inherit);font-size:1.25rem;font-weight:800;letter-spacing:-.015em}
+.cpx .cp-qs{margin:-8px 0 0;color:var(--muted,#93A8AE);font-size:.86rem}
+.cpx .cp-opts{display:grid;gap:8px}
+.cpx .cp-opt{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;border-radius:16px;border:1px solid var(--line2,#27414A);background:var(--card2,#132A32);color:var(--ink,#F2F6F7);cursor:pointer;font-family:inherit}
+.cpx .cp-opt .cp-cs{width:48px;height:48px}
+.cpx .cp-opt b{display:block;font-size:1rem}
+.cpx .cp-opt small{display:block;color:var(--muted,#93A8AE);font-size:.8rem;margin-top:1px}
+.cpx .cp-opt.on{border-color:var(--cc,#2B8A94)}
+.cpx .cp-chips button{min-height:52px;font-size:1.02rem}
+.cpx .cp-fv .cp-frow .cp-btn[disabled]{opacity:.4}
