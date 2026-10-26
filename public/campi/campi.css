@@ -504,3 +504,10 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 #panelOther .stPage[data-st="bizinfo"] .stMsg:empty{display:none}
 #panelOther .stPage[data-st="contacts"] .stCard{padding:22px}
 #panelOther .stPage[data-st="contacts"] .stMsg:empty{display:none}
+#panelOther .cx-lead{padding:0 4px}
+#panelOther .cx-rule{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:16px;border:1px solid var(--line);border-left:5px solid var(--accent);background:var(--card2)}
+#panelOther .cx-rtop{display:flex;align-items:center;justify-content:space-between}
+#panelOther .cx-rtop b{font-size:.95rem}
+#panelOther .cx-lnk.bad{color:var(--danger)}
+#panelOther .cx-quick{display:flex;gap:16px}
+#panelOther .cx-rule .cx-sel{max-width:none;width:100%}

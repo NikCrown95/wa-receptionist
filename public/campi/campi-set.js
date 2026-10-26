@@ -117,29 +117,65 @@
   }
 
   // ---------- 2. PREZZI ----------
+  var DS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  function tsel(val, label, end) {
+    var o = []; for (var m = 0; m < 24 * 60; m += 30) { var t = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); o.push([t, t]); }
+    if (end) o.push(['23:59', 'Fine giornata']);
+    if (!o.some(function (x) { return x[0] === val; })) o.push([val, val]);
+    var e = el('select', 'set-input cx-sel'); e.setAttribute('aria-label', label);
+    o.forEach(function (x) { var op = el('option', null, x[1]); op.value = x[0]; if (x[0] === val) op.selected = true; e.appendChild(op); }); return e;
+  }
   function pPrices(w) {
     if (!D.courts.length) { var c0 = card(); c0.appendChild(hint('Aggiungi prima un campo da "Campi".')); w.appendChild(c0); return; }
-    var c1 = card('Prezzo a testa');
-    c1.appendChild(hint('Ogni giocatore paga la sua quota. Il prezzo della prenotazione è la somma: i soci pagano il prezzo socio, gli altri il prezzo non socio. Il pagamento si fa sempre al circolo.'));
-    var head = el('div', 'cx-pr cx-prh'); head.appendChild(el('span', null, 'Campo')); head.appendChild(el('span', null, 'Socio (€)')); head.appendChild(el('span', null, 'Non socio (€)')); c1.appendChild(head);
-    var rows = [];
-    D.courts.forEach(function (c) {
-      var r = el('div', 'cx-pr'), nm = el('div', 'cx-prn'), dot = el('i', 'cx-dot'); dot.style.background = courtColor(c); nm.appendChild(dot); nm.appendChild(el('b', null, c.name));
-      var a = input('number', c.price_member_eur, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' }), b = input('number', c.price_guest_eur, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' });
-      a.setAttribute('aria-label', c.name + ', prezzo socio'); b.setAttribute('aria-label', c.name + ', prezzo non socio');
-      r.appendChild(nm); r.appendChild(a); r.appendChild(b); c1.appendChild(r); rows.push([c, a, b]);
-    });
-    c1.appendChild(hint('Lascia vuoto per non mostrare il prezzo. Scrivi 0 se per i soci il campo è gratis.'));
-    if (D.courts.length > 1) c1.appendChild(btn('Usa i prezzi del primo campo per tutti', 'ghost', function () { rows.forEach(function (x, i) { if (i) { x[1].value = rows[0][1].value; x[2].value = rows[0][2].value; } }); }));
-    w.appendChild(c1);
-    var msg = msgBox(); w.appendChild(msg);
+    w.appendChild(hint('Ogni giocatore paga la sua quota: il prezzo della prenotazione è la somma, con il prezzo socio per i soci e quello non socio per gli altri. Il pagamento si fa sempre al circolo.', 'cx-lead'));
+    var P = {}, blocks = [];
+    D.courts.forEach(function (c) { P[c.id] = { m: c.price_member_eur, g: c.price_guest_eur, rules: copy(c.price_rules || []) }; });
+    function draw() {
+      blocks.forEach(function (b) { if (b.parentNode) b.parentNode.removeChild(b); }); blocks = [];
+      var anchor = msgAnchor;
+      D.courts.forEach(function (c) {
+        var S = P[c.id], k = card(), hd = el('div', 'cx-prn'), dot = el('i', 'cx-dot'); dot.style.background = courtColor(c);
+        hd.appendChild(dot); hd.appendChild(el('b', null, c.name)); k.appendChild(hd);
+        var a = input('number', S.m, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' }), b = input('number', S.g, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' });
+        a.oninput = function () { S.m = a.value === '' ? null : +a.value; }; b.oninput = function () { S.g = b.value === '' ? null : +b.value; };
+        k.appendChild(row2(sf('Socio, a testa (€)', a), sf('Non socio, a testa (€)', b)));
+        k.appendChild(hint('Prezzo di base. Lascia vuoto per non mostrare il prezzo, scrivi 0 se per i soci è gratis.'));
+        var dyn = S.rules.length > 0 || S.open;
+        k.appendChild(swRow('Prezzi diversi per giorno e orario', 'Per esempio più cari la sera o nel weekend, più bassi di giorno', dyn, function (v) { S.open = v; if (v && !S.rules.length) S.rules.push({ days: [1, 2, 3, 4, 5], from: '17:00', to: '23:59', member: S.m, guest: S.g }); if (!v) { S.rules = []; S.open = false; } draw(); }));
+        if (dyn) {
+          S.rules.forEach(function (r, i) {
+            var rb = el('div', 'cx-rule'), top = el('div', 'cx-rtop'); top.appendChild(el('b', null, 'Fascia ' + (i + 1)));
+            var rm = el('button', 'cx-lnk bad', 'Elimina'); rm.type = 'button'; rm.onclick = function () { S.rules.splice(i, 1); if (!S.rules.length) S.open = false; draw(); }; top.appendChild(rm); rb.appendChild(top);
+            var dl = el('div', 'stF'); dl.appendChild(el('span', null, 'Giorni'));
+            var dc = el('div', 'stChips');
+            DS.forEach(function (n, di) { var bt = el('button', null, n); bt.type = 'button'; bt.setAttribute('aria-pressed', r.days.indexOf(di + 1) >= 0 ? 'true' : 'false'); bt.onclick = function () { var j = r.days.indexOf(di + 1); if (j >= 0) r.days.splice(j, 1); else r.days.push(di + 1); r.days.sort(); bt.setAttribute('aria-pressed', j >= 0 ? 'false' : 'true'); }; dc.appendChild(bt); });
+            dl.appendChild(dc);
+            var qk = el('div', 'cx-quick');
+            [['Feriali', [1, 2, 3, 4, 5]], ['Weekend', [6, 7]], ['Tutti', [1, 2, 3, 4, 5, 6, 7]]].forEach(function (q) { var qb = el('button', 'cx-lnk', q[0]); qb.type = 'button'; qb.onclick = function () { r.days = q[1].slice(); draw(); }; qk.appendChild(qb); });
+            dl.appendChild(qk); rb.appendChild(dl);
+            var f = tsel(r.from, 'Dalle', false), t = tsel(r.to, 'Alle', true); f.onchange = function () { r.from = f.value; }; t.onchange = function () { r.to = t.value; };
+            rb.appendChild(row2(sf('Dalle', f), sf('Alle', t)));
+            var ra = input('number', r.member, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'come base' }), rbp = input('number', r.guest, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'come base' });
+            ra.oninput = function () { r.member = ra.value === '' ? null : +ra.value; }; rbp.oninput = function () { r.guest = rbp.value === '' ? null : +rbp.value; };
+            rb.appendChild(row2(sf('Socio (€)', ra), sf('Non socio (€)', rbp)));
+            k.appendChild(rb);
+          });
+          k.appendChild(btn('+ Aggiungi una fascia', 'ghost', function () { S.rules.push({ days: [6, 7], from: '08:00', to: '23:59', member: S.m, guest: S.g }); draw(); }));
+          k.appendChild(hint('Conta l\'ora in cui inizia la prenotazione. Dove nessuna fascia si applica vale il prezzo base; se due fasce si sovrappongono vale la prima.'));
+        }
+        w.insertBefore(k, anchor); blocks.push(k);
+      });
+      if (D.courts.length > 1) { var cp = btn('Usa i prezzi e le fasce del primo campo per tutti', 'ghost', function () { var f0 = P[D.courts[0].id]; D.courts.forEach(function (c, i) { if (i) P[c.id] = { m: f0.m, g: f0.g, rules: copy(f0.rules), open: f0.open }; }); draw(); }); w.insertBefore(cp, anchor); blocks.push(cp); }
+    }
+    var msg = msgBox(), msgAnchor = msg; w.appendChild(msg);
+    draw();
     var sv = btn('Salva prezzi', '', function () {
       var i = 0;
       guard(sv, msg, new Promise(function (ok, ko) {
         (function next() {
-          if (i >= rows.length) return ok();
-          var x = rows[i++], c = x[0];
-          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: x[1].value === '' ? null : +x[1].value, price_guest_eur: x[2].value === '' ? null : +x[2].value, active: c.active, hours: c.hours }).then(next).catch(ko);
+          if (i >= D.courts.length) return ok();
+          var c = D.courts[i++], S = P[c.id];
+          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: S.m, price_guest_eur: S.g, price_rules: S.rules.map(function (r) { return { days: r.days, from: r.from, to: r.to, member: r.member, guest: r.guest }; }), active: c.active, hours: c.hours }).then(next).catch(ko);
         })();
       }).then(load)).then(function () { toast('Prezzi salvati'); changed(); }).catch(function () { });
     });
@@ -266,7 +302,7 @@
   // ---------- pagine e voci in Impostazioni ----------
   var PAGES = [
     ['courts', 'c-teal', IC.court, 'Campi', 'Nome, fondo e durata delle prenotazioni', 'I campi', 'I campi del circolo. Tocca un campo per modificarlo o aggiungine uno nuovo.', pCourts],
-    ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Quanto paga a testa chi gioca, socio e non socio, per ogni campo.', pPrices],
+    ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.', pPrices],
     ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il circolo è aperto e i campi si possono prenotare.', pHours],
     ['closures', 'c-red', IC.off, 'Chiusure e lavori', 'Tornei, manutenzione, maltempo', 'Chiusure e lavori', 'Quando il circolo o un singolo campo non è disponibile: tornei, lavori, manutenzione, maltempo.', pClosures],
     ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, FIT e limite giornaliero', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules]
@@ -280,7 +316,7 @@
     function s(k, t) { var e = rowOf[k] && rowOf[k].querySelector('small'); if (e && t) e.textContent = t; }
     var n = D.courts.length, a = D.courts.filter(function (c) { return c.active; }).length;
     s('courts', n ? (n === 1 ? '1 campo' : n + ' campi') + (a < n ? ' · ' + a + ' attivi' : '') : 'Nessun campo: aggiungine uno');
-    var pr = [].concat.apply([], D.courts.map(function (c) { return [c.price_member_eur, c.price_guest_eur].filter(function (x) { return x != null; }); }));
+    var pr = [].concat.apply([], D.courts.map(function (c) { return [c.price_member_eur, c.price_guest_eur].concat((c.price_rules || []).reduce(function (a, r) { return a.concat([r.member, r.guest]); }, [])).filter(function (x) { return x != null; }); }));
     s('prices', pr.length ? 'Da ' + euro(Math.min.apply(null, pr)) + ' a ' + euro(Math.max.apply(null, pr)) + ' a testa' : 'Nessun prezzo impostato');
     s('closures', D.closures.length ? D.closures.length + (D.closures.length === 1 ? ' chiusura in programma' : ' chiusure in programma') : 'Nessuna in programma');
     var C = D.club; s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.fit ? ' · FIT' : ''));
