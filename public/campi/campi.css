@@ -589,3 +589,10 @@ body.campiOn #view-month{display:none!important}
 .cpx .cp-lm b{font-size:1.02rem}
 .cpx .cp-lm small{font-size:.76rem;margin-top:1px}
 @media (max-width:480px){.cpx .cp-li,.cpx .cp-li.hl{grid-template-columns:56px 42px minmax(0,1fr);gap:10px;padding:7px 10px 7px 16px}.cpx .cp-cs.li{width:42px;height:42px}.cpx .cp-lm b{font-size:.98rem}}
+
+/* notifica: la prenotazione toccata pulsa (solo dopo il tocco sulla notifica) */
+.cpx .cp-li.cp-fx{--fxc:var(--accent,#2B8A94);position:relative;z-index:3;border-color:var(--fxc)!important;animation:cpFx 1.3s ease-in-out 3 both;animation-delay:var(--fx-d,0ms)}
+.cpx .cp-li.cp-fx.bad{--fxc:#ef6a5e}
+@keyframes cpFx{0%,100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent;transform:scale(1)}40%{box-shadow:0 0 0 5px color-mix(in srgb,var(--fxc) 38%,transparent),0 0 38px 8px color-mix(in srgb,var(--fxc) 50%,transparent);transform:scale(1.03)}}
+.cpx.fxOn .cp-li:not(.cp-fx){opacity:.35;transition:opacity .35s ease}
+@media (prefers-reduced-motion:reduce){.cpx .cp-li.cp-fx{animation:cpFxStill 4.4s ease-out both;animation-delay:0ms}@keyframes cpFxStill{0%,70%{box-shadow:0 0 0 4px color-mix(in srgb,var(--fxc) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}}

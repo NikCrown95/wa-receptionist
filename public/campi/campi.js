@@ -401,6 +401,38 @@
   }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && (S.sel || S.form) && !document.querySelector('.cps-back')) closeDet(); });
   function scrollDet() { setTimeout(function () { var d = root.querySelector('.cp-det'); if (d && d.scrollIntoView) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30); }
+  // dalla campanella: la prenotazione toccata si evidenzia con l'effetto "pulsa" (solo dopo il tocco su una notifica), come nelle altre attivita'
+  function fxOn() { var h = S.hl; return !!(h && Date.now() < h.exp && (!h.first || Date.now() - h.first < 4600)); }
+  function fxHit(b) {
+    if (!fxOn()) return false;
+    var h = S.hl, nm = [b.first_name, b.last_name].filter(Boolean).join(' ').trim().toLowerCase(), c = courtOf(b.court_id);
+    if (Math.abs(new Date(b.starts_at).getTime() - new Date(h.start).getTime()) >= 60000) return false;
+    if (h.name && nm !== h.name) return false;
+    return !(h.svc && c && String(c.name || '').trim().toLowerCase() !== h.svc);
+  }
+  function fxMark(node, b) {
+    if (!fxHit(b)) return;
+    var h = S.hl; if (!h.first) h.first = Date.now();
+    node.classList.add('cp-fx'); if (h.bad) node.classList.add('bad');
+    node.style.setProperty('--fx-d', (-(Date.now() - h.first)) + 'ms');
+    root.classList.add('fxOn'); clearTimeout(S.fxT);
+    S.fxT = setTimeout(function () { root.classList.remove('fxOn'); }, Math.max(100, 4600 - (Date.now() - h.first)));
+    if (!h.scrolled) { h.scrolled = true; setTimeout(function () { try { node.scrollIntoView({ block: 'center', behavior: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } catch (e) { } }, 160); }
+  }
+  function openFromBell(iso) { // la campanella chiama liaOpenDate: qui porta al giorno della prenotazione
+    var tz = (S.data && S.data.timezone) || 'Europe/Rome', d;
+    try { d = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date(iso)); } catch (e) { return; }
+    var fe = window.liaFocusEv || {};
+    S.hl = { start: iso, name: String(fe.name || '').trim().toLowerCase(), svc: String(fe.svc || '').trim().toLowerCase(), bad: !!fe.bad, exp: Date.now() + 9000, first: 0, scrolled: false };
+    var vd = document.getElementById('view-day'); if (vd && phWeek()) vd.click();
+    S.view = 'day'; S.day = d; S.sel = null; S.form = null; S.askCancel = false; S.stripKeep = false;
+    if (S.data && S.strip && d >= S.strip && d <= addDays(S.strip, 6)) draw();
+    else { S.strip = monday(d); S.data = null; load(); }
+  }
+  window.liaOpenDate = openFromBell;
+  document.addEventListener('lia:section', function () { window.liaOpenDate = openFromBell; });
+  window.addEventListener('load', function () { window.liaOpenDate = openFromBell; });
+
   function dayList(bs, now) {
     var wrap = el('div', 'cp-list');
     var list = bs.slice().sort(function (a, b) { return a.start < b.start ? -1 : a.start > b.start ? 1 : 0; });
@@ -410,12 +442,12 @@
     var isToday = S.day === now.date;
     var pastL = isToday ? list.filter(function (b) { return mins(b.end) <= now.min; }) : [];
     var focus = isToday ? (list.filter(function (b) { return mins(b.start) <= now.min && now.min < mins(b.end); })[0] || list.filter(function (b) { return mins(b.start) > now.min; })[0]) : null;
-    if (isToday) list = list.filter(function (b) { return pastL.indexOf(b) < 0 || S.sel === b.id; });
+    if (isToday) list = list.filter(function (b) { return pastL.indexOf(b) < 0 || S.sel === b.id || fxHit(b); });
     if (isToday && !list.length && pastL.length) wrap.appendChild(el('div', 'cp-load', 'Per oggi non ci sono altre prenotazioni.'));
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
-      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '') + (focus === b ? ' hl' : '')); r.type = 'button'; r.style.setProperty('--cc', courtColor(c));
+      var r = el('button', 'cp-li' + ((b.players || 0) >= 4 ? ' p4' : ' p2') + (S.sel === b.id ? ' on' : '') + (past ? ' past' : '') + (cur ? ' cur' : '') + (focus === b ? ' hl' : '')); r.type = 'button'; r.style.setProperty('--cc', courtColor(c)); fxMark(r, b);
       r.setAttribute('aria-expanded', S.sel === b.id ? 'true' : 'false');
       var t = el('span', 'cp-lt'); t.appendChild(el('b', null, b.start)); t.appendChild(el('small', null, 'fino alle ' + b.end)); r.appendChild(t);
       r.appendChild(courtSvg(c, b.players || 0, b.members, 'li'));
