@@ -1,7 +1,7 @@
 
 // --- Note cliente (nota fissa) e note per visita: condivise tra scheda Clienti e foglio appuntamento ---
 (function(){
-  var MED=!!window.__LIA_MED; /* studi sanitari: nessuna nota libera, per non raccogliere dati sulla salute */
+  var MED=!!(window.__LIA_MED||window.__liaCampi); /* studi sanitari: nessuna nota libera, per non raccogliere dati sulla salute */
   var S={fixed:{},visits:{},okFixed:true,okVisits:true,loaded:false,p:null,focus:null};
   var drafts={},mounted=[];
   function tok(){return (new URLSearchParams(location.search).get('t')||'').trim();}
