@@ -372,3 +372,20 @@ body.campiOn .pf2Sv,body.campiOn .pfCard:has(#pfHours),body.campiOn #pfTeamCard{
 .cpx .cp-list .cp-det.cp-fv{margin:auto}
 
 .cpx .cp-kv a.cp-em{word-break:break-all;text-align:right;font-size:.86rem}
+
+/* grafici a torta delle statistiche */
+.gcs .cgs-pies{margin-top:16px;display:grid;gap:22px}
+.gcs .cgs-pie{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.gcs .cgs-ring{width:150px;height:150px;flex:0 0 150px;border-radius:50%;display:grid;place-items:center;filter:drop-shadow(0 10px 20px rgba(0,0,0,.14));cursor:pointer;touch-action:pan-y}
+.gcs .cgs-hole{width:104px;height:104px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.gcs .cgs-hole strong{font-size:1.5rem;font-weight:800;line-height:1;color:var(--ink)}
+.gcs .cgs-hole span{margin-top:6px;font-size:.72rem;color:var(--muted);text-align:center;max-width:90px;line-height:1.2}
+.gcs .cgs-pl{flex:1;min-width:170px;display:grid;gap:8px}
+.gcs .cgs-pl h3{margin:0 0 2px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.gcs .cgs-pr{display:grid;grid-template-columns:12px 1fr auto auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2);cursor:pointer;font-size:.92rem}
+.gcs .cgs-pr i{width:10px;height:10px;border-radius:50%}
+.gcs .cgs-pr b{font-weight:800}
+.gcs .cgs-pr small{color:var(--muted);min-width:2.2em;text-align:right}
+.gcs .cgs-pr.on{outline:2px solid var(--accent);outline-offset:2px}
+.gcs .cgs-pr.dim{opacity:.5}
+@media(max-width:699px){.gcs .cgs-pie{justify-content:center}.gcs .cgs-pl{flex-basis:100%}}

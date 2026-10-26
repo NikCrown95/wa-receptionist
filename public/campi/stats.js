@@ -100,6 +100,31 @@
     [].forEach.call(host.querySelectorAll('.hbar-row'), function (r) { r.addEventListener('pointerdown', function () { var x = rows[+r.dataset.i]; clearOn(); r.classList.add('on'); var b = r.getBoundingClientRect(); tipShow(x.tip, b.left + b.width / 2, b.top); }); });
   }
 
+  function pie(host, title, total, segs, unit) {
+    var box = document.createElement('div'); box.className = 'cgs-pie';
+    var tot = segs.reduce(function (t, x) { return t + x.v; }, 0), acc = 0, stops = [];
+    segs.forEach(function (x) { var a = tot ? acc / tot * 100 : 0, b = tot ? (acc + x.v) / tot * 100 : 0; if (x.v > 0) stops.push(x.color + ' ' + a.toFixed(2) + '% ' + b.toFixed(2) + '%'); acc += x.v; });
+    var ring = document.createElement('div'); ring.className = 'cgs-ring'; ring.style.background = stops.length ? 'conic-gradient(' + stops.join(',') + ')' : 'var(--card2)';
+    var hole = document.createElement('div'); hole.className = 'cgs-hole'; hole.innerHTML = '<strong>' + num(total) + '</strong><span>' + esc(unit) + '</span>'; ring.appendChild(hole);
+    var lg = document.createElement('div'); lg.className = 'cgs-pl'; lg.innerHTML = '<h3>' + esc(title) + '</h3>' + segs.map(function (x, i) { var pc = tot ? Math.round(x.v / tot * 100) : 0; return '<div class="cgs-pr" data-i="' + i + '" data-tip="1"><i style="background:' + x.color + '"></i><span>' + esc(x.name) + '</span><b>' + pc + '%</b><small>' + num(x.v) + '</small></div>'; }).join('');
+    function sel(i, x, y) {
+      [].forEach.call(lg.querySelectorAll('.cgs-pr'), function (r, j) { r.classList.toggle('on', j === i); r.classList.toggle('dim', i != null && j !== i); });
+      if (i == null) { hole.innerHTML = '<strong>' + num(total) + '</strong><span>' + esc(unit) + '</span>'; tipHide(); return; }
+      var sg = segs[i], pc = tot ? Math.round(sg.v / tot * 100) : 0; hole.innerHTML = '<strong>' + pc + '%</strong><span>' + esc(sg.name) + '</span>';
+      tipShow('<b>' + esc(sg.name) + '</b>' + num(sg.v) + ' ' + esc(unit) + ' su ' + num(tot), x, y);
+    }
+    ring.addEventListener('pointerdown', function (e) {
+      var r = ring.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), rad = Math.sqrt(dx * dx + dy * dy);
+      if (rad > r.width / 2 + 4 || rad < r.width * .3 || !tot) { sel(null); return; }
+      var deg = (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360, p = deg / 360 * tot, a = 0, hit = null;
+      for (var i = 0; i < segs.length; i++) { a += segs[i].v; if (p < a && segs[i].v > 0) { hit = i; break; } }
+      sel(hit, e.clientX, e.clientY - 4);
+    });
+    [].forEach.call(lg.querySelectorAll('.cgs-pr'), function (r, i) { r.addEventListener('pointerdown', function () { var b = r.getBoundingClientRect(); sel(i, b.left + b.width / 2, b.top); }); });
+    box.appendChild(ring); box.appendChild(lg); host.appendChild(box);
+    if (!tot) lg.appendChild(Object.assign(document.createElement('p'), { className: 'hint', textContent: 'Ancora nessuna prenotazione nel periodo.' }));
+  }
+
   // ---------- calcoli ----------
   function openMinutes(c, wd) { var t = 0; ((c.hours && c.hours[String(wd)]) || []).forEach(function (h) { var a = h[0].split(':'), b = h[1].split(':'); t += (+b[0] * 60 + +b[1]) - (+a[0] * 60 + +a[1]); }); return t; }
   function capacity(from, to) { // minuti di campo disponibili tra due date (incluse)
@@ -176,7 +201,7 @@
       '<div class="row2"><div class="panel"><h2>Occupazione per campo</h2><p class="sub">Ore giocate sulle ore di apertura, nel periodo.</p><div class="hbars" id="byservice"></div></div>' +
       '<div class="panel"><h2>Giorni più richiesti</h2><p class="sub">Prenotazioni per giorno della settimana.</p><div class="hbars" id="cgsWd"></div></div></div>' +
       '<div class="row2"><div class="panel"><h2>Orari più richiesti</h2><p class="sub">A che ora si gioca di più.</p><div class="hbars" id="cgsHr"></div></div>' +
-      '<div class="panel"><h2>Chi gioca</h2><p class="sub">Soci e non soci, singolo e doppio.</p><div class="hbars" id="cgsWho"></div></div></div>' +
+      '<div class="panel"><h2>Chi gioca</h2><p class="sub">Soci e non soci, singolo e doppio. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div></div>' +
       '<div class="row2 row-full"><div class="panel"><h2>I giocatori più assidui</h2><p class="sub" id="cgsTopSub"></p><div id="cgsTop"></div></div></div>' +
       '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p><p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
     bars(wrap.querySelector('#cgsRev'), d.series, function (x) { return x.rev; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + eur(x.rev) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni'); });
@@ -187,12 +212,9 @@
     var hk = Object.keys(d.hc).map(Number).sort(function (a, b) { return a - b; }), hm = Math.max.apply(null, hk.map(function (k) { return d.hc[k]; }).concat([1]));
     hbars(wrap.querySelector('#cgsHr'), hk.map(function (k) { var n = d.hc[k]; return { name: String(k).padStart(2, '0') + ':00', color: 'var(--accent)', pct: Math.round(n / hm * 100), amt: String(n), tip: '<b>' + String(k).padStart(2, '0') + ':00</b>' + n + (n === 1 ? ' prenotazione' : ' prenotazioni') }; }), 'Ancora nessuna prenotazione nel periodo.');
     var tp = nM + nG, tg = d.dbl + d.sgl;
-    hbars(wrap.querySelector('#cgsWho'), tp ? [
-      { name: 'Soci', color: 'var(--accent)', pct: Math.round(nM / tp * 100), amt: Math.round(nM / tp * 100) + '%', tip: '<b>Soci</b>' + num(nM) + ' giocatori su ' + num(tp) },
-      { name: 'Non soci', color: '#3B9CFF', pct: Math.round(nG / tp * 100), amt: Math.round(nG / tp * 100) + '%', tip: '<b>Non soci</b>' + num(nG) + ' giocatori su ' + num(tp) },
-      { name: 'Doppio', color: '#7FDCDC', pct: tg ? Math.round(d.dbl / tg * 100) : 0, amt: tg ? Math.round(d.dbl / tg * 100) + '%' : '0%', tip: '<b>Doppio (3-4 giocatori)</b>' + d.dbl + ' prenotazioni su ' + tg },
-      { name: 'Singolo', color: '#E0A23A', pct: tg ? Math.round(d.sgl / tg * 100) : 0, amt: tg ? Math.round(d.sgl / tg * 100) + '%' : '0%', tip: '<b>Singolo (1-2 giocatori)</b>' + d.sgl + ' prenotazioni su ' + tg }
-    ] : [], 'Ancora nessuna prenotazione nel periodo.');
+    var who = wrap.querySelector('#cgsWho');
+    pie(who, 'Giocatori', tp, [{ name: 'Soci', v: nM, color: css('--accent', '#2B8A94') }, { name: 'Non soci', v: nG, color: '#3B9CFF' }], 'giocatori');
+    pie(who, 'Tipo di partita', tg, [{ name: 'Doppio (3-4)', v: d.dbl, color: '#7FDCDC' }, { name: 'Singolo (1-2)', v: d.sgl, color: '#E0A23A' }], 'partite');
     var tb = wrap.querySelector('#cgsTop'), ts = wrap.querySelector('#cgsTopSub');
     ts.textContent = d.top.length ? 'Chi ha prenotato di più negli ' + PL[P] + '.' : 'Ancora nessuna prenotazione negli ' + PL[P] + '.';
     d.top.forEach(function (x) {
