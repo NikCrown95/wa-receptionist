@@ -2317,9 +2317,12 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 /* Notifiche: righe a schede con tessera data (sab 24 ott). Colore per significato come sopra */
 #notifPanel{--n-on:#06161b}
 :root[data-theme="light"] #notifPanel,body[data-theme="light"] #notifPanel{--n-on:#fff}
-#notifPanel .np-head{padding:22px 18px 12px 22px}
+#notifPanel .np-head{padding:10px 12px 2px 20px;gap:6px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,transparent),transparent)}
+#notifPanel .np-head h2{font-size:1.05rem}
+#notifPanel .np-x{width:30px;height:30px}
+#notifPanel .np-x svg{width:14px;height:14px}
 #notifPanel .np-list{padding:0 14px 16px}
-#notifPanel .np-grp{padding:16px 6px 10px}
+#notifPanel .np-grp{padding:8px 6px 8px}
 #notifPanel .np-it.np-v{display:grid;grid-template-columns:58px minmax(0,1fr);gap:15px;align-items:center;padding:14px;margin-bottom:10px;border-radius:18px;background:var(--card2);border:1px solid var(--line2)}
 #notifPanel .np-it.np-v:hover{background:var(--accent-soft)}
 #notifPanel .np-it.np-v.un{background:color-mix(in srgb,var(--accent) 9%,var(--card2))}
