@@ -291,22 +291,26 @@
 
   // ---------- 5. CHI PUO' PRENOTARE ----------
   function pRules(w) {
-    var C = D.club, st = { fit: C.fit === true, open_to: C.open_to || 'all', lim: C.member_daily_limit_min || 0 };
+    var C = D.club, st = { fit: C.fit === true, medical: C.medical || 'all', open_to: C.open_to || 'all', lim: C.member_daily_limit_min || 0 };
     var c1 = card('Chi può prenotare');
     c1.appendChild(chips([['all', 'Soci e non soci'], ['members', 'Solo con almeno un socio']], st.open_to, function (v) { st.open_to = v; }, 'stSeg'));
     c1.appendChild(hint('Il circolo lo comunica sempre ai clienti, nella pagina di prenotazione.'));
     w.appendChild(c1);
+    var cm = card('Certificato medico');
+    cm.appendChild(hint('Di solito il circolo lo chiede sempre, ed è l\'impostazione di partenza. Nella pagina di prenotazione compare una spunta obbligatoria e il messaggio cambia in base a quanti giocatori sono soci; Lia lo ricorda in chat e le email di conferma dicono cosa portare.'));
+    cm.appendChild(chips([['all', 'Richiesto a tutti i giocatori'], ['guests', 'Solo ai non soci'], ['none', 'Non richiesto']], st.medical, function (v) { st.medical = v; }));
+    w.appendChild(cm);
     var c2 = card('Limite di ore per i soci');
     c2.appendChild(hint('Quante ore di campo al giorno può prenotare chi è socio. Vale per le prenotazioni in cui c\'è almeno un socio; chi non è socio non ha limiti.'));
     c2.appendChild(chips([[0, 'Nessun limite'], [30, '30 min'], [60, '1 ora'], [90, '1 ora e mezza'], [120, '2 ore'], [180, '3 ore']], st.lim, function (v) { st.lim = +v; }));
     w.appendChild(c2);
     var c3 = card('Affiliazione FIT');
-    var note = hint('La pagina di prenotazione chiede una spunta obbligatoria, e le email di conferma ricordano tessera e certificato.', 'ok'); note.hidden = !st.fit;
-    c3.appendChild(swRow('Circolo affiliato FIT', 'Chi prenota deve avere tessera FIT e certificato medico', st.fit, function (v) { st.fit = v; note.hidden = !v; }));
+    var note = hint('La pagina di prenotazione chiede una spunta obbligatoria anche per la tessera FIT, e le email di conferma la ricordano.', 'ok'); note.hidden = !st.fit;
+    c3.appendChild(swRow('Circolo affiliato FIT', 'Chi prenota deve avere la tessera FIT', st.fit, function (v) { st.fit = v; note.hidden = !v; }));
     c3.appendChild(note); w.appendChild(c3);
     var msg = msgBox(); w.appendChild(msg);
     var sv = btn('Salva le regole', '', function () {
-      guard(sv, msg, call({ action: 'save_rules', fit: st.fit, open_to: st.open_to, member_daily_limit_min: st.lim || null }).then(load)).then(function () { toast('Regole salvate'); changed(); }).catch(function () { });
+      guard(sv, msg, call({ action: 'save_rules', fit: st.fit, medical: st.medical, open_to: st.open_to, member_daily_limit_min: st.lim || null }).then(load)).then(function () { toast('Regole salvate'); changed(); }).catch(function () { });
     });
     w.appendChild(sv);
   }
@@ -336,7 +340,7 @@
     ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.', pPrices],
     ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il circolo è aperto e i campi si possono prenotare.', pHours],
     ['closures', 'c-red', IC.off, 'Lavori e indisponibilità', 'Manutenzione, tornei, maltempo', 'Lavori e indisponibilità', 'Segnala un problema o dei lavori su un campo, o la chiusura del circolo: nei giorni e negli orari indicati non si può prenotare.', pClosures],
-    ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, FIT e limite giornaliero', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules],
+    ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, certificato, FIT e limite', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules],
     ['policy', 'c-teal', IC.clock, 'Prenotazione e disdetta', 'Preavviso, anticipo e annullamento', 'Prenotazione e disdetta', 'Come e fino a quando i clienti possono prenotare o annullare.', pPolicy]
   ];
   var made = {}, rowOf = {}, curKey = null;
@@ -351,7 +355,7 @@
     var pr = [].concat.apply([], D.courts.map(function (c) { return [c.price_member_eur, c.price_guest_eur].concat((c.price_rules || []).reduce(function (a, r) { return a.concat([r.member, r.guest]); }, [])).filter(function (x) { return x != null; }); }));
     s('prices', pr.length ? 'Da ' + euro(Math.min.apply(null, pr)) + ' a ' + euro(Math.max.apply(null, pr)) + ' a testa' : 'Nessun prezzo impostato');
     s('closures', D.closures.length ? D.closures.length + (D.closures.length === 1 ? ' chiusura in programma' : ' chiusure in programma') : 'Nessuna in programma');
-    var C = D.club; s('policy', 'Disdetta ' + ((C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) === 0 ? 'sempre possibile' : 'fino a ' + (C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) + (C.cancel_limit_hours === 1 ? ' ora prima' : ' ore prima'))); s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.fit ? ' · FIT' : ''));
+    var C = D.club; s('policy', 'Disdetta ' + ((C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) === 0 ? 'sempre possibile' : 'fino a ' + (C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) + (C.cancel_limit_hours === 1 ? ' ora prima' : ' ore prima'))); s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.medical === 'none' ? ' · Senza certificato' : C.medical === 'guests' ? ' · Certificato ai non soci' : ' · Certificato') + (C.fit ? ' · FIT' : ''));
   }
   function label(t) { var sl = document.getElementById('sectionLabel'); if (sl) setTimeout(function () { sl.textContent = t; }, 30); }
   function openPane(k) {
