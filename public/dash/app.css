@@ -2343,6 +2343,19 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 .np-lb{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin-top:8px}
 .np-lb:empty{display:none}
 .np-lb u{flex:none;width:7px;height:7px;border-radius:50%;background:var(--accent);text-decoration:none}
+/* Banner nuova notifica: stessa tessera data, barra piu sottile */
+body #notifToast{--n-on:#06161b;padding:8px 12px;gap:12px;border-radius:16px}
+:root[data-theme="light"] #notifToast,body[data-theme="light"] #notifToast{--n-on:#fff}
+#notifToast .np-dt.b{--c:var(--n-ok);--cb:var(--n-ok-bg)}
+#notifToast .np-dt.c{--c:var(--n-bad);--cb:var(--n-bad-bg)}
+#notifToast .np-tdt{width:42px;flex:none;border-radius:11px}
+#notifToast .np-tdt i{font-size:.54rem;padding:2px 0}
+#notifToast .np-tdt b{font-size:1.1rem;padding-top:2px;display:block}
+#notifToast .np-tdt s{font-size:.58rem;padding-bottom:3px}
+#notifToast .np-ic{width:36px;height:36px;border-radius:12px}
+#notifToast .np-ic svg{width:18px;height:18px}
+#notifToast b{font-size:.92rem}
+#notifToast span{font-size:.8rem;margin-top:0}
 .np-em{padding:44px 22px 40px;text-align:center;color:var(--muted)}
 .np-em svg{color:var(--accent-ink);opacity:.8;margin-bottom:10px}
 .np-em b{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
