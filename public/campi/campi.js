@@ -240,7 +240,7 @@
     if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
     lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60;
     var H = (hi - lo) * PPM, g = el('div', 'cp-g');
-    g.style.gridTemplateColumns = '44px repeat(7,minmax(' + (S.court ? 150 : 250) + 'px,1fr))';
+    g.style.gridTemplateColumns = '44px repeat(7,minmax(' + (S.court ? 112 : 250) + 'px,1fr))';
     g.appendChild(el('div'));
     days.forEach(function (d) {
       var n = bookingsOn(d).filter(function (b) { return !S.court || b.court_id === S.court; }).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
@@ -315,13 +315,8 @@
     var isToday = S.day === now.date;
     var pastL = isToday ? list.filter(function (b) { return mins(b.end) <= now.min; }) : [];
     var focus = isToday ? (list.filter(function (b) { return mins(b.start) <= now.min && now.min < mins(b.end); })[0] || list.filter(function (b) { return mins(b.start) > now.min; })[0]) : null;
-    if (pastL.length) {
-      var pb = el('button', 'cp-pastbtn' + (S.showPast ? ' on' : ''), (S.showPast ? 'Nascondi le ' : 'Mostra le ') + pastL.length + (pastL.length === 1 ? ' già conclusa' : ' già concluse')); pb.type = 'button';
-      pb.onclick = function () { S.showPast = !S.showPast; draw(); }; wrap.appendChild(pb);
-      if (!S.showPast && S.sel && pastL.some(function (b) { return b.id === S.sel; })) S.showPast = true;
-    }
-    if (isToday && !S.showPast) list = list.filter(function (b) { return pastL.indexOf(b) < 0; });
-    if (isToday && !S.showPast && !list.length && pastL.length) wrap.appendChild(el('div', 'cp-load', 'Per oggi non ci sono altre prenotazioni.'));
+    if (isToday) list = list.filter(function (b) { return pastL.indexOf(b) < 0 || S.sel === b.id; });
+    if (isToday && !list.length && pastL.length) wrap.appendChild(el('div', 'cp-load', 'Per oggi non ci sono altre prenotazioni.'));
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
