@@ -223,3 +223,19 @@ body.cps-lock{overflow:hidden}
 @keyframes cpOutUp{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px)}}
 @media (max-width:899px){.cpx .cp-gs .cp-det.enter{animation-name:cpInDown}.cpx .cp-gs .cp-det.leave{animation-name:cpOutUp}}
 @media (prefers-reduced-motion:reduce){.cpx .cp-det.enter,.cpx .cp-det.leave{animation:none}}
+
+/* card della settimana: stile curato, colonne larghe con scorrimento laterale */
+.cpx .cp-board.wk{padding:12px 10px 10px}
+.cpx .cp-board.wk .cp-hrs{position:sticky;left:0;z-index:5;background:var(--card,#0F2229)}
+.cpx .cp-board.wk .cp-g>div:first-child{position:sticky;left:0;z-index:5;background:var(--card,#0F2229)}
+.cpx .cp-b.wk{background:linear-gradient(135deg,color-mix(in srgb,var(--cc) 22%,var(--card2,#132A32)),var(--card2,#132A32) 78%);border:1px solid color-mix(in srgb,var(--cc) 38%,var(--line2,#27414A));border-left:5px solid var(--cc);color:var(--ink,#F2F6F7);border-radius:11px;padding:4px 8px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 3px 8px -5px rgba(0,0,0,.55)}
+.cpx .cp-b.wk.ns{background:linear-gradient(135deg,color-mix(in srgb,var(--sec,#3B9CFF) 26%,var(--card2,#132A32)),var(--card2,#132A32) 78%);border-color:color-mix(in srgb,var(--sec,#3B9CFF) 60%,var(--line2,#27414A));border-left-color:var(--cc)}
+.cpx .cp-b.wk.on{box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#2B8A94) 55%,transparent)}
+.cpx .cp-b.wk .cp-bt b{font-size:.86rem;font-weight:700;letter-spacing:-.01em;color:var(--ink,#F2F6F7)}
+.cpx .cp-b.wk .cp-bt small{font-size:.7rem;color:var(--muted,#93A8AE);opacity:1}
+.cpx .cp-b.wk .cp-bt small.l1{font-weight:600;color:var(--muted,#93A8AE)}
+.cpx .cp-b.wk .cp-bt small em{font-style:normal;font-weight:800;color:var(--cc)}
+.cpx .cp-b.wk.mini{padding:3px 5px 3px 7px;border-left-width:4px}
+.cpx .cp-b.wk.mini .cp-bt b{font-size:.74rem}
+.cpx .cp-b.wk.mini .cp-bt small{font-size:.64rem}
+@media (max-width:699px){.cpx .cp-b.wk{padding:2px 4px;border-left-width:4px}.cpx .cp-b.wk .cp-bt b{font-size:.68rem}.cpx .cp-b.wk .cp-bt small{font-size:.6rem}}

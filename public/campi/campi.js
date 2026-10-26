@@ -199,7 +199,7 @@
     if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
     lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60;
     var H = (hi - lo) * PPM, g = el('div', 'cp-g');
-    g.style.gridTemplateColumns = '40px repeat(7,minmax(0,1fr))';
+    g.style.gridTemplateColumns = '44px repeat(7,minmax(' + (S.court ? 150 : 250) + 'px,1fr))';
     g.appendChild(el('div'));
     days.forEach(function (d) {
       var n = bookingsOn(d).filter(function (b) { return !S.court || b.court_id === S.court; }).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
@@ -240,10 +240,12 @@
         x.style.left = 'calc(' + (it.lane * 100 / it.n) + '% + 2px)'; x.style.width = 'calc(' + (100 / it.n) + '% - 4px)'; x.style.right = 'auto';
         if ((it.e - it.s) * PPM < 46) x.classList.add('tight');
         x.setAttribute('aria-label', c.name + ' ' + b.start + '-' + b.end + ', ' + (b.last_name || '') + ' ' + (b.first_name || ''));
-        x.style.borderLeftColor = courtColor(c);
+        x.style.setProperty('--cc', courtColor(c));
         var short = c.name.replace(/^Campo\s*/i, 'C'), t = el('span', 'cp-bt');
         t.appendChild(el('b', null, b.last_name || b.first_name || '—'));
-        t.appendChild(el('small', 'l1', S.court ? b.start + '–' + b.end : short + ' · ' + b.start));
+        var l1 = el('small', 'l1');
+        if (S.court) l1.textContent = b.start + '–' + b.end; else { l1.appendChild(el('em', null, short)); l1.appendChild(document.createTextNode(' · ' + b.start)); }
+        t.appendChild(l1);
         var info = [b.players ? b.players + ' gioc.' : '', b.members == null ? '' : (b.members === 0 ? '0 soci' : soc(b.members))].filter(Boolean).join(' · ');
         if (info) t.appendChild(el('small', 'l2', info));
         x.appendChild(t);
