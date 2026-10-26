@@ -95,7 +95,7 @@
 
   // ---------- disegno ----------
   function draw() {
-    root.textContent = '';
+    root.textContent = ''; root.classList.remove('wide');
     if (S.err && !S.data) {
       var e = el('div', 'cp-err'); e.appendChild(el('span', null, S.err));
       var rb = el('button', 'cp-btn', 'Riprova'); rb.type = 'button'; rb.onclick = load; e.appendChild(rb); root.appendChild(e); return;
@@ -117,8 +117,8 @@
     });
     top.appendChild(vw);
     var da = el('div', 'cp-dd');
-    [[-1, SVG_L, 'Giorno prima'], [1, SVG_R, 'Giorno dopo']].forEach(function (v) {
-      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { goDay(v[0]); }; da.appendChild(b);
+    [[-1, SVG_L, S.view === 'grid' ? 'Settimana prima' : 'Giorno prima'], [1, SVG_R, S.view === 'grid' ? 'Settimana dopo' : 'Giorno dopo']].forEach(function (v) {
+      var b = el('button', 'cp-arr'); b.type = 'button'; b.setAttribute('aria-label', v[2]); b.innerHTML = v[1]; b.onclick = function () { if (S.view === 'grid') goWeek(v[0]); else goDay(v[0]); }; da.appendChild(b);
     });
     top.appendChild(da);
     var nb = el('button', 'cp-now', 'Oggi'); nb.type = 'button';
@@ -160,9 +160,10 @@
     lg.innerHTML = '<span><i style="background:var(--accent,#2B8A94)"></i>Almeno un socio</span><span><i style="background:var(--sec,#3B9CFF)"></i>Solo non soci</span>';
     root.appendChild(lg);
 
-    if (S.view === 'grid') { var gs = el('div', 'cp-gs'); gs.appendChild(board(bs, now)); gs.appendChild(detail(bs)); root.appendChild(gs); }
+    if (S.view === 'grid') { var gs = el('div', 'cp-gs' + (S.sel || S.form ? ' open' : '')); gs.appendChild(board(bs, now)); if (S.sel || S.form) gs.appendChild(detail(bs)); root.appendChild(gs); root.classList.add('wide'); }
     else root.appendChild(dayList(bs, now));
   }
+  function goWeek(n) { S.strip = addDays(S.strip, 7 * n); S.day = addDays(S.day, 7 * n); S.sel = null; S.form = null; S.askCancel = false; load(); }
   function goDay(n) {
     var nd = addDays(S.day, n); S.sel = null; S.form = null; S.askCancel = false;
     if (nd < S.strip || nd > addDays(S.strip, 6)) { S.strip = nd; S.day = nd; load(); } else { S.day = nd; draw(); }

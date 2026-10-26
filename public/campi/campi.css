@@ -123,7 +123,7 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-closed{position:absolute;left:3px;right:3px;z-index:1;border-radius:10px;border:1px dashed var(--line2,#27414A);background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in srgb,var(--muted,#93A8AE) 14%,transparent) 6px 12px);color:var(--muted,#93A8AE);font-size:.64rem;font-weight:600;display:grid;place-items:center;text-align:center;padding:2px;overflow:hidden}
 .cps-line input[type=time]{padding:0 8px;font-size:14px}
 .cps-body input[type=time]::-webkit-calendar-picker-indicator{display:none}
-@media (min-width:700px){.cpx{max-width:1000px}}
+@media (min-width:700px){.cpx{max-width:1000px}.cpx.wide{max-width:1480px}}
 
 /* viste Giorno / Griglia */
 .cpx .cp-vw{flex:none;display:flex;border:1px solid var(--line2,#27414A);border-radius:12px;overflow:hidden;background:var(--card,#0F2229)}
@@ -161,5 +161,5 @@ body.cps-lock{overflow:hidden}
 .cpx .cp-strip.thin .cp-d{flex-direction:row;justify-content:center;gap:6px;padding:7px 2px;border-radius:12px}
 .cpx .cp-strip.thin .cp-d b{font-size:.95rem}
 .cpx .cp-gs{display:grid;gap:12px;grid-template-columns:minmax(0,1fr);align-items:start}
-@media (min-width:900px){.cpx .cp-gs{grid-template-columns:minmax(0,1fr) 300px}.cpx .cp-gs .cp-det{position:sticky;top:12px}}
+@media (min-width:900px){.cpx .cp-gs.open{grid-template-columns:minmax(0,1fr) 320px}.cpx .cp-gs .cp-det{position:sticky;top:12px}}
 @media (min-width:700px){.cpx .cp-cs.hd{width:76px;height:76px;margin-bottom:6px}.cpx .cp-ch{font-size:.9rem}.cpx .cp-ch small{font-size:.72rem}}
