@@ -3570,3 +3570,7 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #calSubApp #sheet .ap-hero .sv i{width:12px;height:12px}
 #calSubApp #sheet .ap-hero .tm{margin-top:10px}
 #calSubApp #sheet .nt-fixwrap>.nt-add{display:none}
+/* cliente in evidenza, colorato come la scelta dell'operatore nella pagina di prenotazione */
+#calSubApp #sheet .ap-cli{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,var(--card)),var(--card) 75%);border-color:color-mix(in srgb,var(--c) 40%,var(--line2))}
+#calSubApp #sheet .ap-cli .av{background:var(--c);border:0;color:#0b1418}
+#calSubApp #sheet .ap-cli .nm{color:var(--c);font-size:1.15rem;font-weight:800}
