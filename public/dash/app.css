@@ -3565,3 +3565,8 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #calSubApp #sheet.apv #sheet-close,#calSubApp #sheet.apv .ap-ttl{display:none}
 #calSubApp .sheet#sheet.apv{padding-top:8px}
 #calSubApp #sheet.apv .grabber{margin:6px auto 10px}
+/* servizio in evidenza, una sola richiesta di nota */
+#calSubApp #sheet .ap-hero .sv{background:none;padding:0;gap:10px;font-size:1.4rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-family:'Manrope','Plus Jakarta Sans',system-ui,sans-serif}
+#calSubApp #sheet .ap-hero .sv i{width:12px;height:12px}
+#calSubApp #sheet .ap-hero .tm{margin-top:10px}
+#calSubApp #sheet .nt-fixwrap>.nt-add{display:none}
