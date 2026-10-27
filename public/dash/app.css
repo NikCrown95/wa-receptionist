@@ -3391,3 +3391,19 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #panelOther .supReply small{color:var(--muted);font-size:.78rem}
 #panelOther .supEmpty{padding:30px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:16px}
 #panelOther .supEmpty b{display:block;color:var(--ink);margin-bottom:4px}
+
+/* Modalita' del servizio: spunte con il prezzo di ognuna */
+.lmodes{display:flex;flex-direction:column;gap:8px;margin:4px 0 10px}
+.lmodes .lmcap{font-size:.84rem;font-weight:700;color:var(--muted)}
+.lmodes .lmhint{margin:0;font-size:.82rem;color:var(--muted)}
+.lmodes .lmrow{border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:4px 12px}
+.lmodes .lmrow.on{border-color:var(--accent)}
+.lmodes .lmchk,.lmodes .lmhalf{display:flex;align-items:center;gap:12px;min-height:46px;cursor:pointer}
+.lmodes .lmchk input,.lmodes .lmhalf input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin:0}
+.lmodes .lmchk b,.lmodes .lmhalf b{display:block;font-size:.95rem}
+.lmodes .lmchk small,.lmodes .lmhalf small{display:block;font-size:.8rem;color:var(--muted);line-height:1.35}
+.lmodes .lmprice{display:none;padding:0 0 10px 34px}
+.lmodes .lmrow.on .lmprice{display:block}
+.lmodes .lmprice label{display:flex;flex-direction:column;gap:5px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.lmodes .lmprice input{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 12px}
+.lmodes .lmhalf{border:1px dashed var(--line);border-radius:14px;padding:6px 12px}

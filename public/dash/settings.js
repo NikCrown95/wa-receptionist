@@ -7,7 +7,7 @@
   var DAY_NAMES_FULL = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
   var eur = new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:2});
   var token = (new URLSearchParams(location.search).get('t') || '').trim();
-  var S = {bizName:'',services:[],combos:[],hours:{0:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],1:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],2:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],3:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],4:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],5:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],6:[]},blocks:[]};
+  var S = {bizName:'',services:[],groups:[],combos:[],hours:{0:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],1:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],2:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],3:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],4:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],5:[{open:'09:00',close:'13:00'},{open:'15:00',close:'19:30'}],6:[]},blocks:[]};
   renderHours();
   var uid=0;
   function newId(p){uid++;return p+'_'+Date.now().toString(36)+uid;}
@@ -29,21 +29,50 @@
   function flash(msg){var e=document.getElementById('setSavedHint');if(e)e.textContent=msg;}
 
   function svcHomeOn(){try{return stAreasList().length>0||S.services.some(function(x){return x.home})}catch(e){return S.services.some(function(x){return x.home})}}
+  var ML={sede:'In sede',domicilio:'A domicilio',online:'Online'},MK=['sede','domicilio','online'];
+  function buildGroups(list){var map={},out=[];list.forEach(function(x){var k=x.gid||x.id,g=map[k];if(!g){g=map[k]={key:k,name:x.rawName||x.name,dur:x.duration_min,half:!!x.half,maxUnits:x.maxUnits||1,modes:{},rows:[]};out.push(g)}g.modes[x.mode]={id:x.id,price:x.price};g.rows.push(x)});return out}
+  function grpSub(g){var ks=MK.filter(function(k){return g.modes[k]});if(!ks.length)return '';if(ks.length===1&&ks[0]==='sede')return eur.format(g.modes.sede.price)+' · '+g.dur+' min';return ks.map(function(k){return ML[k]+' '+eur.format(g.modes[k].price)}).join(' · ')+' · '+g.dur+' min'}
+  function openGroup(g){
+    if(window.__LIA_MED){var s=g.rows[0];
+      window.liaServiceSheet({name:s.name,price:s.price,min:s.duration_min,home:s.home,showHome:svcHomeOn(),showUnits:true,maxUnits:s.maxUnits||1},function(v){var u={action:'service_update',id:s.id,name:v.name,price_eur:v.price,duration_min:v.min};if(v.showHome)u.at_customer_place=!!v.home;if((v.maxUnits||1)!==(s.maxUnits||1))u.max_units=v.maxUnits;return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:s.id}).then(loadRemote)});return}
+    var mv={};MK.forEach(function(k){if(g.modes[k])mv[k]=g.modes[k].price});
+    var first=g.rows[0];
+    window.liaServiceSheet({name:g.name,min:g.dur,useModes:true,modes:mv,half:g.half,showUnits:true,maxUnits:g.maxUnits},function(v){
+      var u={action:'service_save',id:first.id,name:v.name,duration_min:v.min,half_hour:!!v.half,modes:v.modes.map(function(m){return {mode:m.mode,price_eur:m.price_eur}})};
+      if((v.maxUnits||1)!==(g.maxUnits||1))u.max_units=v.maxUnits;
+      return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:first.id}).then(loadRemote)});
+  }
   function renderServices(){if(window.liaRlRender)setTimeout(window.liaRlRender,0);
     var box=document.getElementById('svcList');box.innerHTML='';
     if(!S.services.length)box.innerHTML='<p class="set-empty">Nessun servizio ancora.</p>';
-    S.services.forEach(function(s,idx){
+    S.groups.forEach(function(g){
       var row=document.createElement('div');row.className='svc-item';
       row.innerHTML='<span class="swatch"></span><span class="info"><b></b><span></span></span><button type="button" class="iconbtn2 svcChev" data-act="edit" title="Modifica" aria-label="Modifica servizio">›</button>';
-      row.querySelector('.swatch').style.background='var(--'+({a:'accent',s:'sec',t:'ter',u:'qua',v:'qui'})[window.liaSvcColor(s.name)]+')';
-      row.querySelector('.info b').textContent=s.name;row.querySelector('.info span').textContent=eur.format(s.price)+' · '+s.duration_min+' min';
-      row.onclick=function(){window.liaServiceSheet({name:s.name,price:s.price,min:s.duration_min,home:s.home,showHome:svcHomeOn(),showUnits:true,maxUnits:s.maxUnits||1},function(v){var u={action:'service_update',id:s.id,name:v.name,price_eur:v.price,duration_min:v.min};if(v.showHome)u.at_customer_place=!!v.home;if((v.maxUnits||1)!==(s.maxUnits||1))u.max_units=v.maxUnits;return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:s.id}).then(loadRemote)});};
+      row.querySelector('.swatch').style.background='var(--'+({a:'accent',s:'sec',t:'ter',u:'qua',v:'qui'})[window.liaSvcColor(g.name)]+')';
+      row.querySelector('.info b').textContent=g.name;row.querySelector('.info span').textContent=grpSub(g);
+      row.onclick=function(){openGroup(g)};
       box.appendChild(row);
     });
-    var hwp=document.getElementById('svcNewHomeWrap');if(hwp)hwp.hidden=!svcHomeOn();
+    var hwp=document.getElementById('svcNewHomeWrap');if(hwp)hwp.hidden=!!window.__LIA_MED?!svcHomeOn():true;
     renderComboPicker();renderCombos();
   }
+  var svcNewBlock=null;
+  function svcNewModesInit(){
+    var host=document.getElementById('svcNewModes'),pw=document.getElementById('svcNewPriceWrap');
+    if(!host||window.__LIA_MED){return}
+    if(pw)pw.hidden=true;host.hidden=false;
+    svcNewBlock=window.liaModesBlock(host,{modes:{sede:''}},function(){return document.getElementById('svcNewMin').value});
+  }
+  svcNewModesInit();
   document.getElementById('svcAddBtn').onclick=function(){
+    if(svcNewBlock){
+      var n2=document.getElementById('svcNewName').value.trim(),d2=parseInt(document.getElementById('svcNewMin').value,10),r2=svcNewBlock.read();
+      if(!n2||!d2){alert('Compila nome e durata del servizio.');return}
+      if(r2.error){alert(r2.error);return}
+      api('POST',{action:'service_create',name:n2,duration_min:d2,half_hour:!!r2.half,modes:r2.modes}).then(function(){document.getElementById('svcNewName').value='';document.getElementById('svcNewMin').value='';svcNewModesInit();return loadRemote()}).catch(function(e){alert(e.message)});
+      return;
+    }
+
     var n=document.getElementById('svcNewName').value.trim(),p=parseFloat(document.getElementById('svcNewPrice').value.replace(',','.')),d=parseInt(document.getElementById('svcNewMin').value,10);
     if(!n||isNaN(p)||p<0||!d){alert('Compila nome, prezzo e durata del servizio.');return}
     var hw=document.getElementById('svcNewHome'),hm=!!(hw&&!document.getElementById('svcNewHomeWrap').hidden&&hw.checked);api('POST',{action:'service_create',name:n,price_eur:p,duration_min:d,at_customer_place:hm}).then(function(){if(hw)hw.checked=false;document.getElementById('svcNewName').value='';document.getElementById('svcNewPrice').value='';document.getElementById('svcNewMin').value='';return loadRemote()}).catch(function(e){alert(e.message)});
@@ -676,7 +705,7 @@ function pfRenderPoster(box,b,opts){
   function applyRemote(d){
       var pv=window.liaProfileData;if(pv&&pv.business&&d.business&&d.business.subscription===undefined&&pv.business.subscription!==undefined){d.business.subscription=pv.business.subscription;d.business.public_phone=pv.business.public_phone;d.business.public_instagram=pv.business.public_instagram;d.business.public_facebook=pv.business.public_facebook}
       window.liaProfileData=d;writeProfileCache(d);
-      S.bizName=d.business.name;S.services=d.services.map(function(x){return {id:x.id,name:x.name,price:Number(x.price_eur||0),duration_min:x.duration_min,home:!!x.at_customer_place,maxUnits:x.max_units||1}});S.combos=(d.packages||[]).map(function(x){return {id:x.id,name:x.name,serviceIds:x.service_ids||[],price:Number(x.price_eur||0),duration_min:x.duration_min}});S.blocks=(d.blocks||[]).map(function(x){return {id:x.id,date:x.date,from:x.full_day?null:x.from,to:x.full_day?null:x.to}});S.hours={};
+      S.bizName=d.business.name;S.services=d.services.map(function(x){var md=x.mode||(x.at_customer_place?'domicilio':'sede');return {id:x.id,rawName:x.name,name:x.label||x.name,price:Number(x.price_eur||0),duration_min:x.duration_min,home:md==='domicilio'||!!x.at_customer_place,mode:md,gid:x.group_id||null,half:x.half_hour===true,maxUnits:x.max_units||1}});S.groups=buildGroups(S.services);S.combos=(d.packages||[]).map(function(x){return {id:x.id,name:x.name,serviceIds:x.service_ids||[],price:Number(x.price_eur||0),duration_min:x.duration_min}});S.blocks=(d.blocks||[]).map(function(x){return {id:x.id,date:x.date,from:x.full_day?null:x.from,to:x.full_day?null:x.to}});S.hours={};
       (d.hours||[]).forEach(function(h){var wd=Number(h.weekday),op=String(h.opens||'').slice(0,5),cl=String(h.closes||'').slice(0,5);if(wd<0||wd>7||!op||!cl)return;var k=String(wd===0?6:(wd-1));if(!S.hours[k])S.hours[k]=[];S.hours[k].push({open:op,close:cl})});
       for(var i=0;i<7;i++)if(!S.hours[i])S.hours[i]=[];
       if(bizInput)bizInput.value=S.bizName;var be=document.getElementById('businessName');if(be)be.textContent=S.bizName;
@@ -702,7 +731,7 @@ function pfRenderPoster(box,b,opts){
   }
   function stSum(){
     if(!stReady)return;
-    var n=S.services.length;
+    var n=(S.groups||S.services).length;
     if(!n)stText('stSumServices','Nessun servizio: aggiungi il primo');
     else{var pr=S.services.map(function(s){return Number(s.price)||0}),mn=Math.min.apply(null,pr),mx=Math.max.apply(null,pr);
       stText('stSumServices',n+(n===1?' servizio':' servizi')+(mn===mx?' \u00b7 '+stPrice(mn):' \u00b7 da '+stPrice(mn)+' a '+stPrice(mx)))}
