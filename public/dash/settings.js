@@ -53,7 +53,7 @@
       row.onclick=function(){openGroup(g)};
       box.appendChild(row);
     });
-    var hwp=document.getElementById('svcNewHomeWrap');if(hwp)hwp.hidden=!!window.__LIA_MED?!svcHomeOn():true;
+    var hwp=document.getElementById('svcNewHomeWrap');if(hwp){hwp.hidden=!!window.__LIA_MED?!svcHomeOn():true;if(!window.__LIA_MED)hwp.style.display='none'}
     renderComboPicker();renderCombos();
   }
   var svcNewBlock=null;
