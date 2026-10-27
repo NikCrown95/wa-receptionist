@@ -3503,3 +3503,19 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #calSubApp #sheet .ap-op .oi{width:40px;height:40px;border-radius:12px;background:var(--sx5);color:#0b1418;display:grid;place-items:center;font-weight:800;flex:none}
 #calSubApp #sheet .ap-op small{display:block;color:var(--muted);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 #calSubApp #sheet .ap-op b{font-size:1.1rem;font-weight:800}
+/* Calendario del mese nel passo "Che giorno?" */
+.nx-cal{border:1px solid var(--line2);border-radius:18px;background:var(--card2);padding:14px}
+.nx-ch2{display:flex;align-items:center;justify-content:space-between}
+.nx-ch2 b{font-size:1.05rem;text-transform:capitalize}
+.nx-cn{display:flex;gap:6px}
+.nx-cn button{width:38px;height:38px;border-radius:13px;border:1px solid var(--line2);background:var(--card);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.nx-cn button:disabled{opacity:.3;cursor:default}
+.nx-dow,.nx-cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.nx-dow{margin-top:12px}
+.nx-dow span{text-align:center;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.nx-cg{margin-top:4px}
+.nx-cd{aspect-ratio:1;border:0;border-radius:13px;background:transparent;color:var(--ink);font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.nx-cd.pad{visibility:hidden}
+.nx-cd:disabled{opacity:.3;cursor:default}
+.nx-cd.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.nx-cd[aria-pressed="true"]{background:var(--accent);color:var(--on-accent,#fff)}
