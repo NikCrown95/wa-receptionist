@@ -847,7 +847,7 @@ rects.push(rect);
   render();
   var statsLoaded=false;
   function ensureStatsLoaded(){ if(statsLoaded)return; statsLoaded=true; loadStatsHours(); loadRealStats(); }
-  document.addEventListener('lia:section',function(e){ if(e.detail==='stats')ensureStatsLoaded(); });
+  document.addEventListener('lia:section',function(e){ if(e.detail!=='stats')return; if(!statsLoaded)ensureStatsLoaded(); else loadStatsHours(); }); // orari e chiusure si rileggono a ogni apertura: se li hai appena cambiati i grafici si aggiornano
   document.addEventListener('lia:data-changed',function(){ statsLoaded=false; });
   var statsPanel=document.getElementById('panelStats');
   if(statsPanel&&statsPanel.classList.contains('on'))ensureStatsLoaded();

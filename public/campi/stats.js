@@ -5,7 +5,7 @@
   var token = (new URLSearchParams(location.search).get('t') || '').trim(); if (!token) return;
   var root = document.createElement('div'); root.className = 'gcs'; pSt.appendChild(root);
   var tip = document.createElement('div'); tip.className = 'gcsTip'; document.body.appendChild(tip);
-  var P = 'month', active = false, DATA = null, COURTS = null, busy = false, failed = false;
+  var P = 'month', active = false, DATA = null, COURTS = null, CLOSED = [], busy = false, failed = false;
   var PL = { week: 'ultimi 7 giorni', month: 'ultimi 30 giorni', year: 'ultimi 12 mesi' };
   var DAYS = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'], DAYL = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
   var MS = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
@@ -127,6 +127,15 @@
 
   // ---------- calcoli ----------
   function openMinutes(c, wd) { var t = 0; ((c.hours && c.hours[String(wd)]) || []).forEach(function (h) { var a = h[0].split(':'), b = h[1].split(':'); t += (+b[0] * 60 + +b[1]) - (+a[0] * 60 + +a[1]); }); return t; }
+  // un giorno e' chiuso se lo sono tutti i campi: nessun orario in quel giorno della settimana oppure chiusura di giornata intera
+  function dayClosed(d) {
+    var cs = COURTS || []; if (!cs.length) return false;
+    var k = key(d), wd = d.getDay() === 0 ? 7 : d.getDay();
+    return cs.every(function (c) {
+      if (!openMinutes(c, wd)) return true;
+      return CLOSED.some(function (x) { return (!x.court_id || x.court_id === c.id) && k >= x.starts_on && k <= x.ends_on; });
+    });
+  }
   function capacity(from, to) { // minuti di campo disponibili tra due date (incluse)
     var t = 0, d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
     while (d <= to) { var wd = d.getDay() === 0 ? 7 : d.getDay(); (COURTS || []).forEach(function (c) { t += openMinutes(c, wd); }); d = addD(d, 1); }
@@ -145,6 +154,7 @@
       var s = new Date(a.starts_at), e = new Date(a.ends_at);
       return { d: new Date(s.getFullYear(), s.getMonth(), s.getDate()), h: s.getHours(), price: Number(a.price_eur) || 0, min: Math.max(0, (e - s) / 60000), pl: +a.players || 0, mem: Math.min(+a.members || 0, +a.players || 0), name: a.customer_name || '', phone: a.customer_phone || '', court: a.court_id, cname: a.service };
     });
+    all = all.filter(function (r) { return !dayClosed(r.d); }); // nei giorni di chiusura non si conta nulla
     var cur = all.filter(function (r) { return r.d >= from && r.d <= tdy; }), prev = all.filter(function (r) { return r.d >= pFrom && r.d <= pTo; });
     var c = agg(cur), p = agg(prev);
     c.cap = capacity(from, tdy); p.cap = capacity(pFrom, pTo);
@@ -152,7 +162,10 @@
     // serie nel tempo
     var series = [], i;
     if (P === 'year') { for (i = 11; i >= 0; i--) { var m0 = new Date(tdy.getFullYear(), tdy.getMonth() - i, 1), m1 = new Date(m0.getFullYear(), m0.getMonth() + 1, 0); series.push({ d0: m0, d1: m1 }); } }
-    else for (i = 0; i < days; i++) { var dd = addD(from, i); series.push({ d0: dd, d1: dd }); }
+    else {
+      for (i = 0; i < days; i++) { var dd = addD(from, i); if (!dayClosed(dd)) series.push({ d0: dd, d1: dd }); } // i giorni di chiusura non compaiono nei grafici
+      if (!series.length) series.push({ d0: tdy, d1: tdy });
+    }
     series.forEach(function (x) { var a = agg(cur.filter(function (r) { return r.d >= x.d0 && r.d <= x.d1; })); x.n = a.n; x.rev = a.rev; x.min = a.min; x.pl = a.pl; });
     // per campo
     var byC = (COURTS || []).map(function (ct) {
@@ -180,7 +193,7 @@
     var wrap = root.querySelector('#gcsWrap'); if (wrap && !DATA) wrap.innerHTML = '<div class="gcSk gcSkL"><i></i><i></i><i></i><i></i></div>';
     var h = window.liaGetHistory ? window.liaGetHistory() : fetch('/api/agenda?t=' + encodeURIComponent(token) + '&history=1', { cache: 'no-store' }).then(function (r) { return r.json(); });
     var cs = fetch('/api/agenda?t=' + encodeURIComponent(token) + '&courts=1&view=settings', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); });
-    Promise.all([h, cs]).then(function (a) { DATA = a[0]; COURTS = (a[1].courts || []).filter(function (c) { return c.active !== false; }); })
+    Promise.all([h, cs]).then(function (a) { DATA = a[0]; COURTS = (a[1].courts || []).filter(function (c) { return c.active !== false; }); CLOSED = (a[1].past_closures || []).concat((a[1].closures || []).filter(function (c) { return !c.from; })).map(function (c) { return { court_id: c.court_id || null, starts_on: c.starts_on, ends_on: c.ends_on }; }); })
       .catch(function () { failed = true; })
       .then(function () { busy = false; if (active) draw(); });
   }
@@ -202,7 +215,7 @@
       '<div class="panel"><h2>Giorni più richiesti</h2><p class="sub">Prenotazioni per giorno della settimana.</p><div class="hbars" id="cgsWd"></div></div></div>' +
       '<div class="row2"><div class="panel"><h2>Soci e non soci</h2><p class="sub">Chi gioca sui campi. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div>' +
       '<div class="panel"><h2>Singolo o doppio</h2><p class="sub">Come si gioca. Tocca una fetta per il dettaglio.</p><div id="cgsTyp" class="cgs-pies"></div></div></div>' +
-      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p><p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
+      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p><p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p><p>I giorni di chiusura (campi senza orari in quel giorno o chiusi tutto il giorno) non compaiono nei grafici e non contano negli incassi.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
     bars(wrap.querySelector('#cgsRev'), d.series, function (x) { return x.rev; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + eur(x.rev) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni'); });
     line(wrap.querySelector('#cgsBk'), d.series, function (x) { return x.n; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + '<br>' + hrs(x.min) + ' di campo · ' + x.pl + ' giocatori'; });
     hbars(wrap.querySelector('#byservice'), d.byC.map(function (x) { return { name: x.c.name, color: courtColor(x.c), pct: x.pct, amt: x.pct + '%', tip: '<b>' + esc(x.c.name) + ' · ' + x.pct + '%</b>' + hrs(x.min) + ' su ' + hrs(x.cap) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + ' · ' + eur(x.rev) }; }), 'Aggiungi i campi da Impostazioni › Campi e orari.');
