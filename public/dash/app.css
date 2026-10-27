@@ -3408,10 +3408,18 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .lmodes .lmprice input{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 12px}
 .lmodes .lmhalf{border:1px dashed var(--line);border-radius:14px;padding:6px 12px}
 
-/* Inserimento manuale per attivita' a ore */
+/* Inserimento manuale per attivita' a ore: schermata centrale, una domanda per volta */
 .nx-f[hidden]{display:none}
-.nx-hl{font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
-.nx-hl:first-child{margin-top:0}
-.nx-hc small{display:block;font-weight:500;opacity:.75;font-size:.78rem}
-.nx-hs{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:14px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 14%,var(--card))}
-.nx-hs b{font-size:1.1rem}.nx-hs span{color:var(--muted);font-size:.86rem}
+.nx-opts{display:grid;gap:8px}
+.nx-opt{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;min-height:58px;border-radius:16px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-family:inherit;cursor:pointer;width:100%}
+.nx-opt i{flex:none;width:10px;height:10px;border-radius:50%}
+.nx-opt b{display:block;font-size:1rem}
+.nx-opt small{display:block;color:var(--muted);font-size:.82rem;margin-top:1px}
+.nx-opt .pr{margin-left:auto;font-weight:700;white-space:nowrap}
+.nx-dg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.nx-dg .nx-tch{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:10px 6px;min-height:60px}
+.nx-dg .nx-tch small{color:var(--muted);font-size:.78rem;font-weight:500}
+.ov.hourly{display:flex;align-items:center;justify-content:center;padding:16px}
+.ov.hourly[hidden]{display:none}
+.ov.hourly .nwsheet{position:relative;left:auto;right:auto;bottom:auto;margin:0;width:100%;max-width:440px;max-height:100%;border-radius:24px;padding:18px 20px 22px}
+.ov.hourly .grab{display:none}
