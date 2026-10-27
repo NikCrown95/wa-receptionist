@@ -447,8 +447,8 @@
     var isToday = S.day === now.date;
     var pastL = isToday ? list.filter(function (b) { return mins(b.end) <= now.min; }) : [];
     var focus = isToday ? (list.filter(function (b) { return mins(b.start) <= now.min && now.min < mins(b.end); })[0] || list.filter(function (b) { return mins(b.start) > now.min; })[0]) : null;
-    if (isToday) list = list.filter(function (b) { return pastL.indexOf(b) < 0 || S.sel === b.id || fxHit(b); });
-    if (isToday && !list.length && pastL.length) wrap.appendChild(el('div', 'cp-load', 'Per oggi non ci sono altre prenotazioni.'));
+    // oggi: prima la prenotazione in corso / la prossima e le successive, poi quelle finite (piu' scure) in fondo
+    if (isToday) list = list.filter(function (b) { return pastL.indexOf(b) < 0; }).concat(pastL);
     list.forEach(function (b) {
       var c = courtOf(b.court_id) || { name: 'Campo' };
       var past = S.day < now.date || (S.day === now.date && mins(b.end) <= now.min), cur = S.day === now.date && mins(b.start) <= now.min && now.min < mins(b.end);
