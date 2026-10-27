@@ -606,3 +606,8 @@ body.campiOn #view-month{display:none!important}
   .cpx .cp-pact .cp-now{height:36px;min-height:0;font-size:1.02rem;font-weight:800;padding:0 4px 0 10px}
   .cpx .cp-pstrip{margin-top:0}
 }
+
+/* La colonna della griglia non deve allargarsi al contenuto (es. titolo della settimana su due mesi): resta larga quanto lo schermo */
+.cpx{grid-template-columns:minmax(0,1fr)}
+.cpx>*,.cpx .cp-list,.cpx .cp-list>*,.cpx .cp-pbody,.cpx .cp-pbody>*,.cpx .cp-ptop{min-width:0}
+.cpx .cp-list{grid-template-columns:minmax(0,1fr)}
