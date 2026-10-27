@@ -36,7 +36,10 @@ self.addEventListener("notificationclick", function (e) {
       var c = list[i];
       if (url.indexOf("/admin/") === 0) {
         if (c.url.indexOf("/admin/") !== -1 && "focus" in c) return c.focus().then(function (w) { return w && "navigate" in w ? w.navigate(url) : w; });
-      } else if (c.url.indexOf("/api/agenda") !== -1 && "focus" in c) return c.focus();
+      } else if (c.url.indexOf("/api/agenda") !== -1 && "focus" in c) {
+        if (url.indexOf("open=") !== -1) return c.focus().then(function (w) { return w && "navigate" in w ? w.navigate(url) : w; });
+        return c.focus();
+      }
     }
     return self.clients.openWindow(url);
   }));

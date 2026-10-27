@@ -1445,7 +1445,7 @@ function pfRenderPoster(box,b,opts){
       var m=(q('supMsg').value||'').trim();if(m.length<5){stMsg('supOut','Scrivi almeno una riga, cos\u00ec capiamo come aiutarti.',true);return}
       var b=this;b.disabled=true;stMsg('supOut','Invio in corso\u2026');
       var sel=q('supTopic');
-      stSend('support',{topic:sel.value,message:m,contact:(q('supContact').value||'').trim()}).then(function(){q('supMsg').value='';stMsg('supOut','Richiesta inviata. Ti rispondiamo appena possibile.')}).catch(function(e){stMsg('supOut',e.message,true)}).then(function(){b.disabled=false});
+      stSend('support',{topic:sel.value,message:m,contact:(q('supContact').value||'').trim()}).then(function(){q('supMsg').value='';stMsg('supOut','');supTab('list')}).catch(function(e){stMsg('supOut',e.message,true)}).then(function(){b.disabled=false});
     };
     tgBind();
     if(q('waSend'))q('waSend').onclick=function(){
@@ -1489,6 +1489,71 @@ function pfRenderPoster(box,b,opts){
         return loadBusinessProfile();
       }).catch(function(e){stMsg('biMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.')}).then(function(){biS.disabled=false;setTimeout(function(){stMsg('biMsg','')},4000)});
     });
+  })();
+  /* ---- Assistenza: le mie richieste e le risposte ---- */
+  var SUP_TOPIC={domanda:'Domanda',problema:'Qualcosa non funziona',fatturazione:'Pagamenti e fatture',suggerimento:'Suggerimento'};
+  function supWhen(iso){
+    try{
+      var d=new Date(iso),n=new Date(),hm=d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+      var y=new Date(n.getTime()-86400000);
+      if(d.toDateString()===n.toDateString())return 'Oggi, '+hm;
+      if(d.toDateString()===y.toDateString())return 'Ieri, '+hm;
+      return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'}).replace('.','')+(d.getFullYear()!==n.getFullYear()?' '+d.getFullYear():'');
+    }catch(e){return ''}
+  }
+  function supTab(which){
+    var nw=stEl('supTabNew'),ls=stEl('supTabList'),fc=stEl('supFormCard'),lc=stEl('supListCard');if(!nw||!ls||!fc||!lc)return;
+    var list=which==='list';
+    nw.setAttribute('aria-selected',list?'false':'true');ls.setAttribute('aria-selected',list?'true':'false');
+    fc.hidden=list;lc.hidden=!list;
+    if(list)supLoad();
+  }
+  function supRender(items){
+    var box=stEl('supList');if(!box)return;box.textContent='';
+    if(!items.length){
+      var em=stMk('div','supEmpty');em.appendChild(stMk('b',null,'Non hai ancora inviato richieste'));em.appendChild(stMk('span',null,'Quando ci scrivi, trovi qui il messaggio e la nostra risposta.'));box.appendChild(em);return;
+    }
+    items.forEach(function(x){
+      var c=stMk('article','supRq'+(x.reply?' has':''));
+      var top=stMk('div','supTop');
+      if(x.topic&&SUP_TOPIC[x.topic])top.appendChild(stMk('span','supPill topic',SUP_TOPIC[x.topic]));
+      top.appendChild(stMk('span','supPill '+(x.reply?'ans':'wait'),x.reply?'Risposta':'In attesa'));
+      top.appendChild(stMk('time',null,supWhen(x.created_at)));
+      c.appendChild(top);
+      c.appendChild(stMk('p','supMsg',x.message||''));
+      if(x.reply){
+        var r=stMk('div','supReply');r.appendChild(stMk('b',null,'Risposta di Prenolia'));r.appendChild(stMk('p',null,x.reply));
+        var t=supWhen(x.replied_at);
+        if(x.reply_edited_at)t+=' · corretta '+supWhen(x.reply_edited_at).toLowerCase();
+        r.appendChild(stMk('small',null,t));c.appendChild(r);
+      }else c.appendChild(stMk('p','supHint','Ti rispondiamo appena possibile.'));
+      box.appendChild(c);
+    });
+  }
+  function supLoad(){
+    var box=stEl('supList');if(box&&!box.childNodes.length)box.appendChild(stMk('p','supHint','Carico le richieste…'));
+    return fetch('/api/agenda?t='+encodeURIComponent(token)+'&support=1',{cache:'no-store'})
+      .then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Errore');return d})})
+      .then(function(d){supRender(d.items||[])})
+      .catch(function(){var b=stEl('supList');if(b){b.textContent='';b.appendChild(stMk('p','supHint','Non riesco a caricare le richieste. Riprova tra poco.'))}});
+  }
+  (function(){
+    var nw=stEl('supTabNew'),ls=stEl('supTabList');if(!nw||!ls)return;
+    nw.addEventListener('click',function(){supTab('new')});
+    ls.addEventListener('click',function(){supTab('list')});
+    window.liaSupportList=function(){supTab('list')};
+  })();
+  /* apertura dalla notifica "Prenolia ha risposto" */
+  (function(){
+    var open='';try{open=new URLSearchParams(location.search).get('open')||''}catch(e){}
+    if(open!=='assistenza')return;
+    try{var u=new URL(location.href);u.searchParams.delete('open');history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}
+    var tries=0;
+    (function go(){
+      var m=document.getElementById('menuTabOther');
+      if(m&&window.liaSettingsOpen){m.click();setTimeout(function(){window.liaSettingsOpen('help');supTab('list')},60);return}
+      if(++tries<40)setTimeout(go,150);
+    })();
   })();
   stRenderHelp();
   (function(){

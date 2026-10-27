@@ -142,6 +142,15 @@ nav a.on{background:var(--card2);color:var(--ink);}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .req-act{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .req-act .handled{margin-left:auto;font-size:.8rem;color:var(--muted)}
+.reply-box{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.reply-box label{font-size:.82rem;font-weight:600;color:var(--muted)}
+.reply-box textarea{width:100%;min-height:84px;padding:11px 13px;border-radius:13px;border:1px solid var(--line2);background:var(--bg2);color:var(--ink);font:inherit;font-size:.96rem;line-height:1.45;resize:vertical}
+.reply-box textarea:focus{outline:none;border-color:var(--accent)}
+.reply-box .r-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.reply-box .r-info{font-size:.8rem;color:var(--muted)}
+.reply-box .r-note{font-size:.8rem;color:var(--muted)}
+.reply-box .r-err{font-size:.86rem;color:var(--red)}
+.st.replied{background:var(--green-soft);color:var(--green)}
 .req-empty{padding:56px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:22px}
 .req-empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
 .banner{margin-top:18px;padding:14px 16px;border-radius:14px;background:var(--amber-soft);color:var(--amber);font-size:.92rem;line-height:1.5}
@@ -207,7 +216,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
   var TOPIC = { domanda:'Domanda', problema:'Qualcosa non funziona', fatturazione:'Pagamenti e fatture', suggerimento:'Suggerimento', idea:'Un\u2019idea', parere:'Un parere' };
   var DEFAULT_TEXT = { feedback:'Solo il voto, nessun messaggio.', plan_change:'Chiede di cambiare piano.', subscription_cancel:'Chiede di disdire l\u2019abbonamento.', account_delete:'Chiede di eliminare l\u2019account.', whatsapp_activation:'Chiede l\u2019attivazione di WhatsApp.', support:'(nessun messaggio)' };
   var MONTHS = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  var state = { all: [], counts: { new:0, in_progress:0, done:0 }, owner: false, loaded: false };
+  var state = { all: [], counts: { new:0, in_progress:0, done:0 }, owner: false, loaded: false, drafts: {} };
 
   function el(tag, cls, txt){ var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
   function two(n){ return ('0' + n).slice(-2); }
@@ -244,12 +253,47 @@ nav a.on{background:var(--card2);color:var(--ink);}
     return t.join(' \u00b7 ');
   }
 
+  // risposta scritta: la vede il titolare nella sua pagina Assistenza
+  function replyBox(r){
+    var box = el('div', 'reply-box');
+    var id = 'reply-' + r.id;
+    var lb = el('label', null, 'La tua risposta (la vede il titolare)'); lb.setAttribute('for', id); box.appendChild(lb);
+    var ta = document.createElement('textarea'); ta.id = id; ta.maxLength = 2000; ta.placeholder = 'Scrivi la risposta';
+    ta.value = state.drafts[r.id] != null ? state.drafts[r.id] : (r.reply || '');
+    ta.disabled = !state.owner;
+    ta.addEventListener('input', function(){ state.drafts[r.id] = ta.value; });
+    box.appendChild(ta);
+    var row = el('div', 'r-row');
+    var send = el('button', 'btn small', r.reply ? 'Salva correzione' : 'Invia risposta'); send.type = 'button'; send.disabled = !state.owner;
+    row.appendChild(send);
+    if (r.reply) row.appendChild(el('span', 'r-info', 'Risposta inviata ' + dateFull(r.replied_at) + (r.reply_edited_at ? ' \u00b7 corretta ' + dateFull(r.reply_edited_at) : '')));
+    box.appendChild(row);
+    box.appendChild(el('p', 'r-note', r.reply ? 'La correzione aggiorna il testo che il titolare vede, senza un nuovo avviso.' : 'Il titolare riceve una notifica e trova la risposta nella sua pagina Assistenza.'));
+    var err = el('div', 'r-err'); err.hidden = true; box.appendChild(err);
+    send.onclick = function(){
+      var text = ta.value.trim();
+      if (text.length < 2) { err.textContent = 'Scrivi la risposta.'; err.hidden = false; return; }
+      if (r.reply && text === r.reply) { err.textContent = 'Non hai cambiato il testo.'; err.hidden = false; return; }
+      err.hidden = true; send.disabled = true; var t0 = send.textContent; send.textContent = 'Invio\u2026';
+      api('/api/admin/clients', { method: 'POST', body: JSON.stringify({ action: 'request_reply', id: r.id, reply: text }) })
+        .then(function(j){
+          var was = r.status; r.reply = j.reply; r.replied_at = j.replied_at; r.reply_edited_at = j.reply_edited_at || null;
+          if (j.status && j.status !== was) { r.status = j.status; r.handled_by = j.handled_by || null; r.handled_at = j.handled_at || null; state.counts[was] = Math.max(0, (state.counts[was] || 0) - 1); state.counts[r.status] = (state.counts[r.status] || 0) + 1; }
+          delete state.drafts[r.id];
+          render(); if (window.liaNavBadge) window.liaNavBadge(state.counts.new);
+        })
+        .catch(function(e){ send.disabled = false; send.textContent = t0; err.textContent = 'Non sono riuscito a inviare la risposta: ' + e.message; err.hidden = false; });
+    };
+    return box;
+  }
+
   function card(r){
     var biz = r.business || {}, danger = r.kind === 'account_delete';
     var c = el('article', 'req ' + r.status + (danger ? ' danger' : ''));
     var top = el('div', 'req-top');
     top.appendChild(el('span', 'kind ' + r.kind, KIND[r.kind] || r.kind));
     top.appendChild(el('span', 'st ' + r.status, STATUS[r.status] || r.status));
+    if (r.kind === 'support' && r.reply) top.appendChild(el('span', 'st replied', 'Risposto'));
     var when = el('span', 'when', ago(r.created_at)); when.title = dateFull(r.created_at); top.appendChild(when);
     c.appendChild(top);
 
@@ -293,6 +337,8 @@ nav a.on{background:var(--card2);color:var(--ink);}
       if (contact && !num && !mail) cr.appendChild(el('span', 'sub', 'Recapito non riconoscibile come numero o email'));
     } else cr.appendChild(el('span', 'sub', biz.id ? 'Nessun recapito: cerca l\u2019attivit\u00e0 nella scheda cliente.' : 'Nessun recapito disponibile.'));
     c.appendChild(cr);
+
+    if (r.kind === 'support' && biz.id) c.appendChild(replyBox(r));
 
     var act = el('div', 'req-act');
     function st(label, status, cls){ var bt2 = el('button', 'btn small ' + (cls || ''), label); bt2.type = 'button'; bt2.disabled = !state.owner; bt2.onclick = function(){ setStatus(r, status, bt2); }; act.appendChild(bt2); }
@@ -362,7 +408,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
   document.getElementById('reload').addEventListener('click', load);
   render();
   api('/api/admin/clients?view=me').then(function(me){ state.owner = !!(me && me.role === 'owner'); if (!state.owner) banner('Con questo account puoi leggere le richieste ma non cambiarne lo stato.'); }).catch(function(){}).then(load);
-  setInterval(function(){ if (!document.hidden) load(); }, 60000);
+  setInterval(function(){ var ae = document.activeElement; if (!document.hidden && !(ae && ae.tagName === 'TEXTAREA')) load(); }, 60000);
 })();
 </script>
 </body>

@@ -3369,3 +3369,25 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .nx-hw{position:relative;padding-right:44px}
 .nx-x{position:absolute;top:0;right:0;width:36px;height:36px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
 .nx-x:active{transform:scale(.96)}
+
+/* ===== Assistenza: le mie richieste e le risposte ===== */
+#panelOther .supTabs{display:flex;gap:6px;padding:4px;border-radius:15px;background:var(--card);border:1px solid var(--line)}
+#panelOther .supTabs button{flex:1;min-height:40px;border:0;border-radius:11px;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:.88rem;cursor:pointer}
+#panelOther .supTabs button[aria-selected="true"]{background:var(--accent);color:var(--on-accent)}
+#panelOther .stCard[hidden]{display:none}
+#panelOther .supList{display:flex;flex-direction:column;gap:10px}
+#panelOther .supRq{padding:14px 15px;border-radius:17px;background:var(--bg2);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+#panelOther .supTop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#panelOther .supTop time{margin-left:auto;font-size:.8rem;color:var(--muted)}
+#panelOther .supPill{padding:3px 10px;border-radius:999px;font-size:.76rem;font-weight:700;white-space:nowrap}
+#panelOther .supPill.topic{background:var(--card2);color:var(--muted)}
+#panelOther .supPill.ans{background:var(--n-ok-bg,var(--accent-soft));color:var(--n-ok,var(--accent-ink))}
+#panelOther .supPill.wait{background:var(--n-warn-bg,var(--card2));color:var(--n-warn,var(--muted))}
+#panelOther .supMsg{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+#panelOther .supHint{margin:0;font-size:.84rem;color:var(--muted)}
+#panelOther .supReply{padding:11px 13px;border-radius:13px;background:var(--accent-soft);display:flex;flex-direction:column;gap:5px}
+#panelOther .supReply b{font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-ink)}
+#panelOther .supReply p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+#panelOther .supReply small{color:var(--muted);font-size:.78rem}
+#panelOther .supEmpty{padding:30px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:16px}
+#panelOther .supEmpty b{display:block;color:var(--ink);margin-bottom:4px}

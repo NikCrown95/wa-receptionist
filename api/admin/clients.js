@@ -1276,13 +1276,19 @@ async function requestCounts() {
 async function listRequests(query) {
   const status = String((query && query.status) || '');
   const kind = String((query && query.kind) || '');
-  let path = 'support_requests?select=id,created_at,business_id,business_name,kind,topic,message,contact,meta,status,handled_by,handled_at&order=created_at.desc&limit=300';
+  let path = 'support_requests?select=id,created_at,business_id,business_name,kind,topic,message,contact,meta,status,handled_by,handled_at,reply,replied_at,reply_edited_at,replied_by&order=created_at.desc&limit=300';
   if (status === 'open') path += '&status=in.(new,in_progress)';
   else if (REQ_STATUS.includes(status)) path += `&status=eq.${status}`;
   if (REQ_KINDS.includes(kind)) path += `&kind=eq.${kind}`;
   let rows, counts;
   try {
-    rows = (await sb(path)) || [];
+    try {
+      rows = (await sb(path)) || [];
+    } catch (e) {
+      // prima di eseguire la migrazione delle risposte la lista deve funzionare lo stesso
+      if (!/reply|replied/.test(String((e && e.message) || ''))) throw e;
+      rows = (await sb(path.replace(',reply,replied_at,reply_edited_at,replied_by', ''))) || [];
+    }
     counts = await requestCounts();
   } catch (e) {
     if (e && (e.status === 404 || /support_requests/.test(String(e.message || '')))) {
@@ -1326,6 +1332,9 @@ async function listRequests(query) {
       status: r.status,
       handled_by: r.handled_by || null,
       handled_at: r.handled_at || null,
+      reply: r.reply || null,
+      replied_at: r.replied_at || null,
+      reply_edited_at: r.reply_edited_at || null,
       business: biz[r.business_id] || (r.business_id ? { id: r.business_id, name: r.business_name || null } : { id: null, name: r.business_name || null }),
     })),
   };
@@ -1343,6 +1352,32 @@ async function setRequestStatus(body, ctx) {
   if (!rows || !rows.length) { const e = new Error('Richiesta non trovata.'); e.notFound = true; throw e; }
   await audit('request_status', rows[0].business_id || null, { request_id: id, status, kind: rows[0].kind }, ctx.actor);
   return { ok: true, id, status, handled_by: fields.handled_by, handled_at: fields.handled_at };
+}
+
+// Risposta scritta a una richiesta di assistenza (solo kind = support).
+// La prima risposta avvisa il titolare con una push; le correzioni aggiornano il testo senza un secondo avviso.
+async function replyRequest(body, ctx) {
+  const id = String(body.id || '');
+  if (!UUID.test(id)) throw fail('Richiesta non valida.');
+  const reply = String(body.reply || '').trim().slice(0, 2000);
+  if (reply.length < 2) throw fail('Scrivi la risposta.');
+  const cur = await sb(`support_requests?id=eq.${id}&select=id,business_id,kind,status,reply&limit=1`);
+  if (!cur || !cur.length) { const e = new Error('Richiesta non trovata.'); e.notFound = true; throw e; }
+  const row = cur[0];
+  if (row.kind !== 'support') throw fail('Si risponde solo ai messaggi di assistenza.');
+  const now = new Date().toISOString();
+  const first = !row.reply;
+  const fields = first
+    ? { reply, replied_at: now, replied_by: ctx.actor, reply_edited_at: null }
+    : { reply, reply_edited_at: now };
+  // rispondere prende in carico la richiesta, ma non la chiude
+  if (row.status === 'new') { fields.status = 'in_progress'; fields.handled_by = ctx.actor; fields.handled_at = now; }
+  const rows = await sb(`support_requests?id=eq.${id}`, { method: 'PATCH', body: fields, prefer: 'return=representation' });
+  if (!rows || !rows.length) { const e = new Error('Richiesta non trovata.'); e.notFound = true; throw e; }
+  await audit(first ? 'request_reply' : 'request_reply_edit', row.business_id || null, { request_id: id }, ctx.actor);
+  if (first && row.business_id) await require('../../lib/push.js').notifyBusinessSupportReply(row.business_id, { id, reply });
+  const o = rows[0];
+  return { ok: true, id, reply: o.reply, replied_at: o.replied_at, reply_edited_at: o.reply_edited_at || null, replied_by: o.replied_by || null, status: o.status, handled_by: o.handled_by || null, handled_at: o.handled_at || null };
 }
 
 // ============================ ORDINI DELLO SHOP ============================
@@ -1481,6 +1516,10 @@ module.exports = async function handler(req, res) {
       }
       if (body && /^partner_/.test(String(body.action || ''))) {
         res.status(200).json(await referral.partnerAction(body, { get: sbAll, send: (method, path, b, prefer) => sb(path, { method, body: b, prefer }) }));
+        return;
+      }
+      if (body && body.action === 'request_reply') {
+        res.status(200).json(await replyRequest(body, ctx));
         return;
       }
       if (body && body.action === 'request_status') {
