@@ -3560,3 +3560,8 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #calSubApp #sheet .ap-cf{gap:6px}
 #calSubApp #sheet .ap-cli .rb.c,#calSubApp #sheet .ap-cli .rb.w{background:var(--card)}
 #calSubApp #sheet .ap-cli .rb.w svg{width:21px;height:21px}
+/* vista: niente intestazione, parte dall'orario */
+#calSubApp #sheet.apv .ap-top{position:absolute;top:14px;right:14px;z-index:3;padding:0;gap:0}
+#calSubApp #sheet.apv #sheet-close,#calSubApp #sheet.apv .ap-ttl{display:none}
+#calSubApp .sheet#sheet.apv{padding-top:8px}
+#calSubApp #sheet.apv .grabber{margin:6px auto 10px}
