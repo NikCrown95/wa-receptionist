@@ -1108,6 +1108,18 @@ async function runAction(body, ctx) {
 
   if (action === 'extend') {
     if (sub.status === 'cancelled') throw fail('Abbonamento annullato: usa "Riattiva".');
+    if (body.until !== undefined && body.until !== null && body.until !== '') {
+      // proroga fino a una data scelta da te (fine di quel giorno, ora italiana); sostituisce la proroga precedente
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(body.until));
+      if (!m) throw fail('Data non valida.');
+      const until = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 21, 59, 59));
+      if (Number.isNaN(until.getTime()) || until.getUTCMonth() !== +m[2] - 1) throw fail('Data non valida.');
+      if (until.getTime() <= now.getTime()) throw fail('Scegli una data futura.');
+      if (until.getTime() > now.getTime() + 800 * 86400000) throw fail('Scegli una data entro i prossimi 2 anni.');
+      await patchSub(sub.id, { courtesy_until: until.toISOString(), suspended_manually: false, suspended_at: null });
+      await audit('extend', id, { until: body.until, courtesy_until: until.toISOString() }, ctx && ctx.actor);
+      return { ok: true, state: (await accessRow(id) || {}).state, courtesy_until: until.toISOString() };
+    }
     const days = parseInt(body.days, 10);
     if (!days || days < 1 || days > 60) throw fail('La proroga deve essere tra 1 e 60 giorni.');
     const row = await accessRow(id);

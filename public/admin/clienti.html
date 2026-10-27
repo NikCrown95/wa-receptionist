@@ -451,6 +451,9 @@ window.startClients = function(){
       add('Segna come pagato (+1 mese)', '', { action: 'mark_paid', months: 1 });
       add('Proroga di 7 giorni', 'ghost', { action: 'extend', days: 7 });
       add('Proroga di 30 giorni', 'ghost', { action: 'extend', days: 30 });
+      var ub = document.createElement('button'); ub.type = 'button'; ub.className = 'btn ghost act-btn'; ub.textContent = 'Proroga fino a una data…';
+      ub.addEventListener('click', function(){ openUntilForm(c); });
+      box.appendChild(ub);
       var manual = st === 'suspended' && sv && sv.paid_until && new Date(sv.paid_until) > new Date();
       if (st === 'suspended') add(manual ? 'Riattiva (toglie la sospensione)' : 'Riattiva (se scaduto serve pagamento o proroga)', 'ghost', { action: 'reactivate' });
       else add('Sospendi ora', 'danger', { action: 'suspend' }, 'Sospendere ' + c.name + ' adesso? Lia e le prenotazioni online smettono di funzionare.');
@@ -563,6 +566,29 @@ window.startClients = function(){
   }
 
   // ===== "Reset password": link via email oppure password provvisoria
+  // ===== proroga fino a una data scelta
+  function openUntilForm(c){
+    var box = document.getElementById('actBtns'); box.innerHTML = '';
+    document.getElementById('actTitle').textContent = 'Proroga ' + c.name;
+    document.getElementById('actSub').textContent = 'L\'attività resta attiva fino alla fine del giorno che scegli, poi si ferma se non viene rinnovata.';
+    var lab = document.createElement('label'); lab.htmlFor = 'untilDate'; lab.textContent = 'Attiva fino al';
+    lab.style.cssText = 'display:block;font-size:.84rem;color:var(--muted);margin:4px 0 6px;';
+    var inp = document.createElement('input'); inp.type = 'date'; inp.id = 'untilDate';
+    var d0 = new Date(Date.now() + 30 * 86400000); inp.value = d0.toISOString().slice(0, 10);
+    inp.min = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    inp.style.cssText = 'width:100%;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 12px;margin-bottom:12px;';
+    box.appendChild(lab); box.appendChild(inp);
+    var go = document.createElement('button'); go.type = 'button'; go.className = 'btn act-btn'; go.textContent = 'Conferma proroga';
+    go.addEventListener('click', function(){
+      if (!inp.value) { alert('Scegli una data.'); return; }
+      runAction(c, { action: 'extend', until: inp.value }, 'Tenere attiva ' + c.name + ' fino al ' + inp.value.split('-').reverse().join('/') + '?', go);
+    });
+    box.appendChild(go);
+    var back = document.createElement('button'); back.type = 'button'; back.className = 'btn ghost act-btn'; back.textContent = 'Indietro';
+    back.addEventListener('click', function(){ openActions(c); });
+    box.appendChild(back);
+  }
+
   function openPasswordForm(c){
     var box = document.getElementById('actBtns'); box.innerHTML = '';
     document.getElementById('actTitle').textContent = 'Password di ' + c.name;
