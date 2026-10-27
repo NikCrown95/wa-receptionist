@@ -3407,3 +3407,11 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .lmodes .lmprice label{display:flex;flex-direction:column;gap:5px;font-size:.8rem;font-weight:600;color:var(--muted)}
 .lmodes .lmprice input{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;padding:0 12px}
 .lmodes .lmhalf{border:1px dashed var(--line);border-radius:14px;padding:6px 12px}
+
+/* Inserimento manuale per attivita' a ore */
+.nx-f[hidden]{display:none}
+.nx-hl{font-size:.74rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.nx-hl:first-child{margin-top:0}
+.nx-hc small{display:block;font-weight:500;opacity:.75;font-size:.78rem}
+.nx-hs{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:14px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 14%,var(--card))}
+.nx-hs b{font-size:1.1rem}.nx-hs span{color:var(--muted);font-size:.86rem}
