@@ -3519,3 +3519,44 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 .nx-cd:disabled{opacity:.3;cursor:default}
 .nx-cd.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .nx-cd[aria-pressed="true"]{background:var(--accent);color:var(--on-accent,#fff)}
+
+/* Scheda appuntamento: stile morbido a riquadri */
+#calSubApp .sheet#sheet{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--card)),var(--card) 260px);border-color:var(--line)}
+#calSubApp #sheet .ap-ib{border:0;background:none;color:var(--ink);border-radius:12px}
+#calSubApp #sheet .ap-pill,#calSubApp #sheet .ap-pill.l,#calSubApp #sheet .ap-pill.p,#calSubApp #sheet .ap-pill.x{background:none;padding:0;border-radius:0;font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+#calSubApp #sheet .ap-pill i{background:var(--live)}
+#calSubApp #sheet .ap-pill.l i{background:var(--accent)}
+#calSubApp #sheet .ap-pill.p i{background:var(--muted)}
+#calSubApp #sheet .ap-pill.x i{background:var(--danger)}
+#calSubApp #sheet .ap-pill.x{color:var(--danger)}
+#calSubApp #sheet .ap-hero{background:none;padding:2px 2px 0;gap:0}
+#calSubApp #sheet .ap-hero .sv{display:inline-flex;align-items:center;gap:8px;width:fit-content;background:color-mix(in srgb,var(--c) 14%,var(--card));color:var(--ink);padding:5px 12px;border-radius:999px;font-size:.8rem;font-weight:700}
+#calSubApp #sheet .ap-hero .sv i{width:8px;height:8px;background:var(--c)}
+#calSubApp #sheet .ap-hero .tm{display:flex;align-items:baseline;gap:8px;font-family:'Manrope','Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:3rem;letter-spacing:-.04em;line-height:1;margin-top:14px}
+#calSubApp #sheet .ap-hero .tm small{font-family:inherit;font-weight:500;font-size:1.3rem;color:var(--muted);letter-spacing:-.02em}
+#calSubApp #sheet .ap-hero .dy{margin-top:6px}
+#calSubApp #sheet .ap-op{background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:13px 14px}
+#calSubApp #sheet .ap-op .oi{width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--accent) 16%,var(--card));color:var(--accent-ink);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line2))}
+#calSubApp #sheet .ap-op b{font-size:1.05rem;font-weight:700}
+#calSubApp #sheet .ap-cli{background:var(--card);border-radius:18px}
+#calSubApp #sheet .ap-cli .av{background:color-mix(in srgb,var(--accent) 14%,var(--card));color:var(--accent-ink);border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line2))}
+#calSubApp #sheet .ap-cli .rb{background:var(--card);border:1px solid var(--line2);width:42px;height:42px}
+#calSubApp #sheet .ap-cli .rb.c{color:var(--accent-ink)}
+#calSubApp #sheet .ap-cli .rb.w{color:var(--wa,#1f9d57)}
+#calSubApp #sheet .dt-list{display:flex;flex-direction:column;gap:10px}
+#calSubApp #sheet .dt-list .dt-row{border:1px solid var(--line2);border-radius:18px;background:var(--card);padding:13px 14px}
+#calSubApp #sheet .ap-foot{border-top:0}
+#calSubApp #sheet .ap-btn.p{background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent));border-radius:16px;min-height:54px}
+#calSubApp #sheet .ap-btn.d{border-radius:16px;font-weight:700}
+/* modifica: righe sottili, pillole, campi con linea */
+#calSubApp #sheet .ap-acc{border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
+#calSubApp #sheet .ap-acc.open{border-color:var(--line)}
+#calSubApp #sheet .ap-acc>button{padding:14px 0}
+#calSubApp #sheet .ap-oc{border-radius:999px;background:none;padding:9px 16px}
+#calSubApp #sheet .ap-oc[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+#calSubApp #sheet .ap-acc .opts{padding:0 0 14px}
+#calSubApp #sheet .ap-f input{background:none;border:0;border-bottom:1px solid var(--line2);border-radius:0;padding:8px 0;min-height:42px}
+#calSubApp #sheet .ap-f input:focus{border-bottom-color:var(--accent)}
+#calSubApp #sheet .ap-cf{gap:6px}
+#calSubApp #sheet .ap-cli .rb.c,#calSubApp #sheet .ap-cli .rb.w{background:var(--card)}
+#calSubApp #sheet .ap-cli .rb.w svg{width:21px;height:21px}
