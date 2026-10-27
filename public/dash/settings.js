@@ -42,7 +42,7 @@
       if((v.maxUnits||1)!==(g.maxUnits||1))u.max_units=v.maxUnits;
       return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:first.id}).then(loadRemote)});
   }
-  function renderServices(){if(window.liaRlRender)setTimeout(window.liaRlRender,0);
+  function renderServices(){if(window.liaRlRender)setTimeout(window.liaRlRender,0);if(!svcNewBlock)svcNewModesInit();
     var box=document.getElementById('svcList');box.innerHTML='';
     if(!S.services.length)box.innerHTML='<p class="set-empty">Nessun servizio ancora.</p>';
     S.groups.forEach(function(g){
@@ -59,17 +59,18 @@
   var svcNewBlock=null;
   function svcNewModesInit(){
     var host=document.getElementById('svcNewModes'),pw=document.getElementById('svcNewPriceWrap');
-    if(!host||window.__LIA_MED){return}
-    if(pw)pw.hidden=true;host.hidden=false;
+    if(!host||window.__LIA_MED||typeof window.liaModesBlock!=='function')return; // service-sheet.js si carica dopo: si riprova alla prima lista servizi
+    if(pw){pw.hidden=true;pw.style.display='none'}host.hidden=false;
     svcNewBlock=window.liaModesBlock(host,{modes:{sede:''}},function(){return document.getElementById('svcNewMin').value});
   }
   svcNewModesInit();
   document.getElementById('svcAddBtn').onclick=function(){
+    if(!svcNewBlock)svcNewModesInit();
     if(svcNewBlock){
       var n2=document.getElementById('svcNewName').value.trim(),d2=parseInt(document.getElementById('svcNewMin').value,10),r2=svcNewBlock.read();
       if(!n2||!d2){alert('Compila nome e durata del servizio.');return}
       if(r2.error){alert(r2.error);return}
-      api('POST',{action:'service_create',name:n2,duration_min:d2,half_hour:!!r2.half,modes:r2.modes}).then(function(){document.getElementById('svcNewName').value='';document.getElementById('svcNewMin').value='';svcNewModesInit();return loadRemote()}).catch(function(e){alert(e.message)});
+      api('POST',{action:'service_create',name:n2,duration_min:d2,half_hour:!!r2.half,modes:r2.modes}).then(function(){document.getElementById('svcNewName').value='';document.getElementById('svcNewMin').value='';svcNewBlock=null;svcNewModesInit();return loadRemote()}).catch(function(e){alert(e.message)});
       return;
     }
 
