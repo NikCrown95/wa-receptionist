@@ -135,7 +135,7 @@ function addDays(dateStr, n) {
 
 async function getBusinessByToken(token) {
   if (!/^[a-f0-9]{32,128}$/.test(token)) return null;
-  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,timezone,team_mode,created_at,business_type,booking_rules");
+  const r = await sb("GET", "businesses?agenda_token=eq." + token + "&active=eq.true&select=id,name,slug,public_phone,address,cancel_limit_hours,timezone,team_mode,created_at,business_type,booking_rules");
   if (!r.ok || !Array.isArray(r.data) || !r.data.length) return null;
   return r.data[0];
 }
