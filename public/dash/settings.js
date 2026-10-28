@@ -1264,9 +1264,11 @@ function pfRenderPoster(box,b,opts){
       now.appendChild(stMk('h3',null,'Piano non ancora configurato'));now.appendChild(stMk('p',null,'Scrivi all\u2019assistenza e lo sistemiamo insieme.'));
       if(chg)chg.hidden=true;if(cc)cc.hidden=true;stText('stSumSub','Piano non configurato');return;
     }
-    if(chg)chg.hidden=true;if(cc)cc.hidden=false;now.style.display='none';try{pfRenderPlan(stEl('plTop'),stEl('plCols'),{premium:D.prem,known:D.known,cd:pfCountdown(D.sub),sub:D.sub})}catch(e){}
-    if(typeof PLAN_IMG!=='undefined'){var im=document.createElement('img');im.className='planImg'+(D.prem?' prem':'');im.src=D.prem?PLAN_IMG.smart:PLAN_IMG.base;im.alt='';now.appendChild(im)}
-    now.appendChild(stMk('h3',null,'Piano '+(D.prem?P.premium.name:P.base.name)));
+    if(chg)chg.hidden=true;if(cc)cc.hidden=false;try{pfRenderPlan(stEl('plTop'),stEl('plCols'),{premium:D.prem,known:D.known,cd:pfCountdown(D.sub),sub:D.sub});stEl('plTop').hidden=true}catch(e){}
+    /* il nome del piano e' scritto come il logo Prenolia: la "a" e' il robottino */
+    var wm=stMk('div','stWm');wm.setAttribute('role','img');wm.setAttribute('aria-label','Piano '+(D.prem?P.premium.name:P.base.name));
+    wm.appendChild(document.createTextNode(D.prem?'Sm':'B'));var wa=document.createElement('img');wa.src='/lia-a.png';wa.alt='';wm.appendChild(wa);wm.appendChild(document.createTextNode(D.prem?'rt':'se'));
+    now.appendChild(wm);
     var price=(D.sub&&D.sub.price_eur!=null)?Number(D.sub.price_eur):(D.prem?P.premium.price:P.base.price);
     var line=stEur(price)+' al mese'+(end?(cancelled?' \u00b7 attivo fino al '+end:' \u00b7 si rinnova il '+end):'');
     now.appendChild(stMk('p',null,cancelled?'Disdetta registrata. Il piano resta attivo'+(end?' fino al '+end:'')+'.':line));
@@ -1295,7 +1297,7 @@ function pfRenderPoster(box,b,opts){
     else if(B.has_stripe){mode='portal';label='Gestisci pagamento e fatture';
       if(B.status==='trial'){title='Abbonamento attivato';tx='Non paghi nulla fino al '+endTxt+': il primo addebito ('+price+') parte quel giorno. Puoi disdire quando vuoi.'}
       else if(B.cancel_at_period_end){title='Disdetta registrata';tx='Il piano resta attivo fino al '+endTxt+', poi non si rinnova. Puoi cambiare idea dal pulsante qui sotto.'}
-      else{title='Abbonamento attivo';tx='Si rinnova il '+endTxt+' ('+price+'). Da qui aggiorni la carta, scarichi le ricevute o disdici: il piano resta attivo fino alla fine del periodo già pagato.'}}
+      else{title='Abbonamento attivo';tx='Da qui aggiorni la carta, scarichi le ricevute o disdici. Il piano resta attivo fino alla fine del periodo già pagato.'}}
     else if(B.status==='trial'){title='Attiva il tuo abbonamento';tx='Prova gratuita fino al '+endTxt+'. Se lo attivi adesso non paghi nulla fino a quel giorno: poi '+price+', disdici quando vuoi.';label='Attiva l’abbonamento · '+price}
     else if(expired){title='Abbonamento scaduto';tx=(leftDays>0?'Hai ancora '+leftDays+(leftDays===1?' giorno':' giorni')+' di tolleranza, poi la pagina di prenotazione si ferma. ':'La pagina di prenotazione è ferma. ')+'Rinnova per ripartire subito: '+price+'.';label='Rinnova · '+price}
     else{title='Attiva il rinnovo automatico';tx='Il piano è attivo'+(endTxt?' fino al '+endTxt:'')+'. Attiva il rinnovo automatico per non fermarti: '+price+', disdici quando vuoi.';label='Attiva il rinnovo · '+price}

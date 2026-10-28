@@ -3602,3 +3602,16 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 
 .ov.hourly #nwAddrF .nx-lb em{display:inline;color:var(--muted);font-weight:500}
 .ov.hourly #nwAddrF .nx-lb{font-size:.86rem;color:var(--ink)}
+/* Abbonamento: l'elenco delle funzioni sta in una scheda ripiegata */
+#panelOther .stInc{padding:0;overflow:hidden}
+#panelOther .stInc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;font-weight:700;font-size:.98rem;color:var(--ink)}
+#panelOther .stInc>summary::-webkit-details-marker{display:none}
+#panelOther .stInc>summary::after{content:'';width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .2s;flex:none}
+#panelOther .stInc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+#panelOther .stInc .plPage{padding:0 8px 8px}
+#panelOther .stInc .plCols{display:flex;flex-direction:column;gap:6px}
+#panelOther .stInc .pfCard{background:none;border:0;box-shadow:none;padding:10px}
+/* Abbonamento: nome del piano scritto come il logo Prenolia (la "a" e' il robottino) */
+#panelOther .stWm{font-family:'Poppins','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:2.4rem;line-height:1;display:inline-flex;align-items:baseline;align-self:flex-start;letter-spacing:-.02em;color:var(--ink);-webkit-text-stroke:.03em currentColor;paint-order:stroke fill;padding:2px 0 6px}
+#panelOther .stWm img{height:.74em;width:auto;margin:0 .01em 0 .02em;transform:translateY(.08em)}
+
