@@ -201,6 +201,13 @@
     var b = document.body;
     b.classList.toggle("mnB", !!biz && !biz.gym && !window.__liaCampi && !b.classList.contains("campiOn") && !b.classList.contains("gym"));
   }
+  /* tipo di attivita' come lo ha scelto l'attivita' (dentista, parrucchiere, ...): "altro" non dice niente, in quel caso si usa la categoria dell'icona se c'e' */
+  function typeLabel(raw, isGym, k) {
+    if (isGym) return "Palestra";
+    var t = String((raw && raw.business_type) || "").replace(/_/g, " ").trim().toLowerCase();
+    if (t && t !== "altro") return t.charAt(0).toUpperCase() + t.slice(1);
+    return k && k.key !== "altro" ? k.label : "";
+  }
   function syncProfile() {
     grpSync();
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
@@ -232,11 +239,11 @@
         setTimeout(function () { if (window.liaFitBizName) window.liaFitBizName(); }, 0);
       }
     } catch (e) {}
-    var kd = $("mnKind"); if (kd) { kd.textContent = isGym ? "Palestra" : k ? k.label : ""; kd.hidden = !(isGym || k); }
+    var kd = $("mnKind"); if (kd) kd.hidden = true; // il tipo di attivita' sta sotto il nome, al posto dell'indirizzo
     var pn = txt("pfName"), name = (pn && pn !== "La tua attività") ? pn : (raw.name || biz.name || "La tua attività");
     var nm = $("mnBizName"); if (nm) nm.textContent = name;
-    var ad = $("mnBizAddr"), addr = txt("pfAddr") || String(raw.address || "").trim();
-    if (ad) { ad.textContent = addr; ad.hidden = !addr; }
+    var ad = $("mnBizAddr"), tl = typeLabel(raw, isGym, k);
+    if (ad) { ad.textContent = tl; ad.hidden = !tl; }
   }
   /* il nome nell'intestazione resta su una riga: se non entra si rimpicciolisce, poi si accorcia con i puntini */
   function fitBizName() {
