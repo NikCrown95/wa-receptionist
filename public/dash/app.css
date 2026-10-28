@@ -3599,3 +3599,6 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .cd-ml{margin-top:3px;font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
 .cd-md{font-weight:700;color:var(--accent);background:var(--soft,rgba(35,131,145,.12));padding:1px 8px;border-radius:999px;font-size:.74rem}
 .cd-ad{overflow-wrap:anywhere}
+
+.ov.hourly #nwAddrF .nx-lb em{display:inline;color:var(--muted);font-weight:500}
+.ov.hourly #nwAddrF .nx-lb{font-size:.86rem;color:var(--ink)}
