@@ -234,11 +234,13 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
  domicilio:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
  palestra:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+ campi:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.6"/>',
  sanitari:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
  sanitario:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>'};
 var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi nel tuo locale"],
  ["domicilio","Servizi anche a domicilio","Ricevi nel tuo locale e vai dai clienti, nelle città che scegli tu"],
  ["palestra","Palestra","Lezioni di gruppo, personal training e iscritti"],
+ ["campi","Centro sportivo","Campi da tennis, padel, calcio, pallavolo e altri sport, da prenotare a ore"],
  ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Privacy rafforzata, con prenotazione dal calendario"]];
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
@@ -255,15 +257,20 @@ function MESTIERI(){return S.v==="domicilio"?M2:(S.v==="sanitario"?M3:M1)}
 var GYMSUG=Q("Corso di gruppo|60,Personal training 1 a 1|60,Prima consulenza|30");
 var DAYN=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
 var DAYS=["L","M","M","G","V","S","D"];
-var SUBT={tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
-var NAMES={tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
+var SPORTS=[["Tennis","tennis",["Terra battuta","Cemento","Erba sintetica","Erba"],60],["Padel","padel",["Erba sintetica","Cemento"],90],["Calcio","calcio",["Erba sintetica","Erba naturale","Terra"],60],["Pallavolo","altro",["Parquet","Sabbia","Cemento"],60],["Basket","altro",["Parquet","Cemento"],60],["Altro sport","altro",[],60]];
+var CDURS=[30,45,60,75,90,120,150,180];
+function sportInfo(){return SPORTS.filter(function(x){return x[0]===S.sportLbl})[0]||null}
+function courtName(c){var n=c.n.trim();var si=sportInfo();if(si&&si[1]==="calcio"&&c.fmt&&!/\b(a|da)\s?(5|7|11)\b/i.test(n))n+=" · a "+c.fmt;return n}
+var SUBT={sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
+var NAMES={sport:"Sport",campi:"Campi",regole:"Regole",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
-var S={ok1:false,ok2:false,v:null,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
+var S={sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
   if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
   if(v==="palestra")return["tipo","attivita","lezioni","calendario","fine"];
+  if(v==="campi")return["tipo","attivita","sport","campi","orari","regole","fine"];
   if(v==="sanitario")return["tipo","attivita","servizi","orari","privacy","fine"];return["tipo"]}
 function h(t,a,k){var e=document.createElement(t);a=a||{};for(var x in a){if(x==="text")e.textContent=a[x];else if(x==="class")e.className=a[x];else if(x.slice(0,2)==="on")e[x]=a[x];else e.setAttribute(x,a[x])}
   (k||[]).forEach(function(c){if(c)e.appendChild(typeof c==="string"?document.createTextNode(c):c)});return e}
@@ -288,13 +295,17 @@ function chip(t,pressed,fn){var b=h("button",{class:"chip",type:"button","aria-p
 function go(n){S.step=Math.max(0,S.step+n);S.err="";render()}
 function tradeName(){return S.mestiere==="Altro"?S.altro.trim():S.mestiere}
 function validate(k){
-  if(k==="attivita"){if(S.nome.trim().length<2)return"Scrivi il nome della tua attività.";if(S.v!=="palestra"&&S.mestiere==="Altro"&&S.altro.trim().length<2)return"Scrivi che mestiere fai.";
-    if(S.v!=="palestra"&&S.v!=="sanitario"){var tn=tradeName().toLowerCase();if(Object.keys(M3).some(function(x){return x.toLowerCase()===tn}))return"Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»."}}
+  if(k==="attivita"){if(S.nome.trim().length<2)return"Scrivi il nome della tua attività.";if(S.v!=="palestra"&&S.v!=="campi"&&S.mestiere==="Altro"&&S.altro.trim().length<2)return"Scrivi che mestiere fai.";
+    if(S.v!=="palestra"&&S.v!=="campi"&&S.v!=="sanitario"){var tn=tradeName().toLowerCase();if(Object.keys(M3).some(function(x){return x.toLowerCase()===tn}))return"Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»."}}
   if(k==="servizi"||k==="lezioni"){
     if(!S.items.length||S.items.some(function(x){return!x.n.trim()}))return S.items.length?"Dai un nome a ogni voce, oppure rimuovila.":(k==="lezioni"?"Aggiungi almeno una lezione.":"Aggiungi almeno un servizio.");
     if(k==="servizi"&&S.items.some(function(x){var p=String(x.p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
+  if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
+  if(k==="campi"){if(!S.courts.length)return"Aggiungi almeno un campo.";
+    if(S.courts.some(function(c){return!c.n.trim()}))return"Dai un nome a ogni campo, oppure rimuovilo.";
+    if(S.courts.some(function(c){return[c.pm,c.pg].some(function(p){p=String(p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti."}
   if(k==="privacy"&&!(S.ok1&&S.ok2))return"Per continuare spunta entrambe le caselle.";
   if(k==="zona"&&!S.cities.length)return"Aggiungi almeno una città dove vai a domicilio.";
   if(k==="zona"&&!S.items.some(function(x){return x.h}))return"Torna ai servizi e segna almeno un servizio che fai a casa del cliente.";
@@ -342,6 +353,13 @@ function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   if(S.v==="palestra"){base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
     return{name:x.n.trim(),duration_min:x.d,capacity:Number(x.k),category:x.cat,slots:sl}});return base}
+  if(S.v==="campi"){var si3=sportInfo();base.sport=si3?si3[1]:"altro";base.open_to=S.open_to;base.fit=!!S.fit;
+    base.courts=S.courts.map(function(c){var a=String(c.pm).trim().replace(",","."),b=String(c.pg).trim().replace(",",".");if(a===""&&b!=="")a=b;if(b===""&&a!=="")b=a;
+      return{name:courtName(c),surface:c.surf.trim(),indoor:!!c.indoor,slot_min:c.d,price_member_eur:a===""?null:Number(a),price_guest_eur:b===""?null:Number(b)}});
+    base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
+      if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
+      else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
+    return base}
   base.trade=tradeName().toLowerCase();
   base.services=S.items.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:x.d,price_eur:p===""?null:Number(p),at_customer_place:S.v==="domicilio"&&!!x.h}});
   base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
@@ -374,13 +392,13 @@ function render(){
     var st=h("div",{class:"stack"});
     VERT.forEach(function(x){
       var b=h("button",{class:"opt",type:"button","aria-pressed":S.v===x[0]?"true":"false"},[h("span",{class:"ic"},[svg(x[0])]),h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
-      b.onclick=function(){if(S.v!==x[0]){S.v=x[0];S.items=[];S.mestiere=x[0]==="sanitario"?"Dentista":"Parrucchiere";S.altro=""}S.err="";render()};st.appendChild(b)});
+      b.onclick=function(){if(S.v!==x[0]){S.v=x[0];S.items=[];if(x[0]==="campi"&&!S.hoursSet){S.hoursSet=true;S.hours=DAYN.map(function(){return{on:true,from:"08:00",to:"22:00"}})}S.mestiere=x[0]==="sanitario"?"Dentista":"Parrucchiere";S.altro=""}S.err="";render()};st.appendChild(b)});
     v.appendChild(st);
   }
   if(k==="attivita"){
     v.appendChild(head(lab,"Come si chiama la tua attività?","Il nome compare sulla pagina di prenotazione."));
-    var c=h("div",{class:"card"});c.appendChild(field("Nome dell'attività",inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2"),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"})));
-    if(S.v!=="palestra"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Che mestiere fai?"}));var ch=h("div",{class:"chips"});
+    var c=h("div",{class:"card"});c.appendChild(field("Nome dell'attività",inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="campi"?"es. Tennis Club Rossi":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2")),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"})));
+    if(S.v!=="palestra"&&S.v!=="campi"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Che mestiere fai?"}));var ch=h("div",{class:"chips"});
       Object.keys(MESTIERI()).forEach(function(m){ch.appendChild(chip(m,S.mestiere===m,function(){if(S.mestiere!==m){S.mestiere=m;S.items=[]}render()}))});c.appendChild(ch);
       if(S.mestiere==="Altro")c.appendChild(field("Che mestiere fai?",inp(S.altro,"es. Sarta",function(x){S.altro=x},{maxlength:"40"})))}
     c.appendChild(logoRow());
@@ -430,8 +448,55 @@ function render(){
     v.appendChild(cp);
     v.appendChild(h("p",{class:"hint",text:"L'informativa per i pazienti è generata da Prenolia e collegata alla tua pagina di prenotazione. Per le tue esigenze legali, fai rivedere questi documenti da un consulente."}));
   }
+  if(k==="sport"){
+    v.appendChild(head(lab,"Che sport si gioca?","Scegli lo sport dei tuoi campi."));
+    var cs=h("div",{class:"card"}),chs=h("div",{class:"chips"});
+    SPORTS.forEach(function(x){chs.appendChild(chip(x[0],S.sportLbl===x[0],function(){if(S.sportLbl!==x[0]){S.sportLbl=x[0];S.courts=[]}S.err="";render()}))});
+    cs.appendChild(chs);cs.appendChild(h("p",{class:"hint",text:"Tutti i campi del centro sono dello stesso sport. Le regole cambiano un poco: nel tennis e nel padel si gioca in 2 o in 4, nel calcio il campo può essere a 5, a 7 o a 11."}));v.appendChild(cs);
+  }
+  if(k==="campi"){
+    var si=sportInfo(),isC=si&&si[1]==="calcio";
+    v.appendChild(head(lab,"Quali campi hai?",isC?"Aggiungi i tuoi campi e scegli se sono a 5, a 7 o a 11. Superficie e prezzo si possono cambiare in seguito.":"Aggiungi i tuoi campi. Superficie e prezzo si possono cambiare in seguito."));
+    var addC=function(f){var n=S.courts.length+1;S.courts.push({n:"Campo "+n,fmt:f||"5",surf:si&&si[2][0]&&S.courts.length===0?si[2][0]:(S.courts.length?S.courts[S.courts.length-1].surf:""),indoor:S.courts.length?S.courts[S.courts.length-1].indoor:false,d:si?si[3]:60,pm:"",pg:""});S.err="";render()};
+    var sb3=h("div",{class:"sugs"}),ch3=h("div",{class:"chips"});
+    if(isC){[["5","Calcetto a 5"],["7","Calcio a 7"],["11","Calcio a 11"]].forEach(function(x){ch3.appendChild(chip("+ "+x[1],false,function(){addC(x[0])}))})}
+    else ch3.appendChild(chip("+ Aggiungi un campo",false,function(){addC()}));
+    sb3.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));sb3.appendChild(ch3);v.appendChild(sb3);
+    if(!S.courts.length)v.appendChild(h("p",{class:"empty",text:"Nessun campo ancora. Tocca un pulsante qui sopra."}));
+    S.courts.forEach(function(c,idx){
+      var cd=h("div",{class:"card"});
+      var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
+      top.appendChild(ni);top.appendChild(h("button",{class:"chip",type:"button",text:"Duplica",onclick:function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);render()}}));
+      top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);render()}}));
+      cd.appendChild(top);
+      if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
+      cd.appendChild(h("label",{text:"Superficie (facoltativa)"}));
+      if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});cd.appendChild(sc)}
+      var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Terra battuta",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};cd.appendChild(sfi);
+      var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));cd.appendChild(lc);
+      var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
+      cd.appendChild(field("Durata di ogni prenotazione",dsel));
+      var pr=h("div",{class:"times"});
+      var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
+      var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
+      pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
+      cd.appendChild(h("label",{text:"Prezzo per giocatore all'ora, soci e non soci (facoltativo)"}));cd.appendChild(pr);
+      v.appendChild(cd)});
+    if(S.courts.length)v.appendChild(h("p",{class:"hint",text:"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro."}));
+  }
+  if(k==="regole"){
+    var si2=sportInfo();
+    v.appendChild(head(lab,"Chi può prenotare?","Puoi cambiarlo in ogni momento da Impostazioni."));
+    var st2=h("div",{class:"stack"});
+    [["all","Soci e non soci","Chiunque può prenotare un campo"],["members","Solo i soci","Prenota chi gioca con almeno un socio"]].forEach(function(x){
+      var b=h("button",{class:"opt",type:"button","aria-pressed":S.open_to===x[0]?"true":"false"},[h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
+      b.onclick=function(){S.open_to=x[0];render()};st2.appendChild(b)});
+    v.appendChild(st2);
+    if(si2&&(si2[1]==="tennis"||si2[1]==="padel")){var cf=h("div",{class:"card"}),lf=h("label",{class:"tgl long"}),cbf=h("input",{type:"checkbox"});cbf.checked=S.fit;cbf.onchange=function(){S.fit=cbf.checked};lf.appendChild(cbf);lf.appendChild(h("span",{text:"Il centro è affiliato FIT: ricorda ai giocatori di portare la tessera"}));cf.appendChild(lf);v.appendChild(cf)}
+    v.appendChild(h("p",{class:"hint",text:"Ai giocatori ricordiamo di portare il certificato medico valido: il controllo lo fai tu di persona al campo, Prenolia non lo registra. Puoi cambiare questa regola da Impostazioni."}));
+  }
   if(k==="orari"){
-    v.appendChild(head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare."));
+    v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare."));
     var c4=h("div",{class:"card"});
     S.hours.forEach(function(d,i){var r=h("div",{class:"day"});var l=h("label",{class:"tgl"});l.style.margin="0";var cb=h("input",{type:"checkbox"});cb.checked=d.on;
       l.appendChild(cb);l.appendChild(document.createTextNode(DAYN[i]));
@@ -447,12 +512,12 @@ function render(){
     pauseT.appendChild(pauseA);pauseT.appendChild(h("span",{text:"–"}));pauseT.appendChild(pauseB);pauseRow.appendChild(pauseLbl);pauseRow.appendChild(pauseT);c4.appendChild(pauseRow);
     v.appendChild(c4);
     v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni di apertura. Orari, pause, chiusure e ferie si possono cambiare in ogni momento da Disponibilità, anche per ogni collaboratore."}));
-    v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: di base i clienti prenotano fino a 3 mesi prima e fino a 15 minuti prima dell'orario, e possono annullare fino a 2 ore prima. Le cambi quando vuoi da Impostazioni."]));
+    if(S.v!=="campi")v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: di base i clienti prenotano fino a 3 mesi prima e fino a 15 minuti prima dell'orario, e possono annullare fino a 2 ore prima. Le cambi quando vuoi da Impostazioni."]));
   }
   if(k==="fine"){
     v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
     var vn=VERT.filter(function(x){return x[0]===S.v})[0][1];
-    var hero=h("div",{class:"hero"},[h("span",{class:"ic"},[svg(S.v)]),h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:vn+" · "+tradeName()})])]);
+    var hero=h("div",{class:"hero"},[h("span",{class:"ic"},[svg(S.v)]),h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:(S.v==="campi"?vn+" · "+S.sportLbl:vn+" · "+tradeName())})])]);
     v.appendChild(hero);
     function sec(title,stepName,body,count){
       var idx=flow().indexOf(stepName);
@@ -460,7 +525,17 @@ function render(){
       var eb=h("button",{class:"edit",type:"button",text:"Modifica"});eb.onclick=function(){S.step=idx;S.err="";render()};hd.appendChild(eb);
       return h("section",{class:"rcard"},[hd,body])}
     var fmtMin=function(m){return m>=60&&m%60===0?(m/60)+" h":m+" min"};
-    if(S.v==="palestra"){
+    if(S.v==="campi"){
+      var cb4=h("div",{class:"rows"});
+      S.courts.forEach(function(c){var p1=String(c.pm).trim().replace(",","."),p2=String(c.pg).trim().replace(",",".");
+        var pt=(p1===""&&p2==="")?"prezzo da definire":(p1!==""&&p2!==""&&p1!==p2?p1+" € soci · "+p2+" € non soci":(p1||p2)+" €");
+        cb4.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:courtName(c)}),h("small",{text:[c.surf.trim(),c.indoor?"Coperto":"Scoperto"].filter(Boolean).join(" · ")})]),h("span",{class:"rv"+(pt==="prezzo da definire"?" dim":""),text:fmtMin(c.d)+" · "+pt})]))});
+      v.appendChild(sec("Campi","campi",cb4,S.courts.length));
+      var wk2=h("div",{class:"week"});
+      S.hours.forEach(function(d,i){wk2.appendChild(h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),h("span",{class:"tm",text:d.on?d.from:"–"}),h("span",{class:"tm e",text:d.on?d.to:"chiuso"})]))});
+      v.appendChild(sec("Orari di apertura","orari",S.pause.on?h("div",null,[wk2,h("p",{class:"hint",text:"Pausa ogni giorno dalle "+S.pause.from+" alle "+S.pause.to+"."})]):wk2));
+      v.appendChild(sec("Chi può prenotare","regole",h("div",{class:"rows"},[h("div",{class:"rr"},[h("div",null,[h("b",{text:S.open_to==="members"?"Solo i soci":"Soci e non soci"}),S.fit?h("small",{text:"Tessera FIT richiesta"}):null])])])));
+    } else if(S.v==="palestra"){
       var lb=h("div",{class:"rows"});
       S.items.forEach(function(x){lb.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" · ")+" alle "+x.time})]),h("span",{class:"rv",text:fmtMin(x.d)+" · "+x.k+(Number(x.k)===1?" posto":" posti")})]))});
       v.appendChild(sec("Lezioni","lezioni",lb,S.items.length));
@@ -478,8 +553,8 @@ function render(){
     }
     var nx=h("div",{class:"next"},[h("b",{text:"Cosa succede dopo"}),
       h("ul",null,[h("li",{text:"La prova gratuita dura 14 giorni."}),
-        h("li",{text:S.v==="palestra"?"La pagina di prenotazione è già attiva: possono prenotare solo gli iscritti che registri tu.":"La pagina di prenotazione è già attiva. Dal menu dell'agenda puoi condividere il link o mostrare il QR code."}),
-        h("li",{text:S.v==="palestra"?"Lezioni e abbonamenti si modificano quando vuoi dall'agenda.":"Servizi, orari e prezzi si modificano quando vuoi da Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I pazienti vedono il consenso privacy prima di prenotare."})]:[]))]);
+        h("li",{text:S.v==="campi"?"La pagina di prenotazione è già attiva: i clienti scelgono campo, giorno e ora.":S.v==="palestra"?"La pagina di prenotazione è già attiva: possono prenotare solo gli iscritti che registri tu.":"La pagina di prenotazione è già attiva. Dal menu dell'agenda puoi condividere il link o mostrare il QR code."}),
+        h("li",{text:S.v==="campi"?"Campi, orari e prezzi si modificano quando vuoi dall'agenda.":S.v==="palestra"?"Lezioni e abbonamenti si modificano quando vuoi dall'agenda.":"Servizi, orari e prezzi si modificano quando vuoi da Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I pazienti vedono il consenso privacy prima di prenotare."})]:[]))]);
     v.appendChild(nx);
   }
   if(S.err)v.appendChild(h("div",{class:"err",role:"alert",text:S.err}));

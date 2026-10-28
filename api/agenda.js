@@ -646,13 +646,13 @@ module.exports = async (req, res) => {
       if (action === "onboarding_save") {
         if (biz.onboarded_at) return res.status(409).json({ error: "La configurazione è già completata." });
         const kind = String(body.kind || "");
-        if (!["persona", "domicilio", "palestra", "sanitario"].includes(kind)) return res.status(400).json({ error: "Scegli il tipo di attività." });
+        if (!["persona", "domicilio", "palestra", "sanitario", "campi"].includes(kind)) return res.status(400).json({ error: "Scegli il tipo di attività." });
         let obLogo = null;
         if (body.logo) { obLogo = logoLib.parseLogo(body.logo); if (obLogo.error) return res.status(400).json({ error: obLogo.error }); }
         const bname = String(body.name || "").trim().replace(/\s+/g, " ");
         if (bname.length < 2 || bname.length > 80) return res.status(400).json({ error: "Scrivi il nome della tua attività." });
         const HM = /^([01]\d|2[0-3]):[0-5]\d$/;
-        const btype = kind === "palestra" ? "palestra" : (String(body.trade || "").trim().toLowerCase().replace(/[^a-z0-9\u00e0\u00e8\u00e9\u00ec\u00f2\u00f9' -]/g, "").slice(0, 40) || "altro");
+        const btype = kind === "palestra" ? "palestra" : kind === "campi" ? "centro_sportivo" : (String(body.trade || "").trim().toLowerCase().replace(/[^a-z0-9\u00e0\u00e8\u00e9\u00ec\u00f2\u00f9' -]/g, "").slice(0, 40) || "altro");
         // Chi non ha scelto "Studi sanitari" non può finire con un tipo sanitario (scrivendolo a mano in "Altro"): salterebbe l'Accordo.
         if (kind !== "sanitario" && require("../lib/verticals.js").isMedical(btype)) return res.status(400).json({ error: "Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»." });
         const patch = { name: bname, business_type: btype };
@@ -668,6 +668,37 @@ module.exports = async (req, res) => {
           if (!acc2.ok) return res.status(500).json({ error: "Non siamo riusciti a registrare l'accettazione. Riprova." });
         }
 
+        if (kind === "campi") {
+          // Centro sportivo: sport, campi, orari e regole stanno nelle tabelle dei campi (lib/courts.js)
+          const cl2 = require("../lib/courts.js");
+          const sport = ["tennis", "padel", "calcio", "altro"].includes(body.sport) ? body.sport : null;
+          if (!sport) return res.status(400).json({ error: "Scegli lo sport." });
+          const cts = Array.isArray(body.courts) ? body.courts : [];
+          if (!cts.length || cts.length > 30) return res.status(400).json({ error: "Aggiungi almeno un campo." });
+          const hrsC = {};
+          for (const h of (Array.isArray(body.hours) ? body.hours : []).slice(0, 28)) {
+            const wd = Number(h && h.weekday), op = String((h && h.opens) || ""), cs = String((h && h.closes) || "");
+            if (!Number.isInteger(wd) || wd < 1 || wd > 7 || !HM.test(op) || !HM.test(cs) || op >= cs) return res.status(400).json({ error: "Controlla gli orari: l'apertura deve venire prima della chiusura." });
+            (hrsC[String(wd)] = hrsC[String(wd)] || []).push([op, cs]);
+          }
+          if (!Object.keys(hrsC).length) return res.status(400).json({ error: "Scegli almeno un giorno di apertura." });
+          const p3 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
+          if (!p3.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
+          const rules0 = Object.assign({}, biz.booking_rules || {}, { courts: Object.assign({}, (biz.booking_rules && biz.booking_rules.courts) || {}, { sport }) });
+          const pr0 = await sb("PATCH", "businesses?id=eq." + biz.id, { booking_rules: rules0 }, "return=minimal");
+          if (!pr0.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare le regole. Riprova." });
+          biz.booking_rules = rules0;
+          const rr0 = await cl2.saveRules(sb, biz, { open_to: body.open_to === "members" ? "members" : "all", fit: body.fit === true && (sport === "tennis" || sport === "padel"), medical: "all" });
+          if (rr0.status !== 200) return res.status(rr0.status).json(rr0.body);
+          await sb("DELETE", "courts?business_id=eq." + biz.id, null, "return=minimal");
+          for (const c of cts) {
+            const rc = await cl2.saveCourt(sb, biz, { name: c && c.name, surface: c && c.surface, indoor: !!(c && c.indoor), slot_min: c && c.slot_min, price_member_eur: c && c.price_member_eur, price_guest_eur: c && c.price_guest_eur, hours: hrsC });
+            if (rc.status !== 200) return res.status(rc.status).json(rc.body);
+          }
+          // Come per la palestra: la "risorsa" creata alla registrazione non serve
+          await sb("DELETE", "opening_hours?resource_id=in.(" + biz.resources.map((r) => r.id).filter(Boolean).join(",") + ")", null, "return=minimal").catch(() => {});
+          await sb("DELETE", "resources?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
+        } else
         if (kind === "palestra") {
           const courses = Array.isArray(body.courses) ? body.courses : [];
           if (!courses.length || courses.length > 20) return res.status(400).json({ error: "Aggiungi almeno una lezione." });
