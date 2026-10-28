@@ -411,6 +411,7 @@ function liaPosterTpl(theme){if(!liaPosterTplCache[theme])liaPosterTplCache[them
 function liaPosterCanvas(o){
   /* La locandina e' l'immagine del modello (1024 x 1536): qui si sostituiscono solo il nome e il QR. */
   var dk=o.theme==='dark',tpl=o.tpl;
+  if(o.kind==='med')o.lia=false; /* studi sanitari: niente Lia sulla locandina */
   var cw=o.width||LIA_POSTER_W,ch=Math.round(cw*LIA_POSTER_H/LIA_POSTER_W),S=cw/1024;
   var cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
   var c=cv.getContext('2d');
@@ -422,6 +423,15 @@ function liaPosterCanvas(o){
   if(o.lia===false){
     c.fillStyle=BG;c.fillRect(80,1016,864,346);
     c.drawImage(tpl,140,1022,270,330,377,1022,270,330);
+  }
+  /* didascalia sotto "Calendario": campi e palestre non scelgono un servizio */
+  var cap=o.kind==='campi'?['Scegli campo,','giorno e ora.']:o.kind==='palestra'?['Scegli il corso,','giorno e ora.']:null;
+  if(cap){
+    var ccx=o.lia===false?511:274;
+    c.fillStyle=BG;c.fillRect(ccx-135,1280,270,78);
+    c.fillStyle=dk?'#FFFFFF':'#000000';c.textAlign='center';c.textBaseline='alphabetic';
+    c.font='500 34px "Plus Jakarta Sans",Manrope,-apple-system,"Helvetica Neue",Arial,sans-serif';
+    c.fillText(cap[0],ccx,1311);c.fillText(cap[1],ccx,1352);
   }
   /* nome dell'attivita' */
   c.fillStyle=BG;c.fillRect(60,38,904,64);
@@ -573,11 +583,13 @@ function pfRenderServices(box,list){
   if(!n)box.appendChild(pfMk('p','pfHint','Nessun servizio configurato. Aggiungili da \u201cModifica\u201d e i clienti potranno prenotarli.'));
 }
 /* locandina: anteprima + download */
-window.liaPoster={tpl:liaPosterTpl,canvas:liaPosterCanvas,pdf:liaPosterPdf,qr:liaQr,fonts:liaPosterFonts};
+function liaPosterKind(b){var t=String((b&&b.business_type)||'').toLowerCase().trim();if(['dentista','studio medico','fisioterapista','osteopata','nutrizionista','psicologo','podologo','logopedista'].indexOf(t)>=0||window.__LIA_MED)return 'med';return t==='palestra'?'palestra':(t==='centro_sportivo'||window.__liaCampi)?'campi':''}
+window.liaPoster={kind:liaPosterKind,tpl:liaPosterTpl,canvas:liaPosterCanvas,pdf:liaPosterPdf,qr:liaQr,fonts:liaPosterFonts};
 function pfRenderPoster(box,b,opts){
   opts=opts||{};box.innerHTML='';
   var link=b.public_link||'';
   var name=b.name||'La tua attività';
+  if(liaPosterKind(b)==='campi'){var ph=box.parentNode&&box.parentNode.querySelector('h3');if(ph)ph.textContent='Locandina'}
   if(!link){box.appendChild(pfMk('p','pfHint','La locandina sarà disponibile appena la tua pagina di prenotazione è attiva.'));return}
   var themes=opts.themes||['light','dark'],cur=opts.initial||'light';
   var wrap=pfMk('div','pstWrap');
@@ -588,12 +600,12 @@ function pfRenderPoster(box,b,opts){
   var btns={};
   themes.forEach(function(t){var x=pfMk('button',null,labels[t]);x.type='button';x.setAttribute('aria-pressed',t===cur?'true':'false');x.onclick=function(){cur=t;paint()};btns[t]=x;seg.appendChild(x)});
   side.appendChild(seg);
-  side.appendChild(pfMk('p','pstNote','Formato 10 \u00d7 15 cm, pronta da stampare e attaccare in vetrina. Il QR porta alla pagina di prenotazione di '+name+'.'));
+  side.appendChild(pfMk('p','pstNote','Formato 10 \u00d7 15 cm, pronta da stampare. Il QR porta alla pagina di prenotazione di '+name+'.'));
   var dl=pfMk('button','pfBtn primary pstDl');dl.type='button';dl.innerHTML=plSvg('print',18,2)+'<span>Scarica la locandina (PDF)</span>';side.appendChild(dl);
   var msg=pfMk('p','pstMsg');msg.setAttribute('role','status');side.appendChild(msg);
   wrap.appendChild(side);box.appendChild(wrap);
   var M=liaQr(window.liaQrLink(link,'vetrina')),busy=false;
-  var premium=(b.plan_name==='Base+Lia')&&b.business_type!=='palestra'&&!window.__LIA_MED;function build(t,width){var dark=(t!=='light');return liaPosterFonts().then(function(){return liaPosterTpl(dark?'dark':'light')}).then(function(tpl){if(!tpl)throw new Error('tpl');return liaPosterCanvas({theme:dark?'dark':'light',name:name,link:link,M:M,tpl:tpl,lia:premium,width:width})})}
+  var premium=(b.plan_name==='Base+Lia')&&b.business_type!=='palestra'&&!window.__LIA_MED;function build(t,width){var dark=(t!=='light');return liaPosterFonts().then(function(){return liaPosterTpl(dark?'dark':'light')}).then(function(tpl){if(!tpl)throw new Error('tpl');return liaPosterCanvas({theme:dark?'dark':'light',name:name,link:link,M:M,tpl:tpl,lia:premium,kind:liaPosterKind(b),width:width})})}
   function paint(){
     themes.forEach(function(t){btns[t].setAttribute('aria-pressed',t===cur?'true':'false')});
     var mine=cur;build(cur,Math.round(Math.min(360,(box.clientWidth||360)*0.5)*(window.devicePixelRatio||1))).then(function(cv){if(mine!==cur)return;cvHold.innerHTML='';cvHold.appendChild(cv)}).catch(function(){cvHold.textContent='Anteprima non disponibile'});

@@ -186,7 +186,7 @@
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
-      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabPoster", "Da stampare per la vetrina"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabPoster", isCourts() ? "Da stampare" : "Da stampare per la vetrina"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
     [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
@@ -309,7 +309,7 @@
       '<div class="mnActs">' +
       '<button type="button" class="mnAct" data-a="wa"><i class="wa">' + I.wa + '</i><span class="mnT">Invia su WhatsApp</span></button>' +
       '<button type="button" class="mnAct" data-a="dl" id="mnDl"><i>' + I.down + '</i><span class="mnT">Scarica il QR</span></button>' +
-      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">Locandina per la vetrina<small>PDF pronto da stampare</small></span>' + I.chev + "</button>" +
+      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '<small>PDF pronto da stampare</small></span>' + I.chev + "</button>" +
       "</div>" +
       '<p class="mnMsg" role="status"></p></div>';
     document.body.appendChild(sheet);
@@ -333,13 +333,14 @@
     var p = $("menuTabProfile"); if (p) p.click();
     setTimeout(function () { var t = $("pfPoster") || $("panelProfile"); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 280);
   }
+  function isCourts() { var b = (biz && biz.raw) || {}; return !!window.__liaCampi || String(b.business_type || "") === "centro_sportivo"; }
   function pstBuild(t, width) {
     var b = (biz && biz.raw) || {}, link = b.public_link || "", P = window.liaPoster;
     var M = P.qr(window.liaQrLink ? window.liaQrLink(link, "vetrina") : link);
     var premium = (b.plan_name === "Base+Lia") && b.business_type !== "palestra" && !window.__LIA_MED;
     return P.fonts().then(function () { return P.tpl(t); }).then(function (tpl) {
       if (!tpl) throw new Error("tpl");
-      return P.canvas({ theme: t, name: pstName, link: link, M: M, tpl: tpl, lia: premium, width: width });
+      return P.canvas({ theme: t, name: pstName, link: link, M: M, tpl: tpl, lia: premium, kind: P.kind ? P.kind(b) : "", width: width });
     });
   }
   function pstPaint() {
@@ -372,7 +373,7 @@
     pst.setAttribute("role", "dialog"); pst.setAttribute("aria-modal", "true"); pst.setAttribute("aria-labelledby", "mnPstT");
     pst.innerHTML =
       '<button type="button" class="mnScrim" data-a="x" aria-label="Chiudi"></button>' +
-      '<div class="mnSheet mnPst"><div class="mnSH"><div><span class="mnQrKick" id="mnPstK"></span><h2 id="mnPstT">Locandina per la vetrina</h2></div>' +
+      '<div class="mnSheet mnPst"><div class="mnSH"><div><span class="mnQrKick" id="mnPstK"></span><h2 id="mnPstT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '</h2></div>' +
       '<button type="button" class="mnClose" data-a="x" aria-label="Chiudi">' + I.x + "</button></div>" +
       '<div class="mnPstCv" id="mnPstCv"></div>' +
       '<div class="mnSeg" role="group" aria-label="Versione"><button type="button" data-t="dark" aria-pressed="true">Scura</button><button type="button" data-t="light" aria-pressed="false">Chiara</button></div>' +
