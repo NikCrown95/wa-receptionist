@@ -3574,3 +3574,25 @@ body.lia-sec-cal.lia-week #calSubApp .controls > .seg{order:4!important}
 #calSubApp #sheet .ap-cli{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,var(--card)),var(--card) 75%);border-color:color-mix(in srgb,var(--c) 40%,var(--line2))}
 #calSubApp #sheet .ap-cli .av{background:var(--c);border:0;color:#0b1418}
 #calSubApp #sheet .ap-cli .nm{color:var(--c);font-size:1.15rem;font-weight:800}
+
+/* Notifiche piu' compatte (ott 2026): tessera data, righe e testi ridotti */
+@media(min-width:700px){#notifPanel{width:372px}}
+#notifPanel .np-head{padding:8px 10px 0 18px}
+#notifPanel .np-list{padding:0 10px 10px}
+#notifPanel .np-grp{padding:5px 4px 5px;font-size:.7rem}
+#notifPanel .np-it.np-v{grid-template-columns:44px minmax(0,1fr);gap:11px;padding:7px 11px;margin-bottom:5px;border-radius:14px}
+#notifPanel .np-dt{width:44px;border-radius:11px}
+#notifPanel .np-dt i{font-size:.54rem;padding:2px 0}
+#notifPanel .np-dt b{font-size:1.12rem;padding-top:3px}
+#notifPanel .np-dt s{font-size:.56rem;padding-bottom:3px}
+#notifPanel .np-dt.np-dti{height:44px}
+#notifPanel .np-dt.np-dti svg{width:20px;height:20px}
+#notifPanel .np-r1 strong{font-size:.92rem}
+#notifPanel .np-r1 em{font-size:.68rem}
+#notifPanel .np-sv{font-size:.78rem;margin-top:1px;line-height:1.3}
+#notifPanel .np-lb{font-size:.6rem;padding:1px 8px;margin-top:3px;gap:5px}
+#notifPanel .np-lb u{width:6px;height:6px}
+#notifToast .np-tdt{width:38px}
+#notifToast .np-ic{width:34px;height:34px}
+body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
+@media(min-width:700px){#notifToast{width:340px}}
