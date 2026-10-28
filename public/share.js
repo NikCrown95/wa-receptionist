@@ -179,6 +179,10 @@
     else { menu.appendChild(g); }
     var oi = other.querySelector("svg");
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
+    /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
+    [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+    [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
     if (pt && window.MutationObserver) new MutationObserver(markCur).observe(pt, { attributes: true, attributeFilter: ["aria-current"] });
@@ -192,7 +196,13 @@
   }
   /* logo dell'attivita' al posto dell'icona (per slug), come per palestra e centro estetico */
   var SKINS = { style2: "/brand/style2.jpg" };
+  /* il menu raggruppato vale solo per le attivita' normali: palestre e circoli sportivi hanno voci e nomi diversi */
+  function grpSync() {
+    var b = document.body;
+    b.classList.toggle("mnB", !!biz && !biz.gym && !window.__liaCampi && !b.classList.contains("campiOn") && !b.classList.contains("gym"));
+  }
   function syncProfile() {
+    grpSync();
     var av = $("mnAv"), card = $("mnShareCard"); if (!av || !card || !biz) return;
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
     var k = window.liaHeroKindOf ? window.liaHeroKindOf(window.__liaCampi ? { business_type: "centro_sportivo", name: "circolo tennis" } : raw) : null;
@@ -258,6 +268,7 @@
   setTimeout(placeSeg, 300); setTimeout(placeSeg, 1200);
   window.liaMenuSync = syncProfile;
   function paintMenu() {
+    grpSync();
     var c = $("mnShareCard");
     var avb = $("menuTabAvail"); if (avb) avb.style.display = biz && biz.gym ? "none" : "";
     if (c) {
