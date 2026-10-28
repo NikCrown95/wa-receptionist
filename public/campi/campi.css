@@ -611,3 +611,5 @@ body.campiOn #view-month{display:none!important}
 .cpx{grid-template-columns:minmax(0,1fr)}
 .cpx>*,.cpx .cp-list,.cpx .cp-list>*,.cpx .cp-pbody,.cpx .cp-pbody>*,.cpx .cp-ptop{min-width:0}
 .cpx .cp-list{grid-template-columns:minmax(0,1fr)}
+/* Disponibilità del circolo: avviso sulle prenotazioni già fissate nel periodo chiuso */
+.avClt small.avWarnTx{color:var(--danger);font-weight:700}

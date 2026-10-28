@@ -390,7 +390,7 @@
       g[1].forEach(function (k) {
         var p = byK[k], b = el('button', 'stRow'); b.type = 'button'; b.setAttribute('data-cx', k);
         b.innerHTML = '<span class="stIc ' + p[1] + '">' + svg(p[2]) + '</span><span class="stTx"><b>' + p[3] + '</b><small>' + p[4] + '</small></span><span class="stCh" aria-hidden="true">›</span>';
-        b.addEventListener('click', function () { openPane(k); }); list.appendChild(b); rowOf[k] = b;
+        b.addEventListener('click', function () { if ((k === 'hours' || k === 'closures') && window.liaAvailOpen) window.liaAvailOpen(k === 'hours' ? 'club' : 'chi'); else openPane(k); }); list.appendChild(b); rowOf[k] = b;
         var pane = el('section', 'stPage cx-page'); pane.setAttribute('data-st', 'cx-' + k);
         var hd = el('header', 'stPh'), bk = el('button', 'stBack'); bk.type = 'button'; bk.innerHTML = '<span aria-hidden="true">‹</span> Impostazioni';
         bk.addEventListener('click', function () { sh.classList.remove('inPage'); var wr = document.querySelector('#panelOther .otherWrap'); if (wr) wr.scrollTop = 0; });
@@ -407,7 +407,6 @@
     if (bp) bp.classList.add('cx-native');
     // cliccando una voce normale, le mie pagine si spengono
     menu.addEventListener('click', function (e) { var r = e.target.closest && e.target.closest('.stRow'); if (r && !r.hasAttribute('data-cx')) { unmark(); label('Impostazioni'); } }, true);
-    window.liaAvailOpen = function () { var m = document.getElementById('menuTabOther'); if (m) m.click(); setTimeout(function () { openPane('closures'); }, 80); };
     var orig = window.liaSettingsOpen;
     if (typeof orig === 'function' && !orig.__cx) { var w2 = function (k) { if (String(k).indexOf('cx-') !== 0) unmark(); return orig(k); }; w2.__cx = 1; window.liaSettingsOpen = w2; }
     ph.remove(); load().catch(function () { });
