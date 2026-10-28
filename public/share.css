@@ -313,16 +313,26 @@ body.mnOn.mnB #burgerMenu > .logoutBtn{gap:13px;padding:0 10px;min-height:52px}
 body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:36px;height:36px;padding:8px;box-sizing:border-box;border-radius:10px;border:1px solid color-mix(in srgb,var(--danger) 40%,var(--line2));background:transparent}
 
 /* telefono: il menu raggruppato entra per intero nello schermo, senza scorrere.
-   Le 8 righe (7 voci piu' Esci) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
+   Le 9 righe (8 voci piu' Esci) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
    Sotto l'altezza minima il menu torna a scorrere. */
 @media (max-width:699px){
-  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(44px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/8),56px);min-height:clamp(44px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/8),56px)}
+  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(40px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),56px);min-height:clamp(40px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),56px)}
 }
 @media (max-width:699px) and (max-height:719px){
-  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(38px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/8),50px);min-height:clamp(38px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/8),50px)}
+  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(34px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),50px);min-height:clamp(34px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),50px)}
   body.mnOn.mnB #burgerMenu > button[data-sub]::after{display:none}
   body.mnOn.mnB #burgerMenu > button[data-sub]{grid-template-columns:32px minmax(0,1fr) auto}
   body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-row:1;width:32px;height:32px;padding:7px}
   body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-row:1}
   body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:32px;height:32px;padding:7px}
 }
+
+/* foglio "Locandina per la vetrina" (si apre dal menu, come il QR) */
+.mnPst .mnPstCv{margin:14px auto 0;display:grid;place-items:center;min-height:120px;font-size:.85rem;color:var(--muted)}
+.mnPst .mnPstCv canvas{display:block;height:min(40dvh,380px);width:auto;max-width:100%;aspect-ratio:2/3;border-radius:10px;border:1px solid var(--line2);box-shadow:0 14px 30px -12px rgba(0,0,0,.6)}
+.mnPst .mnSeg{margin-top:14px}
+.mnPst .mnPstNote{margin:10px 2px 0;font-size:.78rem;line-height:1.4;color:var(--muted);text-align:center}
+.mnPst .mnPstGo{flex:none;margin-top:12px;min-height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent,#fff);font:inherit;font-weight:800;font-size:.95rem;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer}
+.mnPst .mnPstGo:disabled{opacity:.6;cursor:default}
+.mnPst .mnPstMsg{margin:8px 0 0;min-height:1.1em;font-size:.8rem;text-align:center;color:var(--accent-ink);font-weight:650}
+.mnQrOnly.mnPstL .mnSheet{overflow-y:auto}

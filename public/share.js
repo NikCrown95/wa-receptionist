@@ -173,6 +173,11 @@
     av.type = "button"; av.id = "menuTabAvail"; av.setAttribute("role", "menuitem"); av.setAttribute("aria-current", "false");
     av.addEventListener("click", function () { closeMenu(); if (window.liaAvailOpen) window.liaAvailOpen(); });
     menu.insertBefore(av, other);
+    /* Locandina per la vetrina: voce propria nel menu, apre Scheda attivita' sulla locandina */
+    var po = mk("button", "", I.print + "Locandina");
+    po.type = "button"; po.id = "menuTabPoster"; po.setAttribute("role", "menuitem"); po.setAttribute("aria-current", "false");
+    po.addEventListener("click", openPoster);
+    menu.insertBefore(po, other);
     /* ordine: ... Impostazioni, Come si usa, separatore, Esci */
     var sep = mk("div", "mnSep");
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
@@ -181,7 +186,7 @@
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
-      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabPoster", "Da stampare per la vetrina"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
     [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
@@ -322,6 +327,82 @@
       else if (a === "poster") { closeSheet(); var p = $("menuTabProfile"); if (p) p.click(); setTimeout(function () { var t = $("pfPoster") || $("panelProfile"); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 280); }
     });
   }
+  /* ---------- foglio "Locandina per la vetrina": prima la scura, poi si puo' scegliere la chiara e scaricare il PDF da stampare ---------- */
+  var pst = null, pstTheme = "dark", pstBusy = false, pstName = "";
+  function posterPage() {
+    var p = $("menuTabProfile"); if (p) p.click();
+    setTimeout(function () { var t = $("pfPoster") || $("panelProfile"); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 280);
+  }
+  function pstBuild(t, width) {
+    var b = (biz && biz.raw) || {}, link = b.public_link || "", P = window.liaPoster;
+    var M = P.qr(window.liaQrLink ? window.liaQrLink(link, "vetrina") : link);
+    var premium = (b.plan_name === "Base+Lia") && b.business_type !== "palestra" && !window.__LIA_MED;
+    return P.fonts().then(function () { return P.tpl(t); }).then(function (tpl) {
+      if (!tpl) throw new Error("tpl");
+      return P.canvas({ theme: t, name: pstName, link: link, M: M, tpl: tpl, lia: premium, width: width });
+    });
+  }
+  function pstPaint() {
+    var mine = pstTheme, hold = $("mnPstCv");
+    pst.querySelectorAll(".mnSeg button").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-t") === mine ? "true" : "false"); });
+    pstBuild(mine, 640).then(function (cv) { if (mine !== pstTheme) return; hold.innerHTML = ""; hold.appendChild(cv); })
+      .catch(function () { if (mine === pstTheme) hold.textContent = "Anteprima non disponibile"; });
+  }
+  function pstDownload() {
+    if (pstBusy) return;
+    pstBusy = true;
+    var go = pst.querySelector(".mnPstGo"), msg = pst.querySelector(".mnPstMsg"), t = pstTheme;
+    go.disabled = true; msg.textContent = "Sto preparando la locandina\u2026";
+    pstBuild(t).then(function (cv) { return window.liaPoster.pdf(cv); }).then(function (blob) {
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+      a.download = "locandina-" + slug(pstName) + "-" + (t === "light" ? "chiara" : "scura") + ".pdf";
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      msg.textContent = "Fatto. Controlla i download.";
+    }).catch(function () { msg.textContent = "Non sono riuscito a creare la locandina. Riprova."; })
+      .then(function () { pstBusy = false; go.disabled = false; setTimeout(function () { if (msg.textContent.indexOf("Fatto") === 0) msg.textContent = ""; }, 5000); });
+  }
+  function closePoster() {
+    if (!pst || pst.hidden) return;
+    pst.hidden = true;
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+  }
+  function buildPoster() {
+    pst = mk("div", "mnLayer mnQrOnly mnPstL");
+    pst.id = "mnPosterSheet"; pst.hidden = true;
+    pst.setAttribute("role", "dialog"); pst.setAttribute("aria-modal", "true"); pst.setAttribute("aria-labelledby", "mnPstT");
+    pst.innerHTML =
+      '<button type="button" class="mnScrim" data-a="x" aria-label="Chiudi"></button>' +
+      '<div class="mnSheet mnPst"><div class="mnSH"><div><span class="mnQrKick" id="mnPstK"></span><h2 id="mnPstT">Locandina per la vetrina</h2></div>' +
+      '<button type="button" class="mnClose" data-a="x" aria-label="Chiudi">' + I.x + "</button></div>" +
+      '<div class="mnPstCv" id="mnPstCv"></div>' +
+      '<div class="mnSeg" role="group" aria-label="Versione"><button type="button" data-t="dark" aria-pressed="true">Scura</button><button type="button" data-t="light" aria-pressed="false">Chiara</button></div>' +
+      '<p class="mnPstNote">Formato 10 \u00d7 15 cm, pronta da stampare. Il QR porta alla tua pagina di prenotazione.</p>' +
+      '<button type="button" class="mnPstGo" data-a="dl">' + I.print + "<span>Scarica il PDF da stampare</span></button>" +
+      '<p class="mnPstMsg" role="status"></p></div>';
+    document.body.appendChild(pst);
+    pst.addEventListener("click", function (ev) {
+      var s = ev.target.closest(".mnSeg button");
+      if (s) { pstTheme = s.getAttribute("data-t") === "light" ? "light" : "dark"; pstPaint(); return; }
+      var b = ev.target.closest("[data-a]"); if (!b) return;
+      if (b.getAttribute("data-a") === "x") closePoster(); else if (b.getAttribute("data-a") === "dl") pstDownload();
+    });
+  }
+  function openPoster() {
+    closeMenu();
+    load().then(function (b) {
+      var raw = (b && b.raw) || {}, P = window.liaPoster;
+      /* senza i dati o gli strumenti della locandina si apre la pagina Scheda attivita' come prima */
+      if (!b || !raw.public_link || !P || !P.fonts || !P.canvas || !P.pdf || !P.qr) { posterPage(); return; }
+      if (!pst) buildPoster();
+      pstName = raw.name || b.name || "La tua attivit\u00e0"; pstTheme = "dark";
+      $("mnPstK").textContent = pstName;
+      var hold = $("mnPstCv"); hold.innerHTML = ""; pst.querySelector(".mnPstMsg").textContent = "";
+      lastFocus = document.activeElement;
+      pst.hidden = false; pstPaint();
+      var c = pst.querySelector(".mnClose"); if (c) c.focus();
+    });
+  }
+
   function paintSheet() {
     if (!sheet || !biz) return;
     var l = biz.links[cur] || biz.links[0], seg = sheet.querySelector(".mnSeg");
@@ -679,7 +760,7 @@
   /* ---------- avvio ---------- */
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    if (guide && !guide.hidden) closeGuide(); else if (sheet && !sheet.hidden) closeSheet();
+    if (guide && !guide.hidden) closeGuide(); else if (pst && !pst.hidden) closePoster(); else if (sheet && !sheet.hidden) closeSheet();
   });
   function init() {
     try {

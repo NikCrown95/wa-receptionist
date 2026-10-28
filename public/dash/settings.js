@@ -573,7 +573,7 @@ function pfRenderServices(box,list){
   if(!n)box.appendChild(pfMk('p','pfHint','Nessun servizio configurato. Aggiungili da \u201cModifica\u201d e i clienti potranno prenotarli.'));
 }
 /* locandina: anteprima + download */
-window.liaPoster={tpl:liaPosterTpl,canvas:liaPosterCanvas,pdf:liaPosterPdf,qr:liaQr};
+window.liaPoster={tpl:liaPosterTpl,canvas:liaPosterCanvas,pdf:liaPosterPdf,qr:liaQr,fonts:liaPosterFonts};
 function pfRenderPoster(box,b,opts){
   opts=opts||{};box.innerHTML='';
   var link=b.public_link||'';
