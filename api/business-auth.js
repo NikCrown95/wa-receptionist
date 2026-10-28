@@ -4,6 +4,7 @@
 // Variabili su Vercel: SUPABASE_URL, SUPABASE_SECRET_KEY, RESEND_API_KEY.
 // Opzionali: BUSINESS_SESSION_SECRET, PUBLIC_URL, RESEND_FROM.
 const crypto = require("crypto");
+const { ownerMail } = require("../lib/owner-mail.js");
 
 const COOKIE = "lia_business_session";
 const SHORT_SESSION_MS = 12 * 3600 * 1000;          // 12 ore
@@ -194,42 +195,37 @@ async function sendMail(to, subject, html, text) {
     return r.ok;
   } catch (e) { console.error("Resend", e && e.message); return false; }
 }
+function ownerBase() { return (typeof PUBLIC_URL === "string" && PUBLIC_URL) || "https://prenolia.it"; }
+function cleanName(name) { return String(name || "").replace(/[<>&"]/g, "").trim(); }
 function resetMail(name, link) {
-  const html = '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0b1220">'
-    + '<h2 style="margin:0 0 12px;letter-spacing:-.01em">Scegli la tua nuova password</h2>'
-    + '<p style="line-height:1.5">Ciao' + (name ? " " + String(name).replace(/[<>&"]/g, "") : "") + ', hai chiesto di reimpostare la password. Il link vale <b>30 minuti</b> e funziona una sola volta.</p>'
-    + '<p style="margin:24px 0"><a href="' + link + '" style="background:#19b8c8;color:#031016;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;display:inline-block">Scegli la nuova password</a></p>'
-    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Non sei stato tu? Ignora questa email: la tua password non cambia.</p>'
-    + '<p style="color:#8793a8;font-size:12px">Prenolia</p></div>';
+  const n = cleanName(name);
+  const html = ownerMail({ style: "a", base: ownerBase(), chip: "Sicurezza", headline: "Scegli la tua nuova password",
+    body: "Ciao" + (n ? " " + n : "") + ", hai chiesto di reimpostare la password.", facts: [["Il link vale", "30 minuti, una sola volta"]],
+    cta: "Scegli la nuova password", link, note: "Non sei stato tu? Ignora questa email: la tua password non cambia.", footer: "Email di servizio inviata da Prenolia. Non rispondere a questo messaggio.", preheader: "Il link vale 30 minuti." });
   const text = "Hai chiesto di reimpostare la password.\nScegli la nuova password da qui (il link vale 30 minuti e funziona una sola volta):\n" + link + "\n\nNon sei stato tu? Ignora questa email: la tua password non cambia.";
   return { html, text };
 }
 
-function mailShell(inner) {
-  return '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0b1220">' + inner + '<p style="color:#8793a8;font-size:12px;margin-top:28px">Prenolia</p></div>';
-}
-function mailButton(link, label) {
-  return '<p style="margin:24px 0"><a href="' + link + '" style="background:#19b8c8;color:#031016;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:12px;display:inline-block">' + label + '</a></p>';
-}
 function confirmMail(name, link) {
-  const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Benvenuto in Prenolia</h2>'
-    + '<p style="line-height:1.5">Ciao' + (name === "Nuova attività" ? "" : " " + esc(name)) + ', manca un solo passaggio: conferma il tuo indirizzo e la tua prova gratuita di <b>14 giorni</b> parte subito.</p>'
-    + mailButton(link, "Conferma e inizia")
-    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Il link vale 24 ore. Non sei stato tu? Ignora questa email: non verrà creato nessun account.</p>');
+  const n = name === "Nuova attività" ? "" : cleanName(name);
+  const html = ownerMail({ style: "a", base: ownerBase(), chip: "Benvenuto", headline: "Manca un solo passaggio",
+    body: "Ciao" + (n ? " " + n : "") + ", conferma il tuo indirizzo e la tua prova gratuita di <b>14 giorni</b> parte subito.",
+    facts: [["Prova gratuita", "14 giorni"], ["Il link vale", "24 ore"]],
+    cta: "Conferma e inizia", link, note: "Non sei stato tu? Ignora questa email: non verrà creato nessun account.", footer: "Email di servizio inviata da Prenolia. Non rispondere a questo messaggio.", preheader: "Conferma e la prova gratuita parte subito." });
   const text = "Benvenuto in Prenolia.\nConferma il tuo indirizzo e la prova gratuita di 14 giorni parte subito (il link vale 24 ore):\n" + link + "\n\nNon sei stato tu? Ignora questa email: non verrà creato nessun account.";
   return { html, text };
 }
+
 function alreadyMail(name) {
   const login = PUBLIC_URL + "/login.html", reset = PUBLIC_URL + "/reset.html";
-  const html = mailShell('<h2 style="margin:0 0 12px;letter-spacing:-.01em">Hai già un account</h2>'
-    + '<p style="line-height:1.5">Ciao, qualcuno ha provato a registrare ' + (name === "Nuova attività" ? "un account" : esc(name)) + ' con questo indirizzo, ma un account Prenolia esiste già.</p>'
-    + mailButton(login, "Accedi")
-    + '<p style="line-height:1.5;color:#55627a;font-size:14px">Non ricordi la password? <a href="' + reset + '" style="color:#0aa6b4">Recuperala qui</a>. Non sei stato tu? Puoi ignorare questa email.</p>');
+  const n = name === "Nuova attività" ? "" : cleanName(name);
+  const html = ownerMail({ style: "a", base: ownerBase(), chip: "Account esistente", headline: "Hai già un account",
+    body: "Ciao, qualcuno ha provato a registrare " + (n ? "<b>" + n + "</b>" : "un account") + " con questo indirizzo, ma un account Prenolia esiste già.",
+    cta: "Accedi", link: login, note: "Non ricordi la password? <a href=\"" + reset + "\" style=\"color:#0A8F9D\">Recuperala qui</a>. Non sei stato tu? Puoi ignorare questa email.", footer: "Email di servizio inviata da Prenolia. Non rispondere a questo messaggio.", preheader: "Esiste già un account con questo indirizzo." });
   const text = "Esiste già un account Prenolia con questo indirizzo.\nAccedi: " + login + "\nPassword dimenticata: " + reset + "\n\nNon sei stato tu? Ignora questa email.";
   return { html, text };
 }
 
-/* ---------- handler ---------- */
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Robots-Tag", "noindex");
