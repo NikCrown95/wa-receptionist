@@ -514,7 +514,7 @@
     var F = S.form, c = courtOf(F.court_id), D = S.data, now0 = nowIn();
     d.style.setProperty('--cc', courtColor(c));
     d.classList.add('cp-fv');
-    var ORDER = ['court', 'day', 'time', 'dur', 'who', 'pl'];
+    var ORDER = ['court', 'day', 'time', 'dur', 'pl', 'who'];
     function go(n) { F.hist.push(F.step); F.step = n; F.msg = ''; draw(); }
     function back() { F.step = F.hist.pop() || 'court'; F.msg = ''; draw(); }
     function busyAt(x, cc) { return bookingsOn(F.date).some(function (b) { return b.court_id === cc.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }
@@ -540,53 +540,77 @@
       D.courts.forEach(function (x) {
         var b = el('button', 'cp-opt' + (x.id === F.court_id && F.hist.length ? ' on' : '')); b.type = 'button'; b.appendChild(courtSvg(x, 0, 0, 'li'));
         var tx = el('span'); tx.appendChild(el('b', null, x.name)); tx.appendChild(el('small', null, [x.surface, x.indoor ? 'coperto' : ''].filter(Boolean).join(' · '))); b.appendChild(tx);
-        b.onclick = function () { F.court_id = x.id; F.time = ''; F.hours = 1; go('day'); }; ls.appendChild(b);
+        b.onclick = function () { F.court_id = x.id; F.time = ''; F.hours = 1; F.ym = F.date.slice(0, 7); go('day'); }; ls.appendChild(b);
       });
       f.appendChild(ls);
     } else if (F.step === 'day') {
-      q('Che giorno?');
-      var dc = el('div', 'cp-chips');
-      [0, 1, 2].forEach(function (n) { var dt = addDays(D.today, n), b = el('button', F.date === dt ? 'on' : '', n === 0 ? 'Oggi' : n === 1 ? 'Domani' : longDay(dt)); b.type = 'button'; b.onclick = function () { F.date = dt; F.time = ''; go('time'); }; dc.appendChild(b); });
-      f.appendChild(dc);
-      var l = el('label', null, 'Oppure scegli un altro giorno'), di = el('input'); di.type = 'date'; di.value = F.date; di.min = D.today;
-      di.onchange = function () { if (di.value) { F.date = di.value; F.time = ''; go('time'); } }; l.appendChild(di); f.appendChild(l);
+      q('Che giorno?', c.name);
+      if (!F.ym) F.ym = F.date.slice(0, 7);
+      F.mon = F.mon || {};
+      var ym = F.ym;
+      if (!F.mon[ym]) { F.mon[ym] = 'loading'; loadMonth(ym, function () { F.mon[ym] = 'ok'; if (S.form === F && F.step === 'day') draw(); }); }
+      var y0 = +ym.slice(0, 4), m0 = +ym.slice(5, 7), nd = new Date(Date.UTC(y0, m0, 0)).getUTCDate(), off0 = (new Date(Date.UTC(y0, m0 - 1, 1)).getUTCDay() + 6) % 7;
+      var cal = el('div', 'cp-mc'), mh = el('div', 'cp-mh');
+      var pv = el('button', null, '‹'); pv.type = 'button'; pv.setAttribute('aria-label', 'Mese prima'); pv.disabled = ym <= D.today.slice(0, 7);
+      var nxm = el('button', null, '›'); nxm.type = 'button'; nxm.setAttribute('aria-label', 'Mese dopo');
+      pv.onclick = function () { F.ym = new Date(Date.UTC(y0, m0 - 2, 1)).toISOString().slice(0, 7); draw(); };
+      nxm.onclick = function () { F.ym = new Date(Date.UTC(y0, m0, 1)).toISOString().slice(0, 7); draw(); };
+      mh.appendChild(pv); mh.appendChild(el('b', null, MO[m0 - 1].charAt(0).toUpperCase() + MO[m0 - 1].slice(1) + ' ' + y0)); mh.appendChild(nxm); cal.appendChild(mh);
+      var gr = el('div', 'cp-mg'); ['L', 'M', 'M', 'G', 'V', 'S', 'D'].forEach(function (l) { gr.appendChild(el('span', 'cp-mw', l)); });
+      for (var i0 = 0; i0 < off0; i0++) gr.appendChild(el('span', 'cp-md pad'));
+      for (var dn = 1; dn <= nd; dn++) (function (dn) {
+        var dt = ym + '-' + (dn < 10 ? '0' : '') + dn, past = dt < D.today;
+        var all = slotsOf(c, dt).filter(function (x) { return !closedAt(c, dt, x.s, x.e); }), fr = past ? [] : freeSlots(c, dt);
+        var st = F.mon[ym] !== 'ok' ? '' : past || !all.length ? ' off' : fr.length ? ' ok' : ' full';
+        var bt = el('button', 'cp-md' + st + (dt === D.today ? ' today' : '') + (dt === F.date ? ' on' : ''), String(dn)); bt.type = 'button';
+        bt.disabled = F.mon[ym] === 'ok' && (past || !fr.length);
+        bt.setAttribute('aria-label', longDay(dt) + (st === ' ok' ? ', con orari liberi' : st === ' full' ? ', completo' : ''));
+        bt.onclick = function () { F.date = dt; F.time = ''; go('time'); };
+        gr.appendChild(bt);
+      })(dn);
+      cal.appendChild(gr);
+      var lg2 = el('div', 'cp-ml'); lg2.appendChild(el('span', null, 'Il pallino segna i giorni con orari liberi')); cal.appendChild(lg2);
+      f.appendChild(cal);
     } else if (F.step === 'time') {
       q('A che ora?', c.name + ' · ' + longDay(F.date));
       var fr = freeSlots(c, F.date), tc = el('div', 'cp-chips');
       if (!fr.length) tc.appendChild(el('p', 'cp-none', 'Nessun orario libero. Torna indietro per cambiare giorno o campo.'));
-      fr.forEach(function (x) { var t = hhmm(x.s), b = el('button', F.time === t ? 'on' : '', t); b.type = 'button'; b.onclick = function () { F.time = t; F.hours = 1; if (maxHours() > 1) go('dur'); else go('who'); }; tc.appendChild(b); });
+      fr.forEach(function (x) { var t = hhmm(x.s), b = el('button', F.time === t ? 'on' : '', t); b.type = 'button'; b.onclick = function () { F.time = t; F.hours = 1; if (maxHours() > 1) go('dur'); else go('pl'); }; tc.appendChild(b); });
       f.appendChild(tc);
     } else if (F.step === 'dur') {
       q('Per quanto?');
       var du = el('div', 'cp-chips'), mh = maxHours();
-      for (var h = 1; h <= mh; h++) (function (h) { var b = el('button', F.hours === h ? 'on' : '', label(h)); b.type = 'button'; b.onclick = function () { F.hours = h; go('who'); }; du.appendChild(b); })(h);
+      for (var h = 1; h <= mh; h++) (function (h) { var b = el('button', F.hours === h ? 'on' : '', label(h)); b.type = 'button'; b.onclick = function () { F.hours = h; go('pl'); }; du.appendChild(b); })(h);
       f.appendChild(du);
-    } else if (F.step === 'who') {
-      q('Chi prenota?');
-      var nx = el('button', 'cp-btn pri', 'Avanti'); nx.type = 'button';
+    } else if (F.step === 'pl') {
+      q('Quanti giocano?', F.hours > 1 ? c.name + ' · ' + label(F.hours) : c.name);
+      var sp = (D.club && D.club.sport) || 'tennis', two = sp === 'tennis' || sp === 'padel';
+      if (two) { var pc = el('div', 'cp-chips'); [['2', 'Singolo · 2'], ['4', 'Doppio · 4']].forEach(function (x) { var b = el('button', F.players === x[0] ? 'on' : '', x[1]); b.type = 'button'; b.onclick = function () { F.players = x[0]; if (+F.members > +x[0]) F.members = x[0]; draw(); }; pc.appendChild(b); }); f.appendChild(pc); }
+      var stepper = function (label, key, min, max) {
+        var w = el('div', 'cp-st'); w.appendChild(el('span', 'cp-stl', label));
+        var bx = el('div', 'cp-stb'), mi = el('button', null, '−'), v = el('b', null, String(F[key] === '' ? 0 : F[key])), pp = el('button', null, '+');
+        mi.type = 'button'; pp.type = 'button'; mi.setAttribute('aria-label', 'Meno ' + label.toLowerCase()); pp.setAttribute('aria-label', 'Più ' + label.toLowerCase());
+        function set(n) { n = Math.max(min, Math.min(max, n)); F[key] = String(n); if (key === 'players' && +F.members > n) F.members = String(n); draw(); }
+        mi.onclick = function () { set((+F[key] || 0) - 1); }; pp.onclick = function () { set((+F[key] || 0) + 1); };
+        bx.appendChild(mi); bx.appendChild(v); bx.appendChild(pp); w.appendChild(bx); return w;
+      };
+      var gp = el('div', 'cp-f2 st'); if (!two) gp.appendChild(stepper('Giocatori', 'players', 1, 22)); gp.appendChild(stepper('Di cui soci', 'members', 0, +F.players || 22)); f.appendChild(gp);
+      var nx2 = el('button', 'cp-btn pri', 'Avanti'); nx2.type = 'button'; nx2.onclick = function () { go('who'); };
+      var rw3 = el('div', 'cp-row cp-frow'); rw3.appendChild(nx2); f.appendChild(rw3);
+    } else {
+      q('Chi prenota?', (F.players || '?') + (+F.players === 1 ? ' giocatore' : ' giocatori') + ' · ' + (F.members || 0) + (+F.members === 1 ? ' socio' : ' soci'));
+      var sv = el('button', 'cp-btn pri', S.busy ? 'Salvo…' : 'Salva prenotazione'); sv.type = 'button';
       function ready() { return !!(F.first_name.trim() && F.last_name.trim() && F.phone.trim()); }
-      function upd() { nx.disabled = !ready(); }
+      function upd() { sv.disabled = S.busy || !ready(); }
       function inp(label, key, type, extra) {
         var l = el('label', null, label), i = el('input'); i.type = type || 'text'; i.value = F[key]; if (extra) for (var k in extra) i.setAttribute(k, extra[k]);
         i.setAttribute('data-k', key); i.oninput = function () { F[key] = i.value; upd(); }; l.appendChild(i); return l;
       }
       var r1 = el('div', 'cp-f2'); r1.appendChild(inp('Nome', 'first_name', 'text', { autocomplete: 'off', maxlength: 60 })); r1.appendChild(inp('Cognome', 'last_name', 'text', { autocomplete: 'off', maxlength: 60 })); f.appendChild(r1);
       f.appendChild(inp('Telefono', 'phone', 'tel', { inputmode: 'tel', maxlength: 30 }));
-      nx.onclick = function () { if (ready()) go('pl'); }; upd(); var rw = el('div', 'cp-row cp-frow'); rw.appendChild(nx); f.appendChild(rw);
-    } else {
-      q('Quanti giocano?');
-      var stepper = function (label, key, min, max) {
-        var w = el('div', 'cp-st'); w.appendChild(el('span', 'cp-stl', label));
-        var bx = el('div', 'cp-stb'), mi = el('button', null, '−'), v = el('b', null, String(F[key] === '' ? 0 : F[key])), pp = el('button', null, '+');
-        mi.type = 'button'; pp.type = 'button'; mi.setAttribute('aria-label', 'Meno ' + label.toLowerCase()); pp.setAttribute('aria-label', 'Più ' + label.toLowerCase());
-        function set(n) { n = Math.max(min, Math.min(max, n)); F[key] = String(n); if (key === 'players' && +F.members > n) F.members = String(n); v.textContent = String(n); if (key === 'players') { var m2 = f.querySelector('.cp-st:nth-child(2) b'); if (m2) m2.textContent = F.members; } }
-        mi.onclick = function () { set((+F[key] || 0) - 1); }; pp.onclick = function () { set((+F[key] || 0) + 1); };
-        bx.appendChild(mi); bx.appendChild(v); bx.appendChild(pp); w.appendChild(bx); return w;
-      };
-      var gp = el('div', 'cp-f2 st'); gp.appendChild(stepper('Giocatori', 'players', 1, 22)); gp.appendChild(stepper('Di cui soci', 'members', 0, 22)); f.appendChild(gp);
-      var le = el('label', null, 'Email (facoltativa: se la scrivi, il cliente riceve la conferma)'), ie = el('input'); ie.type = 'email'; ie.value = F.email; ie.setAttribute('inputmode', 'email'); ie.setAttribute('autocomplete', 'off'); ie.setAttribute('maxlength', 120); ie.oninput = function () { F.email = ie.value; }; le.appendChild(ie); f.appendChild(le);
+      f.appendChild(inp('Email (facoltativa: se la scrivi, il cliente riceve la conferma)', 'email', 'email', { inputmode: 'email', autocomplete: 'off', maxlength: 120 }));
       if (F.msg) { var m = el('div', 'cp-msg', F.msg); m.setAttribute('role', 'alert'); f.appendChild(m); }
-      var sv = el('button', 'cp-btn pri', S.busy ? 'Salvo…' : 'Salva prenotazione'); sv.type = 'button'; sv.disabled = S.busy; sv.onclick = save;
+      sv.onclick = save; upd();
       var rw2 = el('div', 'cp-row cp-frow'); rw2.appendChild(sv); f.appendChild(rw2);
     }
     d.appendChild(f); return d;
@@ -594,8 +618,18 @@
   function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); var fr = sl.filter(function (x) { return !bookingsOn(d).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }); return fr.length ? hhmm(fr[0].s) : sl.length ? hhmm(sl[0].s) : ''; }
   function openForm(date, courtId, time) {
     var D = S.data, c = courtOf(courtId || D.courts[0].id), d = date || S.day; S.sel = null; S.askCancel = false;
-    S.form = { step: time ? 'who' : courtId ? 'time' : 'court', hist: time ? ['court', 'day', 'time'] : courtId ? ['court', 'day'] : [], court_id: c.id, date: d, time: time || '', hours: 1, first_name: '', last_name: '', phone: '', email: '', players: '2', members: '0', notes: '', msg: '' };
+    S.form = { step: time ? 'pl' : courtId ? 'time' : 'court', hist: time ? ['court', 'day', 'time'] : courtId ? ['court', 'day'] : [], court_id: c.id, date: d, time: time || '', hours: 1, first_name: '', last_name: '', phone: '', email: '', players: defPlayers(c), members: '0', notes: '', msg: '', ym: d.slice(0, 7), mon: {} };
     draw(); focusForm();
+  }
+  function defPlayers(c) { var sp = (S.data.club && S.data.club.sport) || 'tennis'; if (sp === 'tennis' || sp === 'padel') return '2'; var m = /\b(?:a|da)\s?(5|7|11)\b/i.exec(String(c.name || '')); return m ? String(m[1] * 2) : '2'; }
+  function loadMonth(ym, done) { // i giorni del mese si leggono a parte: il calendario mostra subito quali hanno posto
+    var y = +ym.slice(0, 4), m = +ym.slice(5, 7), n = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    fetch(URL0 + '&from=' + ym + '-01&days=' + n).then(function (r) { return r.json(); }).then(function (j) {
+      var D = S.data; if (!D) return;
+      (j.bookings || []).forEach(function (b) { if (!(D.bookings || []).some(function (x) { return x.id === b.id; })) D.bookings.push(b); });
+      D.closures = D.closures || []; (j.closures || []).forEach(function (c) { if (!D.closures.some(function (x) { return x.id === c.id; })) D.closures.push(c); });
+      done();
+    }).catch(function () { done(); });
   }
   function maxEnd(c) { var m = 0; ((c.hours && c.hours[String(wd(S.form.date))]) || []).forEach(function (h) { if (mins(h[0]) <= mins(S.form.time) && mins(h[1]) > mins(S.form.time)) m = mins(h[1]); }); return m; }
   function focusForm() { setTimeout(function () { var i = root.querySelector('.cp-form input[data-k]'); if (i) { try { i.focus({ preventScroll: true }); } catch (e) { i.focus(); } } }, 30); }
