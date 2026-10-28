@@ -530,6 +530,9 @@ var PL_GROUPS=[
   ]}
 ];
 function plGymGroups(f){f=f||{classes:true,personal:true,online:true};var ok={on:f.online,cls:f.classes,cal:f.classes||f.personal};return PL_GYM.map(function(g){return {t:g.t,cls:g.cls,items:g.items.filter(function(it){return !it[6]||ok[it[6]]})}}).filter(function(g){return g.items.length})}
+/* nome del piano scritto come il logo Prenolia: la "a" e' il robottino */
+function liaPlanWm(prem,cls){var w=document.createElement('span');w.className='lWm'+(cls?' '+cls:'');w.setAttribute('role','img');w.setAttribute('aria-label','Piano '+(prem?'Smart':'Base'));
+  w.appendChild(document.createTextNode(prem?'Sm':'B'));var a=document.createElement('img');a.src='/lia-a.png';a.alt='';w.appendChild(a);w.appendChild(document.createTextNode(prem?'rt':'se'));return w}
 function pfRenderPlan(top,cols,o){
   /* o: {premium, known, cd (countdown), sub}. top = riquadro del piano, cols = riquadri delle funzioni */
   top.innerHTML='';cols.innerHTML='';
@@ -538,7 +541,7 @@ function pfRenderPlan(top,cols,o){
   PL_USE.forEach(function(g){g.items.forEach(function(it){if((!it[3]||prem)&&!it[4])total++})});
   var head=pfMk('div','plHead');
   var hx=pfMk('div','plHx');
-  var ttl=pfMk('h2','plTitle');if(o.known&&typeof PLAN_IMG!=='undefined'){ttl.appendChild(document.createTextNode('Il tuo piano è '));var im=document.createElement('img');im.className='planImg'+(prem?' prem':'');im.src=prem?PLAN_IMG.smart:PLAN_IMG.base;im.alt=prem?'Smart':'Base';ttl.appendChild(im)}else{ttl.textContent='Il tuo piano'}hx.appendChild(ttl);
+  var ttl=pfMk('h2','plTitle');if(o.known){ttl.appendChild(document.createTextNode('Il tuo piano è '));ttl.appendChild(liaPlanWm(prem,'plWm'))}else{ttl.textContent='Il tuo piano'}hx.appendChild(ttl);
   hx.appendChild(pfMk('p','plLead',o.gym?'Il programma dei corsi, le prenotazioni degli iscritti e gli abbonamenti in un unico posto.':window.__LIA_MED?'Agenda online, pazienti e numeri, con la privacy al primo posto: niente chat, niente note libere, notifiche e email senza dettagli sulla visita.':prem?'Agenda online, clienti e numeri, più Lia: l’assistente virtuale che prenota e gestisce gli appuntamenti per te sulla webchat e su Telegram.':(o.known?'Agenda online, clienti e numeri in un unico posto.':'Il tuo piano non è ancora configurato.')));
   head.appendChild(hx);
   if(o.known){var chip=pfMk('span','plChip');chip.innerHTML='<b>'+total+'</b><small>funzioni incluse</small>';head.appendChild(chip)}
@@ -631,7 +634,7 @@ function pfRenderPoster(box,b,opts){
     var bd=document.getElementById('pfPlanCard'),cd0=pfCountdown(sub);
     if(bd){if(!known){bd.hidden=true;bd.innerHTML=''}else{bd.hidden=false;bd.innerHTML='';
       var pb=document.createElement('button');pb.type='button';pb.className='pfPlan'+(cd0&&cd0.cls?' '+cd0.cls:'');pb.setAttribute('aria-label','Apri il tuo piano');
-      var pim=document.createElement('img');pim.className='planImg pfPlanImg'+(premium?' prem':'');pim.src=premium?PLAN_IMG.smart:PLAN_IMG.base;pim.alt='Piano '+(premium?'Smart':'Base');pb.appendChild(pim);
+      pb.appendChild(liaPlanWm(premium,'pfBadgeWm'));
       var ptx=document.createElement('span');ptx.className='pfPlanTx';
       var psm=document.createElement('small');psm.textContent=cd0?cd0.txt:'Piano attivo';ptx.appendChild(psm);
       if(cd0){var br=document.createElement('span');br.className='pfPlanBar';var fi=document.createElement('i');fi.style.width=cd0.pct.toFixed(1)+'%';br.appendChild(fi);ptx.appendChild(br)}
@@ -1265,10 +1268,7 @@ function pfRenderPoster(box,b,opts){
       if(chg)chg.hidden=true;if(cc)cc.hidden=true;stText('stSumSub','Piano non configurato');return;
     }
     if(chg)chg.hidden=true;if(cc)cc.hidden=false;try{pfRenderPlan(stEl('plTop'),stEl('plCols'),{premium:D.prem,known:D.known,cd:pfCountdown(D.sub),sub:D.sub});stEl('plTop').hidden=true}catch(e){}
-    /* il nome del piano e' scritto come il logo Prenolia: la "a" e' il robottino */
-    var wm=stMk('div','stWm');wm.setAttribute('role','img');wm.setAttribute('aria-label','Piano '+(D.prem?P.premium.name:P.base.name));
-    wm.appendChild(document.createTextNode(D.prem?'Sm':'B'));var wa=document.createElement('img');wa.src='/lia-a.png';wa.alt='';wm.appendChild(wa);wm.appendChild(document.createTextNode(D.prem?'rt':'se'));
-    now.appendChild(wm);
+    now.appendChild(liaPlanWm(D.prem,'stWm'));
     var price=(D.sub&&D.sub.price_eur!=null)?Number(D.sub.price_eur):(D.prem?P.premium.price:P.base.price);
     var line=stEur(price)+' al mese'+(end?(cancelled?' \u00b7 attivo fino al '+end:' \u00b7 si rinnova il '+end):'');
     now.appendChild(stMk('p',null,cancelled?'Disdetta registrata. Il piano resta attivo'+(end?' fino al '+end:'')+'.':line));

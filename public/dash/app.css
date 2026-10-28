@@ -3611,7 +3611,9 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 #panelOther .stInc .plPage{padding:0 8px 8px}
 #panelOther .stInc .plCols{display:flex;flex-direction:column;gap:6px}
 #panelOther .stInc .pfCard{background:none;border:0;box-shadow:none;padding:10px}
-/* Abbonamento: nome del piano scritto come il logo Prenolia (la "a" e' il robottino) */
-#panelOther .stWm{font-family:'Poppins','Plus Jakarta Sans',sans-serif;font-weight:700;font-size:2.4rem;line-height:1;display:inline-flex;align-items:baseline;align-self:flex-start;letter-spacing:-.02em;color:var(--ink);-webkit-text-stroke:.03em currentColor;paint-order:stroke fill;padding:2px 0 6px}
-#panelOther .stWm img{height:.74em;width:auto;margin:0 .01em 0 .02em;transform:translateY(.08em)}
-
+/* nome del piano scritto come il logo Prenolia (la "a" e' il robottino) */
+.lWm{font-family:'Poppins','Plus Jakarta Sans',sans-serif;font-weight:700;line-height:1;display:inline-flex;align-items:baseline;letter-spacing:-.02em;color:var(--ink);-webkit-text-stroke:.03em currentColor;paint-order:stroke fill;white-space:nowrap}
+.lWm img{height:.74em;width:auto;margin:0 .01em 0 .02em;transform:translateY(.08em)}
+#panelOther .stPlanNow .lWm{font-size:2.4rem;align-self:flex-start;padding:2px 0 6px}
+#panelProfile .pfPlan .pfBadgeWm{font-size:1.75rem;flex:none;padding-bottom:3px}
+#stPlanBody .plTitle .lWm{font-size:1.5em;vertical-align:-.12em}
