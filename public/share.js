@@ -376,7 +376,7 @@
       '<button type="button" class="mnClose" data-a="x" aria-label="Chiudi">' + I.x + "</button></div>" +
       '<div class="mnPstCv" id="mnPstCv"></div>' +
       '<div class="mnSeg" role="group" aria-label="Versione"><button type="button" data-t="dark" aria-pressed="true">Scura</button><button type="button" data-t="light" aria-pressed="false">Chiara</button></div>' +
-      '<p class="mnPstNote"><b>Stampala, appendila, e lascia che siano i clienti a prenotare.</b><span>Formato 10 \u00d7 15 cm. Il QR porta alla tua pagina di prenotazione.</span></p>' +
+      '<p class="mnPstNote">Formato 10 \u00d7 15 cm, pronta da stampare. Il QR porta alla tua pagina di prenotazione.</p>' +
       '<button type="button" class="mnPstGo" data-a="dl">' + I.print + "<span>Scarica il PDF da stampare</span></button>" +
       '<p class="mnPstMsg" role="status"></p></div>';
     document.body.appendChild(pst);
