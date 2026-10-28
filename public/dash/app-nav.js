@@ -93,16 +93,17 @@
     window.liaClientsPromise=window.liaGetHistory().then(function(data){
       var now=new Date(),byPhone={},ns={};
       (data.appointments||[]).forEach(function(a){
+        if(a.mode&&a.mode!=='sede')window.liaMultiMode=true;
         if(a.status==='no_show'&&a.customer_phone){ns[a.customer_phone]=(ns[a.customer_phone]||0)+1;if(!byPhone[a.customer_phone])byPhone[a.customer_phone]={name:a.customer_name,phone:a.customer_phone,email:'',visits:0,lastDate:null,past:[],next:null,svc:{}};if(a.customer_email)byPhone[a.customer_phone].email=a.customer_email;return}
         if(a.status!=='confirmed'||!a.customer_phone)return;
         var key=a.customer_phone,st=new Date(a.starts_at),en=new Date(a.ends_at);
         var c=byPhone[key]||(byPhone[key]={name:a.customer_name,phone:key,email:'',visits:0,lastDate:null,past:[],next:null,svc:{}});
         c.name=a.customer_name;if(a.customer_email)c.email=a.customer_email;
         if(st<=now){
-          c.visits++;c.past.push({id:a.id,start:st,service:a.service||'',price:a.price_eur});
+          c.visits++;c.past.push({id:a.id,start:st,service:a.service||'',price:a.price_eur,mode:a.mode||'sede',address:a.address||''});
           if(!c.lastDate||st>c.lastDate)c.lastDate=st;
           if(a.service)c.svc[a.service]=(c.svc[a.service]||0)+1;
-        }else if(!c.next||st<c.next.start){c.next={start:st,end:en,service:a.service||''};}
+        }else if(!c.next||st<c.next.start){c.next={start:st,end:en,service:a.service||'',mode:a.mode||'sede',address:a.address||''};}
       });
       CLIENTS=Object.keys(byPhone).map(function(k){
         var x=byPhone[k],top='',n=0;
@@ -180,9 +181,11 @@
       x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
     function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
     var tel=String(c.phone).replace(/\s+/g,'');
-    var nx=c.next?('<div class="cd-next"><div class="cd-dd">'+c.next.start.getDate()+'<small>'+c.next.start.toLocaleDateString('it-IT',{month:'short'})+'</small></div><div><b>'+esc(c.next.service||'Appuntamento')+'</b><div style="color:var(--muted);font-size:.85rem;margin-top:2px">'+c.next.start.toLocaleDateString('it-IT',{weekday:'long'})+' alle '+clHm(c.next.start)+'</div></div></div>'):'<div style="color:var(--muted);font-size:.92rem">Nessun appuntamento in programma</div>';
+    var ML={sede:'In sede',domicilio:'A domicilio',online:'Online'};
+    function mline(h){var m=h.mode||'sede',o='';if(window.liaMultiMode||m!=='sede')o+='<span class="cd-md">'+ML[m]+'</span>';if(m==='domicilio'&&h.address)o+=' <span class="cd-ad">\u{1F4CD} '+esc(h.address)+'</span>';return o?'<div class="cd-ml">'+o+'</div>':'';}
+    var nx=c.next?('<div class="cd-next"><div class="cd-dd">'+c.next.start.getDate()+'<small>'+c.next.start.toLocaleDateString('it-IT',{month:'short'})+'</small></div><div><b>'+esc(c.next.service||'Appuntamento')+'</b>'+mline(c.next)+'<div style="color:var(--muted);font-size:.85rem;margin-top:2px">'+c.next.start.toLocaleDateString('it-IT',{weekday:'long'})+' alle '+clHm(c.next.start)+'</div></div></div>'):'<div style="color:var(--muted);font-size:.92rem">Nessun appuntamento in programma</div>';
     var lim=clShowAll?c.past.length:Math.min(c.past.length,8);
-    var hist=c.past.slice(0,lim).map(function(h){return '<div class="cd-vh"><div class="cd-hr"><div class="t">'+esc(h.service||'Appuntamento')+'<small>'+clDate(h.start)+'</small></div><div class="pr">'+clMoney(h.price)+'</div></div>'+(h.id?'<div data-vn="'+esc(h.id)+'" data-vs="'+esc(h.start.toISOString())+'"></div>':'')+'</div>';}).join('')||'<div style="color:var(--muted);font-size:.92rem">Nessuna visita registrata</div>';
+    var hist=c.past.slice(0,lim).map(function(h){return '<div class="cd-vh"><div class="cd-hr"><div class="t">'+esc(h.service||'Appuntamento')+'<small>'+clDate(h.start)+'</small>'+mline(h)+'</div><div class="pr">'+clMoney(h.price)+'</div></div>'+(h.id?'<div data-vn="'+esc(h.id)+'" data-vs="'+esc(h.start.toISOString())+'"></div>':'')+'</div>';}).join('')||'<div style="color:var(--muted);font-size:.92rem">Nessuna visita registrata</div>';
     var more=c.past.length>8?'<button type="button" class="cd-more" data-more="1">'+(clShowAll?'Mostra meno':'Mostra tutte ('+c.past.length+')')+'</button>':'';
     return '<div class="cd"><button type="button" class="cd-x" data-back="1" aria-label="Chiudi">'+ic.x+'</button>'+
       '<div class="cd-hero"><div class="cd-av">'+esc(initials(c.name))+'</div><h2>'+esc(c.name)+'</h2><div class="p">'+esc(c.phone)+'</div>'+(c.email?'<div class="p cd-mail"><a href="mailto:'+esc(c.email)+'" style="color:inherit;text-decoration:none;overflow-wrap:anywhere">'+esc(c.email)+'</a></div>':'')+'</div>'+
