@@ -1085,7 +1085,7 @@ function pfRenderPoster(box,b,opts){
 
   /* ---- Impostazioni: canali, abbonamento, elimina account, assistenza ---- */
   /* Dati di prova: sostituiscili con quelli veri (contatti, bot Telegram, prezzi). */
-  window.LIA_SUPPORT=window.LIA_SUPPORT||{whatsapp:'+39 345 827 6260',email:'nico.corona95@icloud.com'};
+  window.LIA_SUPPORT=window.LIA_SUPPORT||{whatsapp:'',email:''}; /* contatti assistenza disattivati per ora: compila qui per riattivarli */
   window.LIA_CHANNELS=window.LIA_CHANNELS||{telegramLink:'https://t.me/LiaDemoBot?start=collega'};
   window.LIA_PLANS=window.LIA_PLANS||{base:{name:'Base',price:16.99},premium:{name:'Smart',price:24.99}};
   function stMk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
@@ -1334,7 +1334,6 @@ function pfRenderPoster(box,b,opts){
     if(wa){if(num){wa.href='https://wa.me/'+num+'?text='+encodeURIComponent('Ciao, sono '+name+'. ');wa.hidden=false}else wa.hidden=true}
     if(ml){if(s.email){ml.href='mailto:'+s.email+'?subject='+encodeURIComponent('Assistenza Prenolia \u2013 '+name);ml.hidden=false}else ml.hidden=true}
     stText('hlpWaTxt',s.whatsapp||'');stText('hlpMailTxt',s.email||'');
-    var card=wa&&wa.parentNode;if(card)card.hidden=(wa.hidden&&ml.hidden);
     var c=stEl('supContact');if(c&&!c.value&&stD().b.public_phone)c.value=stD().b.public_phone;
     var fb=stEl('hlpFb');if(fb&&!fb.getAttribute('data-b')){fb.setAttribute('data-b','1');fb.addEventListener('click',function(){stFeedback(false)})}
   }
