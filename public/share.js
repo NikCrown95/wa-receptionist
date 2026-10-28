@@ -612,71 +612,72 @@
     return G;
   }
   var M_SUB = "Menu › Impostazioni › Abbonamento";
-  /* Guida a percorsi (attivita' normali): elenco di percorsi, poi un passo alla volta con la schermata vera e il riquadro sul punto giusto. */
+  /* Guida a domande (attivita' normali): elenco di "Dove trovo…? / Come faccio…?"; toccandone una si apre il passo-passo con la schermata vera e il riquadro sul punto giusto. */
   function usePaths(b) { return !b.gym && !isCourts() && !window.__LIA_MED; }
-  var PATHSK = "lia:guide:paths:" + token;
   function loadPaths() {
-    if (window.LIA_PATHS) return Promise.resolve(window.LIA_PATHS);
+    if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=1";
-      sc.onload = function () { res(window.LIA_PATHS || null); }; sc.onerror = function () { res(null); };
+      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=2";
+      sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
   }
   function esc2(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
   function buildPathGuide() {
-    var done = {}, term = "", cur = null, D = null;
-    try { done = JSON.parse(ls("g", PATHSK) || "{}") || {}; } catch (e) { done = {}; }
+    var term = "", cur = null, D = null, flat = [];
     guide = mk("div", "mnLayer"); guide.id = "mnGuide"; guide.hidden = true; guide.className += " gp";
     guide.setAttribute("role", "dialog"); guide.setAttribute("aria-modal", "true"); guide.setAttribute("aria-labelledby", "mnGuideT");
     guide.innerHTML = '<div class="mnGuide"><div class="mnGuideIn"><div id="mnGBody"></div></div></div>';
     document.body.appendChild(guide);
     var body = guide.querySelector("#mnGBody"), scr = guide.querySelector(".mnGuide");
-    var img = function (k) { return "/guida/" + k + ".jpg?v=1"; };
+    var img = function (k) { return "/guida/" + k + ".jpg?v=2"; };
     function home() {
       cur = null;
       var s = term.trim().toLowerCase(), h =
         '<div class="mnGH"><button type="button" class="mnBack" data-close="1" aria-label="Indietro">' + I.back + '</button><div class="gpHd"><h2 id="mnGuideT">Guida</h2></div></div>' +
-        '<div class="gpHd"><p>Scegli cosa vuoi fare. Ogni percorso ti mostra le schermate vere di Prenolia, un passo alla volta, e dove toccare.</p></div>' +
-        '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off" value="' + esc2(term).replace(/"/g, "&quot;") + '"></label>';
+        '<div class="gpHd"><p>Scegli la tua domanda: ti mostro la schermata vera di Prenolia e dove toccare, passo dopo passo.</p></div>' +
+        '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “QR” o “prezzo”" aria-label="Cerca nella guida" autocomplete="off" value="' + esc2(term).replace(/"/g, "&quot;") + '"></label>';
       if (!D) { body.innerHTML = h + '<p class="mnEmpty">Un attimo…</p>'; return; }
-      var n = 0; h += '<div class="gpGrid">';
-      D.paths.forEach(function (p, i) {
-        if (s && (p.t + " " + p.s + " " + p.steps.map(function (x) { return x[1] + " " + x[2] + " " + x[3]; }).join(" ")).toLowerCase().indexOf(s) < 0) return;
-        n++;
-        h += '<button type="button" class="gpPc" data-p="' + i + '"><span class="gpTh" style="background-image:url(' + img(p.steps[0][0]) + ')"></span><span><h3>' + esc2(p.t) + "</h3><p>" + esc2(p.s) + '</p><span class="gpMt">' + (p.tag ? '<span class="gpTg">' + esc2(p.tag) + "</span>" : "") + "<span>" + p.steps.length + " passi · " + p.min + " min</span>" + (done[p.id] ? '<span class="gpOk">✓ Fatto</span>' : "") + "</span></span>" + I.chev + "</button>";
+      var n = 0;
+      D.forEach(function (g) {
+        var r = "";
+        g.q.forEach(function (x) {
+          if (s && (x.q + " " + x.s + " " + x.steps.map(function (y) { return y[1] + " " + y[2] + " " + y[3]; }).join(" ")).toLowerCase().indexOf(s) < 0) return;
+          n++; r += '<button type="button" class="gpQ" data-q="' + x.id + '"><span class="gpQt"><b>' + esc2(x.q) + "</b><small>" + esc2(x.s) + "</small></span>" + I.chev + "</button>";
+        });
+        if (r) h += '<div class="gpG"><h3 class="gpGt">' + esc2(g.g) + '</h3><div class="gpQs">' + r + "</div></div>";
       });
-      h += "</div>" + (n ? "" : '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>');
+      if (!n) h += '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>';
       h += '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>";
       body.innerHTML = h;
       var q = body.querySelector("#mnGuideQ");
       if (q) q.addEventListener("input", function () { term = this.value; var pos = term.length; home(); var q2 = body.querySelector("#mnGuideQ"); if (q2) { q2.focus(); try { q2.setSelectionRange(pos, pos); } catch (e) {} } });
     }
-    function step(pi, si) {
-      var p = D.paths[pi], n = p.steps.length;
-      cur = [pi, si];
-      var back = '<div class="gpBar"><button type="button" class="mnBack" data-home="1" aria-label="Torna ai percorsi">' + I.back + '</button><span class="gpNm" id="mnGuideT">' + esc2(p.t) + "</span>";
+    function find(id) { for (var i = 0; i < flat.length; i++) if (flat[i].id === id) return i; return -1; }
+    function step(qi, si) {
+      var x = flat[qi], n = x.steps.length;
+      cur = [qi, si];
+      var back = '<div class="gpBar"><button type="button" class="mnBack" data-home="1" aria-label="Torna alle domande">' + I.back + '</button><span class="gpNm" id="mnGuideT">' + esc2(x.q) + "</span>";
       if (si >= n) {
-        done[p.id] = 1; ls("s", PATHSK, JSON.stringify(done));
-        var nx = D.paths[pi + 1];
-        body.innerHTML = back + '</div><div class="gpDone"><h3>Percorso completato</h3><p>Hai visto tutti i passi di “' + esc2(p.t) + "”.</p>" +
-          (nx ? '<button type="button" class="gpBtn pri" data-p="' + (pi + 1) + '" style="width:100%">Prossimo: ' + esc2(nx.t) + "</button>" : "") +
-          '<button type="button" class="gpBtn" data-home="1" style="width:100%;margin-top:10px">Torna ai percorsi</button></div>';
+        var nx = flat[qi + 1] && flat[qi + 1].g === x.g ? flat[qi + 1] : null;
+        body.innerHTML = back + '</div><div class="gpDone"><h3>Fatto!</h3><p>Ora sai ' + esc2(x.q.replace(/\?$/, "").replace(/^Come /, "come ").replace(/^Dove /, "dove ").replace(/^Quanto /, "quanto ").replace(/^Cosa /, "cosa ")) + ".</p>" +
+          (nx ? '<button type="button" class="gpBtn pri" data-q="' + nx.id + '" style="width:100%">Prossima: ' + esc2(nx.q) + "</button>" : "") +
+          '<button type="button" class="gpBtn" data-home="1" style="width:100%;margin-top:10px">Altre domande</button></div>';
         scr.scrollTop = 0; return;
       }
-      var st = p.steps[si], seg = "", bx = D.box[st[0]];
+      var st = x.steps[si], seg = "", bx = st[4];
       for (var i = 0; i < n; i++) seg += '<i class="' + (i <= si ? "on" : "") + '"></i>';
       body.innerHTML = back + '<span class="gpCt">' + (si + 1) + " di " + n + '</span></div><div class="gpSeg">' + seg + "</div>" +
         '<div class="gpStage"><div class="gpPhone"><div class="gpShot"><img src="' + img(st[0]) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
         (bx ? '<span class="gpRing" style="left:' + bx[0] + "%;top:" + bx[1] + "%;width:" + bx[2] + "%;height:" + bx[3] + '%"></span>' : "") + "</div></div>" +
-        '<div class="gpCopy"><span class="gpN">Passo ' + (si + 1) + "</span><h3>" + esc2(st[1]) + "</h3><p>" + esc2(st[2]) + '</p><span class="gpWhere">' + esc2(st[3]) + "</span>" +
+        '<div class="gpCopy"><span class="gpN">Passo ' + (si + 1) + "</span><h3>" + esc2(st[1]) + "</h3><p>" + esc2(st[2]) + "</p>" + (st[3] ? '<span class="gpWhere">' + esc2(st[3]) + "</span>" : "") +
         '<div class="gpNav"><button type="button" class="gpBtn" data-go="' + (si - 1) + '"' + (si ? "" : " disabled") + '>Indietro</button><button type="button" class="gpBtn pri" data-go="' + (si + 1) + '">' + (si === n - 1 ? "Fine" : "Avanti") + "</button></div></div></div>";
       scr.scrollTop = 0;
     }
     body.addEventListener("click", function (ev) {
-      var t = ev.target, a = t.closest("[data-p]"), g = t.closest("[data-go]"), h = t.closest("[data-home]"), c = t.closest("[data-close]");
+      var t = ev.target, a = t.closest("[data-q]"), g = t.closest("[data-go]"), h = t.closest("[data-home]"), c = t.closest("[data-close]");
       if (c) { closeGuide(); return; }
-      if (a) { step(+a.getAttribute("data-p"), 0); return; }
+      if (a) { var i = find(a.getAttribute("data-q")); if (i >= 0) step(i, 0); return; }
       if (g && cur && !g.disabled) { step(cur[0], +g.getAttribute("data-go")); return; }
       if (h) { home(); scr.scrollTop = 0; return; }
       if (t.closest("#mnHelp")) {
@@ -686,7 +687,12 @@
     });
     guide.__gpReset = function () { term = ""; home(); scr.scrollTop = 0; };
     home();
-    loadPaths().then(function (d) { D = d; if (!D) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; } if (!cur) home(); });
+    loadPaths().then(function (d) {
+      D = d;
+      if (!D) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; }
+      D.forEach(function (g) { g.q.forEach(function (x) { x.g = g.g; flat.push(x); }); });
+      if (!cur) home();
+    });
   }
   function buildGuide(b) {
     if (usePaths(b)) return buildPathGuide();
