@@ -427,11 +427,13 @@ function liaPosterCanvas(o){
   /* didascalia sotto "Calendario": campi e palestre non scelgono un servizio */
   var cap=o.kind==='campi'?['Scegli il campo,','giorno e ora.']:o.kind==='palestra'?['Scegli il corso,','giorno e ora.']:null;
   if(cap){
-    var ccx=o.lia===false?511:274;
-    c.fillStyle=BG;c.fillRect(ccx-135,1280,270,78);
-    c.fillStyle=dk?'#FFFFFF':'#000000';c.textAlign='center';c.textBaseline='alphabetic';
-    c.font='500 34px "Plus Jakarta Sans",Manrope,-apple-system,"Helvetica Neue",Arial,sans-serif';
-    c.fillText(cap[0],ccx,1311);c.fillText(cap[1],ccx,1352);
+    /* il testo originale occupa x 160-383, y 1275-1347: si copre tutta la zona (y 1264-1360) e si riscrive */
+    var ccx=o.lia===false?509:272;
+    c.fillStyle=BG;c.fillRect(ccx-128,1264,256,98);
+    c.fillStyle=dk?'#FFFFFF':'#00010A';c.textAlign='center';c.textBaseline='alphabetic';
+    var CF='"Plus Jakarta Sans",Manrope,-apple-system,"Helvetica Neue",Arial,sans-serif',cs=34;
+    c.font='500 '+cs+'px '+CF;while(cs>24&&c.measureText(cap[0]).width>224){cs--;c.font='500 '+cs+'px '+CF}
+    c.fillText(cap[0],ccx,1300);c.fillText(cap[1],ccx,1340);
   }
   /* nome dell'attivita' */
   c.fillStyle=BG;c.fillRect(60,38,904,64);
