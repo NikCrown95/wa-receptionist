@@ -190,6 +190,7 @@ async function getBusinessFullByToken(token) {
   const b = r.data[0];
   b.services = (b.services || []).filter((x) => x.active);
   b.resources = (b.resources || []).filter((x) => x.active);
+  modes.attach(b); // stesso servizio in piu' modalita': il nome porta la modalita' (anche per orari liberi e nuovo appuntamento)
   await attachStaff(b, sb);
   return b;
 }
@@ -1851,6 +1852,13 @@ module.exports = async (req, res) => {
       hoursByDay[d] = iv;
     }
 
+    // Servizio con piu' modalita' (stesso group_id attivo piu' volte): serve per mostrare "In sede" anche quando e' la modalita' scelta.
+    const grpOf = {}, grpCount = {};
+    try {
+      let svSrc = Array.isArray(biz.services) && biz.services.length ? biz.services : null;
+      if (!svSrc && r.data.some((a) => a.service_id)) { const gs = await sb("GET", "services?business_id=eq." + biz.id + "&active=eq.true&select=id,group_id"); svSrc = gs.ok && Array.isArray(gs.data) ? gs.data : []; }
+      (svSrc || []).forEach((x) => { if (x.group_id) { grpOf[x.id] = x.group_id; grpCount[x.group_id] = (grpCount[x.group_id] || 0) + 1; } });
+    } catch (e) {}
     return res.status(200).json({
       business: biz.name,
       timezone: tz,
@@ -1870,7 +1878,7 @@ module.exports = async (req, res) => {
         units: a.units || null,
         service_id: a.service_id || null,
         mode: a.services ? modes.modeOf(a.services) : "sede",
-        mode_multi: (() => { const sv = (biz.services || []).find((x) => x.id === a.service_id); return !!(sv && sv.group_id && biz.services.filter((x) => x.group_id === sv.group_id).length > 1); })(),
+        mode_multi: !!(a.service_id && grpOf[a.service_id] && grpCount[grpOf[a.service_id]] > 1),
         notes: a.notes,
         status: a.status,
         service: a.services ? a.services.name : null,
