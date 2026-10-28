@@ -34,10 +34,12 @@
     feedback: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>',
     med: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 9v5M9.5 11.5h5"/></svg>',
     sub: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18M7 15h4"/></svg>',
+    bars: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-11"/></svg>',
+    reply: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>',
     clock: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
-  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4" };
-  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med };
+  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6" };
+  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply };
 
   function build() {
     var bell = document.getElementById("bellBtn");
@@ -75,7 +77,7 @@
   function markSeen(k) { ls("s", SEEN + k, "1"); }
   function noticeAlive(n) {
     // il promemoria del lunedi' gia' letto sparisce dopo 5 ore; gli altri restano finche' servono (lo dice il server)
-    if (n.type !== "closures_reminder") return true;
+    if (n.type !== "closures_reminder" && n.type !== "weekly_recap" && n.type !== "support_reply") return true;
     if (pinned[kOf(n)]) return true;
     var t = Date.parse(n.created_at);
     return !isSeen(kOf(n)) || !(Date.now() - t >= LIFE);
@@ -143,6 +145,13 @@
         text: data.team ? "Controlla chiusure, ferie e assenze." : "Controlla chiusure e ferie.",
         cta: "Apri Chiusure e ferie", time: ago(n.created_at)
       };
+    }
+    if (n.type === "weekly_recap") {
+      var wn = Number(meta.count) || 0, wa = Math.round(Number(meta.amount) || 0);
+      return { title: "Riepilogo della settimana", text: "Lia ha preso " + wn + (wn === 1 ? " prenotazione" : " prenotazioni") + (wa > 0 ? ", circa " + wa.toLocaleString("it-IT") + " \u20ac" : "") + ".", cta: "", time: ago(n.created_at) };
+    }
+    if (n.type === "support_reply") {
+      return { title: "Prenolia ti ha risposto", text: meta.excerpt || "Apri la risposta alla tua richiesta.", cta: "Leggi la risposta", time: ago(n.created_at) };
     }
     if (n.type === "feedback_ask") {
       return { title: "Come ti trovi con Prenolia?", text: "Ci vuole un minuto: dicci cosa funziona e cosa manca.", cta: "Rispondi", time: "" };
@@ -261,6 +270,7 @@
     if ((type === "member_expiring" || type === "medical_expiring") && window.liaGymMember) return window.liaGymMember(mid);
     if (type === "closures_reminder") { if (data && data.gym && window.liaGym) { var om = document.getElementById("menuTabOther"); if (om) om.click(); return setTimeout(function () { window.liaGym.openSetting("chiusure"); }, 80); } return openSettings("blocks"); }
     if (type === "sub_expiring") return openSettings("subscription");
+    if (type === "support_reply") { var os = document.getElementById("menuTabOther"); if (os) os.click(); return setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); if (window.liaSupportList) window.liaSupportList(); }, 80); }
     if (type === "feedback_ask" && window.liaFeedbackOpen) window.liaFeedbackOpen(true);
   }
 

@@ -180,6 +180,8 @@ body:not(.lia-pack-on) #panelOther .stRow[data-st="combos"],body:not(.lia-pack-o
 .lr-it .ic.k1{background:linear-gradient(145deg,#F7AA2B,#E88A17)}
 .lr-it .ic.k2{background:linear-gradient(145deg,#9279F4,#6E52DB)}
 .lr-it .ic.k3{background:linear-gradient(145deg,#FF9484,#E2584A)}
+.lr-it .ic.k5{background:linear-gradient(145deg,#34A0AB,#27808A);color:#fff}
+.lr-it .ic.k6{background:linear-gradient(145deg,#5FB0FF,#2F7FE0);color:#fff}
 .lr-it .ic.k4{background:linear-gradient(145deg,#E9B955,#B8861F);color:#2A1E04}
 .lr-secmed{color:#C9A04A}
 .lr-it.med.bad{background:color-mix(in srgb,#E2584A 7%,transparent)}
