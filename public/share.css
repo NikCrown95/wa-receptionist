@@ -302,10 +302,10 @@ body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
    Vale solo per le attivita' normali (body.mnB, messo da share.js): palestre e circoli tengono il menu di prima. */
 #burgerMenu .mnGrp{display:none}
 body.mnOn.mnB #burgerMenu .mnGrp{display:block;flex:none;padding:12px 10px 4px;font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-body.mnOn.mnB #burgerMenu > button[data-sub]{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:13px;row-gap:1px;align-items:center;align-content:center;min-height:56px;padding:0 10px;font-size:.97rem}
-body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-column:1;grid-row:1 / span 2;width:22px;height:22px;padding:0;margin:0 7px;box-sizing:border-box;border:0;background:none;color:var(--muted)}
-body.mnOn.mnB #burgerMenu > button[data-sub]::after{content:attr(data-sub);grid-column:2;grid-row:2;min-width:0;font-size:.74rem;font-weight:500;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-column:3;grid-row:1 / span 2;align-self:center}
+body.mnOn.mnB #burgerMenu > button[data-sub]{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:13px;row-gap:1px;align-items:center;align-content:center;min-height:50px;padding:0 10px;font-size:.97rem}
+body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-column:1;grid-row:1;width:22px;height:22px;padding:0;margin:0 7px;box-sizing:border-box;border:0;background:none;color:var(--muted)}
+body.mnOn.mnB #burgerMenu > button[data-sub]::after{display:none;content:attr(data-sub);grid-column:2;grid-row:2;min-width:0;font-size:.74rem;font-weight:500;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-column:3;grid-row:1;align-self:center}
 body.mnOn.mnB:not(.mnGOn):not(.mnAOn) #burgerMenu > button[data-sub][aria-current="true"] > svg,
 body.mnOn.mnB.mnGOn #burgerMenu > #menuTabGuide[aria-current="true"] > svg,
 body.mnOn.mnB.mnAOn #burgerMenu > #menuTabAvail[aria-current="true"] > svg{background:none;border:0;color:var(--accent-ink)}
@@ -316,7 +316,7 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;ma
    Le 9 righe (8 voci piu' Esci) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
    Sotto l'altezza minima il menu torna a scorrere. */
 @media (max-width:699px){
-  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(40px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),56px);min-height:clamp(40px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),56px)}
+  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(40px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),50px);min-height:clamp(40px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),50px)}
 }
 @media (max-width:699px) and (max-height:719px){
   body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(34px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),50px);min-height:clamp(34px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),50px)}
