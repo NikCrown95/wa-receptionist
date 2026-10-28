@@ -1085,7 +1085,7 @@ function pfRenderPoster(box,b,opts){
 
   /* ---- Impostazioni: canali, abbonamento, elimina account, assistenza ---- */
   /* Dati di prova: sostituiscili con quelli veri (contatti, bot Telegram, prezzi). */
-  window.LIA_SUPPORT=window.LIA_SUPPORT||{whatsapp:'+39 000 000 0000',email:'assistenza@lia.example'};
+  window.LIA_SUPPORT=window.LIA_SUPPORT||{whatsapp:'+39 345 827 6260',email:'nico.corona95@icloud.com'};
   window.LIA_CHANNELS=window.LIA_CHANNELS||{telegramLink:'https://t.me/LiaDemoBot?start=collega'};
   window.LIA_PLANS=window.LIA_PLANS||{base:{name:'Base',price:16.99},premium:{name:'Smart',price:24.99}};
   function stMk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
