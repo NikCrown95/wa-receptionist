@@ -121,3 +121,23 @@
     });
   }catch(e){}
 })();
+
+// --- Toccando la notifica di una nuova prenotazione si apre il calendario sul giorno giusto e la prenotazione lampeggia (come dalla campanella) ---
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    if(q.get('open')!=='booking')return;
+    var at=q.get('at')||'';
+    if(!at||isNaN(new Date(at).getTime()))return;
+    var name=q.get('n')||'',svc=q.get('s')||'';
+    try{var u=new URL(location.href);['open','at','n','s'].forEach(function(k){u.searchParams.delete(k)});history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}
+    var tries=0;
+    (function go(){
+      var cal=document.getElementById('menuTabCal');
+      if(typeof window.liaOpenDate!=='function'||!cal){if(++tries<40)setTimeout(go,150);return}
+      cal.click();
+      window.liaFocusEv={name:name,svc:'',start:at,exp:Date.now()+9000,first:0,bad:false};
+      setTimeout(function(){if(typeof window.liaOpenDate==='function')window.liaOpenDate(at)},120);
+    })();
+  }catch(e){}
+})();
