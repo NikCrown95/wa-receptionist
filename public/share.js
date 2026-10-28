@@ -174,7 +174,7 @@
     av.addEventListener("click", function () { closeMenu(); if (window.liaAvailOpen) window.liaAvailOpen(); });
     menu.insertBefore(av, other);
     /* Locandina per la vetrina: voce propria nel menu, apre Scheda attivita' sulla locandina */
-    var po = mk("button", "", I.print + "Locandina");
+    var po = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="4.5" y="2.5" width="15" height="19" rx="1.8"/><path d="M8 6.2h8"/><rect x="8" y="9.5" width="3.2" height="3.2" rx=".6"/><rect x="12.8" y="9.5" width="3.2" height="3.2" rx=".6"/><rect x="8" y="14.3" width="3.2" height="3.2" rx=".6"/><path d="M13 15.2h3M14.4 17.4H16"/></svg>Locandina');
     po.type = "button"; po.id = "menuTabPoster"; po.setAttribute("role", "menuitem"); po.setAttribute("aria-current", "false");
     po.addEventListener("click", openPoster);
     menu.insertBefore(po, other);
