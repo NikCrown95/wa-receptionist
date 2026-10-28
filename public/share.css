@@ -303,14 +303,14 @@ body.mnOn #burgerMenu > button > svg{width:22px;height:22px}
 #burgerMenu .mnGrp{display:none}
 body.mnOn.mnB #burgerMenu .mnGrp{display:block;flex:none;padding:12px 10px 4px;font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 body.mnOn.mnB #burgerMenu > button[data-sub]{display:grid;grid-template-columns:36px minmax(0,1fr) auto;column-gap:13px;row-gap:1px;align-items:center;align-content:center;min-height:56px;padding:0 10px;font-size:.97rem}
-body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-column:1;grid-row:1 / span 2;width:36px;height:36px;padding:8px;box-sizing:border-box;border-radius:10px;background:var(--card);border:1px solid var(--line2);color:var(--muted)}
+body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-column:1;grid-row:1 / span 2;width:22px;height:22px;padding:0;margin:0 7px;box-sizing:border-box;border:0;background:none;color:var(--muted)}
 body.mnOn.mnB #burgerMenu > button[data-sub]::after{content:attr(data-sub);grid-column:2;grid-row:2;min-width:0;font-size:.74rem;font-weight:500;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-column:3;grid-row:1 / span 2;align-self:center}
 body.mnOn.mnB:not(.mnGOn):not(.mnAOn) #burgerMenu > button[data-sub][aria-current="true"] > svg,
 body.mnOn.mnB.mnGOn #burgerMenu > #menuTabGuide[aria-current="true"] > svg,
-body.mnOn.mnB.mnAOn #burgerMenu > #menuTabAvail[aria-current="true"] > svg{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+body.mnOn.mnB.mnAOn #burgerMenu > #menuTabAvail[aria-current="true"] > svg{background:none;border:0;color:var(--accent-ink)}
 body.mnOn.mnB #burgerMenu > .logoutBtn{gap:13px;padding:0 10px;min-height:52px}
-body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:36px;height:36px;padding:8px;box-sizing:border-box;border-radius:10px;border:1px solid color-mix(in srgb,var(--danger) 40%,var(--line2));background:transparent}
+body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;margin:0 7px;box-sizing:border-box;border:0;background:none}
 
 /* telefono: il menu raggruppato entra per intero nello schermo, senza scorrere.
    Le 9 righe (8 voci piu' Esci) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
@@ -322,9 +322,9 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:36px;height:36px;padding:8px;
   body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(34px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/9),50px);min-height:clamp(34px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/9),50px)}
   body.mnOn.mnB #burgerMenu > button[data-sub]::after{display:none}
   body.mnOn.mnB #burgerMenu > button[data-sub]{grid-template-columns:32px minmax(0,1fr) auto}
-  body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-row:1;width:32px;height:32px;padding:7px}
+  body.mnOn.mnB #burgerMenu > button[data-sub] > svg{grid-row:1;width:24px;height:24px;padding:0;margin:0 4px}
   body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-row:1}
-  body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:32px;height:32px;padding:7px}
+  body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:24px;height:24px;padding:0;margin:0 4px}
 }
 
 /* foglio "Locandina per la vetrina" (si apre dal menu, come il QR) */
