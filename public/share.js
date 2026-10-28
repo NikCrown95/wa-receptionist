@@ -612,7 +612,84 @@
     return G;
   }
   var M_SUB = "Menu › Impostazioni › Abbonamento";
+  /* Guida a percorsi (attivita' normali): elenco di percorsi, poi un passo alla volta con la schermata vera e il riquadro sul punto giusto. */
+  function usePaths(b) { return !b.gym && !isCourts() && !window.__LIA_MED; }
+  var PATHSK = "lia:guide:paths:" + token;
+  function loadPaths() {
+    if (window.LIA_PATHS) return Promise.resolve(window.LIA_PATHS);
+    return new Promise(function (res) {
+      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=1";
+      sc.onload = function () { res(window.LIA_PATHS || null); }; sc.onerror = function () { res(null); };
+      document.head.appendChild(sc);
+    });
+  }
+  function esc2(x) { return String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function buildPathGuide() {
+    var done = {}, term = "", cur = null, D = null;
+    try { done = JSON.parse(ls("g", PATHSK) || "{}") || {}; } catch (e) { done = {}; }
+    guide = mk("div", "mnLayer"); guide.id = "mnGuide"; guide.hidden = true; guide.className += " gp";
+    guide.setAttribute("role", "dialog"); guide.setAttribute("aria-modal", "true"); guide.setAttribute("aria-labelledby", "mnGuideT");
+    guide.innerHTML = '<div class="mnGuide"><div class="mnGuideIn"><div id="mnGBody"></div></div></div>';
+    document.body.appendChild(guide);
+    var body = guide.querySelector("#mnGBody"), scr = guide.querySelector(".mnGuide");
+    var img = function (k) { return "/guida/" + k + ".jpg?v=1"; };
+    function home() {
+      cur = null;
+      var s = term.trim().toLowerCase(), h =
+        '<div class="mnGH"><button type="button" class="mnBack" data-close="1" aria-label="Indietro">' + I.back + '</button><div class="gpHd"><h2 id="mnGuideT">Guida</h2></div></div>' +
+        '<div class="gpHd"><p>Scegli cosa vuoi fare. Ogni percorso ti mostra le schermate vere di Prenolia, un passo alla volta, e dove toccare.</p></div>' +
+        '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “ferie”" aria-label="Cerca nella guida" autocomplete="off" value="' + esc2(term).replace(/"/g, "&quot;") + '"></label>';
+      if (!D) { body.innerHTML = h + '<p class="mnEmpty">Un attimo…</p>'; return; }
+      var n = 0; h += '<div class="gpGrid">';
+      D.paths.forEach(function (p, i) {
+        if (s && (p.t + " " + p.s + " " + p.steps.map(function (x) { return x[1] + " " + x[2] + " " + x[3]; }).join(" ")).toLowerCase().indexOf(s) < 0) return;
+        n++;
+        h += '<button type="button" class="gpPc" data-p="' + i + '"><span class="gpTh" style="background-image:url(' + img(p.steps[0][0]) + ')"></span><span><h3>' + esc2(p.t) + "</h3><p>" + esc2(p.s) + '</p><span class="gpMt">' + (p.tag ? '<span class="gpTg">' + esc2(p.tag) + "</span>" : "") + "<span>" + p.steps.length + " passi · " + p.min + " min</span>" + (done[p.id] ? '<span class="gpOk">✓ Fatto</span>' : "") + "</span></span>" + I.chev + "</button>";
+      });
+      h += "</div>" + (n ? "" : '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>');
+      h += '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>";
+      body.innerHTML = h;
+      var q = body.querySelector("#mnGuideQ");
+      if (q) q.addEventListener("input", function () { term = this.value; var pos = term.length; home(); var q2 = body.querySelector("#mnGuideQ"); if (q2) { q2.focus(); try { q2.setSelectionRange(pos, pos); } catch (e) {} } });
+    }
+    function step(pi, si) {
+      var p = D.paths[pi], n = p.steps.length;
+      cur = [pi, si];
+      var back = '<div class="gpBar"><button type="button" class="mnBack" data-home="1" aria-label="Torna ai percorsi">' + I.back + '</button><span class="gpNm" id="mnGuideT">' + esc2(p.t) + "</span>";
+      if (si >= n) {
+        done[p.id] = 1; ls("s", PATHSK, JSON.stringify(done));
+        var nx = D.paths[pi + 1];
+        body.innerHTML = back + '</div><div class="gpDone"><h3>Percorso completato</h3><p>Hai visto tutti i passi di “' + esc2(p.t) + "”.</p>" +
+          (nx ? '<button type="button" class="gpBtn pri" data-p="' + (pi + 1) + '" style="width:100%">Prossimo: ' + esc2(nx.t) + "</button>" : "") +
+          '<button type="button" class="gpBtn" data-home="1" style="width:100%;margin-top:10px">Torna ai percorsi</button></div>';
+        scr.scrollTop = 0; return;
+      }
+      var st = p.steps[si], seg = "", bx = D.box[st[0]];
+      for (var i = 0; i < n; i++) seg += '<i class="' + (i <= si ? "on" : "") + '"></i>';
+      body.innerHTML = back + '<span class="gpCt">' + (si + 1) + " di " + n + '</span></div><div class="gpSeg">' + seg + "</div>" +
+        '<div class="gpStage"><div class="gpPhone"><div class="gpShot"><img src="' + img(st[0]) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
+        (bx ? '<span class="gpRing" style="left:' + bx[0] + "%;top:" + bx[1] + "%;width:" + bx[2] + "%;height:" + bx[3] + '%"></span>' : "") + "</div></div>" +
+        '<div class="gpCopy"><span class="gpN">Passo ' + (si + 1) + "</span><h3>" + esc2(st[1]) + "</h3><p>" + esc2(st[2]) + '</p><span class="gpWhere">' + esc2(st[3]) + "</span>" +
+        '<div class="gpNav"><button type="button" class="gpBtn" data-go="' + (si - 1) + '"' + (si ? "" : " disabled") + '>Indietro</button><button type="button" class="gpBtn pri" data-go="' + (si + 1) + '">' + (si === n - 1 ? "Fine" : "Avanti") + "</button></div></div></div>";
+      scr.scrollTop = 0;
+    }
+    body.addEventListener("click", function (ev) {
+      var t = ev.target, a = t.closest("[data-p]"), g = t.closest("[data-go]"), h = t.closest("[data-home]"), c = t.closest("[data-close]");
+      if (c) { closeGuide(); return; }
+      if (a) { step(+a.getAttribute("data-p"), 0); return; }
+      if (g && cur && !g.disabled) { step(cur[0], +g.getAttribute("data-go")); return; }
+      if (h) { home(); scr.scrollTop = 0; return; }
+      if (t.closest("#mnHelp")) {
+        closeGuide(); var o = $("menuTabOther"); if (o) o.click();
+        setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); }, 80);
+      }
+    });
+    guide.__gpReset = function () { term = ""; home(); scr.scrollTop = 0; };
+    home();
+    loadPaths().then(function (d) { D = d; if (!D) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; } if (!cur) home(); });
+  }
   function buildGuide(b) {
+    if (usePaths(b)) return buildPathGuide();
     var d = guideFor(b), open = {}, term = "", full = true; /* niente percorso iniziale in 3 passi: la guida si apre subito completa */
     if (d.tiers[0] && d.tiers[0].topics[0]) open[d.tiers[0].topics[0].id] = true;
     guide = mk("div", "mnLayer");
@@ -700,11 +777,11 @@
     var nw = document.querySelector("#menuTabGuide .mnNew"); if (nw) nw.hidden = true;
     load().then(function (b) {
       b = b || { name: "", plan: "", gym: false, classes: true, personal: true, rental: false, links: [] };
-      if (!guide) buildGuide(b);
+      if (!guide) buildGuide(b); else if (guide.__gpReset) guide.__gpReset();
       lastFocus = document.activeElement;
       guide.hidden = false; markGuide(true); guideTop();
       var sc = guide.querySelector(".mnGuide"); if (sc) sc.scrollTop = 0;
-      var bk = $("mnGuideBack"); if (bk) bk.focus();
+      var bk = $("mnGuideBack") || guide.querySelector(".mnBack"); if (bk) bk.focus();
     });
   }
   var guidePrev = [], guidePrevLbl = "";

@@ -336,3 +336,46 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:36px;height:36px;padding:8px;
 .mnPst .mnPstGo:disabled{opacity:.6;cursor:default}
 .mnPst .mnPstMsg{margin:8px 0 0;min-height:1.1em;font-size:.8rem;text-align:center;color:var(--accent-ink);font-weight:650}
 .mnQrOnly.mnPstL .mnSheet{overflow-y:auto}
+
+/* ---------- Guida a percorsi (attivita' normali): schermate vere, un passo alla volta ---------- */
+#mnGuide.gp .mnGuideIn{max-width:900px}
+.gpHd h2{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+.gpHd p{margin:8px 0 0;color:var(--muted);font-size:.92rem;line-height:1.45;max-width:52ch}
+.gpGrid{margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gpPc{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:13px;align-items:center;width:100%;text-align:left;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer}
+.gpPc:hover{border-color:var(--accent)}
+.gpPc .gpTh{width:54px;aspect-ratio:390/560;border-radius:10px;background-size:cover;background-position:top center;border:1px solid var(--line2)}
+.gpPc h3{margin:0;font-size:.96rem;font-weight:800;line-height:1.25}
+.gpPc p{margin:3px 0 0;color:var(--muted);font-size:.8rem;line-height:1.35}
+.gpMt{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:7px;font-size:.72rem;font-weight:700;color:var(--muted)}
+.gpMt .gpTg{color:var(--accent-ink);background:var(--accent-soft);border-radius:7px;padding:0 8px}
+.gpMt .gpOk{color:var(--accent-ink)}
+.gpPc > svg{color:var(--muted)}
+.gpBar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.gpBar .gpNm{flex:1;min-width:0;font-weight:800;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gpBar .gpCt{font-size:.82rem;color:var(--muted);font-weight:700;white-space:nowrap}
+.gpSeg{display:flex;gap:5px;margin-bottom:20px}.gpSeg i{flex:1;height:4px;border-radius:3px;background:var(--line2)}.gpSeg i.on{background:var(--accent)}
+.gpStage{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:center}
+.gpPhone{width:100%;max-width:200px;margin:0 auto;border-radius:32px;border:1px solid var(--line2);background:#050e11;padding:6px;box-shadow:0 16px 38px rgba(0,0,0,.22)}
+.gpShot{position:relative;aspect-ratio:390/844;border-radius:26px;overflow:hidden;background:#08151A}
+.gpShot img{display:block;width:100%;height:100%;object-fit:cover}
+.gpRing{position:absolute;border-radius:13px;border:2px solid #7FDCDC;box-shadow:0 0 0 999px rgba(6,18,22,.5);pointer-events:none}
+.gpRing::after{content:"";position:absolute;inset:-7px;border-radius:18px;border:2px solid #7FDCDC;opacity:0;animation:gpPulse 2s ease-out infinite}
+@keyframes gpPulse{0%{opacity:.8;transform:scale(.97)}100%{opacity:0;transform:scale(1.06)}}
+.gpCopy .gpN{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
+.gpCopy h3{margin:6px 0 10px;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.gpCopy p{margin:0;color:var(--muted);font-size:.98rem;line-height:1.55;max-width:44ch}
+.gpWhere{display:inline-block;margin-top:14px;font-size:.82rem;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);border-radius:10px;padding:6px 12px}
+.gpNav{position:sticky;bottom:0;display:flex;gap:10px;margin:22px -18px 0;padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line)}
+.gpBtn{flex:1;min-height:48px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-size:.95rem;font-weight:800;cursor:pointer}
+.gpBtn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+.gpBtn[disabled]{opacity:.4;cursor:default}
+.gpDone{margin:6px auto 0;padding:26px 20px;max-width:520px;text-align:center;border-radius:20px;background:var(--card);border:1px solid var(--line)}
+.gpDone h3{margin:0;font-size:1.4rem;font-weight:800}.gpDone p{margin:8px 0 18px;color:var(--muted)}
+@media (min-width:760px){
+  .gpStage{grid-template-columns:minmax(0,290px) minmax(0,1fr);gap:28px 52px}
+  .gpPhone{max-width:290px}
+  .gpNav{position:static;margin:26px 0 0;padding:0;border:0;background:none;max-width:360px}
+}
+@media (max-width:640px){.gpGrid{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.gpRing::after{animation:none}}
