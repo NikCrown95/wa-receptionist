@@ -187,7 +187,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
       </div>
       <div class="field"><label for="nPlan">Piano</label>
         <select class="inp" id="nPlan">
-          <option value="ai">Smart — 24,99 €/mese</option>
+          <option value="ai">Smart — 21,99 €/mese</option>
         </select>
       </div>
     </div>
@@ -209,7 +209,7 @@ nav a.on{background:var(--card2);color:var(--ink);}
 
 <script>
 window.startClients = function(){
-  var PLAN_PRICE = { base: 39.99, ai: 24.99 };
+  var PLAN_PRICE = { base: 39.99, ai: 21.99 };
   var PLAN_LABEL = { base: 'Base', ai: 'Smart' };
   var STATUS_LABEL = { active: 'Attivo', trial: 'In prova', past_due: 'Scaduto', cancelled: 'Annullato', none: 'Senza piano' };
   var eur = new Intl.NumberFormat('it-IT', { style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2 });
@@ -443,7 +443,7 @@ window.startClients = function(){
     box.appendChild(rb);
 
     if (c.status === 'none') {
-      add('Assegna piano Smart (24,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
+      add('Assegna piano Smart (21,99 €/mese)', '', { action: 'assign_plan', plan: 'ai' });
       add('Smart in prova gratuita (14 giorni)', 'ghost', { action: 'assign_plan', plan: 'ai', status: 'trial' });
     } else if (c.status === 'cancelled') {
       add('Riattiva (1 mese da oggi)', '', { action: 'reactivate' }, 'Riattivare ' + c.name + ' per 1 mese a partire da oggi?');
@@ -517,7 +517,7 @@ window.startClients = function(){
       opts.forEach(function(o){ var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; s.appendChild(op); });
       s.value = String(val); return s;
     }
-    var selPlan = sel([['ai', 'Smart (24,99 €/mese)']], 'ai');
+    var selPlan = sel([['ai', 'Smart (21,99 €/mese)']], 'ai');
     var statusOpts = locked ? [['active', 'Attivo (pagato)']] : [['trial', 'In prova gratuita'], ['active', 'Attivo (pagato)']];
     var selStatus = sel(statusOpts, locked ? 'active' : ('trial'));
     var selDur = document.createElement('select'); selDur.className = 'inp';

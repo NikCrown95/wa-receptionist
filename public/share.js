@@ -551,7 +551,7 @@
               ["Come collego Telegram?", "Crei il tuo bot in un tocco e i clienti prenotano da lì. Ricevi l’agenda del giorno sul tuo Telegram e puoi spegnerla.", M + "Impostazioni › Telegram"]
             ] },
             { id: "t10", ic: "card", n: "Piano e account", d: "Costi, prova e disdetta", q: [
-              ["Quanto costa e cosa include?", "Il piano Smart costa 24,99 € al mese: calendario, prenotazione online dei clienti e Lia su webchat e Telegram.", M + "Impostazioni › Abbonamento"],
+              ["Quanto costa e cosa include?", "Il piano Smart costa 21,99 € al mese: calendario, prenotazione online dei clienti e Lia su webchat e Telegram.", M + "Impostazioni › Abbonamento"],
               ["Come funzionano prova e scadenza?", "Hai 14 giorni di prova gratuita. Alla scadenza del piano ci sono 3 giorni di tolleranza prima della sospensione.", M + "Impostazioni › Abbonamento"],
               ["Posso disdire?", "Sì, quando vuoi. Il servizio resta attivo fino alla fine del mese già pagato, senza rimborsi.", M + "Impostazioni › Abbonamento"]
             ] }
@@ -603,7 +603,7 @@
           tp.q = [tp.q[0], ["Posso scrivere note sui pazienti?", "No, per scelta: negli studi sanitari Prenolia non ha note libere, così non raccoglie informazioni sulla salute. Cartelle e note cliniche restano nel tuo gestionale o nel tuo archivio.", ""], tp.q[2]];
         }
         if (tp.id === "t10") {
-          tp.q[0] = ["Quanto costa e cosa include?", "Il piano Smart costa 24,99 € al mese: calendario e prenotazione online dei pazienti, con la privacy rafforzata (niente chat, niente note libere).", M_SUB];
+          tp.q[0] = ["Quanto costa e cosa include?", "Il piano Smart costa 21,99 € al mese: calendario e prenotazione online dei pazienti, con la privacy rafforzata (niente chat, niente note libere).", M_SUB];
         }
       });
     });

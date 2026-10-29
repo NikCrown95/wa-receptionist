@@ -1104,7 +1104,7 @@ function pfRenderPoster(box,b,opts){
   /* Dati di prova: sostituiscili con quelli veri (contatti, bot Telegram, prezzi). */
   window.LIA_SUPPORT=window.LIA_SUPPORT||{whatsapp:'',email:''}; /* contatti assistenza disattivati per ora: compila qui per riattivarli */
   window.LIA_CHANNELS=window.LIA_CHANNELS||{telegramLink:'https://t.me/LiaDemoBot?start=collega'};
-  window.LIA_PLANS=window.LIA_PLANS||{base:{name:'Base',price:16.99},premium:{name:'Smart',price:24.99}};
+  window.LIA_PLANS=window.LIA_PLANS||{base:{name:'Base',price:16.99},premium:{name:'Smart',price:21.99}};
   function stMk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
   function stD(){var d=window.liaProfileData||{},b=d.business||{},pn=b.plan_name||'',prem=(pn==='Base+Lia');return {b:b,sub:b.subscription||null,prem:prem,known:(pn==='Base'||prem)}}
   function stEur(n){return Number(n).toLocaleString('it-IT',{style:'currency',currency:'EUR'})}
