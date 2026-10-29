@@ -57,12 +57,9 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
 .ok .mail svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ok h1{margin-bottom:8px}
 .hint{margin-top:6px;font-size:.8rem;color:var(--muted)}
-.more{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;padding:12px 14px;border-radius:14px;border:1px dashed rgba(45,210,220,.5);background:rgba(45,210,220,.07);font-size:.92rem;color:var(--accent);font-weight:600;transition:background .15s,border-color .15s}
-.more svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.more:hover{background:rgba(45,210,220,.11);border-color:rgba(45,210,220,.7)}
-.more .go{margin-left:auto;font-weight:500;color:var(--muted);font-size:.8rem}
+.more{all:unset;cursor:pointer;display:inline-block;margin-top:14px;font-size:.88rem;color:var(--accent);font-weight:600}
 .more:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
-#refwrap{display:none;margin-top:16px;padding:2px 14px 14px;border-radius:14px;border:1px dashed rgba(45,210,220,.5);background:rgba(45,210,220,.07)}
+#refwrap{display:none}
 #refwrap .hint.good{color:#7BE3B0}
 .chk{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:.84rem;line-height:1.45;color:var(--muted)}
 .chk input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--accent)}
@@ -76,6 +73,37 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   .logo{--lp:center;margin:0 auto}
   .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}
   .card{padding:26px 20px}.row2{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  body{padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));min-height:100vh;min-height:100dvh}
+  .side{gap:8px;margin-bottom:12px}
+  .logo{width:132px;height:31.5px}
+  .side h2{font-size:1.35rem;line-height:1.1}
+  .card{padding:16px 16px 14px;border-radius:22px}
+  .row2{gap:0}
+  h1{font-size:1.25rem;margin:0}.sub{font-size:.86rem;margin:0}
+  label{margin:10px 0 4px;font-size:.8rem}
+  .inp{min-height:44px;border-radius:12px}.eye{top:3px;height:38px}
+  .hint{margin-top:4px;font-size:.74rem;line-height:1.3}
+  .more{margin-top:10px;font-size:.84rem}
+  .chk{margin-top:12px;font-size:.76rem;line-height:1.35}
+  .btn{min-height:48px;margin-top:14px}
+  .foot{margin-top:10px;font-size:.84rem}.foot + .foot{display:none}
+  .invite{margin:8px 0 0;padding:7px 12px;font-size:.8rem;line-height:1.3}
+  #refwrap label{margin-top:8px}
+}
+@media (max-width:900px) and (max-height:760px){
+  .side{margin-bottom:8px}
+  .side h2{font-size:1.05rem;white-space:nowrap}
+  .card{padding:14px 14px 12px}
+  .inp{min-height:42px}.eye{top:2px;height:38px}
+  label{margin:8px 0 3px}
+  .chk{margin-top:10px}
+  .btn{min-height:46px;margin-top:12px}
+}
+@media (max-width:900px) and (max-height:680px){
+  .sub{display:none}
+  .more{margin-top:8px}
 }
 @keyframes plsnow{0%,100%{box-shadow:0 0 0 4px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}50%{box-shadow:0 0 0 12px rgba(45,210,220,.04),0 8px 34px -6px rgba(45,210,220,.9)}}
 .spin{display:inline-block;width:22px;height:22px;border-radius:50%;border:3px solid rgba(3,16,22,.25);border-top-color:var(--on-accent);animation:rot .7s linear infinite;vertical-align:middle}
@@ -118,7 +146,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
       </div>
       <p class="hint">Password: almeno 8 caratteri, un numero e un carattere speciale.</p>
 
-      <button type="button" class="more" id="refopen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 6v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a2 2 0 0 1 0-6V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>Hai un codice invito?<span class="go">Inseriscilo</span></button>
+      <button type="button" class="more" id="refopen">Hai un codice invito?</button>
       <div id="refwrap">
         <label for="refcode">Codice invito (facoltativo)</label>
         <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
