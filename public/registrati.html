@@ -19,7 +19,11 @@ h1,h2,p{margin:0}button{font-family:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
 .shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,480px);gap:72px;align-items:center;min-height:calc(100vh - 100px)}
 .side{display:flex;flex-direction:column;gap:30px}
-.logo{display:block;width:150px;height:36px;background:var(--logo) left center / contain no-repeat}
+.logo{--lp:left center;position:relative;display:block;width:150px;height:36px;background:var(--logo) var(--lp) / contain no-repeat}
+.logo .a{position:absolute;inset:0;pointer-events:none;animation:aglow 3.6s ease-in-out infinite}
+.logo .a::before{content:"";position:absolute;inset:0;background:var(--logo) var(--lp) / contain no-repeat;clip-path:inset(0 0 0 79.5%)}
+@keyframes aglow{0%,100%{filter:drop-shadow(0 0 1px rgba(45,210,220,.15))}50%{filter:drop-shadow(0 0 6px rgba(45,210,220,.9)) drop-shadow(0 0 14px rgba(47,123,255,.45))}}
+@media (prefers-reduced-motion:reduce){.logo .a{animation:none;filter:drop-shadow(0 0 4px rgba(45,210,220,.5))}}
 .side h2{font-size:2.5rem;line-height:1.08;font-weight:800;letter-spacing:-.035em;text-wrap:balance;max-width:15ch}
 .side .lead{color:var(--muted);font-size:1.05rem;max-width:36ch}
 .path{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:0;position:relative}
@@ -53,9 +57,13 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
 .ok .mail svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ok h1{margin-bottom:8px}
 .hint{margin-top:6px;font-size:.8rem;color:var(--muted)}
-.more{all:unset;cursor:pointer;display:inline-block;margin-top:14px;font-size:.88rem;color:var(--accent);font-weight:600}
+.more{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;padding:12px 14px;border-radius:14px;border:1px dashed rgba(45,210,220,.5);background:rgba(45,210,220,.07);font-size:.92rem;color:var(--accent);font-weight:600;transition:background .15s,border-color .15s}
+.more svg{flex:none;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.more:hover{background:rgba(45,210,220,.11);border-color:rgba(45,210,220,.7)}
+.more .go{margin-left:auto;font-weight:500;color:var(--muted);font-size:.8rem}
 .more:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
-#refwrap{display:none}
+#refwrap{display:none;margin-top:16px;padding:2px 14px 14px;border-radius:14px;border:1px dashed rgba(45,210,220,.5);background:rgba(45,210,220,.07)}
+#refwrap .hint.good{color:#7BE3B0}
 .chk{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:.84rem;line-height:1.45;color:var(--muted)}
 .chk input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--accent)}
 .chk a{color:var(--accent)}
@@ -65,7 +73,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
 @media (max-width:900px){
   .shell{display:block;max-width:480px;min-height:0}
   .side{gap:14px;margin-bottom:24px;align-items:center;text-align:center}
-  .logo{background-position:center;margin:0 auto}
+  .logo{--lp:center;margin:0 auto}
   .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}
   .card{padding:26px 20px}.row2{grid-template-columns:1fr}
 }
@@ -78,7 +86,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
 <body>
 <div class="shell">
   <aside class="side">
-    <div class="logo" role="img" aria-label="Prenolia"></div>
+    <div class="logo" role="img" aria-label="Prenolia"><span class="a" aria-hidden="true"></span></div>
     <h2>La tua agenda, pronta in pochi minuti</h2>
     <p class="lead">Crea l'account e ti guidiamo passo passo. Poi Lia, la tua assistente virtuale, risponde ai clienti e fissa gli appuntamenti al posto tuo.</p>
     <ol class="path">
@@ -110,7 +118,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
       </div>
       <p class="hint">Password: almeno 8 caratteri, un numero e un carattere speciale.</p>
 
-      <button type="button" class="more" id="refopen">Hai un codice invito?</button>
+      <button type="button" class="more" id="refopen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 6v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a2 2 0 0 1 0-6V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14 6v12" stroke-dasharray="2 2.5"/></svg>Hai un codice invito?<span class="go">Inseriscilo</span></button>
       <div id="refwrap">
         <label for="refcode">Codice invito (facoltativo)</label>
         <input class="inp" id="refcode" type="text" maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
@@ -163,7 +171,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
       var asked = ref;
       fetch('/api/business-auth?action=ref-check&code=' + encodeURIComponent(asked)).then(function (r) { return r.json(); }).then(function (j) {
         if (asked !== ref) return;
-        refMsg.textContent = j && j.valid ? 'Invitato da ' + j.name + '.' : 'Codice non trovato: puoi comunque registrarti.';
+        refMsg.textContent = j && j.valid ? 'Invitato da ' + j.name + '.' : 'Codice non trovato: puoi comunque registrarti.'; refMsg.className = 'hint' + (j && j.valid ? ' good' : '');
       }).catch(function () {});
     }, 350);
   }
