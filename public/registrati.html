@@ -229,7 +229,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   refInp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); checkRef(); } });
   if (ref) { document.getElementById('invite').hidden = false; checkRef(); }
 
-  function goLabel() { return window.matchMedia('(max-width:900px)').matches ? 'Inizia 14 giorni gratis' : 'Crea il mio account'; }
+  function goLabel() { return window.matchMedia('(max-width:900px)').matches ? 'Inizia la prova gratuita' : 'Crea il mio account'; }
   var form = document.getElementById('form'), err = document.getElementById('err'), go = document.getElementById('go');
   go.textContent = goLabel(); window.matchMedia('(max-width:900px)').addEventListener('change', function () { if (!go.disabled) go.textContent = goLabel(); });
   function show(msg) { err.textContent = msg; err.style.display = 'block'; }
