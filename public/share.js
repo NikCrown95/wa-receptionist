@@ -611,11 +611,11 @@
   }
   var M_SUB = "Menu › Impostazioni › Abbonamento";
   /* Guida a domande (attivita' normali): elenco di "Dove trovo…? / Come faccio…?"; toccandone una si apre il passo-passo con la schermata vera e il riquadro sul punto giusto. */
-  function usePaths(b) { return !b.gym && !isCourts() && !window.__LIA_MED; }
+  function usePaths(b) { return !b.gym && !isCourts(); }
   function loadPaths() {
     if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=8";
+      var sc = document.createElement("script"); sc.src = window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=8";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
