@@ -228,7 +228,7 @@ body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
   .mnGH h2{font-size:1.7rem}
   .mnGSub{font-size:1rem}
   .mnSearch{max-width:560px;min-height:52px}
-  #mnGBody{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);column-gap:36px;align-items:start}
+  #mnGuide:not(.gp) #mnGBody{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);column-gap:36px;align-items:start}
   #mnGBody > .mnCan{grid-column:1;grid-row:1 / span 20;position:sticky;top:16px;margin-top:22px}
   #mnGBody > .mnCan ul{grid-template-columns:1fr 1fr;gap:10px}
   #mnGBody > .mnTier{grid-column:2;margin-top:22px}
@@ -238,7 +238,7 @@ body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
   .mnQa p{font-size:.94rem}
   .mnHelp{max-width:380px;margin-top:26px}
 }
-@media (min-width:1300px){.mnGuideIn{max-width:1240px}#mnGBody{grid-template-columns:420px minmax(0,1fr)}}
+@media (min-width:1300px){.mnGuideIn{max-width:1240px}#mnGuide:not(.gp) #mnGBody{grid-template-columns:420px minmax(0,1fr)}}
 
 /* pagina aperta sopra la dashboard: nel menu resta evidenziata solo la sua voce */
 body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide),body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail){background:transparent;color:var(--ink)}
@@ -339,6 +339,7 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;ma
 
 /* ---------- Guida a percorsi (attivita' normali): schermate vere, un passo alla volta ---------- */
 #mnGuide.gp .mnGuideIn{max-width:900px}
+@media (min-width:900px){#mnGuide.gp .mnGuideIn{max-width:1080px}.gpQs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .gpHd h2{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
 .gpHd p{margin:8px 0 0;color:var(--muted);font-size:.92rem;line-height:1.45;max-width:52ch}
 .gpGrid{margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -390,3 +391,9 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;ma
 .gpQt small{display:block;margin-top:2px;font-size:.78rem;font-weight:600;color:var(--muted)}
 .gpQ > svg{flex:none;color:var(--muted)}
 @media (min-width:760px){.gpQs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* guida: schermate larghe (iPad / desktop dai 900px): immagine a sinistra senza cornice, testo a destra */
+.gpStage.wd{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:28px 44px;align-items:start}
+.gpStage.wd .gpShot{aspect-ratio:auto;display:inline-block;max-width:100%;border-radius:16px;border:1px solid var(--line2);box-shadow:0 16px 38px rgba(0,0,0,.22);background:#08151A;justify-self:center;line-height:0}
+.gpStage.wd .gpShot img{width:auto;height:auto;max-width:100%;max-height:calc(100vh - 190px);object-fit:contain}
+.gpStage.wd .gpRing{border-radius:10px}
+.gpStage.wd .gpCopy{align-self:center}

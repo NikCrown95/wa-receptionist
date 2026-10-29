@@ -615,7 +615,7 @@
   function loadPaths() {
     if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=5";
+      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=7";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
@@ -629,6 +629,9 @@
     document.body.appendChild(guide);
     var body = guide.querySelector("#mnGBody"), scr = guide.querySelector(".mnGuide");
     var img = function (k) { return "/guida/" + k + ".jpg?v=5"; };
+    var wideMq = window.matchMedia("(min-width:900px)");
+    var wideChange = function () { if (guide && !guide.hidden && cur && cur[1] < flat[cur[0]].steps.length) step(cur[0], cur[1]); };
+    if (wideMq.addEventListener) wideMq.addEventListener("change", wideChange); else if (wideMq.addListener) wideMq.addListener(wideChange);
     function home() {
       cur = null;
       var s = term.trim().toLowerCase(), h =
@@ -663,11 +666,12 @@
           '<button type="button" class="gpBtn" data-home="1" style="width:100%;margin-top:10px">Altre domande</button></div>';
         scr.scrollTop = 0; return;
       }
-      var st = x.steps[si], seg = "", bx = st[4];
+      var st = x.steps[si], seg = "", bx = st[4], w = st[5], wd = !!(w && wideMq.matches);
+      if (wd) { bx = w.r || bx; st = [st[0], w.t || st[1], w.x || st[2], w.c != null ? w.c : st[3]]; }
       for (var i = 0; i < n; i++) seg += '<i class="' + (i <= si ? "on" : "") + '"></i>';
       body.innerHTML = back + '<span class="gpCt">' + (si + 1) + " di " + n + '</span></div><div class="gpSeg">' + seg + "</div>" +
-        '<div class="gpStage"><div class="gpPhone"><div class="gpShot"><img src="' + img(st[0]) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
-        (bx ? '<span class="gpRing" style="left:' + bx[0] + "%;top:" + bx[1] + "%;width:" + bx[2] + "%;height:" + bx[3] + '%"></span>' : "") + "</div></div>" +
+        '<div class="gpStage' + (wd ? " wd" : "") + '">' + (wd ? "" : '<div class="gpPhone">') + '<div class="gpShot">' + '<img src="' + (wd ? "/guida/" + st[0] + "-w.jpg?v=7" : img(st[0])) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
+        (bx ? '<span class="gpRing" style="left:' + bx[0] + "%;top:" + bx[1] + "%;width:" + bx[2] + "%;height:" + bx[3] + '%"></span>' : "") + "</div>" + (wd ? "" : "</div>") +
         '<div class="gpCopy"><span class="gpN">Passo ' + (si + 1) + "</span><h3>" + esc2(st[1]) + "</h3><p>" + esc2(st[2]) + "</p>" + (st[3] ? '<span class="gpWhere">' + esc2(st[3]) + "</span>" : "") +
         '<div class="gpNav"><button type="button" class="gpBtn" data-go="' + (si - 1) + '"' + (si ? "" : " disabled") + '>Indietro</button><button type="button" class="gpBtn pri" data-go="' + (si + 1) + '">' + (si === n - 1 ? "Fine" : "Avanti") + "</button></div></div></div>";
       scr.scrollTop = 0;
