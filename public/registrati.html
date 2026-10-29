@@ -107,7 +107,9 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   /* look minimal: piatto, bordi sottili, nessun effetto */
   .side h2{font-size:1.15rem;font-weight:500;letter-spacing:-.01em;color:var(--muted);line-height:1.25}
   /* titolo e riga dei 14 giorni nascosti su smartphone (restano per i lettori di schermo) */
-  #form h1,#form .sub{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  #form .nocc{display:none}
+  #form .sub{color:var(--muted);font-size:.95rem;margin:0 0 2px}
+  #form h1{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .card{border-color:var(--line);background:var(--card);box-shadow:none}
   label:not(.chk){font-size:.8rem;font-weight:500;color:var(--muted)}
   .chk{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
@@ -140,7 +142,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   <div class="card">
     <form id="form" novalidate>
       <h1>Prova Prenolia</h1>
-      <p class="sub">14 giorni gratis, senza carta di credito.</p>
+      <p class="sub">14 giorni gratis<span class="nocc">, senza carta di credito</span>.</p>
       <div class="invite" id="invite" hidden>Sei stato invitato: la tua registrazione verrà collegata al link che hai ricevuto.</div>
 
       <label for="email">Email</label>
