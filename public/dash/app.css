@@ -3634,3 +3634,14 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .nx-lg s{opacity:.7}
 
 .nx-tch:disabled{opacity:.35;cursor:default}
+
+/* Nuovo appuntamento: titolo e barra dei passaggi restano fermi, scorre solo il contenuto del passo (elenchi lunghi);
+   i servizi sono un elenco a righe, una per servizio (stesso aspetto su smartphone, iPad e computer) */
+.ov.hourly #newSheet{overflow:hidden;display:flex;flex-direction:column}
+.ov.hourly #newSheet>.nx-step:not([hidden]){flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-right:2px}
+.ov.hourly #newSheet .nx-q{position:sticky;top:0;z-index:2;background:var(--card);padding:2px 0 6px}
+.nx-chips{flex-direction:column;flex-wrap:nowrap;gap:8px}
+.nx-ch{width:100%;min-height:54px;padding:10px 14px;gap:12px;border-radius:14px;font-size:1rem;font-weight:650;line-height:1.25}
+.nx-ch i{width:10px;height:10px}
+.nx-ch .nm{flex:1 1 auto}
+.nx-ch small{margin-left:auto;padding-left:8px;font-size:.82rem;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
