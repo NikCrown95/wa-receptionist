@@ -107,8 +107,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   /* look minimal: piatto, bordi sottili, nessun effetto */
   .side h2{font-size:1.15rem;font-weight:500;letter-spacing:-.01em;color:var(--muted);line-height:1.25}
   /* titolo e riga dei 14 giorni nascosti su smartphone (restano per i lettori di schermo) */
-  #form .nocc{display:none}
-  #form .sub{color:var(--muted);font-size:.95rem;margin:0 0 2px}
+  #form .sub{display:none}
   #form h1{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .card{border-color:var(--line);background:var(--card);box-shadow:none}
   label:not(.chk){font-size:.8rem;font-weight:500;color:var(--muted)}
@@ -230,7 +229,9 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   refInp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); checkRef(); } });
   if (ref) { document.getElementById('invite').hidden = false; checkRef(); }
 
+  function goLabel() { return window.matchMedia('(max-width:900px)').matches ? 'Inizia 14 giorni gratis' : 'Crea il mio account'; }
   var form = document.getElementById('form'), err = document.getElementById('err'), go = document.getElementById('go');
+  go.textContent = goLabel(); window.matchMedia('(max-width:900px)').addEventListener('change', function () { if (!go.disabled) go.textContent = goLabel(); });
   function show(msg) { err.textContent = msg; err.style.display = 'block'; }
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
@@ -263,7 +264,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
     }).catch(function () {
       show('Connessione assente. Riprova tra poco.');
     }).then(function () {
-      go.disabled = false; go.textContent = 'Crea il mio account'; go.removeAttribute('aria-label');
+      go.disabled = false; go.textContent = goLabel(); go.removeAttribute('aria-label');
     });
   });
 })();
