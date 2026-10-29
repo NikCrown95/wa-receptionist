@@ -173,11 +173,6 @@
     av.type = "button"; av.id = "menuTabAvail"; av.setAttribute("role", "menuitem"); av.setAttribute("aria-current", "false");
     av.addEventListener("click", function () { closeMenu(); if (window.liaAvailOpen) window.liaAvailOpen(); });
     menu.insertBefore(av, other);
-    /* Locandina per la vetrina: voce propria nel menu, apre Scheda attivita' sulla locandina */
-    var po = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="4.5" y="2.5" width="15" height="19" rx="1.8"/><path d="M8 6.2h8"/><rect x="8" y="9.5" width="3.2" height="3.2" rx=".6"/><rect x="12.8" y="9.5" width="3.2" height="3.2" rx=".6"/><rect x="8" y="14.3" width="3.2" height="3.2" rx=".6"/><path d="M13 15.2h3M14.4 17.4H16"/></svg>Locandina');
-    po.type = "button"; po.id = "menuTabPoster"; po.setAttribute("role", "menuitem"); po.setAttribute("aria-current", "false");
-    po.addEventListener("click", openPoster);
-    menu.insertBefore(po, other);
     /* ordine: ... Impostazioni, Come si usa, separatore, Esci */
     var sep = mk("div", "mnSep");
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
@@ -186,7 +181,7 @@
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
-      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabPoster", isCourts() ? "Da stampare" : "Da stampare per la vetrina"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
     [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
@@ -249,6 +244,7 @@
     var nm = $("mnBizName"); if (nm) nm.textContent = name;
     var ad = $("mnBizAddr"), tl = typeLabel(raw, isGym, k);
     if (ad) { ad.textContent = tl; ad.hidden = !tl; }
+    var ps = $("stSumPoster"); if (ps) ps.textContent = isCourts() ? "Da stampare" : "Da stampare per la vetrina";
   }
   /* il nome nell'intestazione resta su una riga: se non entra si rimpicciolisce, poi si accorcia con i puntini */
   function fitBizName() {
@@ -404,6 +400,8 @@
     });
   }
 
+  window.liaOpenPoster = openPoster; /* la riga "Locandina" in Impostazioni apre questo foglio */
+
   function paintSheet() {
     if (!sheet || !biz) return;
     var l = biz.links[cur] || biz.links[0], seg = sheet.querySelector(".mnSeg");
@@ -502,7 +500,7 @@
       ];
       var t7q = [];
       if (link) t7q.push(["Dove trovo il mio link e il QR?", "Puoi condividere il link, mostrare il QR da inquadrare o inviarlo su WhatsApp.", M + "Condividi la tua pagina"]);
-      t7q.push(["Come faccio prenotare dalla vetrina?", "Scarica la locandina con il tuo QR, stampala e attaccala in vetrina: chi passa inquadra e prenota anche a negozio chiuso.", M + "Scheda attività"]);
+      t7q.push(["Come faccio prenotare dalla vetrina?", "Scarica la locandina con il tuo QR, stampala e attaccala in vetrina: chi passa inquadra e prenota anche a negozio chiuso.", M + "Impostazioni › Locandina"]);
       var GUIDE = {
         start: [["clock", "Controlla servizi e orari", "Cosa offri e quando ricevi", "t5"], ["link", "Condividi il link ai clienti", "Così possono prenotare da soli", "t1"], ["cal", "Guarda il calendario", "Qui vedi le prenotazioni", "t2"]],
         can: [
@@ -617,7 +615,7 @@
   function loadPaths() {
     if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=4";
+      var sc = document.createElement("script"); sc.src = "/guida/percorsi.js?v=5";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
@@ -630,7 +628,7 @@
     guide.innerHTML = '<div class="mnGuide"><div class="mnGuideIn"><div id="mnGBody"></div></div></div>';
     document.body.appendChild(guide);
     var body = guide.querySelector("#mnGBody"), scr = guide.querySelector(".mnGuide");
-    var img = function (k) { return "/guida/" + k + ".jpg?v=4"; };
+    var img = function (k) { return "/guida/" + k + ".jpg?v=5"; };
     function home() {
       cur = null;
       var s = term.trim().toLowerCase(), h =
