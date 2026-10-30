@@ -153,6 +153,10 @@ table.rt tr.off td{opacity:.55}
 .card .pill{justify-self:end}
 .card.off{opacity:.55}
 .card.person{grid-template-columns:minmax(0,1fr);gap:12px}
+.code{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;background:var(--card2);border-radius:12px;padding:10px 12px;min-width:0}
+.code .k{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.code b{font-size:1.15rem;letter-spacing:.02em;overflow-wrap:anywhere}
+.code .lk{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere;flex:1 1 100%}
 .person .st{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .person .st div{background:var(--card2);border-radius:12px;padding:9px 12px;min-width:0}
 .person .st b{display:block;font-variant-numeric:tabular-nums}
@@ -221,6 +225,7 @@ table.rt tr.off td{opacity:.55}
   <h2 id="sheetTitle">Nuova persona</h2>
   <form id="pForm">
     <div class="field"><label for="pName">Nome e cognome</label><input class="inp" id="pName" required maxlength="80" placeholder="Es. Marco Rossi"></div>
+    <div class="field"><label for="pCode">Codice invito</label><input class="inp" id="pCode" maxlength="40" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="Per esempio marco-10"><p class="hint" id="pCodeHint"></p></div>
     <div class="field"><label for="pReward">Premio per ogni attività che paga (€)</label><input class="inp" id="pReward" inputmode="decimal" placeholder="21,99"><p class="hint" id="pRewardHint"></p></div>
     <div class="field"><label for="pNote">Nota (facoltativa)</label><input class="inp" id="pNote" maxlength="300" placeholder="Es. parrucchiere amico, lo conosco da…"></div>
     <label class="chkrow" id="pActiveRow" hidden><input type="checkbox" id="pActive" checked> Link attivo (se lo disattivi, i nuovi arrivi non vengono più collegati)</label>
@@ -331,10 +336,13 @@ table.rt tr.off td{opacity:.55}
     rows.forEach(function(p){
       var c = el('div', 'card person' + (p.active ? '' : ' off'));
       var h = el('div'); h.appendChild(el('b', 'nm', p.name)); h.appendChild(el('div', 's', (p.active ? '' : 'Link disattivato · ') + (p.note || 'dal ' + dshort(p.created_at)) + ' · premio ' + eur(p.reward_eur))); c.appendChild(h);
+      var cd = el('div', 'code'); cd.appendChild(el('span', 'k', 'Codice')); cd.appendChild(el('b', null, p.code || '—'));
+      var lk = el('span', 'lk', (p.link || '').replace(/^https?:\/\//, '')); cd.appendChild(lk); c.appendChild(cd);
       var st = el('div', 'st');
       [[p.registered, 'registrate'], [p.paid, 'hanno pagato'], [eur(p.due_eur), 'da pagare']].forEach(function(x){ var d = el('div'); d.appendChild(el('b', null, String(x[0]))); d.appendChild(el('span', null, x[1])); st.appendChild(d); });
       c.appendChild(st);
       var a = el('div', 'acts');
+      var cc = el('button', 'btn ghost small', 'Copia codice'); cc.type = 'button'; cc.addEventListener('click', function(){ copy(p.code, cc); }); a.appendChild(cc);
       var cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.addEventListener('click', function(){ copy(p.link, cp); }); a.appendChild(cp);
       if (state.owner){
         if (p.due_eur > 0){ var pay = el('button', 'btn small', 'Premio pagato'); pay.type = 'button'; pay.addEventListener('click', function(){ payout(p, pay); }); a.appendChild(pay); }
@@ -407,6 +415,8 @@ table.rt tr.off td{opacity:.55}
     var base = state.data && state.data.settings ? (state.data.settings.premium_price || state.data.settings.base_price) : 0;
     document.getElementById('pReward').value = p ? String(p.reward_eur).replace('.', ',') : String(base).replace('.', ',');
     document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di Smart (' + eur(base) + '), sia dopo la prova sia dopo un anno. Puoi cambiarlo.';
+    document.getElementById('pCode').value = p ? (p.code || '') : '';
+    document.getElementById('pCodeHint').textContent = p ? 'Se lo cambi, il vecchio link smette di funzionare e la persona deve entrare in /promoter con il codice nuovo.' : 'Lo scegli tu: lettere, numeri e trattini. Se lo lasci vuoto lo creo dal nome. Il link personale usa lo stesso codice.';
     document.getElementById('pNote').value = p ? (p.note || '') : '';
     document.getElementById('pActive').checked = p ? p.active : true;
     document.getElementById('pActiveRow').hidden = !p;
@@ -420,12 +430,12 @@ table.rt tr.off td{opacity:.55}
   document.getElementById('pForm').addEventListener('submit', function(ev){
     ev.preventDefault();
     var save = document.getElementById('pSave'); save.disabled = true;
-    var body = { name: document.getElementById('pName').value, reward_eur: document.getElementById('pReward').value, note: document.getElementById('pNote').value };
+    var body = { name: document.getElementById('pName').value, reward_eur: document.getElementById('pReward').value, note: document.getElementById('pNote').value, code: document.getElementById('pCode').value };
     if (state.editing){ body.action = 'partner_update'; body.id = state.editing.id; body.active = document.getElementById('pActive').checked; }
     else body.action = 'partner_create';
     post(body).then(function(j){
       closeSheet();
-      banner(state.editing ? 'Salvato.' : 'Link creato: ' + j.link);
+      banner(state.editing ? 'Salvato.' : 'Creato. Codice: ' + j.code + ' · Link: ' + j.link);
       return load();
     }).catch(function(e){ banner(e.message); }).then(function(){ save.disabled = false; });
   });
