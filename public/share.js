@@ -310,10 +310,10 @@
   }
   /* logo dell'attivita' al posto dell'icona (per slug), come per palestra e centro estetico */
   var SKINS = { style2: "/brand/style2.jpg" };
-  /* il menu raggruppato vale solo per le attivita' normali: palestre e circoli sportivi hanno voci e nomi diversi */
+  /* il menu raggruppato (Agenda / La tua attivita' / Account) vale per le attivita' normali e per i circoli; le palestre hanno voci e nomi diversi */
   function grpSync() {
     var b = document.body;
-    b.classList.toggle("mnB", !!biz && !biz.gym && !window.__liaCampi && !b.classList.contains("campiOn") && !b.classList.contains("gym"));
+    b.classList.toggle("mnB", !!biz && !biz.gym && !b.classList.contains("gym")); // i circoli (campi) hanno lo stesso menu a gruppi delle attivita' normali
   }
   /* tipo di attivita' come lo ha scelto l'attivita' (dentista, parrucchiere, ...): "altro" non dice niente, in quel caso si usa la categoria dell'icona se c'e' */
   function typeLabel(raw, isGym, k) {
