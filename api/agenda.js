@@ -671,7 +671,7 @@ module.exports = async (req, res) => {
         if (kind === "campi") {
           // Centro sportivo: sport, campi, orari e regole stanno nelle tabelle dei campi (lib/courts.js)
           const cl2 = require("../lib/courts.js");
-          const sport = ["tennis", "padel", "calcio", "altro"].includes(body.sport) ? body.sport : null;
+          const sport = ["tennis", "padel", "calcio", "pallavolo", "altro"].includes(body.sport) ? body.sport : null;
           if (!sport) return res.status(400).json({ error: "Scegli lo sport." });
           const cts = Array.isArray(body.courts) ? body.courts : [];
           if (!cts.length || cts.length > 30) return res.status(400).json({ error: "Aggiungi almeno un campo." });
@@ -692,7 +692,7 @@ module.exports = async (req, res) => {
           if (rr0.status !== 200) return res.status(rr0.status).json(rr0.body);
           await sb("DELETE", "courts?business_id=eq." + biz.id, null, "return=minimal");
           for (const c of cts) {
-            const rc = await cl2.saveCourt(sb, biz, { name: c && c.name, surface: c && c.surface, indoor: !!(c && c.indoor), slot_min: c && c.slot_min, price_member_eur: c && c.price_member_eur, price_guest_eur: c && c.price_guest_eur, hours: hrsC });
+            const rc = await cl2.saveCourt(sb, biz, { name: c && c.name, surface: c && c.surface, indoor: !!(c && c.indoor), slot_min: c && c.slot_min, price_member_eur: c && c.price_member_eur, price_guest_eur: c && c.price_guest_eur, price_eur: c && c.price_eur, hours: hrsC });
             if (rc.status !== 200) return res.status(rc.status).json(rc.body);
           }
           // Come per la palestra: la "risorsa" creata alla registrazione non serve
@@ -1796,7 +1796,7 @@ module.exports = async (req, res) => {
         const cr = await sb("GET", "court_bookings?business_id=eq." + biz.id + "&order=created_at.desc&limit=" + REG_LIMIT + "&select=id,starts_at,first_name,last_name,players,status,channel,created_at,courts(name)");
         if (!cr.ok || !Array.isArray(cr.data)) return res.status(500).json({ error: "Errore nella lettura del registro" });
         const chm = { web: "selfservice", chat: "webchat", manual: "manuale" };
-        return res.status(200).json({ timezone: tz, limit: REG_LIMIT, courts: true, items: cr.data.map((x) => ({ id: x.id, created_at: x.created_at, starts_at: x.starts_at, customer_name: [x.first_name, x.last_name].filter(Boolean).join(" "), service: (x.courts ? x.courts.name : "Campo") + " · " + (x.players || 2) + " giocatori", status: x.status, channel: chm[x.channel] || x.channel })) });
+        return res.status(200).json({ timezone: tz, limit: REG_LIMIT, courts: true, items: cr.data.map((x) => ({ id: x.id, created_at: x.created_at, starts_at: x.starts_at, customer_name: [x.first_name, x.last_name].filter(Boolean).join(" "), service: (x.courts ? x.courts.name : "Campo") + (require("../lib/courts.js").rulesOf(biz).party ? " · " + (x.players || 2) + " giocatori" : ""), status: x.status, channel: chm[x.channel] || x.channel })) });
       }
       if (require("../lib/verticals.js").areaOf(biz.business_type) === "palestra") {
         // Palestra: prenotazioni di corsi e di Personal 1:1, dalla piu' recente
@@ -1833,7 +1833,7 @@ module.exports = async (req, res) => {
           for (const row of rp.data) rows.push(row);
           if (rp.data.length < 1000) break;
         }
-        return res.status(200).json({ business: biz.name, timezone: tz, courts: true, appointments: rows.map((b) => ({ id: b.id, starts_at: b.starts_at, ends_at: b.ends_at, customer_name: [b.first_name, b.last_name].filter(Boolean).join(" "), customer_phone: b.phone, customer_email: b.email || "", status: b.status, channel: b.channel, service: b.courts ? b.courts.name : "Campo", court_id: b.court_id, players: b.players || 2, members: b.members || 0, price_eur: b.price_eur == null ? null : Number(b.price_eur) })) });
+        return res.status(200).json({ business: biz.name, timezone: tz, courts: true, appointments: rows.map((b) => ({ id: b.id, starts_at: b.starts_at, ends_at: b.ends_at, customer_name: [b.first_name, b.last_name].filter(Boolean).join(" "), customer_phone: b.phone, customer_email: b.email || "", status: b.status, channel: b.channel, service: b.courts ? b.courts.name : "Campo", court_id: b.court_id, players: require("../lib/courts.js").rulesOf(biz).party ? (b.players || 2) : null, members: b.members || 0, price_eur: b.price_eur == null ? null : Number(b.price_eur) })) });
       }
       const histPcol = (await promos.hasCol(sb)) ? ",promo_price_eur" : "";
       const from = addDays(today, -395);

@@ -257,9 +257,11 @@ function MESTIERI(){return S.v==="domicilio"?M2:(S.v==="sanitario"?M3:M1)}
 var GYMSUG=Q("Corso di gruppo|60,Personal training 1 a 1|60,Prima consulenza|30");
 var DAYN=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
 var DAYS=["L","M","M","G","V","S","D"];
-var SPORTS=[["Tennis","tennis",["Terra battuta","Cemento","Erba sintetica","Erba"],60],["Padel","padel",["Erba sintetica","Cemento"],90],["Calcio","calcio",["Erba sintetica","Erba naturale","Terra"],60],["Pallavolo","altro",["Parquet","Sabbia","Cemento"],60],["Basket","altro",["Parquet","Cemento"],60],["Altro sport","altro",[],60]];
+var SPORTS=[["Tennis","tennis",["Terra battuta","Cemento","Erba sintetica","Erba"],60],["Padel","padel",["Erba sintetica","Cemento"],90],["Calcio","calcio",["Erba sintetica","Erba naturale","Terra"],60],["Pallavolo","pallavolo",["Parquet","Sabbia","Cemento"],60],["Basket","altro",["Parquet","Cemento"],60],["Altro sport","altro",[],60]];
 var CDURS=[30,45,60,75,90,120,150,180];
 function sportInfo(){return SPORTS.filter(function(x){return x[0]===S.sportLbl})[0]||null}
+// tennis e padel: 2 o 4 giocatori, soci, certificato e FIT. Calcio, pallavolo e gli altri sport: solo il referente, nessun socio, nessuna regola, un prezzo per campo.
+function partySport(){var si=sportInfo();return !!si&&(si[1]==="tennis"||si[1]==="padel")}
 function courtName(c){var n=c.n.trim();var si=sportInfo();if(si&&si[1]==="calcio"&&c.fmt&&!/\b(a|da)\s?(5|7|11)\b/i.test(n))n+=" · a "+c.fmt;return n}
 var SUBT={sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
 var NAMES={sport:"Sport",campi:"Campi",regole:"Regole",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
@@ -270,7 +272,7 @@ var S={sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
   if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
   if(v==="palestra")return["tipo","attivita","lezioni","calendario","fine"];
-  if(v==="campi")return["tipo","attivita","sport","campi","orari","regole","fine"];
+  if(v==="campi")return["tipo","attivita","sport","campi","orari"].concat(partySport()?["regole"]:[]).concat(["fine"]);
   if(v==="sanitario")return["tipo","attivita","servizi","orari","privacy","fine"];return["tipo"]}
 function h(t,a,k){var e=document.createElement(t);a=a||{};for(var x in a){if(x==="text")e.textContent=a[x];else if(x==="class")e.className=a[x];else if(x.slice(0,2)==="on")e[x]=a[x];else e.setAttribute(x,a[x])}
   (k||[]).forEach(function(c){if(c)e.appendChild(typeof c==="string"?document.createTextNode(c):c)});return e}
@@ -353,8 +355,9 @@ function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   if(S.v==="palestra"){base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
     return{name:x.n.trim(),duration_min:x.d,capacity:Number(x.k),category:x.cat,slots:sl}});return base}
-  if(S.v==="campi"){var si3=sportInfo();base.sport=si3?si3[1]:"altro";base.open_to=S.open_to;base.fit=!!S.fit;
+  if(S.v==="campi"){var si3=sportInfo();base.sport=si3?si3[1]:"altro";base.open_to=partySport()?S.open_to:"all";base.fit=partySport()&&!!S.fit;
     base.courts=S.courts.map(function(c){var a=String(c.pm).trim().replace(",","."),b=String(c.pg).trim().replace(",",".");if(a===""&&b!=="")a=b;if(b===""&&a!=="")b=a;
+      if(!partySport()){var one=String(c.pg).trim().replace(",",".");return{name:courtName(c),surface:c.surf.trim(),indoor:!!c.indoor,slot_min:c.d,price_member_eur:null,price_guest_eur:one===""?null:Number(one),price_eur:one===""?null:Number(one)}}
       return{name:courtName(c),surface:c.surf.trim(),indoor:!!c.indoor,slot_min:c.d,price_member_eur:a===""?null:Number(a),price_guest_eur:b===""?null:Number(b)}});
     base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
       if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
@@ -461,7 +464,7 @@ function render(){
     v.appendChild(head(lab,"Che sport si gioca?","Scegli lo sport dei tuoi campi."));
     var cs=h("div",{class:"card"}),chs=h("div",{class:"chips"});
     SPORTS.forEach(function(x){chs.appendChild(chip(x[0],S.sportLbl===x[0],function(){if(S.sportLbl!==x[0]){S.sportLbl=x[0];S.courts=[]}S.err="";render()}))});
-    cs.appendChild(chs);cs.appendChild(h("p",{class:"hint",text:"Tutti i campi del centro sono dello stesso sport. Le regole cambiano un poco: nel tennis e nel padel si gioca in 2 o in 4, nel calcio il campo può essere a 5, a 7 o a 11."}));v.appendChild(cs);
+    cs.appendChild(chs);cs.appendChild(h("p",{class:"hint",text:"Tutti i campi del centro sono dello stesso sport. Le regole cambiano un poco: nel tennis e nel padel si gioca in 2 o in 4 e ci sono i soci; nel calcio il campo può essere a 5, a 7 o a 11; calcio e pallavolo si prenotano senza soci né certificato medico, e il prezzo lo decidi tu."}));v.appendChild(cs);
   }
   if(k==="campi"){
     var si=sportInfo(),isC=si&&si[1]==="calcio";
@@ -486,12 +489,17 @@ function render(){
       var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
       cd.appendChild(field("Durata di ogni prenotazione",dsel));
       var pr=h("div",{class:"times"});
+      if(!partySport()){
+        var p1=h("input",{class:"inp",value:c.pg,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo del campo in euro"});p1.oninput=function(){c.pg=p1.value;c.pm=p1.value};
+        pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),p1]));
+        cd.appendChild(h("label",{text:"Prezzo del campo per ogni prenotazione (facoltativo)"}));cd.appendChild(pr);
+      }else{
       var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
       var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
       pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
-      cd.appendChild(h("label",{text:"Prezzo per giocatore all'ora, soci e non soci (facoltativo)"}));cd.appendChild(pr);
+      cd.appendChild(h("label",{text:"Prezzo per giocatore all'ora, soci e non soci (facoltativo)"}));cd.appendChild(pr)}
       v.appendChild(cd)});
-    if(S.courts.length)v.appendChild(h("p",{class:"hint",text:"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro."}));
+    if(S.courts.length)v.appendChild(h("p",{class:"hint",text:partySport()?"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro.":"Il prezzo lo decidi tu, anche diverso da campo a campo. Il campo si paga direttamente al centro, non online."}));
   }
   if(k==="regole"){
     var si2=sportInfo();
@@ -537,13 +545,13 @@ function render(){
     if(S.v==="campi"){
       var cb4=h("div",{class:"rows"});
       S.courts.forEach(function(c){var p1=String(c.pm).trim().replace(",","."),p2=String(c.pg).trim().replace(",",".");
-        var pt=(p1===""&&p2==="")?"prezzo da definire":(p1!==""&&p2!==""&&p1!==p2?p1+" € soci · "+p2+" € non soci":(p1||p2)+" €");
+        var pt=(p1===""&&p2==="")?"prezzo da definire":(partySport()&&p1!==""&&p2!==""&&p1!==p2?p1+" € soci · "+p2+" € non soci":(p1||p2)+" €");
         cb4.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:courtName(c)}),h("small",{text:[c.surf.trim(),c.indoor?"Coperto":"Scoperto"].filter(Boolean).join(" · ")})]),h("span",{class:"rv"+(pt==="prezzo da definire"?" dim":""),text:fmtMin(c.d)+" · "+pt})]))});
       v.appendChild(sec("Campi","campi",cb4,S.courts.length));
       var wk2=h("div",{class:"week"});
       S.hours.forEach(function(d,i){wk2.appendChild(h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),h("span",{class:"tm",text:d.on?d.from:"–"}),h("span",{class:"tm e",text:d.on?d.to:"chiuso"})]))});
       v.appendChild(sec("Orari di apertura","orari",S.pause.on?h("div",null,[wk2,h("p",{class:"hint",text:"Pausa ogni giorno dalle "+S.pause.from+" alle "+S.pause.to+"."})]):wk2));
-      v.appendChild(sec("Chi può prenotare","regole",h("div",{class:"rows"},[h("div",{class:"rr"},[h("div",null,[h("b",{text:S.open_to==="members"?"Solo i soci":"Soci e non soci"}),S.fit?h("small",{text:"Tessera FIT richiesta"}):null])])])));
+      if(partySport())v.appendChild(sec("Chi può prenotare","regole",h("div",{class:"rows"},[h("div",{class:"rr"},[h("div",null,[h("b",{text:S.open_to==="members"?"Solo i soci":"Soci e non soci"}),S.fit?h("small",{text:"Tessera FIT richiesta"}):null])])])));
     } else if(S.v==="palestra"){
       var lb=h("div",{class:"rows"});
       S.items.forEach(function(x){lb.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" · ")+" alle "+x.time})]),h("span",{class:"rv",text:fmtMin(x.d)+" · "+x.k+(Number(x.k)===1?" posto":" posti")})]))});

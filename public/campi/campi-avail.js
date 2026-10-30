@@ -129,7 +129,7 @@
   }
 
   var PAL = { club: "#2B8A94" };
-  function courtColor(c) { var s = ((c && c.surface) || "").toLowerCase(); return /terra/.test(s) ? "#D9784A" : /cement/.test(s) ? "#5B8DB8" : /erba|prato/.test(s) ? "#5DB07A" : "#4BB3D6"; }
+  function courtColor(c) { var s = ((c && c.surface) || "").toLowerCase(); if (/parquet|legno/.test(s)) return "#C58B4E"; if (/sabbia/.test(s)) return "#D9B877"; return /terra/.test(s) ? "#D9784A" : /cement/.test(s) ? "#5B8DB8" : /erba|prato/.test(s) ? "#5DB07A" : "#4BB3D6"; }
   function colorOf(id) { if (id === "club") return PAL.club; if (id === "chi") return "#E5826A"; var c = courtOf(id); return c ? courtColor(c) : PAL.club; }
   function tag(c) { var n = (c.name || "").match(/\d+/); return n ? n[0] : String(c.name || "?").charAt(0).toUpperCase(); }
   function avatar(id) {

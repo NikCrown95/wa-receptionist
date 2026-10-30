@@ -23,6 +23,8 @@
   function svg(tag, attrs) { var e = document.createElementNS(SVGNS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
   function courtColor(c) {
     var t = (String(c.surface || '') + ' ' + String(c.name || '')).toLowerCase();
+    if (/parquet|legno|wood/.test(t)) return '#C58B4E';
+    if (/sabbia|sand|beach/.test(t)) return '#D9B877';
     if (/erba|grass|prato/.test(t)) return '#5DB07A';
     if (/terra|rossa|clay|battuta/.test(t)) return '#D9784A';
     if (/cement|hard|resina|sintetic|moquette|pvc|acrilic/.test(t)) return '#5B8DB8';
@@ -193,10 +195,12 @@
     var wrap = root.querySelector('#gcsWrap'); if (wrap && !DATA) wrap.innerHTML = '<div class="gcSk gcSkL"><i></i><i></i><i></i><i></i></div>';
     var h = window.liaGetHistory ? window.liaGetHistory() : fetch('/api/agenda?t=' + encodeURIComponent(token) + '&history=1', { cache: 'no-store' }).then(function (r) { return r.json(); });
     var cs = fetch('/api/agenda?t=' + encodeURIComponent(token) + '&courts=1&view=settings', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); });
-    Promise.all([h, cs]).then(function (a) { DATA = a[0]; COURTS = (a[1].courts || []).filter(function (c) { return c.active !== false; }); CLOSED = (a[1].past_closures || []).concat((a[1].closures || []).filter(function (c) { return !c.from; })).map(function (c) { return { court_id: c.court_id || null, starts_on: c.starts_on, ends_on: c.ends_on }; }); })
+    Promise.all([h, cs]).then(function (a) { DATA = a[0]; SPORT = (a[1].club && a[1].club.sport) || 'tennis'; COURTS = (a[1].courts || []).filter(function (c) { return c.active !== false; }); CLOSED = (a[1].past_closures || []).concat((a[1].closures || []).filter(function (c) { return !c.from; })).map(function (c) { return { court_id: c.court_id || null, starts_on: c.starts_on, ends_on: c.ends_on }; }); })
       .catch(function () { failed = true; })
       .then(function () { busy = false; if (active) draw(); });
   }
+  var SPORT = 'tennis'; // tennis e padel: giocatori e soci; calcio, pallavolo e altri: solo prenotazioni e ore
+  function isSimple() { return SPORT !== 'tennis' && SPORT !== 'padel'; }
   function draw() {
     tipHide(); if (!root.querySelector('#gcsWrap')) shell();
     var wrap = root.querySelector('#gcsWrap');
@@ -207,21 +211,22 @@
       kpi('Incasso', eur(c.rev), delta(c.rev, p.rev), '', PL[P]) +
       kpi('Prenotazioni', num(c.n), delta(c.n, p.n), hrs(c.min) + ' di campo giocate') +
       kpi('Occupazione dei campi', c.fill + '%', delta(c.fill, p.fill, 'pt'), hrs(c.min) + ' su ' + hrs(c.cap) + ' disponibili') +
-      kpi('Giocatori', num(c.pl), delta(c.pl, p.pl), num(nM) + ' soci · ' + num(nG) + ' non soci') +
+      (isSimple() ? kpi('Ore giocate', hrs(c.min), delta(c.min, p.min), 'sui campi, nel periodo') : kpi('Giocatori', num(c.pl), delta(c.pl, p.pl), num(nM) + ' soci · ' + num(nG) + ' non soci')) +
       '</div><div class="panels">' +
       '<div class="row2"><div class="panel"><h2>Incassi nel tempo</h2><p class="sub">Quanto hanno pagato i giocatori. Tocca una barra per il dettaglio.</p><div id="cgsRev"></div></div>' +
       '<div class="panel"><h2>Prenotazioni nel tempo</h2><p class="sub">Campi prenotati ogni ' + (P === 'year' ? 'mese' : 'giorno') + '.</p><div id="cgsBk"></div></div></div>' +
       '<div class="row2"><div class="panel"><h2>Occupazione per campo</h2><p class="sub">Ore giocate sulle ore di apertura, nel periodo.</p><div class="hbars" id="byservice"></div></div>' +
       '<div class="panel"><h2>Giorni più richiesti</h2><p class="sub">Prenotazioni per giorno della settimana.</p><div class="hbars" id="cgsWd"></div></div></div>' +
-      '<div class="row2"><div class="panel"><h2>Soci e non soci</h2><p class="sub">Chi gioca sui campi. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div>' +
-      '<div class="panel"><h2>Singolo o doppio</h2><p class="sub">Come si gioca. Tocca una fetta per il dettaglio.</p><div id="cgsTyp" class="cgs-pies"></div></div></div>' +
-      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p><p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p><p>I giorni di chiusura (campi senza orari in quel giorno o chiusi tutto il giorno) non compaiono nei grafici e non contano negli incassi.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
+      (isSimple() ? '' : '<div class="row2"><div class="panel"><h2>Soci e non soci</h2><p class="sub">Chi gioca sui campi. Tocca una fetta per il dettaglio.</p><div id="cgsWho" class="cgs-pies"></div></div>' +
+      '<div class="panel"><h2>Singolo o doppio</h2><p class="sub">Come si gioca. Tocca una fetta per il dettaglio.</p><div id="cgsTyp" class="cgs-pies"></div></div></div>') +
+      '</div><details class="stats-method"><summary>Come vengono calcolate le statistiche?</summary><div class="stats-method-body"><p><strong>Incasso</strong> Somma dei prezzi delle prenotazioni confermate nel periodo.</p><p><strong>Occupazione</strong> Ore di campo prenotate diviso le ore in cui i campi sono aperti (gli orari che imposti in «Campi e orari»). Le chiusure straordinarie non sono tolte dal totale.</p>' + (isSimple() ? '<p><strong>Ore giocate</strong> Ore di campo delle prenotazioni confermate nel periodo.</p>' : '<p><strong>Giocatori</strong> Somma dei giocatori indicati su ogni prenotazione; i soci sono quelli segnati come tali.</p>') + '<p>I giorni di chiusura (campi senza orari in quel giorno o chiusi tutto il giorno) non compaiono nei grafici e non contano negli incassi.</p><p>Le prenotazioni annullate non vengono contate. Il confronto è con il periodo precedente della stessa durata.</p></div></details>';
     bars(wrap.querySelector('#cgsRev'), d.series, function (x) { return x.rev; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + eur(x.rev) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni'); });
     line(wrap.querySelector('#cgsBk'), d.series, function (x) { return x.n; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + '<br>' + hrs(x.min) + ' di campo · ' + x.pl + ' giocatori'; });
     hbars(wrap.querySelector('#byservice'), d.byC.map(function (x) { return { name: x.c.name, color: courtColor(x.c), pct: x.pct, amt: x.pct + '%', tip: '<b>' + esc(x.c.name) + ' · ' + x.pct + '%</b>' + hrs(x.min) + ' su ' + hrs(x.cap) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + ' · ' + eur(x.rev) }; }), 'Aggiungi i campi da Impostazioni › Campi e orari.');
     var mx = Math.max.apply(null, d.wdc.concat([1]));
     hbars(wrap.querySelector('#cgsWd'), c.n ? d.wdc.map(function (n, i) { return { name: DAYL[i], color: 'var(--accent)', pct: Math.round(n / mx * 100), amt: String(n), tip: '<b>' + DAYL[i] + '</b>' + n + (n === 1 ? ' prenotazione' : ' prenotazioni') }; }) : [], 'Ancora nessuna prenotazione nel periodo.');
     var tp = nM + nG, tg = d.dbl + d.sgl;
+    if (isSimple()) return;
     pie(wrap.querySelector('#cgsWho'), 'Giocatori', tp, [{ name: 'Soci', v: nM, color: css('--accent', '#2B8A94') }, { name: 'Non soci', v: nG, color: '#3B9CFF' }], 'giocatori');
     pie(wrap.querySelector('#cgsTyp'), 'Tipo di partita', tg, [{ name: 'Doppio (3-4)', v: d.dbl, color: '#7FDCDC' }, { name: 'Singolo (1-2)', v: d.sgl, color: '#E0A23A' }], 'partite');
   }

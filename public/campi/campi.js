@@ -50,8 +50,13 @@
   }
 
   // ---------- disegno del campo ----------
+  // tennis e padel: 2 o 4 giocatori, soci, certificato. Calcio, pallavolo e gli altri sport: solo il referente, nessun socio, un prezzo per prenotazione.
+  function clubSport() { return (S.data && S.data.club && S.data.club.sport) || 'tennis'; }
+  function isSimple() { var sp = clubSport(); return sp !== 'tennis' && sp !== 'padel'; }
   function courtColor(c) {
     var t = (String(c.surface || '') + ' ' + String(c.name || '')).toLowerCase();
+    if (/parquet|legno|wood/.test(t)) return '#C58B4E';
+    if (/sabbia|sand|beach/.test(t)) return '#D9B877';
     if (/erba|grass|prato/.test(t)) return '#5DB07A';
     if (/terra|rossa|clay|battuta/.test(t)) return '#D9784A';
     if (/cement|hard|resina|sintetic|moquette|pvc|acrilic/.test(t)) return '#5B8DB8';
@@ -64,8 +69,12 @@
   }
   function courtSvg(c, players, members, cls) { // il campo visto dall'alto, con i giocatori
     var col = courtColor(c), w = el('span', 'cp-cs' + (cls ? ' ' + cls : ''));
-    var d = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="' + col + '"/><rect x="9" y="9" width="46" height="46" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2"/><line x1="9" y1="32" x2="55" y2="32" stroke="#fff" stroke-opacity=".85" stroke-width="2"/><line x1="20" y1="9" x2="20" y2="55" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/><line x1="44" y1="9" x2="44" y2="55" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/>';
-    if (players > 0) {
+    var sp = clubSport(), L = 'stroke="#fff" stroke-opacity=".85" stroke-width="2"', L2 = 'stroke="#fff" stroke-opacity=".6" stroke-width="1.5"', body;
+    if (sp === 'calcio') body = '<rect x="10" y="7" width="44" height="50" fill="none" ' + L + '/><line x1="10" y1="32" x2="54" y2="32" ' + L + '/><circle cx="32" cy="32" r="7" fill="none" ' + L + '/><rect x="21" y="7" width="22" height="10" fill="none" ' + L2 + '/><rect x="21" y="47" width="22" height="10" fill="none" ' + L2 + '/>';
+    else if (sp === 'pallavolo') body = '<rect x="7" y="15" width="50" height="34" fill="none" ' + L + '/><line x1="32" y1="11" x2="32" y2="53" ' + L + '/><line x1="21" y1="15" x2="21" y2="49" ' + L2 + '/><line x1="43" y1="15" x2="43" y2="49" ' + L2 + '/>';
+    else body = '<rect x="9" y="9" width="46" height="46" fill="none" ' + L + '/><line x1="9" y1="32" x2="55" y2="32" ' + L + '/><line x1="20" y1="9" x2="20" y2="55" ' + L2 + '/><line x1="44" y1="9" x2="44" y2="55" ' + L2 + '/>';
+    var d = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="' + col + '"/>' + body;
+    if (players > 0 && !isSimple()) {
       var top = Math.ceil(players / 2), pts = dotsAt(top, 21).concat(dotsAt(players - top, 43)), m = members == null ? 0 : members;
       pts.forEach(function (q, i) { d += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + q[2] + '" ' + (i < m ? 'fill="#fff" stroke="#fff"' : (members == null ? 'fill="#fff" stroke="#fff"' : 'fill="rgba(0,0,0,.35)" stroke="#fff"')) + ' stroke-width="1.6"/>'; });
     }
@@ -167,7 +176,7 @@
       });
     }).length;
     tile('Occupazione', pct + '%', s0.occ + ' slot su ' + s0.tot);
-    tile('Persone', String(ppl), mem + ' soci · ' + (ppl - mem) + ' non soci');
+    if (isSimple()) tile('Prenotazioni', String(bs.length), bs.length === 1 ? 'in questo giorno' : 'in questo giorno'); else tile('Persone', String(ppl), mem + ' soci · ' + (ppl - mem) + ' non soci');
     tile('Campi liberi', freeC + ' su ' + D.courts.length, S.day === now.date ? 'con posto libero' : 'con posto libero');
     if (PH && !phWeek()) { // telefono: una sola card compatta, come l'agenda dei parrucchieri
       sum.textContent = ''; sum.className = 'cp-sum cp-sum1';
@@ -481,10 +490,12 @@
     ht.appendChild(el('p', null, c.name + ' · ' + b.start + '–' + b.end)); if (b.date) ht.appendChild(el('p', 'cp-dd', longDay(b.date))); hd.appendChild(ht); d.appendChild(hd);
     var tl = el('div', 'cp-tiles');
     function tile2(l, v) { var t = el('div', 'cp-tile'); t.appendChild(el('span', null, l)); t.appendChild(el('b', null, v)); tl.appendChild(t); }
-    tile2('Giocatori', b.players != null ? String(b.players) : '—');
-    tile2('Soci', b.members != null ? String(b.members) : '—');
-    tile2('Non soci', b.players != null && b.members != null ? String(Math.max(0, b.players - b.members)) : '—');
-    d.appendChild(tl);
+    if (!isSimple()) {
+      tile2('Giocatori', b.players != null ? String(b.players) : '—');
+      tile2('Soci', b.members != null ? String(b.members) : '—');
+      tile2('Non soci', b.players != null && b.members != null ? String(Math.max(0, b.players - b.members)) : '—');
+      d.appendChild(tl);
+    }
     var kv = el('div', 'cp-kv');
     function row2(l, v, cls) { var r0 = el('div'); r0.appendChild(el('span', null, l)); var x = typeof v === 'string' ? el('b', cls || null, v) : v; r0.appendChild(x); kv.appendChild(r0); }
     if (b.price_eur != null) row2('Incasso', b.price_eur === 0 ? 'Gratis' : eur(b.price_eur));
@@ -515,7 +526,7 @@
     d.style.setProperty('--cc', courtColor(c));
     d.classList.add('cp-fv');
     var ORDER = ['court', 'day', 'time', 'dur', 'pl', 'who'];
-    function go(n) { F.hist.push(F.step); F.step = n; F.msg = ''; draw(); }
+    function go(n) { if (n === 'pl' && isSimple()) n = 'who'; F.hist.push(F.step); F.step = n; F.msg = ''; draw(); }
     function back() { F.step = F.hist.pop() || 'court'; F.msg = ''; draw(); }
     function busyAt(x, cc) { return bookingsOn(F.date).some(function (b) { return b.court_id === cc.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }
     function freeSlots(cc, date) { return slotsOf(cc, date).filter(function (x) { return !closedAt(cc, date, x.s, x.e) && !busyAt(x, cc) && !(date < now0.date || (date === now0.date && x.e <= now0.min)); }); }
@@ -598,7 +609,7 @@
       var nx2 = el('button', 'cp-btn pri', 'Avanti'); nx2.type = 'button'; nx2.onclick = function () { go('who'); };
       var rw3 = el('div', 'cp-row cp-frow'); rw3.appendChild(nx2); f.appendChild(rw3);
     } else {
-      q('Chi prenota?', (F.players || '?') + (+F.players === 1 ? ' giocatore' : ' giocatori') + ' · ' + (F.members || 0) + (+F.members === 1 ? ' socio' : ' soci'));
+      q('Chi prenota?', isSimple() ? (F.hours > 1 ? c.name + ' · ' + label(F.hours) : c.name) : (F.players || '?') + (+F.players === 1 ? ' giocatore' : ' giocatori') + ' · ' + (F.members || 0) + (+F.members === 1 ? ' socio' : ' soci'));
       var sv = el('button', 'cp-btn pri', S.busy ? 'Salvo…' : 'Salva prenotazione'); sv.type = 'button';
       function ready() { return !!(F.first_name.trim() && F.last_name.trim() && F.phone.trim()); }
       function upd() { sv.disabled = S.busy || !ready(); }
@@ -618,10 +629,10 @@
   function firstTime(c, d) { var sl = slotsOf(c, d).filter(function (x) { return !closedAt(c, d, x.s, x.e); }); var fr = sl.filter(function (x) { return !bookingsOn(d).some(function (b) { return b.court_id === c.id && mins(b.start) < x.e && mins(b.end) > x.s; }); }); return fr.length ? hhmm(fr[0].s) : sl.length ? hhmm(sl[0].s) : ''; }
   function openForm(date, courtId, time) {
     var D = S.data, c = courtOf(courtId || D.courts[0].id), d = date || S.day; S.sel = null; S.askCancel = false;
-    S.form = { step: time ? 'pl' : courtId ? 'time' : 'court', hist: time ? ['court', 'day', 'time'] : courtId ? ['court', 'day'] : [], court_id: c.id, date: d, time: time || '', hours: 1, first_name: '', last_name: '', phone: '', email: '', players: defPlayers(c), members: '0', notes: '', msg: '', ym: d.slice(0, 7), mon: {} };
+    S.form = { step: time ? (isSimple() ? 'who' : 'pl') : courtId ? 'time' : 'court', hist: time ? ['court', 'day', 'time'] : courtId ? ['court', 'day'] : [], court_id: c.id, date: d, time: time || '', hours: 1, first_name: '', last_name: '', phone: '', email: '', players: defPlayers(c), members: isSimple() ? '' : '0', notes: '', msg: '', ym: d.slice(0, 7), mon: {} };
     draw(); focusForm();
   }
-  function defPlayers(c) { var sp = (S.data.club && S.data.club.sport) || 'tennis'; if (sp === 'tennis' || sp === 'padel') return '2'; var m = /\b(?:a|da)\s?(5|7|11)\b/i.exec(String(c.name || '')); return m ? String(m[1] * 2) : '2'; }
+  function defPlayers(c) { if (isSimple()) return ''; var sp = (S.data.club && S.data.club.sport) || 'tennis'; if (sp === 'tennis' || sp === 'padel') return '2'; var m = /\b(?:a|da)\s?(5|7|11)\b/i.exec(String(c.name || '')); return m ? String(m[1] * 2) : '2'; }
   function loadMonth(ym, done) { // i giorni del mese si leggono a parte: il calendario mostra subito quali hanno posto
     var y = +ym.slice(0, 4), m = +ym.slice(5, 7), n = new Date(Date.UTC(y, m, 0)).getUTCDate();
     fetch(URL0 + '&from=' + ym + '-01&days=' + n).then(function (r) { return r.json(); }).then(function (j) {

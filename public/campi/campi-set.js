@@ -29,7 +29,7 @@
   function fmtDay(s) { var p = s.split('-'); return +p[2] + ' ' + MO[+p[1] - 1]; }
   function dur(m) { return m < 60 ? m + ' min' : m === 60 ? '1 ora' : m % 60 === 0 ? (m / 60) + ' ore' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'; }
   function euro(n) { return String(n).replace('.', ',') + ' €'; }
-  function courtColor(c) { var s = (c.surface || '').toLowerCase(); return /terra/.test(s) ? '#D9784A' : /cement/.test(s) ? '#5B8DB8' : /erba|prato/.test(s) ? '#5DB07A' : '#4BB3D6'; }
+  function courtColor(c) { var s = (c.surface || '').toLowerCase(); if (/parquet|legno/.test(s)) return '#C58B4E'; if (/sabbia/.test(s)) return '#D9B877'; return /terra/.test(s) ? '#D9784A' : /cement/.test(s) ? '#5B8DB8' : /erba|prato/.test(s) ? '#5DB07A' : '#4BB3D6'; }
   function copy(o) { return JSON.parse(JSON.stringify(o)); }
   function changed() { if (window.__cpReload) { try { window.__cpReload(); } catch (e) { } } }
 
@@ -39,6 +39,9 @@
   // ---------- pezzi di modulo, con le classi gia' usate nelle altre impostazioni ----------
   function card(title, cls) { var c = el('div', 'stCard cx-card' + (cls ? ' ' + cls : '')); if (title) c.appendChild(el('h4', null, title)); return c; }
   function hint(t, cls) { return el('p', 'stHint' + (cls ? ' ' + cls : ''), t); }
+  // tennis e padel: prezzo a testa, soci, certificato. Calcio, pallavolo e altri: un prezzo per prenotazione, nessun socio ne' regola
+  function clubSport() { return (D && D.club && D.club.sport) || 'tennis'; }
+  function simple() { var sp = clubSport(); return sp !== 'tennis' && sp !== 'padel'; }
   function sf(label, node) { var l = el('label', 'stF'); l.appendChild(el('span', null, label)); l.appendChild(node); return l; }
   function input(type, val, attrs) { var i = el('input', 'set-input'); i.type = type; i.value = val == null ? '' : val; for (var k in (attrs || {})) i.setAttribute(k, attrs[k]); return i; }
   function btn(label, cls, fn) { var b = el('button', 'stBtn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; if (fn) b.onclick = fn; return b; }
@@ -82,6 +85,7 @@
       w.appendChild(c0);
       w.appendChild(btn('+ Aggiungi un campo', 'ghost', function () { edit = null; form(true); }));
     }
+    function SP0() { return clubSport(); }
     function form(isNew) {
       var c = edit, F = c ? copy(c) : { id: null, name: 'Campo ' + (D.courts.length + 1), surface: '', indoor: false, slot_min: 60, price_member_eur: null, price_guest_eur: null, active: true, hours: null };
       if (!F.hours) { var base = D.courts.filter(function (x) { return x.active && !x.custom_hours; })[0] || D.courts.filter(function (x) { return !x.custom_hours; })[0] || D.courts[0]; F.hours = base ? copy(base.hours) : { 1: [['08:00', '22:00']], 2: [['08:00', '22:00']], 3: [['08:00', '22:00']], 4: [['08:00', '22:00']], 5: [['08:00', '22:00']], 6: [['08:00', '22:00']], 7: [['08:00', '22:00']] }; }
@@ -90,7 +94,13 @@
       var c1 = card(c ? 'Modifica ' + c.name : 'Nuovo campo');
       var n = input('text', F.name, { maxlength: 60, autocomplete: 'off', placeholder: 'Es. Campo 1' });
       c1.appendChild(sf('Nome', n));
-      var surf = ['Terra rossa', 'Cemento', 'Erba', 'Erba sintetica', 'Moquette'];
+      if (SP0() === 'calcio') { // formato del campo: 5, 7 o 11, scritto nel nome come alla registrazione
+        var fm = el('div', 'stF'); fm.appendChild(el('span', null, 'Formato'));
+        var FMT = /\b(?:a|da)\s?(5|7|11)\b/i, cur = (FMT.exec(F.name) || [])[1] || '';
+        fm.appendChild(chips([['5', 'A 5'], ['7', 'A 7'], ['11', 'A 11']], cur, function (v) { var base = n.value.replace(/\s*[·-]?\s*\b(?:a|da)\s?(?:5|7|11)\b/i, '').trim(); n.value = base + ' · a ' + v; F.name = n.value; }));
+        c1.appendChild(fm);
+      }
+      var SP = clubSport(), surf = SP === 'calcio' ? ['Erba sintetica', 'Erba naturale', 'Terra'] : SP === 'pallavolo' ? ['Parquet', 'Sabbia', 'Cemento'] : SP === 'altro' ? ['Parquet', 'Cemento', 'Erba sintetica'] : ['Terra rossa', 'Cemento', 'Erba', 'Erba sintetica', 'Moquette'];
       var sv0 = F.surface && surf.indexOf(F.surface) < 0 ? surf.concat([F.surface]) : surf;
       var lf = el('div', 'stF'); lf.appendChild(el('span', null, 'Fondo (facoltativo)'));
       lf.appendChild(chips(sv0.map(function (x) { return [x, x]; }), F.surface, function (v) { F.surface = F.surface === v ? '' : v; var bs = lf.querySelectorAll('.stChips button'); Array.prototype.forEach.call(bs, function (b) { b.setAttribute('aria-pressed', b.textContent === F.surface ? 'true' : 'false'); }); }));
@@ -127,7 +137,7 @@
   }
   function pPrices(w) {
     if (!D.courts.length) { var c0 = card(); c0.appendChild(hint('Aggiungi prima un campo da "Campi".')); w.appendChild(c0); return; }
-    w.appendChild(hint('Ogni giocatore paga la sua quota: il prezzo della prenotazione è la somma, con il prezzo socio per i soci e quello non socio per gli altri. Il pagamento si fa sempre al circolo.', 'cx-lead'));
+    w.appendChild(hint(simple() ? 'Scegli tu quanto far pagare ogni prenotazione: un prezzo per campo, anche diverso da un campo all\'altro. Il pagamento si fa sempre al campo, non online.' : 'Ogni giocatore paga la sua quota: il prezzo della prenotazione è la somma, con il prezzo socio per i soci e quello non socio per gli altri. Il pagamento si fa sempre al circolo.', 'cx-lead'));
     var P = {}, blocks = [];
     D.courts.forEach(function (c) { P[c.id] = { m: c.price_member_eur, g: c.price_guest_eur, rules: copy(c.price_rules || []) }; });
     function draw() {
@@ -138,8 +148,9 @@
         hd.appendChild(dot); hd.appendChild(el('b', null, c.name)); k.appendChild(hd);
         var a = input('number', S.m, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' }), b = input('number', S.g, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: '—' });
         a.oninput = function () { S.m = a.value === '' ? null : +a.value; }; b.oninput = function () { S.g = b.value === '' ? null : +b.value; };
-        k.appendChild(row2(sf('Socio, a testa (€)', a), sf('Non socio, a testa (€)', b)));
-        k.appendChild(hint('Prezzo di base. Lascia vuoto per non mostrare il prezzo, scrivi 0 se per i soci è gratis.'));
+        if (simple()) { b.oninput = function () { S.g = b.value === '' ? null : +b.value; S.m = null; }; k.appendChild(sf('Prezzo della prenotazione (€)', b)); k.appendChild(hint('Quanto paga chi prenota questo campo, per ogni prenotazione. Lascia vuoto per non mostrare il prezzo, scrivi 0 se è gratis.')); }
+        else { k.appendChild(row2(sf('Socio, a testa (€)', a), sf('Non socio, a testa (€)', b)));
+        k.appendChild(hint('Prezzo di base. Lascia vuoto per non mostrare il prezzo, scrivi 0 se per i soci è gratis.')); }
         var dyn = S.rules.length > 0 || S.open;
         k.appendChild(swRow('Prezzi diversi per giorno e orario', 'Per esempio più cari la sera o nel weekend, più bassi di giorno', dyn, function (v) { S.open = v; if (v && !S.rules.length) S.rules.push({ days: [1, 2, 3, 4, 5], from: '17:00', to: '23:59', member: S.m, guest: S.g }); if (!v) { S.rules = []; S.open = false; } draw(); }));
         if (dyn) {
@@ -157,7 +168,7 @@
             rb.appendChild(row2(sf('Dalle', f), sf('Alle', t)));
             var ra = input('number', r.member, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'come base' }), rbp = input('number', r.guest, { inputmode: 'decimal', min: 0, step: '0.5', placeholder: 'come base' });
             ra.oninput = function () { r.member = ra.value === '' ? null : +ra.value; }; rbp.oninput = function () { r.guest = rbp.value === '' ? null : +rbp.value; };
-            rb.appendChild(row2(sf('Socio (€)', ra), sf('Non socio (€)', rbp)));
+            if (simple()) rb.appendChild(sf('Prezzo (€)', rbp)); else rb.appendChild(row2(sf('Socio (€)', ra), sf('Non socio (€)', rbp)));
             k.appendChild(rb);
           });
           k.appendChild(btn('+ Aggiungi una fascia', 'ghost', function () { S.rules.push({ days: [6, 7], from: '08:00', to: '23:59', member: S.m, guest: S.g }); draw(); }));
@@ -175,7 +186,7 @@
         (function next() {
           if (i >= D.courts.length) return ok();
           var c = D.courts[i++], S = P[c.id];
-          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: S.m, price_guest_eur: S.g, price_rules: S.rules.map(function (r) { return { days: r.days, from: r.from, to: r.to, member: r.member, guest: r.guest }; }), active: c.active, hours: c.hours }).then(next).catch(ko);
+          call({ action: 'save_court', id: c.id, name: c.name, surface: c.surface, indoor: c.indoor, slot_min: c.slot_min, price_member_eur: simple() ? null : S.m, price_guest_eur: S.g, price_rules: S.rules.map(function (r) { return { days: r.days, from: r.from, to: r.to, member: simple() ? null : r.member, guest: r.guest }; }), active: c.active, hours: c.hours }).then(next).catch(ko);
         })();
       }).then(load)).then(function () { toast('Prezzi salvati'); changed(); }).catch(function () { });
     });
@@ -353,7 +364,9 @@
     var n = D.courts.length, a = D.courts.filter(function (c) { return c.active; }).length;
     s('courts', n ? (n === 1 ? '1 campo' : n + ' campi') + (a < n ? ' · ' + a + ' attivi' : '') : 'Nessun campo: aggiungine uno');
     var pr = [].concat.apply([], D.courts.map(function (c) { return [c.price_member_eur, c.price_guest_eur].concat((c.price_rules || []).reduce(function (a, r) { return a.concat([r.member, r.guest]); }, [])).filter(function (x) { return x != null; }); }));
-    s('prices', pr.length ? 'Da ' + euro(Math.min.apply(null, pr)) + ' a ' + euro(Math.max.apply(null, pr)) + ' a testa' : 'Nessun prezzo impostato');
+    s('prices', pr.length ? 'Da ' + euro(Math.min.apply(null, pr)) + ' a ' + euro(Math.max.apply(null, pr)) + (simple() ? ' a prenotazione' : ' a testa') : 'Nessun prezzo impostato');
+    if (rowOf.rules) rowOf.rules.style.display = simple() ? 'none' : '';
+    if (made.prices) { var hp = made.prices.pane.querySelector('.stPh p'); if (hp) hp.textContent = simple() ? 'Il prezzo di ogni campo per prenotazione, anche diverso per giorno e fascia oraria.' : 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.'; }
     s('closures', D.closures.length ? D.closures.length + (D.closures.length === 1 ? ' chiusura in programma' : ' chiusure in programma') : 'Nessuna in programma');
     var C = D.club; s('policy', 'Disdetta ' + ((C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) === 0 ? 'sempre possibile' : 'fino a ' + (C.cancel_limit_hours == null ? 2 : C.cancel_limit_hours) + (C.cancel_limit_hours === 1 ? ' ora prima' : ' ore prima'))); s('rules', (C.open_to === 'members' ? 'Solo con un socio' : 'Soci e non soci') + (C.medical === 'none' ? ' · Senza certificato' : C.medical === 'guests' ? ' · Certificato ai non soci' : ' · Certificato') + (C.fit ? ' · FIT' : ''));
   }
