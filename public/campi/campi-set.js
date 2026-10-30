@@ -415,6 +415,7 @@
     });
     var bp = sh.querySelector('.stPage[data-st="bizinfo"]');
     if (bp) { var bh = bp.querySelector('.stPh h2'), bpp = bp.querySelector('.stPh p'); if (bh) bh.textContent = 'Dati del centro sportivo'; if (bpp) bpp.textContent = 'Nome, indirizzo e logo che i clienti vedono nella pagina di prenotazione.'; }
+    var dl = [].slice.call(sh.querySelectorAll('.stRow small')).filter(function (x) { return /^Scarica clienti e appuntamenti/.test(x.textContent); })[0]; if (dl) dl.textContent = 'Scarica prenotazioni, clienti e campi';
     var bl = sh.querySelector('label[for="biName"]'); if (bl) bl.textContent = 'Nome del centro sportivo';
     var cp = sh.querySelector('.stPage[data-st="contacts"]'); if (cp) cp.classList.add('cx-native');
     if (bp) bp.classList.add('cx-native');
