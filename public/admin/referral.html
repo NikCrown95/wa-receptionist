@@ -128,6 +128,42 @@ table.rt tr.off td{opacity:.55}
 .chkrow input{width:22px;height:22px;accent-color:var(--accent);margin:0}
 </style>
 
+<style>
+/* ===== Referral semplice ===== */
+.pagehd{margin-bottom:16px}.pagehd h1{font-size:1.6rem;letter-spacing:-.02em}.pagehd p{color:var(--muted);margin-top:4px}
+.top3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.top3 .n{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;min-width:0}
+.top3 .n b{display:block;font-size:1.8rem;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}
+.top3 .n span{color:var(--muted);font-size:.82rem}
+.due{margin-top:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--amber-soft);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);border-radius:16px;padding:12px 16px}
+.due b{color:var(--amber);font-variant-numeric:tabular-nums}
+.tabs{margin-top:18px;display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.tabs button{flex:1;min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--card2);color:var(--ink)}
+.bar{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar.between{justify-content:space-between;align-items:flex-start}
+.bar .inp{flex:1 1 220px;width:auto;min-height:46px;border-radius:13px;font-size:16px}
+.chip{min-height:46px;padding:0 15px;border-radius:13px;border:1px solid var(--line2);background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.note{color:var(--muted);font-size:.86rem;line-height:1.45;max-width:640px;flex:1 1 320px}
+.cards{margin-top:12px;display:grid;gap:8px}
+.card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 16px}
+.card .s{color:var(--muted);font-size:.84rem;grid-column:1;overflow-wrap:anywhere}
+.card .r{grid-column:2;grid-row:2;justify-self:end;color:var(--muted);font-size:.8rem;text-align:right}
+.card .pill{justify-self:end}
+.card.off{opacity:.55}
+.card.person{grid-template-columns:minmax(0,1fr);gap:12px}
+.person .st{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.person .st div{background:var(--card2);border-radius:12px;padding:9px 12px;min-width:0}
+.person .st b{display:block;font-variant-numeric:tabular-nums}
+.person .st span{font-size:.74rem;color:var(--muted)}
+.person .acts{display:flex;gap:8px;flex-wrap:wrap}
+.person .acts .btn{flex:1 1 auto;justify-content:center}
+.person .more{display:none;gap:8px;flex-wrap:wrap}.person .more.on{display:flex}
+.person .more .btn{flex:1 1 auto;justify-content:center}
+.btn.ghost{background:var(--card2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line2)}
+@media (max-width:520px){.top3 .n b{font-size:1.45rem}.tabs button{font-size:.88rem}}
+</style>
 <link rel="stylesheet" href="/admin/mobile.css">
 </head>
 <body>
@@ -146,51 +182,36 @@ table.rt tr.off td{opacity:.55}
 
 <div class="wrap">
   <div class="banner" id="setup" hidden>Il sistema referral non e' ancora attivo nel database. Esegui in Supabase lo script SQL <b>20261010_referral.sql</b> e poi ricarica la pagina.</div>
-  <div class="kpis" id="kpis"></div>
+  <div class="pagehd"><h1>Referral</h1><p>Chi porta nuove attività e quanto gli devi.</p></div>
+  <div class="top3" id="kpis"></div>
+  <div class="due" id="due" hidden></div>
+  <div class="tabs" role="tablist" id="tabs">
+    <button type="button" role="tab" aria-selected="true" data-t="arrivi">Arrivi</button>
+    <button type="button" role="tab" aria-selected="false" data-t="persone">Persone</button>
+    <button type="button" role="tab" aria-selected="false" data-t="attivita">Attività</button>
+  </div>
 
-  <section class="sec">
-    <div class="sec-top">
-      <div>
-        <h2>Attività arrivate da un link</h2>
-        <p class="lead">Tutte le attività che si sono registrate dal link di un'attività o di una persona. «In prova» finché non pagano il primo mese; poi «Ha pagato».</p>
-      </div>
+  <section id="v-arrivi">
+    <div class="bar">
+      <input class="inp" id="search" type="text" placeholder="Cerca attività o chi l’ha invitata" aria-label="Cerca">
+      <button class="chip" type="button" data-f="trial" aria-pressed="false">In prova</button>
+      <button class="chip" type="button" data-f="paid" aria-pressed="false">Hanno pagato</button>
+      <button class="btn ghost small" id="reload" type="button">Aggiorna</button>
     </div>
-    <div class="toolbar">
-      <div class="search">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input id="search" type="text" placeholder="Cerca per attività o per chi l'ha invitata…">
-      </div>
-      <select class="filter" id="filterStatus" aria-label="Stato">
-        <option value="all">Tutte</option>
-        <option value="trial">In prova</option>
-        <option value="paid">Hanno pagato</option>
-      </select>
-      <select class="filter" id="filterKind" aria-label="Chi ha invitato">
-        <option value="all">Tutti i link</option>
-        <option value="business">Solo da attività</option>
-        <option value="partner">Solo da persone</option>
-      </select>
-      <button class="btn ghost" id="reload" type="button">Aggiorna</button>
-    </div>
-    <div class="tablewrap"><table class="rt" id="tReferred"></table></div>
+    <div class="cards" id="arrivi"></div>
   </section>
 
-  <section class="sec">
-    <h2>Mesi di Smart accumulati dalle attività</h2>
-    <p class="lead">Ogni attività invitata che paga il primo mese vale un mese di Smart per chi l'ha invitata. Per ora il credito viene solo conteggiato, non scalato dalla fattura.</p>
-    <div class="tablewrap"><table class="rt" id="tCredits"></table></div>
+  <section id="v-persone" hidden>
+    <div class="bar between">
+      <p class="note">Persone esterne con un link. Quando un'attività paga il primo mese matura un premio (di base un mese di Smart), un altro dopo un anno se è ancora iscritta. Loro vedono tutto da <b id="promUrl">…</b> con nome, cognome e codice.</p>
+      <div class="rowbtns"><button class="btn ghost small" id="copyProm" type="button">Copia link pagina promoter</button><button class="btn small" id="addPerson" type="button">Nuova persona</button></div>
+    </div>
+    <div class="cards" id="persone"></div>
   </section>
 
-  <section class="sec">
-    <div class="sec-top">
-      <div>
-        <h2>Persone con un link</h2>
-        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro codice e paga il primo mese matura un premio in contanti (di base un mese di Smart); un altro dopo un anno, se l'attività è ancora iscritta. Con «Assegna attività» colleghi a una persona anche un'attività che non si è registrata col suo codice.</p>
-        <p class="lead">Loro vedono tutto da <b id="promUrl">…</b>: entrano con nome, cognome e codice.</p>
-      </div>
-      <div class="rowbtns"><button class="btn ghost" id="copyProm" type="button">Copia link pagina promoter</button><button class="btn" id="addPerson" type="button">Nuova persona</button></div>
-    </div>
-    <div class="tablewrap"><table class="rt" id="tPeople"></table></div>
+  <section id="v-attivita" hidden>
+    <p class="note" style="margin-bottom:12px">Ogni attività invitata che paga il primo mese vale un mese di Smart per chi l'ha invitata. Per ora il credito viene solo conteggiato, non scalato dalla fattura.</p>
+    <div class="cards" id="attivita"></div>
   </section>
 </div>
 
@@ -245,99 +266,87 @@ table.rt tr.off td{opacity:.55}
   function pill(text, cls){ return el('span', 'pill ' + cls, text); }
   function bizLink(name, id){ var s = el('span', 'nm'); if (id){ var a = el('a', null, name); a.href = '/admin/attivita.html?id=' + encodeURIComponent(id); s.appendChild(a); } else s.textContent = name; return s; }
 
+  var FILTER = '', TAB = 'arrivi';
   function kpis(){
     var box = document.getElementById('kpis'); box.innerHTML = '';
     var s = state.data && state.data.summary; if (!s) return;
-    [['Registrate da un link', s.registered, 'in totale', ''],
-     ['In prova', s.in_trial, 'non hanno ancora pagato', ''],
-     ['Hanno pagato', s.paid, 'primo mese incassato', s.paid ? '' : ''],
-     ['Mesi di Smart', s.credit_months, eur(s.credit_value_eur) + ' di credito', ''],
-     ['Premi da pagare', eur(s.partners_due_eur), 'alle persone esterne', s.partners_due_eur > 0 ? 'warn' : '']
-    ].forEach(function(k){ var d = el('div', 'kpi'); d.appendChild(el('div', 'lbl', k[0])); d.appendChild(el('div', 'val ' + k[3], String(k[1]))); d.appendChild(el('div', 'sub', k[2])); box.appendChild(d); });
+    [[s.registered, 'arrivate da un link'], [s.paid, 'hanno già pagato'], [s.in_trial, 'ancora in prova']].forEach(function(k){
+      var d = el('div', 'n'); d.appendChild(el('b', null, String(k[0]))); d.appendChild(el('span', null, k[1])); box.appendChild(d);
+    });
+    var due = document.getElementById('due'), n = ((state.data.partners) || []).filter(function(p){ return p.due_eur > 0; }).length;
+    due.innerHTML = '';
+    if (s.partners_due_eur > 0){
+      var sp = el('span'); sp.appendChild(document.createTextNode('Premi da pagare: ')); sp.appendChild(el('b', null, eur(s.partners_due_eur))); sp.appendChild(document.createTextNode(' a ' + n + (n === 1 ? ' persona' : ' persone')));
+      var go = el('button', 'btn small', 'Vai a pagare'); go.type = 'button'; go.addEventListener('click', function(){ setTab('persone'); });
+      due.appendChild(sp); due.appendChild(go); due.hidden = false;
+    } else due.hidden = true;
+  }
+  function setTab(t){
+    TAB = t;
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(b){ b.setAttribute('aria-selected', b.getAttribute('data-t') === t ? 'true' : 'false'); });
+    ['arrivi', 'persone', 'attivita'].forEach(function(k){ document.getElementById('v-' + k).hidden = k !== t; });
+  }
+  function card(name, bizId, pillEl, sub, right){
+    var d = el('div', 'card'); d.appendChild(bizLink(name, bizId)); d.appendChild(pillEl || el('span'));
+    d.appendChild(el('span', 's', sub)); if (right) d.appendChild(right); return d;
   }
 
   function renderReferred(){
-    var t = document.getElementById('tReferred'); t.innerHTML = '';
+    var box = document.getElementById('arrivi'); box.innerHTML = '';
     var q = document.getElementById('search').value.trim().toLowerCase();
-    var fs = document.getElementById('filterStatus').value, fk = document.getElementById('filterKind').value;
     var all = (state.data && state.data.referred) || [];
     var rows = all.filter(function(r){
-      if (fs !== 'all' && r.status !== fs) return false;
-      if (fk !== 'all' && r.via_kind !== fk) return false;
+      if (FILTER && r.status !== FILTER) return false;
       if (q && (r.name + ' ' + r.via_name).toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
-    th(t, [['Attività'], ['Arrivata da'], ['Stato'], ['Registrata'], ['Prova / pagamento'], ['']]);
-    if (!rows.length){ empty(t, 6, all.length ? 'Nessun risultato con questi filtri' : 'Ancora nessuna registrazione da un link', all.length ? 'Cambia filtro o cerca altro.' : 'Quando qualcuno si registra da un link referral, lo vedi qui.'); return; }
-    var tb = el('tbody');
+    if (!rows.length){ box.appendChild(el('p', 'note', all.length ? 'Nessun risultato con questi filtri.' : 'Ancora nessuna registrazione da un link. Quando qualcuno si registra da un link referral, lo vedi qui.')); return; }
     rows.forEach(function(r){
-      var tr = el('tr');
-      var c1 = el('td'); c1.appendChild(bizLink(r.name, r.business_id)); tr.appendChild(c1);
-      var c2 = el('td'); var v = el('span', 'via'); v.appendChild(bizLink(r.via_name, r.via_kind === 'business' ? r.via_id : null)); v.appendChild(el('span', 'tag ' + (r.via_kind === 'partner' ? 'partner' : 'biz'), r.via_kind === 'partner' ? 'Persona' : 'Attività')); if (r.manual) v.appendChild(el('span', 'tag', 'Assegnata a mano')); c2.appendChild(v); tr.appendChild(c2);
-      var c3 = el('td'); c3.appendChild(r.status === 'paid' ? pill('Ha pagato', 'active') : pill('In prova', 'trial')); tr.appendChild(c3);
-      tr.appendChild(el('td', null, dshort(r.created_at)));
-      var c5 = el('td');
-      if (r.status === 'paid') c5.textContent = 'Pagato il ' + dshort(r.paid_at);
-      else if (r.trial_ends_at) c5.textContent = 'La prova finisce il ' + dshort(r.trial_ends_at);
-      else c5.textContent = r.sub_status === 'cancelled' ? 'Abbonamento annullato' : '\u2014';
-      if (r.reward2_at) c5.appendChild(el('small', null, 'Un anno compiuto: seconda mensilità maturata'));
-      tr.appendChild(c5);
+      var when = r.status === 'paid' ? 'Pagato il ' + dshort(r.paid_at) : r.trial_ends_at ? 'Prova fino al ' + dshort(r.trial_ends_at) : r.sub_status === 'cancelled' ? 'Abbonamento annullato' : 'Registrata il ' + dshort(r.created_at);
+      var right = el('span', 'r', when + (r.reward2_at ? ' · un anno compiuto' : ''));
+      var c = card(r.name, r.business_id, r.status === 'paid' ? pill('Ha pagato', 'active') : pill('In prova', 'trial'), 'Invitata da ' + r.via_name + (r.via_kind === 'partner' ? ' (persona)' : ''), right);
       if (state.owner && r.via_kind === 'partner' && r.business_id){
-        var c6 = el('td', 'num'); var un = el('button', 'btn ghost small', 'Togli'); un.type = 'button'; un.addEventListener('click', function(){ unassign(r, un); }); c6.appendChild(un); tr.appendChild(c6);
-      } else tr.appendChild(el('td'));
-      tb.appendChild(tr);
+        var un = el('button', 'btn ghost small', 'Togli'); un.type = 'button'; un.style.cssText = 'grid-column:1/-1;justify-self:end'; un.addEventListener('click', function(){ unassign(r, un); }); c.appendChild(un);
+      }
+      box.appendChild(c);
     });
-    t.appendChild(tb);
   }
 
   function renderCredits(){
-    var t = document.getElementById('tCredits'); t.innerHTML = '';
+    var box = document.getElementById('attivita'); box.innerHTML = '';
     var rows = (state.data && state.data.credits) || [];
-    th(t, [['Attività'], ['Invitate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Mesi di Smart', 'num'], ['Valore', 'num'], ['Link', 'num']]);
-    if (!rows.length){ empty(t, 7, 'Nessuna attività ha ancora invitato qualcuno', 'Ogni attività ha il suo link nella Scheda attività.'); return; }
-    var tb = el('tbody');
+    if (!rows.length){ box.appendChild(el('p', 'note', 'Nessuna attività ha ancora invitato qualcuno. Ogni attività ha il suo link nella Scheda attività.')); return; }
     rows.forEach(function(c){
-      var tr = el('tr');
-      var c1 = el('td'); c1.appendChild(bizLink(c.name, c.business_id)); tr.appendChild(c1);
-      tr.appendChild(el('td', 'num', String(c.invited)));
-      tr.appendChild(el('td', 'num', String(c.in_trial)));
-      tr.appendChild(el('td', 'num', String(c.paid)));
-      var m = el('td', 'num'); m.appendChild(el('b', null, String(c.credit_months))); tr.appendChild(m);
-      tr.appendChild(el('td', 'num', eur(c.credit_value_eur)));
-      var l = el('td', 'num'); if (c.link){ var b = el('button', 'btn ghost small', 'Copia link'); b.type = 'button'; b.addEventListener('click', function(){ copy(c.link, b); }); l.appendChild(b); } tr.appendChild(l);
-      tb.appendChild(tr);
+      var sub = c.invited + (c.invited === 1 ? ' invitata' : ' invitate') + ' · ' + c.in_trial + ' in prova · ' + c.paid + (c.paid === 1 ? ' pagata' : ' pagate');
+      var cp = null;
+      if (c.link){ cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.style.cssText = 'grid-column:2;grid-row:2;justify-self:end'; cp.addEventListener('click', function(){ copy(c.link, cp); }); }
+      box.appendChild(card(c.name, c.business_id, pill(c.credit_months + (c.credit_months === 1 ? ' mese di Smart' : ' mesi di Smart'), c.credit_months ? 'active' : 'trial'), sub, cp));
     });
-    t.appendChild(tb);
   }
 
   function renderPeople(){
-    var t = document.getElementById('tPeople'); t.innerHTML = '';
+    var box = document.getElementById('persone'); box.innerHTML = '';
     var rows = (state.data && state.data.partners) || [];
-    th(t, [['Persona'], ['Registrate', 'num'], ['In prova', 'num'], ['Hanno pagato', 'num'], ['Premio cad.', 'num'], ['Maturato', 'num'], ['Da pagare', 'num'], ['', 'num']]);
-    if (!rows.length){ empty(t, 8, 'Nessuna persona inserita', 'Tocca «Nuova persona» per creare un link con il suo nome.'); return; }
-    var tb = el('tbody');
+    if (!rows.length){ box.appendChild(el('p', 'note', 'Nessuna persona inserita. Tocca «Nuova persona» per creare un link con il suo nome.')); return; }
     rows.forEach(function(p){
-      var tr = el('tr'); if (!p.active) tr.className = 'off';
-      var c1 = el('td'); var n = el('div', 'nm', p.name); c1.appendChild(n);
-      var sm = el('small', null, (p.active ? '' : 'Link disattivato \u00b7 ') + (p.note || 'dal ' + dshort(p.created_at))); c1.appendChild(sm); tr.appendChild(c1);
-      tr.appendChild(el('td', 'num', String(p.registered)));
-      tr.appendChild(el('td', 'num', String(p.in_trial)));
-      var pd = el('td', 'num', String(p.paid)); if (p.second) pd.appendChild(el('small', null, p.second + (p.second === 1 ? ' anche a un anno' : ' anche a un anno'))); tr.appendChild(pd);
-      tr.appendChild(el('td', 'num', eur(p.reward_eur)));
-      tr.appendChild(el('td', 'num', eur(p.earned_eur)));
-      var due = el('td', 'num'); var db = el('b', null, eur(p.due_eur)); if (p.due_eur > 0) db.style.color = 'var(--amber)'; due.appendChild(db);
-      if (p.settled_eur > 0) due.appendChild(el('small', null, eur(p.settled_eur) + ' gia\' pagati')); tr.appendChild(due);
-      var act = el('td', 'num'); var rb = el('div', 'rowbtns');
-      var cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.addEventListener('click', function(){ copy(p.link, cp); }); rb.appendChild(cp);
+      var c = el('div', 'card person' + (p.active ? '' : ' off'));
+      var h = el('div'); h.appendChild(el('b', 'nm', p.name)); h.appendChild(el('div', 's', (p.active ? '' : 'Link disattivato · ') + (p.note || 'dal ' + dshort(p.created_at)) + ' · premio ' + eur(p.reward_eur))); c.appendChild(h);
+      var st = el('div', 'st');
+      [[p.registered, 'registrate'], [p.paid, 'hanno pagato'], [eur(p.due_eur), 'da pagare']].forEach(function(x){ var d = el('div'); d.appendChild(el('b', null, String(x[0]))); d.appendChild(el('span', null, x[1])); st.appendChild(d); });
+      c.appendChild(st);
+      var a = el('div', 'acts');
+      var cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.addEventListener('click', function(){ copy(p.link, cp); }); a.appendChild(cp);
       if (state.owner){
-        if (p.due_eur > 0){ var pay = el('button', 'btn small', 'Premio pagato'); pay.type = 'button'; pay.addEventListener('click', function(){ payout(p, pay); }); rb.appendChild(pay); }
-        var as = el('button', 'btn ghost small', 'Assegna attività'); as.type = 'button'; as.addEventListener('click', function(){ openAssign(p); }); rb.appendChild(as);
-        var ed = el('button', 'btn ghost small', 'Modifica'); ed.type = 'button'; ed.addEventListener('click', function(){ openSheet(p); }); rb.appendChild(ed);
-      }
-      act.appendChild(rb); tr.appendChild(act);
-      tb.appendChild(tr);
+        if (p.due_eur > 0){ var pay = el('button', 'btn small', 'Premio pagato'); pay.type = 'button'; pay.addEventListener('click', function(){ payout(p, pay); }); a.appendChild(pay); }
+        var more = el('div', 'more');
+        var as = el('button', 'btn ghost small', 'Assegna attività'); as.type = 'button'; as.addEventListener('click', function(){ openAssign(p); });
+        var ed = el('button', 'btn ghost small', 'Modifica'); ed.type = 'button'; ed.addEventListener('click', function(){ openSheet(p); });
+        more.appendChild(as); more.appendChild(ed);
+        var mb = el('button', 'btn ghost small', 'Altro'); mb.type = 'button'; mb.addEventListener('click', function(){ more.classList.toggle('on'); });
+        a.appendChild(mb); c.appendChild(a); c.appendChild(more);
+      } else c.appendChild(a);
+      box.appendChild(c);
     });
-    t.appendChild(tb);
   }
 
   function render(){
@@ -432,8 +441,12 @@ table.rt tr.off td{opacity:.55}
   }
 
   document.getElementById('search').addEventListener('input', renderReferred);
-  document.getElementById('filterStatus').addEventListener('change', renderReferred);
-  document.getElementById('filterKind').addEventListener('change', renderReferred);
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(c){ c.addEventListener('click', function(){
+    var on = c.getAttribute('aria-pressed') === 'true';
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(x){ x.setAttribute('aria-pressed', 'false'); });
+    FILTER = on ? '' : c.getAttribute('data-f'); if (!on) c.setAttribute('aria-pressed', 'true'); renderReferred();
+  }); });
+  Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function(b){ b.addEventListener('click', function(){ setTab(b.getAttribute('data-t')); }); });
   document.getElementById('reload').addEventListener('click', load);
   api('/api/admin/clients?view=me').then(function(me){ state.owner = !!(me && me.role === 'owner'); render(); }).catch(function(){});
   render();
