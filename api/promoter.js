@@ -155,6 +155,7 @@ module.exports = async function handler(req, res) {
     const tdays = await referral.trialDays(get);
     if (!/^\[demo\]/i.test(String(partner.note || ''))) await promoter.settle(get, send, { partnerId: partner.id, trialDays: tdays });
     const data = await promoter.viewFor(partner, get, { trialDays: tdays });
+    data.partner.link = referral.referralLink(partner.code);
     return res.status(200).json(data);
   } catch (e) {
     console.error('promoter:', e && e.message);

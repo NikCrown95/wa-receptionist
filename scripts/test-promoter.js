@@ -145,7 +145,7 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
 
   r = await call('GET', undefined, ck);
   assert.strictEqual(r.code, 200, JSON.stringify(r.json));
-  assert.strictEqual(r.json.partner.name, 'Marco Rossi');
+  assert.strictEqual(r.json.partner.name, 'Marco Rossi'); assert.strictEqual(r.json.partner.code, 'marco-3f9a'); assert.strictEqual(r.json.partner.link, 'https://prenolia.test/invito/marco-3f9a');
   assert.strictEqual(r.json.totals.registered, 3); assert.strictEqual(r.json.totals.in_trial, 1); assert.strictEqual(r.json.totals.paid, 2);
   const names = r.json.businesses.map((b) => b.name);
   assert.ok(names.includes('Studio <b>Aurora</b>'));

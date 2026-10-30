@@ -88,6 +88,14 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .chev{width:20px;height:20px;color:var(--muted);transition:transform .25s ease;flex:none}
 .biz.open .chev{transform:rotate(180deg);color:var(--ink)}
 .bd{padding-top:2px}
+.code-card{margin-top:12px;border-radius:18px;background:var(--card);border:1px solid var(--line);padding:16px 16px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.code-card .l{min-width:0}
+.code-card small{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.code-card .v{display:block;font-family:var(--display);font-weight:800;font-size:1.45rem;letter-spacing:.02em;color:var(--gold);overflow-wrap:anywhere;margin-top:2px}
+.code-card .hint2{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
+.code-card .acts{display:flex;gap:8px;flex-wrap:wrap}
+.cbtn{border:1px solid var(--line2);background:var(--card2);border-radius:12px;padding:0 14px;min-height:44px;color:var(--ink);font-weight:600;font-size:.88rem;cursor:pointer}
+.cbtn.main{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .tip{margin:0 0 12px;font-size:.8rem;color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.chev{transition:none}}
 .bh .nm{display:block;font-family:var(--display);font-size:1.08rem;font-weight:700;letter-spacing:-.015em;overflow-wrap:anywhere}
@@ -208,6 +216,11 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
       <div class="stat p"><b id="sPaid">0</b><span>Hanno pagato</span></div>
     </div>
 
+    <div class="code-card">
+      <div class="l"><small>Il tuo codice invito</small><span class="v" id="myCode">—</span><span class="hint2">Chi si registra con il tuo codice o con il tuo link viene collegato a te.</span></div>
+      <div class="acts"><button class="cbtn main" type="button" id="cpCode">Copia codice</button><button class="cbtn" type="button" id="cpLink">Copia link</button></div>
+    </div>
+
     <div class="bar">
       <h2>Le tue attività</h2>
       <div class="chips" role="group" aria-label="Filtro">
@@ -326,6 +339,7 @@ function render(){
   $('due').textContent = eur(t.due); $('got').textContent = eur(t.got); $('pot').textContent = eur(t.pot);
   $('sReg').textContent = t.registered; $('sTry').textContent = t.in_trial; $('sPaid').textContent = t.paid;
   $('rw').textContent = eur(d.partner.reward_eur);
+  $('myCode').textContent = d.partner.code || '—';
   d.businesses.forEach(function(b){
     var k = kind(b);
     if(FILTER==='ok' ? !b.paid : FILTER!=='all' && k!==FILTER) return;
@@ -379,6 +393,14 @@ $('exit').addEventListener('click',function(){
   fetch('/api/promoter',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})}).catch(function(){}).then(function(){ showLogin(''); });
 });
 $('refresh').addEventListener('click',function(){ load(false).catch(function(){ $('liveTxt').textContent = 'Non riesco ad aggiornare'; }); });
+function copyText(text, btn){
+  var label = btn.textContent;
+  function ok(){ btn.textContent = 'Copiato'; setTimeout(function(){ btn.textContent = label; }, 1500); }
+  function fallback(){ var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy') ? ok() : (btn.textContent='Seleziona e copia a mano'); }catch(e){ btn.textContent='Seleziona e copia a mano'; } ta.remove(); }
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
+$('cpCode').addEventListener('click',function(){ if(DATA) copyText(DATA.partner.code, this); });
+$('cpLink').addEventListener('click',function(){ if(DATA) copyText(DATA.partner.link || (location.origin + '/invito/' + DATA.partner.code), this); });
 $('grid').addEventListener('click',function(e){
   var btn = e.target.closest ? e.target.closest('.bh') : null; if(!btn) return;
   var id = btn.getAttribute('data-id'), art = btn.parentNode, open = !OPEN[id];
