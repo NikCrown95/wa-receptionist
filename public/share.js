@@ -178,7 +178,7 @@
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
     else { menu.appendChild(g); }
     /* Invita un'attivita': voce semplice nel gruppo Account (tra Impostazioni e Guida); compare solo se il referral e' attivo per questa attivita' */
-    var rf = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg><span>Invita un\u2019attività</span>');
+    var rf = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg><span>Invita un amico</span>');
     rf.type = "button"; rf.id = "menuTabReferral"; rf.setAttribute("role", "menuitem"); rf.setAttribute("aria-current", "false"); rf.hidden = true;
     rf.querySelector("span:first-of-type").style.flex = "1";
     rf.addEventListener("click", function () { closeMenu(); openRef(); });
@@ -197,7 +197,7 @@
     return true;
   }
   /* ---------- Invita un'attivita': voce nel menu e pagina intera con codice, link e numeri ---------- */
-  var RK = "lia:ref:v1:" + token, refInfo = null, refPage = null, refPrev = [], refPrevLbl = "", RLBL = "Invita un\u2019attività";
+  var RK = "lia:ref:v1:" + token, refInfo = null, refPage = null, refPrev = [], refPrevLbl = "", RLBL = "Invita un amico";
   function refShow(on) {
     var b = $("menuTabReferral"); if (b) b.hidden = !on;
     document.body.classList.toggle("mnRef", !!on);
