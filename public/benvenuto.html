@@ -265,7 +265,7 @@ var SUBT={sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e pre
 var NAMES={sport:"Sport",campi:"Campi",regole:"Regole",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
-var S={sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
+var S={sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,online:false,half:false,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
   if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
@@ -366,6 +366,7 @@ function payload(){
     if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
     else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
   if(S.v==="domicilio")base.areas=S.cities.slice();
+  if(S.v==="domicilio"){base.online=!!S.online;base.half_hour=!!S.half}
   if(S.v==="sanitario")base.dpa=true;
   return base}
 function save(){
@@ -412,6 +413,14 @@ function render(){
       var ch2=h("div",{class:"chips"});left.forEach(function(x){ch2.appendChild(chip("+ "+x[0]+" · "+x[1]+" min",false,function(){addItem(x[0],x[1],false)}))});sb.appendChild(ch2);v.appendChild(sb)}
     v.appendChild(listBox(gym,S.v==="domicilio"));
     if(S.v==="domicilio")v.appendChild(h("p",{class:"hint",text:"L'icona della casa segna i servizi che fai a casa del cliente. Gli altri li fai nel tuo locale."}));
+    if(S.v==="domicilio"){
+      var mx=h("div",{class:"card",style:"display:grid;gap:10px;margin-top:14px"},[h("span",{class:"stepl",text:"Come lavori"})]);
+      function yn(label,sub,key){var row=h("div",{class:"chips"},[h("div",{style:"flex:1 1 100%"},[h("b",{text:label}),h("small",{text:sub,style:"display:block;color:var(--muted)"})]),
+        chip("No",!S[key],function(){S[key]=false;render()}),chip("Sì",!!S[key],function(){S[key]=true;render()})]);return row}
+      mx.appendChild(yn("Offri anche servizi online?","In videochiamata, per esempio consulenze o lezioni.","online"));
+      mx.appendChild(yn("I clienti possono prenotare a mezz'ore?","Oltre alla durata minima possono aggiungere mezz'ore.","half"));
+      mx.appendChild(h("p",{class:"hint",text:"Queste scelte decidono cosa vedranno i tuoi clienti. Se non le spunti, non compariranno."}));
+      v.appendChild(mx)}
   }
   if(k==="calendario"){
     v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio di ogni lezione. Altri orari li aggiungi dopo con il pulsante Programma."));

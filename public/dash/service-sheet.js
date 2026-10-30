@@ -1,35 +1,39 @@
 // Modalita' del servizio (in sede / a domicilio / online) con il prezzo di ognuna e la spunta delle mezz'ore.
 // init: {modes:{sede:25,domicilio:30,online:20}, half:false}. read() -> {modes:[{mode,price_eur}], half} oppure {error}.
 window.liaModesBlock=function(host,init,getMin){
-  init=init||{};var M=init.modes||{sede:''},half=!!init.half,rows={};
+  init=init||{};var M=init.modes||{sede:''},half=!!init.half,rows={},AL=init.allow||{sede:true,domicilio:true,online:true,half:true};
+  function vis(k){return k==='sede'||M[k]!==undefined||!!AL[k]}
+  var showHalf=half||!!AL.half,multi=['domicilio','online'].some(vis);
   var DEF=[['sede','In sede','A casa tua'],['domicilio','A domicilio','A casa del cliente'],['online','Online','In videochiamata']];
   host.innerHTML='';host.className=(host.className?host.className+' ':'')+'lmodes';
-  var cap=document.createElement('div');cap.className='lmcap';cap.textContent='Modalità e prezzo';host.appendChild(cap);
-  var hint=document.createElement('p');hint.className='lmhint';host.appendChild(hint);
+  var cap=document.createElement('div');cap.className='lmcap';cap.textContent=multi?'Modalità e prezzo':'Prezzo';host.appendChild(cap);
+  var hint=document.createElement('p');hint.className='lmhint';if(multi)host.appendChild(hint);
   function paintHint(){var d=typeof getMin==='function'?parseInt(getMin(),10):0;hint.textContent=d>=5?'Il prezzo è per '+d+' minuti.':'Spunta come lo fai e scrivi il prezzo di ognuna.'}
   DEF.forEach(function(d){
-    var on=M[d[0]]!==undefined,wrap=document.createElement('div');wrap.className='lmrow'+(on?' on':'');
+    if(!vis(d[0]))return;
+    var on=M[d[0]]!==undefined||!multi,wrap=document.createElement('div');wrap.className='lmrow'+(on?' on':'');
     var lab=document.createElement('label');lab.className='lmchk';
     var cb=document.createElement('input');cb.type='checkbox';cb.checked=on;cb.setAttribute('aria-label',d[1]);
     var tx=document.createElement('span');var b=document.createElement('b');b.textContent=d[1];var sm=document.createElement('small');sm.textContent=d[2];tx.appendChild(b);tx.appendChild(sm);
-    lab.appendChild(cb);lab.appendChild(tx);wrap.appendChild(lab);
+    if(multi){lab.appendChild(cb);lab.appendChild(tx);wrap.appendChild(lab)}else{cb.checked=true}
     var pf=document.createElement('div');pf.className='lmprice';
     var pl=document.createElement('label');pl.textContent='Prezzo (€)';
     var pi=document.createElement('input');pi.type='text';pi.inputMode='decimal';pi.autocomplete='off';pi.value=on&&M[d[0]]!==''?String(M[d[0]]).replace('.',','):'';
     pi.setAttribute('aria-label','Prezzo '+d[1]);pl.appendChild(pi);pf.appendChild(pl);wrap.appendChild(pf);
+    if(!multi)wrap.className='lmrow on single';
     cb.addEventListener('change',function(){wrap.classList.toggle('on',cb.checked);if(cb.checked)pi.focus()});
     rows[d[0]]={cb:cb,pi:pi};host.appendChild(wrap);
   });
   var hl=document.createElement('label');hl.className='lmhalf';
   var hc=document.createElement('input');hc.type='checkbox';hc.checked=half;
   var ht=document.createElement('span');var hb=document.createElement('b');hb.textContent='Si può prenotare anche a mezz’ore';var hs=document.createElement('small');
-  ht.appendChild(hb);ht.appendChild(hs);hl.appendChild(hc);hl.appendChild(ht);host.appendChild(hl);
+  ht.appendChild(hb);ht.appendChild(hs);hl.appendChild(hc);hl.appendChild(ht);if(showHalf)host.appendChild(hl);
   function paintHalf(){var d=typeof getMin==='function'?parseInt(getMin(),10):0;hs.textContent=hc.checked?'Dopo la durata minima il cliente aggiunge mezz’ore. Ogni mezz’ora in più costa il 50% del prezzo dell’ora.':'Si prenota solo la durata minima'+(d>=5?' ('+d+' min)':'')+'.'}
   hc.addEventListener('change',paintHalf);paintHalf();paintHint();
   host.addEventListener('input',function(){paintHint();paintHalf()});
   return {read:function(){
     var out=[];
-    for(var i=0;i<DEF.length;i++){var k=DEF[i][0],r=rows[k];if(!r.cb.checked)continue;
+    for(var i=0;i<DEF.length;i++){var k=DEF[i][0],r=rows[k];if(!r||!r.cb.checked)continue;
       var p=parseFloat(String(r.pi.value).replace(',','.'));
       if(!(p>=0))return {error:'Scrivi il prezzo di “'+DEF[i][1]+'”, per esempio 18 o 12,50.'};
       out.push({mode:k,price_eur:p})}
@@ -53,7 +57,7 @@ window.liaServiceSheet=function(v,onSave,onDelete){
   document.body.appendChild(bg);document.body.appendChild(sh);
   var $=function(q){return sh.querySelector(q)};
   $('#lsName').value=v.name||'';if($('#lsPrice'))$('#lsPrice').value=String(v.price==null?'':v.price).replace('.',',');$('#lsMin').value=v.min==null?'':v.min;
-  var mb=null;if(v.useModes)mb=window.liaModesBlock($('#lsModes'),{modes:v.modes,half:v.half},function(){return $('#lsMin').value});
+  var mb=null;if(v.useModes)mb=window.liaModesBlock($('#lsModes'),{modes:v.modes,half:v.half,allow:v.allow},function(){return $('#lsMin').value});
   var mu=Math.max(1,Math.min(8,parseInt(v.maxUnits,10)||1)),ub=$('#lsUnits');
   function uLabel(m){if(m<60)return m+' min';if(m%60===0)return (m/60)+(m===60?' ora':' ore');return Math.floor(m/60)+' h '+(m%60)+' min'}
   function uPaint(){if(!ub)return;var d=parseInt($('#lsMin').value,10),top=Math.max(4,mu);ub.innerHTML='';for(var k=1;k<=top;k++)(function(k){var b=document.createElement('button');b.type='button';b.className='uo'+(k===mu?' on':'');b.setAttribute('aria-pressed',k===mu?'true':'false');b.textContent=d>=5?uLabel(d*k):(k+'×');b.addEventListener('click',function(){mu=k;uPaint()});ub.appendChild(b)})(k)}

@@ -611,7 +611,7 @@ module.exports = async (req, res) => {
           },
           staff_choice: biz.staff_choice === true,
           capacity_hours: capacityHours(biz),
-          business: { logo_url: logoLib.logoUrl(biz), name: biz.name, onboarded: biz.onboarded_at !== null, service_areas: Array.isArray(biz.service_areas) ? biz.service_areas : [], slug: biz.slug || null, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: gymNoOnline(biz) ? "" : (biz.public_link || biz.booking_url || site.bookingUrl(biz.slug, biz.business_type, reqBase(req))), gym_offers: biz.business_type === "palestra" ? gymOffers(biz) : null, telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
+          business: { logo_url: logoLib.logoUrl(biz), name: biz.name, onboarded: biz.onboarded_at !== null, service_areas: Array.isArray(biz.service_areas) ? biz.service_areas : [], offers_online: biz.offers_online === true, half_hour_ok: biz.half_hour_ok === true, slug: biz.slug || null, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: gymNoOnline(biz) ? "" : (biz.public_link || biz.booking_url || site.bookingUrl(biz.slug, biz.business_type, reqBase(req))), gym_offers: biz.business_type === "palestra" ? gymOffers(biz) : null, telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
           services: (() => { const sv = biz.services.filter(s => !isPackage(s)); const lab = modes.labels(sv); return sv.map(s => ({ id:s.id, name:s.__rawName || s.name, label:lab[s.id], mode:modes.modeOf(s), group_id:s.group_id || null, half_hour:s.half_hour === true, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place, max_units:maxUnits(s) })); })(),
           packages: biz.services.filter(isPackage).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, price_eur:s.price_eur, service_ids:s.package_service_ids })),
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
@@ -756,6 +756,7 @@ module.exports = async (req, res) => {
             if (!sl2.some((x) => x.at_customer_place)) return res.status(400).json({ error: "Segna almeno un servizio che fai a casa del cliente." });
           }
           patch.service_areas = areas;
+          if (kind === "domicilio") { patch.offers_online = body.online === true; patch.half_hour_ok = body.half_hour === true; }
           const p2 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
           if (!p2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
           await sb("DELETE", "services?business_id=eq." + biz.id, null, "return=minimal");
@@ -786,6 +787,7 @@ module.exports = async (req, res) => {
           const ms = modes.cleanModes(body.modes);
           if (!name || name.length > 80 || !Number.isInteger(duration_min) || duration_min <= 0 || duration_min > 720 || !ms) return res.status(400).json({ error: "Servizio non valido" });
           const gid = crypto.randomUUID(), half = body.half_hour === true;
+          { const cur = await sb("GET", "services?business_id=eq." + biz.id + "&active=eq.true&select=*"); const bad = modes.violation(biz, cur.ok ? cur.data : [], ms, half); if (bad) return res.status(400).json({ error: bad }); }
           const rowsNew = ms.map((m) => ({ business_id: biz.id, name, duration_min, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true, mode: m.mode, group_id: gid, half_hour: half }));
           let rr = await sb("POST", "services", rowsNew, "return=representation");
           if (!rr.ok && ms.length === 1 && ms[0].mode !== "online") {
@@ -867,6 +869,7 @@ module.exports = async (req, res) => {
           if (g.ok && Array.isArray(g.data) && g.data.length) group = g.data;
         }
         const gid = row0.group_id || crypto.randomUUID(), half = body.half_hour === true;
+        { const cur = await sb("GET", "services?business_id=eq." + biz.id + "&active=eq.true&select=*"); const bad = modes.violation(biz, cur.ok ? cur.data : [], ms, half); if (bad) return res.status(400).json({ error: bad }); }
         let mu = null;
         if (body.max_units !== undefined) { mu = Number(body.max_units); if (!Number.isInteger(mu) || mu < 1 || mu > 8) return res.status(400).json({ error: "Durata massima non valida" }); }
         const simple = ms.length === 1 && ms[0].mode !== "online" && group.length === 1;

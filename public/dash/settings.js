@@ -29,6 +29,9 @@
   function flash(msg){var e=document.getElementById('setSavedHint');if(e)e.textContent=msg;}
 
   function svcHomeOn(){try{return stAreasList().length>0||S.services.some(function(x){return x.home})}catch(e){return S.services.some(function(x){return x.home})}}
+  /* le modalità (a domicilio, online, mezz'ore) compaiono solo a chi le usa davvero: gli altri vedono solo il prezzo */
+  function modesAllowed(){var sv=S.services||[];return {sede:true,domicilio:svcHomeOn()||sv.some(function(x){return x.mode==='domicilio'}),online:sv.some(function(x){return x.mode==='online'})||bizFlag('offers_online'),half:sv.some(function(x){return x.half})||bizFlag('half_hour_ok')}}
+  function bizFlag(k){try{var b=window.liaSettingsData&&window.liaSettingsData.business;return !!(b&&b[k]===true)}catch(e){return false}}
   var ML={sede:'In sede',domicilio:'A domicilio',online:'Online'},MK=['sede','domicilio','online'];
   function buildGroups(list){var map={},out=[];list.forEach(function(x){var k=x.gid||x.id,g=map[k];if(!g){g=map[k]={key:k,name:x.rawName||x.name,dur:x.duration_min,half:!!x.half,maxUnits:x.maxUnits||1,modes:{},rows:[]};out.push(g)}g.modes[x.mode]={id:x.id,price:x.price};g.rows.push(x)});return out}
   function grpSub(g){var ks=MK.filter(function(k){return g.modes[k]});if(!ks.length)return '';if(ks.length===1&&ks[0]==='sede')return eur.format(g.modes.sede.price)+' · '+g.dur+' min';return ks.map(function(k){return ML[k]+' '+eur.format(g.modes[k].price)}).join(' · ')+' · '+g.dur+' min'}
@@ -37,7 +40,7 @@
       window.liaServiceSheet({name:s.name,price:s.price,min:s.duration_min,home:s.home,showHome:svcHomeOn(),showUnits:true,maxUnits:s.maxUnits||1},function(v){var u={action:'service_update',id:s.id,name:v.name,price_eur:v.price,duration_min:v.min};if(v.showHome)u.at_customer_place=!!v.home;if((v.maxUnits||1)!==(s.maxUnits||1))u.max_units=v.maxUnits;return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:s.id}).then(loadRemote)});return}
     var mv={};MK.forEach(function(k){if(g.modes[k])mv[k]=g.modes[k].price});
     var first=g.rows[0];
-    window.liaServiceSheet({name:g.name,min:g.dur,useModes:true,modes:mv,half:g.half,showUnits:true,maxUnits:g.maxUnits},function(v){
+    window.liaServiceSheet({name:g.name,min:g.dur,useModes:true,modes:mv,half:g.half,allow:modesAllowed(),showUnits:true,maxUnits:g.maxUnits},function(v){
       var u={action:'service_save',id:first.id,name:v.name,duration_min:v.min,half_hour:!!v.half,modes:v.modes.map(function(m){return {mode:m.mode,price_eur:m.price_eur}})};
       if((v.maxUnits||1)!==(g.maxUnits||1))u.max_units=v.maxUnits;
       return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:first.id}).then(loadRemote)});
@@ -61,7 +64,7 @@
     var host=document.getElementById('svcNewModes'),pw=document.getElementById('svcNewPriceWrap');
     if(!host||window.__LIA_MED||typeof window.liaModesBlock!=='function')return; // service-sheet.js si carica dopo: si riprova alla prima lista servizi
     if(pw){pw.hidden=true;pw.style.display='none'}host.hidden=false;
-    svcNewBlock=window.liaModesBlock(host,{modes:{sede:''}},function(){return document.getElementById('svcNewMin').value});
+    svcNewBlock=window.liaModesBlock(host,{modes:{sede:''},allow:modesAllowed()},function(){return document.getElementById('svcNewMin').value});
   }
   svcNewModesInit();
   document.getElementById('svcAddBtn').onclick=function(){
