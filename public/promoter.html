@@ -137,16 +137,12 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .nd:hover .ic,.nd:focus-within .ic{transform:translate(-50%,-50%) scale(1.22);filter:drop-shadow(0 0 7px rgba(45,210,220,.65))}
 .nd.ms:hover .ic{filter:drop-shadow(0 0 8px rgba(230,199,122,.7))}
 .nd:active .ic{transform:translate(-50%,-50%) scale(.9)}
-@keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(.3)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes drawn{from{stroke-dashoffset:var(--len,400)}to{stroke-dashoffset:0}}
-.biz.open .nd .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*55ms)}
-.biz.open .nd .lb{animation:fadeup .4s ease both;animation-delay:calc(var(--i)*55ms + 120ms)}
 @keyframes hop{0%,100%{translate:0 0}50%{translate:0 -4px}}
-.biz.open .nd .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both,hop 2.2s ease-in-out infinite;animation-delay:calc(var(--i)*55ms),calc(.6s + var(--i)*140ms)}
-@keyframes fadeup{from{opacity:0}to{opacity:1}}
+.biz.open .nd .ic{animation:hop 2.2s ease-in-out infinite;animation-delay:calc(var(--i)*140ms)}
 @keyframes shine{50%{filter:drop-shadow(0 0 9px rgba(230,199,122,.8))}}
-.nd.ms.due .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both,hop 2.2s ease-in-out infinite,shine 2.6s ease-in-out infinite;animation-delay:calc(var(--i)*55ms),calc(.6s + var(--i)*140ms),1s}
-@media(prefers-reduced-motion:reduce){.biz.open .nd .ic,.biz.open .nd .lb,.nd.ms.due .ic{animation:none}.nd .ic{transition:none}}
+.nd.ms.due .ic{animation:hop 2.2s ease-in-out infinite,shine 2.6s ease-in-out infinite;animation-delay:calc(var(--i)*140ms),0s}
+@media(prefers-reduced-motion:reduce){.biz.open .nd .ic,.nd.ms.due .ic{animation:none}.nd .ic{transition:none}}
 
 .pill.late{background:rgba(242,184,75,.14);color:var(--warn)}
 .key{display:flex;gap:6px 16px;flex-wrap:wrap;margin:0 0 14px;font-size:.78rem;color:var(--muted)}
