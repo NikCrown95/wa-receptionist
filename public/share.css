@@ -411,9 +411,11 @@ body.mnRef{--mnN:10}
 body:has(#mnRefPage:not([hidden])) #fabNew{display:none!important}
 .mnRfPg{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
 .mnRfCol{display:flex;flex-direction:column;gap:28px;min-width:0}
-@media (min-width:900px){
-  #mnRefPage .mnGuideIn{max-width:1080px;padding-left:32px;padding-right:32px;padding-top:calc(env(safe-area-inset-top,0px) + 30px);padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
-  .mnRfPg{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px 56px}
+@media (min-width:700px){
+  #mnRefPage .mnGuideIn{max-width:720px;margin-left:auto;margin-right:auto;padding-left:32px;padding-right:32px;padding-top:calc(env(safe-area-inset-top,0px) + 44px);padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .mnRfPg,.mnRfCol{gap:40px}
+  .mnRfLead{font-size:2.15rem}
+  .mnRfSub{font-size:1.04rem;max-width:56ch}
 }
 .mnRfHead{display:flex;flex-direction:column}
 .mnRfLead{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;line-height:1.3;text-wrap:balance}
