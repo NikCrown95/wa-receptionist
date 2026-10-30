@@ -1004,15 +1004,23 @@ async function runAction(body, ctx) {
     const status = body.status === 'trial' ? 'trial' : body.status === 'active' ? 'active' : null;
     if (!status) throw fail('Scegli lo stato: in prova o attivo.');
     const plan = await planInfo(planKey);
+    // Data di partenza (facoltativa): il conto dei giorni/mesi parte da li' invece che da oggi
+    let startAt = now;
+    if (body.start_on) {
+      const so = String(body.start_on);
+      const t = /^\d{4}-\d{2}-\d{2}$/.test(so) ? Date.parse(so + 'T12:00:00Z') : NaN;
+      if (!Number.isFinite(t) || t < now.getTime() - 120 * 86400000 || t > now.getTime() + 400 * 86400000) throw fail('La data di partenza non e\' valida (al massimo 4 mesi fa o 13 mesi avanti).');
+      if (so !== new Date(now.getTime() + 3600000).toISOString().slice(0, 10)) startAt = new Date(t); // se e' oggi resta l'ora esatta
+    }
     let days = null, months = null, trialEnd = null, periodEnd = null;
     if (status === 'trial') {
       days = parseInt(body.days, 10);
       if (!days || days < 1 || days > 365) throw fail('La prova deve durare tra 1 e 365 giorni.');
-      trialEnd = new Date(now.getTime() + days * 86400000);
+      trialEnd = new Date(startAt.getTime() + days * 86400000);
     } else {
       months = parseInt(body.months, 10);
       if (!months || months < 1 || months > 12) throw fail('Il periodo pagato deve essere tra 1 e 12 mesi.');
-      periodEnd = addMonths(now, months);
+      periodEnd = addMonths(startAt, months);
     }
     const fromPlan = sub && sub.plans ? sub.plans.name : null;
     const fromPrice = sub ? subPrice(sub) : null;
@@ -1025,14 +1033,14 @@ async function runAction(body, ctx) {
       await sb('subscriptions', {
         method: 'POST',
         body: {
-          business_id: id, plan_id: plan.id, status, started_at: now.toISOString(),
+          business_id: id, plan_id: plan.id, status, started_at: startAt.toISOString(),
           current_period_end: periodEnd ? periodEnd.toISOString() : null,
           trial_ends_at: trialEnd ? trialEnd.toISOString() : null,
         },
       });
     } else {
       await patchSub(sub.id, {
-        plan_id: plan.id, status,
+        plan_id: plan.id, status, ...(body.start_on && startAt !== now ? { started_at: startAt.toISOString() } : {}),
         trial_ends_at: trialEnd ? trialEnd.toISOString() : sub.trial_ends_at,
         current_period_end: periodEnd ? periodEnd.toISOString() : null,
         courtesy_until: null, suspended_manually: false, suspended_at: null,
@@ -1041,7 +1049,7 @@ async function runAction(body, ctx) {
     }
     // Registro: stessi eventi dei pulsanti singoli, cosi' la pagina dei ricavi resta coerente.
     if (!sub) {
-      await audit('assign_plan', id, { plan: planKey, status, was_new: true, from_plan: null, from_price: null, to_plan: plan.name, to_price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
+      await audit('assign_plan', id, { plan: planKey, status, was_new: true, from_plan: null, from_price: null, to_plan: plan.name, to_price: plan.price, via: 'apply_plan', start_on: body.start_on || null }, ctx && ctx.actor);
     } else {
       if (wasCancelled) await audit('reactivate', id, { was_cancelled: true, price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);
       if (fromPlan !== plan.name) await audit('assign_plan', id, { plan: planKey, status, was_new: false, from_plan: fromPlan, from_price: fromPrice, to_plan: plan.name, to_price: plan.price, via: 'apply_plan' }, ctx && ctx.actor);

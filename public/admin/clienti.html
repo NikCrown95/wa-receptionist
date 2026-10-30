@@ -532,21 +532,25 @@ window.startClients = function(){
       durLabel.textContent = trial ? 'Durata della prova' : 'Periodo pagato';
       upd();
     }
+    var selStart = document.createElement('input'); selStart.type = 'date'; selStart.className = 'inp';
+    var today = new Date(); var todayIso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    selStart.value = todayIso;
     function endDate(){
-      var t = new Date(); var n = parseInt(selDur.value, 10);
+      var t = selStart.value ? new Date(selStart.value + 'T12:00:00') : new Date(); var n = parseInt(selDur.value, 10);
       if (selStatus.value === 'trial') t.setDate(t.getDate() + n); else t.setMonth(t.getMonth() + n);
       return t;
     }
     function upd(){
       var dt = endDate();
-      note.textContent = (selStatus.value === 'trial' ? 'La prova finisce il ' : 'Il servizio è coperto fino al ') + dt.getDate() + ' ' + ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][dt.getMonth()] + ' ' + dt.getFullYear() + '. Il conto parte da oggi e toglie sospensioni e proroghe già date.';
+      note.textContent = (selStatus.value === 'trial' ? 'La prova finisce il ' : 'Il servizio è coperto fino al ') + dt.getDate() + ' ' + ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'][dt.getMonth()] + ' ' + dt.getFullYear() + '. Il conto parte ' + (selStart.value === todayIso || !selStart.value ? 'da oggi' : 'dal ' + new Date(selStart.value + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })) + ' e toglie sospensioni e proroghe già date.';
     }
     var durWrap = field('', selDur); var durLabel = durWrap.querySelector('label');
-    selStatus.addEventListener('change', fillDur); selDur.addEventListener('change', upd);
+    selStatus.addEventListener('change', fillDur); selDur.addEventListener('change', upd); selStart.addEventListener('input', upd);
 
     box.appendChild(field('Piano', selPlan));
     box.appendChild(field('Stato', selStatus));
     box.appendChild(durWrap);
+    box.appendChild(field('Parte dal', selStart));
     box.appendChild(note);
     fillDur();
 
@@ -555,7 +559,8 @@ window.startClients = function(){
       var trial = selStatus.value === 'trial';
       var payload = { action: 'apply_plan', plan: selPlan.value, status: selStatus.value };
       if (trial) payload.days = parseInt(selDur.value, 10); else payload.months = parseInt(selDur.value, 10);
-      var txt = 'Applicare a ' + c.name + ': ' + (selPlan.value === 'ai' ? 'Smart' : 'Base') + ', ' + (trial ? 'in prova per ' + selDur.value + ' giorni' : 'attivo per ' + selDur.value + (selDur.value === '1' ? ' mese' : ' mesi')) + '?';
+      if (selStart.value && selStart.value !== todayIso) payload.start_on = selStart.value;
+      var txt = 'Applicare a ' + c.name + ': ' + (selPlan.value === 'ai' ? 'Smart' : 'Base') + ', ' + (trial ? 'in prova per ' + selDur.value + ' giorni' : 'attivo per ' + selDur.value + (selDur.value === '1' ? ' mese' : ' mesi')) + (payload.start_on ? ', a partire dal ' + new Date(payload.start_on + 'T12:00:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) : '') + '?';
       if (c.status === 'cancelled') txt += ' L\'abbonamento annullato verrà riattivato.';
       runAction(c, payload, txt, apply);
     });
