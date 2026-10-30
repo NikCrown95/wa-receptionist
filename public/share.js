@@ -641,12 +641,12 @@
       if (!D) { body.innerHTML = h + '<p class="mnEmpty">Un attimo…</p>'; return; }
       var n = 0;
       D.forEach(function (g) {
-        var r = "";
+        var r = "", gn = 0;
         g.q.forEach(function (x) {
           if (s && (x.q + " " + x.s + " " + x.steps.map(function (y) { return y[1] + " " + y[2] + " " + y[3]; }).join(" ")).toLowerCase().indexOf(s) < 0) return;
-          n++; r += '<button type="button" class="gpQ" data-q="' + x.id + '"><span class="gpQt"><b>' + esc2(x.q) + "</b><small>" + esc2(x.s) + "</small></span>" + I.chev + "</button>";
+          n++; gn++; r += '<button type="button" class="gpQ" data-q="' + x.id + '"><span class="gpQt"><b>' + esc2(x.q) + "</b><small>" + esc2(x.s) + "</small></span>" + I.chev + "</button>";
         });
-        if (r) h += '<div class="gpG"><h3 class="gpGt">' + esc2(g.g) + '</h3><div class="gpQs">' + r + "</div></div>";
+        if (r) h += '<div class="gpG"><div class="gpGh"><h3 class="gpGt">' + esc2(g.g) + '</h3><span class="gpGc">' + gn + (gn === 1 ? " domanda" : " domande") + '</span></div><div class="gpQs">' + r + "</div></div>";
       });
       if (!n) h += '<p class="mnEmpty">Nessun risultato. Prova con un’altra parola o scrivici.</p>';
       h += '<button type="button" class="mnHelp" id="mnHelp">' + I.chat + '<span class="mnT"><b>Non trovi la risposta?</b><small>Scrivici, ti rispondiamo noi</small></span>' + I.chev + "</button>";

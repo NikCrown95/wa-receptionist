@@ -381,16 +381,20 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;ma
 @media (max-width:640px){.gpGrid{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.gpRing::after{animation:none}}
 
-.gpG{margin-top:20px}
-.gpGt{margin:0 0 8px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
-.gpQs{display:flex;flex-direction:column;gap:7px}
-.gpQ{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-align:left;cursor:pointer}
-.gpQ:hover{border-color:var(--accent)}
+.gpG{margin-top:26px}
+.gpGh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--accent)}
+.gpGt{margin:0;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+.gpGc{font-size:.74rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gpQs{display:flex;flex-direction:column}
+.gpQ{display:flex;align-items:center;gap:13px;width:100%;min-width:0;min-height:68px;padding:16px 2px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
+.gpQ:hover b,.gpQ:active b{color:var(--accent-ink)}
+.gpQ:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
 .gpQt{flex:1;min-width:0}
-.gpQt b{display:block;font-size:.94rem;font-weight:800;line-height:1.3}
-.gpQt small{display:block;margin-top:2px;font-size:.78rem;font-weight:600;color:var(--muted)}
-.gpQ > svg{flex:none;color:var(--muted)}
-@media (min-width:760px){.gpQs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gpQt b{display:block;font-size:1.02rem;font-weight:800;letter-spacing:-.01em;line-height:1.3;text-wrap:balance}
+.gpQt small{display:block;margin-top:3px;font-size:.78rem;font-weight:500;line-height:1.35;color:var(--muted)}
+.gpQ > svg{flex:none;color:var(--accent-ink)}
+@media (prefers-reduced-motion:no-preference){.gpQt b{transition:color .15s}}
+@media (min-width:760px){.gpQs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:36px}}
 /* guida: schermate larghe (iPad / desktop dai 900px): immagine a sinistra senza cornice, testo a destra */
 .gpStage.wd{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:28px 44px;align-items:start}
 .gpStage.wd .gpShot{aspect-ratio:auto;display:inline-block;max-width:100%;border-radius:16px;border:1px solid var(--line2);box-shadow:0 16px 38px rgba(0,0,0,.22);background:#08151A;justify-self:center;line-height:0}
