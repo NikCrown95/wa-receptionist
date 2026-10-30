@@ -29,7 +29,7 @@
   function fmtDay(s) { var p = s.split('-'); return +p[2] + ' ' + MO[+p[1] - 1]; }
   function dur(m) { return m < 60 ? m + ' min' : m === 60 ? '1 ora' : m % 60 === 0 ? (m / 60) + ' ore' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'; }
   function euro(n) { return String(n).replace('.', ',') + ' €'; }
-  function courtColor(c) { var s = (c.surface || '').toLowerCase(); if (/parquet|legno/.test(s)) return '#C58B4E'; if (/sabbia/.test(s)) return '#D9B877'; if (((c && c.sport) || window.__liaCampiSport) === 'pallavolo') return '#8E7CC3'; return /terra/.test(s) ? '#D9784A' : /cement/.test(s) ? '#5B8DB8' : /erba|prato/.test(s) ? '#5DB07A' : '#4BB3D6'; }
+  function courtColor(c) { var s = (c.surface || '').toLowerCase(); if (((c && c.sport) || window.__liaCampiSport) === 'pallavolo') return '#8E7CC3'; if (/parquet|legno/.test(s)) return '#C58B4E'; if (/sabbia/.test(s)) return '#D9B877'; return /terra/.test(s) ? '#D9784A' : /cement/.test(s) ? '#5B8DB8' : /erba|prato/.test(s) ? '#5DB07A' : '#4BB3D6'; }
   function copy(o) { return JSON.parse(JSON.stringify(o)); }
   function changed() { if (window.__cpReload) { try { window.__cpReload(); } catch (e) { } } }
 
