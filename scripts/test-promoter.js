@@ -61,7 +61,8 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   assert.ok(!promoter.sameName('Marco Rossi', 'Marco'));
   assert.ok(!promoter.sameName('', ''));
   assert.strictEqual(promoter.cleanCode(' Marco-3F9A '), 'marco-3f9a');
-  assert.strictEqual(promoter.cleanCode('a b'), '');
+  assert.strictEqual(promoter.cleanCode('corona 10'), 'corona-10');
+  assert.strictEqual(promoter.cleanCode('a!b'), '');
   assert.strictEqual(promoter.addMonths(new Date('2026-01-31T10:00:00Z'), 1).toISOString().slice(0, 10), '2026-02-28');
   assert.strictEqual(promoter.addMonths(new Date('2026-10-17T10:00:00Z'), 12).toISOString().slice(0, 10), '2027-10-17');
 
@@ -178,6 +179,17 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   r = await call('POST', { action: 'login', name: 'Marco Rossi', code: 'marco-3f9a' });
   assert.strictEqual(r.code, 429, 'anche con i dati giusti, finche\' e\' bloccato');
   DB.auth_throttle.length = 0;
+
+  // ---- account dimostrativo: dati simulati, nessuna scrittura
+  const demo = { id: uid(), name: 'Nico Corona', code: 'corona-10', reward_eur: 21.99, active: true, note: '[demo] dati simulati', created_at: D('2026-10-01') };
+  DB.referral_partners.push(demo);
+  const nWrites = log.filter((l) => /^(POST|PATCH|DELETE) (referrals|businesses|subscriptions)/.test(l)).length;
+  r = await call('POST', { action: 'login', name: 'nico corona', code: 'Corona 10' });
+  assert.strictEqual(r.code, 200);
+  r = await call('GET', undefined, cookieOf(r));
+  assert.strictEqual(r.json.totals.registered, 6); assert.strictEqual(r.json.totals.paid, 3); assert.strictEqual(r.json.totals.in_trial, 2);
+  assert.strictEqual(log.filter((l) => /^(POST|PATCH|DELETE) (referrals|businesses|subscriptions)/.test(l)).length, nWrites, 'la demo non scrive nulla');
+  DB.referral_partners.pop();
 
   // ---- assegnazione a mano
   const ctx = { get, send };

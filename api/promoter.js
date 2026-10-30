@@ -147,13 +147,13 @@ module.exports = async function handler(req, res) {
 
     const s = unsign(readCookie(req));
     if (!s) return res.status(401).json({ error: 'Accesso richiesto.' });
-    const rows = await get('referral_partners?id=eq.' + enc(s.pid) + '&select=id,name,code,reward_eur,active&limit=1');
+    const rows = await get('referral_partners?id=eq.' + enc(s.pid) + '&select=id,name,code,reward_eur,active,note&limit=1');
     const partner = rows[0];
     // se il codice viene cambiato o la persona eliminata, la sessione smette di valere
     if (!partner || partner.code !== s.code) { clearSession(res); return res.status(401).json({ error: 'Accesso richiesto.' }); }
 
     const tdays = await referral.trialDays(get);
-    await promoter.settle(get, send, { partnerId: partner.id, trialDays: tdays });
+    if (!/^\[demo\]/i.test(String(partner.note || ''))) await promoter.settle(get, send, { partnerId: partner.id, trialDays: tdays });
     const data = await promoter.viewFor(partner, get, { trialDays: tdays });
     return res.status(200).json(data);
   } catch (e) {
