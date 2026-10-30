@@ -128,9 +128,16 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .nd.late .lb b{color:var(--warn)}
 .nd.lost .lb b,.nd.void .lb em{color:var(--danger)}
 .nd.void .lb em{text-decoration:line-through}
-.lb i.mn{font-style:normal;font-size:.62rem;line-height:1.15;color:#000;background:#fff;border-radius:9px;padding:3px 6px;text-align:center;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.lb i.mn b{display:block;font-weight:800}.lb i.mn u{display:block;text-decoration:none;font-weight:500}
-.lb i.mn.dim{opacity:.78}
+.lb i.mn{background-color:#0E131B;font-style:normal;width:68px;margin-top:3px;border-radius:14px;padding:7px 4px 8px;text-align:center;white-space:nowrap;background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 14px rgba(0,0,0,.35)}
+.lb i.mn small{display:block;font:600 .55rem Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.lb i.mn b{display:block;font:800 .95rem Manrope,sans-serif;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.lb i.mn em{display:block;font:500 .66rem 'Plus Jakarta Sans',sans-serif;font-style:normal;color:var(--muted);margin-top:1px}
+.lb i.mn.done{border-color:rgba(45,210,220,.35);background-image:linear-gradient(180deg,rgba(45,210,220,.16),rgba(45,210,220,.04))}
+.lb i.mn.done small{color:var(--accent)}
+.lb i.mn.cur{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,210,220,.12),0 8px 18px rgba(0,0,0,.4)}
+.lb i.mn.cur small{color:var(--accent)}
+.lb i.mn.late{border-color:rgba(242,184,75,.5)}.lb i.mn.late small{color:var(--warn)}
+.lb i.mn.todo b,.lb i.mn.lost b{color:var(--muted)}.lb i.mn.todo,.lb i.mn.lost{border-color:rgba(255,255,255,.06)}
 .lb i.lp{white-space:nowrap;font-style:normal;font-size:.6rem;line-height:1.2;color:#000;background:#fff;border-radius:8px;padding:3px 5px;margin-top:3px;text-align:center;font-weight:500;box-shadow:0 0 0 2px rgba(45,210,220,.45)}
 .lb i.lp b{font-size:.72rem;font-weight:800}
 .nd .ic{cursor:pointer;transition:transform .22s cubic-bezier(.3,1.5,.5,1),filter .22s}
@@ -329,7 +336,7 @@ function snake(b,nodes){
     var amt = n.ms ? '<em>'+(n.rw==='void' ? '' : '+')+eur(n.eur)+'</em>' : '';
     var lab = n.ms && n.rw==='got' ? '<span>ricevuta</span>' : n.ms && n.rw==='due' ? '<span>da ricevere</span>' : '';
     var say = n.t + (isMonth ? ' · ' + (STATE_TXT[n.st]||'') : '') + (n.last ? ' · ultimo pagamento ' + fmt(n.start) : '');
-    var chip = n.n && !n.ms ? '<i class="mn'+(n.st==='todo'||n.st==='lost'?' dim':'')+'"><b>Mese '+n.n+'</b><u>'+esc(n.when)+'</u></i>' : '';
+    var chip = n.n && !n.ms ? '<i class="mn '+n.st+'"><small>Mese</small><b>'+n.n+'</b><em>'+esc(n.when)+'</em></i>' : '';
     var lp = n.last ? '<i class="lp">Ultimo pagamento<br><b>'+fmt(n.start)+'</b></i>' : '';
     var head = n.ms || i<2 ? '<b>'+n.t+'</b>'+(n.d && !n.last ? '<span>'+esc(n.d)+'</span>' : '') : '';
     var text = '<div class="lb" style="top:'+(size/2+5)+'px">'+head+amt+lab+(n.ms?chip:chip)+lp+'</div>';
