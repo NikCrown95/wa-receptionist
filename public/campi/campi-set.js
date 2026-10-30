@@ -1,4 +1,4 @@
-/* Impostazioni del circolo (campi sportivi) per la dashboard di Lia.
+/* Impostazioni del centro sportivo (campi sportivi) per la dashboard di Lia.
    Stesso schema delle altre attivita': lista a sinistra, dettaglio a destra (su telefono: pagina intera con freccia indietro).
    Dati da /api/agenda?t=CODICE&courts=1 (&view=settings). */
 (function () {
@@ -208,11 +208,11 @@
     var cp = btn('Copia gli orari del lunedì su tutti i giorni', 'ghost', function () { var m = H[1] || []; for (var d = 2; d <= 7; d++) H[d] = copy(m); draw(); });
     function pick() {
       chipBox.textContent = ''; H = HS[who];
-      if (D.courts.length > 1) chipBox.appendChild(chips([['', 'Orari del circolo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), who, function (v) { who = v; pick(); draw(); }));
+      if (D.courts.length > 1) chipBox.appendChild(chips([['', 'Orari del centro sportivo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), who, function (v) { who = v; pick(); draw(); }));
       var cc = D.courts.filter(function (c) { return c.id === who; })[0];
-      hh.textContent = !who ? 'Sono gli orari di tutti i campi, tranne quelli a cui hai dato orari propri. Fuori da questi orari non si può prenotare, né dalla pagina né da Lia.' : CU[who] ? cc.name + ' ha orari propri, diversi da quelli del circolo. Gli altri campi non cambiano.' : cc.name + ' segue gli orari del circolo.';
+      hh.textContent = !who ? 'Sono gli orari di tutti i campi, tranne quelli a cui hai dato orari propri. Fuori da questi orari non si può prenotare, né dalla pagina né da Lia.' : CU[who] ? cc.name + ' ha orari propri, diversi da quelli del centro sportivo. Gli altri campi non cambiano.' : cc.name + ' segue gli orari del centro sportivo.';
       swBox.textContent = '';
-      if (who) swBox.appendChild(swRow('Orari diversi da quelli del circolo', 'Ad esempio per tenere chiusi d\'inverno i campi esterni o aprire i coperti più a lungo.', CU[who], function (v) { CU[who] = v; if (v) HS[who] = copy(saved0); pick(); draw(); }));
+      if (who) swBox.appendChild(swRow('Orari diversi da quelli del centro sportivo', 'Ad esempio per tenere chiusi d\'inverno i campi esterni o aprire i coperti più a lungo.', CU[who], function (v) { CU[who] = v; if (v) HS[who] = copy(saved0); pick(); draw(); }));
       box.hidden = !!who && !CU[who]; cp.hidden = box.hidden;
     }
     w.appendChild(c0);
@@ -268,7 +268,7 @@
       D.closures.forEach(function (c) {
         var r = el('div', 'cx-clo'), t = el('div', 'cx-t');
         var cn = c.court_id ? (D.courts.filter(function (x) { return x.id === c.court_id; })[0] || { name: 'Campo' }).name : null;
-        t.appendChild(el('b', null, (cn ? cn + ' non disponibile' : 'Circolo chiuso')));
+        t.appendChild(el('b', null, (cn ? cn + ' non disponibile' : 'Centro chiuso')));
         t.appendChild(el('small', null, (c.starts_on === c.ends_on ? fmtDay(c.starts_on) : fmtDay(c.starts_on) + ' – ' + fmtDay(c.ends_on)) + ' · ' + (c.from ? 'dalle ' + c.from + ' alle ' + c.to : 'tutto il giorno') + (c.reason ? ' · ' + c.reason : '')));
         if (c.bookings) t.appendChild(el('small', 'cx-warn', c.bookings + (c.bookings === 1 ? ' prenotazione già fissata: avvisa il cliente' : ' prenotazioni già fissate: avvisa i clienti')));
         r.appendChild(t);
@@ -282,13 +282,13 @@
 
       var c2 = card('Segnala un problema o dei lavori');
       var l1 = el('div', 'stF'); l1.appendChild(el('span', null, 'Cosa non si può prenotare'));
-      l1.appendChild(chips([['', 'Tutto il circolo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), S.who, function (v) { S.who = v; })); c2.appendChild(l1);
+      l1.appendChild(chips([['', 'Tutto il centro sportivo']].concat(D.courts.map(function (c) { return [c.id, c.name]; })), S.who, function (v) { S.who = v; })); c2.appendChild(l1);
       var a = input('date', '', { min: D.today }), z = input('date', '', { min: D.today });
       c2.appendChild(row2(sf('Dal giorno', a), sf('Al giorno (vuoto = solo quel giorno)', z)));
       var l2 = el('div', 'stF'); l2.appendChild(el('span', null, 'Orario'));
       var t1 = input('time', ''), t2 = input('time', ''), hrs = row2(sf('Dalle', t1), sf('Alle', t2)); hrs.hidden = S.allday;
       l2.appendChild(chips([['1', 'Tutto il giorno'], ['0', 'Solo alcune ore']], S.allday ? '1' : '0', function (v) { S.allday = v === '1'; hrs.hidden = S.allday; })); c2.appendChild(l2); c2.appendChild(hrs);
-      c2.appendChild(hint('Nei giorni e negli orari indicati il campo (o tutto il circolo) non si può prenotare e il calendario lo mostra chiuso.'));
+      c2.appendChild(hint('Nei giorni e negli orari indicati il campo (o tutto il centro sportivo) non si può prenotare e il calendario lo mostra chiuso.'));
       w.appendChild(c2);
       var msg = msgBox(); w.appendChild(msg);
       var sv = btn('Segnala e blocca le prenotazioni', '', function () {
@@ -305,10 +305,10 @@
     var C = D.club, st = { fit: C.fit === true, medical: C.medical || 'all', open_to: C.open_to || 'all', lim: C.member_daily_limit_min || 0 };
     var c1 = card('Chi può prenotare');
     c1.appendChild(chips([['all', 'Soci e non soci'], ['members', 'Solo con almeno un socio']], st.open_to, function (v) { st.open_to = v; }, 'stSeg'));
-    c1.appendChild(hint('Il circolo lo comunica sempre ai clienti, nella pagina di prenotazione.'));
+    c1.appendChild(hint('Il centro sportivo lo comunica sempre ai clienti, nella pagina di prenotazione.'));
     w.appendChild(c1);
     var cm = card('Certificato medico');
-    cm.appendChild(hint('Di solito il circolo lo chiede sempre, ed è l\'impostazione di partenza. Nella pagina di prenotazione compare una spunta obbligatoria e il messaggio cambia in base a quanti giocatori sono soci; Lia lo ricorda in chat e le email di conferma dicono cosa portare.'));
+    cm.appendChild(hint('Di solito il centro sportivo lo chiede sempre, ed è l\'impostazione di partenza. Nella pagina di prenotazione compare una spunta obbligatoria e il messaggio cambia in base a quanti giocatori sono soci; Lia lo ricorda in chat e le email di conferma dicono cosa portare.'));
     cm.appendChild(chips([['all', 'Richiesto a tutti i giocatori'], ['guests', 'Solo ai non soci'], ['none', 'Non richiesto']], st.medical, function (v) { st.medical = v; }));
     w.appendChild(cm);
     var c2 = card('Limite di ore per i soci');
@@ -336,7 +336,7 @@
     c2.appendChild(hint('Fino a quanti giorni da oggi i clienti vedono i campi liberi.'));
     c2.appendChild(chips(opt([7, 14, 30, 60, 90, 180], function (v) { return v === 7 ? '1 settimana' : v === 14 ? '2 settimane' : v === 30 ? '1 mese' : v === 60 ? '2 mesi' : v === 90 ? '3 mesi' : '6 mesi'; }), st.a, function (v) { st.a = +v; })); w.appendChild(c2);
     var c3 = card('Disdetta');
-    c3.appendChild(hint('Fino a quanto tempo prima il cliente può annullare da solo con il link dell\'email di conferma. Dopo, deve chiamare il circolo. L\'annullamento libera il campo e ti arriva una notifica.'));
+    c3.appendChild(hint('Fino a quanto tempo prima il cliente può annullare da solo con il link dell\'email di conferma. Dopo, deve chiamare il centro sportivo. L\'annullamento libera il campo e ti arriva una notifica.'));
     c3.appendChild(chips(opt([0, 1, 2, 4, 12, 24, 48], function (v) { return v === 0 ? 'Sempre' : v === 1 ? '1 ora prima' : v < 24 ? v + ' ore prima' : v === 24 ? '1 giorno prima' : '2 giorni prima'; }), st.c, function (v) { st.c = +v; })); w.appendChild(c3);
     var msg = msgBox(); w.appendChild(msg);
     var sv = btn('Salva le regole', '', function () {
@@ -347,10 +347,10 @@
 
   // ---------- pagine e voci in Impostazioni ----------
   var PAGES = [
-    ['courts', 'c-teal', IC.court, 'Campi', 'Nome, fondo e durata delle prenotazioni', 'I campi', 'I campi del circolo. Tocca un campo per modificarlo o aggiungine uno nuovo.', pCourts],
+    ['courts', 'c-teal', IC.court, 'Campi', 'Nome, fondo e durata delle prenotazioni', 'I campi', 'I campi del centro sportivo. Tocca un campo per modificarlo o aggiungine uno nuovo.', pCourts],
     ['prices', 'c-amber', IC.euro, 'Prezzi', 'Quanto paga ogni giocatore', 'Prezzi', 'Il prezzo a testa di ogni campo, anche diverso per giorno e fascia oraria.', pPrices],
-    ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il circolo è aperto e i campi si possono prenotare.', pHours],
-    ['closures', 'c-red', IC.off, 'Lavori e indisponibilità', 'Manutenzione, tornei, maltempo', 'Lavori e indisponibilità', 'Segnala un problema o dei lavori su un campo, o la chiusura del circolo: nei giorni e negli orari indicati non si può prenotare.', pClosures],
+    ['hours', 'c-blue', IC.clock, 'Orari di apertura', 'Quando i campi si possono prenotare', 'Orari di apertura', 'I giorni e le ore in cui il centro sportivo è aperto e i campi si possono prenotare.', pHours],
+    ['closures', 'c-red', IC.off, 'Lavori e indisponibilità', 'Manutenzione, tornei, maltempo', 'Lavori e indisponibilità', 'Segnala un problema o dei lavori su un campo, o la chiusura del centro sportivo: nei giorni e negli orari indicati non si può prenotare.', pClosures],
     ['rules', 'c-violet', IC.rules, 'Chi può prenotare', 'Soci, certificato, FIT e limite', 'Chi può prenotare', 'Le regole che i clienti trovano nella pagina di prenotazione.', pRules],
     ['policy', 'c-teal', IC.clock, 'Prenotazione e disdetta', 'Preavviso, anticipo e annullamento', 'Prenotazione e disdetta', 'Come e fino a quando i clienti possono prenotare o annullare.', pPolicy]
   ];
@@ -391,9 +391,9 @@
     var menu = document.querySelector('#panelOther .stMenu'), sh = shell(), det = sh && sh.querySelector('.stDetail'); if (!menu || !det) return false;
     if (menu.querySelector('[data-cx]')) return true;
     HIDE.forEach(function (k) { var r = menu.querySelector('[data-st="' + k + '"]'); if (r) r.style.display = 'none'; });
-    Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il circolo'; });
+    Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'Il centro sportivo'; });
     Array.prototype.forEach.call(menu.querySelectorAll('.stGroup'), function (g) { var rows = g.querySelectorAll('.stRow'); if (rows.length && Array.prototype.every.call(rows, function (r) { return r.style.display === 'none'; })) g.style.display = 'none'; });
-    var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del circolo';
+    var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati del centro sportivo';
     var groups = [['Campi e prezzi', ['courts', 'prices']], ['Disponibilità', ['hours', 'closures']], ['Regole', ['rules', 'policy']]];
     var bg = menu.querySelector('[data-st="bizinfo"]'); bg = bg && bg.closest('.stGroup'); var first = bg ? bg.nextSibling : menu.firstChild;
     var ph = el('div'); menu.insertBefore(ph, first); first = ph;
@@ -414,8 +414,8 @@
       menu.insertBefore(grp, first);
     });
     var bp = sh.querySelector('.stPage[data-st="bizinfo"]');
-    if (bp) { var bh = bp.querySelector('.stPh h2'), bpp = bp.querySelector('.stPh p'); if (bh) bh.textContent = 'Dati del circolo'; if (bpp) bpp.textContent = 'Nome, indirizzo e logo che i clienti vedono nella pagina di prenotazione.'; }
-    var bl = sh.querySelector('label[for="biName"]'); if (bl) bl.textContent = 'Nome del circolo';
+    if (bp) { var bh = bp.querySelector('.stPh h2'), bpp = bp.querySelector('.stPh p'); if (bh) bh.textContent = 'Dati del centro sportivo'; if (bpp) bpp.textContent = 'Nome, indirizzo e logo che i clienti vedono nella pagina di prenotazione.'; }
+    var bl = sh.querySelector('label[for="biName"]'); if (bl) bl.textContent = 'Nome del centro sportivo';
     var cp = sh.querySelector('.stPage[data-st="contacts"]'); if (cp) cp.classList.add('cx-native');
     if (bp) bp.classList.add('cx-native');
     // cliccando una voce normale, le mie pagine si spengono

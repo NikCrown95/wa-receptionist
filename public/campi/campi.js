@@ -1,4 +1,4 @@
-/* Calendario del circolo (campi sportivi) per la dashboard di Lia.
+/* Calendario del centro sportivo (campi sportivi) per la dashboard di Lia.
    Sostituisce il calendario degli appuntamenti: giorno con i campi in colonna, dettaglio, annulla e prenotazione a mano.
    Dati da /api/agenda?t=CODICE&courts=1 (stesso codice segreto dell'agenda). */
 (function () {
@@ -82,7 +82,7 @@
   }
 
   // ---------- calcoli ----------
-  function nowIn() { // data e minuti attuali nel fuso del circolo
+  function nowIn() { // data e minuti attuali nel fuso del centro sportivo
     var tz = (S.data && S.data.timezone) || 'Europe/Rome';
     var p = new Intl.DateTimeFormat('en-CA', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date());
     var g = function (t) { return p.filter(function (x) { return x.type === t; })[0].value; };
@@ -311,7 +311,7 @@
     D.courts.forEach(function (c) { days.forEach(function (d) { slotsOf(c, d).forEach(function (sl) { lo = Math.min(lo, Math.floor(sl.s / 60)); hi = Math.max(hi, Math.ceil(sl.e / 60)); }); }); });
     days.forEach(function (d) { bookingsOn(d).forEach(function (b) { lo = Math.min(lo, Math.floor(mins(b.start) / 60)); hi = Math.max(hi, Math.ceil(mins(b.end) / 60)); }); });
     var wrap = el('div', 'cp-board wk all');
-    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
+    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il centro sportivo è chiuso in questa settimana.')); return wrap; }
     var g = el('div', 'cp-ga'); g.appendChild(el('div'));
     days.forEach(function (d) {
       var n = bookingsOn(d).length, h = el('button', 'cp-wh' + (d === now.date ? ' tod' : '')); h.type = 'button';
@@ -347,7 +347,7 @@
     for (var i = 0; i < 7; i++) days.push(addDays(S.strip, i));
     CC.forEach(function (c) { days.forEach(function (d) { slotsOf(c, d).forEach(function (s) { lo = Math.min(lo, s.s); hi = Math.max(hi, s.e); }); }); });
     var wrap = el('div', 'cp-board wk');
-    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il circolo è chiuso in questa settimana.')); return wrap; }
+    if (hi <= lo) { wrap.appendChild(el('div', 'cp-load', 'Il centro sportivo è chiuso in questa settimana.')); return wrap; }
     lo = Math.floor(lo / 60) * 60; hi = Math.ceil(hi / 60) * 60;
     var H = (hi - lo) * PPM, g = el('div', 'cp-g');
     g.style.gridTemplateColumns = '44px repeat(7,minmax(' + (S.court ? 112 : 250) + 'px,1fr))';

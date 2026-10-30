@@ -1,4 +1,4 @@
-/* Disponibilità del circolo (campi sportivi): stessa pagina e stesso stile di quella dei parrucchieri
+/* Disponibilità del centro sportivo (campi sportivi): stessa pagina e stesso stile di quella dei parrucchieri
    (public/dash/avail.js + avail.css): lista a sinistra, dettaglio a destra, ore con − e +, date in italiano.
    Dati e salvataggi: /api/agenda?t=CODICE&courts=1 (view=settings, save_court, add_closure, delete_closure). */
 (function () {
@@ -139,7 +139,7 @@
     return a;
   }
 
-  /* una riga per giorno: pulsante Aperto / + Apri, ore con − e +, niente pausa (un circolo non ha pausa pranzo) */
+  /* una riga per giorno: pulsante Aperto / + Apri, ore con − e +, niente pausa (un centro sportivo non ha pausa pranzo) */
   function dayRows(list, days, ref) {
     list.textContent = "";
     days.forEach(function (d, i) {
@@ -170,7 +170,7 @@
     });
   }
 
-  /* ---------- editor: orari del circolo / di un campo ---------- */
+  /* ---------- editor: orari del centro sportivo / di un campo ---------- */
   function noCourts(box) {
     var pane = mk("div", "avPane"); pane.style.setProperty("--c", colorOf("club"));
     pane.appendChild(mk("p", "avHint", "Prima di impostare gli orari aggiungi almeno un campo."));
@@ -187,12 +187,12 @@
     var head = mk("div", "avHd");
     head.appendChild(avatar(id));
     var tt = mk("div", "avHt");
-    tt.appendChild(mk("h2", null, isClub ? "Circolo · orari di apertura" : c.name));
-    tt.appendChild(mk("p", null, !own ? "Segue gli orari del circolo" : hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni") + " di apertura"));
+    tt.appendChild(mk("h2", null, isClub ? "Centro sportivo · orari di apertura" : c.name));
+    tt.appendChild(mk("p", null, !own ? "Segue gli orari del centro sportivo" : hword(w.h) + " a settimana · " + w.n + (w.n === 1 ? " giorno" : " giorni") + " di apertura"));
     head.appendChild(tt); pane.appendChild(head);
     pane.appendChild(mk("p", "avHint", isClub
       ? "Sono gli orari di tutti i campi, tranne quelli a cui dai orari propri. Fuori da questi orari non si può prenotare, né dalla pagina né da Lia. Per tornei e lavori usa Lavori e indisponibilità."
-      : (own ? c.name + " ha orari propri, diversi da quelli del circolo. Gli altri campi non cambiano." : c.name + " segue gli orari del circolo. Attiva gli orari propri per dargli giorni e ore diversi, ad esempio per tenere chiusi d'inverno i campi esterni.")));
+      : (own ? c.name + " ha orari propri, diversi da quelli del centro sportivo. Gli altri campi non cambiano." : c.name + " segue gli orari del centro sportivo. Attiva gli orari propri per dargli giorni e ore diversi, ad esempio per tenere chiusi d'inverno i campi esterni.")));
 
     if (!isClub) {
       var line = mk("div", "avRow");
@@ -263,7 +263,7 @@
     var dur = mk("div", "avSeg");
     var hrsBox = mk("div", "avField"); hrsBox.hidden = true;
     var add = mk("button", "avBtn pri", "Aggiungi chiusura"); add.type = "button";
-    var persons = [["", "Tutto il circolo"]].concat(D.courts.map(function (x) { return [x.id, x.name]; }));
+    var persons = [["", "Tutto il centro sportivo"]].concat(D.courts.map(function (x) { return [x.id, x.name]; }));
 
     function redrawWho() { chips(who, persons, function (v) { return C.who === v; }, function (v) { C.who = v; redrawWho(); }); }
     function qd(a, b) { C.from = a; C.to = b; d1.value = a; d2.value = b; }
@@ -331,7 +331,7 @@
       var r = mk("div", "avCl"), t = mk("div", "avClt");
       t.appendChild(mk("b", null, plabel(it.starts_on, it.ends_on)));
       var s = mk("small"), cn = it.court_id ? (courtOf(it.court_id) || { name: "Campo" }).name : null, nd = ndays(it.starts_on, it.ends_on);
-      s.appendChild(mk("span", it.court_id ? "avTag p" : "avTag", cn || "Circolo"));
+      s.appendChild(mk("span", it.court_id ? "avTag p" : "avTag", cn || "Centro sportivo"));
       s.appendChild(document.createTextNode(it.from ? "dalle " + it.from + " alle " + it.to : "tutto il giorno" + (nd > 1 ? " · " + nd + " giorni" : "")));
       t.appendChild(s);
       if (it.bookings) t.appendChild(mk("small", "avWarnTx", it.bookings + (it.bookings === 1 ? " prenotazione già fissata: avvisa il cliente" : " prenotazioni già fissate: avvisa i clienti")));
@@ -361,13 +361,13 @@
       nav.appendChild(b);
     }
     var wn = weekHours(HS[""] || []);
-    nav.appendChild(mk("div", "avSl", "Circolo"));
-    item("club", "Orari del circolo", D.courts.length ? "Apertura · " + hword(wn.h) : "Aggiungi prima un campo");
+    nav.appendChild(mk("div", "avSl", "Centro sportivo"));
+    item("club", "Orari del centro sportivo", D.courts.length ? "Apertura · " + hword(wn.h) : "Aggiungi prima un campo");
     if (D.courts.length > 1) {
       nav.appendChild(mk("div", "avSl", "Campi"));
       D.courts.forEach(function (c) {
         var own = !!CU[c.id], w = weekHours(HS[c.id] || []);
-        item(c.id, c.name, own ? "Orari propri · " + hword(w.h) : "Come il circolo");
+        item(c.id, c.name, own ? "Orari propri · " + hword(w.h) : "Come il centro sportivo");
       });
     }
     nav.appendChild(mk("div", "avSep"));
@@ -383,7 +383,7 @@
     if (sel === "chi") {
       var hd = mk("div", "avHd flat"), tt = mk("div", "avHt"); hd.style.setProperty("--c", colorOf("chi"));
       tt.appendChild(mk("h2", null, "Lavori e indisponibilità"));
-      tt.appendChild(mk("p", null, "Tornei, lavori, maltempo: un campo o tutto il circolo chiuso per uno o più giorni, o solo alcune ore."));
+      tt.appendChild(mk("p", null, "Tornei, lavori, maltempo: un campo o tutto il centro sportivo chiuso per uno o più giorni, o solo alcune ore."));
       hd.appendChild(tt); box.appendChild(hd);
       renderChi(box);
     } else editor(box, sel);
@@ -427,7 +427,7 @@
     if (keepMenu !== false) { prevCur.forEach(function (b) { b.setAttribute("aria-current", "true"); }); }
     prevCur = [];
   }
-  /* t: "neg"/"club" = orari del circolo, "chi" = lavori e indisponibilità (predefinito, come per le altre attività) */
+  /* t: "neg"/"club" = orari del centro sportivo, "chi" = lavori e indisponibilità (predefinito, come per le altre attività) */
   function open(t) {
     if (!layer) build();
     pending = t === "neg" || t === "club" ? "club" : "chi";

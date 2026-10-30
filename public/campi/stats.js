@@ -1,4 +1,4 @@
-/* Statistiche del circolo: pensate per i campi, con lo stesso stile delle statistiche delle altre attivita' (radice .gcs).
+/* Statistiche del centro sportivo: pensate per i campi, con lo stesso stile delle statistiche delle altre attivita' (radice .gcs).
    I dati sono le prenotazioni dei campi (?history=1) e gli orari dei campi (?courts=1&view=settings). */
 (function () {
   var pSt = document.getElementById('panelStats'); if (!pSt || !window.__liaCampi) return;
