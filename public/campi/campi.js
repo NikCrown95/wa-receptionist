@@ -57,6 +57,7 @@
     var t = (String(c.surface || '') + ' ' + String(c.name || '')).toLowerCase();
     if (/parquet|legno|wood/.test(t)) return '#C58B4E';
     if (/sabbia|sand|beach/.test(t)) return '#D9B877';
+    if ((c.sport || window.__liaCampiSport) === 'pallavolo') return '#8E7CC3'; // pallavolo al coperto: viola, per distinguerlo dal tennis in terra
     if (/erba|grass|prato/.test(t)) return '#5DB07A';
     if (/terra|rossa|clay|battuta/.test(t)) return '#D9784A';
     if (/cement|hard|resina|sintetic|moquette|pvc|acrilic/.test(t)) return '#5B8DB8';
