@@ -177,17 +177,97 @@
     var sep = mk("div", "mnSep");
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
     else { menu.appendChild(g); }
+    /* Invita un amico: voce semplice nel gruppo Account (tra Impostazioni e Guida); compare solo se il referral e' attivo per questa attivita' */
+    var rf = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg><span>Invita un amico</span><span class="mnTag">1 mese in regalo</span>');
+    rf.type = "button"; rf.id = "menuTabReferral"; rf.setAttribute("role", "menuitem"); rf.setAttribute("aria-current", "false"); rf.hidden = true;
+    rf.querySelector("span:first-of-type").style.flex = "1";
+    rf.addEventListener("click", function () { closeMenu(); openRef(); });
+    menu.insertBefore(rf, g);
     var oi = other.querySelector("svg");
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
-      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabReferral", "Un mese in regalo per ogni attivita"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
     [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
     if (pt && window.MutationObserver) new MutationObserver(markCur).observe(pt, { attributes: true, attributeFilter: ["aria-current"] });
     markCur();
+    refSync();
     return true;
+  }
+  /* ---------- Invita un amico: voce nel menu e schermata con codice, link e numeri ---------- */
+  var RK = "lia:ref:v1:" + token, refInfo = null, refSheet = null;
+  function refShow(on) {
+    var b = $("menuTabReferral"); if (b) b.hidden = !on;
+    document.body.classList.toggle("mnRef", !!on);
+  }
+  function refFetch() { return getJson("/api/agenda?t=" + encodeURIComponent(token) + "&referral=1"); }
+  function refSync() {
+    try { var c = JSON.parse(ls("g", RK) || "null"); if (c && c.available && c.live && c.link) { refInfo = c; refShow(true); } } catch (e) {}
+    refFetch().then(function (d) {
+      if (d && d.available && d.link) { refInfo = d; refShow(true); ls("s", RK, JSON.stringify(Object.assign({ live: true }, d))); }
+      else { refInfo = null; refShow(false); }
+    }).catch(function () {});
+  }
+  function refDate(x) { try { return new Date(x).toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) { return ""; } }
+  function buildRef() {
+    refSheet = mk("div", "mnLayer");
+    refSheet.id = "mnRefSheet"; refSheet.hidden = true;
+    refSheet.setAttribute("role", "dialog"); refSheet.setAttribute("aria-modal", "true"); refSheet.setAttribute("aria-labelledby", "mnRfT");
+    refSheet.innerHTML =
+      '<button type="button" class="mnScrim" data-r="close" aria-label="Chiudi"></button>' +
+      '<div class="mnSheet mnRf"><div class="mnGrab"></div>' +
+      '<div class="mnSH"><div><h2 id="mnRfT">Invita un amico</h2><p class="mnSub">Ogni attività che si abbona grazie a te, dopo la prova gratuita, ti regala un mese di Smart. Conta una volta sola per attività.</p></div><button type="button" class="mnClose" data-r="close" aria-label="Chiudi">' + I.x + "</button></div>" +
+      '<div class="mnRfStats" id="mnRfStats"></div>' +
+      '<div class="mnLinkRow"><div class="mnRfCd"><small>Il tuo codice</small><b id="mnRfCode"></b></div><button type="button" class="mnCopy" data-r="code">' + I.copy + "<span>Copia</span></button></div>" +
+      '<div class="mnLinkRow"><div class="mnRfCd"><small>Il tuo link</small><b id="mnRfUrl"></b></div><button type="button" class="mnCopy" data-r="link">' + I.copy + "<span>Copia</span></button></div>" +
+      '<button type="button" class="mnRfGo" data-r="share">' + I.share + "<span>Condividi</span></button>" +
+      '<details class="mnRfMore" id="mnRfMore" hidden><summary id="mnRfSum"></summary><div id="mnRfList"></div></details>' +
+      "</div>";
+    document.body.appendChild(refSheet);
+    refSheet.addEventListener("click", function (ev) {
+      var b = ev.target.closest("[data-r]"); if (!b || !refInfo) return;
+      var a = b.getAttribute("data-r");
+      if (a === "close") closeRef();
+      else if (a === "code") copyText(refInfo.code || "", b);
+      else if (a === "link") copyText(refInfo.link, b);
+      else if (a === "share") {
+        var m = "Uso Prenolia per gestire gli appuntamenti della mia attività. Provalo gratis da qui (o usa il codice " + (refInfo.code || "") + "):";
+        if (navigator.share) navigator.share({ title: "Prenolia", text: m, url: refInfo.link }).catch(function () {});
+        else copyText(m + " " + refInfo.link, b);
+      }
+    });
+  }
+  function paintRef() {
+    var d = refInfo; if (!d || !refSheet) return;
+    var months = Number(d.credit_months) || 0, st = $("mnRfStats");
+    st.innerHTML = [["In regalo", months, " hi"], ["Invitate", Number(d.invited) || 0, ""], ["Hanno pagato", months, ""]].map(function (c) {
+      return '<div class="mnRfStat' + c[2] + '"><small>' + c[0] + "</small><b>" + c[1] + "</b></div>";
+    }).join("");
+    $("mnRfCode").textContent = d.code || "";
+    $("mnRfUrl").textContent = String(d.link || "").replace(/^https?:\/\//, "");
+    var list = d.list || [], box = $("mnRfList"), more = $("mnRfMore");
+    more.hidden = !list.length;
+    $("mnRfSum").textContent = "Vedi chi hai invitato (" + list.length + ")";
+    box.innerHTML = list.map(function (x) {
+      var paid = x.status === "paid";
+      return '<div class="mnRfRow"><span><b>' + esc2(x.name || "Attività") + "</b><small>" + (paid ? "Ha pagato il primo mese" : "In prova gratuita · dal " + esc2(refDate(x.created_at))) + '</small></span><span class="mnRfChip' + (paid ? " paid" : "") + '">' + (paid ? "Hai ricevuto 1 mese" : "In prova") + "</span></div>";
+    }).join("");
+  }
+  function openRef() {
+    if (!refInfo) return;
+    if (!refSheet) buildRef();
+    paintRef();
+    lastFocus = document.activeElement;
+    refSheet.hidden = false;
+    var c = refSheet.querySelector(".mnClose"); if (c) c.focus();
+    refFetch().then(function (d) { if (d && d.available && d.link) { refInfo = d; paintRef(); } }).catch(function () {});
+  }
+  function closeRef() {
+    if (!refSheet || refSheet.hidden) return;
+    refSheet.hidden = true;
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
   }
   function txt(id) { var e = $(id); return e && !e.hidden ? String(e.textContent || "").trim() : ""; }
   function markCur() {
@@ -854,7 +934,7 @@
   /* ---------- avvio ---------- */
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    if (guide && !guide.hidden) closeGuide(); else if (pst && !pst.hidden) closePoster(); else if (sheet && !sheet.hidden) closeSheet();
+    if (guide && !guide.hidden) closeGuide(); else if (pst && !pst.hidden) closePoster(); else if (refSheet && !refSheet.hidden) closeRef(); else if (sheet && !sheet.hidden) closeSheet();
   });
   function init() {
     try {
