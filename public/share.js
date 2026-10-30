@@ -729,7 +729,7 @@
   function loadPaths() {
     if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=8";
+      var sc = document.createElement("script"); sc.src = window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=9";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
@@ -807,10 +807,10 @@
     function modesInfo() {
       var d = window.liaSettingsData, sv = (d && d.services) || [], home = false, any = false;
       sv.forEach(function (x) { var m = x.mode || (x.at_customer_place ? "domicilio" : "sede"); if (m === "domicilio" || x.at_customer_place) home = true; if (m !== "sede" || x.at_customer_place) any = true; });
-      return { home: home, modes: any, pack: document.body.classList.contains("lia-pack-on") };
+      return { home: home, modes: any, pack: document.body.classList.contains("lia-pack-on"), referral: !!(refInfo && refInfo.available && refInfo.link) };
     }
     var pre = window.liaSettingsData ? Promise.resolve() : (window.liaSettingsRefresh ? Promise.resolve(window.liaSettingsRefresh()).catch(function () {}) : Promise.resolve());
-    Promise.all([loadPaths(), pre]).then(function (r) {
+    Promise.all([loadPaths(), pre, refInfo ? Promise.resolve() : refFetch().then(function (d) { if (d && d.available && d.link) refInfo = d; }).catch(function () {})]).then(function (r) {
       var d = r[0], mi = modesInfo();
       if (!d) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; }
       D = d.map(function (g) { return { g: g.g, q: g.q.filter(function (x) { return !x.need || mi[x.need]; }) }; }).filter(function (g) { return g.q.length; });
