@@ -128,8 +128,9 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .nd.late .lb b{color:var(--warn)}
 .nd.lost .lb b,.nd.void .lb em{color:var(--danger)}
 .nd.void .lb em{text-decoration:line-through}
-.lb i.mn{font-style:normal;font-size:.66rem;font-weight:800;line-height:1;color:#000;background:#fff;border-radius:999px;min-width:18px;padding:3px 6px;text-align:center;margin-top:2px;font-variant-numeric:tabular-nums}
-.lb i.mn.dim{opacity:.55}
+.lb i.mn{font-style:normal;font-size:.62rem;line-height:1.15;color:#000;background:#fff;border-radius:9px;padding:3px 6px;text-align:center;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lb i.mn b{display:block;font-weight:800}.lb i.mn u{display:block;text-decoration:none;font-weight:500}
+.lb i.mn.dim{opacity:.78}
 .lb i.lp{white-space:nowrap;font-style:normal;font-size:.6rem;line-height:1.2;color:#000;background:#fff;border-radius:8px;padding:3px 5px;margin-top:3px;text-align:center;font-weight:500;box-shadow:0 0 0 2px rgba(45,210,220,.45)}
 .lb i.lp b{font-size:.72rem;font-weight:800}
 .nd .ic{cursor:pointer;transition:transform .22s cubic-bezier(.3,1.5,.5,1),filter .22s}
@@ -140,9 +141,11 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 @keyframes drawn{from{stroke-dashoffset:var(--len,400)}to{stroke-dashoffset:0}}
 .biz.open .nd .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*55ms)}
 .biz.open .nd .lb{animation:fadeup .4s ease both;animation-delay:calc(var(--i)*55ms + 120ms)}
+@keyframes hop{0%,100%{translate:0 0}50%{translate:0 -4px}}
+.biz.open .nd .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both,hop 2.2s ease-in-out infinite;animation-delay:calc(var(--i)*55ms),calc(.6s + var(--i)*140ms)}
 @keyframes fadeup{from{opacity:0}to{opacity:1}}
 @keyframes shine{50%{filter:drop-shadow(0 0 9px rgba(230,199,122,.8))}}
-.nd.ms.due .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both,shine 2.6s ease-in-out 1s infinite;animation-delay:calc(var(--i)*55ms),1s}
+.nd.ms.due .ic{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both,hop 2.2s ease-in-out infinite,shine 2.6s ease-in-out infinite;animation-delay:calc(var(--i)*55ms),calc(.6s + var(--i)*140ms),1s}
 @media(prefers-reduced-motion:reduce){.biz.open .nd .ic,.biz.open .nd .lb,.nd.ms.due .ic{animation:none}.nd .ic{transition:none}}
 
 .pill.late{background:rgba(242,184,75,.14);color:var(--warn)}
@@ -295,19 +298,20 @@ function iconOf(n, i){
 var STATE_TXT = {done:'pagato', cur:'in corso', late:'in ritardo', todo:'da venire', lost:'non attivo'};
 /* nodi: Registrata, Fine prova, Mese 1 ... Mese 12, Un anno dopo. Le righe della serpentina sono di 4 e cambiano direzione. */
 var MAP = {paid:'done', cur:'cur', late:'late', todo:'todo', lost:'lost'};
+function addM(iso, k){ var d = new Date(iso), day = d.getUTCDate(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth()+k); var last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 0)).getUTCDate(); d.setUTCDate(Math.min(day,last)); return d.toISOString(); }
 function nodesOf(b){
-  var n = [], now = new Date(DATA.now);
+  var n = [], now = new Date(DATA.now), base = (b.months[0] && b.months[0].start) || b.trial_end, fut = !(b.months[0] && b.months[0].start);
   n.push({t:'Registrata', d:fmt(b.reg), st:'done'});
   var tr = b.phase === 'trial', wait = b.phase === 'waiting';
   var tot = Math.max(1, new Date(b.trial_end) - new Date(b.reg)), frac = Math.min(1, Math.max(.06, (now - new Date(b.reg)) / tot));
   n.push({t:'Fine prova', frac:frac, left: tr ? daysLeft(b.trial_end) : 0, d: tr ? fmt(b.trial_end) + ' · ' + daysLeft(b.trial_end) + ' g' : fmt(b.trial_end), st: (tr || wait) ? 'cur' : 'done'});
   b.months.forEach(function(m){
     var st = MAP[m.state] || 'todo';
-    n.push({t:'Mese '+m.n, n:m.n, start:m.start, d: (m.start && (st==='done'||st==='cur'||st==='late')) ? fmt(m.start) : '', st:st, ms:m.n===1, rw: m.n===1 ? b.m1.state : null, eur: b.m1.eur});
+    n.push({t:'Mese '+m.n, n:m.n, start:m.start, when: fmt(m.start || addM(base, m.n-1)), d: fmt(m.start || addM(base, m.n-1)), st:st, ms:m.n===1, rw: m.n===1 ? b.m1.state : null, eur: b.m1.eur});
   });
   for(var k=n.length-1;k>1;k--){ if(n[k].n && (n[k].st==='done'||n[k].st==='cur') && n[k].start){ n[k].last=true; break; } }
   var reached = b.anniv && new Date(b.anniv) <= now && b.m2.state !== 'void';
-  n.push({t:'Un anno dopo', d: b.anniv ? fmt(b.anniv, true) : '', st: b.m2.state==='void' ? 'lost' : (reached ? 'done' : 'todo'), ms:true, rw:b.m2.state, eur:b.m2.eur});
+  n.push({t:'Un anno dopo', d: fmt(b.anniv || addM(base,12), true), st: b.m2.state==='void' ? 'lost' : (reached ? 'done' : 'todo'), ms:true, rw:b.m2.state, eur:b.m2.eur});
   return n;
 }
 /* geometria: viewBox 300 x 450, 4 colonne, righe alternate sinistra-destra e destra-sinistra */
@@ -329,7 +333,7 @@ function snake(b,nodes){
     var amt = n.ms ? '<em>'+(n.rw==='void' ? '' : '+')+eur(n.eur)+'</em>' : '';
     var lab = n.ms && n.rw==='got' ? '<span>ricevuta</span>' : n.ms && n.rw==='due' ? '<span>da ricevere</span>' : '';
     var say = n.t + (isMonth ? ' · ' + (STATE_TXT[n.st]||'') : '') + (n.last ? ' · ultimo pagamento ' + fmt(n.start) : '');
-    var chip = n.n && !n.ms ? '<i class="mn'+(n.st==='todo'||n.st==='lost'?' dim':'')+'">'+n.n+'</i>' : '';
+    var chip = n.n && !n.ms ? '<i class="mn'+(n.st==='todo'||n.st==='lost'?' dim':'')+'"><b>Mese '+n.n+'</b><u>'+esc(n.when)+'</u></i>' : '';
     var lp = n.last ? '<i class="lp">Ultimo pagamento<br><b>'+fmt(n.start)+'</b></i>' : '';
     var head = n.ms || i<2 ? '<b>'+n.t+'</b>'+(n.d && !n.last ? '<span>'+esc(n.d)+'</span>' : '') : '';
     var text = '<div class="lb" style="top:'+(size/2+5)+'px">'+head+amt+lab+(n.ms?chip:chip)+lp+'</div>';
