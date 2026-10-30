@@ -45,7 +45,7 @@
       if((v.maxUnits||1)!==(g.maxUnits||1))u.max_units=v.maxUnits;
       return api('POST',u).then(loadRemote)},function(){return api('POST',{action:'service_disable',id:first.id}).then(loadRemote)});
   }
-  function renderServices(){if(window.liaRlRender)setTimeout(window.liaRlRender,0);if(!svcNewBlock)svcNewModesInit();
+  function renderServices(){if(window.liaRlRender)setTimeout(window.liaRlRender,0);svcNewModesInit();
     var box=document.getElementById('svcList');box.innerHTML='';
     if(!S.services.length)box.innerHTML='<p class="set-empty">Nessun servizio ancora.</p>';
     S.groups.forEach(function(g){
@@ -59,12 +59,20 @@
     var hwp=document.getElementById('svcNewHomeWrap');if(hwp){hwp.hidden=!!window.__LIA_MED?!svcHomeOn():true;if(!window.__LIA_MED)hwp.style.display='none'}
     renderComboPicker();renderCombos();
   }
-  var svcNewBlock=null;
+  var svcNewBlock=null,svcNewSig='';
   function svcNewModesInit(){
     var host=document.getElementById('svcNewModes'),pw=document.getElementById('svcNewPriceWrap');
     if(!host||window.__LIA_MED||typeof window.liaModesBlock!=='function')return; // service-sheet.js si carica dopo: si riprova alla prima lista servizi
+    var al=modesAllowed(),multi=!!(al.domicilio||al.online||al.half),sig=multi?'m':'s';
+    if(svcNewBlock&&svcNewSig===sig)return;
+    svcNewSig=sig;
+    if(!multi){ // solo in sede: un unico riquadro del prezzo accanto alla durata
+      host.hidden=true;host.innerHTML='';if(pw){pw.hidden=false;pw.style.display=''}
+      svcNewBlock={read:function(){var pe=document.getElementById('svcNewPrice'),p=parseFloat(String(pe.value).replace(',','.'));
+        if(!(p>=0))return {error:'Scrivi il prezzo, per esempio 18 o 12,50.'};return {modes:[{mode:'sede',price_eur:p}],half:false}}};
+      return}
     if(pw){pw.hidden=true;pw.style.display='none'}host.hidden=false;
-    svcNewBlock=window.liaModesBlock(host,{modes:{sede:''},allow:modesAllowed()},function(){return document.getElementById('svcNewMin').value});
+    svcNewBlock=window.liaModesBlock(host,{modes:{sede:''},allow:al},function(){return document.getElementById('svcNewMin').value});
   }
   svcNewModesInit();
   document.getElementById('svcAddBtn').onclick=function(){
@@ -73,7 +81,7 @@
       var n2=document.getElementById('svcNewName').value.trim(),d2=parseInt(document.getElementById('svcNewMin').value,10),r2=svcNewBlock.read();
       if(!n2||!d2){alert('Compila nome e durata del servizio.');return}
       if(r2.error){alert(r2.error);return}
-      api('POST',{action:'service_create',name:n2,duration_min:d2,half_hour:!!r2.half,modes:r2.modes}).then(function(){document.getElementById('svcNewName').value='';document.getElementById('svcNewMin').value='';svcNewBlock=null;svcNewModesInit();return loadRemote()}).catch(function(e){alert(e.message)});
+      api('POST',{action:'service_create',name:n2,duration_min:d2,half_hour:!!r2.half,modes:r2.modes}).then(function(){document.getElementById('svcNewName').value='';document.getElementById('svcNewMin').value='';var pr=document.getElementById('svcNewPrice');if(pr)pr.value='';svcNewBlock=null;svcNewModesInit();return loadRemote()}).catch(function(e){alert(e.message)});
       return;
     }
 
