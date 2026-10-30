@@ -36,10 +36,11 @@
     sub: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18M7 15h4"/></svg>',
     bars: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-11"/></svg>',
     reply: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>',
+    mega: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h3l8 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/></svg>',
     clock: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
-  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6" };
-  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply };
+  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6", announcement: "k7" };
+  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply, announcement: IC.mega };
 
   function build() {
     var bell = document.getElementById("bellBtn");
@@ -150,6 +151,10 @@
       var wn = Number(meta.count) || 0, wa = Math.round(Number(meta.amount) || 0);
       return { title: "Riepilogo della settimana", text: "Lia ha preso " + wn + (wn === 1 ? " prenotazione" : " prenotazioni") + (wa > 0 ? ", circa " + wa.toLocaleString("it-IT") + " \u20ac" : "") + ".", cta: "", time: ago(n.created_at) };
     }
+    if (n.type === "announcement") {
+      var AT = { maintenance: "Manutenzione programmata", news: "Novit\u00e0 di Prenolia", notice: "Avviso da Prenolia" };
+      return { title: meta.title || AT[meta.kind] || AT.notice, text: meta.message || "", cta: "", time: ago(n.created_at) };
+    }
     if (n.type === "support_reply") {
       return { title: "Prenolia ti ha risposto", text: meta.excerpt || "Apri la risposta alla tua richiesta.", cta: "Leggi la risposta", time: ago(n.created_at) };
     }
@@ -194,7 +199,7 @@
   }
   function noticeRow(n, un) {
     var t = noticeText(n);
-    return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
+    return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "announcement" ? " ann a-" + esc(n.meta && n.meta.kind || "notice") : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
       '<span class="tx"><b>' + esc(t.title) + "</b><span>" + esc(t.text) + "</span></span>" + (t.time ? "<time>" + esc(t.time) + "</time>" : "") + (un ? '<i class="lr-dot"></i>' : "") + "</button>";
   }
 

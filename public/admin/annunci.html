@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – Annunci</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --sec:#8CC6FF; --sec-soft:#0A2547;
+  --green:#3FE08A; --amber:#F5C15E; --red:#FF8A8A;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;flex:none;}
+.top-row nav{display:flex;gap:4px;}
+.top-row nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+.top-row nav a.on{background:var(--card2);color:var(--ink);}
+.spacer{flex:1;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--green);font-weight:600;}
+
+.panels{margin-top:16px;display:grid;gap:16px;}
+.panel{padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);}
+.panel h2{font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;}
+.panel .sub{margin-top:2px;font-size:.85rem;color:var(--muted);}
+.row2{display:grid;gap:16px;}
+@media (min-width:860px){.row2{grid-template-columns:1fr 1fr;}}
+
+.linechart{margin-top:18px;width:100%;height:auto;overflow:visible;}
+.linechart .grid-l{stroke:var(--line);stroke-width:1;}
+.linechart .area{fill:url(#areaGrad);}
+.linechart .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.linechart .dot{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+.linechart .axis{font-size:11px;fill:var(--muted);}
+
+.pairbars{margin-top:18px;width:100%;height:auto;}
+.pairbars .new{fill:var(--accent);}
+.pairbars .lost{fill:var(--red);}
+.pairbars .axis{font-size:10.5px;fill:var(--muted);}
+.legend2{margin-top:10px;display:flex;gap:18px;font-size:.85rem;color:var(--muted);}
+.legend2 span{display:inline-flex;align-items:center;gap:6px;}
+.legend2 i{width:9px;height:9px;border-radius:3px;}
+
+.hbars{margin-top:18px;display:grid;gap:14px;}
+.hbar-row{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:12px;}
+.hbar-row .lab{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:500;}
+.hbar-row .lab i{width:9px;height:9px;border-radius:50%;flex:none;}
+.track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.fill{height:100%;border-radius:6px;}
+.hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+.kpi .sub.m{color:var(--muted);font-weight:500;}
+.kpi .sub.warn{color:var(--amber);}
+.grid2c{display:grid;gap:16px;align-items:start;}
+@media (min-width:960px){.grid2c{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);}}
+.side{display:grid;gap:16px;}
+.rowh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;min-height:52px;}
+.rowh:last-child{border-bottom:0;}
+.rowh .n{font-weight:600;font-size:.94rem;}
+.rowh .a{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;}
+.rowh .a.ok{color:var(--green);}.rowh .a.warn{color:var(--amber);}.rowh .a.crit{color:var(--red);}
+.rowh .bar{grid-column:1/-1;height:8px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.rowh .bar i{display:block;height:100%;border-radius:6px;background:var(--accent);}
+.rowh .bar.warn i{background:var(--amber);}.rowh .bar.crit i{background:var(--red);}
+.rowh small{grid-column:1/-1;color:var(--muted);font-size:.8rem;margin-top:-2px;}
+.empty-s{color:var(--muted);font-size:.9rem;padding:10px 0;line-height:1.5;}
+.panel h2 .live-note{font-weight:500;color:var(--muted);font-size:.8rem;margin-left:8px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}}
+
+.field{display:grid;gap:6px;min-width:0;}
+.field label{font-size:.82rem;color:var(--muted);font-weight:500;}
+.field label b{color:var(--ink);font-variant-numeric:tabular-nums;}
+.inp{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-family:inherit;font-size:16px;width:100%;min-width:0;}
+.inp:focus{outline:none;border-color:var(--accent);}
+input[type=range]{width:100%;accent-color:var(--accent);height:34px;margin:0;}
+.fields{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.96rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2);}
+.btn.small{min-height:40px;padding:0 14px;font-size:.88rem;}
+.btn:disabled{opacity:.55;cursor:default;}
+.big{font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1;}
+.hint{color:var(--muted);font-size:.84rem;line-height:1.5;}
+.bar{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .3s;}
+.bar.warn i{background:var(--amber);}.bar.crit i{background:var(--red);}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);}
+.cols{display:grid;gap:16px;align-items:start;grid-template-columns:minmax(0,1fr);}
+.cols>*,.stack>*{min-width:0;}
+@media (min-width:960px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}
+.ok-t{color:var(--green);}.warn-t{color:var(--amber);}.crit-t{color:var(--red);}
+.msg{font-size:.88rem;margin-top:10px;min-height:1.2em;}
+.msg.err{color:var(--red);}.msg.good{color:var(--green);}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;}
+.stat3 div{background:var(--card2);border-radius:14px;padding:12px;min-width:0;}
+.stat3 b{display:block;font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.stat3 span{color:var(--muted);font-size:.76rem;}
+.exp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+.exp:last-child{border-bottom:0;}
+.exp b{display:block;font-weight:600;font-size:.96rem;overflow-wrap:anywhere;}
+.exp span.s{color:var(--muted);font-size:.82rem;}
+.days{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.exp .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.exp .acts .inp{width:auto;flex:1 1 150px;}
+.addrow{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));align-items:end;}
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}.big{font-size:1.7rem;}.panel .btn{width:100%;}.exp .acts .btn{width:auto;flex:1 1 auto;}}
+</style>
+<link rel="manifest" href="/admin/manifest.webmanifest"><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Prenolia Admin"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" type="image/png" sizes="64x64" href="/admin/icons/admin-64.png?v=6"><link rel="icon" type="image/png" sizes="512x512" href="/admin/icons/admin-512.png?v=6"><link rel="apple-touch-icon" href="/admin/icons/admin-apple-180.png?v=6">
+<link rel="stylesheet" href="/admin/mobile.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav"></nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+
+<style>
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:44px;padding:0 16px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:.92rem;font-weight:600;cursor:pointer}
+.chip[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+textarea.inp{padding:12px 14px;min-height:110px;resize:vertical;line-height:1.45}
+.cnt{text-align:right;font-size:.78rem;color:var(--muted)}
+.prev{margin-top:6px;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
+.prev .lbl{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.pit{display:flex;gap:11px;align-items:flex-start;padding:10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.pit .ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none;background:linear-gradient(145deg,#2DD2DC,#1B9AA5)}
+.pit .ic.maintenance{background:linear-gradient(145deg,#F7AA2B,#E88A17)}
+.pit .ic.notice{background:linear-gradient(145deg,#FF9484,#E2584A)}
+.pit b{display:block;font-size:.9rem}
+.pit span.t{display:block;margin-top:2px;font-size:.82rem;color:var(--muted);white-space:pre-line;overflow-wrap:anywhere}
+.hist{padding:14px 0;border-bottom:1px solid var(--line);display:grid;gap:6px}
+.hist:last-child{border-bottom:0}
+.hist .h{display:flex;gap:10px;justify-content:space-between;align-items:baseline;flex-wrap:wrap}
+.hist b{font-weight:600}
+.hist .m{color:var(--muted);font-size:.86rem;white-space:pre-line;overflow-wrap:anywhere}
+.tag{font-size:.76rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--card2);color:var(--muted)}
+.tag.on{background:var(--accent-soft);color:var(--accent-ink)}
+</style>
+<div class="wrap">
+  <div class="pagehd"><h1>Annunci</h1><p>Scrivi un messaggio a tutte le attività: lo trovano nel pannello Avvisi di Lia, l’icona con la “a” accanto alla campanella.</p></div>
+  <div class="banner" id="setup" hidden style="background:#3A2E12;color:#F5C15E;padding:12px 16px;border-radius:14px;margin-bottom:16px;font-size:.92rem;line-height:1.45">Manca la tabella degli annunci: esegui in Supabase lo script <b>20261104_announcements.sql</b> e ricarica la pagina.</div>
+  <div class="cols">
+    <div class="panel">
+      <h2>Nuovo annuncio</h2>
+      <p class="sub">Va a tutte le attività, di ogni tipo. Non parte nessuna notifica sul telefono: lo vedono aprendo il pannello Avvisi, dove compare il punto di novità.</p>
+      <form id="form" autocomplete="off" style="margin-top:16px;display:grid;gap:14px">
+        <div class="field"><label>Tipo</label>
+          <div class="chips" id="kinds">
+            <button type="button" class="chip" data-k="maintenance" aria-pressed="false">Manutenzione</button>
+            <button type="button" class="chip" data-k="news" aria-pressed="true">Novità</button>
+            <button type="button" class="chip" data-k="notice" aria-pressed="false">Avviso</button>
+          </div>
+        </div>
+        <div class="field"><label for="title">Titolo (facoltativo)</label><input class="inp" id="title" type="text" maxlength="60" placeholder="Per esempio Manutenzione sabato notte"></div>
+        <div class="field"><label for="msg">Testo</label><textarea class="inp" id="msg" maxlength="400" placeholder="Scrivi in modo semplice quello che devono sapere"></textarea><div class="cnt" id="cnt">0 / 400</div></div>
+        <div class="field"><label for="days">Resta visibile per</label>
+          <select class="inp" id="days"><option value="1">1 giorno</option><option value="3">3 giorni</option><option value="7" selected>7 giorni</option><option value="14">14 giorni</option><option value="30">30 giorni</option></select>
+        </div>
+        <div class="prev"><div class="lbl">Così lo vedono le attività</div><div class="pit"><span class="ic news" id="pIc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h3l8 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/></svg></span><div style="min-width:0"><b id="pT"></b><span class="t" id="pM"></span></div></div></div>
+        <button class="btn" type="submit" id="send">Pubblica a tutte le attività</button>
+        <div class="msg" id="sMsg" role="status"></div>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Pubblicati</h2>
+      <p class="sub">Puoi ritirare un annuncio quando vuoi: sparisce subito dal pannello di tutte le attività.</p>
+      <div id="hist" style="margin-top:8px"></div>
+      <div class="msg" id="hMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  function $(s) { return document.getElementById(s); }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  var NAME = { maintenance: 'Manutenzione programmata', news: 'Novità di Prenolia', notice: 'Avviso da Prenolia' };
+  var LBL = { maintenance: 'Manutenzione', news: 'Novità', notice: 'Avviso' };
+  var kind = 'news';
+  function post(b) { return window.liaApi('/api/admin/system', { method: 'POST', body: JSON.stringify(b) }); }
+  function say(id, t, k) { var m = $(id); m.textContent = t || ''; m.className = 'msg' + (k ? ' ' + k : ''); }
+  function fmt(iso) { return new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' }).format(new Date(iso)); }
+  function prev() {
+    $('pT').textContent = $('title').value.trim() || NAME[kind];
+    $('pM').textContent = $('msg').value.trim() || 'Qui compare il testo che scrivi.';
+    $('pIc').className = 'ic ' + kind;
+    $('cnt').textContent = $('msg').value.length + ' / 400';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) {
+    c.addEventListener('click', function () {
+      kind = c.getAttribute('data-k');
+      Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+      prev();
+    });
+  });
+  $('title').addEventListener('input', prev); $('msg').addEventListener('input', prev);
+  function paint(a) {
+    var box = $('hist'); box.innerHTML = '';
+    $('setup').hidden = !a || a.table !== false;
+    var items = (a && a.items) || [];
+    if (!items.length) { box.appendChild(el('p', 'hint', 'Nessun annuncio pubblicato finora.')); return; }
+    items.forEach(function (r) {
+      var row = el('div', 'hist'), h = el('div', 'h');
+      h.appendChild(el('b', null, r.title || NAME[r.kind] || 'Annuncio'));
+      h.appendChild(el('span', 'tag' + (r.live ? ' on' : ''), r.live ? 'In corso' : (r.active ? 'Scaduto' : 'Ritirato')));
+      row.appendChild(h);
+      row.appendChild(el('div', 'm', r.message));
+      var f = el('div', 'hint', (LBL[r.kind] || '') + ' · pubblicato il ' + fmt(r.created_at) + (r.live ? ' · visibile fino al ' + fmt(r.expires_at) : ''));
+      row.appendChild(f);
+      if (r.live) {
+        var b = el('button', 'btn small ghost', 'Ritira'); b.type = 'button'; var armed = false;
+        b.addEventListener('click', function () {
+          if (!armed) { armed = true; b.textContent = 'Conferma: ritira per tutti'; setTimeout(function () { armed = false; b.textContent = 'Ritira'; }, 3500); return; }
+          b.disabled = true;
+          post({ action: 'announce_stop', id: r.id }).then(function (j) { paint(j.announcements); say('hMsg', 'Annuncio ritirato.', 'good'); }).catch(function (e) { say('hMsg', e.message, 'err'); b.disabled = false; });
+        });
+        row.appendChild(b);
+      }
+      box.appendChild(row);
+    });
+  }
+  var armedSend = false, t = null;
+  $('form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var m = $('msg').value.trim();
+    if (m.length < 5) { say('sMsg', 'Scrivi il testo dell’annuncio.', 'err'); return; }
+    var b = $('send');
+    if (!armedSend) { armedSend = true; b.textContent = 'Conferma: invia a tutte le attività'; say('sMsg', 'Controlla l’anteprima, poi tocca di nuovo per pubblicare.'); t = setTimeout(function () { armedSend = false; b.textContent = 'Pubblica a tutte le attività'; say('sMsg', ''); }, 6000); return; }
+    clearTimeout(t); armedSend = false; b.disabled = true; say('sMsg', 'Pubblico…');
+    post({ action: 'announce_send', kind: kind, title: $('title').value, message: m, days: $('days').value }).then(function (j) {
+      paint(j.announcements); $('title').value = ''; $('msg').value = ''; prev(); say('sMsg', 'Pubblicato: le attività lo vedono nel pannello Avvisi.', 'good');
+    }).catch(function (e) { say('sMsg', e.message, 'err'); }).then(function () { b.disabled = false; b.textContent = 'Pubblica a tutte le attività'; });
+  });
+  prev();
+  window.liaApi('/api/admin/system?view=announcements').then(paint).catch(function (e) { window.liaBanner('Non riesco a caricare la pagina: ' + e.message); });
+})();
+</script>
+</body>
+</html>

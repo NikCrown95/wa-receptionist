@@ -11,6 +11,7 @@
     { label: 'Ricavi', href: '/admin/soldi.html' },
     { label: 'Costi', href: '/admin/costi.html' },
     { label: 'Referral', href: '/admin/referral.html' },
+    { label: 'Annunci', href: '/admin/annunci.html' },
     { label: 'Sistema', href: '/admin/sistema.html' }
   ];
   var nav = document.getElementById('mainNav');
@@ -213,6 +214,7 @@
       'Ricavi': '<path d="M17.5 7.5A6 6 0 1 0 17.5 16.5"/><path d="M4.5 10.5h8M4.5 13.5h8"/>',
       'Costi': '<path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z"/><path d="M9 8.5h6M9 12h6"/>',
       'Referral': '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/>',
+      'Annunci': '<path d="M3 10v4a1 1 0 0 0 1 1h3l8 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/>',
       'Sistema': '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'
     };
     function svg(l) { return '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[l] || '') + '</svg>'; }

@@ -480,6 +480,18 @@ async function controlView() {
   };
 }
 
+// ----------------------------- ANNUNCI -----------------------------
+async function announcements() {
+  try {
+    const rows = await sb('announcements?select=id,kind,title,message,created_at,expires_at,active&order=created_at.desc&limit=15');
+    const now = Date.now();
+    return { table: true, items: (rows || []).map((r) => ({ ...r, live: !!r.active && Date.parse(r.expires_at) > now })) };
+  } catch (e) {
+    if (e && (e.status === 404 || /announcements/.test(String(e.message || '')))) return { table: false, items: [] };
+    throw e;
+  }
+}
+
 // ----------------------------- MODIFICHE -----------------------------
 const eurNum = (v) => { const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) ? n : NaN; };
 const bad = (m) => { const e = new Error(m); e.validation = true; return e; };
@@ -543,6 +555,24 @@ async function act(body, ctx) {
     if (sent.error) throw bad('Notifiche non disponibili: manca la tabella dei dispositivi.');
     return sent;
   }
+  if (a === 'announce_send') {
+    const kind = ['maintenance', 'news', 'notice'].includes(body.kind) ? body.kind : null;
+    const title = String(body.title || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    const message = String(body.message || '').replace(/[ \t]+/g, ' ').trim().slice(0, 400);
+    const days = Math.min(30, Math.max(1, parseInt(body.days, 10) || 7));
+    if (!kind) throw bad('Scegli il tipo di annuncio.');
+    if (message.length < 5) throw bad('Scrivi il testo dell\u2019annuncio.');
+    const expires = new Date(Date.now() + days * 86400000).toISOString();
+    try {
+      await sb('announcements', { method: 'POST', body: { kind, title: title || null, message, expires_at: expires, created_by: String(ctx.actor || '').slice(0, 200) }, prefer: 'return=minimal' });
+    } catch (e) { if (e && (e.status === 404 || /announcements/.test(String(e.message || '')))) throw bad('Manca la tabella degli annunci: esegui in Supabase lo script 20261104_announcements.sql.'); throw e; }
+    return { ok: true, announcements: await announcements() };
+  }
+  if (a === 'announce_stop') {
+    if (!isUuid(body.id)) throw bad('Annuncio non valido.');
+    await sb(`announcements?id=eq.${body.id}`, { method: 'PATCH', body: { active: false }, prefer: 'return=minimal' });
+    return { ok: true, announcements: await announcements() };
+  }
   throw bad('Azione non riconosciuta.');
 }
 
@@ -573,6 +603,7 @@ module.exports = async function handler(req, res) {
         return;
       }
       if (view === 'home') { res.status(200).json(await homeView()); return; }
+      if (view === 'announcements') { res.status(200).json(await announcements()); return; }
       if (view === 'control') { res.status(200).json(await controlView()); return; }
       res.status(400).json({ error: 'bad_view' });
       return;
