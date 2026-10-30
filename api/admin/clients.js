@@ -1502,7 +1502,7 @@ module.exports = async function handler(req, res) {
         return;
       }
       if (view === 'referrals') {
-        try { res.status(200).json(await referral.adminOverview(sbAll)); }
+        try { res.status(200).json(await referral.adminOverview(sbAll, (method, path, b, prefer) => sb(path, { method, body: b, prefer }))); }
         catch (e) {
           if (/referr|app_settings|relation|does not exist|schema cache/i.test(String(e && e.message))) { res.status(200).json({ setup: true }); return; }
           throw e;
@@ -1527,7 +1527,11 @@ module.exports = async function handler(req, res) {
         return;
       }
       if (body && /^partner_/.test(String(body.action || ''))) {
-        res.status(200).json(await referral.partnerAction(body, { get: sbAll, send: (method, path, b, prefer) => sb(path, { method, body: b, prefer }) }));
+        const out = await referral.partnerAction(body, { get: sbAll, send: (method, path, b, prefer) => sb(path, { method, body: b, prefer }) });
+        if (body.action === 'partner_assign' || body.action === 'partner_unassign') {
+          await audit(body.action === 'partner_assign' ? 'referral_assign' : 'referral_unassign', String(body.business_id || '') || null, { partner_id: body.id || null, paid_on: body.paid_on || null }, ctx && ctx.actor);
+        }
+        res.status(200).json(out);
         return;
       }
       if (body && body.action === 'request_reply') {

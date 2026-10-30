@@ -185,9 +185,10 @@ table.rt tr.off td{opacity:.55}
     <div class="sec-top">
       <div>
         <h2>Persone con un link</h2>
-        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro link e paga il primo mese matura un premio in contanti (di base un mese di Smart).</p>
+        <p class="lead">Persone esterne che inserisci tu. Ogni attività che arriva dal loro codice e paga il primo mese matura un premio in contanti (di base un mese di Smart); un altro dopo un anno, se l'attività è ancora iscritta. Con «Assegna attività» colleghi a una persona anche un'attività che non si è registrata col suo codice.</p>
+        <p class="lead">Loro vedono tutto da <b id="promUrl">…</b>: entrano con nome, cognome e codice.</p>
       </div>
-      <button class="btn" id="addPerson" type="button">Nuova persona</button>
+      <div class="rowbtns"><button class="btn ghost" id="copyProm" type="button">Copia link pagina promoter</button><button class="btn" id="addPerson" type="button">Nuova persona</button></div>
     </div>
     <div class="tablewrap"><table class="rt" id="tPeople"></table></div>
   </section>
@@ -199,12 +200,25 @@ table.rt tr.off td{opacity:.55}
   <h2 id="sheetTitle">Nuova persona</h2>
   <form id="pForm">
     <div class="field"><label for="pName">Nome e cognome</label><input class="inp" id="pName" required maxlength="80" placeholder="Es. Marco Rossi"></div>
-    <div class="field"><label for="pReward">Premio per ogni attività che paga (€)</label><input class="inp" id="pReward" inputmode="decimal" placeholder="16,99"><p class="hint" id="pRewardHint"></p></div>
+    <div class="field"><label for="pReward">Premio per ogni attività che paga (€)</label><input class="inp" id="pReward" inputmode="decimal" placeholder="21,99"><p class="hint" id="pRewardHint"></p></div>
     <div class="field"><label for="pNote">Nota (facoltativa)</label><input class="inp" id="pNote" maxlength="300" placeholder="Es. parrucchiere amico, lo conosco da…"></div>
     <label class="chkrow" id="pActiveRow" hidden><input type="checkbox" id="pActive" checked> Link attivo (se lo disattivi, i nuovi arrivi non vengono più collegati)</label>
     <div class="sheet-actions">
       <button type="button" class="btn ghost" id="pCancel">Annulla</button>
       <button type="submit" class="btn" id="pSave">Crea link</button>
+    </div>
+  </form>
+</div>
+
+<div class="sheet" id="aSheet" style="max-height:92vh;overflow-y:auto" role="dialog" aria-modal="true" aria-labelledby="aTitle" tabindex="-1">
+  <div class="grabber" aria-hidden="true"></div>
+  <h2 id="aTitle">Assegna un'attività</h2>
+  <form id="aForm">
+    <div class="field"><label for="aBiz">Attività</label><select class="inp" id="aBiz" required></select><p class="hint" id="aBizHint"></p></div>
+    <div class="field"><label for="aDate">Data del primo pagamento (solo se già paga)</label><input class="inp" id="aDate" type="date"><p class="hint">Se la lasci vuota uso il primo «Segna come pagato» registrato, oppure l'inizio dell'abbonamento. Serve a calcolare i mesi e l'anno.</p></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn ghost" id="aCancel">Annulla</button>
+      <button type="submit" class="btn" id="aSave">Assegna</button>
     </div>
   </form>
 </div>
@@ -253,20 +267,24 @@ table.rt tr.off td{opacity:.55}
       if (q && (r.name + ' ' + r.via_name).toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
-    th(t, [['Attività'], ['Arrivata da'], ['Stato'], ['Registrata'], ['Prova / pagamento']]);
-    if (!rows.length){ empty(t, 5, all.length ? 'Nessun risultato con questi filtri' : 'Ancora nessuna registrazione da un link', all.length ? 'Cambia filtro o cerca altro.' : 'Quando qualcuno si registra da un link referral, lo vedi qui.'); return; }
+    th(t, [['Attività'], ['Arrivata da'], ['Stato'], ['Registrata'], ['Prova / pagamento'], ['']]);
+    if (!rows.length){ empty(t, 6, all.length ? 'Nessun risultato con questi filtri' : 'Ancora nessuna registrazione da un link', all.length ? 'Cambia filtro o cerca altro.' : 'Quando qualcuno si registra da un link referral, lo vedi qui.'); return; }
     var tb = el('tbody');
     rows.forEach(function(r){
       var tr = el('tr');
       var c1 = el('td'); c1.appendChild(bizLink(r.name, r.business_id)); tr.appendChild(c1);
-      var c2 = el('td'); var v = el('span', 'via'); v.appendChild(bizLink(r.via_name, r.via_kind === 'business' ? r.via_id : null)); v.appendChild(el('span', 'tag ' + (r.via_kind === 'partner' ? 'partner' : 'biz'), r.via_kind === 'partner' ? 'Persona' : 'Attività')); c2.appendChild(v); tr.appendChild(c2);
+      var c2 = el('td'); var v = el('span', 'via'); v.appendChild(bizLink(r.via_name, r.via_kind === 'business' ? r.via_id : null)); v.appendChild(el('span', 'tag ' + (r.via_kind === 'partner' ? 'partner' : 'biz'), r.via_kind === 'partner' ? 'Persona' : 'Attività')); if (r.manual) v.appendChild(el('span', 'tag', 'Assegnata a mano')); c2.appendChild(v); tr.appendChild(c2);
       var c3 = el('td'); c3.appendChild(r.status === 'paid' ? pill('Ha pagato', 'active') : pill('In prova', 'trial')); tr.appendChild(c3);
       tr.appendChild(el('td', null, dshort(r.created_at)));
       var c5 = el('td');
       if (r.status === 'paid') c5.textContent = 'Pagato il ' + dshort(r.paid_at);
       else if (r.trial_ends_at) c5.textContent = 'La prova finisce il ' + dshort(r.trial_ends_at);
       else c5.textContent = r.sub_status === 'cancelled' ? 'Abbonamento annullato' : '\u2014';
+      if (r.reward2_at) c5.appendChild(el('small', null, 'Un anno compiuto: seconda mensilità maturata'));
       tr.appendChild(c5);
+      if (state.owner && r.via_kind === 'partner' && r.business_id){
+        var c6 = el('td', 'num'); var un = el('button', 'btn ghost small', 'Togli'); un.type = 'button'; un.addEventListener('click', function(){ unassign(r, un); }); c6.appendChild(un); tr.appendChild(c6);
+      } else tr.appendChild(el('td'));
       tb.appendChild(tr);
     });
     t.appendChild(tb);
@@ -304,7 +322,7 @@ table.rt tr.off td{opacity:.55}
       var sm = el('small', null, (p.active ? '' : 'Link disattivato \u00b7 ') + (p.note || 'dal ' + dshort(p.created_at))); c1.appendChild(sm); tr.appendChild(c1);
       tr.appendChild(el('td', 'num', String(p.registered)));
       tr.appendChild(el('td', 'num', String(p.in_trial)));
-      tr.appendChild(el('td', 'num', String(p.paid)));
+      var pd = el('td', 'num', String(p.paid)); if (p.second) pd.appendChild(el('small', null, p.second + (p.second === 1 ? ' anche a un anno' : ' anche a un anno'))); tr.appendChild(pd);
       tr.appendChild(el('td', 'num', eur(p.reward_eur)));
       tr.appendChild(el('td', 'num', eur(p.earned_eur)));
       var due = el('td', 'num'); var db = el('b', null, eur(p.due_eur)); if (p.due_eur > 0) db.style.color = 'var(--amber)'; due.appendChild(db);
@@ -313,6 +331,7 @@ table.rt tr.off td{opacity:.55}
       var cp = el('button', 'btn ghost small', 'Copia link'); cp.type = 'button'; cp.addEventListener('click', function(){ copy(p.link, cp); }); rb.appendChild(cp);
       if (state.owner){
         if (p.due_eur > 0){ var pay = el('button', 'btn small', 'Premio pagato'); pay.type = 'button'; pay.addEventListener('click', function(){ payout(p, pay); }); rb.appendChild(pay); }
+        var as = el('button', 'btn ghost small', 'Assegna attività'); as.type = 'button'; as.addEventListener('click', function(){ openAssign(p); }); rb.appendChild(as);
         var ed = el('button', 'btn ghost small', 'Modifica'); ed.type = 'button'; ed.addEventListener('click', function(){ openSheet(p); }); rb.appendChild(ed);
       }
       act.appendChild(rb); tr.appendChild(act);
@@ -324,6 +343,9 @@ table.rt tr.off td{opacity:.55}
   function render(){
     kpis(); renderReferred(); renderCredits(); renderPeople();
     document.getElementById('addPerson').hidden = !state.owner;
+    var pu = state.data && state.data.promoter_url;
+    document.getElementById('promUrl').textContent = pu ? pu.replace(/^https?:\/\//, '') : '/promoter';
+    document.getElementById('copyProm').hidden = !pu;
   }
 
   function payout(p, btn){
@@ -333,16 +355,49 @@ table.rt tr.off td{opacity:.55}
       .catch(function(e){ banner(e.message); btn.disabled = false; });
   }
 
+  // ---- assegna un'attivita' a una persona, o toglila
+  var aSheet = document.getElementById('aSheet'), aPerson = null;
+  function closeAssign(){ bg.classList.remove('on'); aSheet.classList.remove('on'); }
+  function openAssign(p){
+    aPerson = p;
+    document.getElementById('aTitle').textContent = 'Assegna un\'attività a ' + p.name;
+    var sel = document.getElementById('aBiz'); sel.innerHTML = '';
+    var o0 = el('option', null, 'Scegli l\'attività…'); o0.value = ''; sel.appendChild(o0);
+    ((state.data && state.data.business_options) || []).forEach(function(b){
+      var o = el('option', null, b.name + (b.via ? ' (già di ' + b.via + ')' : '')); o.value = b.id; sel.appendChild(o);
+    });
+    document.getElementById('aDate').value = '';
+    document.getElementById('aBizHint').textContent = 'Se era già collegata a un\'altra persona, la sposto (finché a quella non hai pagato premi).';
+    bg.classList.add('on'); aSheet.classList.add('on');
+    setTimeout(function(){ sel.focus(); }, 50);
+  }
+  document.getElementById('aCancel').addEventListener('click', closeAssign);
+  document.getElementById('aForm').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var biz = document.getElementById('aBiz').value; if (!biz){ banner('Scegli un\'attività.'); return; }
+    var save = document.getElementById('aSave'); save.disabled = true;
+    post({ action: 'partner_assign', id: aPerson.id, business_id: biz, paid_on: document.getElementById('aDate').value || undefined })
+      .then(function(j){ closeAssign(); banner(j.business + ' ora è di ' + j.partner + (j.status === 'paid' ? ' (già paga: prima mensilità maturata).' : ' (in prova: matura quando paga).')); return load(); })
+      .catch(function(e){ banner(e.message); }).then(function(){ save.disabled = false; });
+  });
+  function unassign(r, btn){
+    if (!confirm('Tolgo «' + r.name + '» a ' + r.via_name + '? Non conterà più per lui/lei.')) return;
+    btn.disabled = true;
+    post({ action: 'partner_unassign', business_id: r.business_id, id: r.via_id }).then(function(){ banner('Fatto: ' + r.name + ' non è più collegata.'); return load(); })
+      .catch(function(e){ banner(e.message); btn.disabled = false; });
+  }
+  document.getElementById('copyProm').addEventListener('click', function(){ var b = this; copy((state.data && state.data.promoter_url) || (location.origin + '/promoter'), b); });
+
   // ---- scheda "Nuova persona / Modifica"
   var bg = document.getElementById('sheetBg'), sheet = document.getElementById('sheet');
-  function closeSheet(){ bg.classList.remove('on'); sheet.classList.remove('on'); }
+  function closeSheet(){ bg.classList.remove('on'); sheet.classList.remove('on'); aSheet.classList.remove('on'); }
   function openSheet(p){
     state.editing = p || null;
     document.getElementById('sheetTitle').textContent = p ? 'Modifica ' + p.name : 'Nuova persona';
     document.getElementById('pName').value = p ? p.name : '';
     var base = state.data && state.data.settings ? (state.data.settings.premium_price || state.data.settings.base_price) : 0;
     document.getElementById('pReward').value = p ? String(p.reward_eur).replace('.', ',') : String(base).replace('.', ',');
-    document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di Smart (' + eur(base) + '). Puoi cambiarlo.';
+    document.getElementById('pRewardHint').textContent = p ? 'Vale per i prossimi pagamenti: quelli gia\' maturati restano al premio di quando sono scattati.' : 'Di base e\' un mese di Smart (' + eur(base) + '), sia dopo la prova sia dopo un anno. Puoi cambiarlo.';
     document.getElementById('pNote').value = p ? (p.note || '') : '';
     document.getElementById('pActive').checked = p ? p.active : true;
     document.getElementById('pActiveRow').hidden = !p;
