@@ -222,7 +222,7 @@ async function listClients() {
   const since = new Date(now.getTime() - 30 * 86400000).toISOString();
 
   const businesses = await sbAll(
-    'businesses?select=id,name,business_type,owner_phone,owner_whatsapp,created_at,' +
+    'businesses?select=id,name,slug,logo_v,business_type,owner_phone,owner_whatsapp,created_at,' +
       'subscriptions(status,started_at,cancelled_at,trial_ends_at,plans(name,price_eur)),' +
       'services(id),resources(id,active,opening_hours(id))' +
       '&order=created_at.desc,id.asc'
@@ -297,6 +297,7 @@ async function listClients() {
     return {
       id: b.id,
       name: b.name,
+      logo_url: require('../../lib/logo.js').logoUrl(b),
       type: typeLabel(b.business_type),
       plan,
       status,

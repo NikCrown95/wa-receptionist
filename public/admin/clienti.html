@@ -53,7 +53,13 @@ button{font-family:inherit;}
 .btn:hover{filter:brightness(1.08);}
 
 .tablewrap{margin-top:18px;border-radius:22px;border:1px solid var(--line);background:var(--card);overflow-x:auto;}
-table{border-collapse:collapse;width:100%;min-width:1240px;}
+table{border-collapse:collapse;width:100%;min-width:0;table-layout:auto;}
+.avatar.has-logo{background:#fff;overflow:hidden;padding:0}.avatar.has-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.who .avatar{display:grid;place-items:center;color:var(--accent-ink);font-size:.85rem}
+.who-contact,.plan-price{display:none}
+@media (min-width:700px) and (max-width:899px){.health-reasons,.svc-sub,.who-contact a:nth-child(2){display:none}table th,table td{padding-left:7px !important;padding-right:7px !important}.who .avatar{width:32px;height:32px}.who{gap:8px}table th:nth-child(6),table td.appts{display:none}.wrap{padding-left:14px;padding-right:14px}}
+@media (min-width:700px){th:nth-child(5),td.mrr,th:nth-child(8),td.contact{display:none}.who-contact{display:block;margin-top:3px}.who-contact a{display:block;color:var(--muted);font-size:.78rem;text-decoration:none;overflow-wrap:anywhere}.who-contact a:hover{color:var(--accent-ink)}.plan-price{display:block;margin-top:2px;font-size:.8rem;font-weight:600;color:var(--ink)}}
+@media (min-width:700px){.health-reasons{max-width:170px}.svc-sub{max-width:130px}table th:nth-child(6){width:96px}td.act{white-space:normal}.act .btn{margin:0 0 6px 0 !important;display:flex;justify-content:center}table th{padding:12px 10px;white-space:normal;line-height:1.25;font-size:.72rem}table td{padding:12px 10px;font-size:.9rem}.who{gap:10px}.who b{white-space:normal;overflow-wrap:anywhere}.mrr{white-space:normal}.contact a{overflow-wrap:anywhere}.avatar{width:38px;height:38px}}
 th{text-align:left;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;padding:14px 18px;border-bottom:1px solid var(--line);white-space:nowrap;}
 td{padding:14px 18px;border-bottom:1px solid var(--line);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
@@ -304,7 +310,8 @@ window.startClients = function(){
         '<td class="act"></td>';
       ['Attività','Piano e stato','Rinnovo','Servizio','Incasso','Appuntamenti (30gg)','Stato','Contatti','Azioni'].forEach(function(l, i){ tr.children[i].setAttribute('data-l', l); });
 
-      tr.querySelector('.avatar').textContent = initials(c.name);
+      var av = tr.querySelector('.avatar'); av.textContent = initials(c.name);
+      if (c.logo_url) { var im = document.createElement('img'); im.alt = ''; im.src = c.logo_url; im.addEventListener('load', function(){ av.textContent = ''; av.classList.add('has-logo'); av.appendChild(im); }); }
       var nameEl = tr.querySelector('.who b');
       if (c.id) {
         var nameLink = document.createElement('a'); nameLink.href = '/admin/attivita.html?id=' + encodeURIComponent(c.id);
@@ -372,6 +379,12 @@ window.startClients = function(){
       var contact = tr.querySelector('.contact');
       if (c.phone) { var telLink = document.createElement('a'); telLink.href = 'tel:' + c.phone.replace(/\s+/g,''); telLink.textContent = c.phone; contact.appendChild(telLink); } else { contact.textContent = '—'; }
       if (c.email){ var mailLink = document.createElement('a'); mailLink.href = 'mailto:' + c.email; mailLink.textContent = c.email; contact.appendChild(mailLink); }
+
+      var wc = document.createElement('div'); wc.className = 'who-contact';
+      [c.phone && ['tel:' + c.phone.replace(/\s+/g,''), c.phone], c.email && ['mailto:' + c.email, c.email]].forEach(function(x){ if (!x) return; var a = document.createElement('a'); a.href = x[0]; a.textContent = x[1]; wc.appendChild(a); });
+      if (wc.firstChild) tr.querySelector('.who > div').appendChild(wc);
+      var pp = document.createElement('div'); pp.className = 'plan-price'; pp.textContent = tr.querySelector('.mrr').textContent;
+      if (pp.textContent && pp.textContent !== '\u2014') tr.querySelector('.plan-name').parentNode.appendChild(pp);
 
       tbody.appendChild(tr);
     });

@@ -266,8 +266,14 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && side.classList.contains('open')) setOpen(false); });
     var canHover = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches, hov = null;
     if (canHover) {
-      side.addEventListener('mouseenter', function () { clearTimeout(hov); hov = setTimeout(function () { setOpen(true); }, 140); });
-      side.addEventListener('mouseleave', function () { clearTimeout(hov); hov = setTimeout(function () { if (!side.contains(document.activeElement) || document.activeElement === tog) setOpen(false); }, 220); });
+      // si apre solo se il mouse si muove davvero sopra la colonna (non quando la pagina si carica con il puntatore gia' li')
+      var p0 = null;
+      side.addEventListener('mousemove', function (e) {
+        if (side.classList.contains('open')) { clearTimeout(hov); return; }
+        if (!p0) { p0 = [e.clientX, e.clientY, Date.now()]; return; }
+        if (Date.now() - p0[2] > 800 || Math.abs(e.clientX - p0[0]) + Math.abs(e.clientY - p0[1]) > 6) { if (Math.abs(e.clientX - p0[0]) + Math.abs(e.clientY - p0[1]) > 6) { clearTimeout(hov); hov = setTimeout(function () { setOpen(true); }, 120); } p0 = [e.clientX, e.clientY, Date.now()]; }
+      });
+      side.addEventListener('mouseleave', function () { p0 = null; clearTimeout(hov); hov = setTimeout(function () { if (!side.contains(document.activeElement) || document.activeElement === tog) setOpen(false); }, 220); });
     }
     var navBox = side.querySelector('.ls-nav');
     PAGES.forEach(function (p) {
