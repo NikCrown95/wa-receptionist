@@ -241,8 +241,8 @@ body:has(#mnGuide:not([hidden])) #fabNew{display:none!important}
 @media (min-width:1300px){.mnGuideIn{max-width:1240px}#mnGuide:not(.gp) #mnGBody{grid-template-columns:420px minmax(0,1fr)}}
 
 /* pagina aperta sopra la dashboard: nel menu resta evidenziata solo la sua voce */
-body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide),body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail){background:transparent;color:var(--ink)}
-body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide) > svg,body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail) > svg{color:var(--muted)}
+body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide):not(#menuTabReferral),body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail){background:transparent;color:var(--ink)}
+body.mnOn.mnGOn #burgerMenu > button[aria-current="true"]:not(#menuTabGuide):not(#menuTabReferral) > svg,body.mnOn.mnAOn #burgerMenu > button[aria-current="true"]:not(#menuTabAvail) > svg{color:var(--muted)}
 /* guida: niente titolo ripetuto, accanto al tasto indietro c'e' la frase di spiegazione */
 .mnSr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .mnGH .mnGSub{margin:0;flex:1;min-width:0}
@@ -308,12 +308,13 @@ body.mnOn.mnB #burgerMenu > button[data-sub]::after{display:none;content:attr(da
 body.mnOn.mnB #burgerMenu > button[data-sub] > .mnNew{grid-column:3;grid-row:1;align-self:center}
 body.mnOn.mnB:not(.mnGOn):not(.mnAOn) #burgerMenu > button[data-sub][aria-current="true"] > svg,
 body.mnOn.mnB.mnGOn #burgerMenu > #menuTabGuide[aria-current="true"] > svg,
+body.mnOn.mnB.mnGOn #burgerMenu > #menuTabReferral[aria-current="true"] > svg,
 body.mnOn.mnB.mnAOn #burgerMenu > #menuTabAvail[aria-current="true"] > svg{background:none;border:0;color:var(--accent-ink)}
 body.mnOn.mnB #burgerMenu > .logoutBtn{gap:13px;padding:0 10px;min-height:52px}
 body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;margin:0 7px;box-sizing:border-box;border:0;background:none}
 
 /* telefono, iPad e computer: il menu raggruppato entra per intero nello schermo, senza scorrere.
-   Le 9 righe (8 voci piu' Esci; 10 quando c'e' anche "Invita un amico", vedi --mnN) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
+   Le 9 righe (8 voci piu' Esci; 10 quando c'e' anche "Invita un'attivita'", vedi --mnN) si adattano all'altezza disponibile; se lo schermo e' basso spariscono le righe di spiegazione.
    Sotto l'altezza minima il menu torna a scorrere. */
 @media all{
   body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(40px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px);min-height:clamp(40px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px)}
@@ -402,31 +403,57 @@ body.mnOn.mnB #burgerMenu > .logoutBtn > svg{width:22px;height:22px;padding:0;ma
 .gpStage.wd .gpRing{border-radius:10px}
 .gpStage.wd .gpCopy{align-self:center}
 
-/* Invita un amico: voce nel menu (solo se il referral e' attivo) e relativa schermata; con la voce in piu' le righe si dividono in 10 */
+/* Invita un'attivita': voce nel menu (solo se il referral e' attivo) e pagina intera; con la voce in piu' le righe si dividono in 10 */
 body.mnRef{--mnN:10}
 #burgerMenu #menuTabReferral[hidden]{display:none!important}
-#burgerMenu .mnTag{flex:none;font-size:.72rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);white-space:nowrap}
-body.mnOn.mnB #burgerMenu > button[data-sub] > .mnTag{grid-column:3;grid-row:1;align-self:center}
-.mnRfStats{margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.mnRfStat{min-width:0;padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
-.mnRfStat small{display:block;font-size:.7rem;font-weight:700;color:var(--muted)}
-.mnRfStat b{display:block;margin-top:3px;font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums}
-.mnRfStat.hi b{color:var(--accent-ink)}
-.mnRfCd{flex:1;min-width:0}
-.mnRfCd small{display:block;font-size:.68rem;font-weight:700;color:var(--muted)}
-.mnRfCd b{display:block;margin-top:1px;font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mnRfGo{flex:none;margin-top:14px;width:100%;min-height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent,#fff);font-size:.95rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer}
-.mnRfGo svg{width:16px;height:16px}
-.mnRfMore{flex:none;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
-.mnRfMore[hidden]{display:none}
-.mnRfMore summary{padding:13px 14px;font-size:.88rem;font-weight:700;cursor:pointer;list-style:none}
-.mnRfMore summary::-webkit-details-marker{display:none}
-.mnRfRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
+.mnLayer#mnRefPage{z-index:30;inset:auto 0 0 0;top:0}
+#mnRefPage .mnGuideIn{max-width:640px;padding-top:calc(env(safe-area-inset-top,0px) + 22px)}
+body:has(#mnRefPage:not([hidden])) #fabNew{display:none!important}
+.mnRfPg{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+.mnRfCol{display:flex;flex-direction:column;gap:28px;min-width:0}
+@media (min-width:900px){
+  #mnRefPage .mnGuideIn{max-width:1080px;padding-left:32px;padding-right:32px;padding-top:calc(env(safe-area-inset-top,0px) + 30px);padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+  .mnRfPg{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px 56px}
+}
+.mnRfHead{display:flex;flex-direction:column}
+.mnRfLead{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;line-height:1.3;text-wrap:balance}
+.mnRfLogo{height:.95em;width:auto;vertical-align:-.17em;margin:0 .06em 0 .04em}
+.mnRfLl{display:none}
+:root[data-theme="light"] .mnRfLd,body[data-theme="light"] .mnRfLd{display:none}
+:root[data-theme="light"] .mnRfLl,body[data-theme="light"] .mnRfLl{display:inline}
+.mnRfSub{margin:12px 0 0;font-size:.96rem;line-height:1.6;color:var(--muted);max-width:52ch}
+.mnRfWm{font-size:1.12em;vertical-align:baseline}
+.mnRfSec{display:flex;flex-direction:column;gap:14px;min-width:0}
+.mnRfKick{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--accent);font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+.mnRfKick span{font-size:.74rem;font-weight:700;letter-spacing:0;text-transform:none;color:var(--muted)}
+.mnRfCds{display:flex;flex-direction:column;margin-top:-14px}
+.mnRfCd{display:flex;align-items:center;gap:12px;min-width:0;padding:14px 2px;border-bottom:1px solid var(--line)}
+.mnRfV{flex:1;min-width:0}
+.mnRfV small{display:block;font-size:.72rem;font-weight:700;color:var(--muted)}
+.mnRfV b{display:block;margin-top:2px;font-size:1.02rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mnRfBtn{flex:none;min-height:42px;padding:0 16px;border-radius:12px;border:1px solid var(--line2);background:transparent;color:var(--ink);font:inherit;font-size:.86rem;font-weight:800;cursor:pointer}
+.mnRfBtn:hover{border-color:var(--accent)}
+.mnRfGo{flex:none;width:100%;min-height:50px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent,#fff);font:inherit;font-size:.97rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer}
+.mnRfGo svg{width:17px;height:17px}
+.mnRfStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:-4px}
+.mnRfSt{padding:6px 12px 6px 0;min-width:0}
+.mnRfSt + .mnRfSt{padding-left:16px;border-left:1px solid var(--line)}
+.mnRfSt small{display:block;font-size:.72rem;font-weight:700;color:var(--muted)}
+.mnRfSt b{display:block;margin-top:4px;font-size:1.9rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.mnRfSt.hi b{color:var(--accent-ink)}
+.mnRfSteps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;margin-top:-14px}
+.mnRfSteps li{display:flex;gap:14px;align-items:flex-start;min-width:0;padding:15px 2px;border-bottom:1px solid var(--line)}
+.mnRfSteps .n{flex:none;width:28px;height:28px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:.8rem;font-weight:800}
+.mnRfSteps b{display:block;font-size:.97rem;font-weight:800;line-height:1.35}
+.mnRfSteps .d{display:block;margin-top:3px;font-size:.84rem;line-height:1.5;color:var(--muted)}
+.mnRfWho{display:flex;flex-direction:column;margin-top:-14px}
+.mnRfRow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:14px 2px;border-bottom:1px solid var(--line)}
 .mnRfRow > span:first-child{min-width:0}
-.mnRfRow b{display:block;font-size:.88rem}
-.mnRfRow small{display:block;margin-top:2px;font-size:.74rem;color:var(--muted)}
-.mnRfChip{flex:none;font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:999px;border:1px solid var(--line2);color:var(--muted)}
+.mnRfRow b{display:block;font-size:.95rem;font-weight:800}
+.mnRfRow small{display:block;margin-top:2px;font-size:.78rem;color:var(--muted)}
+.mnRfChip{flex:none;font-size:.72rem;font-weight:800;padding:4px 11px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
 .mnRfChip.paid{color:var(--accent-ink);border-color:var(--accent)}
+.mnRfEmpty{margin:14px 0 0;font-size:.9rem;line-height:1.5;color:var(--muted)}
 /* schermi molto bassi (sotto i 600px): con la voce in piu' le righe possono scendere a 30px per restare senza scroll */
 @media (max-height:599px){
   body.mnOn.mnB.mnRef #burgerMenu > button[data-sub],body.mnOn.mnB.mnRef #burgerMenu > .logoutBtn{min-height:clamp(30px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px);min-height:clamp(30px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px)}

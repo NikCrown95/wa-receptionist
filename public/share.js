@@ -136,7 +136,7 @@
   /* ---------- menu ---------- */
   function buildMenu() {
     menu = $("burgerMenu");
-    if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabGuide") closeGuide(); });
+    if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabGuide") closeGuide(); if (bt && bt.id !== "menuTabReferral") closeRef(); });
     var cal = $("menuTabCal"), other = $("menuTabOther"), out = $("logoutBtn");
     if (!menu || !cal || !other || menu.getAttribute("data-mn")) return false;
     menu.setAttribute("data-mn", "1");
@@ -177,8 +177,8 @@
     var sep = mk("div", "mnSep");
     if (out) { menu.insertBefore(g, out); menu.insertBefore(sep, out); }
     else { menu.appendChild(g); }
-    /* Invita un amico: voce semplice nel gruppo Account (tra Impostazioni e Guida); compare solo se il referral e' attivo per questa attivita' */
-    var rf = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg><span>Invita un amico</span><span class="mnTag">1 mese in regalo</span>');
+    /* Invita un'attivita': voce semplice nel gruppo Account (tra Impostazioni e Guida); compare solo se il referral e' attivo per questa attivita' */
+    var rf = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg><span>Invita un\u2019attività</span>');
     rf.type = "button"; rf.id = "menuTabReferral"; rf.setAttribute("role", "menuitem"); rf.setAttribute("aria-current", "false"); rf.hidden = true;
     rf.querySelector("span:first-of-type").style.flex = "1";
     rf.addEventListener("click", function () { closeMenu(); openRef(); });
@@ -187,7 +187,7 @@
     if (oi) oi.innerHTML = '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>';
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
-      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabReferral", "Un mese in regalo per ogni attivita"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
+      ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabReferral", "Fai conoscere Prenolia"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
     [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
@@ -196,8 +196,8 @@
     refSync();
     return true;
   }
-  /* ---------- Invita un amico: voce nel menu e schermata con codice, link e numeri ---------- */
-  var RK = "lia:ref:v1:" + token, refInfo = null, refSheet = null;
+  /* ---------- Invita un'attivita': voce nel menu e pagina intera con codice, link e numeri ---------- */
+  var RK = "lia:ref:v1:" + token, refInfo = null, refPage = null, refPrev = [], refPrevLbl = "", RLBL = "Invita un\u2019attività";
   function refShow(on) {
     var b = $("menuTabReferral"); if (b) b.hidden = !on;
     document.body.classList.toggle("mnRef", !!on);
@@ -207,26 +207,35 @@
     try { var c = JSON.parse(ls("g", RK) || "null"); if (c && c.available && c.live && c.link) { refInfo = c; refShow(true); } } catch (e) {}
     refFetch().then(function (d) {
       if (d && d.available && d.link) { refInfo = d; refShow(true); ls("s", RK, JSON.stringify(Object.assign({ live: true }, d))); }
-      else { refInfo = null; refShow(false); }
+      else { refInfo = null; refShow(false); if (refPage && !refPage.hidden) closeRef(); }
     }).catch(function () {});
   }
   function refDate(x) { try { return new Date(x).toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) { return ""; } }
+  /* il badge del piano Smart come nel resto della dashboard: la scritta con la "a" del robot */
+  var RWM = '<span class="lWm mnRfWm" role="img" aria-label="Smart">Sm<img src="/lia-a.png" alt="">rt</span>';
   function buildRef() {
-    refSheet = mk("div", "mnLayer");
-    refSheet.id = "mnRefSheet"; refSheet.hidden = true;
-    refSheet.setAttribute("role", "dialog"); refSheet.setAttribute("aria-modal", "true"); refSheet.setAttribute("aria-labelledby", "mnRfT");
-    refSheet.innerHTML =
-      '<button type="button" class="mnScrim" data-r="close" aria-label="Chiudi"></button>' +
-      '<div class="mnSheet mnRf"><div class="mnGrab"></div>' +
-      '<div class="mnSH"><div><h2 id="mnRfT">Invita un amico</h2><p class="mnSub">Ogni attività che si abbona grazie a te, dopo la prova gratuita, ti regala un mese di Smart. Conta una volta sola per attività.</p></div><button type="button" class="mnClose" data-r="close" aria-label="Chiudi">' + I.x + "</button></div>" +
-      '<div class="mnRfStats" id="mnRfStats"></div>' +
-      '<div class="mnLinkRow"><div class="mnRfCd"><small>Il tuo codice</small><b id="mnRfCode"></b></div><button type="button" class="mnCopy" data-r="code">' + I.copy + "<span>Copia</span></button></div>" +
-      '<div class="mnLinkRow"><div class="mnRfCd"><small>Il tuo link</small><b id="mnRfUrl"></b></div><button type="button" class="mnCopy" data-r="link">' + I.copy + "<span>Copia</span></button></div>" +
-      '<button type="button" class="mnRfGo" data-r="share">' + I.share + "<span>Condividi</span></button>" +
-      '<details class="mnRfMore" id="mnRfMore" hidden><summary id="mnRfSum"></summary><div id="mnRfList"></div></details>' +
-      "</div>";
-    document.body.appendChild(refSheet);
-    refSheet.addEventListener("click", function (ev) {
+    refPage = mk("div", "mnLayer");
+    refPage.id = "mnRefPage"; refPage.hidden = true;
+    refPage.setAttribute("role", "dialog"); refPage.setAttribute("aria-modal", "true"); refPage.setAttribute("aria-labelledby", "mnRfT");
+    refPage.innerHTML =
+      '<div class="mnGuide"><div class="mnGuideIn"><button type="button" class="mnBack mnSr" id="mnRefBack" data-r="close" aria-label="Indietro">' + I.back + "</button>" +
+      '<div class="mnRfPg"><div class="mnRfCol">' +
+      '<div class="mnRfHead"><h2 class="mnRfLead" id="mnRfT">Conosci un\u2019attività che può usare <img class="mnRfLogo mnRfLd" src="/brand/prenolia-dark.png" alt="Prenolia"><img class="mnRfLogo mnRfLl" src="/brand/prenolia-light.png" alt="" aria-hidden="true">?</h2>' +
+      '<p class="mnRfSub">Se si abbona grazie a te, dopo la prova gratuita, ti regala un mese di ' + RWM + ". Conta una volta sola per attività.</p></div>" +
+      '<section class="mnRfSec"><div class="mnRfKick">Il tuo invito</div><div class="mnRfCds">' +
+      '<div class="mnRfCd"><div class="mnRfV"><small>Il tuo codice</small><b id="mnRfCode"></b></div><button type="button" class="mnRfBtn" data-r="code">Copia</button></div>' +
+      '<div class="mnRfCd"><div class="mnRfV"><small>Il tuo link</small><b id="mnRfUrl"></b></div><button type="button" class="mnRfBtn" data-r="link">Copia</button></div></div>' +
+      '<button type="button" class="mnRfGo" data-r="share">' + I.share + "<span>Condividi</span></button></section>" +
+      '<section class="mnRfSec"><div class="mnRfKick">I tuoi numeri</div><div class="mnRfStats" id="mnRfStats"></div></section>' +
+      '</div><div class="mnRfCol">' +
+      '<section class="mnRfSec"><div class="mnRfKick">Come funziona</div><ol class="mnRfSteps">' +
+      '<li><span class="n">1</span><span><b>Condividi il tuo link o il tuo codice</b><span class="d">Lo manda chi vuoi tu: una collega, un\u2019amica con un negozio, un conoscente.</span></span></li>' +
+      '<li><span class="n">2</span><span><b>L\u2019attività prova Prenolia gratis</b><span class="d">Si iscrive dal tuo link, oppure scrive il tuo codice quando crea l\u2019account.</span></span></li>' +
+      '<li><span class="n">3</span><span><b>Se si abbona, ricevi un mese di ' + RWM + '</b><span class="d">Dopo la prova gratuita. Conta una volta sola per attività.</span></span></li></ol></section>' +
+      '<section class="mnRfSec"><div class="mnRfKick">Chi hai invitato <span id="mnRfCount"></span></div><div class="mnRfWho" id="mnRfList"></div></section>' +
+      "</div></div></div></div>";
+    document.body.appendChild(refPage);
+    refPage.addEventListener("click", function (ev) {
       var b = ev.target.closest("[data-r]"); if (!b || !refInfo) return;
       var a = b.getAttribute("data-r");
       if (a === "close") closeRef();
@@ -240,33 +249,58 @@
     });
   }
   function paintRef() {
-    var d = refInfo; if (!d || !refSheet) return;
-    var months = Number(d.credit_months) || 0, st = $("mnRfStats");
-    st.innerHTML = [["In regalo", months, " hi"], ["Invitate", Number(d.invited) || 0, ""], ["Hanno pagato", months, ""]].map(function (c) {
-      return '<div class="mnRfStat' + c[2] + '"><small>' + c[0] + "</small><b>" + c[1] + "</b></div>";
+    var d = refInfo; if (!d || !refPage) return;
+    var months = Number(d.credit_months) || 0;
+    $("mnRfStats").innerHTML = [["Attività invitate", Number(d.invited) || 0, ""], ["Hanno pagato", months, ""], ["Mesi in regalo", months, " hi"]].map(function (c) {
+      return '<div class="mnRfSt' + c[2] + '"><small>' + c[0] + "</small><b>" + c[1] + "</b></div>";
     }).join("");
     $("mnRfCode").textContent = d.code || "";
     $("mnRfUrl").textContent = String(d.link || "").replace(/^https?:\/\//, "");
-    var list = d.list || [], box = $("mnRfList"), more = $("mnRfMore");
-    more.hidden = !list.length;
-    $("mnRfSum").textContent = "Vedi chi hai invitato (" + list.length + ")";
-    box.innerHTML = list.map(function (x) {
+    var list = d.list || [];
+    $("mnRfCount").textContent = list.length ? list.length + (list.length === 1 ? " attività" : " attività") : "";
+    $("mnRfList").innerHTML = list.length ? list.map(function (x) {
       var paid = x.status === "paid";
       return '<div class="mnRfRow"><span><b>' + esc2(x.name || "Attività") + "</b><small>" + (paid ? "Ha pagato il primo mese" : "In prova gratuita · dal " + esc2(refDate(x.created_at))) + '</small></span><span class="mnRfChip' + (paid ? " paid" : "") + '">' + (paid ? "Hai ricevuto 1 mese" : "In prova") + "</span></div>";
-    }).join("");
+    }).join("") : '<p class="mnRfEmpty">Quando un\u2019attività si iscrive con il tuo link o con il tuo codice la vedrai qui.</p>';
+  }
+  function refTop() {
+    if (!refPage) return;
+    var h = document.querySelector(".mainTop"), t = 0;
+    try { window.scrollTo(0, 0); } catch (e) {}
+    if (h) { var r = h.getBoundingClientRect(); t = Math.round(r.bottom); if (t <= 0) t = Math.round(h.offsetHeight || 0); t = Math.max(0, t); }
+    refPage.style.top = t + "px";
+  }
+  window.addEventListener("resize", function () { if (refPage && !refPage.hidden) refTop(); });
+  /* pagina intera: l'intestazione della dashboard resta visibile e nel menu resta evidenziata solo la sua voce */
+  function markRef(on) {
+    var g = $("menuTabReferral"), menu = $("burgerMenu");
+    document.body.classList.toggle("mnGOn", !!on);
+    var sl = $("sectionLabel");
+    if (sl) { if (on) { if (sl.textContent !== RLBL) refPrevLbl = sl.textContent; sl.textContent = RLBL; } else if (sl.textContent === RLBL && refPrevLbl) sl.textContent = refPrevLbl; }
+    if (on) {
+      refPrev = [];
+      if (menu) menu.querySelectorAll('[aria-current="true"]').forEach(function (x) { if (x !== g) { refPrev.push(x); x.setAttribute("aria-current", "false"); } });
+      if (g) g.setAttribute("aria-current", "true");
+    } else {
+      if (g) g.setAttribute("aria-current", "false");
+      refPrev.forEach(function (x) { if (!menu || !menu.querySelector('[aria-current="true"]')) x.setAttribute("aria-current", "true"); });
+      refPrev = [];
+    }
   }
   function openRef() {
     if (!refInfo) return;
-    if (!refSheet) buildRef();
+    closeGuide();
+    if (!refPage) buildRef();
     paintRef();
     lastFocus = document.activeElement;
-    refSheet.hidden = false;
-    var c = refSheet.querySelector(".mnClose"); if (c) c.focus();
+    refPage.hidden = false; markRef(true); refTop();
+    var sc = refPage.querySelector(".mnGuide"); if (sc) sc.scrollTop = 0;
+    var bk = $("mnRefBack"); if (bk) bk.focus();
     refFetch().then(function (d) { if (d && d.available && d.link) { refInfo = d; paintRef(); } }).catch(function () {});
   }
   function closeRef() {
-    if (!refSheet || refSheet.hidden) return;
-    refSheet.hidden = true;
+    if (!refPage || refPage.hidden) return;
+    refPage.hidden = true; markRef(false);
     if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
   }
   function txt(id) { var e = $(id); return e && !e.hidden ? String(e.textContent || "").trim() : ""; }
@@ -934,7 +968,7 @@
   /* ---------- avvio ---------- */
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    if (guide && !guide.hidden) closeGuide(); else if (pst && !pst.hidden) closePoster(); else if (refSheet && !refSheet.hidden) closeRef(); else if (sheet && !sheet.hidden) closeSheet();
+    if (guide && !guide.hidden) closeGuide(); else if (pst && !pst.hidden) closePoster(); else if (refPage && !refPage.hidden) closeRef(); else if (sheet && !sheet.hidden) closeSheet();
   });
   function init() {
     try {
