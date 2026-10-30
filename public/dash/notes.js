@@ -95,6 +95,8 @@
     opts=opts||{};
     function draw(){
       box.innerHTML='';
+      /* finche' le note non sono arrivate si tiene libero lo spazio del blocco, cosi' il foglio non cambia altezza all'improvviso */
+      box.style.minHeight=(!S.loaded&&opts.label)?'64px':'';
       if(!S.loaded||!S.okVisits)return;
       var key='v:'+id,e=S.visits[id],cur=(e&&e.n)||'',editing=drafts[key]!=null;
       var wrap=opts.label?mk('div','nt-vc'):box;
@@ -144,5 +146,13 @@
     }
     reg(box,draw);draw();ensure();
   }
+  /* Le note si scaricano subito dopo l'apertura della pagina (a calendario gia' mostrato), cosi' sono pronte quando si tocca un appuntamento.
+     Se la prima lettura non riesce se ne fa una seconda dopo qualche secondo. */
+  function prefetch(){
+    if(MED||!tok())return;
+    var go=function(){ensure().then(function(){if(!S.okFixed&&!S.okVisits)setTimeout(function(){S.p=null;ensure();},4000);});};
+    if(window.requestIdleCallback)requestIdleCallback(go,{timeout:2500});else setTimeout(go,1200);
+  }
+  if(document.readyState==='complete')prefetch();else window.addEventListener('load',prefetch);
   window.liaNotes={ensure:ensure,mountFixed:mountFixed,mountVisit:mountVisit,mountLast:mountLast,state:S};
 })();
