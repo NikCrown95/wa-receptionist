@@ -118,6 +118,7 @@
     }
     if (!S.data) { root.appendChild(el('div', 'cp-load', 'Carico il calendario…')); return; }
     var D = S.data;
+    if (window.__liaCampiSport !== clubSport()) { window.__liaCampiSport = clubSport(); try { document.dispatchEvent(new Event('liaSport')); } catch (e) {} } // il menu e l'intestazione seguono lo sport del centro
     if (!D.courts.length) { root.appendChild(el('div', 'cp-load', 'Non hai ancora nessun campo attivo. Aggiungili dalle Impostazioni.')); return; }
 
     // testata

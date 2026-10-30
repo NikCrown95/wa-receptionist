@@ -222,6 +222,9 @@
     barbiere:{label:'Barbiere',h:28,icon:'<circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="M8.6 8.6L20 19M8.6 15.4L20 5"/>'},
     trainer:{label:'Personal trainer',h:150,icon:'<path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/>'},
     idraulico:{label:'Idraulico',h:212,icon:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5L3 17.6 6.4 21l6.3-6.3a4 4 0 0 0 5-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'},
+    calcio:{label:'Campi da calcio',h:190,icon:'<circle cx="12" cy="12" r="9"/><path d="M12 8.3l3.4 2.5-1.3 4h-4.2l-1.3-4z"/><path d="M12 3v5.3M15.4 10.8l5-1.6M14.1 14.8l3 4.1M9.9 14.8l-3 4.1M8.6 10.8l-5-1.6"/>'},
+    pallavolo:{label:'Campi da pallavolo',h:190,icon:'<circle cx="12" cy="12" r="9"/><path d="M12 12Q9 7.5 12 3"/><path d="M12 12Q17 12 19.8 16.5"/><path d="M12 12Q7 12 4.2 16.5"/>'},
+    campi:{label:'Centro sportivo',h:190,icon:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6M10 17h4"/>'},
     sport:{label:'Circolo sportivo',h:190,icon:'<ellipse cx="9.5" cy="9.5" rx="5.6" ry="6.8" transform="rotate(-45 9.5 9.5)"/><path d="M13.6 13.6L20.5 20.5"/>'},
     altro:{label:'Attività',h:200,icon:'<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M4 9a3 3 0 0 0 5.3 1.9A3 3 0 0 0 14.7 10.9 3 3 0 0 0 20 9"/><path d="M10 20v-5h4v5"/>'}
   };
@@ -233,6 +236,9 @@
     if(/barb/.test(s))return 'barbiere';
     if(/trainer|palestra|fitness|gym|crossfit|yoga|pilates/.test(s))return 'trainer';
     if(/idraul|termoidraul|plumb/.test(s))return 'idraulico';
+    var sp=String(b.sport||(b.booking_rules&&b.booking_rules.courts&&b.booking_rules.courts.sport)||(window.__liaCampi&&window.__liaCampiSport)||'').toLowerCase();
+    if(sp==='calcio'||sp==='pallavolo')return sp;
+    if(sp==='altro'&&/centro_sportivo/.test(t))return 'campi';
     if(/tennis|padel|circolo|sport|club/.test(s))return 'sport';
     return 'altro';
   }
