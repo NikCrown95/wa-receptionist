@@ -102,7 +102,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .leg.late{stroke:var(--warn);stroke-dasharray:2 8}
 .nd{position:absolute;width:0;height:0}
 .dot{position:absolute;left:-13px;top:-13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:.72rem;border:2px solid var(--line2);background:var(--bg);color:var(--muted)}
-.dot svg{width:13px;height:13px}
+.snake .dot svg{position:static;inset:auto;width:13px;height:13px}
 .nd.done .dot{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .nd.cur .dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 0 rgba(45,210,220,.55);animation:ring 2s infinite}
 .nd.late .dot{border-color:var(--warn);color:var(--warn);background:rgba(242,184,75,.12)}
@@ -122,6 +122,11 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .nd.late .lb b{color:var(--warn)}
 .nd.lost .lb b,.nd.void .lb em{color:var(--danger)}
 .nd.void .lb em{text-decoration:line-through}
+.nd .dot.sym{left:-17px;top:-17px;width:34px;height:34px;border:0;background:none;box-shadow:none;animation:none;overflow:visible}
+.nd .dot.sym svg{width:34px;height:34px;overflow:visible}
+.nd .dot.symsm{border:0;background:none;box-shadow:none;animation:none;overflow:visible}
+.nd .dot.symsm svg{width:26px;height:26px;overflow:visible}
+.nd.symn .lb{top:24px}
 .pill.late{background:rgba(242,184,75,.14);color:var(--warn)}
 .key{display:flex;gap:6px 16px;flex-wrap:wrap;margin:0 0 14px;font-size:.78rem;color:var(--muted)}
 .key span{display:inline-flex;align-items:center;gap:7px}
@@ -143,6 +148,15 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gTeal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6CEBF2"/><stop offset=".55" stop-color="#2DD2DC"/><stop offset="1" stop-color="#169AA6"/></linearGradient>
+    <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6E3A8"/><stop offset=".5" stop-color="#E6C77A"/><stop offset="1" stop-color="#B8964A"/></linearGradient>
+    <linearGradient id="gGraph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F3B4E"/><stop offset="1" stop-color="#151C27"/></linearGradient>
+    <linearGradient id="gShine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <radialGradient id="gGlow"><stop offset="0" stop-color="#2DD2DC" stop-opacity=".45"/><stop offset="1" stop-color="#2DD2DC" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
 <div class="wrap">
   <section id="vLoad" class="load">Un attimo…</section>
 
@@ -228,13 +242,26 @@ function fmt(iso, year){
 function daysLeft(iso){ return Math.max(0, Math.ceil((new Date(iso) - new Date(DATA.now)) / 86400000)); }
 function daysTxt(n){ return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; }
 
+/* simboli "medaglione": Registrata, Fine prova (anello che si riempie), tappe non attive */
+var SPARK = 'M12 3.2l1.7 6.9 6.9 1.9-6.9 1.9L12 20.8l-1.7-6.9L3.4 12l6.9-1.9z';
+var GLASS = 'M8 4.5h8M8 19.5h8M8.6 4.5c0 4 3.4 4.6 3.4 7.5s-3.4 3.5-3.4 7.5M15.4 4.5c0 4-3.4 4.6-3.4 7.5s3.4 3.5 3.4 7.5';
+function gl(path, s){ return '<g transform="translate('+(28-12*s)+' '+(28-12*s)+') scale('+s+')">'+path+'</g>'; }
+function coinSvg(kind, frac){
+  var v = '<svg viewBox="0 0 56 56" aria-hidden="true">';
+  if(kind==='reg') v += '<circle cx="28" cy="28" r="26" fill="none" stroke="url(#gGold)" stroke-width="1.4"/><circle cx="28" cy="28" r="22" fill="url(#gTeal)"/><ellipse cx="28" cy="18" rx="15" ry="8" fill="url(#gShine)"/><circle cx="28" cy="28" r="18.5" fill="none" stroke="#fff" stroke-opacity=".28"/>'+gl('<path d="'+SPARK+'" fill="#031016"/>',1);
+  else if(kind==='done') v += '<circle cx="28" cy="28" r="22" fill="url(#gTeal)"/><ellipse cx="28" cy="18" rx="15" ry="8" fill="url(#gShine)"/><circle cx="28" cy="28" r="18.5" fill="none" stroke="#fff" stroke-opacity=".28"/>'+gl('<path d="M5.5 12.5l4.5 4.5L18.5 7.5" fill="none" stroke="#031016" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',1.05);
+  else if(kind==='try'){ var c = 2*Math.PI*22; v += '<circle cx="28" cy="28" r="26" fill="url(#gGlow)"/><circle cx="28" cy="28" r="22" fill="#0B1118" stroke="#1C2532" stroke-width="3"/><circle cx="28" cy="28" r="22" fill="none" stroke="url(#gTeal)" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="'+(c*frac).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 28 28)"/><ellipse cx="28" cy="17" rx="13" ry="6" fill="url(#gShine)" opacity=".35"/>'+gl('<path d="'+GLASS+'" fill="none" stroke="#2DD2DC" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',.95); }
+  else v += '<circle cx="28" cy="28" r="22" fill="url(#gGraph)" stroke="#2A3648"/><ellipse cx="28" cy="18" rx="14" ry="7" fill="url(#gShine)" opacity=".12"/><circle cx="28" cy="28" r="17.5" fill="none" stroke="#fff" stroke-opacity=".07"/>'+gl('<path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#F08A8A" stroke-opacity=".85" stroke-width="1.8" stroke-linecap="round" fill="none"/>',1.05);
+  return v + '</svg>';
+}
 /* nodi: Registrata, Fine prova, Mese 1 ... Mese 12, Un anno dopo. Le righe della serpentina sono di 4 e cambiano direzione. */
 var MAP = {paid:'done', cur:'cur', late:'late', todo:'todo', lost:'lost'};
 function nodesOf(b){
   var n = [], now = new Date(DATA.now);
   n.push({t:'Registrata', d:fmt(b.reg), st:'done'});
   var tr = b.phase === 'trial', wait = b.phase === 'waiting';
-  n.push({t:'Fine prova', d: tr ? fmt(b.trial_end) + ' · ' + daysLeft(b.trial_end) + ' g' : fmt(b.trial_end), st: (tr || wait) ? 'cur' : 'done'});
+  var tot = Math.max(1, new Date(b.trial_end) - new Date(b.reg)), frac = Math.min(1, Math.max(.06, (now - new Date(b.reg)) / tot));
+  n.push({t:'Fine prova', frac:frac, d: tr ? fmt(b.trial_end) + ' · ' + daysLeft(b.trial_end) + ' g' : fmt(b.trial_end), st: (tr || wait) ? 'cur' : 'done'});
   b.months.forEach(function(m){
     var st = MAP[m.state] || 'todo';
     n.push({t:'Mese '+m.n, d: (m.start && (st==='done'||st==='cur'||st==='late')) ? fmt(m.start) : '', st:st, ms:m.n===1, rw: m.n===1 ? b.m1.state : null, eur: b.m1.eur});
@@ -258,9 +285,13 @@ function snake(b,nodes){
   var html = nodes.map(function(n,i){
     var p = pos(i), cls = 'nd '+n.st+(n.ms?' ms '+n.rw:'');
     var inner = n.ms ? (n.rw==='got' ? ICON.check : n.rw==='void' ? ICON.x : '€') : n.st==='lost' ? ICON.x : n.st==='late' ? '!' : n.st==='done' ? ICON.check : (n.t.indexOf('Mese ')===0 ? n.t.slice(5) : (i===1 ? ICON.clock : ''));
+    var sym = '', dcls = 'dot';
+    if(i===0){ inner = coinSvg('reg'); dcls = 'dot sym'; }
+    else if(i===1){ inner = coinSvg(n.st==='cur' && b.phase==='trial' ? 'try' : n.st==='cur' ? 'try' : 'done', n.st==='cur' && b.phase!=='trial' ? 1 : n.frac); dcls = 'dot sym'; }
+    else if(n.st==='lost' && !n.ms){ inner = coinSvg('off'); dcls = 'dot symsm'; }
     var amt = n.ms ? '<em>'+(n.rw==='void' ? '' : '+')+eur(n.eur)+'</em>' : '';
     var lab = n.ms && n.rw==='got' ? '<span>ricevuta</span>' : n.ms && n.rw==='due' ? '<span>da ricevere</span>' : '';
-    return '<li class="'+cls+'" style="left:'+(p[0]/3)+'%;top:'+(p[1]/3.88)+'%"><span class="dot">'+inner+'</span><div class="lb"><b>'+n.t+'</b>'+(n.d?'<span>'+esc(n.d)+'</span>':'')+amt+lab+'</div></li>';
+    return '<li class="'+cls+(i<2?' symn':'')+'" style="left:'+(p[0]/3)+'%;top:'+(p[1]/3.88)+'%"><span class="'+dcls+'">'+inner+'</span><div class="lb"><b>'+n.t+'</b>'+(n.d?'<span>'+esc(n.d)+'</span>':'')+amt+lab+'</div></li>';
   }).join('');
   return '<ol class="snake" aria-label="Percorso di '+esc(b.name)+'">'+svg+html+'</ol>';
 }
