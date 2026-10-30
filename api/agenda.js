@@ -1524,7 +1524,7 @@ module.exports = async (req, res) => {
         if (q.meta === "1") {
           const all = await ex.collect(biz, sb, tz, defs.map((d) => d.id), {});
           const n = {}; all.forEach((s) => { n[s.id] = s.rows.length; });
-          return res.status(200).json({ type: biz.business_type === "palestra" ? "gym" : "normal", name: biz.name || "", sections: defs.map((d) => ({ id: d.id, name: d.name, desc: d.desc, period: !!d.period, count: n[d.id] || 0 })) });
+          return res.status(200).json({ type: biz.business_type === "palestra" ? "gym" : require("../lib/verticals.js").areaOf(biz.business_type) === "campi" ? "campi" : "normal", name: biz.name || "", sections: defs.map((d) => ({ id: d.id, name: d.name, desc: d.desc, period: !!d.period, count: n[d.id] || 0 })) });
         }
         const fmt = String(q.fmt || "xlsx");
         if (!["xlsx", "pdf", "csv"].includes(fmt)) return res.status(400).json({ error: "Formato non valido" });

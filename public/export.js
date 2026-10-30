@@ -70,7 +70,7 @@
       });
       h += "</div>";
       if (S.per === "custom") h += '<div class="xpDates"><label>Dal<input type="date" id="xpFrom" value="' + esc(S.from) + '"></label><label>Al<input type="date" id="xpTo" value="' + esc(S.to) + '"></label></div>';
-      h += '<p class="xpNote">Vale per le date degli appuntamenti e delle prenotazioni. Clienti, iscritti, servizi e orari escono sempre per intero.</p></div>';
+      h += '<p class="xpNote">' + (meta.type === "campi" ? "Vale per le date delle prenotazioni e delle chiusure. Clienti, campi, orari e regole escono sempre per intero." : "Vale per le date degli appuntamenti e delle prenotazioni. Clienti, iscritti, servizi e orari escono sempre per intero.") + "</p></div>";
     }
 
     h += '<div class="xpBlock"><div class="xpHead"><span class="xpKick">' + (usesPeriod() ? "3" : "2") + " · Formato</span></div><div class=\"xpList\">";
