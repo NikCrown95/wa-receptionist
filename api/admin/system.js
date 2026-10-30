@@ -3,7 +3,8 @@
 //   GET  /api/admin/system?view=feed[&since=ISO][&business=UUID][&limit=N]  -> attivita' in diretta
 //   GET  /api/admin/system?view=problems                                       -> elenco per la campanella
 //   GET  /api/admin/system?view=system                                         -> credito AI, email Resend, scadenze
-//   GET  /api/admin/system?view=home                                           -> numeri della Panoramica
+//   GET  /api/admin/system?view=home                                           -> numeri della Panoramica (vecchia)
+//   GET  /api/admin/system?view=control                                        -> centro di controllo: sistemi, andamento, ore, abbonamenti, scadenze, rischio
 //   POST /api/admin/system {action: set_credit | set_resend | expiry_add | expiry_update | expiry_delete, ...}
 //
 // Stesso accesso delle altre API admin (login vero + elenco admin_users). Le modifiche solo al titolare.
@@ -255,6 +256,230 @@ async function homeView() {
   };
 }
 
+
+// ----------------------------- CENTRO DI CONTROLLO -----------------------------
+// Tutto quello che serve alla Panoramica in una sola chiamata. Lo storico (ultime 4 settimane) si ricalcola
+// al massimo ogni 10 minuti; quello che cambia di continuo (oggi, ultima ora, sistemi) si legge ogni volta.
+const memo = {};
+async function cached(key, ms, fn) {
+  const m = memo[key];
+  if (m && Date.now() - m.t < ms) return m.v;
+  const v = await fn();
+  memo[key] = { t: Date.now(), v };
+  return v;
+}
+const romeDayFmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' });
+const romeHourFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', hour12: false });
+const dayOf = (t) => romeDayFmt.format(new Date(t));
+const hourOf = (t) => parseInt(romeHourFmt.format(new Date(t)), 10) % 24;
+const addDays = (day, n) => new Date(Date.parse(day + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+// istante in cui comincia il giorno "YYYY-MM-DD" a Roma (gestisce ora legale e solare)
+function romeStart(day) {
+  const base = Date.parse(day + 'T00:00:00Z');
+  for (const off of [2, 1, 3, 0]) {
+    const t = base - off * 3600000;
+    if (dayOf(t) === day && dayOf(t - 1) !== day) return new Date(t);
+  }
+  return new Date(base - 2 * 3600000);
+}
+const itNum = (n) => String(n).replace('.', ',');
+const itDate = (d) => { const p = String(d).slice(0, 10).split('-').map(Number); return p[2] + '/' + p[1]; };
+function ago(t, now) {
+  const m = Math.floor((now.getTime() - new Date(t).getTime()) / 60000);
+  if (m < 1) return 'adesso';
+  if (m < 60) return m + ' min fa';
+  const h = Math.floor(m / 60);
+  if (h < 48) return h + (h === 1 ? ' ora fa' : ' ore fa');
+  const d = Math.floor(h / 24);
+  return d + ' giorni fa';
+}
+const isCancelledStatus = (st) => st === 'cancelled' || st === 'annullato';
+
+async function controlView() {
+  const now = new Date();
+  const today = dayOf(now);
+  const warnings = [];
+  const soft = async (label, p, fb) => { try { return await p; } catch (e) { warnings.push(label); console.error('system:control:' + label, e && e.message); return fb; } };
+  const todayStart = romeStart(today);
+  const histFrom = romeStart(addDays(today, -28));
+  const hourAgo = new Date(now.getTime() - 3600000).toISOString();
+
+  const [hist, todayApps, subs, access, bizRows, credit, resend, exp, chatsToday, lastChats, lastAi, aiDown, failed, stripeLast, supportNew, hAccounts, hChats, hCancels, dbMs, bmap] = await Promise.all([
+    soft('storico', cached('hist:' + today, 600000, () => sbAll(`appointments?select=created_at,business_id,status&created_at=gte.${q(histFrom.toISOString())}&created_at=lt.${q(todayStart.toISOString())}&order=id.asc`)), []),
+    soft('oggi', sbAll(`appointments?select=created_at,channel,status&created_at=gte.${q(todayStart.toISOString())}&order=id.asc`), []),
+    soft('abbonamenti', sbAll('subscriptions?select=id,business_id,status,started_at,trial_ends_at,current_period_end,cancelled_at,cancel_at_period_end,plans(price_eur),businesses(name)&order=id.asc'), []),
+    soft('accessi', sbAll('service_access_v?select=business_id,state,sub_status,allowed&order=business_id.asc'), []),
+    soft('account', sbAll('businesses?select=id,created_at&order=created_at.asc'), []),
+    soft('credito', creditData(now), null),
+    soft('email', resendData(now), null),
+    soft('scadenze', expiries(), []),
+    soft('chat oggi', countRows('chat_messages', `select=id&role=eq.user&created_at=gte.${q(todayStart.toISOString())}`), 0),
+    soft('whatsapp', sb('chat_messages?select=created_at,customer_phone&role=eq.user&order=created_at.desc&limit=200'), []),
+    soft('lia', sb('ai_usage_costed_v?select=at&order=at.desc&limit=1'), []),
+    soft('lia errori', sbAll(`admin_alerts_sent?select=kind,details,sent_at&kind=eq.ai_down&sent_at=gte.${q(new Date(now.getTime() - 12 * 3600000).toISOString())}&order=sent_at.desc`), []),
+    soft('pagamenti', countRows('stripe_events', `select=id&type=eq.invoice.payment_failed&received_at=gte.${q(new Date(now.getTime() - 7 * 86400000).toISOString())}`), 0),
+    soft('pagamenti ultimo', sb('stripe_events?select=received_at&order=received_at.desc&limit=1'), []),
+    soft('assistenza', sbAll('support_requests?select=id,created_at,business_name&kind=eq.support&status=eq.new&order=created_at.desc'), []),
+    soft('ora account', countRows('businesses', `select=id&created_at=gte.${q(hourAgo)}`), 0),
+    soft('ora chat', countRows('chat_messages', `select=id&role=eq.user&created_at=gte.${q(hourAgo)}`), 0),
+    soft('ora annullamenti', countRows('notification_events', `select=id&event_type=in.(cancelled,rental_cancelled)&created_at=gte.${q(hourAgo)}`), 0),
+    (async () => { const t0 = Date.now(); try { await countRows('businesses', 'select=id'); return Date.now() - t0; } catch (e) { warnings.push('database'); return null; } })(),
+    soft('attivita', bizMap(), {}),
+  ]);
+
+  // ---- prenotazioni: per giorno, per ora, tipico
+  const live = (r) => !isCancelledStatus(r.status);
+  const perDay = {};
+  const perDayHour = {};
+  (hist || []).filter(live).forEach((r) => {
+    const d = dayOf(r.created_at);
+    perDay[d] = (perDay[d] || 0) + 1;
+    (perDayHour[d] = perDayHour[d] || new Array(24).fill(0))[hourOf(r.created_at)]++;
+  });
+  const days14 = [];
+  for (let i = 14; i >= 1; i--) days14.push(addDays(today, -i));
+  const bookingsSeries = days14.map((d) => perDay[d] || 0);
+  const typical = new Array(24).fill(0);
+  [1, 2, 3, 4].forEach((k) => { const row = perDayHour[addDays(today, -7 * k)]; if (row) row.forEach((v, h) => { typical[h] += v / 4; }); });
+  const hours = new Array(24).fill(0);
+  const channels = {};
+  let lastHourBookings = 0;
+  (todayApps || []).filter(live).forEach((a) => {
+    hours[hourOf(a.created_at)]++;
+    const k = CHANNEL_LABEL[a.channel] || 'Altro';
+    channels[k] = (channels[k] || 0) + 1;
+    if (new Date(a.created_at).toISOString() >= hourAgo) lastHourBookings++;
+  });
+  const totalToday = hours.reduce((a, b) => a + b, 0);
+  const hNow = hourOf(now);
+  const typicalSoFar = typical.slice(0, hNow + 1).reduce((a, b) => a + b, 0);
+  const vsTypical = typicalSoFar >= 3 ? Math.round((totalToday / typicalSoFar - 1) * 100) : null;
+  const byChannel = Object.keys(channels).map((k) => ({ label: k, n: channels[k] })).sort((a, b) => b.n - a.n);
+
+  // ---- abbonamenti
+  const paying = (subs || []).filter((s) => s.status === 'active' && !s.cancelled_at);
+  const price = (s) => Number((s.plans && s.plans.price_eur) || 0);
+  const mrr = Math.round(paying.reduce((a, s) => a + price(s), 0) * 100) / 100;
+  const trialsNow = (subs || []).filter((s) => s.status === 'trial');
+  const trialsSoon = trialsNow.filter((s) => { if (!s.trial_ends_at) return false; const d = health.daysBetween(today, dayOf(s.trial_ends_at)); return d >= 0 && d <= 3; });
+  const days14i = []; for (let i = 13; i >= 0; i--) days14i.push(addDays(today, -i));
+  const endOf = (d) => romeStart(addDays(d, 1)).getTime() - 1;
+  const mrrSeries = days14i.map((d) => {
+    const t = endOf(d);
+    return Math.round((subs || []).filter((s) => s.started_at && new Date(s.started_at).getTime() <= t && (!s.trial_ends_at || new Date(s.trial_ends_at).getTime() <= t) && (!s.cancelled_at || new Date(s.cancelled_at).getTime() > t) && (s.status === 'active' || s.status === 'cancelled')).reduce((a, s) => a + price(s), 0) * 100) / 100;
+  });
+  mrrSeries[mrrSeries.length - 1] = mrr; // l'ultimo punto e' sempre il valore vero
+  const trialSeries = days14i.map((d) => {
+    const t = endOf(d);
+    return (subs || []).filter((s) => s.started_at && s.trial_ends_at && new Date(s.started_at).getTime() <= t && new Date(s.trial_ends_at).getTime() > t && (!s.cancelled_at || new Date(s.cancelled_at).getTime() > t)).length;
+  });
+  trialSeries[trialSeries.length - 1] = trialsNow.length;
+  const accountSeries = days14i.map((d) => { const t = endOf(d); return (bizRows || []).filter((b) => new Date(b.created_at).getTime() <= t).length; });
+  const acc = access || [];
+  const cnt = (f) => acc.filter(f).length;
+  const funnel = [
+    { key: 'paid', label: 'Abbonamento attivo', n: cnt((a) => a.state === 'active' && a.sub_status === 'active') },
+    { key: 'trial', label: 'In prova gratuita', n: cnt((a) => a.state === 'active' && a.sub_status === 'trial') },
+    { key: 'grace', label: 'Periodo di grazia', n: cnt((a) => a.state === 'grace') },
+    { key: 'susp', label: 'Sospese', n: cnt((a) => a.state === 'suspended') },
+    { key: 'canc', label: 'Disdette', n: cnt((a) => a.state === 'cancelled') },
+    { key: 'free', label: 'Senza abbonamento', n: cnt((a) => a.state === 'unmanaged') },
+  ];
+  const activeNow = cnt((a) => a.state === 'active');
+
+  // ---- scadenze dei prossimi 30 giorni
+  const B = bmap || {};
+  const agenda = [];
+  (subs || []).forEach((s) => {
+    const name = (s.businesses && s.businesses.name) || (B[s.business_id] && B[s.business_id].name) || 'Un’attività';
+    if (s.status === 'trial' && s.trial_ends_at) { const d = health.daysBetween(today, dayOf(s.trial_ends_at)); if (d >= 0 && d <= 30) agenda.push({ date: dayOf(s.trial_ends_at), days: d, kind: 'trial', title: name, detail: 'Fine della prova gratuita', id: s.business_id }); }
+    if (s.status === 'active' && !s.cancelled_at && s.current_period_end) { const d = health.daysBetween(today, dayOf(s.current_period_end)); if (d >= 0 && d <= 30) agenda.push({ date: dayOf(s.current_period_end), days: d, kind: 'renewal', title: name, detail: s.cancel_at_period_end ? 'Fine abbonamento (disdetto)' : 'Rinnovo dell’abbonamento', id: s.business_id }); }
+  });
+  (exp || []).forEach((e) => { const d = health.daysBetween(today, String(e.due_date).slice(0, 10)); if (d >= 0 && d <= 30) agenda.push({ date: String(e.due_date).slice(0, 10), days: d, kind: 'expiry', title: e.name, detail: e.note || 'Dal registro delle scadenze' }); });
+  agenda.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+  // ---- attivita' a rischio: usano meno Prenolia di prima
+  const byBiz = {};
+  (hist || []).filter(live).forEach((r) => { (byBiz[r.business_id] = byBiz[r.business_id] || []).push(new Date(r.created_at).getTime()); });
+  const subByBiz = {};
+  (subs || []).forEach((s) => { subByBiz[s.business_id] = s; });
+  const D = 86400000, nowMs = now.getTime();
+  const risk = [];
+  acc.filter((a) => a.allowed && a.state !== 'unmanaged').forEach((a) => {
+    const times = byBiz[a.business_id] || [];
+    const last7 = times.filter((t) => nowMs - t < 7 * D).length;
+    const prev = times.filter((t) => nowMs - t >= 7 * D && nowMs - t < 28 * D).length;
+    const lastT = times.length ? Math.max.apply(null, times) : null;
+    const sub = subByBiz[a.business_id];
+    const name = (B[a.business_id] && B[a.business_id].name) || 'Un’attività';
+    const daysSince = lastT ? Math.floor((nowMs - lastT) / D) : null;
+    if (a.sub_status === 'trial' && sub && sub.started_at && nowMs - new Date(sub.started_at).getTime() > 5 * D && last7 === 0) {
+      const left = sub.trial_ends_at ? health.daysBetween(today, dayOf(sub.trial_ends_at)) : null;
+      risk.push({ id: a.business_id, name, severity: 'crit', score: 3, reason: (left != null && left >= 0 ? (left === 0 ? 'La prova finisce oggi. ' : 'La prova finisce tra ' + left + (left === 1 ? ' giorno. ' : ' giorni. ')) : '') + (daysSince == null ? 'Nessuna prenotazione dall’inizio della prova.' : 'Nessuna prenotazione da ' + daysSince + (daysSince === 1 ? ' giorno.' : ' giorni.')) });
+    } else if (prev >= 6 && last7 === 0) {
+      risk.push({ id: a.business_id, name, severity: 'warn', score: 2, reason: 'Nessuna prenotazione da ' + (daysSince == null ? 'oltre 4 settimane' : daysSince + (daysSince === 1 ? ' giorno' : ' giorni')) + ', prima ne riceveva circa ' + Math.round(prev / 3) + ' a settimana.' });
+    } else if (prev >= 12 && last7 * 3 <= prev * 0.4) {
+      const drop = Math.round((1 - (last7 * 3) / prev) * 100);
+      risk.push({ id: a.business_id, name, severity: 'warn', score: 1, reason: 'Prenotazioni in calo del ' + drop + '% rispetto alle tre settimane precedenti.' });
+    }
+  });
+  risk.sort((a, b) => b.score - a.score || (a.name < b.name ? -1 : 1));
+
+  // ---- celle dei sistemi
+  const cells = [];
+  if (!credit) cells.push({ key: 'credit', label: 'Credito AI', value: 'non leggibile', sub: 'Esegui lo script SQL della Super Dashboard e ricarica.', state: 'warn', gauge: null, href: '/admin/sistema.html' });
+  else if (!credit.configured) cells.push({ key: 'credit', label: 'Credito AI', value: 'da impostare', sub: 'Scrivi il saldo di Anthropic: ti avviso prima che finisca.', state: 'warn', gauge: null, href: '/admin/sistema.html' });
+  else {
+    const st = credit.remaining <= 0 || (credit.days_left != null && credit.days_left <= 3) ? 'crit' : (credit.days_left != null && credit.days_left <= 7 ? 'warn' : 'ok');
+    cells.push({ key: 'credit', label: 'Credito AI', state: st, href: '/admin/sistema.html',
+      value: credit.remaining <= 0 ? 'esaurito' : (credit.days_left == null ? itNum(credit.remaining) + ' €' : (credit.days_left === 0 ? 'finisce oggi' : credit.days_left + (credit.days_left === 1 ? ' giorno' : ' giorni'))),
+      sub: 'Restano ' + itNum(credit.remaining) + ' € · consumo ' + itNum(credit.avg_daily) + ' € al giorno', gauge: credit.days_left == null ? 100 : Math.min(100, Math.round(credit.days_left / 30 * 100)) });
+  }
+  const downKinds = {};
+  (aiDown || []).forEach((d) => { const stt = d.details && d.details.status; downKinds[stt === 401 || stt === 403 ? 'key' : stt === 404 ? 'model' : 'credit'] = 1; });
+  const downTxt = downKinds.credit ? 'Credito esaurito' : downKinds.key ? 'Chiave non valida' : downKinds.model ? 'Modello non trovato' : '';
+  const lastAiAt = (lastAi && lastAi[0] && lastAi[0].at) || null;
+  cells.push({ key: 'lia', label: 'Lia', state: downTxt ? 'crit' : 'ok', href: '/admin/lia.html', value: downTxt ? 'Non risponde' : 'Operativa',
+    sub: downTxt ? downTxt + ' nelle ultime 12 ore' : (lastAiAt ? 'Ultima risposta ' + ago(lastAiAt, now) : 'Nessuna risposta registrata'), gauge: downTxt ? 0 : 100 });
+  cells.push(!resend
+    ? { key: 'mail', label: 'Email Resend', value: 'non leggibile', sub: 'Esegui lo script SQL della Super Dashboard e ricarica.', state: 'warn', gauge: null, href: '/admin/sistema.html' }
+    : { key: 'mail', label: 'Email Resend', value: resend.pct + '%', state: resend.pct >= 100 ? 'crit' : resend.pct >= 80 ? 'warn' : 'ok', href: '/admin/sistema.html',
+        sub: resend.month_sent + ' su ' + resend.limit_month + ' questo mese', gauge: Math.min(100, resend.pct) });
+  const lastPay = stripeLast && stripeLast[0] && stripeLast[0].received_at;
+  cells.push({ key: 'pay', label: 'Pagamenti', state: failed > 0 ? 'warn' : 'ok', href: '/admin/soldi.html', value: failed > 0 ? failed + (failed === 1 ? ' fallito' : ' falliti') : 'Regolari',
+    sub: (failed > 0 ? 'Negli ultimi 7 giorni' : '0 falliti negli ultimi 7 giorni') + (lastPay ? ' · ultimo evento ' + ago(lastPay, now) : ''), gauge: null });
+  const sup = supportNew || [];
+  cells.push({ key: 'support', label: 'Assistenza', state: sup.length ? 'warn' : 'ok', href: '/admin/richieste.html', value: sup.length ? sup.length + (sup.length === 1 ? ' nuova' : ' nuove') : 'Nessuna',
+    sub: sup.length ? (sup[0].business_name || 'Un’attività') + ' · ' + ago(sup[0].created_at, now) : 'Nessuna richiesta da leggere', gauge: null });
+  const ex0 = (exp || [])[0];
+  if (ex0) {
+    const d = health.daysBetween(today, String(ex0.due_date).slice(0, 10));
+    cells.push({ key: 'expiry', label: 'Scadenze', state: d <= 7 ? 'crit' : d <= 30 ? 'warn' : 'ok', href: '/admin/sistema.html', value: d < 0 ? 'scaduta' : (d === 0 ? 'oggi' : d + (d === 1 ? ' giorno' : ' giorni')),
+      sub: ex0.name + ' · ' + itDate(ex0.due_date), gauge: d < 0 ? 100 : Math.max(4, Math.min(100, Math.round((1 - d / 90) * 100))) });
+  } else cells.push({ key: 'expiry', label: 'Scadenze', state: 'ok', href: '/admin/sistema.html', value: 'Nessuna', sub: 'Aggiungi domini, chiavi e abbonamenti da tenere d’occhio.', gauge: null });
+  cells.push(dbMs == null
+    ? { key: 'db', label: 'Database', state: 'crit', value: 'non risponde', sub: 'La lettura di prova è fallita', gauge: 100, href: '/admin/sistema.html' }
+    : { key: 'db', label: 'Database', state: dbMs < 600 ? 'ok' : dbMs < 2000 ? 'warn' : 'crit', value: dbMs + ' ms', sub: 'Tempo di risposta in questo momento', gauge: Math.min(100, Math.round(dbMs / 10)), href: '/admin/sistema.html' });
+  const waMsg = (lastChats || []).filter((m) => !/^(web|tg):/.test(String(m.customer_phone || '')))[0];
+  const waAge = waMsg ? (nowMs - new Date(waMsg.created_at).getTime()) / D : null;
+  cells.push({ key: 'wa', label: 'WhatsApp', state: waMsg == null ? 'warn' : waAge > 3 ? 'warn' : 'ok', href: '/admin/lia.html', value: waMsg == null ? 'Nessun messaggio' : (waAge > 3 ? 'Silenzioso' : 'Attivo'),
+    sub: waMsg ? 'Ultimo messaggio ' + ago(waMsg.created_at, now) : 'Nessun messaggio WhatsApp recente', gauge: null });
+
+  const delta = (arr) => arr[arr.length - 1] - arr[0];
+  return {
+    now: now.toISOString(), warnings, cells,
+    kpis: {
+      mrr, mrr_series: mrrSeries, mrr_delta: Math.round(delta(mrrSeries) * 100) / 100,
+      active: activeNow, accounts_total: (bizRows || []).length, accounts_series: accountSeries, accounts_delta: delta(accountSeries),
+      bookings_today: totalToday, bookings_vs_typical: vsTypical, bookings_series: bookingsSeries,
+      trials: trialsNow.length, trials_soon: trialsSoon.length, trials_series: trialSeries,
+    },
+    today: { hours, typical: typical.map((v) => Math.round(v * 10) / 10), hour_now: hNow, channels: byChannel, total: totalToday },
+    last_hour: { accounts: hAccounts, bookings: lastHourBookings, chats: hChats, cancels: hCancels },
+    funnel, total_businesses: acc.length, agenda: agenda.slice(0, 12), at_risk: risk.slice(0, 6),
+  };
+}
+
 // ----------------------------- MODIFICHE -----------------------------
 const eurNum = (v) => { const n = Number(String(v).replace(',', '.')); return Number.isFinite(n) ? n : NaN; };
 const bad = (m) => { const e = new Error(m); e.validation = true; return e; };
@@ -348,6 +573,7 @@ module.exports = async function handler(req, res) {
         return;
       }
       if (view === 'home') { res.status(200).json(await homeView()); return; }
+      if (view === 'control') { res.status(200).json(await controlView()); return; }
       res.status(400).json({ error: 'bad_view' });
       return;
     }

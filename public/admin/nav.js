@@ -27,7 +27,7 @@
     a.textContent = p.label;
     var on = is(p.href) || (p.also || []).some(is);
     if (on) { a.className = 'on'; a.setAttribute('aria-current', 'page'); }
-    if (p.badge) a.id = 'navRichieste';
+    if (p.badge) { a.id = 'navRichieste'; a.setAttribute('data-badge', 'richieste'); }
     menu.appendChild(a);
   });
   var pushBtn = document.createElement('button');
@@ -40,11 +40,12 @@
 
   // numerino rosso con le richieste nuove (le pagine possono aggiornarlo con window.liaNavBadge)
   window.liaNavBadge = function (n) {
-    var a = document.getElementById('navRichieste'); if (!a) return;
-    var b = a.querySelector('.nav-badge');
-    if (!n) { if (b) b.remove(); return; }
-    if (!b) { b = document.createElement('span'); b.className = 'nav-badge'; b.style.cssText = 'margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#FF8A8A;color:#2a0a0a;font-size:.76rem;font-weight:800;line-height:22px;text-align:center'; a.appendChild(b); }
-    b.textContent = n > 99 ? '99+' : String(n);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-badge="richieste"]'), function (a) {
+      var b = a.querySelector('.nav-badge');
+      if (!n) { if (b) b.remove(); return; }
+      if (!b) { b = document.createElement('span'); b.className = 'nav-badge'; b.style.cssText = 'margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#FF8A8A;color:#2a0a0a;font-size:.76rem;font-weight:800;line-height:22px;text-align:center'; a.appendChild(b); }
+      b.textContent = n > 99 ? '99+' : String(n);
+    });
   };
   var onLogin = /\/admin\/login/.test(location.pathname);
   if (window.liaApi && !onLogin) {
@@ -197,6 +198,123 @@
       menuOpen(false);
     }, { passive: true });
   }
+
+  // ---------- menu laterale e ricerca (desktop) ----------
+  // Da 900px in su il menu sta a sinistra, sempre visibile. Sotto i 900px (telefono, iPad in verticale) resta il burger.
+  (function () {
+    if (onLogin) return;
+    var IC = {
+      'Panoramica': '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+      'Clienti': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.4c2 .7 3.5 2.6 3.5 5.6"/>',
+      'In diretta': '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+      'Richieste': '<path d="M4 13.5 6.2 5.8A2 2 0 0 1 8.1 4.5h7.8a2 2 0 0 1 1.9 1.3L20 13.5"/><path d="M4 13.5V18a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 18v-4.5h-4.2l-1 2h-5.6l-1-2Z"/>',
+      'Andamento': '<path d="M4 19V5M4 19h16"/><path d="m7.5 14 3.5-4 3 2.5 4.5-6"/>',
+      'Uso di Lia': '<path d="M21 12a8 8 0 0 1-11.7 7.1L4 20.5l1.5-4.6A8 8 0 1 1 21 12Z"/>',
+      'Ricavi': '<path d="M17.5 7.5A6 6 0 1 0 17.5 16.5"/><path d="M4.5 10.5h8M4.5 13.5h8"/>',
+      'Costi': '<path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z"/><path d="M9 8.5h6M9 12h6"/>',
+      'Referral': '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="m8.2 10.8 7.6-3.6M8.2 13.2l7.6 3.6"/>',
+      'Sistema': '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'
+    };
+    function svg(l) { return '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[l] || '') + '</svg>'; }
+    var st = document.createElement('style');
+    st.textContent =
+      '.lia-side{display:none}' +
+      '@media (min-width:900px){' +
+        'html.lia-hassidebar body{padding-left:232px}' +
+        'html.lia-hassidebar .top .brand,html.lia-hassidebar #liaBurger{display:none !important}' +
+        '.lia-side{display:flex;flex-direction:column;position:fixed;z-index:15;left:0;top:0;bottom:0;width:232px;padding:calc(env(safe-area-inset-top,0px) + 18px) 12px calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--bg2,#0A0D12);border-right:1px solid var(--line,#1C2532);overflow-y:auto;overscroll-behavior:contain}' +
+      '}' +
+      '.lia-side .ls-brand{padding:2px 8px 14px}.lia-side .logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat}' +
+      '.lia-side .ls-brand small{display:block;margin-top:7px;color:var(--muted,#9BA6B5);font-size:.72rem;letter-spacing:.04em}' +
+      '.ls-nav{display:flex;flex-direction:column;gap:2px;margin-top:12px}' +
+      '.ls-nav a{display:flex;align-items:center;gap:12px;min-height:42px;padding:0 10px;border-radius:10px;color:var(--muted,#9BA6B5);text-decoration:none;font-weight:600;font-size:.92rem}' +
+      '.ls-nav a svg{flex:none}.ls-nav a:hover{background:var(--card,#0E131B);color:var(--ink,#F9F6F0)}' +
+      '.ls-nav a.on{background:var(--card2,#161D29);color:var(--ink,#F9F6F0)}.ls-nav a.on svg{color:var(--accent,#2DD2DC)}' +
+      '.ls-foot{margin-top:auto;padding-top:12px;display:flex;flex-direction:column}' +
+      '.lia-side .lia-out{display:flex;align-items:center;width:100%;min-height:44px;margin-top:6px;padding:0 10px;border:0;border-top:1px solid var(--line2,#2A3648);border-radius:0;background:transparent;color:#FF8A8A;font:inherit;font-weight:600;font-size:.92rem;cursor:pointer;text-align:left}' +
+      '.lia-side .lia-out:hover{background:rgba(255,138,138,.1);border-radius:10px}' +
+      '.lia-side .lia-push{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:var(--ink,#F9F6F0);font-size:.88rem;line-height:1.3;padding-top:8px;padding-bottom:8px}.lia-side .lia-push small{display:block;color:var(--muted,#9BA6B5);font-weight:500;font-size:.76rem}.lia-side .lia-push[hidden]{display:none}' +
+      '.ls-sw{position:relative;margin:0 0 4px}.ls-sw svg{position:absolute;left:12px;top:12px;color:var(--muted,#9BA6B5);pointer-events:none}' +
+      '.ls-sw input{width:100%;min-height:42px;border-radius:11px;border:1px solid var(--line2,#2A3648);background:var(--card,#0E131B);color:var(--ink,#F9F6F0);padding:0 12px 0 38px;font:inherit;font-size:16px;font-size:max(16px,.92rem)}' +
+      '.ls-sw input::placeholder{color:var(--muted,#9BA6B5)}' +
+      '.ls-res{position:absolute;left:0;right:0;top:48px;z-index:5;padding:6px;border-radius:12px;background:var(--card2,#161D29);border:1px solid var(--line2,#2A3648);box-shadow:0 18px 40px rgba(0,0,0,.55)}.ls-res[hidden]{display:none}' +
+      '.lia-menu .ls-sw{margin:2px 0 6px}.lia-menu .ls-res{position:static;margin-top:6px;box-shadow:none}' +
+      '.ls-res a{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:40px;padding:0 10px;border-radius:8px;color:var(--ink,#F9F6F0);text-decoration:none;font-weight:600;font-size:.9rem}' +
+      '.ls-res a small{color:var(--muted,#9BA6B5);font-weight:500;font-size:.76rem;white-space:nowrap}.ls-res a:hover,.ls-res a.hl{background:var(--card,#0E131B)}.ls-res .none{padding:10px;color:var(--muted,#9BA6B5);font-size:.86rem}';
+    document.head.appendChild(st);
+
+    var side = document.createElement('aside');
+    side.className = 'lia-side'; side.setAttribute('aria-label', 'Pagine');
+    side.innerHTML = '<div class="ls-brand"><span class="logo" role="img" aria-label="Prenolia"></span><small>Super dashboard</small></div><div class="ls-search"></div><nav class="ls-nav"></nav><div class="ls-foot"></div>';
+    var navBox = side.querySelector('.ls-nav');
+    PAGES.forEach(function (p) {
+      var a = document.createElement('a');
+      a.href = p.href;
+      a.innerHTML = svg(p.label) + '<span></span>';
+      a.lastChild.textContent = p.label;
+      if (is(p.href) || (p.also || []).some(is)) { a.className = 'on'; a.setAttribute('aria-current', 'page'); }
+      if (p.badge) a.setAttribute('data-badge', 'richieste');
+      navBox.appendChild(a);
+    });
+    document.body.appendChild(side);
+    document.documentElement.classList.add('lia-hassidebar');
+
+    // il pulsante delle notifiche e "Esci" stanno nella barra laterale su desktop e nel burger sul telefono
+    var foot = side.querySelector('.ls-foot'), mq = window.matchMedia('(min-width:900px)');
+    function place() { var host = mq.matches ? foot : menu; host.appendChild(pushBtn); host.appendChild(outLink); }
+    place();
+    if (mq.addEventListener) mq.addEventListener('change', place); else if (mq.addListener) mq.addListener(place);
+
+    // ricerca: attivita' (elenco clienti, letto alla prima volta) e pagine
+    var clients = null, loading = false;
+    function loadClients() {
+      if (clients || loading || !window.liaApi) return;
+      loading = true;
+      window.liaApi('/api/admin/clients').then(function (j) { clients = (j && j.clients) || []; }).catch(function () { clients = []; }).then(function () { loading = false; refreshAll(); });
+    }
+    var boxes = [];
+    function mkSearch(host) {
+      var wrap = document.createElement('div'); wrap.className = 'ls-sw';
+      wrap.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" autocomplete="off" placeholder="Cerca attività…" aria-label="Cerca un’attività o una pagina"><div class="ls-res" hidden></div>';
+      var inp = wrap.querySelector('input'), res = wrap.querySelector('.ls-res');
+      var box = { inp: inp, res: res };
+      boxes.push(box);
+      inp.addEventListener('focus', loadClients);
+      inp.addEventListener('input', function () { render(box); });
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { res.hidden = true; inp.blur(); }
+        if (e.key === 'Enter') { var a = res.querySelector('a'); if (a) { e.preventDefault(); location.href = a.href; } }
+      });
+      host.insertBefore(wrap, host.firstChild);
+    }
+    function render(box) {
+      var v = box.inp.value.trim().toLowerCase();
+      if (!v) { box.res.hidden = true; return; }
+      var hits = [];
+      PAGES.forEach(function (p) { if (p.label.toLowerCase().indexOf(v) >= 0) hits.push({ t: p.label, s: 'Pagina', h: p.href }); });
+      (clients || []).forEach(function (c) { if (String(c.name || '').toLowerCase().indexOf(v) >= 0) hits.push({ t: c.name, s: c.type || 'Attività', h: '/admin/attivita.html?id=' + encodeURIComponent(c.id) }); });
+      box.res.innerHTML = '';
+      hits.slice(0, 7).forEach(function (x) {
+        var a = document.createElement('a'); a.href = x.h;
+        var t = document.createElement('span'); t.textContent = x.t;
+        var sm = document.createElement('small'); sm.textContent = x.s;
+        a.appendChild(t); a.appendChild(sm); box.res.appendChild(a);
+      });
+      if (!hits.length) { var n = document.createElement('div'); n.className = 'none'; n.textContent = clients === null ? 'Carico le attività…' : 'Nessun risultato.'; box.res.appendChild(n); }
+      box.res.hidden = false;
+    }
+    function refreshAll() { boxes.forEach(function (b) { if (b.inp.value.trim()) render(b); }); }
+    mkSearch(side.querySelector('.ls-search'));
+    mkSearch(menu);
+    document.addEventListener('click', function (e) { boxes.forEach(function (b) { if (!b.res.parentNode.contains(e.target)) b.res.hidden = true; }); });
+    document.addEventListener('keydown', function (e) {
+      var tag = (e.target && e.target.tagName) || '';
+      var typing = /INPUT|TEXTAREA|SELECT/.test(tag) || (e.target && e.target.isContentEditable);
+      if (!mq.matches || e.metaKey && e.key !== 'k' || e.altKey) return;
+      if ((e.key === '/' && !typing) || ((e.metaKey || e.ctrlKey) && e.key === 'k')) { e.preventDefault(); boxes[0].inp.focus(); }
+    });
+  })();
+
   // ---------- notifiche push sul telefono (messaggi all'assistenza) ----------
   (function () {
     if (onLogin || !pushBtn) return;
