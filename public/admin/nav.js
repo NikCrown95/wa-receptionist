@@ -222,9 +222,16 @@
     st.textContent =
       '.lia-side{display:none}' +
       '@media (min-width:900px){' +
-        'html.lia-hassidebar body{padding-left:232px}' +
+        'html.lia-hassidebar body{padding-left:64px}' +
         'html.lia-hassidebar .top .brand,html.lia-hassidebar #liaBurger{display:none !important}' +
-        '.lia-side{display:flex;flex-direction:column;position:fixed;z-index:15;left:0;top:0;bottom:0;width:232px;padding:calc(env(safe-area-inset-top,0px) + 18px) 12px calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--bg2,#0A0D12);border-right:1px solid var(--line,#1C2532);overflow-y:auto;overscroll-behavior:contain}' +
+        '.lia-side{display:flex;flex-direction:column;position:fixed;z-index:15;left:0;top:0;bottom:0;width:64px;padding:calc(env(safe-area-inset-top,0px) + 14px) 10px calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--bg2,#0A0D12);border-right:1px solid var(--line,#1C2532);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;transition:width .18s ease,box-shadow .18s ease}' +
+        '.lia-side.open{width:232px;padding-left:12px;padding-right:12px;z-index:40;box-shadow:18px 0 48px rgba(0,0,0,.55)}' +
+        '.lia-side:not(.open) .ls-brand,.lia-side:not(.open) .ls-search,.lia-side:not(.open) .ls-foot{display:none}' +
+        '.lia-side:not(.open) .ls-nav a{justify-content:center;padding:0;position:relative}.lia-side:not(.open) .ls-nav a>span:not(.nav-badge){display:none}' +
+        '.lia-side:not(.open) .nav-badge{position:absolute;top:4px;right:4px;min-width:10px !important;width:10px;height:10px !important;padding:0 !important;font-size:0 !important;line-height:0 !important;margin:0 !important}' +
+        '.ls-tog{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;border:0;border-radius:12px;background:transparent;color:var(--muted,#9BA6B5);cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}.ls-tog:hover{background:var(--card,#0E131B);color:var(--ink,#F9F6F0)}' +
+        '.lia-side.open .ls-tog{align-self:flex-end;margin-bottom:-36px;position:relative;z-index:2}' +
+        '.ls-scrim{position:fixed;inset:0;z-index:39;background:rgba(0,0,0,.35)}.ls-scrim[hidden]{display:none}' +
       '}' +
       '.lia-side .ls-brand{padding:2px 8px 14px}.lia-side .logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat}' +
       '.lia-side .ls-brand small{display:block;margin-top:7px;color:var(--muted,#9BA6B5);font-size:.72rem;letter-spacing:.04em}' +
@@ -248,12 +255,26 @@
     var side = document.createElement('aside');
     side.className = 'lia-side'; side.setAttribute('aria-label', 'Pagine');
     side.innerHTML = '<div class="ls-brand"><span class="logo" role="img" aria-label="Prenolia"></span><small>Super dashboard</small></div><div class="ls-search"></div><nav class="ls-nav"></nav><div class="ls-foot"></div>';
+    var tog = document.createElement('button');
+    tog.type = 'button'; tog.className = 'ls-tog'; tog.setAttribute('aria-label', 'Apri il menu delle pagine'); tog.setAttribute('aria-expanded', 'false');
+    tog.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/></svg>';
+    side.insertBefore(tog, side.firstChild);
+    var scrim = document.createElement('div'); scrim.className = 'ls-scrim'; scrim.hidden = true; document.body.appendChild(scrim);
+    function setOpen(o) { side.classList.toggle('open', o); scrim.hidden = !o; tog.setAttribute('aria-expanded', o ? 'true' : 'false'); tog.setAttribute('aria-label', o ? 'Chiudi il menu' : 'Apri il menu delle pagine'); }
+    tog.addEventListener('click', function () { setOpen(!side.classList.contains('open')); });
+    scrim.addEventListener('click', function () { setOpen(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && side.classList.contains('open')) setOpen(false); });
+    var canHover = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches, hov = null;
+    if (canHover) {
+      side.addEventListener('mouseenter', function () { clearTimeout(hov); hov = setTimeout(function () { setOpen(true); }, 140); });
+      side.addEventListener('mouseleave', function () { clearTimeout(hov); hov = setTimeout(function () { if (!side.contains(document.activeElement) || document.activeElement === tog) setOpen(false); }, 220); });
+    }
     var navBox = side.querySelector('.ls-nav');
     PAGES.forEach(function (p) {
       var a = document.createElement('a');
       a.href = p.href;
       a.innerHTML = svg(p.label) + '<span></span>';
-      a.lastChild.textContent = p.label;
+      a.lastChild.textContent = p.label; a.title = p.label;
       if (is(p.href) || (p.also || []).some(is)) { a.className = 'on'; a.setAttribute('aria-current', 'page'); }
       if (p.badge) a.setAttribute('data-badge', 'richieste');
       navBox.appendChild(a);
