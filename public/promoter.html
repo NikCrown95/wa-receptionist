@@ -109,27 +109,18 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 
 /* serpentina: righe che si invertono di direzione, un nodo per ogni mese */
 .snake{position:relative;width:100%;max-width:400px;margin:10px auto 6px;aspect-ratio:300/388;list-style:none;padding:0}
-.snake svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.leg{fill:none;stroke-width:3;stroke-linecap:round}
+.snake>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.leg{fill:none;stroke-width:1.8;stroke-linecap:round}
 .leg.done{stroke:var(--accent);filter:drop-shadow(0 0 4px rgba(45,210,220,.4))}
-.leg.todo{stroke:var(--line2);stroke-dasharray:2 8}
-.leg.lost{stroke:rgba(240,138,138,.4);stroke-dasharray:2 8}
-.leg.late{stroke:var(--warn);stroke-dasharray:2 8}
+.leg.todo{stroke:var(--line2);stroke-dasharray:2 7}
+.leg.lost{stroke:rgba(240,138,138,.4);stroke-dasharray:2 7}
+.leg.late{stroke:var(--warn);stroke-dasharray:2 7}
 .nd{position:absolute;width:0;height:0}
-.dot{position:absolute;left:-13px;top:-13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:.72rem;border:2px solid var(--line2);background:var(--bg);color:var(--muted)}
-.snake .dot svg{position:static;inset:auto;width:13px;height:13px}
-.nd.done .dot{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.nd.cur .dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 0 rgba(45,210,220,.55);animation:ring 2s infinite}
-.nd.late .dot{border-color:var(--warn);color:var(--warn);background:rgba(242,184,75,.12)}
-.nd.lost .dot{border-color:rgba(240,138,138,.5);color:var(--danger)}
-.nd.ms .dot{left:-18px;top:-18px;width:36px;height:36px;font-size:.95rem}
-.nd.ms.due .dot{background:var(--gold);border-color:var(--gold);color:#241A05}
-.nd.ms.got .dot{background:rgba(230,199,122,.16);border-color:var(--gold);color:var(--gold)}
-.nd.ms.pend .dot{border:2px dashed rgba(230,199,122,.7);color:var(--gold);background:var(--bg)}
-.nd.ms.void .dot{border:2px dashed rgba(240,138,138,.5);color:var(--danger);background:var(--bg)}
-@keyframes ring{70%{box-shadow:0 0 0 10px rgba(45,210,220,0)}100%{box-shadow:0 0 0 0 rgba(45,210,220,0)}}
-.lb{position:absolute;left:0;top:19px;transform:translateX(-50%);width:76px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
-.nd.ms .lb{top:24px;width:88px}
+.nd .ic{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:block;overflow:visible}
+@keyframes ring{50%{opacity:.5}}
+.pulse{animation:ring 2.4s ease-in-out infinite}
+.lb{position:absolute;left:0;transform:translateX(-50%);width:76px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.nd.ms .lb{width:88px}
 .lb b{font-size:.72rem;font-weight:600;line-height:1.15}
 .lb span{font-size:.68rem;color:var(--muted);line-height:1.15}
 .lb em{font-style:normal;font-size:.72rem;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
@@ -137,11 +128,6 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .nd.late .lb b{color:var(--warn)}
 .nd.lost .lb b,.nd.void .lb em{color:var(--danger)}
 .nd.void .lb em{text-decoration:line-through}
-.nd .dot.sym{left:-17px;top:-17px;width:34px;height:34px;border:0;background:none;box-shadow:none;animation:none;overflow:visible}
-.nd .dot.sym svg{width:34px;height:34px;overflow:visible}
-.nd .dot.symsm{border:0;background:none;box-shadow:none;animation:none;overflow:visible}
-.nd .dot.symsm svg{width:26px;height:26px;overflow:visible}
-.nd.symn .lb{top:24px}
 .pill.late{background:rgba(242,184,75,.14);color:var(--warn)}
 .key{display:flex;gap:6px 16px;flex-wrap:wrap;margin:0 0 14px;font-size:.78rem;color:var(--muted)}
 .key span{display:inline-flex;align-items:center;gap:7px}
@@ -152,7 +138,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px}
 .how{margin-top:26px;border-radius:18px;border:1px solid var(--line);padding:16px 18px;color:var(--muted);font-size:.88rem;display:grid;gap:6px}
 .how b{color:var(--ink);font-weight:600}
 [hidden]{display:none!important}
-@media(prefers-reduced-motion:reduce){.live i,.nd.cur .dot{animation:none}}
+@media(prefers-reduced-motion:reduce){.live i,.pulse{animation:none}}
 @media(max-width:380px){.stat b{font-size:1.5rem}}
 
 .err{margin-top:14px;color:var(--danger);font-size:.88rem;text-align:center;min-height:1.2em}
@@ -264,18 +250,32 @@ function fmt(iso, year){
 function daysLeft(iso){ return Math.max(0, Math.ceil((new Date(iso) - new Date(DATA.now)) / 86400000)); }
 function daysTxt(n){ return n === 0 ? 'oggi' : n === 1 ? 'domani' : 'tra ' + n + ' giorni'; }
 
-/* simboli "medaglione": Registrata, Fine prova (anello che si riempie), tappe non attive */
-var SPARK = 'M12 3.2l1.7 6.9 6.9 1.9-6.9 1.9L12 20.8l-1.7-6.9L3.4 12l6.9-1.9z';
+/* icone a linea sottile: robottino Prenolia per la registrazione, punti sul filo per i mesi, oro per le mensilità */
 var GLASS = 'M8 4.5h8M8 19.5h8M8.6 4.5c0 4 3.4 4.6 3.4 7.5s-3.4 3.5-3.4 7.5M15.4 4.5c0 4-3.4 4.6-3.4 7.5s3.4 3.5 3.4 7.5';
+var CHECKP = 'M6 12.8l4 4L18.2 8';
 function gl(path, s){ return '<g transform="translate('+(28-12*s)+' '+(28-12*s)+') scale('+s+')">'+path+'</g>'; }
-function coinSvg(kind, frac){
-  var v = '<svg viewBox="0 0 56 56" aria-hidden="true">';
-  if(kind==='reg') v += '<circle cx="28" cy="28" r="26" fill="none" stroke="url(#gGold)" stroke-width="1.4"/><circle cx="28" cy="28" r="22" fill="url(#gTeal)"/><ellipse cx="28" cy="18" rx="15" ry="8" fill="url(#gShine)"/><circle cx="28" cy="28" r="18.5" fill="none" stroke="#fff" stroke-opacity=".28"/>'+gl('<path d="'+SPARK+'" fill="#031016"/>',1);
-  else if(kind==='done') v += '<circle cx="28" cy="28" r="22" fill="url(#gTeal)"/><ellipse cx="28" cy="18" rx="15" ry="8" fill="url(#gShine)"/><circle cx="28" cy="28" r="18.5" fill="none" stroke="#fff" stroke-opacity=".28"/>'+gl('<path d="M5.5 12.5l4.5 4.5L18.5 7.5" fill="none" stroke="#031016" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',1.05);
-  else if(kind==='try'){ var c = 2*Math.PI*22; v += '<circle cx="28" cy="28" r="26" fill="url(#gGlow)"/><circle cx="28" cy="28" r="22" fill="#0B1118" stroke="#1C2532" stroke-width="3"/><circle cx="28" cy="28" r="22" fill="none" stroke="url(#gTeal)" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="'+(c*frac).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 28 28)"/><ellipse cx="28" cy="17" rx="13" ry="6" fill="url(#gShine)" opacity=".35"/>'+gl('<path d="'+GLASS+'" fill="none" stroke="#2DD2DC" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',.95); }
-  else v += '<circle cx="28" cy="28" r="22" fill="url(#gGraph)" stroke="#2A3648"/><ellipse cx="28" cy="18" rx="14" ry="7" fill="url(#gShine)" opacity=".12"/><circle cx="28" cy="28" r="17.5" fill="none" stroke="#fff" stroke-opacity=".07"/>'+gl('<path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#F08A8A" stroke-opacity=".85" stroke-width="1.8" stroke-linecap="round" fill="none"/>',1.05);
-  return v + '</svg>';
+function chk(c, w, s){ return gl('<path d="'+CHECKP+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>', s||1); }
+function euro(c, fs){ return '<text x="28" y="'+(28+fs*.36)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+c+'">€</text>'; }
+function iconOf(n, i){
+  if(i===0) return '<circle cx="28" cy="28" r="24" fill="#0E2A31" stroke="#E6C77A" stroke-width="1.6"/><image href="/brand/mark.png" x="14.5" y="16" width="27" height="24" preserveAspectRatio="xMidYMid meet"/>';
+  if(i===1){
+    if(n.st==='cur'){ var c = 2*Math.PI*24; return '<circle cx="28" cy="28" r="24" fill="#0B1118" stroke="#1C2532" stroke-width="2"/><circle cx="28" cy="28" r="24" fill="none" stroke="#2DD2DC" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="'+(c*n.frac).toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 28 28)"/>'+gl('<path d="'+GLASS+'" fill="none" stroke="#2DD2DC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',.8); }
+    return '<circle cx="28" cy="28" r="24" fill="#0E2A31" stroke="#2DD2DC" stroke-width="1.6"/>'+chk('#2DD2DC',2);
+  }
+  if(n.ms){
+    var r = n.rw;
+    if(r==='got') return '<circle cx="28" cy="28" r="24" fill="rgba(230,199,122,.14)" stroke="#E6C77A" stroke-width="1.8"/>'+chk('#E6C77A',2.2);
+    if(r==='due') return '<circle cx="28" cy="28" r="27" fill="url(#gGlow)" opacity=".6"/><circle cx="28" cy="28" r="24" fill="url(#gGold)"/><circle cx="28" cy="28" r="20.5" fill="none" stroke="#fff" stroke-opacity=".3"/>'+euro('#3A2A08',22);
+    if(r==='void') return '<circle cx="28" cy="28" r="23" fill="#0E131B" stroke="#F08A8A" stroke-opacity=".6" stroke-width="1.6" stroke-dasharray="3 4"/>'+gl('<path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#F08A8A" stroke-opacity=".85" stroke-width="1.6" stroke-linecap="round" fill="none"/>',1);
+    return '<circle cx="28" cy="28" r="23" fill="#0E131B" stroke="#E6C77A" stroke-opacity=".7" stroke-width="1.6" stroke-dasharray="3 4"/>'+euro('#E6C77A',21);
+  }
+  if(n.st==='done') return '<circle cx="28" cy="28" r="17" fill="#2DD2DC"/>';
+  if(n.st==='cur') return '<circle cx="28" cy="28" r="26" fill="url(#gGlow)" class="pulse"/><circle cx="28" cy="28" r="17" fill="#0B1118" stroke="#2DD2DC" stroke-width="3.5"/>';
+  if(n.st==='late') return '<circle cx="28" cy="28" r="17" fill="rgba(242,184,75,.16)" stroke="#F2B84B" stroke-width="3.5"/>';
+  if(n.st==='lost') return '<circle cx="28" cy="28" r="17" fill="#0E131B"/><circle cx="28" cy="28" r="17" fill="none" stroke="#F08A8A" stroke-opacity=".5" stroke-width="3"/>'+gl('<path d="M9.5 9.5l5 5M14.5 9.5l-5 5" stroke="#F08A8A" stroke-opacity=".8" stroke-width="1.6" stroke-linecap="round" fill="none"/>',1);
+  return '<circle cx="28" cy="28" r="15" fill="#0E131B" stroke="#2A3648" stroke-width="3"/>';
 }
+var STATE_TXT = {done:'pagato', cur:'in corso', late:'in ritardo', todo:'da venire', lost:'non attivo'};
 /* nodi: Registrata, Fine prova, Mese 1 ... Mese 12, Un anno dopo. Le righe della serpentina sono di 4 e cambiano direzione. */
 var MAP = {paid:'done', cur:'cur', late:'late', todo:'todo', lost:'lost'};
 function nodesOf(b){
@@ -306,14 +306,14 @@ function snake(b,nodes){
   var svg = '<svg viewBox="0 0 300 388" aria-hidden="true">' + nodes.slice(1).map(function(t,i){ return '<path class="leg '+legClass(t)+'" d="'+legPath(i)+'"/>'; }).join('') + '</svg>';
   var html = nodes.map(function(n,i){
     var p = pos(i), cls = 'nd '+n.st+(n.ms?' ms '+n.rw:'');
-    var inner = n.ms ? (n.rw==='got' ? ICON.check : n.rw==='void' ? ICON.x : '€') : n.st==='lost' ? ICON.x : n.st==='late' ? '!' : n.st==='done' ? ICON.check : (n.t.indexOf('Mese ')===0 ? n.t.slice(5) : (i===1 ? ICON.clock : ''));
-    var sym = '', dcls = 'dot';
-    if(i===0){ inner = coinSvg('reg'); dcls = 'dot sym'; }
-    else if(i===1){ inner = coinSvg(n.st==='cur' && b.phase==='trial' ? 'try' : n.st==='cur' ? 'try' : 'done', n.st==='cur' && b.phase!=='trial' ? 1 : n.frac); dcls = 'dot sym'; }
-    else if(n.st==='lost' && !n.ms){ inner = coinSvg('off'); dcls = 'dot symsm'; }
+    var isMonth = i>1 && !n.ms;
+    var size = i<2 ? 32 : n.ms ? 40 : (n.st==='cur'||n.st==='late') ? 20 : 16;
+    var show = !isMonth || n.st==='cur' || n.st==='late';
     var amt = n.ms ? '<em>'+(n.rw==='void' ? '' : '+')+eur(n.eur)+'</em>' : '';
     var lab = n.ms && n.rw==='got' ? '<span>ricevuta</span>' : n.ms && n.rw==='due' ? '<span>da ricevere</span>' : '';
-    return '<li class="'+cls+(i<2?' symn':'')+'" style="left:'+(p[0]/3)+'%;top:'+(p[1]/3.88)+'%"><span class="'+dcls+'">'+inner+'</span><div class="lb"><b>'+n.t+'</b>'+(n.d?'<span>'+esc(n.d)+'</span>':'')+amt+lab+'</div></li>';
+    var say = n.t + (isMonth ? ' · ' + (STATE_TXT[n.st]||'') : '');
+    var text = show ? '<div class="lb" style="top:'+(size/2+6)+'px"><b>'+n.t+'</b>'+(n.d?'<span>'+esc(n.d)+'</span>':'')+amt+lab+'</div>' : '';
+    return '<li class="'+cls+'" style="left:'+(p[0]/3)+'%;top:'+(p[1]/3.88)+'%"><svg class="ic" width="'+size+'" height="'+size+'" viewBox="0 0 56 56" role="img" aria-label="'+esc(say)+'">'+iconOf(n,i)+'</svg>'+text+'</li>';
   }).join('');
   return '<ol class="snake" aria-label="Percorso di '+esc(b.name)+'">'+svg+html+'</ol>';
 }
