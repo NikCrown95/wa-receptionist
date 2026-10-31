@@ -236,15 +236,24 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .opt.nic{grid-template-columns:1fr 24px}
 .csum{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:12px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer}
 .csum .cn{font-weight:700}.csum .cd{color:var(--muted);font-size:.85rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.csum .ce{color:var(--accent);font-weight:600;font-size:.88rem}
-.chip.addnext{justify-content:center;width:100%;gap:10px;min-height:46px;border:0;background:var(--grad);color:var(--on-accent);font-weight:700}
-.chip.addnext .pl{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(3,16,22,.25);font-size:1.1rem;line-height:1}
+.chip.addnext{justify-content:center;width:100%;gap:10px;min-height:46px;border:1.5px dashed rgba(45,210,220,.6);background:transparent;color:var(--accent);font-weight:700}
+.chip.addnext .pl{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;font-size:1.1rem;line-height:1}
+.stp{display:flex;align-items:center;justify-content:center;gap:22px}.stp .rnd{width:56px;height:56px;min-height:56px;padding:0;justify-content:center;font-size:1.8rem;border-radius:50%}.stp .big{font-size:3rem;font-weight:800;min-width:70px;text-align:center}
+.cnt .hint{text-align:center;margin:6px 0 0}
+.csum.dn .cn{color:var(--ink)}.csum.td{opacity:.6}
+.btn.off{opacity:.45}
+.morel{all:unset;cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem;padding:4px 0}
+.dets{display:flex;flex-direction:column;gap:10px}
+.ready{margin:2px 0 0;text-align:center;color:var(--muted);font-size:.9rem}.ready b{color:var(--ink)}
+.btn.pulse{animation:bpulse 1.8s ease-in-out infinite}
+@keyframes bpulse{0%,100%{box-shadow:0 0 0 0 rgba(45,210,220,.0)}50%{box-shadow:0 0 0 6px rgba(45,210,220,.28),0 0 22px rgba(47,123,255,.45)}}
 .card.closing{overflow:hidden;animation:cclose .24s ease-in forwards}
 @keyframes cclose{to{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:-6px;border-width:0}}
 .card.enter{animation:center .38s .12s ease-out both}
 @keyframes center{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .csum.flash{animation:cflash .9s ease-out}
 @keyframes cflash{0%{box-shadow:0 0 0 3px rgba(45,210,220,.55),0 0 28px rgba(45,210,220,.5);border-color:var(--accent);max-height:0;opacity:.2}30%{max-height:70px;opacity:1}100%{box-shadow:0 0 0 0 rgba(45,210,220,0);border-color:var(--line)}}
-@media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash{animation:none}}
+@media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash,.btn.pulse{animation:none}}
 </style>
 </head>
 <body>
@@ -352,7 +361,8 @@ function validate(k){
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
   if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
-  if(k==="campi"){if(!S.courts.length)return"Aggiungi almeno un campo.";
+  if(k==="campi"){if(!S.courts.length||S.cph!==2)return"";
+    if(S.courts.some(function(c){return!c.done}))return"Salva tutti i campi: premi «Salva» su quello aperto.";
     if(S.courts.some(function(c){return!c.n.trim()}))return"Dai un nome a ogni campo, oppure rimuovilo.";
     if(S.courts.some(function(c){return[c.pm,c.pg].some(function(p){p=String(p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti."}
   if(k==="privacy"&&!(S.ok1&&S.ok2))return"Per continuare spunta entrambe le caselle.";
@@ -517,48 +527,59 @@ function render(){
   }
   if(k==="campi"){
     var si=sportInfo(),isC=si&&si[1]==="calcio";
-    v.appendChild(head(lab,"Quali campi hai?",isC?"Aggiungi i tuoi campi e scegli se sono a 5, a 7 o a 11. Superficie e prezzo si possono cambiare in seguito.":"Aggiungi i tuoi campi. Superficie e prezzo si possono cambiare in seguito."));
-    var addC=function(f){var n=S.courts.length+1;S.courts.push({n:"Campo "+n,fmt:f||"5",surf:si&&si[2][0]&&S.courts.length===0?si[2][0]:(S.courts.length?S.courts[S.courts.length-1].surf:""),indoor:S.courts.length?S.courts[S.courts.length-1].indoor:false,d:si?si[3]:60,pm:"",pg:""});S.oc=S.courts.length-1;S.err="";render()};
-    var sb3=h("div",{class:"sugs"}),ch3=h("div",{class:"chips"});
-    if(isC){[["5","Calcetto a 5"],["7","Calcio a 7"],["11","Calcio a 11"]].forEach(function(x){ch3.appendChild(chip("+ "+x[1],false,function(){addC(x[0])}))})}
-    else ch3.appendChild(chip("+ Aggiungi un campo",false,function(){addC()}));
-    sb3.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));sb3.appendChild(ch3);v.appendChild(sb3);
-    if(!S.courts.length&&!isC){addC();return}
-    if(!S.courts.length)v.appendChild(h("p",{class:"empty",text:"Scegli il formato del primo campo."}));
-    if(!(S.oc>=0&&S.oc<S.courts.length))S.oc=S.courts.length-1;
+    if(S.cph!==2||!S.courts.length){
+      if(!S.cn)S.cn=Math.max(1,S.courts.length);
+      v.appendChild(head(lab,"Quanti campi hai?","Poi compili un campo alla volta: nome, prezzo e poco altro."));
+      var sc0=h("div",{class:"card cnt"});
+      var mn=h("button",{class:"chip rnd",type:"button","aria-label":"Un campo in meno",text:"−",onclick:function(){S.cn=Math.max(1,S.cn-1);render()}});
+      var pl=h("button",{class:"chip rnd",type:"button","aria-label":"Un campo in più",text:"+",onclick:function(){S.cn=Math.min(30,S.cn+1);render()}});
+      sc0.appendChild(h("div",{class:"stp"},[mn,h("span",{class:"big",text:String(S.cn)}),pl]));
+      sc0.appendChild(h("p",{class:"hint",text:S.cn===1?"Un solo campo. Premi Avanti per compilarlo.":"Premi Avanti: compili i "+S.cn+" campi uno dopo l'altro."}));
+      v.appendChild(sc0);
+    }else{
+    var nD=S.courts.filter(function(c){return c.done}).length,allD=nD===S.courts.length;
+    if(!(S.oc>=0&&S.oc<S.courts.length)&&!allD)S.oc=S.courts.findIndex(function(c){return!c.done});
+    v.appendChild(head(lab,allD?"Campi pronti":"Campo "+(S.oc+1)+" di "+S.courts.length,allD?"Hai compilato tutti i campi.":"Compila e salva: poi passi al successivo."));
     S.courts.forEach(function(c,idx){
-      if(idx!==S.oc){
-        var pp=[];if(c.surf)pp.push(c.surf);if(c.indoor)pp.push("coperto");pp.push(c.d+" min");
+      if(idx!==S.oc||allD){
+        var pp=[];if(!c.done)pp.push("Da compilare");else{if(c.surf)pp.push(c.surf);if(c.indoor)pp.push("coperto");pp.push(c.d+" min");
         var pa=String(c.pm).trim(),pb=String(c.pg).trim();
-        if(partySport()){if(pa||pb)pp.push("€ "+(pa||"–")+" soci · € "+(pb||"–")+" non soci")}else if(pb)pp.push("€ "+pb);
-        var sm=h("div",{class:"csum"+(S.flash===idx?" flash":""),role:"button",tabindex:"0","aria-label":"Modifica "+c.n,onclick:function(){S.oc=idx;render()}},[
-          h("span",{class:"cn",text:courtName(c)}),h("span",{class:"cd",text:pp.join(" · ")}),h("span",{class:"ce",text:"Modifica"})]);
+        if(partySport()){if(pa||pb)pp.push("€ "+(pa||"–")+" soci · € "+(pb||"–")+" non soci")}else if(pb)pp.push("€ "+pb)}
+        var sm=h("div",{class:"csum"+(c.done?" dn":" td")+(S.flash===idx?" flash":""),role:"button",tabindex:"0","aria-label":"Modifica "+c.n,onclick:function(){c.done=false;S.oc=idx;render()}},[
+          h("span",{class:"cn",text:(c.done?"✓ ":"")+courtName(c)}),h("span",{class:"cd",text:pp.join(" · ")}),h("span",{class:"ce",text:c.done?"Modifica":"Apri"})]);
         v.appendChild(sm);return}
       var cd=h("div",{class:"card"+(S.flash!=null&&idx===S.oc?" enter":"")});
       var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
       top.appendChild(ni);
-      top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.oc=S.courts.length-1;render()}}));
+      if(S.courts.length>1)top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.cn=S.courts.length;S.oc=S.courts.findIndex(function(x){return!x.done});render()}}));
       cd.appendChild(top);
       if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
-      cd.appendChild(h("label",{text:"Superficie (facoltativa)"}));
-      if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});cd.appendChild(sc)}
-      if(!(si&&si[2].length)){var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};cd.appendChild(sfi)}
-      var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));
-      var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
-      var rw=h("div",{class:"times cov"},[lc,field("Durata di ogni prenotazione",dsel)]);cd.appendChild(rw);
       var pr=h("div",{class:"times"});
       if(!partySport()){
         var p1=h("input",{class:"inp",value:c.pg,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo del campo in euro"});p1.oninput=function(){c.pg=p1.value;c.pm=p1.value};
         pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),p1]));
-        cd.appendChild(h("label",{text:"Prezzo del campo per ogni prenotazione (facoltativo)"}));cd.appendChild(pr);
+        cd.appendChild(h("label",{text:"Prezzo per ogni prenotazione (facoltativo)"}));cd.appendChild(pr);
       }else{
       var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
       var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
       pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
       cd.appendChild(h("label",{text:"Prezzo a giocatore all'ora (facoltativo)"}));cd.appendChild(pr)}
-      var an=h("button",{class:"chip addnext",type:"button",onclick:function(){if(cd.classList.contains("closing"))return;cd.classList.add("closing");setTimeout(function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);S.oc=idx+1;S.flash=idx;render();setTimeout(function(){S.flash=null},900)},240)}});an.appendChild(h("span",{class:"pl",text:"+"}));an.appendChild(h("span",{text:"Salva e aggiungi un altro campo"}));cd.appendChild(an);
+      if(S.det){var dt=h("div",{class:"dets"});
+        dt.appendChild(h("label",{text:"Superficie (facoltativa)"}));
+        if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});dt.appendChild(sc)}
+        else{var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};dt.appendChild(sfi)}
+        var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));
+        var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
+        dt.appendChild(h("div",{class:"times cov"},[lc,field("Durata di ogni prenotazione",dsel)]));cd.appendChild(dt)}
+      else cd.appendChild(h("button",{class:"morel",type:"button",text:"Superficie, coperto e durata ›",onclick:function(){S.det=true;render()}}));
+      var more=S.courts.some(function(x,j){return j!==idx&&!x.done});
+      var an=h("button",{class:"chip addnext",type:"button",onclick:function(){if(cd.classList.contains("closing"))return;if(!String(c.n).trim()){S.err="Dai un nome al campo.";render();return}
+        var bad=[c.pm,c.pg].some(function(q){q=String(q).trim().replace(",",".");return q!==""&&(!isFinite(Number(q))||Number(q)<0)});if(bad){S.err="Controlla il prezzo: scrivi solo numeri, oppure lascialo vuoto.";render();return}
+        S.err="";cd.classList.add("closing");setTimeout(function(){c.done=true;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},900)},240)}});
+      an.appendChild(h("span",{class:"pl",text:more?"→":"✓"}));an.appendChild(h("span",{text:more?"Salva e passa al campo successivo":"Salva campo"}));cd.appendChild(an);
       v.appendChild(cd)});
-    if(S.courts.length)v.appendChild(h("p",{class:"hint",text:partySport()?"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro.":"Il prezzo lo decidi tu, anche diverso da campo a campo. Il campo si paga direttamente al centro, non online."}));
+    v.appendChild(h("p",{class:"ready"},[h("b",{text:nD+" di "+S.courts.length}),allD?" campi compilati. Premi Avanti per continuare.":" campi compilati. Avanti si accende alla fine."]));
+    }
   }
   if(k==="regole"){
     var si2=sportInfo();
@@ -637,10 +658,11 @@ function render(){
   var nav=h("div",{class:"nav"});
   if(S.step>0)nav.appendChild(h("button",{class:"btn ghost",type:"button",text:"Indietro",onclick:function(){go(-1)}}));
   var last=k==="fine";
-  var nb=h("button",{class:"btn",type:"button",text:S.busy?"Un attimo…":(last?"Apri la mia agenda":"Avanti")});if(S.busy)nb.disabled=true;
+  var nb=h("button",{class:"btn",type:"button",text:S.busy?"Un attimo…":(last?"Apri la mia agenda":"Avanti")});if(S.busy)nb.disabled=true;if(k==="campi"){var okc=S.cph===2&&S.courts.length&&S.courts.every(function(c){return c.done});if(S.cph===2&&!okc)nb.classList.add("off");if(okc)nb.classList.add("pulse")}
   nb.onclick=function(){
     if(S.busy)return;
     if(k==="tipo"&&!S.v){S.err="Scegli il tipo di attività.";render();return}
+    if(k==="campi"&&S.cph!==2){var si9=sportInfo();while(S.courts.length<S.cn){var n9=S.courts.length+1,pv=S.courts[S.courts.length-1];S.courts.push({n:"Campo "+n9,fmt:"5",surf:pv?pv.surf:(si9&&si9[2][0]||""),indoor:pv?pv.indoor:false,d:si9?si9[3]:60,pm:"",pg:"",done:false})}S.courts.length=Math.min(S.courts.length,S.cn);S.cph=2;S.oc=S.courts.findIndex(function(c){return!c.done});if(S.oc<0)S.oc=0;S.err="";render();return}
     var e=validate(k);if(e){S.err=e;render();return}
     if(last){save();return}
     go(1)};
