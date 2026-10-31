@@ -236,6 +236,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .opt.nic{grid-template-columns:1fr 24px}
 .csum{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:12px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer}
 .csum .cn{font-weight:700}.csum .cd{color:var(--muted);font-size:.85rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.csum .ce{color:var(--accent);font-weight:600;font-size:.88rem}
+.chip.addnext{justify-content:center;width:100%;color:var(--accent);border-color:rgba(45,210,220,.45);background:rgba(45,210,220,.07)}
 </style>
 </head>
 <body>
@@ -527,7 +528,7 @@ function render(){
         v.appendChild(sm);return}
       var cd=h("div",{class:"card"});
       var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
-      top.appendChild(ni);top.appendChild(h("button",{class:"chip",type:"button",text:"Duplica",onclick:function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);S.oc=idx+1;render()}}));
+      top.appendChild(ni);
       top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.oc=S.courts.length-1;render()}}));
       cd.appendChild(top);
       if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
@@ -547,6 +548,7 @@ function render(){
       var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
       pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
       cd.appendChild(h("label",{text:"Prezzo a giocatore all'ora (facoltativo)"}));cd.appendChild(pr)}
+      cd.appendChild(h("button",{class:"chip addnext",type:"button",text:"+ Salva e aggiungi un altro campo",onclick:function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);S.oc=idx+1;render()}}));
       v.appendChild(cd)});
     if(S.courts.length)v.appendChild(h("p",{class:"hint",text:partySport()?"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro.":"Il prezzo lo decidi tu, anche diverso da campo a campo. Il campo si paga direttamente al centro, non online."}));
   }
