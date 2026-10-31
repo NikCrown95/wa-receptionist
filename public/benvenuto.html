@@ -163,7 +163,11 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .orb{position:relative;width:210px;height:210px;flex:none}
 .orb svg{width:100%;height:100%;display:block;overflow:visible}
 .orb .ticks{fill:none;stroke:var(--line2);stroke-width:7;stroke-dasharray:1.5 9.1;transform-origin:120px 120px}
-.orb .spin{transform-origin:120px 120px;animation:spin 60s linear infinite}
+.orb .spin{transform-origin:120px 120px;animation:spin 7s linear infinite}
+.orb .spin2{transform-origin:120px 120px;animation:spin 11s linear infinite reverse}
+.orb .sweep{fill:none;stroke:url(#rg);stroke-width:3;stroke-linecap:round;stroke-dasharray:130 574;opacity:.9;filter:drop-shadow(0 0 6px rgba(45,210,220,.85))}
+.orb .sweep2{fill:none;stroke:#2F7BFF;stroke-width:2;stroke-linecap:round;stroke-dasharray:60 606;opacity:.55;filter:drop-shadow(0 0 5px rgba(47,123,255,.8))}
+.orb .halo{transform-origin:120px 120px;animation:halo 3.4s ease-in-out infinite}
 .orb .inner{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:2 5}
 .orb .trk{fill:none;stroke:var(--line);stroke-width:9}
 .orb .arc{fill:none;stroke:url(#rg);stroke-width:9;stroke-linecap:round;stroke-dasharray:615.75;stroke-dashoffset:615.75;transition:stroke-dashoffset .9s cubic-bezier(.3,.7,.2,1);filter:drop-shadow(0 0 7px rgba(45,210,220,.65))}
@@ -173,6 +177,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .orb .pc b{font-size:2.7rem;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;text-shadow:0 0 24px rgba(45,210,220,.4)}
 .orb .pc span{font-weight:700;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes halo{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.08)}}
 .feed{list-style:none;margin:0;padding:0;min-width:0;flex:1}
 .feed li{position:relative;padding:2px 0 2px 18px;min-width:0}
 .feed li::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px;background:var(--grad);box-shadow:0 0 14px rgba(45,210,220,.7)}
@@ -181,7 +186,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .feed .fx{display:block;font-size:.92rem;color:var(--muted);margin-top:6px;line-height:1.4}
 .feed li.new{animation:feedin .7s cubic-bezier(.3,.7,.2,1)}
 @keyframes feedin{from{opacity:0;transform:translateX(-12px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
-@media (prefers-reduced-motion:reduce){.orb .spin{animation:none}.orb .arc,.orb .dot{transition:none}.feed li.new{animation:none}}
+@media (prefers-reduced-motion:reduce){.orb .spin,.orb .spin2,.orb .halo{animation:none}.orb .arc,.orb .dot{transition:none}.feed li.new{animation:none}}
 .hero{display:flex;align-items:center;gap:16px;padding:18px;border-radius:22px;border:1px solid transparent;background:linear-gradient(135deg,#102430,#0E1A2A) padding-box,var(--grad) border-box;box-shadow:0 14px 40px -16px rgba(45,210,220,.45)}
 .hero .ic{background:var(--grad);color:var(--on-accent);border-color:transparent;flex:none}
 .hero div{min-width:0}
@@ -226,7 +231,9 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
         <svg viewBox="0 0 240 240" aria-hidden="true"><defs>
           <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD2DC"/><stop offset="1" stop-color="#2F7BFF"/></linearGradient>
           <radialGradient id="core" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2DD2DC" stop-opacity=".16"/><stop offset="1" stop-color="#2DD2DC" stop-opacity="0"/></radialGradient></defs>
-          <circle cx="120" cy="120" r="80" fill="url(#core)"/>
+          <circle cx="120" cy="120" r="80" fill="url(#core)" class="halo"/>
+          <g class="spin"><circle cx="120" cy="120" r="112" class="sweep"/></g>
+          <g class="spin2"><circle cx="120" cy="120" r="106" class="sweep2"/></g>
                     <circle cx="120" cy="120" r="98" class="trk"/>
           <circle cx="120" cy="120" r="98" class="arc" id="arc" transform="rotate(-90 120 120)"/>
           <g id="dot" class="dot"><circle cx="120" cy="22" r="7"/></g></svg>
