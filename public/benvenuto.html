@@ -233,6 +233,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .sum{padding:6px 0}
   .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.84rem;line-height:1.3}
 }
+.opt.nic{grid-template-columns:1fr 24px}
 </style>
 </head>
 <body>
@@ -544,7 +545,7 @@ function render(){
     v.appendChild(head(lab,"Chi può prenotare?","Puoi cambiarlo in ogni momento da Impostazioni."));
     var st2=h("div",{class:"stack"});
     [["all","Soci e non soci","Chiunque può prenotare un campo"],["members","Solo i soci","Prenota chi gioca con almeno un socio"]].forEach(function(x){
-      var b=h("button",{class:"opt",type:"button","aria-pressed":S.open_to===x[0]?"true":"false"},[h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
+      var b=h("button",{class:"opt nic",type:"button","aria-pressed":S.open_to===x[0]?"true":"false"},[h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
       b.onclick=function(){S.open_to=x[0];render()};st2.appendChild(b)});
     v.appendChild(st2);
     if(si2&&(si2[1]==="tennis"||si2[1]==="padel")){var cf=h("div",{class:"card"}),lf=h("label",{class:"tgl long"}),cbf=h("input",{type:"checkbox"});cbf.checked=S.fit;cbf.onchange=function(){S.fit=cbf.checked};lf.appendChild(cbf);lf.appendChild(h("span",{text:"Il centro è affiliato FIT: ricorda ai giocatori di portare la tessera"}));cf.appendChild(lf);v.appendChild(cf)}
