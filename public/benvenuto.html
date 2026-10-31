@@ -234,6 +234,8 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.84rem;line-height:1.3}
 }
 .opt.nic{grid-template-columns:1fr 24px}
+.csum{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:12px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer}
+.csum .cn{font-weight:700}.csum .cd{color:var(--muted);font-size:.85rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.csum .ce{color:var(--accent);font-weight:600;font-size:.88rem}
 </style>
 </head>
 <body>
@@ -507,18 +509,26 @@ function render(){
   if(k==="campi"){
     var si=sportInfo(),isC=si&&si[1]==="calcio";
     v.appendChild(head(lab,"Quali campi hai?",isC?"Aggiungi i tuoi campi e scegli se sono a 5, a 7 o a 11. Superficie e prezzo si possono cambiare in seguito.":"Aggiungi i tuoi campi. Superficie e prezzo si possono cambiare in seguito."));
-    var addC=function(f){var n=S.courts.length+1;S.courts.push({n:"Campo "+n,fmt:f||"5",surf:si&&si[2][0]&&S.courts.length===0?si[2][0]:(S.courts.length?S.courts[S.courts.length-1].surf:""),indoor:S.courts.length?S.courts[S.courts.length-1].indoor:false,d:si?si[3]:60,pm:"",pg:""});S.err="";render()};
+    var addC=function(f){var n=S.courts.length+1;S.courts.push({n:"Campo "+n,fmt:f||"5",surf:si&&si[2][0]&&S.courts.length===0?si[2][0]:(S.courts.length?S.courts[S.courts.length-1].surf:""),indoor:S.courts.length?S.courts[S.courts.length-1].indoor:false,d:si?si[3]:60,pm:"",pg:""});S.oc=S.courts.length-1;S.err="";render()};
     var sb3=h("div",{class:"sugs"}),ch3=h("div",{class:"chips"});
     if(isC){[["5","Calcetto a 5"],["7","Calcio a 7"],["11","Calcio a 11"]].forEach(function(x){ch3.appendChild(chip("+ "+x[1],false,function(){addC(x[0])}))})}
     else ch3.appendChild(chip("+ Aggiungi un campo",false,function(){addC()}));
     sb3.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));sb3.appendChild(ch3);v.appendChild(sb3);
     if(!S.courts.length&&!isC){addC();return}
     if(!S.courts.length)v.appendChild(h("p",{class:"empty",text:"Scegli il formato del primo campo."}));
+    if(!(S.oc>=0&&S.oc<S.courts.length))S.oc=S.courts.length-1;
     S.courts.forEach(function(c,idx){
+      if(idx!==S.oc){
+        var pp=[];if(c.surf)pp.push(c.surf);if(c.indoor)pp.push("coperto");pp.push(c.d+" min");
+        var pa=String(c.pm).trim(),pb=String(c.pg).trim();
+        if(partySport()){if(pa||pb)pp.push("€ "+(pa||"–")+" soci · € "+(pb||"–")+" non soci")}else if(pb)pp.push("€ "+pb);
+        var sm=h("div",{class:"csum",role:"button",tabindex:"0","aria-label":"Modifica "+c.n,onclick:function(){S.oc=idx;render()}},[
+          h("span",{class:"cn",text:courtName(c)}),h("span",{class:"cd",text:pp.join(" · ")}),h("span",{class:"ce",text:"Modifica"})]);
+        v.appendChild(sm);return}
       var cd=h("div",{class:"card"});
       var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
-      top.appendChild(ni);top.appendChild(h("button",{class:"chip",type:"button",text:"Duplica",onclick:function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);render()}}));
-      top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);render()}}));
+      top.appendChild(ni);top.appendChild(h("button",{class:"chip",type:"button",text:"Duplica",onclick:function(){var n2=JSON.parse(JSON.stringify(c));n2.n=/\d+\s*$/.test(c.n)?c.n.replace(/\d+\s*$/,String(S.courts.length+1)):c.n+" "+(S.courts.length+1);S.courts.splice(idx+1,0,n2);S.oc=idx+1;render()}}));
+      top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.oc=S.courts.length-1;render()}}));
       cd.appendChild(top);
       if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
       cd.appendChild(h("label",{text:"Superficie (facoltativa)"}));
