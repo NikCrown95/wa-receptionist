@@ -411,7 +411,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/verticals.js").areaOf(bt) === "campi") {
           // Circoli e centri sportivi: stessa dashboard, ma il calendario mostra i campi (public/campi/).
           variantKey = "campi";
-          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=da95ebee"><link rel="stylesheet" href="/campi/campi.css?v=580c2d33">').replace("</body>", '<script src="/campi/campi.js?v=86207e57"></script><script src="/campi/stats.js?v=c36fd949"></script><script src="/campi/campi-set.js?v=f63f9a7d"></script><script src="/campi/campi-avail.js?v=d057fb5e"></script></body>');
+          html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=da95ebee"><link rel="stylesheet" href="/campi/campi.css?v=580c2d33">').replace("</body>", '<script src="/campi/campi.js?v=86207e57"></script><script src="/campi/stats.js?v=4d228c8e"></script><script src="/campi/campi-set.js?v=f63f9a7d"></script><script src="/campi/campi-avail.js?v=d057fb5e"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
