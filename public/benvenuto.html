@@ -237,6 +237,11 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .sum{padding:6px 0}
   .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.84rem;line-height:1.3}
 }
+.namebox{display:grid;gap:8px;padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+.namebox label{margin:0;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.inp.name{height:62px;font-size:1.4rem;font-weight:700;letter-spacing:-.01em;border-radius:16px;border:1.5px solid transparent;background:linear-gradient(var(--card2),var(--card2)) padding-box,var(--grad) border-box;box-shadow:0 0 22px rgba(47,123,255,.2);transition:box-shadow .25s}
+.inp.name:focus{outline:none;box-shadow:0 0 0 3px rgba(45,210,220,.28),0 0 30px rgba(45,210,220,.4)}
+.inp.name::placeholder{font-weight:500;color:var(--muted)}
 .opt.nic{grid-template-columns:1fr 24px}
 .csum{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:12px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer}
 .csum .cn{font-weight:700}.csum .cd{color:var(--muted);font-size:.85rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.csum .ce{color:var(--accent);font-weight:600;font-size:.88rem}
@@ -482,7 +487,7 @@ function render(){
   }
   if(k==="attivita"){
     v.appendChild(head(lab,"Come si chiama la tua attività?","Il nome compare sulla pagina di prenotazione."));
-    var c=h("div",{class:"card"});c.appendChild(field("Nome dell'attività",inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="campi"?"es. Tennis Club Rossi":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2")),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"})));
+    var c=h("div",{class:"card"});var nm=inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="campi"?"es. Tennis Club Rossi":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2")),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"});nm.classList.add("name");c.appendChild(h("div",{class:"namebox"},[h("label",{text:"Nome dell'attività"}),nm]));
     if(S.v!=="palestra"&&S.v!=="campi"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Che mestiere fai?"}));var ch=h("div",{class:"chips"});
       Object.keys(MESTIERI()).forEach(function(m){ch.appendChild(chip(m,S.mestiere===m,function(){if(S.mestiere!==m){S.mestiere=m;S.items=[]}render()}))});c.appendChild(ch);
       if(S.mestiere==="Altro")c.appendChild(field("Che mestiere fai?",inp(S.altro,"es. Sarta",function(x){S.altro=x},{maxlength:"40"})))}
