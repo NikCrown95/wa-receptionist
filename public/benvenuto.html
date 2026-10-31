@@ -484,7 +484,9 @@ function render(){
     v.appendChild(head(lab,"Che sport si gioca?","Scegli lo sport dei tuoi campi."));
     var cs=h("div",{class:"card"}),chs=h("div",{class:"chips"});
     SPORTS.forEach(function(x){chs.appendChild(chip(x[0],S.sportLbl===x[0],function(){if(S.sportLbl!==x[0]){S.sportLbl=x[0];S.courts=[]}S.err="";render()}))});
-    cs.appendChild(chs);cs.appendChild(h("p",{class:"hint",text:"Tutti i campi del centro sono dello stesso sport. Le regole cambiano un poco: nel tennis e nel padel si gioca in 2 o in 4 e ci sono i soci; nel calcio il campo può essere a 5, a 7 o a 11; calcio e pallavolo si prenotano senza soci né certificato medico, e il prezzo lo decidi tu."}));v.appendChild(cs);
+    cs.appendChild(chs);
+    var si0=sportInfo(),note=!si0?"":si0[1]==="tennis"||si0[1]==="padel"?"Si gioca in 2 o in 4, con soci, certificato medico e tessera FIT.":si0[1]==="calcio"?"Campi a 5, a 7 o a 11. Prenota un referente e il prezzo lo decidi tu.":"Prenota un referente e il prezzo lo decidi tu.";
+    if(note)cs.appendChild(h("p",{class:"hint",text:note}));v.appendChild(cs);
   }
   if(k==="campi"){
     var si=sportInfo(),isC=si&&si[1]==="calcio";
