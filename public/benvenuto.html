@@ -25,18 +25,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font
 .side .lead{max-width:30ch;margin:0}
 .pane{max-width:600px;width:100%;display:flex;flex-direction:column;gap:22px;padding-top:6px}
 .steps.bar{display:none}
-@media (min-width:901px){
-  /* iPad e computer: il passo sta tutto nella schermata, senza scorrere */
-  body{padding-block:12px 14px}
-  .shell{min-height:calc(100dvh - 26px);align-items:center;gap:48px}
-  .side{position:static;gap:18px}
-  .pane{gap:12px;padding-top:0}
-  .pane .head{gap:4px}
-  .pane .head h1{font-size:1.7rem;line-height:1.12}
-  .pane .head .lead{font-size:.95rem;margin:0}
-  .opt{padding:10px 14px;gap:14px;border-radius:18px}
-  .opt .d{font-size:.82rem;line-height:1.3}
-}
 @media (max-width:900px){
   .shell{display:block;max-width:460px}
   .side{position:static;gap:16px;margin-bottom:24px}
@@ -116,6 +104,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .times{display:flex;gap:8px;align-items:center;min-width:0}
 .times input{min-width:0;flex:1;min-height:44px;padding:0 8px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;text-align:center}
 .times.off{opacity:.35;pointer-events:none}
+.cov{align-items:flex-end;gap:14px}.cov>div{flex:1;min-width:0}.cov>.tgl{flex:none;min-height:42px}.cov .tgl input{flex:none;min-height:0;width:22px;padding:0}
 .err{background:#3a1c1c;color:var(--err);border-radius:12px;padding:10px 14px;font-size:.9rem}
 .nav{display:flex;gap:10px}
 .logorow{display:flex;gap:16px;align-items:center;padding-top:6px;border-top:1px solid var(--line);margin-top:4px;padding-top:16px}
@@ -218,6 +207,32 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .next ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
 .next li{position:relative;padding-left:22px;font-size:.9rem;color:var(--muted)}
 .next li::before{content:"";position:absolute;left:3px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--grad);transform:rotate(45deg)}
+@media (min-width:901px){
+  /* iPad e computer: il passo sta tutto nella schermata, senza scorrere */
+  body{padding-block:12px 14px}
+  .shell{min-height:calc(100dvh - 26px);align-items:center;gap:48px}
+  .side{position:static;gap:18px}
+  .shell{height:calc(100dvh - 26px);min-height:0}
+  .pane{gap:12px;padding-top:0;max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .pane::-webkit-scrollbar{display:none}
+  .pane>.nav{position:sticky;bottom:0;padding:12px 0 2px;margin-top:auto;background:linear-gradient(to bottom,transparent,var(--bg) 22%);z-index:3}
+  .pane .head{gap:4px}
+  .pane .head h1{font-size:1.7rem;line-height:1.12}
+  .pane .head .lead{font-size:.95rem;margin:0}
+  .opt{padding:10px 14px;gap:14px;border-radius:18px}
+  .opt .d{font-size:.82rem;line-height:1.3}
+  .card{padding:12px 14px;gap:8px;border-radius:18px}
+  .inp{height:42px}
+  .chip{min-height:38px;padding:6px 14px}
+  .day{padding:4px 0;gap:8px}
+  .day .tgl{min-height:34px}
+  .btn{min-height:48px}
+  .hrs{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:26px}
+  .hrs .day:nth-child(5){border-top:0}
+  .hrs .day{margin-top:0!important}
+  .sum{padding:6px 0}
+  .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.84rem;line-height:1.3}
+}
 </style>
 </head>
 <body>
@@ -452,7 +467,7 @@ function render(){
       c6.appendChild(dc);
       var ti=h("input",{class:"inp",type:"time",value:it.time,"aria-label":"Ora di inizio"});ti.oninput=function(){it.time=ti.value};
       c6.appendChild(field("Ora di inizio",ti));v.appendChild(c6)});
-    v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: con quanto anticipo gli iscritti possono prenotare e fino a quando possono disdire. Programma, chiusure e regole puoi cambiarli in ogni momento."]));
+    v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Già impostate: gli iscritti scelgono quanto in anticipo prenotare e fino a quando disdire. Le cambi quando vuoi."]));
   }
   if(k==="zona"){
     v.appendChild(head(lab,"In quali città vai a domicilio?","Il cliente può prenotare a domicilio solo con un indirizzo in una di queste città."));
@@ -496,7 +511,8 @@ function render(){
     if(isC){[["5","Calcetto a 5"],["7","Calcio a 7"],["11","Calcio a 11"]].forEach(function(x){ch3.appendChild(chip("+ "+x[1],false,function(){addC(x[0])}))})}
     else ch3.appendChild(chip("+ Aggiungi un campo",false,function(){addC()}));
     sb3.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));sb3.appendChild(ch3);v.appendChild(sb3);
-    if(!S.courts.length)v.appendChild(h("p",{class:"empty",text:"Nessun campo ancora. Tocca un pulsante qui sopra."}));
+    if(!S.courts.length&&!isC){addC();return}
+    if(!S.courts.length)v.appendChild(h("p",{class:"empty",text:"Scegli il formato del primo campo."}));
     S.courts.forEach(function(c,idx){
       var cd=h("div",{class:"card"});
       var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
@@ -506,10 +522,10 @@ function render(){
       if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
       cd.appendChild(h("label",{text:"Superficie (facoltativa)"}));
       if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});cd.appendChild(sc)}
-      var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Terra battuta",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};cd.appendChild(sfi);
-      var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));cd.appendChild(lc);
+      if(!(si&&si[2].length)){var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};cd.appendChild(sfi)}
+      var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));
       var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
-      cd.appendChild(field("Durata di ogni prenotazione",dsel));
+      var rw=h("div",{class:"times cov"},[lc,field("Durata di ogni prenotazione",dsel)]);cd.appendChild(rw);
       var pr=h("div",{class:"times"});
       if(!partySport()){
         var p1=h("input",{class:"inp",value:c.pg,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo del campo in euro"});p1.oninput=function(){c.pg=p1.value;c.pm=p1.value};
@@ -519,7 +535,7 @@ function render(){
       var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
       var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
       pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
-      cd.appendChild(h("label",{text:"Prezzo per giocatore all'ora, soci e non soci (facoltativo)"}));cd.appendChild(pr)}
+      cd.appendChild(h("label",{text:"Prezzo a giocatore all'ora (facoltativo)"}));cd.appendChild(pr)}
       v.appendChild(cd)});
     if(S.courts.length)v.appendChild(h("p",{class:"hint",text:partySport()?"Se non c'è differenza tra soci e non soci, scrivi un solo prezzo: vale per tutti. Il campo si paga al centro.":"Il prezzo lo decidi tu, anche diverso da campo a campo. Il campo si paga direttamente al centro, non online."}));
   }
@@ -536,7 +552,7 @@ function render(){
   }
   if(k==="orari"){
     v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare."));
-    var c4=h("div",{class:"card"});
+    var c4=h("div",{class:"card hrs"});
     S.hours.forEach(function(d,i){var r=h("div",{class:"day"});var l=h("label",{class:"tgl"});l.style.margin="0";var cb=h("input",{type:"checkbox"});cb.checked=d.on;
       l.appendChild(cb);l.appendChild(document.createTextNode(DAYN[i]));
       var t=h("div",{class:"times"+(d.on?"":" off")});var a=h("input",{type:"time",value:d.from,"aria-label":"Apre"}),b=h("input",{type:"time",value:d.to,"aria-label":"Chiude"});
@@ -550,8 +566,8 @@ function render(){
     pauseCb.onchange=function(){S.pause.on=pauseCb.checked;pauseT.className="times"+(S.pause.on?"":" off")};
     pauseT.appendChild(pauseA);pauseT.appendChild(h("span",{text:"–"}));pauseT.appendChild(pauseB);pauseRow.appendChild(pauseLbl);pauseRow.appendChild(pauseT);c4.appendChild(pauseRow);
     v.appendChild(c4);
-    v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni di apertura. Orari, pause, chiusure e ferie si possono cambiare in ogni momento da Disponibilità, anche per ogni collaboratore."}));
-    if(S.v!=="campi")v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Sono già impostate: di base i clienti prenotano fino a 3 mesi prima e fino a 15 minuti prima dell'orario, e possono annullare fino a 2 ore prima. Le cambi quando vuoi da Impostazioni."]));
+    v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni. Orari, chiusure e ferie si cambiano quando vuoi da Disponibilità."}));
+    if(S.v!=="campi")v.appendChild(h("p",{class:"hint"},[h("b",{text:"Regole di prenotazione. "}),"Già impostate: si prenota fino a 3 mesi prima e fino a 15 minuti prima, si annulla fino a 2 ore prima. Le cambi da Impostazioni."]));
   }
   if(k==="fine"){
     v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
