@@ -123,12 +123,13 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .lh{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:14px;padding-bottom:6px}
 .lr{border-top:1px solid var(--line)}
 .c-svc{grid-template-columns:minmax(0,1fr) 120px 112px 44px}
-.c-dom{grid-template-columns:minmax(0,1fr) 120px 112px 56px 44px}
+.c-dom{grid-template-columns:minmax(0,1fr) 120px 112px 104px 44px}
 .c-gym{grid-template-columns:minmax(0,1fr) 120px 96px 44px}
 .lr .inp{height:46px;border-radius:12px;padding:0 12px;font-size:.96rem}
 .lr .eur .inp{padding-left:28px}
 .lr .eur span{left:12px}
 .lr .rm{flex:none;width:44px;height:44px}
+.wh{all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;padding:0 10px;border-radius:18px;border:1px solid rgba(45,210,220,.5);color:var(--accent);font-size:.8rem;font-weight:700;text-align:center;justify-self:stretch;display:grid;place-items:center}.wh.alt{border-color:var(--line2);color:var(--muted)}
 .home{all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--muted);justify-self:center}
 .home svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .home[aria-pressed="true"]{background:var(--grad);color:var(--on-accent);border-color:transparent}
@@ -146,7 +147,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .c-svc.lr .f-d{grid-column:1}.c-svc.lr .f-p{grid-column:2/4}
   .c-dom.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
   .c-dom.lr .f-n{grid-column:1/3}.c-dom.lr .f-x{grid-column:3;grid-row:1}
-  .c-dom.lr .f-d{grid-column:1}.c-dom.lr .f-p{grid-column:2}.c-dom.lr .f-h{grid-column:3}
+  .c-dom.lr .f-d{grid-column:1}.c-dom.lr .f-p{grid-column:2/4}.c-dom.lr .f-h{grid-column:1/4}
   .c-gym.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
   .c-gym.lr .f-n{grid-column:1/3}.c-gym.lr .f-x{grid-column:3;grid-row:1}
   .c-gym.lr .f-d{grid-column:1}.c-gym.lr .f-p{grid-column:2/4}
@@ -311,6 +312,8 @@ var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":
  "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),"Altro":[]};
 /* chi puo' offrire servizi online: parrucchieri, barbieri, estetiste, massaggiatori e chi lavora solo a casa del cliente non la vedono nemmeno */
 var NOONLINE={"Parrucchiere":1,"Barbiere":1,"Estetista":1,"Massaggiatore":1,"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1};
+function whInit(){if(S.whFor!==S.mestiere||!S.wh){S.whFor=S.mestiere;S.wh={casa:true,sede:!SOLOCASA[S.mestiere],online:false}}if(!onlineOk())S.wh.online=false}
+function mixedWh(){whInit();return S.v==="domicilio"&&S.wh.casa&&S.wh.sede}
 function onlineOk(){return !NOONLINE[S.mestiere]}
 var SOLOCASA={"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1};
 var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),
@@ -326,14 +329,14 @@ function sportInfo(){return SPORTS.filter(function(x){return x[0]===S.sportLbl})
 // tennis e padel: 2 o 4 giocatori, soci, certificato e FIT. Calcio, pallavolo e gli altri sport: solo il referente, nessun socio, nessuna regola, un prezzo per campo.
 function partySport(){var si=sportInfo();return !!si&&(si[1]==="tennis"||si[1]==="padel")}
 function courtName(c){var n=c.n.trim();var si=sportInfo();if(si&&si[1]==="calcio"&&c.fmt&&!/\b(a|da)\s?(5|7|11)\b/i.test(n))n+=" · a "+c.fmt;return n}
-var SUBT={sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
-var NAMES={sport:"Sport",campi:"Campi",regole:"Regole",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
+var SUBT={dove:"Dove ricevi o vai dai clienti.",sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
+var NAMES={dove:"Dove lavori",sport:"Sport",campi:"Campi",regole:"Regole",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
 var S={sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,online:false,half:false,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","fine"];
-  if(v==="domicilio")return["tipo","attivita","servizi","zona","orari","fine"];
+  if(v==="domicilio")return["tipo","attivita","dove","servizi","zona","orari","fine"];
   if(v==="palestra")return["tipo","attivita","lezioni","calendario","fine"];
   if(v==="campi")return["tipo","attivita","sport","campi","orari"].concat(partySport()?["regole"]:[]).concat(["fine"]);
   if(v==="sanitario")return["tipo","attivita","servizi","orari","privacy","fine"];return["tipo"]}
@@ -374,6 +377,7 @@ function validate(k){
     if(S.courts.some(function(c){return[c.pm,c.pg].some(function(p){p=String(p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti."}
   if(k==="privacy"&&!(S.ok1&&S.ok2))return"Per continuare spunta entrambe le caselle.";
   if(k==="zona"&&!S.cities.length)return"Aggiungi almeno una città dove vai a domicilio.";
+  if(k==="dove"){whInit();if(!S.wh.casa)return"Scegli «A casa del cliente»: questa attività va dai clienti."}
   if(k==="zona"&&!S.items.some(function(x){return x.h}))return"Torna ai servizi e segna almeno un servizio che fai a casa del cliente.";
   if(k==="orari"){if(!S.hours.some(function(x){return x.on}))return"Scegli almeno un giorno di apertura.";
     if(S.hours.some(function(x){return x.on&&(!x.from||!x.to||x.from>=x.to)}))return"Controlla gli orari: l'apertura deve venire prima della chiusura.";
@@ -383,7 +387,7 @@ function validate(k){
   return""}
 function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
-  return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"&&!!SOLOCASA[S.mestiere]}}
+  return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"}}
 function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;S.newIt=S.items.length-1;render();setTimeout(function(){S.newIt=null},1000)}
 var DURS=[15,20,30,40,45,50,60,75,90,120,150,180];
 function rowFor(it,idx,kind,gym,dom,draft,onAdd){
@@ -397,8 +401,7 @@ function rowFor(it,idx,kind,gym,dom,draft,onAdd){
   if(gym){var ki=h("input",{class:"inp f-p",value:it.k,placeholder:"Posti",inputmode:"numeric","aria-label":"Posti"});ki.oninput=function(){it.k=ki.value};if(draft)ki.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};r.appendChild(ki)}
   else{var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};if(draft)pi.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
     r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
-  if(dom){var tg=h("button",{class:"home f-h",type:"button","aria-pressed":it.h?"true":"false","aria-label":"Lo faccio a casa del cliente",title:"Lo faccio a casa del cliente"});tg.innerHTML='<svg viewBox="0 0 24 24">'+ICONS.domicilio+'</svg>';
-    tg.onclick=function(){it.h=!it.h;tg.setAttribute("aria-pressed",it.h?"true":"false")};r.appendChild(tg)}
+  if(dom){var tg=h("button",{class:"wh f-h",type:"button","aria-label":"Dove lo fai",text:it.h?"A casa":"Nel locale"});tg.onclick=function(){it.h=!it.h;tg.textContent=it.h?"A casa":"Nel locale";tg.classList.toggle("alt",!it.h)};if(!it.h)tg.classList.add("alt");r.appendChild(tg)}
   if(draft)r.appendChild(h("span",{class:"f-x"}));
   else r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
   r.dataset.i=draft?"d":idx;
@@ -419,7 +422,7 @@ function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
   if(!S.draft){S.draft=newItem("",0)}
   var box=h("div",{class:"list"});
-  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
+  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"Dove"}):null,h("span")]));
   box.appendChild(rowFor(S.draft,0,kind,gym,dom,true,addDraft));
   var bw=h("div",{class:"addwrap"});
   bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
@@ -442,12 +445,12 @@ function payload(){
       else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
     return base}
   base.trade=tradeName().toLowerCase();
-  base.services=S.items.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:x.d,price_eur:p===""?null:Number(p),at_customer_place:S.v==="domicilio"&&!!x.h}});
+  base.services=S.items.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:x.d,price_eur:p===""?null:Number(p),at_customer_place:S.v==="domicilio"&&(S.wh&&S.wh.sede?!!x.h:true)}});
   base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
     if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
     else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
   if(S.v==="domicilio")base.areas=S.cities.slice();
-  if(S.v==="domicilio"){base.online=onlineOk()&&!!S.online;base.half_hour=!!S.half}
+  if(S.v==="domicilio"){whInit();base.online=onlineOk()&&!!S.wh.online;base.half_hour=false}
   if(S.v==="sanitario")base.dpa=true;
   return base}
 function save(){
@@ -486,15 +489,24 @@ function render(){
     c.appendChild(logoRow());
     v.appendChild(c);
   }
+  if(k==="dove"){
+    whInit();
+    v.appendChild(head(lab,"Dove lavori?","Puoi sceglierne più di una."));
+    var stw=h("div",{class:"stack"});
+    var WO=[["casa","A casa del cliente","Vai tu dal cliente"],["sede","Nel mio locale","Il cliente viene da te"]];if(onlineOk())WO.push(["online","Online","In videochiamata"]);
+    WO.forEach(function(x){var on=!!S.wh[x[0]];
+      var b=h("button",{class:"opt nic",type:"button","aria-pressed":on?"true":"false"},[h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
+      b.onclick=function(){S.wh[x[0]]=!S.wh[x[0]];S.err="";render()};stw.appendChild(b)});
+    v.appendChild(stw);
+  }
   if(k==="servizi"||k==="lezioni"){
     var gym=k==="lezioni";
     v.appendChild(head(lab,gym?"Quali lezioni offri?":"Quali servizi offri?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Abbonamenti e iscritti li imposti dopo, dall'agenda.":"Tocca un suggerimento oppure scrivi i tuoi servizi. Durata e prezzo si possono cambiare, il prezzo può restare vuoto."));
     var sug=gym?GYMSUG:(MESTIERI()[S.mestiere]||[]),left=sug.filter(function(x){return!S.items.some(function(i){return i.n===x[0]})});
     if(left.length){var sb=h("div",{class:"sugs"});sb.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));
       var ch2=h("div",{class:"chips"});left.forEach(function(x){ch2.appendChild(chip("+ "+x[0]+" · "+x[1]+" min",false,function(){addItem(x[0],x[1],false)}))});sb.appendChild(ch2);v.appendChild(sb)}
-    v.appendChild(listBox(gym,S.v==="domicilio"));
-    if(S.v==="domicilio")v.appendChild(h("p",{class:"hint",text:"L'icona della casa segna i servizi che fai a casa del cliente. Gli altri li fai nel tuo locale."}));
-    if(S.v==="domicilio"){
+    v.appendChild(listBox(gym,mixedWh()));
+    if(false){
       var mx=h("div",{class:"card",style:"display:grid;gap:10px;margin-top:14px"},[h("span",{class:"stepl",text:"Come lavori"})]);
       function yn(label,sub,key){var row=h("div",{class:"chips"},[h("div",{style:"flex:1 1 100%"},[h("b",{text:label}),h("small",{text:sub,style:"display:block;color:var(--muted)"})]),
         chip("No",!S[key],function(){S[key]=false;render()}),chip("Sì",!!S[key],function(){S[key]=true;render()})]);return row}
