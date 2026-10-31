@@ -366,6 +366,12 @@ module.exports = async (req, res) => {
       const r = await rpc("signup_start", { p_email: email, p_password: password, p_name: name, p_slug: slug, p_type: type, p_phone: phone, p_token_hash: sha(raw), p_expires: new Date(Date.now() + CONFIRM_MS).toISOString(), p_ref: String(body.ref || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || null });
       if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
       await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch(() => {});
+      // Solo per le prove del titolare: gli indirizzi nico.corona95+qualcosa@icloud.com non hanno bisogno di confermare l'email.
+      if (/^nico\.corona95\+[a-z0-9._-]{1,30}@icloud\.com$/.test(email)) {
+        const c = await rpc("signup_confirm", { p_token_hash: sha(raw) });
+        const row = c.ok && Array.isArray(c.data) ? c.data[0] : null;
+        if (row) { startSession(res, row, false); return res.status(200).json({ ok: true, agenda_token: row.agenda_token }); }
+      }
       const m = confirmMail(name, PUBLIC_URL + "/conferma.html?token=" + raw);
       const sent = await sendMail(email, "Conferma la tua email per iniziare con Prenolia", m.html, m.text);
       // Se l'email non parte lo si dice subito: altrimenti la persona aspetta un messaggio che non arriverà. Riprovando si riceve un link nuovo.

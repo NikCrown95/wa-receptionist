@@ -255,6 +255,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
     }).then(function (res) {
       if (res.ok && res.j && res.j.ok) {
         try { localStorage.removeItem(KEY); } catch (e) {}
+        if (res.j.agenda_token) { location.replace('/benvenuto.html?t=' + encodeURIComponent(res.j.agenda_token)); return; }
         form.style.display = 'none';
         document.getElementById('done').style.display = 'block';
         window.scrollTo(0, 0);
