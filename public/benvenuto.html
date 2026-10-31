@@ -133,6 +133,9 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .home svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .home[aria-pressed="true"]{background:var(--grad);color:var(--on-accent);border-color:transparent}
 .empty{margin:0;padding:22px 16px;text-align:center;color:var(--muted);font-size:.92rem;border-top:1px solid var(--line)}
+.lr.draft{background:rgba(45,210,220,.05);border-top:1px solid var(--line)}
+.addwrap{padding:4px 14px 14px;background:rgba(45,210,220,.05)}
+.lh2{padding:12px 14px 6px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;border-top:1px solid var(--line)}
 .addrow{grid-template-columns:minmax(0,1fr) auto;border-top:1px solid var(--line);background:rgba(255,255,255,.015);padding-top:12px;padding-bottom:12px}
 .addrow .inp{height:46px;border-radius:12px;padding:0 14px}
 .chip.add{min-height:46px}
@@ -383,34 +386,48 @@ function newItem(n,min){
   return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"&&!!SOLOCASA[S.mestiere]}}
 function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;S.newIt=S.items.length-1;render();setTimeout(function(){S.newIt=null},1000)}
 var DURS=[15,20,30,40,45,50,60,75,90,120,150,180];
+function rowFor(it,idx,kind,gym,dom,draft,onAdd){
+  var r=h("div",{class:"lr c-"+kind+(draft?" draft":(S.newIt===idx?" lin":""))});
+  var ni=h("input",{class:"inp f-n",value:it.n,placeholder:gym?"Nome della lezione":"Nome del servizio",maxlength:"80","aria-label":"Nome"});ni.oninput=function(){it.n=ni.value};
+  if(draft)ni.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
+  var sel=h("select",{class:"inp f-d","aria-label":"Durata"});
+  (DURS.indexOf(it.d)<0?DURS.concat([it.d]).sort(function(a,b){return a-b}):DURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
+  sel.onchange=function(){it.d=+sel.value};
+  r.appendChild(ni);r.appendChild(sel);
+  if(gym){var ki=h("input",{class:"inp f-p",value:it.k,placeholder:"Posti",inputmode:"numeric","aria-label":"Posti"});ki.oninput=function(){it.k=ki.value};if(draft)ki.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};r.appendChild(ki)}
+  else{var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};if(draft)pi.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
+    r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
+  if(dom){var tg=h("button",{class:"home f-h",type:"button","aria-pressed":it.h?"true":"false","aria-label":"Lo faccio a casa del cliente",title:"Lo faccio a casa del cliente"});tg.innerHTML='<svg viewBox="0 0 24 24">'+ICONS.domicilio+'</svg>';
+    tg.onclick=function(){it.h=!it.h;tg.setAttribute("aria-pressed",it.h?"true":"false")};r.appendChild(tg)}
+  if(draft)r.appendChild(h("span",{class:"f-x"}));
+  else r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
+  r.dataset.i=draft?"d":idx;
+  return r}
+function addDraft(){
+  var d=S.draft;if(!d||!String(d.n).trim())return false;
+  var rd=document.querySelector(".lr.draft"),from=rd?rd.getBoundingClientRect():null;
+  d.n=d.n.trim();S.items.push(d);var last=S.items.length-1;
+  S.draft=newItem("",0);S.draft.d=d.d;S.draft.h=d.h;S.newIt=null;
+  render();
+  var nr=document.querySelector('.lr[data-i="'+last+'"]');
+  if(nr&&from&&nr.animate){var to=nr.getBoundingClientRect(),dy=from.top-to.top;
+    nr.animate([{transform:"translateY("+dy+"px) scale(.985)",opacity:.0,boxShadow:"0 0 0 3px rgba(45,210,220,.55),0 0 26px rgba(45,210,220,.5)",offset:0},{opacity:1,offset:.25},{transform:"none",opacity:1,boxShadow:"0 0 0 3px rgba(45,210,220,.45),0 0 22px rgba(45,210,220,.4)",offset:.75},{transform:"none",opacity:1,boxShadow:"0 0 0 0 rgba(45,210,220,0),0 0 0 rgba(45,210,220,0)",offset:1}],{duration:850,easing:"cubic-bezier(.22,1,.36,1)"});
+    var nd=document.querySelector(".lr.draft");if(nd&&nd.animate)nd.animate([{backgroundColor:"rgba(45,210,220,.16)"},{backgroundColor:"rgba(45,210,220,0)"}],{duration:700,easing:"ease-out"})}
+  var nin=document.querySelector(".lr.draft .f-n");if(nin)nin.focus();
+  return true}
 function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
+  if(!S.draft){S.draft=newItem("",0)}
   var box=h("div",{class:"list"});
-  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:(gym?"Lezione":"Servizio")+(S.items.length?" · "+S.items.length:"")}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
-  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Nessuna lezione ancora. Tocca un suggerimento qui sopra o scrivine una qui sotto.":"Nessun servizio ancora. Tocca un suggerimento qui sopra o scrivine uno qui sotto."}));
-  S.items.forEach(function(it,idx){
-    var r=h("div",{class:"lr c-"+kind+(S.newIt===idx?" lin":"")});
-    var ni=h("input",{class:"inp f-n",value:it.n,placeholder:gym?"Nome della lezione":"Nome del servizio",maxlength:"80","aria-label":"Nome"});ni.oninput=function(){it.n=ni.value};
-    var sel=h("select",{class:"inp f-d","aria-label":"Durata"});
-    (DURS.indexOf(it.d)<0?DURS.concat([it.d]).sort(function(a,b){return a-b}):DURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
-    sel.onchange=function(){it.d=+sel.value};
-    r.appendChild(ni);r.appendChild(sel);
-    if(gym){var ki=h("input",{class:"inp f-p",value:it.k,placeholder:"Posti",inputmode:"numeric","aria-label":"Posti"});ki.oninput=function(){it.k=ki.value};r.appendChild(ki)}
-    else{var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};
-      r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
-    if(dom){var tg=h("button",{class:"home f-h",type:"button","aria-pressed":it.h?"true":"false","aria-label":"Lo faccio a casa del cliente",title:"Lo faccio a casa del cliente"});tg.innerHTML='<svg viewBox="0 0 24 24">'+ICONS.domicilio+'</svg>';
-      tg.onclick=function(){it.h=!it.h;tg.setAttribute("aria-pressed",it.h?"true":"false")};r.appendChild(tg)}
-    r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
-    box.appendChild(r);
-    if(S.focusLast&&idx===S.items.length-1){setTimeout(function(){ni.focus()},0)}
-  });
+  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
+  box.appendChild(rowFor(S.draft,0,kind,gym,dom,true,addDraft));
+  var bw=h("div",{class:"addwrap"});
+  bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
+  box.appendChild(bw);
+  box.appendChild(h("div",{class:"lh2"},[h("span",{text:(gym?"Lezioni aggiunte":"Servizi aggiunti")+(S.items.length?" · "+S.items.length:"")})]));
+  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Scrivi sopra la prima lezione, oppure tocca un suggerimento.":"Scrivi sopra il primo servizio, oppure tocca un suggerimento."}));
+  S.items.forEach(function(it,idx){box.appendChild(rowFor(it,idx,kind,gym,dom,false))});
   S.focusLast=false;
-  var ar=h("div",{class:"addrow"});
-  var ai=h("input",{class:"inp",placeholder:gym?"Scrivi una lezione e premi Invio":"Scrivi un servizio e premi Invio",maxlength:"80","aria-label":"Nuova voce"});
-  var doAdd=function(){var t=ai.value.trim();if(t){addItem(t,0,true)}else{addItem("",0,true)}};
-  ai.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();doAdd()}};
-  ar.appendChild(ai);ar.appendChild(h("button",{class:"chip add",type:"button",text:"+ Aggiungi",onclick:doAdd}));
-  box.appendChild(ar);
   return box}
 function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
@@ -667,6 +684,7 @@ function render(){
     if(S.busy)return;
     if(k==="tipo"&&!S.v){S.err="Scegli il tipo di attività.";render();return}
     if(k==="campi"&&S.cph!==2){var si9=sportInfo();while(S.courts.length<S.cn){var n9=S.courts.length+1,pv=S.courts[S.courts.length-1];S.courts.push({n:"Campo "+n9,fmt:"5",surf:pv?pv.surf:(si9&&si9[2][0]||""),indoor:pv?pv.indoor:false,d:si9?si9[3]:60,pm:"",pg:"",done:false})}S.courts.length=Math.min(S.courts.length,S.cn);S.cph=2;S.oc=S.courts.findIndex(function(c){return!c.done});if(S.oc<0)S.oc=0;S.err="";render();return}
+    if((k==="servizi"||k==="lezioni")&&S.draft&&String(S.draft.n).trim()){S.items.push(S.draft);S.draft=null}
     var e=validate(k);if(e){S.err=e;render();return}
     if(last){save();return}
     go(1)};
