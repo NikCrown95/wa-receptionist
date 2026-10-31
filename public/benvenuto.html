@@ -248,13 +248,16 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .ready{margin:2px 0 0;text-align:center;color:var(--muted);font-size:.9rem}.ready b{color:var(--ink)}
 .btn.pulse{animation:bpulse 1.8s ease-in-out infinite}
 @keyframes bpulse{0%,100%{box-shadow:0 0 0 0 rgba(45,210,220,.0)}50%{box-shadow:0 0 0 6px rgba(45,210,220,.28),0 0 22px rgba(47,123,255,.45)}}
+.lr.lin{animation:lrin .7s cubic-bezier(.22,1,.36,1) both;border-radius:14px}
+@keyframes lrin{0%{opacity:0;transform:translateY(-12px) scale(.97);box-shadow:0 0 0 3px rgba(45,210,220,.5),0 0 26px rgba(45,210,220,.45)}45%{opacity:1;transform:none}100%{box-shadow:0 0 0 0 rgba(45,210,220,0),0 0 0 rgba(45,210,220,0)}}
+.lr.lout{transition:height .32s cubic-bezier(.65,0,.35,1),opacity .28s ease,transform .32s ease,margin .32s ease;opacity:0;transform:translateX(18px);margin-top:0!important;margin-bottom:0!important}
 .card.closing{transition:height .46s cubic-bezier(.65,0,.35,1),opacity .46s ease,transform .46s cubic-bezier(.65,0,.35,1),border-color .46s;opacity:.55;transform:scale(.985);border-color:var(--accent)}
 @keyframes cclose{to{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:-6px;border-width:0}}
 .card.enter{animation:center .6s cubic-bezier(.22,1,.36,1) both}
 @keyframes center{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
 .csum.flash{animation:cflash 1s cubic-bezier(.22,1,.36,1)}
 @keyframes cflash{0%{box-shadow:0 0 0 3px rgba(45,210,220,.55),0 0 28px rgba(45,210,220,.5);border-color:var(--accent);opacity:.3;transform:scale(.97)}35%{opacity:1;transform:none}100%{box-shadow:0 0 0 0 rgba(45,210,220,0);border-color:var(--line)}}
-@media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash,.btn.pulse{animation:none}}
+@media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash,.btn.pulse,.lr.lin{animation:none}.lr.lout{transition:none}}
 </style>
 </head>
 <body>
@@ -378,7 +381,7 @@ function validate(k){
 function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
   return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"&&!!SOLOCASA[S.mestiere]}}
-function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;render()}
+function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;S.newIt=S.items.length-1;render();setTimeout(function(){S.newIt=null},1000)}
 var DURS=[15,20,30,40,45,50,60,75,90,120,150,180];
 function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
@@ -386,7 +389,7 @@ function listBox(gym,dom){
   box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:(gym?"Lezione":"Servizio")+(S.items.length?" · "+S.items.length:"")}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"A casa"}):null,h("span")]));
   if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Nessuna lezione ancora. Tocca un suggerimento qui sopra o scrivine una qui sotto.":"Nessun servizio ancora. Tocca un suggerimento qui sopra o scrivine uno qui sotto."}));
   S.items.forEach(function(it,idx){
-    var r=h("div",{class:"lr c-"+kind});
+    var r=h("div",{class:"lr c-"+kind+(S.newIt===idx?" lin":"")});
     var ni=h("input",{class:"inp f-n",value:it.n,placeholder:gym?"Nome della lezione":"Nome del servizio",maxlength:"80","aria-label":"Nome"});ni.oninput=function(){it.n=ni.value};
     var sel=h("select",{class:"inp f-d","aria-label":"Durata"});
     (DURS.indexOf(it.d)<0?DURS.concat([it.d]).sort(function(a,b){return a-b}):DURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
@@ -397,7 +400,7 @@ function listBox(gym,dom){
       r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
     if(dom){var tg=h("button",{class:"home f-h",type:"button","aria-pressed":it.h?"true":"false","aria-label":"Lo faccio a casa del cliente",title:"Lo faccio a casa del cliente"});tg.innerHTML='<svg viewBox="0 0 24 24">'+ICONS.domicilio+'</svg>';
       tg.onclick=function(){it.h=!it.h;tg.setAttribute("aria-pressed",it.h?"true":"false")};r.appendChild(tg)}
-    r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){S.items.splice(idx,1);render()}}));
+    r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
     box.appendChild(r);
     if(S.focusLast&&idx===S.items.length-1){setTimeout(function(){ni.focus()},0)}
   });
