@@ -248,12 +248,12 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .ready{margin:2px 0 0;text-align:center;color:var(--muted);font-size:.9rem}.ready b{color:var(--ink)}
 .btn.pulse{animation:bpulse 1.8s ease-in-out infinite}
 @keyframes bpulse{0%,100%{box-shadow:0 0 0 0 rgba(45,210,220,.0)}50%{box-shadow:0 0 0 6px rgba(45,210,220,.28),0 0 22px rgba(47,123,255,.45)}}
-.card.closing{overflow:hidden;animation:cclose .24s ease-in forwards}
+.card.closing{transition:height .46s cubic-bezier(.65,0,.35,1),opacity .46s ease,transform .46s cubic-bezier(.65,0,.35,1),border-color .46s;opacity:.55;transform:scale(.985);border-color:var(--accent)}
 @keyframes cclose{to{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:-6px;border-width:0}}
-.card.enter{animation:center .38s .12s ease-out both}
-@keyframes center{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.csum.flash{animation:cflash .9s ease-out}
-@keyframes cflash{0%{box-shadow:0 0 0 3px rgba(45,210,220,.55),0 0 28px rgba(45,210,220,.5);border-color:var(--accent);max-height:0;opacity:.2}30%{max-height:70px;opacity:1}100%{box-shadow:0 0 0 0 rgba(45,210,220,0);border-color:var(--line)}}
+.card.enter{animation:center .6s cubic-bezier(.22,1,.36,1) both}
+@keyframes center{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+.csum.flash{animation:cflash 1s cubic-bezier(.22,1,.36,1)}
+@keyframes cflash{0%{box-shadow:0 0 0 3px rgba(45,210,220,.55),0 0 28px rgba(45,210,220,.5);border-color:var(--accent);opacity:.3;transform:scale(.97)}35%{opacity:1;transform:none}100%{box-shadow:0 0 0 0 rgba(45,210,220,0);border-color:var(--line)}}
 @media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash,.btn.pulse{animation:none}}
 </style>
 </head>
@@ -576,7 +576,7 @@ function render(){
       var more=S.courts.some(function(x,j){return j!==idx&&!x.done});
       var an=h("button",{class:"chip addnext",type:"button",onclick:function(){if(cd.classList.contains("closing"))return;if(!String(c.n).trim()){S.err="Dai un nome al campo.";render();return}
         var bad=[c.pm,c.pg].some(function(q){q=String(q).trim().replace(",",".");return q!==""&&(!isFinite(Number(q))||Number(q)<0)});if(bad){S.err="Controlla il prezzo: scrivi solo numeri, oppure lascialo vuoto.";render();return}
-        S.err="";cd.classList.add("closing");setTimeout(function(){c.done=true;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},900)},240)}});
+        S.err="";var hh0=cd.offsetHeight;cd.style.height=hh0+"px";cd.style.overflow="hidden";cd.getBoundingClientRect();cd.classList.add("closing");cd.style.height="64px";setTimeout(function(){c.done=true;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},1000)},460)}});
       an.appendChild(h("span",{text:more?"Salva e passa al campo successivo":"Salva campo"}));cd.appendChild(an);
       v.appendChild(cd)});
     v.appendChild(h("p",{class:"ready"},[h("b",{text:nD+" di "+S.courts.length}),allD?" campi compilati. Premi Avanti per continuare.":" campi compilati. Avanti si accende alla fine."]));
