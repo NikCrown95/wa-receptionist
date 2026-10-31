@@ -237,7 +237,7 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
  campi:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M12 5v14"/><circle cx="12" cy="12" r="2.6"/>',
  sanitari:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
  sanitario:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>'};
-var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi nel tuo locale"],
+var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi solo nel tuo locale: niente servizi a domicilio o online"],
  ["domicilio","Servizi anche a domicilio","Ricevi nel tuo locale e vai dai clienti, nelle città che scegli tu"],
  ["palestra","Palestra","Lezioni di gruppo, personal training e iscritti"],
  ["campi","Centro sportivo","Campi da tennis, padel, calcio, pallavolo e altri sport, da prenotare a ore"],
@@ -249,6 +249,9 @@ var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"B
 var M2={"Parrucchiere":M1["Parrucchiere"],"Barbiere":M1["Barbiere"],"Estetista":M1["Estetista"],"Massaggiatore":Q("Massaggio rilassante|50,Massaggio decontratturante|50"),
  "Personal trainer":Q("Allenamento 1 a 1|60,Prima consulenza|30"),"Idraulico":Q("Sopralluogo|30,Riparazione perdita|60,Intervento urgente|90"),"Elettricista":Q("Sopralluogo|30,Riparazione guasto|60,Installazione|90"),
  "Tuttofare":Q("Piccole riparazioni|60,Montaggio mobili|90,Sopralluogo|30"),"Pulizie":Q("Pulizia casa|120,Pulizia straordinaria|180"),"Ripetizioni":Q("Lezione di 1 ora|60,Lezione di prova|60"),"Altro":[]};
+/* chi puo' offrire servizi online: parrucchieri, barbieri, estetiste, massaggiatori e chi lavora solo a casa del cliente non la vedono nemmeno */
+var NOONLINE={"Parrucchiere":1,"Barbiere":1,"Estetista":1,"Massaggiatore":1,"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1};
+function onlineOk(){return !NOONLINE[S.mestiere]}
 var SOLOCASA={"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1};
 var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),
  "Osteopata":Q("Prima visita|60,Seduta|45,Seduta di controllo|30"),"Nutrizionista":Q("Prima visita|60,Visita di controllo|30"),"Psicologo":Q("Primo colloquio|50,Colloquio|50"),
@@ -369,7 +372,7 @@ function payload(){
     if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
     else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
   if(S.v==="domicilio")base.areas=S.cities.slice();
-  if(S.v==="domicilio"){base.online=!!S.online;base.half_hour=!!S.half}
+  if(S.v==="domicilio"){base.online=onlineOk()&&!!S.online;base.half_hour=!!S.half}
   if(S.v==="sanitario")base.dpa=true;
   return base}
 function save(){
@@ -420,7 +423,7 @@ function render(){
       var mx=h("div",{class:"card",style:"display:grid;gap:10px;margin-top:14px"},[h("span",{class:"stepl",text:"Come lavori"})]);
       function yn(label,sub,key){var row=h("div",{class:"chips"},[h("div",{style:"flex:1 1 100%"},[h("b",{text:label}),h("small",{text:sub,style:"display:block;color:var(--muted)"})]),
         chip("No",!S[key],function(){S[key]=false;render()}),chip("Sì",!!S[key],function(){S[key]=true;render()})]);return row}
-      mx.appendChild(yn("Offri anche servizi online?","In videochiamata, per esempio consulenze o lezioni.","online"));
+      if(onlineOk())mx.appendChild(yn("Offri anche servizi online?","In videochiamata, per esempio consulenze o lezioni.","online"));
       mx.appendChild(yn("I clienti possono prenotare a mezz'ore?","Oltre alla durata minima possono aggiungere mezz'ore.","half"));
       mx.appendChild(h("p",{class:"hint",text:"Queste scelte decidono cosa vedranno i tuoi clienti. Se non le spunti, non compariranno."}));
       v.appendChild(mx)}

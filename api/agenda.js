@@ -756,7 +756,7 @@ module.exports = async (req, res) => {
             if (!sl2.some((x) => x.at_customer_place)) return res.status(400).json({ error: "Segna almeno un servizio che fai a casa del cliente." });
           }
           patch.service_areas = areas;
-          if (kind === "domicilio") { patch.offers_online = body.online === true; patch.half_hour_ok = body.half_hour === true; }
+          if (kind === "domicilio") { patch.offers_online = body.online === true && !/^(parrucchier|barbier|estetist|massaggiator|idraulic|elettricist|tuttofare|pulizi)/.test(String(body.trade || "").trim().toLowerCase()); patch.half_hour_ok = body.half_hour === true; }
           const p2 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
           if (!p2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
           await sb("DELETE", "services?business_id=eq." + biz.id, null, "return=minimal");
