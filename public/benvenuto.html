@@ -433,7 +433,7 @@ function listBox(gym,dom){
   bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
   box.appendChild(bw);
   box.appendChild(h("div",{class:"lh2"},[h("span",{text:(gym?"Lezioni aggiunte":"Servizi aggiunti")+(S.items.length?" · "+S.items.length:"")})]));
-  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Scrivi sopra la prima lezione, oppure tocca un suggerimento.":"Scrivi sopra il primo servizio, oppure tocca un suggerimento."}));
+  if(!S.items.length)box.appendChild(h("p",{class:"empty",text:gym?"Scrivi sopra la prima lezione, oppure tocca un suggerimento.":"Scrivi sopra il primo servizio e premi Aggiungi."}));
   S.items.forEach(function(it,idx){box.appendChild(rowFor(it,idx,kind,gym,dom,false))});
   S.focusLast=false;
   return box}
@@ -506,8 +506,8 @@ function render(){
   }
   if(k==="servizi"||k==="lezioni"){
     var gym=k==="lezioni";
-    v.appendChild(head(lab,gym?"Quali lezioni offri?":"Quali servizi offri?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Abbonamenti e iscritti li imposti dopo, dall'agenda.":"Tocca un suggerimento oppure scrivi i tuoi servizi. Durata e prezzo si possono cambiare, il prezzo può restare vuoto."));
-    var sug=gym?GYMSUG:(MESTIERI()[S.mestiere]||[]),left=sug.filter(function(x){return!S.items.some(function(i){return i.n===x[0]})});
+    v.appendChild(head(lab,gym?"Quali lezioni offri?":"Quali servizi offri?",gym?"Tocca un suggerimento oppure scrivi le tue lezioni. Abbonamenti e iscritti li imposti dopo, dall'agenda.":"Scrivi nome, durata e prezzo di ogni servizio. Il prezzo può restare vuoto."));
+    var sug=gym?GYMSUG:[],left=sug.filter(function(x){return!S.items.some(function(i){return i.n===x[0]})});
     if(left.length){var sb=h("div",{class:"sugs"});sb.appendChild(h("span",{class:"stepl",text:"Tocca per aggiungere"}));
       var ch2=h("div",{class:"chips"});left.forEach(function(x){ch2.appendChild(chip("+ "+x[0]+" · "+x[1]+" min",false,function(){addItem(x[0],x[1],false)}))});sb.appendChild(ch2);v.appendChild(sb)}
     v.appendChild(listBox(gym,mixedWh()));
