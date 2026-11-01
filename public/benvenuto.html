@@ -123,12 +123,21 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .lh{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:14px;padding-bottom:6px}
 .lr{border-top:1px solid var(--line)}
 .c-svc{grid-template-columns:minmax(0,1fr) 120px 112px 44px}
-.c-dom{grid-template-columns:minmax(0,1fr) 120px 112px 104px 44px}
+.c-dom{grid-template-columns:minmax(0,1fr) 120px 44px}
 .c-gym{grid-template-columns:minmax(0,1fr) 120px 96px 44px}
 .lr .inp{height:46px;border-radius:12px;padding:0 12px;font-size:.96rem}
 .lr .eur .inp{padding-left:28px}
 .lr .eur span{left:12px}
 .lr .rm{flex:none;width:44px;height:44px}
+.c-dom.lr .f-h{grid-column:1/-1}.c-dom.lr .f-x{grid-column:3;grid-row:1}
+.c-dom.lr .f-n{grid-column:1;grid-row:1}.c-dom.lr .f-d{grid-column:2;grid-row:1}
+.mms{display:grid;gap:8px}.mm{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:10px;align-items:center}
+.mm .wh{justify-self:stretch;min-height:44px;border-radius:14px;justify-content:start;padding:0 14px;text-align:left;display:flex;align-items:center;gap:10px;font-size:.92rem}
+.mm .wh::before{content:"";width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line2);flex:none}
+.mm .wh[aria-pressed="true"]{background:rgba(45,210,220,.12)}.mm .wh[aria-pressed="true"]::before{border:0;background:var(--grad)}
+.mm .wh[aria-pressed="false"]{color:var(--muted);border-color:var(--line2)}
+.mm:not(.on) .eur{opacity:.4}
+.mm .eur .inp{height:44px}
 .wh{all:unset;cursor:pointer;box-sizing:border-box;min-height:36px;padding:0 10px;border-radius:18px;border:1px solid rgba(45,210,220,.5);color:var(--accent);font-size:.8rem;font-weight:700;text-align:center;justify-self:stretch;display:grid;place-items:center}.wh.alt{border-color:var(--line2);color:var(--muted)}
 .home{all:unset;cursor:pointer;box-sizing:border-box;width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--muted);justify-self:center}
 .home svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -147,7 +156,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .c-svc.lr .f-d{grid-column:1}.c-svc.lr .f-p{grid-column:2/4}
   .c-dom.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
   .c-dom.lr .f-n{grid-column:1/3}.c-dom.lr .f-x{grid-column:3;grid-row:1}
-  .c-dom.lr .f-d{grid-column:1}.c-dom.lr .f-p{grid-column:2/4}.c-dom.lr .f-h{grid-column:1/4}
+  .c-dom.lr .f-d{grid-column:1/4}.c-dom.lr .f-h{grid-column:1/4}
   .c-gym.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
   .c-gym.lr .f-n{grid-column:1/3}.c-gym.lr .f-x{grid-column:3;grid-row:1}
   .c-gym.lr .f-d{grid-column:1}.c-gym.lr .f-p{grid-column:2/4}
@@ -318,7 +327,10 @@ var M2={"Idraulico":[],"Elettricista":[],"Tuttofare":[],"Fabbro":[],"Imbianchino
 /* chi puo' offrire servizi online: parrucchieri, barbieri, estetiste, massaggiatori e chi lavora solo a casa del cliente non la vedono nemmeno */
 var NOONLINE={"Parrucchiere":1,"Barbiere":1,"Estetista":1,"Massaggiatore":1,"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tecnico caldaie":1,"Beauty a domicilio":1};
 function whInit(){if(S.whFor!==S.mestiere||!S.wh){S.whFor=S.mestiere;S.wh={casa:true,sede:!SOLOCASA[S.mestiere],online:false}}if(!onlineOk())S.wh.online=false}
-function mixedWh(){whInit();return S.v==="domicilio"&&S.wh.casa&&S.wh.sede}
+function whList(){whInit();return["casa","sede","online"].filter(function(k){return S.wh[k]})}
+function mixedWh(){return S.v==="domicilio"&&whList().length>1}
+function itModes(it){var l=whList();if(l.length<2)return l;var m=it.m||{};var r=l.filter(function(k){return m[k]===true});return r.length?r:[l[0]]}
+function mPrice(it,k){var v=(it.mp&&it.mp[k]!==undefined)?it.mp[k]:(it.p||"");return String(v).trim().replace(",",".")}
 function onlineOk(){return !NOONLINE[S.mestiere]}
 var SOLOCASA={"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tecnico caldaie":1,"Beauty a domicilio":1};
 var M3={"Dentista":Q("Prima visita|30,Igiene dentale|45,Visita di controllo|30"),"Fisioterapista":Q("Prima valutazione|45,Seduta|45,Seduta di controllo|30"),
@@ -372,7 +384,7 @@ function validate(k){
     if(S.v!=="palestra"&&S.v!=="campi"&&S.v!=="sanitario"){var tn=tradeName().toLowerCase();if(Object.keys(M3).some(function(x){return x.toLowerCase()===tn}))return"Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»."}}
   if(k==="servizi"||k==="lezioni"){
     if(!S.items.length||S.items.some(function(x){return!x.n.trim()}))return S.items.length?"Dai un nome a ogni voce, oppure rimuovila.":(k==="lezioni"?"Aggiungi almeno una lezione.":"Aggiungi almeno un servizio.");
-    if(k==="servizi"&&S.items.some(function(x){var p=String(x.p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
+    if(k==="servizi"&&S.items.some(function(x){var ks=S.v==="domicilio"?itModes(x):["x"];return ks.some(function(k2){var p=mPrice(x,k2);return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
   if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
@@ -383,7 +395,7 @@ function validate(k){
   if(k==="privacy"&&!(S.ok1&&S.ok2))return"Per continuare spunta entrambe le caselle.";
   if(k==="zona"&&!S.cities.length)return"Aggiungi almeno una città dove vai a domicilio.";
   if(k==="dove"){whInit();if(!S.wh.casa)return"Scegli «A casa del cliente»: questa attività va dai clienti."}
-  if(k==="zona"&&!S.items.some(function(x){return x.h}))return"Torna ai servizi e segna almeno un servizio che fai a casa del cliente.";
+  if(k==="zona"&&!S.items.some(function(x){return itModes(x).indexOf("casa")>=0}))return"Torna ai servizi e segna almeno un servizio che fai a casa del cliente.";
   if(k==="orari"){if(!S.hours.some(function(x){return x.on}))return"Scegli almeno un giorno di apertura.";
     if(S.hours.some(function(x){return x.on&&(!x.from||!x.to||x.from>=x.to)}))return"Controlla gli orari: l'apertura deve venire prima della chiusura.";
     if(S.pause.on){if(!S.pause.from||!S.pause.to||S.pause.from>=S.pause.to)return"Controlla la pausa: deve iniziare prima di finire.";
@@ -392,7 +404,7 @@ function validate(k){
   return""}
 function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
-  return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",h:S.v==="domicilio"}}
+  return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",m:null,mp:null}}
 function addItem(n,min,focus){S.items.push(newItem(n,min));S.focusLast=!!focus;S.newIt=S.items.length-1;render();setTimeout(function(){S.newIt=null},1000)}
 var DURS=[15,20,30,40,45,50,60,75,90,120,150,180];
 function rowFor(it,idx,kind,gym,dom,draft,onAdd){
@@ -403,10 +415,24 @@ function rowFor(it,idx,kind,gym,dom,draft,onAdd){
   (DURS.indexOf(it.d)<0?DURS.concat([it.d]).sort(function(a,b){return a-b}):DURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==it.d)o.selected=true;sel.appendChild(o)});
   sel.onchange=function(){it.d=+sel.value};
   r.appendChild(ni);r.appendChild(sel);
+  var multi=dom&&!gym;
   if(gym){var ki=h("input",{class:"inp f-p",value:it.k,placeholder:"Posti",inputmode:"numeric","aria-label":"Posti"});ki.oninput=function(){it.k=ki.value};if(draft)ki.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};r.appendChild(ki)}
-  else{var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};if(draft)pi.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
+  else if(!multi){var pi=h("input",{class:"inp",value:it.p,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo in euro"});pi.oninput=function(){it.p=pi.value};if(draft)pi.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
     r.appendChild(h("div",{class:"eur f-p"},[h("span",{text:"€"}),pi]))}
-  if(dom){var tg=h("button",{class:"wh f-h",type:"button","aria-label":"Dove lo fai",text:it.h?"A casa":"Nel locale"});tg.onclick=function(){it.h=!it.h;tg.textContent=it.h?"A casa":"Nel locale";tg.classList.toggle("alt",!it.h)};if(!it.h)tg.classList.add("alt");r.appendChild(tg)}
+  if(multi){
+    var wl=whList(),WN={casa:"A casa del cliente",sede:"Nel mio locale",online:"Online"};
+    var mm=h("div",{class:"mms f-h"});
+    wl.forEach(function(k){
+      var on=itModes(it).indexOf(k)>=0;
+      var row=h("div",{class:"mm"+(on?" on":"")});
+      var bt=h("button",{class:"wh",type:"button","aria-pressed":on?"true":"false",text:WN[k]});
+      var pin=h("input",{class:"inp",value:(it.mp&&it.mp[k]!==undefined)?it.mp[k]:(it.p||""),placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo "+WN[k]});
+      pin.oninput=function(){if(!it.mp)it.mp={};it.mp[k]=pin.value};pin.onfocus=function(){if(!row.classList.contains("on")){var c3=itModes(it).slice();c3.push(k);it.m={};wl.forEach(function(q){it.m[q]=c3.indexOf(q)>=0});if(!it.mp)it.mp={};it.mp[k]=pin.value;row.classList.add("on");bt.setAttribute("aria-pressed","true")}};
+      if(draft)pin.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();onAdd()}};
+      var pw=h("div",{class:"eur"},[h("span",{text:"€"}),pin]);
+      bt.onclick=function(){var c2=itModes(it).slice(),i=c2.indexOf(k);if(i>=0){if(c2.length<2)return;c2.splice(i,1)}else c2.push(k);it.m={};wl.forEach(function(q){it.m[q]=c2.indexOf(q)>=0});if(!it.mp)it.mp={};render()};
+      row.appendChild(bt);row.appendChild(pw);mm.appendChild(row)});
+    r.appendChild(mm)}
   if(draft)r.appendChild(h("span",{class:"f-x"}));
   else r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
   r.dataset.i=draft?"d":idx;
@@ -415,7 +441,7 @@ function addDraft(){
   var d=S.draft;if(!d||!String(d.n).trim())return false;
   var rd=document.querySelector(".lr.draft"),from=rd?rd.getBoundingClientRect():null;
   d.n=d.n.trim();S.items.push(d);var last=S.items.length-1;
-  S.draft=newItem("",0);S.draft.d=d.d;S.draft.h=d.h;S.newIt=null;
+  S.draft=newItem("",0);S.draft.d=d.d;S.draft.m=d.m?JSON.parse(JSON.stringify(d.m)):null;S.newIt=null;
   render();
   var nr=document.querySelector('.lr[data-i="'+last+'"]');
   if(nr&&from&&nr.animate){var to=nr.getBoundingClientRect(),dy=from.top-to.top;
@@ -427,7 +453,7 @@ function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
   if(!S.draft){S.draft=newItem("",0)}
   var box=h("div",{class:"list"});
-  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),h("span",{text:gym?"Posti":"Prezzo"}),dom?h("span",{text:"Dove"}):null,h("span")]));
+  box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),dom?null:h("span",{text:gym?"Posti":"Prezzo"}),h("span")]));
   box.appendChild(rowFor(S.draft,0,kind,gym,dom,true,addDraft));
   var bw=h("div",{class:"addwrap"});
   bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
@@ -450,12 +476,12 @@ function payload(){
       else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
     return base}
   base.trade=tradeName().toLowerCase();
-  base.services=S.items.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:x.d,price_eur:p===""?null:Number(p),at_customer_place:S.v==="domicilio"&&(S.wh&&S.wh.sede?!!x.h:true)}});
+  base.services=S.items.map(function(x){var md=S.v==="domicilio"?itModes(x):[];var modes=md.map(function(k){var q=mPrice(x,k);return{mode:k==="casa"?"domicilio":k,price_eur:q===""?null:Number(q)}});var p=String(x.p).trim().replace(",",".");var p1=modes.length?modes[0].price_eur:(p===""?null:Number(p));return{name:x.n.trim(),duration_min:x.d,price_eur:p1,at_customer_place:md.indexOf("casa")>=0,modes:modes}});
   base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
     if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
     else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
   if(S.v==="domicilio")base.areas=S.cities.slice();
-  if(S.v==="domicilio"){whInit();base.online=onlineOk()&&!!S.wh.online;base.half_hour=false}
+  if(S.v==="domicilio"){whInit();base.online=onlineOk()&&!!S.wh.online&&S.items.some(function(x){return itModes(x).indexOf("online")>=0});base.half_hour=false}
   if(S.v==="sanitario")base.dpa=true;
   return base}
 function save(){
@@ -677,7 +703,7 @@ function render(){
     } else {
       var sb2=h("div",{class:"rows"});
       S.items.forEach(function(x){var p=String(x.p).trim().replace(",",".");
-        var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio"&&x.h)?h("small",{class:"home-tag",text:"A casa del cliente"}):(S.v==="domicilio"?h("small",{text:"Nel tuo locale"}):null)]);
+        var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio")?h("small",{class:itModes(x).indexOf("casa")>=0?"home-tag":"",text:itModes(x).map(function(k){var q=mPrice(x,k);return(k==="casa"?"A casa":(k==="sede"?"Nel locale":"Online"))+(q!==""?" € "+q:"")}).join(" · ")}):null]);
         sb2.appendChild(h("div",{class:"rr"},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
       v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
       var wk=h("div",{class:"week"});

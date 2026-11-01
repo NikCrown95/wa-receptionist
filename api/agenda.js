@@ -738,7 +738,23 @@ module.exports = async (req, res) => {
             const sn = String((x && x.name) || "").trim().slice(0, 80), dur = Number(x && x.duration_min);
             const pr = x && x.price_eur !== null && x.price_eur !== undefined && String(x.price_eur).trim() !== "" ? Number(String(x.price_eur).replace(",", ".")) : null;
             if (!sn || !Number.isInteger(dur) || dur < 5 || dur > 480 || (pr !== null && (!Number.isFinite(pr) || pr < 0 || pr > 100000))) return res.status(400).json({ error: "Controlla nome, durata e prezzo di ogni servizio." });
-            sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true });
+            const okOnline = body.online === true && !/^(parrucchier|barbier|estetist|massaggiator|idraulic|elettricist|tuttofare|pulizi|fabbr|imbianc|giardinier|tecnico caldai|beauty)/.test(String(body.trade || "").trim().toLowerCase());
+            const mlist = [];
+            if (kind === "domicilio" && Array.isArray(x.modes)) {
+              for (const m of x.modes) {
+                const md = String((m && m.mode) || "");
+                if (!["sede", "domicilio", "online"].includes(md) || mlist.some((o) => o.mode === md) || (md === "online" && !okOnline)) continue;
+                const mp = m.price_eur !== null && m.price_eur !== undefined && String(m.price_eur).trim() !== "" ? Number(m.price_eur) : null;
+                if (mp !== null && (!Number.isFinite(mp) || mp < 0 || mp > 100000)) return res.status(400).json({ error: "Controlla nome, durata e prezzo di ogni servizio." });
+                mlist.push({ mode: md, price_eur: mp });
+              }
+            }
+            if (mlist.length) {
+              const gid = mlist.length > 1 ? crypto.randomUUID() : null;
+              for (const m of mlist) { const row = { business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true }; if (gid || m.mode === "online") { row.mode = m.mode; if (gid) row.group_id = gid; } sl2.push(row); }
+            } else {
+              sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true });
+            }
           }
           const hrs = Array.isArray(body.hours) ? body.hours : [];
           if (!hrs.length || hrs.length > 28) return res.status(400).json({ error: "Scegli almeno un giorno di apertura." });
@@ -760,7 +776,12 @@ module.exports = async (req, res) => {
           const p2 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
           if (!p2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
           await sb("DELETE", "services?business_id=eq." + biz.id, null, "return=minimal");
-          const si = await sb("POST", "services", sl2, "return=minimal");
+          let si = await sb("POST", "services", sl2, "return=minimal");
+          if (!si.ok && sl2.some((r) => r.mode)) {
+            // colonne mode/group_id non ancora create: si salvano solo sede e domicilio, come prima
+            const old = sl2.filter((r) => r.mode !== "online").map((r) => ({ business_id: r.business_id, name: r.name, duration_min: r.duration_min, buffer_min: 0, price_eur: r.price_eur, at_customer_place: r.at_customer_place, active: true }));
+            si = old.length ? await sb("POST", "services", old, "return=minimal") : si;
+          }
           if (!si.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare i servizi. Riprova." });
           await sb("DELETE", "opening_hours?resource_id=eq." + resource.id, null, "return=minimal");
           const hi = await sb("POST", "opening_hours", hc, "return=minimal");
