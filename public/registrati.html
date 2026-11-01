@@ -20,7 +20,7 @@ h1,h2,p{margin:0}button{font-family:inherit}
 .shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,480px);gap:72px;align-items:center;min-height:calc(100vh - 100px)}
 .side{display:flex;flex-direction:column;gap:30px}
 .side>*{flex:none}
-@media (min-width:901px){.shell{align-content:center;align-items:stretch;grid-template-rows:auto}.side{justify-content:space-between;gap:14px;align-self:start}.path li{padding-bottom:16px}.path li:last-child{padding-bottom:0}.side h2{font-size:2.2rem}.rules{padding:12px 16px}.side .path{margin-top:0}}
+@media (min-width:901px){.shell{align-content:center;align-items:stretch;grid-template-rows:auto}.side{justify-content:space-between;gap:24px;align-self:start}.side .path{margin-top:0}}
 .logo{--lp:left center;position:relative;display:block;width:150px;height:36px}
 .logo::before{content:"";position:absolute;inset:0;background:var(--logo) var(--lp) / contain no-repeat;clip-path:inset(0 20.5% 0 0)}
 .logo .a{position:absolute;inset:0;pointer-events:none;animation:aglow 3.6s ease-in-out infinite}
@@ -44,8 +44,6 @@ h1,h2,p{margin:0}button{font-family:inherit}
 .path li.now .n{animation-name:plsnow;background:var(--grad);color:var(--on-accent);border-color:transparent;box-shadow:0 0 0 6px rgba(45,210,220,.12),0 8px 26px -8px rgba(45,210,220,.6)}
 .path b{display:block;font-size:1.02rem;font-weight:700;margin-top:2px}
 .path span{display:block;font-size:.88rem;color:var(--muted)}
-.rules{margin:0;padding:14px 16px;border-radius:16px;border:1px solid var(--line2);background:var(--card);font-size:.88rem;line-height:1.45;color:var(--muted);max-width:44ch}
-.rules b{display:block;color:var(--ink);font-size:.92rem;font-weight:700;margin-bottom:3px}
 .card{border-radius:28px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card),#0B1017);padding:34px 32px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
 h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
 .sub{color:var(--muted);font-size:.95rem;margin:0 0 4px}
@@ -88,7 +86,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
   .shell{display:block;max-width:480px;min-height:0}
   .side{gap:14px;margin-bottom:24px;align-items:center;text-align:center}
   .logo{--lp:center;margin:0 auto}
-  .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}.rules{display:none}
+  .side h2{font-size:1.6rem;max-width:none}.side .lead{display:none}.path{display:none}
   .card{padding:26px 20px}.row2{grid-template-columns:1fr}
 }
 /* smartphone: layout ariosi; su schermi bassi la pagina scorre un po. --x cresce con l altezza disponibile. */
@@ -140,7 +138,6 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
       <li><div class="n">2</div><div><b>Conferma l'email</b><span>Un click sul link e la prova gratuita di 14 giorni parte.</span></div></li>
       <li><div class="n">3</div><div><b>Configura la tua agenda</b><span>Percorso guidato: attività, servizi, orari. Poi sei pronto.</span></div></li>
     </ol>
-    <p class="rules"><b>Regole di prenotazione già pronte</b>I clienti prenotano fino a 3 mesi prima e fino a 15 minuti prima, e annullano fino a 2 ore prima. Le cambi quando vuoi.</p>
   </aside>
 
   <main>
