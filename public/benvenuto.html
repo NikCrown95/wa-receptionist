@@ -181,6 +181,8 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 @keyframes feedin{from{opacity:0;transform:translateX(-12px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @media (prefers-reduced-motion:reduce){.orb .spin,.orb .spin2,.orb .halo{animation:none}.orb .arc,.orb .dot{transition:none}.feed li.new{animation:none}}
 .hero{display:flex;align-items:center;gap:16px;padding:18px;border-radius:22px;border:1px solid transparent;background:linear-gradient(135deg,#102430,#0E1A2A) padding-box,var(--grad) border-box;box-shadow:0 14px 40px -16px rgba(45,210,220,.45)}
+.hero .ic.lg{width:64px;height:64px;padding:0;overflow:hidden;background:var(--card2);border:1px solid var(--line2)}
+.hero .ic.lg img{width:100%;height:100%;object-fit:cover;display:block}
 .hero .ic{background:var(--grad);color:var(--on-accent);border-color:transparent;flex:none}
 .hero div{min-width:0}
 .hero b{display:block;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}
@@ -652,7 +654,7 @@ function render(){
   if(k==="fine"){
     v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
     var vn=VERT.filter(function(x){return x[0]===S.v})[0][1];
-    var hero=h("div",{class:"hero"},[h("span",{class:"ic"},[svg(S.v)]),h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:(S.v==="campi"?vn+" · "+S.sportLbl:vn+" · "+tradeName())})])]);
+    var heroIc=S.logo?h("span",{class:"ic lg"},[h("img",{src:S.logo,alt:""})]):h("span",{class:"ic"},[svg(S.v)]);var hero=h("div",{class:"hero"},[heroIc,h("div",null,[h("b",{text:S.nome.trim()}),h("span",{text:S.v==="palestra"?vn:(S.v==="campi"?vn+" · "+S.sportLbl:vn+" · "+tradeName())})])]);
     v.appendChild(hero);
     function sec(title,stepName,body,count){
       var idx=flow().indexOf(stepName);
