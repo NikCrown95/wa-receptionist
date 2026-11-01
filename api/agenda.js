@@ -656,6 +656,18 @@ module.exports = async (req, res) => {
         // Chi non ha scelto "Studi sanitari" non può finire con un tipo sanitario (scrivendolo a mano in "Altro"): salterebbe l'Accordo.
         if (kind !== "sanitario" && require("../lib/verticals.js").isMedical(btype)) return res.status(400).json({ error: "Questo è uno studio sanitario: torna indietro e scegli «Studi sanitari»." });
         const patch = { name: bname, business_type: btype };
+        // Regole di prenotazione scelte nella configurazione (valori non validi: restano quelli predefiniti)
+        if (body.rules && typeof body.rules === "object") {
+          const rn = Number(body.rules.min_notice_min), rc = Number(body.rules.cancel_limit_hours), ra = Number(body.rules.max_advance_days), rt = Number(body.rules.travel_min);
+          const okN = [15, 30, 60, 120, 180, 360, 720, 1440, 2880].includes(rn), okC = [0, 1, 2, 4, 12, 24, 48].includes(rc), okA = [7, 14, 30, 60, 90, 180].includes(ra);
+          const okT = kind === "domicilio" && [0, 15, 30, 45, 60, 90, 120, 180].includes(rt);
+          const rp = {};
+          if (okN && rn !== 15) rp.min_notice_min = rn;
+          if (okC && rc !== 2) rp.cancel_limit_hours = rc;
+          if (okA && ra !== 90) rp.max_advance_days = ra;
+          if (okT && rt !== 0) rp.travel_min = rt;
+          if (Object.keys(rp).length) { const rr = await sb("PATCH", "businesses?id=eq." + biz.id, rp, "return=minimal"); if (!rr.ok) console.error("onboarding rules", rr.status); }
+        }
 
         if (kind === "sanitario") {
           // Studi sanitari: il tipo deve essere uno di quelli protetti (altrimenti perderebbe le garanzie) e serve l'accettazione dell'Accordo.
