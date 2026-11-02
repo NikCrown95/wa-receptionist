@@ -699,7 +699,6 @@ function render(){
       var cd2=h("div",{class:"rlbig"+(S.rlNew===i?" enter":"")},[h("span",{class:"n",text:"Domanda "+(i+1)+" di "+rows.length}),h("h2",{text:r[0]}),h("p",{text:r[5]})]);
       var cs=h("div",{class:"rlopts"});
       r[2].forEach(function(o){var on=val===o[0];var b=h("button",{class:"rlo",type:"button","aria-pressed":on?"true":"false"},[h("span",{text:o[1]})]);
-        if(o[0]===r[3])b.appendChild(h("i",{text:"consigliato"}));
         b.onclick=function(){S.rl[r[1]]=o[0];var nu=rows.findIndex(function(q){return S.rl[q[1]]===null});S.rlOpen=nu<0?-1:nu;S.rlNew=nu<0?null:nu;render();setTimeout(function(){S.rlNew=null},700)};cs.appendChild(b)});
       cd2.appendChild(cs);rc.appendChild(cd2)});
     v.appendChild(rc);
