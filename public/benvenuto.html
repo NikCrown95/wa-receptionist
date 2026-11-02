@@ -421,7 +421,7 @@ function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0]
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
  "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
  "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),"Altro":[]};
-var M2={"Idraulico":[],"Elettricista":[],"Tuttofare":[],"Fabbro":[],"Imbianchino":[],"Giardiniere":[],"Pulizie":[],"Tecnico caldaie":[],"Personal trainer":[],"Ripetizioni":[],"Tecnico informatico":[],"Consulente":[],"Fotografo":[],"Babysitter":[],"Dog sitter":[],"Beauty a domicilio":[],"Altro":[]};
+var M2={"Idraulico":[],"Elettricista":[],"Tuttofare":[],"Pulizie":[],"Tecnico caldaie":[],"Personal trainer":[],"Ripetizioni":[],"Consulente":[],"Beauty a domicilio":[],"Altro":[]};
 /* chi puo' offrire servizi online: parrucchieri, barbieri, estetiste, massaggiatori e chi lavora solo a casa del cliente non la vedono nemmeno */
 var NOONLINE={"Parrucchiere":1,"Barbiere":1,"Estetista":1,"Massaggiatore":1,"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tecnico caldaie":1,"Beauty a domicilio":1};
 function whInit(){if(S.whFor!==S.mestiere||!S.wh){S.whFor=S.mestiere;S.wh={casa:true,sede:!SOLOCASA[S.mestiere],online:false}}if(!onlineOk())S.wh.online=false}
