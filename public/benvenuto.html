@@ -720,11 +720,14 @@ function render(){
     fc.appendChild(ab);pwrap.appendChild(fc);v.appendChild(pwrap);
   }
   if(k==="iscritti"){
-    v.appendChild(head(lab,"Come funzioneranno gli iscritti","Dopo l'apertura dell'agenda registri chi si iscrive, una volta sola."));
-    var ex=h("div",{class:"card",style:"display:grid;gap:14px"});
-    [["1","Registra l'iscritto","Bastano nome, cognome e numero di telefono."],["2","Assegna il suo pacchetto","Scegli tra quelli che hai creato: lo trovi aggiornato in ogni momento."],["3","Prenota da solo","Il sistema riconosce il numero di telefono: sa già se è iscritto e se il pacchetto vale per "+(S.gcl===false?"il personal":(S.gpt?"i corsi e per il personal":"i corsi"))+"."]].forEach(function(t){ex.appendChild(h("div",{style:"display:flex;gap:12px;align-items:flex-start"},[h("span",{class:"offk",style:"flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:800"},[t[0]]),h("div",null,[h("b",{text:t[1]}),h("small",{text:t[2],style:"display:block;color:var(--muted)"})])]))});
+    var pers=S.gcl===false||!!S.gpt,pk=pers?"pacchetto":"abbonamento";
+    v.appendChild(head(lab,"I tuoi iscritti","Nell'agenda avrai l'elenco di chi frequenta la tua palestra. Funziona così."));
+    var ex=h("div",{class:"card",style:"display:grid;gap:16px"});
+    [["1","Aggiungi chi si iscrive","Inserisci nome, cognome e numero di telefono. Lo fai una volta sola."],
+     ["2","Assegnagli il "+pk,pers?"Scegli quello che ha comprato, per esempio 10 sessioni di personal.":"Scegli l'abbonamento che ha sottoscritto."],
+     ["3","Poi prenota da solo","Dalla tua pagina di prenotazione scrive il suo numero di telefono. Se è iscritto e il "+pk+" è valido, sceglie "+(S.gcl===false?"giorno e ora della sessione":(S.gpt?"il corso o la sessione di personal":"il corso"))+" e prenota."]].forEach(function(t){ex.appendChild(h("div",{style:"display:flex;gap:12px;align-items:flex-start"},[h("span",{style:"flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:800"},[t[0]]),h("div",null,[h("b",{text:t[1]}),h("small",{text:t[2],style:"display:block;color:var(--muted);margin-top:2px"})])]))});
     v.appendChild(ex);
-    v.appendChild(h("p",{class:"hint",text:"Chi non è iscritto o ha il pacchetto scaduto non può prenotare: nessuna sorpresa per te."}));
+    v.appendChild(h("div",{class:"card",style:"border-color:var(--accent)"},[h("b",{text:"E chi non è iscritto?"}),h("small",{text:"Se il numero non è tra i tuoi iscritti, o il "+pk+" è scaduto o finito, non può prenotare. Non devi controllare niente tu.",style:"display:block;color:var(--muted);margin-top:2px"})]));
   }
   if(k==="calendario"){
     v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio di ogni lezione. Altri orari li aggiungi dopo con il pulsante Programma."));
