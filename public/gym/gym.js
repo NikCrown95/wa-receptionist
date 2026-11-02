@@ -64,6 +64,8 @@
     var cb = document.getElementById('menuTabCal');
     if (cb) { cb.style.display = !o.cls && !o.pt ? 'none' : ''; for (var i = cb.childNodes.length - 1; i >= 0; i--) { var n = cb.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { n.textContent = '\n    ' + lab + '\n  '; break; } } }
     var cr = document.querySelector('[data-gx="corsi"]'); if (cr) cr.style.display = o.cls ? '' : 'none';
+    var rsub = function (k, t) { var r = document.querySelector('[data-gx="' + k + '"] small'); if (r) r.textContent = t; };
+    rsub('orari', o.cls ? 'Quando la palestra è aperta' : 'Quando ricevi'); rsub('chiusure', o.cls ? 'Giorni senza lezioni' : 'Giorni in cui non ricevi');
     if (!o.cls && !o.pt && S.section === 'cal') { var cl = document.getElementById('menuTabClients'); if (cl) cl.click(); }
     setLabel(S.section);
   }
@@ -705,7 +707,7 @@
   function sOrari() {
     sheet('Orari di apertura', function (w, close) {
       var cur = (S.data.settings && S.data.settings.hours) || null, rows = [];
-      w.appendChild(el('p', null, 'I corsi e il Personal si possono mettere solo quando la palestra è aperta.'));
+      w.appendChild(el('p', null, OF().cls ? (OF().pt ? 'I corsi e il Personal si possono mettere solo quando la palestra è aperta.' : 'Le lezioni si possono mettere solo quando la palestra è aperta.') : 'Gli iscritti possono prenotare il Personal solo nelle ore in cui ricevi.'));
       for (var d = 1; d <= 7; d++) {
         (function (d) {
           var h = cur ? cur[d] : (d === 7 ? null : { open: '07:00', close: '21:00' });
@@ -929,10 +931,10 @@
   }
   function sChiusure() {
     sheet('Chiusure e ferie', function (w, close) {
-      w.appendChild(el('p', null, 'Le lezioni dei giorni scelti si annullano da sole. Chi era prenotato viene tolto e gli ingressi tornano disponibili.'));
+      w.appendChild(el('p', null, OF().cls ? 'Le lezioni dei giorni scelti si annullano da sole. Chi era prenotato viene tolto e gli ingressi tornano disponibili.' : 'Nei giorni scelti nessuno può prenotare il Personal. Chi era prenotato viene tolto e gli ingressi tornano disponibili.'));
       var list = S.data.closures || [];
       if (!list.length) w.appendChild(el('div', 'gxEmpty', 'Nessuna chiusura in programma.'));
-      list.forEach(function (c) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, dlabel(c.date))); l.appendChild(el('div', 'gxM', (c.reason ? c.reason + ' · ' : '') + c.count + (c.count === 1 ? ' lezione annullata' : ' lezioni annullate'))); r.appendChild(l); r.appendChild(btn('Riapri', 'ghost sm', function () { act({ action: 'closure_delete', from: c.date, to: c.date }, 'Giorno riaperto.').then(function () { close(); return reload().then(sChiusure); }); })); w.appendChild(r); });
+      list.forEach(function (c) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, dlabel(c.date))); l.appendChild(el('div', 'gxM', (c.reason ? c.reason + ' · ' : '') + c.count + (OF().cls ? (c.count === 1 ? ' lezione annullata' : ' lezioni annullate') : (c.count === 1 ? ' sessione annullata' : ' sessioni annullate')))); r.appendChild(l); r.appendChild(btn('Riapri', 'ghost sm', function () { act({ action: 'closure_delete', from: c.date, to: c.date }, 'Giorno riaperto.').then(function () { close(); return reload().then(sChiusure); }); })); w.appendChild(r); });
       w.appendChild(el('div', 'gxDh', 'Nuova chiusura'));
       var from = inp('date', S.data.today), to = inp('date', S.data.today), why = inp('text', '', 'Es. Ferragosto');
       var two = el('div', 'gxTwo'); two.appendChild(field('Dal', from)); two.appendChild(field('Al', to)); w.appendChild(two); w.appendChild(field('Motivo (facoltativo)', why));
@@ -1052,7 +1054,7 @@
         if (!(D.plans || []).length) pc.appendChild(el('p', 'pfHint', 'Nessun abbonamento ancora. Aggiungili da “Modifica”.'));
         (D.plans || []).forEach(function (p) {
           var onlyPt = (p.covers || []).length === 1 && p.covers[0] === 'personal';
-          var meta = onlyPt ? (p.entries || '') + ' lezioni da 1 ora con il trainer · 1 al giorno' : p.kind === 'entries' ? (p.entries || '') + ' ingressi' : (p.days === 30 ? 'Mensile' : p.days === 90 ? 'Trimestrale' : p.days === 180 ? 'Semestrale' : p.days === 365 ? 'Annuale' : p.days + ' giorni');
+          var meta = onlyPt ? (p.entries || '') + ' sessioni da 1 ora con il trainer · 1 al giorno' : p.kind === 'entries' ? (p.entries || '') + ' ingressi' : (p.days === 30 ? 'Mensile' : p.days === 90 ? 'Trimestrale' : p.days === 180 ? 'Semestrale' : p.days === 365 ? 'Annuale' : p.days + ' giorni');
           if (p.max_per_week) meta += ' · max ' + p.max_per_week + ' a settimana';
           pc.appendChild(row('e', p.name, meta, eur(p.price_eur), true));
         });

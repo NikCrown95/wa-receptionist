@@ -122,7 +122,7 @@
     bindControls(); syncTop();
     toggleFab();
     ensure(r.from, r.to, r.full, function () {
-      prefetchNear();
+      prefetchNear(); toggleFab();
       var body = document.getElementById('gcBody'); if (!body) return;
       if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); dayFocus(body); return; }
       if (S.view === 'week') {
@@ -345,9 +345,15 @@
     items.sort(function (a, b) { return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
     var nxt = live.filter(function (s) { return !isStarted(d, s.time); })[0];
     var left = live.filter(function (s) { return !isEnded(d, s.time, s.duration_min); }).length;
-    var hero = '<div class="gcHero"><div><span class="gcKick">' + (isT ? 'La tua giornata' : 'Agenda') + '</span><h2>' + live.length + (live.length === 1 ? ' lezione' : ' lezioni') + '</h2>' + (isT && live.length ? '<div class="gxM" style="margin-top:4px">' + left + ' rimaste</div>' : '') + '</div><div><span class="gcKick">' + (nxt ? 'Prossima' : 'Stato') + '</span>' +
+    var ob = onlyBooked(), ptB = ob ? (Array.isArray(day.pt) ? day.pt : []).filter(function (p) { return !p.free; }) : [];
+    var ptNext = ptB.filter(function (p) { return !isStarted(d, p.time); })[0], ptLeft = ptB.filter(function (p) { return !isEnded(d, p.time, 60); }).length;
+    var hero = ob ?
+      '<div class="gcHero"><div><span class="gcKick">' + (isT ? 'La tua giornata' : 'Agenda') + '</span><h2>' + ptB.length + (ptB.length === 1 ? ' sessione' : ' sessioni') + '</h2>' + (isT && ptB.length ? '<div class="gxM" style="margin-top:4px">' + ptLeft + ' rimaste</div>' : '') + '</div><div><span class="gcKick">' + (ptNext ? 'Prossima' : 'Stato') + '</span>' +
+      (ptNext ? '<strong>' + ptNext.time + ' · ' + esc(ptNext.name) + '</strong>' : '<strong>' + (ptB.length ? 'Sessioni concluse' : day.closed ? 'Giorno di chiusura' : 'Nessuna sessione') + '</strong>') + '</div></div>' :
+      '<div class="gcHero"><div><span class="gcKick">' + (isT ? 'La tua giornata' : 'Agenda') + '</span><h2>' + live.length + (live.length === 1 ? ' lezione' : ' lezioni') + '</h2>' + (isT && live.length ? '<div class="gxM" style="margin-top:4px">' + left + ' rimaste</div>' : '') + '</div><div><span class="gcKick">' + (nxt ? 'Prossima' : 'Stato') + '</span>' +
       (nxt ? '<strong>' + nxt.time + ' · ' + esc(nxt.course.name) + '</strong><div class="gxM">' + (isT ? 'tra ' + Math.max(0, mins(nxt.time) - nowMin()) + ' min · ' : '') + nxt.taken + '/' + nxt.capacity + ' iscritti</div>' : '<strong>' + (live.length ? 'Lezioni concluse' : 'Palestra chiusa') + '</strong>') + '</div></div>';
-    if (day.closed) return hero + '<p class="gxM" style="text-align:center;padding:24px">In questo giorno non ci sono lezioni in programma: la palestra è chiusa.</p>';
+    if (day.closed) return hero + '<p class="gxM" style="text-align:center;padding:24px">' + (ob ? 'In questo giorno non ricevi: è un giorno di chiusura.' : 'In questo giorno non ci sono lezioni in programma: la palestra è chiusa.') + '</p>';
+    if (ob && !ptB.length) return hero + '<p class="gxM" style="text-align:center;padding:24px">Nessun Personal prenotato in questo giorno. Per prenotarne uno tocca il pulsante +.</p>';
     var out = '', nowDone = false;
     items.forEach(function (it) {
       if (isT && !nowDone && mins(it.t) > nowMin()) { out += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; }
@@ -596,7 +602,7 @@
   // ---------- pulsante + (telefono, vista mese) ----------
   var fab = el('button', 'gxFab gcFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = G.ic('plus', 26); document.body.appendChild(fab);
   fab.addEventListener('click', function () { openNew(); });
-  function toggleFab() { fab.hidden = !(sectionOn && phone()); }
+  function toggleFab() { fab.hidden = !(sectionOn && (phone() || onlyBooked())); }
 
   // ---------- collegamenti con il resto del dashboard ----------
   // dalla campanella: "Nuova prenotazione" porta al giorno e alla lezione indicati

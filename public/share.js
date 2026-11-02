@@ -730,11 +730,13 @@
   }
   var M_SUB = "Menu › Impostazioni › Abbonamento";
   /* Guida a domande (attivita' normali): elenco di "Dove trovo…? / Come faccio…?"; toccandone una si apre il passo-passo con la schermata vera e il riquadro sul punto giusto. */
-  function usePaths(b) { return !b.gym; }
+  function usePaths(b) { return true; }
   function loadPaths() {
-    if (window.LIA_GUIDE) return Promise.resolve(window.LIA_GUIDE);
+    var gk = biz && biz.gym ? (biz.classes !== false && biz.personal !== false ? "entrambi" : biz.classes !== false ? "corsi" : "personal") : "";
+    if (window.LIA_GUIDE && (window.__LIA_GUIDE_GYM || "") === gk) return Promise.resolve(window.LIA_GUIDE);
+    if (window.LIA_GUIDE) window.LIA_GUIDE = null;
     return new Promise(function (res) {
-      var sc = document.createElement("script"); sc.src = isCourts() ? "/guida/percorsi-campi-" + ({ tennis: "tennis", padel: "tennis", pallavolo: "pallavolo" }[campiSport((biz && biz.raw) || {})] || "calcio") + ".js?v=2" : window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=9";
+      var sc = document.createElement("script"); window.__LIA_GUIDE_GYM = gk; sc.src = gk ? "/guida/percorsi-gym-" + gk + ".js?v=1" : isCourts() ? "/guida/percorsi-campi-" + ({ tennis: "tennis", padel: "tennis", pallavolo: "pallavolo" }[campiSport((biz && biz.raw) || {})] || "calcio") + ".js?v=2" : window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=9";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
