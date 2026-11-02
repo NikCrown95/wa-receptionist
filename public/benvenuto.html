@@ -128,6 +128,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .logorow{display:flex;gap:16px;align-items:center;padding-top:6px;border-top:1px solid var(--line);margin-top:4px;padding-top:16px}
 .logoprev{flex:none;width:76px;height:76px;border-radius:22px;display:grid;place-items:center;overflow:hidden;background:var(--card2);border:1px solid var(--line2);color:var(--muted);font-size:2rem;font-weight:300}
 .logoprev img{width:100%;height:100%;object-fit:cover;display:block}
+.logoprev svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
 .logotx{display:flex;flex-direction:column;gap:4px;min-width:0}.logotx b{font-size:.95rem}.logotx span{font-size:.82rem;color:var(--muted)}.logotx .chips{margin-top:6px}
 .btn{all:unset;box-sizing:border-box;cursor:pointer;flex:1;min-height:52px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:var(--grad);color:var(--on-accent);font-weight:700;font-size:1rem}
 .btn.ghost{flex:0 0 auto;padding:0 20px;background:var(--card);color:var(--ink);border:1px solid var(--line2)}
@@ -465,7 +466,7 @@ function prepLogo(file,cb){
     var d=c.toDataURL("image/webp",.9);if(d.indexOf("data:image/webp")!==0)d=c.toDataURL("image/jpeg",.9);cb(d)};
   img.onerror=function(){URL.revokeObjectURL(u);cb("")};img.src=u}
 function logoRow(){
-  var pv=h("div",{class:"logoprev"});if(S.logo){var im=h("img");im.src=S.logo;im.alt="";pv.appendChild(im)}else pv.textContent="+";
+  var pv=h("div",{class:"logoprev"});if(S.logo){var im=h("img");im.src=S.logo;im.alt="";pv.appendChild(im)}else{pv.classList.add("empty");pv.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20.2c0-3.9 3.2-6.7 7.2-6.7s7.2 2.8 7.2 6.7"/></svg>'}
   var f=h("input",{type:"file",accept:"image/*",hidden:"hidden"});
   f.onchange=function(){var file=f.files&&f.files[0];if(!file)return;(window.PrenoliaCrop?function(f2,cb){window.PrenoliaCrop.open(f2,cb)}:prepLogo)(file,function(d){if(!d){render();return}S.err="";S.logo=d;render()})};
   var pick=chip(S.logo?"Cambia logo":"Carica logo",false,function(){f.click()});
