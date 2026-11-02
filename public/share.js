@@ -397,7 +397,7 @@
   function paintMenu() {
     grpSync();
     var c = $("mnShareCard");
-    var avb = $("menuTabAvail"); if (avb) avb.style.display = biz && biz.gym ? "none" : "";
+    var avb = $("menuTabAvail"); if (avb) avb.style.display = "";
     if (c) {
       c.hidden = !biz;
       var nl = !!biz && !biz.links.length;

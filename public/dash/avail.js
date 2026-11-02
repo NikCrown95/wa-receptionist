@@ -44,20 +44,23 @@
   }
 
   /* ---------- rete ---------- */
-  function url() { return "/api/agenda?t=" + encodeURIComponent(token) + "&settings=1"; }
+  /* palestre e personal trainer: stessa pagina, ma orari e chiusure vivono in /api/palestra */
+  function isGym() { return !!(document.body && document.body.classList.contains("gym")); }
+  function url() { return isGym() ? "/api/palestra?t=" + encodeURIComponent(token) + "&avail=1" : "/api/agenda?t=" + encodeURIComponent(token) + "&settings=1"; }
   function getJson(u, opt) { return fetch(u, opt).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "Errore"); return d; }); }); }
   function post(body) {
     window.liaSettingsData = null; window.liaSettingsPromise = null;
-    return getJson(url(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    return getJson(isGym() ? "/api/palestra?t=" + encodeURIComponent(token) : url(), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   }
   /* apertura veloce: se i dati sono gia' scaricati (li legge anche Impostazioni all'avvio) li uso subito, senza aspettare la rete */
-  function cached() { var d = window.liaSettingsData; return d && d.hours ? d : null; }
+  function cached() { if (isGym()) return null; var d = window.liaSettingsData; return d && d.hours ? d : null; }
   /* i dati letti da meno di un minuto e non toccati da nessun salvataggio (ogni salvataggio li azzera) si riusano senza altra richiesta */
   function recent() { return !!(window.liaSettingsAt && cached() && Date.now() - window.liaSettingsAt < 60000); }
   function stamp(d) { window.liaSettingsAt = Date.now(); return d; }
   function usable(d) { return d && d.hours ? stamp(d) : getJson(url()).then(stamp); }
   /* force = true dopo un salvataggio: rilegge sempre. Senza force, se una lettura e' gia' in corso (anche quella anticipata in background) ci si aggancia invece di farne un'altra */
   function fresh(force) {
+    if (isGym()) return getJson(url()).then(stamp);
     if (!force && window.liaSettingsPromise) return Promise.resolve(window.liaSettingsPromise).then(usable);
     var p = window.liaSettingsRefresh ? window.liaSettingsRefresh() : Promise.resolve(null);
     return Promise.resolve(p).then(usable);
@@ -488,7 +491,7 @@
     nav.appendChild(mk("div", "avSep"));
     var n = closureItems().length;
     item("chi", "Chiusure e assenze", n ? n + " in programma" : "Nessuna in programma");
-    if (!S.team || !S.staff.length) {
+    if ((!S.team || !S.staff.length) && !isGym()) {
       var h = mk("div", "avSide-hint");
       h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
       var go = mk("button", "avMini lnk", "Apri Chi lavora da te"); go.type = "button";
