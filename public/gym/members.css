@@ -585,7 +585,17 @@
   :root:root .mzBar{display:flex;gap:10px;flex-wrap:nowrap;align-items:stretch}
   :root:root .mzSearch{grid-column:auto;flex:1 1 260px;min-width:0}
   :root:root .mzBar .mzSel{flex:0 0 170px;min-width:0}
-  :root:root .mzTable{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+  :root:root .mzTable{display:flex;flex-direction:column;gap:10px}
   :root:root .mzTable>:not(.mzRow){grid-column:1/-1}
   :root:root .mzHead p{display:block}
+}
+/* una riga per iscritto: nome, dati dell'abbonamento, stato e azione in orizzontale */
+@media(min-width:701px){
+  :root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow:hover{grid-template-columns:minmax(150px,.8fr) minmax(330px,1.8fr) 140px 140px;grid-template-areas:"n m s a";align-items:stretch}
+  :root:root .mzRow>.mzN{padding:12px 8px 12px 16px;align-self:center}
+  :root:root .mzRow>.mzSm{border-top:0;border-left:1px solid rgba(255,255,255,.07);align-self:stretch;align-items:center}
+  :root:root .mzRow>.mzC:nth-child(6){align-self:center;justify-self:start;padding:0 14px}
+  :root:root .mzRow>.mzA,:root:root .mzRow.st-ok>.mzA{display:flex;align-items:center;justify-self:stretch;background:none;padding:0 16px 0 0;margin:0}
+  :root:root .mzRow.st-ok>.mzA{visibility:hidden}
+  :root:root .mzRow>.mzA .mzRn{width:auto;min-width:110px;padding:0 18px}
 }
