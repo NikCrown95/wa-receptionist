@@ -451,7 +451,7 @@
 
 .mzSm{display:none}
 /* ===== Iscritti su smartphone: card scure con alone (nome, stato, abbonamento, scadenza, ingressi) ===== */
-@media(max-width:700px){
+@media all{
   :root:root .mzTh{display:none}
   :root:root .mzTable{background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;display:flex;flex-direction:column;gap:10px}
   :root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n s" "m m" "a a";gap:0;padding:0;min-height:0;align-items:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);border-radius:22px;color:#fff;background:linear-gradient(160deg,#1E3A42,#0F1E23)!important;--g:#8AA0A7;--t:#C3D2D6}
@@ -475,7 +475,7 @@
   :root:root .mzRow>.mzA .mzRn{width:100%;min-width:0;min-height:42px;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;border:1px solid var(--t);font-size:.9rem;font-weight:800}
 }
 /* Smartphone: elenco iscritti più compatto, si vedono subito più persone */
-@media(max-width:700px){
+@media all{
   :root:root .mzHead p,:root:root .mzCrumb{display:none}
   :root:root .mzHead{margin-bottom:10px;align-items:center}
   :root:root .mzHead h1{font-size:1.9rem;margin:0}
@@ -511,10 +511,10 @@
 }
 
 .mzKt .sh{display:none}
-@media(max-width:700px){.mzKt .sh{display:inline}}
-@media(max-width:700px){:root:root .mzKt>span span{color:inherit;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit}}
+@media all{.mzKt .sh{display:inline}}
+@media all{:root:root .mzKt>span span{color:inherit;margin:0;font:inherit;letter-spacing:inherit;text-transform:inherit}}
 /* KPI più compatte su smartphone */
-@media(max-width:700px){
+@media all{
   :root:root .mzKp{gap:8px;margin-bottom:12px}
   :root:root .mzK{padding:11px 14px 10px;min-height:0;border-radius:18px;column-gap:7px}
   :root:root .mzKi svg{width:15px;height:15px}
@@ -525,7 +525,7 @@
   :root:root .mzK::before{top:-56px;height:80px}
 }
 /* Palette più sobria e professionale (smartphone): grafite, accenti desaturati, filo colorato in alto */
-@media(max-width:700px){
+@media all{
   :root:root .mzK,:root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover{background:linear-gradient(165deg,#1C2E35,#121F25)!important;border-color:rgba(255,255,255,.07);--g:#7F97A0;--t:#B7C6CC}
   :root:root .mzK{--g:#4FA3B0;--t:#9CCFD7}
   :root:root .mzK.ok,:root:root .mzRow.st-ok{--g:#3FAF82;--t:#86CDAA}
@@ -541,7 +541,7 @@
   :root:root .mzRow>.mzA .mzRn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
 }
 /* Card iscritti più piccole e bordo più delineato (smartphone) */
-@media(max-width:700px){
+@media all{
   :root:root .mzTable{gap:8px}
   :root:root .mzRow,:root:root .mzRow:nth-child(even),:root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow:hover,:root:root .mzK{border:1.5px solid #46636E;border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 6px 14px -10px rgba(10,24,30,.7)}
   :root:root .mzRow>.mzN{padding:10px 0 9px 12px;gap:10px}
@@ -556,12 +556,12 @@
   :root:root .mzRow>.mzA .mzRn{min-height:36px;font-size:.84rem;border-radius:10px}
 }
 /* In scadenza / Scaduti: solo il perimetro della card colorato (giallo / rosso) */
-@media(max-width:700px){
+@media all{
   :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{border:2px solid #E0A93B}
   :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{border:2px solid #E0635A}
   :root:root .mzRow.st-warn::before,:root:root .mzRow.st-bad::before{display:none}
 }
-@media(max-width:700px){
+@media all{
   :root:root .mzRow.st-ok,:root:root .mzRow.st-ok:nth-child(even),:root:root .mzRow.st-ok:hover{--g:#3FAF82;--t:#86CDAA}
   :root:root .mzRow.st-warn,:root:root .mzRow.st-warn:nth-child(even),:root:root .mzRow.st-warn:hover{--g:#D9A441;--t:#E6C27A}
   :root:root .mzRow.st-bad,:root:root .mzRow.st-bad:nth-child(even),:root:root .mzRow.st-bad:hover{--g:#D9695F;--t:#E79A92}
@@ -578,3 +578,14 @@
 .mzBar{grid-template-columns:minmax(0,1fr) 170px 200px 170px}
 @media(max-width:1100px){.mzBar{grid-template-columns:repeat(3,minmax(0,1fr))}.mzSearch{grid-column:1/-1}}
 @media(max-width:620px){.mzBar{gap:8px}.mzBar .mzSel{height:48px;padding:0 6px 0 0;border-radius:14px}.mzBar .mzSel select{font-size:.8rem;padding:0 2px 0 10px;text-overflow:ellipsis}.mzBar .mzSel svg{display:none}.mzBar .mzSel:last-child{grid-column:auto}.mzBar .mzSearch{height:50px}}
+
+/* Iscritti su tablet e computer: stessa estetica delle card dello smartphone, su piu' colonne */
+@media(min-width:701px){
+  :root:root .mzKp{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  :root:root .mzBar{display:flex;gap:10px;flex-wrap:nowrap;align-items:stretch}
+  :root:root .mzSearch{grid-column:auto;flex:1 1 260px;min-width:0}
+  :root:root .mzBar .mzSel{flex:0 0 170px;min-width:0}
+  :root:root .mzTable{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+  :root:root .mzTable>:not(.mzRow){grid-column:1/-1}
+  :root:root .mzHead p{display:block}
+}

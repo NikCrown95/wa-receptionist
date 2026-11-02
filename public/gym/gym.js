@@ -330,7 +330,7 @@
     function sel(opts, val, fn) { var w = el('label', 'mzSel'); var x = el('select'); opts.forEach(function (o) { var e = el('option', null, o[1]); e.value = o[0]; if (o[0] === val) e.selected = true; x.appendChild(e); }); x.addEventListener('change', function () { fn(x.value); }); w.appendChild(x); w.insertAdjacentHTML('beforeend', ic('chev', 16)); return w; }
     var planOpts = [['all', 'Abbonamento']].concat(S.data.plans.map(function (p) { return [p.id, p.name]; }), cnt.none ? [['none', 'Senza abbonamento']] : []);
     S.pf = S.pf || 'all'; S.srt = S.srt || 'end'; S.cf = S.cf || 'all';
-    bar.appendChild(sel([['all', 'Certificato'], ['warn', 'Cert. in scadenza'], ['bad', 'Cert. scaduto'], ['none', 'Cert. mancante'], ['ok', 'Cert. valido']], S.cf, function (v) { S.cf = v; S.more = false; renderMem(); }));
+    if (!noCert()) bar.appendChild(sel([['all', 'Certificato'], ['warn', 'Cert. in scadenza'], ['bad', 'Cert. scaduto'], ['none', 'Cert. mancante'], ['ok', 'Cert. valido']], S.cf, function (v) { S.cf = v; S.more = false; renderMem(); }));
     bar.appendChild(sel(planOpts, S.pf, function (v) { S.pf = v; S.more = false; renderMem(); }));
     bar.appendChild(sel([['end', 'Scadenza ↑'], ['endd', 'Scadenza ↓'], ['name', 'Nome A-Z'], ['named', 'Nome Z-A']], S.srt, function (v) { S.srt = v; renderMem(); }));
     root.appendChild(bar);
@@ -358,7 +358,7 @@
           var big = dl < 0 ? '−' + (-dl) : String(dl), unit = Math.abs(dl) === 1 ? 'giorno' : 'giorni', cap = dl < 0 ? 'scaduto il' : dl === 0 ? 'scade oggi' : 'scade il';
           sc = '<span class="mzX ' + m.status.s + '"><span class="mzXn"><b>' + big + '</b><small>' + unit + '</small></span><span class="mzXd"><small>' + cap + '</small><b>' + short(cur.ends_on) + '</b></span></span>';
         } else sc = '<span class="mzMute">Nessun abbonamento</span>';
-        r.innerHTML = '<span class="mzC mzN ' + mzGen(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b>' + (function () { var ci = certInfo(m); return ci.cls === 'warn' || ci.cls === 'bad' ? '<i class="mzCt ' + ci.cls + '" title="Certificato medico: ' + esc(ci.head.toLowerCase()) + '">' + ic('shield', 15) + '</i>' : ''; })() + '</span>' +
+        r.innerHTML = '<span class="mzC mzN ' + mzGen(m) + '"><span class="mzAv s-' + m.status.s + '">' + mzRing(cur, dl) + '<i>' + esc((m.first_name[0] || '') + (m.last_name[0] || '')) + '</i></span><b>' + esc(m.first_name) + ' <span>' + esc(m.last_name) + '</span></b>' + (function () { if (noCert()) return ''; var ci = certInfo(m); return ci.cls === 'warn' || ci.cls === 'bad' ? '<i class="mzCt ' + ci.cls + '" title="Certificato medico: ' + esc(ci.head.toLowerCase()) + '">' + ic('shield', 15) + '</i>' : ''; })() + '</span>' +
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Abbonamento">' + (cur ? '<span class="mzPl pl' + (Math.max(0, S.data.plans.map(function (p) { return p.id; }).indexOf(cur.plan_id)) % 4) + '">' + esc(cur.plan_name) + '</span>' : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + mzPips(cur, u) + '</span>' +
@@ -388,6 +388,8 @@
   function meter(n, max) { if (!max) return ''; var pct = Math.min(100, Math.round((n || 0) / max * 100)); return '<span class="gmMeter"><i class="' + (pct >= 100 ? 'f' : '') + '" style="width:' + pct + '%"></i></span>'; }
   function endOf(m) { var e = m.plans.filter(function (p) { return !p.cancelled && p.ends_on; }).map(function (p) { return p.ends_on; }).sort().pop(); return e || '9999'; }
   function plusYear(iso) { var d = parse(iso); if (isNaN(d)) return ''; var y = d.getFullYear() + 1, mo = d.getMonth(), dd = d.getDate(); var x = new Date(y, mo, dd); if (x.getMonth() !== mo) x = new Date(y, mo + 1, 0); return ymd(x); }
+  // il certificato medico serve solo a chi offre corsi: chi fa solo personal non lo chiede
+  function noCert() { return document.body.classList.contains('gymNoCls'); }
   function certInfo(m) {
     var u = m && m.medical_until; if (!u) return { cls: 'none', head: 'Non inserito', sub: 'Scrivi quando l\'iscritto ha fatto il certificato.' };
     var n = Math.round((parse(u) - parse(S.today)) / 864e5);
@@ -403,12 +405,12 @@
       var two = el('div', 'gxTwo'); two.appendChild(field('Nome', f)); two.appendChild(field('Cognome', l)); w.appendChild(two);
       w.appendChild(field('Telefono', p));
       // certificato medico: il titolare scrive quando è stato fatto; la scadenza è di un anno (modificabile)
-      w.appendChild(el('div', 'gxMfS', 'Certificato medico'));
+      if (!noCert()) w.appendChild(el('div', 'gxMfS', 'Certificato medico'));
       var mf = inp('date', m && m.medical_from || ''), mu = inp('date', m && m.medical_until || ''), muTouched = !!(m && m.medical_until && m.medical_from && m.medical_until !== plusYear(m.medical_from));
       mf.addEventListener('change', function () { if (!muTouched || !mu.value) { mu.value = mf.value ? plusYear(mf.value) : ''; muTouched = false; } });
       mu.addEventListener('input', function () { muTouched = true; });
-      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); w.appendChild(tw);
-      w.appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.'));
+      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); if (!noCert()) w.appendChild(tw);
+      if (!noCert()) w.appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.'));
       // abbonamento scelto subito (solo per un iscritto nuovo)
       var plans = !m && S.data && S.data.plans ? S.data.plans : [], picks = [], paid = {}, st = inp('date', S.data ? S.data.today : ''), box = el('div', 'gxPlanBox');
       if (plans.length) {
@@ -521,7 +523,7 @@
     body.appendChild(gs);
     var ci = certInfo(m), cb = el('button', 'mvCert ' + ci.cls); cb.type = 'button';
     cb.innerHTML = '<span class="ci">' + ic('shield') + '</span><span class="ct"><small>CERTIFICATO MEDICO</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">' + (ci.cls === 'ok' ? 'Modifica' : 'Aggiorna') + '</span>';
-    cb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cb);
+    cb.addEventListener('click', function () { memberForm(m); }); if (!noCert()) body.appendChild(cb);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
     function drawTabs() {
@@ -952,7 +954,7 @@
       w.appendChild(el('p', null, 'Da quel giorno l\'abbonamento compare tra le notifiche e in "In scadenza".'));
       var reqM = st.require_medical !== false, tm = el('button', 'gxTp'); tm.type = 'button';
       var paintTm = function () { tm.setAttribute('aria-pressed', reqM ? 'true' : 'false'); tm.innerHTML = '<span class="t"><b>Certificato medico obbligatorio</b><small>' + (reqM ? 'Senza un certificato valido l\'iscritto non può prenotare, anche con l\'abbonamento attivo.' : 'Gli iscritti prenotano anche senza certificato: lo vedono solo nel profilo.') + '</small></span><i class="sw"><u></u></i>'; };
-      paintTm(); tm.onclick = function () { reqM = !reqM; paintTm(); }; tm.style.margin = '0 0 12px'; w.appendChild(tm);
+      paintTm(); tm.onclick = function () { reqM = !reqM; paintTm(); }; tm.style.margin = '0 0 12px'; if (!noCert()) w.appendChild(tm);
       var showN = st.show_names !== false;
       if (OF().cls) {
         var tg = el('button', 'gxTp'); tg.type = 'button';
