@@ -751,6 +751,20 @@ module.exports = async (req, res) => {
           await sb("DELETE", "resources?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
           await sb("DELETE", "gym_schedule?business_id=eq." + biz.id, null, "return=minimal");
           await sb("DELETE", "gym_courses?business_id=eq." + biz.id, null, "return=minimal");
+          // Pacchetti / abbonamenti venduti dalla palestra (facoltativi)
+          const plansIn = [];
+          for (const x of (Array.isArray(body.plans) ? body.plans : []).slice(0, 20)) {
+            const pn = String((x && x.name) || "").trim().slice(0, 60), kd = x && x.kind === "time" ? "time" : "entries", qty = Number(x && x.qty);
+            const pe = x && x.price_eur !== null && x.price_eur !== undefined && String(x.price_eur).trim() !== "" ? Number(x.price_eur) : null;
+            const cv = (Array.isArray(x && x.covers) ? x.covers : []).filter((c) => c === "tutti" || c === "personal");
+            if (!pn || !Number.isInteger(qty) || qty < 1 || qty > (kd === "time" ? 3660 : 1000) || (pe !== null && (!Number.isFinite(pe) || pe < 0 || pe > 100000)) || !cv.length) return res.status(400).json({ error: "Controlla nome, quantità e prezzo di ogni pacchetto." });
+            plansIn.push({ business_id: biz.id, name: pn, kind: kd, days: kd === "time" ? qty : null, entries: kd === "entries" ? qty : null, price_eur: pe, covers: Array.from(new Set(cv)) });
+          }
+          if (plansIn.length) {
+            await sb("DELETE", "gym_plans?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
+            const pp = await sb("POST", "gym_plans", plansIn, "return=minimal");
+            if (!pp.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare i pacchetti. Riprova." });
+          }
           const ins = !cl.length ? { ok: true, data: [] } : await sb("POST", "gym_courses", cl.map((c) => ({ business_id: biz.id, name: c.name, category: c.category, duration_min: c.duration_min, capacity: c.capacity })), "return=representation");
           if (!ins.ok || !Array.isArray(ins.data) || ins.data.length !== cl.length) return res.status(500).json({ error: "Non siamo riusciti a salvare le lezioni. Riprova." });
           const rows = [];
