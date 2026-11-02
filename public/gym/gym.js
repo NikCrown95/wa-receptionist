@@ -143,7 +143,7 @@
     function draw() {
       box.textContent = '';
       if (!S.sessions) { box.appendChild(el('div', 'gxEmpty', 'Carico...')); return; }
-      if (!S.sessions.length) { box.appendChild(el('div', 'gxEmpty', 'Nessuna lezione in questo giorno. Le aggiungi da Impostazioni, Corsi e programma.')); return; }
+      if (!S.sessions.length && OF().cls) { box.appendChild(el('div', 'gxEmpty', 'Nessuna lezione in questo giorno. Le aggiungi da Impostazioni, Corsi e programma.')); return; }
       S.sessions.forEach(function (s) {
         var key = S.day + '|' + s.schedule_id, openC = S.open === key;
         var c = el('div', 'gxCard tap'), r = el('div', 'gxRow'), l = el('div');
@@ -179,7 +179,7 @@
       if (!S.week) { box.appendChild(el('div', 'gxEmpty', 'Carico...')); return; }
       var times = {}; S.week.days.forEach(function (d) { d.sessions.forEach(function (s) { times[s.time] = 1; }); });
       var ts = Object.keys(times).sort();
-      if (!ts.length) { box.appendChild(el('div', 'gxEmpty', 'Nessuna lezione in programma. Le aggiungi da Impostazioni, Corsi e programma.')); return; }
+      if (!ts.length && OF().cls) { box.appendChild(el('div', 'gxEmpty', 'Nessuna lezione in programma. Le aggiungi da Impostazioni, Corsi e programma.')); return; }
       var g = el('div', 'gxWk'); g.style.gridTemplateColumns = '38px repeat(7,minmax(40px,1fr))';
       g.appendChild(el('div'));
       S.week.days.forEach(function (d) { var x = parse(d.date); g.appendChild(el('div', 'h' + (d.date === S.today ? ' today' : ''), DN[x.getDay()].toUpperCase() + ' ' + x.getDate())); });
@@ -1024,11 +1024,11 @@
         if (right) r.appendChild(el('span', price ? 'svPrice' : 'gpfCnt', right)); return r;
       }
       if (sv) {
-        var card = sv.closest('.pfCard'); if (card) { var h = card.querySelector('h3'); if (h) h.textContent = 'Corsi'; var sub = card.querySelector('.svSub'); if (sub) sub.textContent = 'Le lezioni che gli iscritti possono prenotare.'; }
+        var card = sv.closest('.pfCard'); if (card) { var h = card.querySelector('h3'); var onlyPt0 = !OF().cls; if (h) h.textContent = onlyPt0 ? 'Personal' : 'Corsi'; var sub = card.querySelector('.svSub'); if (sub) sub.textContent = onlyPt0 ? 'Le sessioni 1 a 1 che gli iscritti possono prenotare.' : 'Le lezioni che gli iscritti possono prenotare.'; }
         sv.innerHTML = ''; sv.className = 'gpfList';
         var perC = {}; (D.schedule || []).forEach(function (x) { perC[x.course_id] = (perC[x.course_id] || 0) + 1; });
         function head(t) { return el('div', 'gpfH', t); }
-        if ((D.courses || []).length) {
+        if ((D.courses || []).length && OF().cls) {
           D.courses.forEach(function (c) { var n = perC[c.id] || 0; sv.appendChild(row(CL[c.category] || 'a', c.name, c.duration_min + ' min · max ' + c.capacity + ' posti', n ? n + (n === 1 ? ' lezione' : ' lezioni') + '/sett.' : 'non in programma')); });
         }
         var pth = (D.settings && D.settings.pt_hours) || [];
