@@ -621,7 +621,7 @@ function render(){
   }
   if(k==="attivita"){
     v.appendChild(head(lab,"Come si chiama la tua attività?","Il nome compare sulla pagina di prenotazione."));
-    var c=h("div",{class:"card"});var nm=inp(S.nome,S.v==="palestra"?"es. Studio Move":(S.v==="campi"?"es. Tennis Club Rossi":(S.v==="sanitario"?"es. Studio Dentistico Rossi":"es. Style 2")),function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"});nm.classList.add("name");c.appendChild(h("div",{class:"namebox"},[h("label",{text:"Nome dell'attività"}),nm]));
+    var c=h("div",{class:"card"});var nm=inp(S.nome,"Nome dell'attività",function(x){S.nome=x},{maxlength:"80",autocomplete:"organization"});nm.classList.add("name");c.appendChild(h("div",{class:"namebox"},[h("label",{text:"Nome dell'attività"}),nm]));
     if(S.v!=="palestra"&&S.v!=="campi"){c.appendChild(h("label",{text:S.v==="sanitario"?"Che tipo di studio?":"Che mestiere fai?"}));var ch=h("div",{class:"chips"});
       Object.keys(MESTIERI()).forEach(function(m){ch.appendChild(chip(m,S.mestiere===m,function(){if(S.mestiere!==m){S.mestiere=m;S.items=[]}render()}))});c.appendChild(ch);
       if(S.mestiere==="Altro")c.appendChild(field("Che mestiere fai?",inp(S.altro,"es. Sarta",function(x){S.altro=x},{maxlength:"40"})))}
