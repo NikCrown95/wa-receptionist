@@ -234,6 +234,10 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .rows{display:flex;flex-direction:column}
 .rr{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 0;border-top:1px solid var(--line);min-width:0}
 .rr:first-child{border-top:0}
+.rr.sc{position:relative;border-top:0;margin-top:8px;padding:9px 12px 9px 18px;border-radius:12px;border:1px solid rgba(var(--c),.3);background:linear-gradient(135deg,rgba(var(--c),.14),var(--card) 70%)}
+.rr.sc:first-child{margin-top:0}
+.rr.sc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:rgb(var(--c))}
+.rr.sc .rv{font-weight:700;color:rgb(var(--c))}.rr.sc .rv.dim{color:var(--muted);font-weight:500}
 .rr>div{min-width:0}
 .rr b{display:block;font-weight:600;font-size:.97rem;overflow-wrap:anywhere}
 .rr small{display:block;color:var(--muted);font-size:.8rem;margin-top:1px}
@@ -827,7 +831,7 @@ function render(){
       var sb2=h("div",{class:"rows"});
       S.items.forEach(function(x){var p=String(x.p).trim().replace(",",".");
         var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio")?h("small",{class:itModes(x).indexOf("casa")>=0?"home-tag":"",text:itModes(x).map(function(k){var q=mPrice(x,k);return(k==="casa"?"A casa":(k==="sede"?"Nel locale":"Online"))+(q!==""?" € "+q:"")}).join(" · ")}):null]);
-        sb2.appendChild(h("div",{class:"rr"},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
+        sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[sb2.children.length%SCOL.length]},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
       v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
       var wk=h("div",{class:"week"});
       S.hours.forEach(function(d,i){var c=h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),d.on?h("span",{class:"tm",text:d.from}):h("span",{class:"tm",text:"–"}),d.on?h("span",{class:"tm e",text:d.to}):h("span",{class:"tm e",text:"chiuso"})]);wk.appendChild(c)});
