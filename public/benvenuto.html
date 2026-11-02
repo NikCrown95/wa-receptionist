@@ -296,6 +296,55 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .csum.flash{animation:cflash 1s cubic-bezier(.22,1,.36,1)}
 @keyframes cflash{0%{box-shadow:0 0 0 3px rgba(45,210,220,.55),0 0 28px rgba(45,210,220,.5);border-color:var(--accent);opacity:.3;transform:scale(.97)}35%{opacity:1;transform:none}100%{box-shadow:0 0 0 0 rgba(45,210,220,0);border-color:var(--line)}}
 @media (prefers-reduced-motion:reduce){.card.closing,.card.enter,.csum.flash,.btn.pulse,.lr.lin{animation:none}.lr.lout{transition:none}}
+
+/* Smartphone: stesso principio dell'iPad. La pagina non scorre: in alto una riga sottile di avanzamento, in basso Indietro/Avanti sempre visibili; se un passo e piu alto dello schermo scorre solo il suo contenuto. */
+@media (max-width:900px){
+  html{height:100%}
+  body{height:100dvh;overflow:hidden;padding-block:max(8px,env(safe-area-inset-top,0px)) max(8px,env(safe-area-inset-bottom,0px));padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+  .shell{height:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:0}
+  .side{flex:none;margin:0;gap:0;padding:0}
+  .side .logo,.side h2,.side .lead{display:none}
+  .side .orbrow{margin:0;gap:12px;padding:6px 14px;border-radius:16px;width:100%}
+  .side .orb{width:46px;height:46px}
+  .side .orb .pc b{font-size:.78rem;text-shadow:none}
+  .side .feed li{padding:0 0 0 14px}
+  .side .feed .ft{font-size:.98rem;margin:0}
+  .side .feed .fx{display:none}
+  .pane{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;gap:10px;padding:2px 0 0;max-width:none}
+  .pane::-webkit-scrollbar{display:none}
+  .pane>.nav{position:sticky;bottom:0;padding:10px 0 2px;margin-top:auto;background:linear-gradient(to bottom,transparent,var(--bg) 24%);z-index:3}
+  .pane .head{gap:3px}
+  .pane .head h1{font-size:1.45rem;line-height:1.12}
+  .pane .head .lead{font-size:.88rem;line-height:1.35}
+  .pane .stepl{font-size:.68rem}
+  .opt{padding:10px 14px;gap:12px;border-radius:16px}
+  .opt .d{font-size:.8rem;line-height:1.28}
+  .card{padding:12px;gap:8px;border-radius:16px}
+  .btn{min-height:50px}
+  .day{padding:3px 0;gap:8px}
+  .day .tgl{min-height:40px}.times input{min-height:40px}
+  .sum{padding:6px 0}
+  .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.82rem;line-height:1.3}
+  .inp.name{height:56px;font-size:1.25rem}
+  .hint{font-size:.8rem}
+  .times{gap:4px}.times input{padding:0 4px;font-size:.95rem}
+  .day .tgl{font-size:.95rem}
+  .logoprev{width:54px;height:54px;border-radius:16px;font-size:1.5rem}.logorow{gap:12px;padding-top:10px;margin-top:2px}.logotx span{font-size:.78rem;line-height:1.3}.logotx .chips{margin-top:2px}
+  .chips{gap:7px}
+  .chip[aria-label]{min-width:40px!important;padding:6px 0;justify-content:center}
+  .chips:has(.chip[aria-label]){gap:6px;flex-wrap:nowrap}
+}
+@media (max-width:900px) and (max-height:700px){
+  .side .orbrow{padding:4px 12px}.side .orb{width:38px;height:38px}.side .feed .ft{font-size:.9rem}
+  .pane .head h1{font-size:1.3rem}.pane .head .lead{display:none}
+  .opt{padding:8px 12px}.card{padding:10px}
+  .chip{min-height:36px;padding:4px 12px}.chips{gap:6px}
+  .opt .d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .day .tgl{min-height:32px}.times input{min-height:32px}
+  .opt .ic{width:38px;height:38px}
+  .inp.name{height:50px}
+  .btn{min-height:46px}
+}
 </style>
 </head>
 <body>
