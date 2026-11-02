@@ -1109,7 +1109,7 @@
     var rc = S.data && S.data.settings && S.data.settings.rental, on = !!(rc && rc.on), m = document.getElementById('menuTabRent');
     if (on && !m) {
       var ref = document.getElementById('menuTabClients'); if (!ref) return;
-      m = document.createElement('button'); m.type = 'button'; m.id = 'menuTabRent'; m.setAttribute('role', 'menuitem'); m.setAttribute('aria-current', 'false');
+      m = document.createElement('button'); m.type = 'button'; m.id = 'menuTabRent'; m.setAttribute('role', 'menuitem'); m.setAttribute('aria-current', 'false'); m.setAttribute('data-sub', 'Affitto della sala');
       m.innerHTML = RENT_IC + '\n    Subaffitto\n  '; ref.parentNode.insertBefore(m, ref.nextSibling);
       m.addEventListener('click', function () { goRent(); });
     }

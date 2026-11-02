@@ -313,7 +313,7 @@
   /* il menu raggruppato (Agenda / La tua attivita' / Account) vale per le attivita' normali e per i circoli; le palestre hanno voci e nomi diversi */
   function grpSync() {
     var b = document.body;
-    b.classList.toggle("mnB", !!biz && !biz.gym && !b.classList.contains("gym")); // i circoli (campi) hanno lo stesso menu a gruppi delle attivita' normali
+    b.classList.toggle("mnB", !!biz); // attivita' normali, circoli e palestre: stesso menu a gruppi (Agenda / La tua attivita' / Account)
   }
   /* tipo di attivita' come lo ha scelto l'attivita' (dentista, parrucchiere, ...): "altro" non dice niente, in quel caso si usa la categoria dell'icona se c'e' */
   function typeLabel(raw, isGym, k) {
