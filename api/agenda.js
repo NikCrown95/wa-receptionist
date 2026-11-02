@@ -712,8 +712,22 @@ module.exports = async (req, res) => {
           await sb("DELETE", "resources?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
         } else
         if (kind === "palestra") {
-          const courses = Array.isArray(body.courses) ? body.courses : [];
-          if (!courses.length || courses.length > 20) return res.status(400).json({ error: "Aggiungi almeno una lezione." });
+          const offC = body.classes !== false, offP = body.personal === true || body.classes === false;
+          if (!offC && !offP) return res.status(400).json({ error: "Scegli cosa offri." });
+          const courses = offC && Array.isArray(body.courses) ? body.courses : [];
+          if (offC && (!courses.length || courses.length > 20)) return res.status(400).json({ error: "Aggiungi almeno una lezione." });
+          // Solo personal: servono gli orari in cui si può prenotare
+          let gymHrs = null;
+          if (!offC) {
+            gymHrs = {};
+            for (const x of (Array.isArray(body.hours) ? body.hours : []).slice(0, 14)) {
+              const wd = Number(x && x.weekday), o = String((x && x.opens) || ""), c = String((x && x.closes) || "");
+              if (!Number.isInteger(wd) || wd < 1 || wd > 7 || !HM.test(o) || !HM.test(c) || o >= c) return res.status(400).json({ error: "Controlla gli orari di apertura." });
+              gymHrs[wd] = { open: o, close: c };
+            }
+            if (!Object.keys(gymHrs).length) return res.status(400).json({ error: "Scegli almeno un giorno di apertura." });
+            for (let d = 1; d <= 7; d++) if (!gymHrs[d]) gymHrs[d] = null;
+          }
           const cl = [];
           for (const c of courses) {
             const cn = String((c && c.name) || "").trim().slice(0, 80), dur = Number(c && c.duration_min), cap = Number(c && c.capacity);
@@ -727,6 +741,9 @@ module.exports = async (req, res) => {
             }
             cl.push({ name: cn, duration_min: dur, capacity: cap, category: cat, slots });
           }
+          const gcfg = Object.assign({}, (biz.booking_rules && biz.booking_rules.gym) || {}, { classes: offC, personal: offP });
+          if (gymHrs) gcfg.hours = gymHrs;
+          patch.booking_rules = Object.assign({}, (patch.booking_rules && typeof patch.booking_rules === "object" ? patch.booking_rules : (biz.booking_rules && typeof biz.booking_rules === "object" ? biz.booking_rules : {})), { gym: gcfg });
           const p1 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");
           if (!p1.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
           // La palestra non ha una "risorsa" come gli altri: quella creata alla registrazione si toglie.
@@ -734,7 +751,7 @@ module.exports = async (req, res) => {
           await sb("DELETE", "resources?business_id=eq." + biz.id, null, "return=minimal").catch(() => {});
           await sb("DELETE", "gym_schedule?business_id=eq." + biz.id, null, "return=minimal");
           await sb("DELETE", "gym_courses?business_id=eq." + biz.id, null, "return=minimal");
-          const ins = await sb("POST", "gym_courses", cl.map((c) => ({ business_id: biz.id, name: c.name, category: c.category, duration_min: c.duration_min, capacity: c.capacity })), "return=representation");
+          const ins = !cl.length ? { ok: true, data: [] } : await sb("POST", "gym_courses", cl.map((c) => ({ business_id: biz.id, name: c.name, category: c.category, duration_min: c.duration_min, capacity: c.capacity })), "return=representation");
           if (!ins.ok || !Array.isArray(ins.data) || ins.data.length !== cl.length) return res.status(500).json({ error: "Non siamo riusciti a salvare le lezioni. Riprova." });
           const rows = [];
           cl.forEach((c, i) => c.slots.forEach((sl) => rows.push({ business_id: biz.id, course_id: ins.data[i].id, weekday: sl.weekday, starts_at_time: sl.time, capacity: c.capacity })));

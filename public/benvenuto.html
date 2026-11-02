@@ -93,6 +93,12 @@ label{display:block;font-size:.84rem;color:var(--muted);margin-bottom:6px;font-w
 .rlsum em{font-style:normal;font-size:.8rem;font-weight:600;color:var(--accent)}
 .rlbig.enter,.rlsum.enter{animation:center .6s cubic-bezier(.22,1,.36,1) both}
 @media (prefers-reduced-motion:reduce){.rlbig.enter,.rlsum.enter{animation:none}}
+.offg{display:grid;gap:12px}
+.offc{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;padding:18px;border:1.5px solid var(--line2);border-radius:18px;background:var(--card);min-height:76px;transition:border-color .2s,box-shadow .2s}
+.offc b{display:block;font-size:1rem}.offc small{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
+.offc .offk{flex:none;width:26px;height:26px;border-radius:8px;border:1.5px solid var(--line2);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--on-accent)}
+.offc.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,210,220,.16)}
+.offc.on .offk{background:var(--accent);border-color:var(--accent)}
 .chip{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line2);background:var(--card);border-radius:24px;padding:9px 16px;font-size:.92rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center;gap:6px}
 .chip[aria-pressed="true"]{background:var(--grad);color:var(--on-accent);border-color:transparent}
 .chip.add{border-style:dashed;color:var(--accent)}
@@ -414,14 +420,14 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
  sanitario:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>'};
 var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi solo nel tuo locale: niente servizi a domicilio o online"],
  ["domicilio","Servizi a domicilio e/o online","Vai dai clienti, ricevi nel tuo locale o lavori in videochiamata: scegli tu dove"],
- ["palestra","Palestra","Lezioni di gruppo, personal training e iscritti"],
+ ["palestra","Palestra e personal training","Corsi di gruppo, personal training con pacchetti e iscritti. Ogni iscritto prenota da solo con il suo numero di telefono"],
  ["campi","Centro sportivo","Campi da tennis, padel, calcio, pallavolo e altri sport, da prenotare a ore"],
  ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Privacy rafforzata, con prenotazione dal calendario"]];
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
 var M1={"Parrucchiere":Q("Taglio donna|45,Taglio uomo|30,Piega|30,Colore|90"),"Barbiere":Q("Taglio|30,Barba|20,Taglio e barba|45"),"Estetista":Q("Pulizia viso|60,Manicure|45,Ceretta|40,Massaggio|50"),
  "Nail artist":Q("Manicure|45,Ricostruzione unghie|90,Refill|60,Pedicure|50"),"Centro massaggi":Q("Massaggio rilassante|50,Massaggio decontratturante|50,Massaggio schiena|30"),
  "Tatuatore":Q("Consulenza|30,Tatuaggio piccolo|90,Seduta tatuaggio|180"),"Toelettatore":Q("Bagno e tosatura|90,Bagno|45,Taglio unghie|15"),"Cartomante":Q("Lettura breve|30,Lettura completa|60"),"Altro":[]};
-var M2={"Idraulico":[],"Elettricista":[],"Tuttofare":[],"Pulizie":[],"Tecnico caldaie":[],"Personal trainer":[],"Ripetizioni":[],"Consulente":[],"Beauty a domicilio":[],"Altro":[]};
+var M2={"Idraulico":[],"Elettricista":[],"Tuttofare":[],"Pulizie":[],"Tecnico caldaie":[],"Ripetizioni":[],"Consulente":[],"Beauty a domicilio":[],"Altro":[]};
 /* chi puo' offrire servizi online: parrucchieri, barbieri, estetiste, massaggiatori e chi lavora solo a casa del cliente non la vedono nemmeno */
 var NOONLINE={"Parrucchiere":1,"Barbiere":1,"Estetista":1,"Massaggiatore":1,"Idraulico":1,"Elettricista":1,"Tuttofare":1,"Pulizie":1,"Fabbro":1,"Imbianchino":1,"Giardiniere":1,"Tecnico caldaie":1,"Beauty a domicilio":1};
 function whInit(){if(S.whFor!==S.mestiere||!S.wh){S.whFor=S.mestiere;S.wh={casa:true,sede:!SOLOCASA[S.mestiere],online:false}}if(!onlineOk())S.wh.online=false}
@@ -444,15 +450,15 @@ function sportInfo(){return SPORTS.filter(function(x){return x[0]===S.sportLbl})
 // tennis e padel: 2 o 4 giocatori, soci, certificato e FIT. Calcio, pallavolo e gli altri sport: solo il referente, nessun socio, nessuna regola, un prezzo per campo.
 function partySport(){var si=sportInfo();return !!si&&(si[1]==="tennis"||si[1]==="padel")}
 function courtName(c){var n=c.n.trim();var si=sportInfo();if(si&&si[1]==="calcio"&&c.fmt&&!/\b(a|da)\s?(5|7|11)\b/i.test(n))n+=" · a "+c.fmt;return n}
-var SUBT={prenota:"Come prenotano e annullano i tuoi clienti.",dove:"Dove ricevi o vai dai clienti.",sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
-var NAMES={dove:"Dove lavori",sport:"Sport",campi:"Campi",regole:"Regole",prenota:"Prenotazioni",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
+var SUBT={prenota:"Come prenotano e annullano i tuoi clienti.",dove:"Dove ricevi o vai dai clienti.",sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",offerta:"Corsi di gruppo, personal training o entrambi.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
+var NAMES={dove:"Dove lavori",sport:"Sport",campi:"Campi",regole:"Regole",prenota:"Prenotazioni",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",offerta:"Cosa offri",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
 var S={rl:{adv:null,notice:null,cancel:null,travel:null},sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,online:false,half:false,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","prenota","fine"];
   if(v==="domicilio")return["tipo","attivita","dove","servizi","zona","orari","prenota","fine"];
-  if(v==="palestra")return["tipo","attivita","lezioni","calendario","prenota","fine"];
+  if(v==="palestra")return["tipo","attivita","offerta"].concat(S.gcl!==false?["lezioni","calendario"]:["orari"]).concat(["prenota","fine"]);
   if(v==="campi")return["tipo","attivita","sport","campi","orari"].concat(partySport()?["regole"]:[]).concat(["prenota","fine"]);
   if(v==="sanitario")return["tipo","attivita","servizi","orari","privacy","prenota","fine"];return["tipo"]}
 var RLA=[[7,"1 settimana"],[14,"2 settimane"],[30,"1 mese"],[60,"2 mesi"],[90,"3 mesi"],[180,"6 mesi"]];
@@ -492,6 +498,7 @@ function validate(k){
     if(!S.items.length||S.items.some(function(x){return!x.n.trim()}))return S.items.length?"Dai un nome a ogni voce, oppure rimuovila.":(k==="lezioni"?"Aggiungi almeno una lezione.":"Aggiungi almeno un servizio.");
     if(k==="servizi"&&S.items.some(function(x){var ks=S.v==="domicilio"?itModes(x):["x"];return ks.some(function(k2){var p=mPrice(x,k2);return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
+  if(k==="offerta"&&S.gcl===false&&!S.gpt)return"Scegli almeno una delle due.";
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
   if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
   if(k==="campi"){if(!S.courts.length||S.cph!==2)return"";
@@ -588,7 +595,9 @@ function listBox(gym,dom){
 function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   base.rules={min_notice_min:S.rl.notice,cancel_limit_hours:S.rl.cancel,max_advance_days:S.rl.adv};if(S.v==="domicilio")base.rules.travel_min=S.rl.travel;
-  if(S.v==="palestra"){base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
+  if(S.v==="palestra"){base.classes=S.gcl!==false;base.personal=!!S.gpt||S.gcl===false;
+    if(S.gcl===false){base.hours=[];S.hours.forEach(function(d,i){if(d.on)base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});base.courses=[];return base}
+    base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
     return{name:x.n.trim(),duration_min:x.d,capacity:Number(x.k),category:x.cat,slots:sl}});return base}
   if(S.v==="campi"){var si3=sportInfo();base.sport=si3?si3[1]:"altro";base.open_to=partySport()?S.open_to:"all";base.fit=partySport()&&!!S.fit;
     base.courts=S.courts.map(function(c){var a=String(c.pm).trim().replace(",","."),b=String(c.pg).trim().replace(",",".");if(a===""&&b!=="")a=b;if(b===""&&a!=="")b=a;
@@ -668,6 +677,15 @@ function render(){
       mx.appendChild(yn("I clienti possono prenotare a mezz'ore?","Oltre alla durata minima possono aggiungere mezz'ore.","half"));
       mx.appendChild(h("p",{class:"hint",text:"Queste scelte decidono cosa vedranno i tuoi clienti. Se non le spunti, non compariranno."}));
       v.appendChild(mx)}
+  }
+  if(k==="offerta"){
+    v.appendChild(head(lab,"Cosa offri?","Puoi scegliere entrambe. Gli iscritti prenotano da soli con il loro numero di telefono."));
+    var og=h("div",{class:"offg"});
+    function offCard(title,sub,on,fn){var c=h("button",{type:"button",class:"offc"+(on?" on":"")},[h("span",{class:"offk"},[on?"✓":""]),h("span",null,[h("b",{text:title}),h("small",{text:sub})])]);c.onclick=function(){fn();S.err="";render()};return c}
+    og.appendChild(offCard("Corsi di gruppo","Lezioni con posti limitati e calendario settimanale",S.gcl!==false,function(){S.gcl=S.gcl===false;if(S.gcl===false&&!S.gpt)S.gpt=true}));
+    og.appendChild(offCard("Personal training","Sessioni 1 a 1 e pacchetti: l'iscritto sceglie giorno e ora",!!S.gpt||S.gcl===false,function(){var cur=!!S.gpt||S.gcl===false;if(cur){if(S.gcl===false)return;S.gpt=false}else S.gpt=true}));
+    v.appendChild(og);
+    v.appendChild(h("p",{class:"hint",text:"Pacchetti, abbonamenti e iscritti li imposti dopo, dall'agenda."}));
   }
   if(k==="calendario"){
     v.appendChild(head(lab,"Quando si tengono le lezioni?","Scegli i giorni e l'ora di inizio di ogni lezione. Altri orari li aggiungi dopo con il pulsante Programma."));
@@ -800,7 +818,7 @@ function render(){
     v.appendChild(rc);
   }
   if(k==="orari"){
-    v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare."));
+    v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):(S.v==="palestra"?head(lab,"Quando ricevi per il personal?","Giorni e orari in cui i tuoi iscritti possono prenotare le sessioni."):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare.")));
     var c4=h("div",{class:"card hrs"});
     S.hours.forEach(function(d,i){var r=h("div",{class:"day"});var l=h("label",{class:"tgl"});l.style.margin="0";var cb=h("input",{type:"checkbox"});cb.checked=d.on;
       l.appendChild(cb);l.appendChild(document.createTextNode(DAYN[i]));
@@ -813,9 +831,9 @@ function render(){
     var pauseT=h("div",{class:"times"+(S.pause.on?"":" off")}),pauseA=h("input",{type:"time",value:S.pause.from,"aria-label":"Inizio pausa"}),pauseB=h("input",{type:"time",value:S.pause.to,"aria-label":"Fine pausa"});
     pauseA.oninput=function(){S.pause.from=pauseA.value};pauseB.oninput=function(){S.pause.to=pauseB.value};
     pauseCb.onchange=function(){S.pause.on=pauseCb.checked;pauseT.className="times"+(S.pause.on?"":" off")};
-    pauseT.appendChild(pauseA);pauseT.appendChild(h("span",{text:"–"}));pauseT.appendChild(pauseB);pauseRow.appendChild(pauseLbl);pauseRow.appendChild(pauseT);c4.appendChild(pauseRow);
+    pauseT.appendChild(pauseA);pauseT.appendChild(h("span",{text:"–"}));pauseT.appendChild(pauseB);pauseRow.appendChild(pauseLbl);pauseRow.appendChild(pauseT);if(S.v!=="palestra")c4.appendChild(pauseRow);
     v.appendChild(c4);
-    v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni. Orari, chiusure e ferie si cambiano quando vuoi da Disponibilità."}));
+    if(S.v!=="palestra")v.appendChild(h("p",{class:"hint",text:"La pausa vale per tutti i giorni. Orari, chiusure e ferie si cambiano quando vuoi da Disponibilità."}));
   }
   if(k==="fine"){
     v.appendChild(head(lab,"Controlla e conferma","Questo è ciò che hai inserito. Per cambiare qualcosa tocca Modifica."));
@@ -841,7 +859,8 @@ function render(){
     } else if(S.v==="palestra"){
       var lb=h("div",{class:"rows"});
       S.items.forEach(function(x){lb.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" · ")+" alle "+x.time})]),h("span",{class:"rv",text:fmtMin(x.d)+" · "+x.k+(Number(x.k)===1?" posto":" posti")})]))});
-      v.appendChild(sec("Lezioni","lezioni",lb,S.items.length));
+      if(S.gcl===false){v.appendChild(sec("Cosa offri","offerta",h("div",{class:"rr"},[h("div",null,[h("b",{text:"Personal training"}),h("small",{text:"Gli iscritti prenotano le sessioni 1 a 1"})])])));var wkg=h("div",{class:"week"});S.hours.forEach(function(d,i){wkg.appendChild(h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),h("span",{class:"tm",text:d.on?d.from:"–"}),h("span",{class:"tm e",text:d.on?d.to:"chiuso"})]))});v.appendChild(sec("Orari","orari",wkg))}
+      else{v.appendChild(sec("Cosa offri","offerta",h("div",{class:"rr"},[h("div",null,[h("b",{text:S.gpt?"Corsi di gruppo e personal training":"Corsi di gruppo"})])])));v.appendChild(sec("Lezioni","lezioni",lb,S.items.length))}
     } else {
       var sb2=h("div",{class:"rows"});
       S.items.forEach(function(x){var p=String(x.p).trim().replace(",",".");
