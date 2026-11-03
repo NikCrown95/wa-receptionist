@@ -5,7 +5,7 @@ Si può fare tutto dall'iPad. Parti in **modalità di prova** (nessun soldo vero
 
 ## Cosa fa il sistema
 - **Prova gratuita di 14 giorni** al momento della registrazione, senza carta.
-- Dalle Impostazioni → Abbonamento il titolare tocca **Attiva l'abbonamento** (24,99 € al mese) e paga su una pagina Stripe.
+- Dalle Impostazioni → Abbonamento il titolare tocca **Attiva l'abbonamento** (15,99 € al mese) e paga su una pagina Stripe.
   Se è ancora in prova, il primo addebito parte **alla fine della prova**: non paga niente prima.
 - Dopo la scadenza ci sono **3 giorni di tolleranza**, poi la pagina di prenotazione e Lia si fermano.
 - **Disdetta stile Netflix**: dal pulsante *Gestisci pagamento e fatture* il titolare disdice e il piano resta attivo fino alla fine del periodo già pagato. Nessun rimborso.
@@ -14,8 +14,8 @@ Si può fare tutto dall'iPad. Parti in **modalità di prova** (nessun soldo vero
 
 ## 1. Account Stripe (modalità di prova)
 1. Vai su stripe.com e crea un account. Per ora resta in **Modalità di prova** (interruttore in alto): non serve attivare l'account né la partita IVA.
-2. (Facoltativo) *Catalogo prodotti* → *Aggiungi prodotto*: nome "Prenolia Smart", prezzo ricorrente **24,99 € / mese**. Copia l'ID del prezzo (inizia con `price_`).
-   Se salti questo passaggio, il prezzo viene preso dal database (24,99 €).
+2. (Facoltativo) *Catalogo prodotti* → *Aggiungi prodotto*: nome "Prenolia Smart", prezzo ricorrente **15,99 € / mese**. Copia l'ID del prezzo (inizia con `price_`).
+   Se salti questo passaggio, il prezzo viene preso dal database (15,99 €).
 
 ## 2. Portale clienti (serve per disdire e cambiare carta)
 *Impostazioni* → *Fatturazione* → *Portale clienti* → attiva e salva:
