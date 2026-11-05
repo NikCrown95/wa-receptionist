@@ -378,15 +378,17 @@ html{overflow-x:clip}body{overflow-x:clip}
 #profilo .pf-nav button[aria-pressed="true"]:not(.run)::before{background:var(--aink)}
 #profilo .pf-cap{transition:opacity .16s,transform .32s cubic-bezier(.2,.8,.2,1)}
 #profilo .pf-cap.sw{opacity:0;transform:translateY(8px)}
-.dv img{transition:opacity .12s ease}
-.dv img.sw{opacity:0;transform:none}
-.dv img.pre{opacity:1;transform:none;filter:none;clip-path:inset(0 100% 0 0);transition:none}
-.dv img.in{clip-path:inset(0 0 0 0);transition:clip-path .5s cubic-bezier(.65,0,.25,1)}
-.dv.ph img.in{transition-delay:.08s}
-.dv::after{content:"";position:absolute;top:0;bottom:0;left:-14%;width:14%;background:linear-gradient(90deg,transparent,rgba(156,235,235,.6),transparent);opacity:0;pointer-events:none;z-index:3}
-.dv.swp::after{animation:pfsw .5s cubic-bezier(.65,0,.25,1)}
-.dv.ph.swp::after{animation-delay:.08s}
-@keyframes pfsw{0%{left:-14%;opacity:1}100%{left:100%;opacity:1}}
+.dv img{transition:opacity .12s ease,transform .12s ease}
+.dv img.sw{opacity:0;transform:scale(.985)}
+.dv img.pre{opacity:0;transform:scale(1.03);transition:none}
+.dv img.in{transition:opacity .28s ease,transform .38s cubic-bezier(.2,.8,.2,1)}
+.pf-hint{font:inherit;display:inline-flex;align-items:center;gap:8px;margin:-6px 0 0;padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:rgba(15,34,41,.7);color:var(--aink);font-size:13.5px;font-weight:650;cursor:pointer;transition:border-color .25s,background .25s}
+.pf-hint:hover{border-color:var(--aink);background:rgba(156,235,235,.08)}
+.pf-hint svg{flex:none}
+.pf-hint .ht-m{display:none}
+@media(hover:hover) and (pointer:fine){.pf-hint .ht-t{display:none}.pf-hint .ht-m{display:inline}}
+.pf-hint svg{animation:pfpulse 2.6s ease-in-out infinite}
+@keyframes pfpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 #pfSet{cursor:zoom-in}
 #pfLb{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:rgba(4,12,15,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:56px 16px 24px;opacity:0;transition:opacity .22s}
 #pfLb.show{opacity:1}
@@ -586,6 +588,8 @@ function goV(n,first){var x=K[cs],v=x.v[n],im=IMG[x.k][n];cv=n;clearTimeout(auto
  function apply(){[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('pre');e.classList.remove('sw')});imgs[0].src=im[0];imgs[1].src=im[1];void set.offsetWidth;[].forEach.call(imgs,function(e){e.classList.remove('pre');e.classList.add('in')});typeCap(v.n,v.d);cap.classList.remove('sw');[].forEach.call(imgs,function(e){var d=e.parentNode;d.classList.remove('swp');void d.offsetWidth;d.classList.add('swp')})}
  if(first){apply()}else{[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('sw')});cap.classList.add('sw');setTimeout(apply,120)}
  if(!manual)auto=setTimeout(function(){if(document.hidden){goV(n)}else goV((n+1)%x.v.length)},DUR)}
+var hint=document.createElement('button');hint.type='button';hint.className='pf-hint';hint.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M11 8v6M8 11h6"/></svg><span class="ht-t">Tocca lo schermo per ingrandire</span><span class="ht-m">Clicca sullo schermo per ingrandire</span>';
+set.parentNode.insertBefore(hint,nav);hint.onclick=function(){lbOpenF()};
 var capTok=0;
 function typeCap(n,d){var my=++capTok,full=n+'. '+d,nl=n.length+1,i=0,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
  function put(k){cap.innerHTML='<b>'+full.slice(0,Math.min(k,nl))+'</b>'+(k>nl?full.slice(nl,k):'')}
