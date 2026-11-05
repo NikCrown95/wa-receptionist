@@ -378,10 +378,11 @@ html{overflow-x:clip}body{overflow-x:clip}
 #profilo .pf-nav button[aria-pressed="true"]:not(.run)::before{background:var(--aink)}
 #profilo .pf-cap{transition:opacity .16s,transform .32s cubic-bezier(.2,.8,.2,1)}
 #profilo .pf-cap.sw{opacity:0;transform:translateY(8px)}
-.dv img{transition:opacity .12s ease,transform .12s ease}
-.dv img.sw{opacity:0;transform:scale(.985)}
-.dv img.pre{opacity:0;transform:scale(1.03);transition:none}
-.dv img.in{transition:opacity .28s ease,transform .38s cubic-bezier(.2,.8,.2,1)}
+.dv img{transition:opacity .13s ease,transform .13s ease,filter .13s ease}
+.dv img.sw{opacity:0;transform:translateX(-22px) scale(.99);filter:blur(7px)}
+.dv img.pre{opacity:0;transform:translateX(30px) scale(.99);filter:blur(9px);transition:none}
+.dv.ph img.pre{transform:translateX(56px) scale(.99)}
+.dv img.in{transition:opacity .3s ease,transform .42s cubic-bezier(.2,.85,.25,1),filter .3s ease}
 .pf-hint{font:inherit;display:inline-flex;align-items:center;gap:8px;margin:-6px 0 0;padding:8px 16px;border-radius:999px;border:1px solid var(--line2);background:rgba(15,34,41,.7);color:var(--aink);font-size:13.5px;font-weight:650;cursor:pointer;transition:border-color .25s,background .25s}
 .pf-hint:hover{border-color:var(--aink);background:rgba(156,235,235,.08)}
 .pf-hint svg{flex:none}
