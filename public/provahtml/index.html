@@ -9,8 +9,13 @@
 #profilo .pf-cap .bb{position:relative;flex:1;background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:0 18px;height:76px;display:flex;align-items:center;font-size:15.5px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 #profilo .pf-cap .bb:before{content:"";position:absolute;left:-7px;top:calc(50% - 6px);width:12px;height:12px;background:var(--card);border-left:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:rotate(45deg)}
 #profilo .pf-cap .tx{display:block;color:var(--ink)}
-#profilo .pf-cap .tx span{opacity:0;display:inline-block;transform:translateY(4px);filter:blur(3px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1),filter .55s ease;white-space:pre}
-#profilo .pf-cap .tx span.w{opacity:1;transform:none;filter:none}
+#profilo .pf-cap .tx span{opacity:0}
+#profilo .pf-cap .tx .wd{display:inline-block;white-space:nowrap;font-style:normal}
+#profilo .pf-cap .tx span.w{opacity:1}
+#profilo .pf-cap .tx span.cr:after{content:"";display:inline-block;width:2px;height:1em;background:var(--acc);margin-left:1px;vertical-align:-2px}
+#profilo .pf-cap .rbw.nod .rb{animation:pfnd .8s cubic-bezier(.3,.8,.3,1)}
+@keyframes pfnd{0%{transform:none}30%{transform:rotate(-7deg) translateY(2px)}65%{transform:rotate(3deg)}100%{transform:none}}
+#profilo .pf-cap .rb{transform-origin:50% 90%}
 #profilo .pf-cap .td{position:absolute;left:18px;top:calc(50% - 4px);display:flex;gap:5px;opacity:0;transition:opacity .15s}
 #profilo .pf-cap .td i{width:7px;height:7px;border-radius:9px;background:var(--acc);animation:pftj .9s infinite}
 #profilo .pf-cap .td i:nth-child(2){animation-delay:.15s}#profilo .pf-cap .td i:nth-child(3){animation-delay:.3s}
@@ -623,13 +628,16 @@ var hint=document.createElement('button');hint.type='button';hint.className='pf-
 set.parentNode.insertBefore(hint,nav);hint.onclick=function(){lbOpenF()};
 var capTok=0;
 var capT=[];
-function typeCap(n,d){capT.forEach(clearTimeout);capT=[];var my=++capTok,bb=cap.querySelector('.bb'),tx=cap.querySelector('.tx'),reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
- tx.innerHTML='';var ws=[];
- d.split('*').forEach(function(seg,pi){seg.split(/(?<=\s)/).forEach(function(t){if(!t)return;var e=document.createElement('span');e.textContent=t;if(pi%2)e.className='k';tx.appendChild(e);ws.push(e)})});
- bb.classList.remove('think');
- if(reduce){ws.forEach(function(e){e.classList.add('w')});return}
- bb.classList.add('think');var t=550;
- ws.forEach(function(e){capT.push(setTimeout(function(){if(my!==capTok)return;bb.classList.remove('think');e.classList.add('w')},t));var w=e.textContent.trim();t+=70+w.length*11+(/[,.!?:]$/.test(w)?170:0)})}
+function typeCap(n,d){capT.forEach(clearTimeout);capT=[];var my=++capTok,bb=cap.querySelector('.bb'),tx=cap.querySelector('.tx'),rw=cap.querySelector('.rbw'),reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ tx.innerHTML='';var cs_=[];
+ d.split('*').forEach(function(seg,pi){seg.split(/(\s+)/).forEach(function(w){if(!w)return;if(/^\s+$/.test(w)){tx.appendChild(document.createTextNode(' '));return}
+  var wd=document.createElement('i');wd.className='wd';w.split('').forEach(function(ch){var c=document.createElement('span');c.textContent=ch;if(pi%2)c.className='k';wd.appendChild(c);cs_.push(c)});tx.appendChild(wd)})});
+ bb.classList.remove('think');rw.classList.remove('nod');
+ if(reduce){cs_.forEach(function(e){e.classList.add('w')});return}
+ void rw.offsetWidth;rw.classList.add('nod');capT.push(setTimeout(function(){rw.classList.remove('nod')},900));
+ bb.classList.add('think');var t=500;
+ cs_.forEach(function(e){capT.push(setTimeout(function(){if(my!==capTok)return;bb.classList.remove('think');var o=tx.querySelector('.cr');if(o)o.classList.remove('cr');e.classList.add('w','cr')},t));t+=26});
+ capT.push(setTimeout(function(){if(my!==capTok)return;var o=tx.querySelector('.cr');if(o)o.classList.remove('cr')},t+120))}
 /* ingrandimento schermate */
 var lb=document.createElement('div');lb.id='pfLb';lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');lb.setAttribute('aria-label','Schermate ingrandite');
 lb.innerHTML='<button class="lbx" aria-label="Chiudi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="lbp" aria-label="Precedente"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lbset"><div class="dv tb"><img alt=""></div><div class="dv ph"><img alt=""></div></div><div class="lbc"></div><div class="lbd"></div><button class="lbn" aria-label="Successivo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>';
