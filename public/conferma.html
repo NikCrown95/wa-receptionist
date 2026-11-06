@@ -55,6 +55,11 @@ a.lnk,button.lnk{color:var(--accent);text-decoration:none;font-size:.9rem;backgr
       <div class="err" id="err" role="alert"></div>
       <p class="hint hide" id="again"><a class="lnk" href="/login.html">Vai all'accesso</a></p>
     </section>
+    <section id="done" class="hide">
+      <h1>Email confermata ✓</h1>
+      <p class="sub">La tua prova gratuita è partita. Se ti sei registrato da un altro dispositivo, quella pagina si aggiorna da sola e prosegue da lì.</p>
+      <a class="btn" id="cont" href="/benvenuto.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Continua da questo dispositivo</a>
+    </section>
     <section id="bad" class="hide">
       <h1>Link non valido</h1>
       <p class="sub">Questo link di conferma non funziona. Controlla di aver aperto l'ultima email che ti abbiamo inviato, oppure registrati di nuovo per riceverne una nuova.</p>
@@ -75,7 +80,12 @@ go.addEventListener("click",function(){
   er.style.display="none";go.disabled=true;go.textContent="Un attimo…";
   fetch("/api/business-auth?action=confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:token})})
     .then(function(r){return r.json().catch(function(){return {}}).then(function(j){if(!r.ok||!j.agenda_token)throw new Error(j.error||"Qualcosa non ha funzionato. Riprova.");return j})})
-    .then(function(j){go.textContent="Benvenuto!";location.replace("/benvenuto.html?t="+encodeURIComponent(j.agenda_token))})
+    .then(function(j){
+      var href="/benvenuto.html?t="+encodeURIComponent(j.agenda_token);
+      document.getElementById("ok").classList.add("hide");
+      var d=document.getElementById("done");d.classList.remove("hide");
+      document.getElementById("cont").setAttribute("href",href);
+    })
     .catch(function(x){show(x.message);go.disabled=false;go.textContent="Riprova";document.getElementById("again").classList.remove("hide")});
 });
 })();

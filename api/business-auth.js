@@ -379,6 +379,23 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     }
 
+    // Chi si è registrato su un dispositivo e conferma l'email da un altro: la pagina di registrazione resta in attesa e,
+    // appena l'account esiste, entra da sola. Serve email + password scelta (solo chi ha compilato il modulo le ha).
+    if (req.method === "POST" && action === "signup-wait") {
+      const email = String(body.email || "").trim().toLowerCase();
+      const password = String(body.password || "");
+      if (!EMAIL_RE.test(email) || !password) return res.status(400).json({ error: "Dati mancanti." });
+      if ((await isLocked("wait:" + email)) || (await isLocked("wait-ip:" + ip))) return res.status(429).json({ error: TOO_MANY });
+      const u = await sb("GET", "business_users?email=eq." + enc(email) + "&select=business_id,totp_enabled&limit=1");
+      if (!u.ok || !Array.isArray(u.data) || !u.data.length) return res.status(200).json({ ready: false });
+      if (u.data[0].totp_enabled) return res.status(200).json({ ready: false });
+      const r = await rpc("business_login2", { p_email: email, p_password: password });
+      const row = r.ok && Array.isArray(r.data) ? r.data[0] : null;
+      if (!row) { await recordHit("wait:" + email, 8, 10); await recordHit("wait-ip:" + ip, 40, 10); return res.status(200).json({ ready: false }); }
+      startSession(res, row, false);
+      return res.status(200).json({ ready: true, agenda_token: row.agenda_token });
+    }
+
     if (req.method === "POST" && action === "confirm") {
       const token = String(body.token || "");
       if (!/^[0-9a-f]{64}$/.test(token)) return res.status(400).json({ error: "Questo link non è valido." });
