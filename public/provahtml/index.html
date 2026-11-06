@@ -710,7 +710,7 @@ if(reduce||!('IntersectionObserver' in window)){done();return}
 var go=false;
 function run(){if(go)return;go=true;
  var wEnd=b.offsetWidth;b.textContent=fmt(START);var wStart=b.offsetWidth;b.style.width=wStart+'px';b.style.textAlign='right';
- var t0=performance.now(),D=2400;
+ var t0=performance.now(),D=4200;
  (function f(n){var p=Math.min(1,(n-t0)/D),v=START-(START-END)*ease(p);b.textContent=fmt(v);b.style.color=col(p);
   if(p<1){requestAnimationFrame(f);return}
   b.textContent=FIN;b.style.color='';b.classList.add('fin');b.style.width=wEnd+'px';void b.offsetWidth;b.classList.add('pop');
