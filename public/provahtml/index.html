@@ -44,13 +44,14 @@
 </style>
 <style id="pfz2">
 #profilo .pf-zm{opacity:.8}
-#profilo .pf-zm svg{transition:transform .25s cubic-bezier(.2,.9,.3,1.2);animation:pfzm 3.6s ease-in-out 2.5s infinite}
-#profilo #pfSet{animation:pfzs 3.6s ease-in-out 2.5s infinite}
-#profilo .pf-zm:hover svg,#profilo .pf-zm:focus-visible svg{animation:none;transform:scale(1.3)}
-#profilo .pf-zm:active svg{animation:none;transform:scale(1.5)}
-@keyframes pfzm{0%,55%,100%{transform:scale(1)}72%{transform:scale(1.35)}86%{transform:scale(1)}}
-@keyframes pfzs{0%,55%,100%{scale:1}72%{scale:1.03}86%{scale:1}}
-@media (prefers-reduced-motion:reduce){#profilo .pf-zm svg,#profilo #pfSet{animation:none}}
+#profilo .pf-zm svg{transition:transform .25s cubic-bezier(.2,.9,.3,1.2)}
+#profilo .pf-zm .p1{animation:pfa1 3.6s ease-in-out 2.5s infinite}
+#profilo .pf-zm .p2{animation:pfa2 3.6s ease-in-out 2.5s infinite}
+#profilo .pf-zm:hover svg,#profilo .pf-zm:focus-visible svg{transform:scale(1.3)}
+#profilo .pf-zm:active svg{transform:scale(1.5)}
+@keyframes pfa1{0%,55%,100%{transform:translate(0,0)}72%{transform:translate(2.6px,-2.6px)}86%{transform:translate(0,0)}}
+@keyframes pfa2{0%,55%,100%{transform:translate(0,0)}72%{transform:translate(-2.6px,2.6px)}86%{transform:translate(0,0)}}
+@media (prefers-reduced-motion:reduce){#profilo .pf-zm .p1,#profilo .pf-zm .p2{animation:none}}
 </style>
 </head><body>
 <title>Prenolia: l'agenda online con la segretaria virtuale</title><meta name="robots" content="noindex,nofollow">
@@ -636,7 +637,7 @@ var cs=-1,cv=-1,busy=null,auto=null,manual=false,DUR=7000;
 K.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.textContent=x.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.onclick=function(){manual=false;goS(i)};tabs.appendChild(b)});
 var PL={};function pl(u){return PL[u]||(PL[u]=new Promise(function(r){var i=new Image();i.onload=function(){(i.decode?i.decode():Promise.resolve()).then(r,r)};i.onerror=r;i.src=u}))}
 function plSec(k){(IMG[k]||[]).forEach(function(p){pl(p[0]);pl(p[1])})}
-function mk(){set.innerHTML='<div class="dv tb"><img alt=""></div><div class="dv ph"><img alt=""></div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>'}
+function mk(){set.innerHTML='<div class="dv tb"><img alt=""></div><div class="dv ph"><img alt=""></div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="p1" d="M15 3h6v6M21 3l-7 7"/><path class="p2" d="M9 21H3v-6M3 21l7-7"/></svg></button>'}
 function goS(i){if(i===cs)return;cs=i;[].forEach.call(tabs.children,function(e,j){e.setAttribute('aria-pressed',j===i?'true':'false')});
  clearTimeout(busy);clearTimeout(auto);set.classList.remove('on');set.classList.add('out');
  busy=setTimeout(function(){var x=K[i];nav.innerHTML='';x.v.forEach(function(v,n){var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.innerHTML=v.n+'<i></i>';b.onclick=function(){manual=true;goV(n)};nav.appendChild(b)});
