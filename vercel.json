@@ -167,6 +167,10 @@
       "destination": "/provahtml/domande.html"
     },
     {
+      "source": "/provahtml/tutorial",
+      "destination": "/provahtml/tutorial.html"
+    },
+    {
       "source": "/promoter",
       "destination": "/promoter.html"
     },
