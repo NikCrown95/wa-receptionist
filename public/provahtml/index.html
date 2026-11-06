@@ -491,6 +491,9 @@ body.lbo{overflow:hidden}
 .m3 .m3-t{position:relative;font-size:15px;line-height:1.2;font-weight:700;letter-spacing:.02em;margin:0;color:#8DA3A9}
 .m3 .m3-w{position:relative;height:1.35em;margin-top:6px;font-size:clamp(28px,9.2vw,37px);font-weight:800;letter-spacing:-.045em;white-space:nowrap;line-height:1.35;overflow:visible}
 .m3 .m3-w span{display:inline-block;background:linear-gradient(105deg,#7FDCDC 0%,#4BB3D6 38%,#F2FFFF 50%,#4BB3D6 62%,#7FDCDC 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:m3s 3.2s ease-in-out infinite}
+.m3 .m3-sec{position:relative;margin:4px 0 0;font-size:14px;font-weight:600;color:#8DA3A9;letter-spacing:.01em;transition:opacity .35s ease;height:1.3em}
+.m3 .m3-ln{position:relative;width:84px;height:2px;margin:14px auto 0;border-radius:2px;background:rgba(127,220,220,.16);overflow:hidden}
+.m3 .m3-ln b{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,#4BB3D6,#7FDCDC)}
 @keyframes m3s{0%{background-position:100% 0}60%,100%{background-position:0 0}}
 @media (prefers-reduced-motion:reduce){.m3:before,.m3 .m3-w span{animation:none}}
 #profilo.pf{padding:34px 0 26px!important}
@@ -516,7 +519,7 @@ body.lbo{overflow:hidden}
   </div>
 </section></div>
 
-<section class="pf" id="profilo"><div class="wrap"><div class="m3"><h2 class="m3-t">Per chi è?</h2><div class="m3-w" id="m3w"><span id="m3j">Parrucchiere</span></div></div>
+<section class="pf" id="profilo"><div class="wrap"><div class="m3"><h2 class="m3-t">Per chi è?</h2><div class="m3-w" id="m3w"><span id="m3j">Parrucchiere</span></div><p class="m3-sec" id="m3s">Servizi alla persona</p><div class="m3-ln"><b id="m3b"></b></div></div>
   <div class="pf-in">
     <div class="pf-l">
       <p class="pf-big">La tua Dashboard</p>
@@ -751,10 +754,12 @@ var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){io.disconnec
 <script>
 (function(){var el=document.getElementById('m3j');if(!el)return;var J=['Parrucchiere','Estetista','Barbiere','Personal trainer','Istruttore di tennis','Fisioterapista','Massaggiatore','Insegnante privato'];
 if(matchMedia('(prefers-reduced-motion:reduce)').matches||!matchMedia('(max-width:600px)').matches)return;
+var SE=['Servizi alla persona','Servizi alla persona','Servizi alla persona','Centri sportivi','Centri sportivi','Studi medici','Servizi alla persona','Servizi a domicilio e online'];var se=document.getElementById('m3s'),bb=document.getElementById('m3b');
 var AL='abcdefghijklmnopqrstuvwxyz',k=0,vis=true;
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
 if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(el)}
 (async function loop(){while(true){if(!vis){await sleep(400);continue}var t=J[k%J.length],n=t.length;
+var tot=(n*3+5)*38+1500;se.style.opacity=0;setTimeout(function(){se.textContent=SE[k%J.length];se.style.opacity=1},350);bb.style.transition='none';bb.style.width='0';void bb.offsetWidth;bb.style.transition='width '+tot+'ms linear';bb.style.width='100%';
 for(var f=0;f<=n*3+4;f++){var rv=Math.floor(f/3),o='';for(var i=0;i<n;i++)o+=t[i]===' '?' ':(i<rv?t[i]:AL[Math.floor(Math.random()*26)]);el.textContent=o;el.style.opacity=f<n*3?'.8':'1';await sleep(38)}
 el.textContent=t;await sleep(1500);k++}})()})();
 </script>
