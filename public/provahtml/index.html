@@ -624,6 +624,8 @@ var IMG={"h": [["/provahtml/img/h0-t.webp?v=2", "/provahtml/img/h0-p.webp?v=2"],
 var tabs=document.getElementById('pfTabs'),set=document.getElementById('pfSet'),nav=document.getElementById('pfNav'),cap=document.getElementById('pfCap');if(!tabs)return;
 var cs=-1,cv=-1,busy=null,auto=null,manual=false,DUR=7000;
 K.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.textContent=x.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.onclick=function(){manual=false;goS(i)};tabs.appendChild(b)});
+var PL={};function pl(u){return PL[u]||(PL[u]=new Promise(function(r){var i=new Image();i.onload=function(){(i.decode?i.decode():Promise.resolve()).then(r,r)};i.onerror=r;i.src=u}))}
+function plSec(k){(IMG[k]||[]).forEach(function(p){pl(p[0]);pl(p[1])})}
 function mk(){set.innerHTML='<div class="dv tb"><img alt=""></div><div class="dv ph"><img alt=""></div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>'}
 function goS(i){if(i===cs)return;cs=i;[].forEach.call(tabs.children,function(e,j){e.setAttribute('aria-pressed',j===i?'true':'false')});
  clearTimeout(busy);clearTimeout(auto);set.classList.remove('on');set.classList.add('out');
@@ -634,9 +636,11 @@ function goV(n,first){var x=K[cs],v=x.v[n],im=IMG[x.k][n];cv=n;clearTimeout(auto
  var cur=nav.children[n];if(!manual&&!matchMedia('(prefers-reduced-motion:reduce)').matches){cur.style.setProperty('--pfdur',DUR+'ms');cur.classList.add('run')}
  var imgs=set.querySelectorAll('img');
  function apply(){[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('pre');e.classList.remove('sw')});imgs[0].src=im[0];imgs[1].src=im[1];void set.offsetWidth;[].forEach.call(imgs,function(e){e.classList.remove('pre');e.classList.add('in')});typeCap(v.n,v.d);[].forEach.call(imgs,function(e){var d=e.parentNode;d.classList.remove('swp');void d.offsetWidth;d.classList.add('swp')})}
- if(first){apply()}else{[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('sw')});setTimeout(apply,120)}
+ plSec(x.k);var rdy=Promise.all([pl(im[0]),pl(im[1])]);
+ if(first){rdy.then(function(){if(cv===n)apply()})}else{var t0=Date.now();[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('sw')});rdy.then(function(){setTimeout(function(){if(cv===n)apply()},Math.max(0,120-(Date.now()-t0)))})}
  if(!manual)auto=setTimeout(function(){if(document.hidden){goV(n)}else goV((n+1)%x.v.length)},DUR)}
 var capTok=0;
+window.addEventListener('load',function(){setTimeout(function(){Object.keys(IMG).forEach(plSec)},800)});
 var capT=[];
 function typeCap(n,d){capT.forEach(clearTimeout);capT=[];var my=++capTok,bb=cap.querySelector('.bb'),tx=cap.querySelector('.tx'),rw=cap.querySelector('.rbw'),reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
  tx.innerHTML='';var cs_=[];
