@@ -53,6 +53,13 @@
 @keyframes pfa2{0%,55%,100%{transform:translate(0,0)}72%{transform:translate(-2.6px,2.6px)}86%{transform:translate(0,0)}}
 @media (prefers-reduced-motion:reduce){#profilo .pf-zm .p1,#profilo .pf-zm .p2{animation:none}}
 </style>
+<style id="pfp">
+.pr-price b{display:inline-block;font-variant-numeric:tabular-nums;white-space:nowrap;transition:color .25s,width .45s cubic-bezier(.2,.9,.3,1),text-shadow .6s}
+.pr-price b.fin{color:#5DF2A0;text-shadow:0 0 22px rgba(93,242,160,.38)}
+.pr-price b.pop{animation:prpop .6s cubic-bezier(.2,.9,.3,1.35)}
+@keyframes prpop{0%{transform:scale(1)}40%{transform:scale(1.14);text-shadow:0 0 34px rgba(93,242,160,.75)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pr-price b.pop{animation:none}}
+</style>
 </head><body>
 <title>Prenolia: l'agenda online con la segretaria virtuale</title><meta name="robots" content="noindex,nofollow">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -689,6 +696,29 @@ goS(0);
 
 </script>
 
+<script>
+(function(){var box=document.querySelector('.pr-price'),b=box&&box.querySelector('b');if(!b)return;
+var END=15.99,START=129.99,FIN='15,99\u00a0\u20ac';
+function fmt(v){return v.toFixed(2).replace('.',',')+'\u00a0\u20ac'}
+function ease(t){return 1-Math.pow(1-t,3)}
+function mix(a,c,t){return a.map(function(x,i){return Math.round(x+(c[i]-x)*t)})}
+var HOT=[255,184,107],MID=[255,224,138],GRN=[93,242,160];
+function col(p){return 'rgb('+(p<.55?mix(HOT,MID,p/.55):mix(MID,GRN,(p-.55)/.45)).join(',')+')'}
+var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function done(){b.textContent=FIN;b.style.color='';b.classList.add('fin')}
+if(reduce||!('IntersectionObserver' in window)){done();return}
+var go=false;
+function run(){if(go)return;go=true;
+ var wEnd=b.offsetWidth;b.textContent=fmt(START);var wStart=b.offsetWidth;b.style.width=wStart+'px';b.style.textAlign='right';
+ var t0=performance.now(),D=2400;
+ (function f(n){var p=Math.min(1,(n-t0)/D),v=START-(START-END)*ease(p);b.textContent=fmt(v);b.style.color=col(p);
+  if(p<1){requestAnimationFrame(f);return}
+  b.textContent=FIN;b.style.color='';b.classList.add('fin');b.style.width=wEnd+'px';void b.offsetWidth;b.classList.add('pop');
+  setTimeout(function(){b.style.width='';b.style.textAlign=''},700)})(t0)}
+b.textContent=FIN;
+var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){io.disconnect();run()}},{threshold:.6});io.observe(box);
+})();
+</script>
 </body></html>
 <script>
 (function(){var dd=document.getElementById('dd'),b=document.getElementById('ddb'),m=document.getElementById('ddm');if(!dd||!b||!m)return;
