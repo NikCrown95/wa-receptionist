@@ -171,6 +171,10 @@
       "destination": "/provahtml/tutorial.html"
     },
     {
+      "source": "/provahtml/scegli-settore",
+      "destination": "/provahtml/scegli-settore.html"
+    },
+    {
       "source": "/promoter",
       "destination": "/promoter.html"
     },

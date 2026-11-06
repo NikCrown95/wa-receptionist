@@ -649,7 +649,7 @@ var w=document.getElementById('tuw'),nav=document.getElementById('tuNav'),dd=doc
 dd.innerHTML=SEC.map(function(s){return '<button type="button" role="menuitem" data-id="'+s.id+'"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+s.ic+'</svg></span><span><b>'+s.n+'</b><small>'+s.e+'</small></span></button>'}).join('');
 function open(o){w.classList.toggle('open',o);nav.setAttribute('aria-expanded',o?'true':'false');dd.setAttribute('aria-hidden',o?'false':'true')}
 window.TU_CLOSE=function(){open(false)};
-nav.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();open(!w.classList.contains('open'))});
+nav.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(matchMedia('(max-width:760px)').matches){location.href='/provahtml/scegli-settore';return}open(!w.classList.contains('open'))});
 document.addEventListener('click',function(e){if(!w.contains(e.target))open(false)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')open(false)});
 dd.addEventListener('click',function(e){var b=e.target.closest('button[data-id]');if(!b)return;if(window.TU_PICK)window.TU_PICK(b.dataset.id);else location.href='/provahtml/tutorial?s='+b.dataset.id});
