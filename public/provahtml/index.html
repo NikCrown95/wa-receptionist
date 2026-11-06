@@ -477,6 +477,7 @@ body.lbo{overflow:hidden}
 @media(max-width:600px){#pfLb .lbset{aspect-ratio:auto;width:auto}#pfLb .lbset .dv.tb{display:none}#pfLb .lbset .dv.ph{position:relative;left:auto;bottom:auto;width:min(66vw,300px,calc((100vh - 230px)*.48))}#pfLb .lbp,#pfLb .lbn{top:auto;bottom:18px;transform:none}}
 .pf-set.out .dv{transition-duration:.18s}
 
+@media(max-width:600px){#chat{overflow:hidden}.row{max-height:240px}.row.gone{opacity:0;max-height:0;margin-top:-.5em;overflow:hidden;pointer-events:none;transition:opacity .3s ease,max-height .45s ease,margin .45s ease}}
 .seclin,.m3{display:none}
 @media(max-width:600px){
 .seclin{display:block;margin:14px 0 0;font-size:14px;line-height:1.5;font-weight:600;color:var(--aink);letter-spacing:.01em}
@@ -619,6 +620,8 @@ function bubble(m){var r=row(m[0]),b=document.createElement('div');b.className='
 function meBubble(m){var r=row('me'),b=document.createElement('div');b.className='b';var a=document.createElement('span'),g=document.createElement('span');a.className='ty';g.style.visibility='hidden';g.textContent=m[1];b.appendChild(a);b.appendChild(g);r.appendChild(b);r._a=a;r._g=g;r._t=m[1];return r}
 function typing(){var r=row('lia'),t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';r.appendChild(t);return r}
 function show(to){var cy=document.getElementById('cyl');if(to===book)cy.classList.add('back');else cy.classList.remove('back')}
+var MQ=matchMedia('(max-width:600px)');function hh(c){return c.classList.contains('gone')?0:c.offsetHeight}
+function fit(){if(!MQ.matches)return;var ks=[].slice.call(chat.children).filter(function(c){return c!==lh&&!c.classList.contains('gone')});var g=parseFloat(getComputedStyle(chat).rowGap)||0;function tot(){var t=hh(lh)+(lh.style.display==='none'?0:g);ks.forEach(function(c){t+=c.offsetHeight+g});return t}while(ks.length>1&&tot()>chat.clientHeight){ks.shift().classList.add('gone')}}
 function clear(){[].slice.call(chat.children).forEach(function(c){if(c!==lh)chat.removeChild(c)})}
 function setCap(n){if(!n){cap.classList.add('h');return}cap.classList.remove('h');[].forEach.call(cap.children,function(s,q){s.classList.toggle('on',q<n)})}
 TABS.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.textContent=t.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');
@@ -629,8 +632,8 @@ async function play(i,id){
  if(t.x){lh.style.display='';lh.classList.add('in');await wait(1000,id);
   var M=conv(t.x);
   for(var j=0;j<M.length;j++){var m=M[j];
-   if(m[0]==='lia'){var ty=typing();chat.appendChild(ty);await wait(900,id);chat.removeChild(ty);chat.appendChild(bubble(m));await wait(800,id)}
-   else{await wait(500,id);var mr=meBubble(m);chat.appendChild(mr);if(j>0)mr._a.classList.add('done');await wait(200,id);for(var c=1;c<=mr._t.length;c++){mr._a.textContent=mr._t.slice(0,c);mr._g.textContent=mr._t.slice(c);await wait(32,id)}mr._a.classList.add('done');await wait(260,id)}}
+   if(m[0]==='lia'){var ty=typing();chat.appendChild(ty);fit();await wait(900,id);chat.removeChild(ty);chat.appendChild(bubble(m));fit();await wait(800,id)}
+   else{await wait(500,id);var mr=meBubble(m);chat.appendChild(mr);fit();if(j>0)mr._a.classList.add('done');await wait(200,id);for(var c=1;c<=mr._t.length;c++){mr._a.textContent=mr._t.slice(0,c);mr._g.textContent=mr._t.slice(c);await wait(32,id)}mr._a.classList.add('done');await wait(260,id)}}
   await wait(1400,id)}
  else{lh.style.display='none'}
  setCap('');[].forEach.call(chat.children,function(e,q){e.style.setProperty('--i',q)});if(t.x){chat.classList.add('bye');await wait(300+chat.children.length*45,id)}show(book);
