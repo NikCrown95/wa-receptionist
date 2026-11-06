@@ -42,6 +42,15 @@
 #profilo .pf-zm:hover,#profilo .pf-zm:focus-visible{opacity:.95}
 #profilo .pf-set.out .pf-zm{opacity:0}
 </style>
+<style id="pfz2">
+#profilo .pf-zm svg{transition:transform .25s cubic-bezier(.2,.9,.3,1.2);animation:pfzm 5s ease-in-out 2.5s infinite}
+#profilo .pf-zm:after{content:"";position:absolute;inset:7px;border-radius:50%;border:1.5px solid var(--aink);opacity:0;pointer-events:none;animation:pfzr 5s ease-out 2.5s infinite}
+#profilo .pf-zm:hover svg,#profilo .pf-zm:focus-visible svg{animation:none;transform:scale(1.3)}
+#profilo .pf-zm:active svg{animation:none;transform:scale(1.5)}
+@keyframes pfzm{0%,70%,100%{transform:scale(1);opacity:1}82%{transform:scale(1.4)}92%{transform:scale(1.05)}}
+@keyframes pfzr{0%,72%{transform:scale(.6);opacity:0}78%{opacity:.55}100%{transform:scale(1.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){#profilo .pf-zm svg,#profilo .pf-zm:after{animation:none}}
+</style>
 </head><body>
 <title>Prenolia: l'agenda online con la segretaria virtuale</title><meta name="robots" content="noindex,nofollow">
 <meta name="claude:viewport-fit-sides" content="cover">
