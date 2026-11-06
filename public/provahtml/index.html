@@ -764,16 +764,16 @@ var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){io.disconnec
 (function(){var w=document.getElementById('m3w');if(!w)return;var J=['Parrucchiere','Estetista','Barbiere','Personal trainer','Istruttore di tennis','Fisioterapista','Massaggiatore','Insegnante privato'];
 if(matchMedia('(prefers-reduced-motion:reduce)').matches||!matchMedia('(max-width:600px)').matches)return;
 var SE=['Servizi alla persona','Servizi alla persona','Servizi alla persona','Centri sportivi','Centri sportivi','Studi medici','Servizi alla persona','Servizi a domicilio e online'];var se=document.getElementById('m3s');
-var E='cubic-bezier(.16,1,.3,1)',k=0,vis=true,prev=null,HOLD=1100;
+var k=0,vis=true;
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
 if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(w)}
-(async function loop(){while(true){if(!vis){await sleep(400);continue}
-var i=k%J.length,s=document.createElement('span');s.textContent=J[i];s.style.opacity='0';s.style.letterSpacing='.07em';s.style.transition='opacity .35s ease,letter-spacing .55s '+E;
-w.appendChild(s);void s.offsetWidth;s.style.opacity='1';s.style.letterSpacing='-.045em';
-if(prev){prev.style.transition='opacity .22s ease';prev.style.opacity='0';(function(o){setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o)},260)})(prev)}
-else{var f=document.getElementById('m3j');if(f&&f!==s&&f.parentNode)f.parentNode.removeChild(f)}
-prev=s;se.style.opacity=0;setTimeout(function(){se.textContent=SE[i];se.style.opacity=1},150);
-await sleep(HOLD);k++}})()})();
+(async function loop(){var e=document.createElement('span');e.textContent='';var f=document.getElementById('m3j');if(f&&f.parentNode)f.parentNode.removeChild(f);w.appendChild(e);
+while(true){if(!vis){await sleep(400);continue}
+var i=k%J.length,t=J[i];se.style.opacity=0;setTimeout(function(){se.textContent=SE[i];se.style.opacity=1},120);
+for(var c=1;c<=t.length;c++){e.textContent=t.slice(0,c);await sleep(45)}
+await sleep(800);
+for(var c=t.length;c>=0;c--){e.textContent=t.slice(0,c);await sleep(22)}
+await sleep(60);k++}})()})();
 </script>
 <script>(function(){
 var SEC=[{id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
