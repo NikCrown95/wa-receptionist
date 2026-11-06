@@ -60,6 +60,14 @@
 @keyframes prpop{0%{transform:scale(1)}40%{transform:scale(1.14);text-shadow:0 0 34px rgba(93,242,160,.75)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.pr-price b.pop{animation:none}}
 </style>
+<style id="pfq">
+#profilo #pfSet .dv{display:grid}
+#profilo #pfSet .dv img{grid-area:1/1;width:100%;height:auto;will-change:opacity,transform;backface-visibility:hidden;transition:opacity .16s ease,transform .16s ease}
+#profilo #pfSet .dv img.sw{opacity:0;transform:translateX(-22px) scale(.99);filter:none}
+#profilo #pfSet .dv img.pre{opacity:0;transform:translateX(30px) scale(.99);filter:none;transition:none}
+#profilo #pfSet .dv.ph img.pre{transform:translateX(56px) scale(.99)}
+#profilo #pfSet .dv img.in{opacity:1;transform:none;filter:none;transition:opacity .3s ease,transform .42s cubic-bezier(.2,.85,.25,1)}
+</style>
 </head><body>
 <title>Prenolia: l'agenda online con la segretaria virtuale</title><meta name="robots" content="noindex,nofollow">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -644,7 +652,7 @@ var cs=-1,cv=-1,busy=null,auto=null,manual=false,DUR=7000;
 K.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.textContent=x.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.onclick=function(){manual=false;goS(i)};tabs.appendChild(b)});
 var PL={};function pl(u){return PL[u]||(PL[u]=new Promise(function(r){var i=new Image();i.onload=function(){(i.decode?i.decode():Promise.resolve()).then(r,r)};i.onerror=r;i.src=u}))}
 function plSec(k){(IMG[k]||[]).forEach(function(p){pl(p[0]);pl(p[1])})}
-function mk(){set.innerHTML='<div class="dv tb"><img alt=""></div><div class="dv ph"><img alt=""></div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="p1" d="M15 3h6v6M21 3l-7 7"/><path class="p2" d="M9 21H3v-6M3 21l7-7"/></svg></button>'}
+function mk(){var k=K[cs].k,n=IMG[k].length,st='';for(var i=0;i<n;i++)st+='<img alt="" class="pre" decoding="async">';set.innerHTML='<div class="dv tb">'+st+'</div><div class="dv ph">'+st+'</div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="p1" d="M15 3h6v6M21 3l-7 7"/><path class="p2" d="M9 21H3v-6M3 21l7-7"/></svg></button>';[].forEach.call(set.querySelectorAll('.dv.tb img'),function(e,i){e.src=IMG[k][i][0]});[].forEach.call(set.querySelectorAll('.dv.ph img'),function(e,i){e.src=IMG[k][i][1]})}
 function goS(i){if(i===cs)return;cs=i;[].forEach.call(tabs.children,function(e,j){e.setAttribute('aria-pressed',j===i?'true':'false')});
  clearTimeout(busy);clearTimeout(auto);set.classList.remove('on');set.classList.add('out');
  busy=setTimeout(function(){var x=K[i];nav.innerHTML='';x.v.forEach(function(v,n){var b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.innerHTML=v.n+'<i></i>';b.onclick=function(){manual=true;goV(n)};nav.appendChild(b)});
@@ -652,10 +660,10 @@ function goS(i){if(i===cs)return;cs=i;[].forEach.call(tabs.children,function(e,j
 function goV(n,first){var x=K[cs],v=x.v[n],im=IMG[x.k][n];cv=n;clearTimeout(auto);
  [].forEach.call(nav.children,function(e,j){e.setAttribute('aria-pressed',j===n?'true':'false');e.classList.remove('run');var s=e.querySelector('i');if(s){s.style.animation='none';void s.offsetWidth;s.style.animation=''}});
  var cur=nav.children[n];if(!manual&&!matchMedia('(prefers-reduced-motion:reduce)').matches){cur.style.setProperty('--pfdur',DUR+'ms');cur.classList.add('run')}
- var imgs=set.querySelectorAll('img');
- function apply(){[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('pre');e.classList.remove('sw')});imgs[0].src=im[0];imgs[1].src=im[1];void set.offsetWidth;[].forEach.call(imgs,function(e){e.classList.remove('pre');e.classList.add('in')});typeCap(v.n,v.d);[].forEach.call(imgs,function(e){var d=e.parentNode;d.classList.remove('swp');void d.offsetWidth;d.classList.add('swp')})}
+ var tbI=set.querySelectorAll('.dv.tb img'),phI=set.querySelectorAll('.dv.ph img'),imgs=[tbI[n],phI[n]],all=[].slice.call(set.querySelectorAll('img'));
+ function apply(){all.forEach(function(e){e.classList.remove('in');e.classList.remove('sw');e.classList.add('pre')});void set.offsetWidth;[].forEach.call(imgs,function(e){e.classList.remove('pre');e.classList.add('in')});typeCap(v.n,v.d);[].forEach.call(imgs,function(e){var d=e.parentNode;d.classList.remove('swp');void d.offsetWidth;d.classList.add('swp')})}
  plSec(x.k);var rdy=Promise.all([pl(im[0]),pl(im[1])]);
- if(first){rdy.then(function(){if(cv===n)apply()})}else{var t0=Date.now();[].forEach.call(imgs,function(e){e.classList.remove('in');e.classList.add('sw')});rdy.then(function(){setTimeout(function(){if(cv===n)apply()},Math.max(0,120-(Date.now()-t0)))})}
+ if(first){rdy.then(function(){if(cv===n)apply()})}else{var t0=Date.now();all.forEach(function(e){if(e.classList.contains('in')){e.classList.remove('in');e.classList.add('sw')}});rdy.then(function(){setTimeout(function(){if(cv===n)apply()},Math.max(0,120-(Date.now()-t0)))})}
  if(!manual)auto=setTimeout(function(){if(document.hidden){goV(n)}else goV((n+1)%x.v.length)},DUR)}
 var capTok=0;
 window.addEventListener('load',function(){setTimeout(function(){Object.keys(IMG).forEach(plSec)},800)});
