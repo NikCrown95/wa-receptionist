@@ -121,7 +121,7 @@
 #tutorial .tu-one{width:min(260px,70%);margin:0 auto;opacity:0;transform:translateY(34px) scale(.95);transition:opacity .6s ease,transform .85s cubic-bezier(.2,.9,.3,1.08)}
 #tutorial .tu-one.dsk{width:100%}#tutorial .tu-one.show{opacity:1;transform:none}
 #tutorial .tu-tag{margin:14px 0 0}#tutorial .tu-tag span{display:inline-block;padding:7px 13px;border:1px solid var(--tl);border-radius:999px;font-size:13px;color:var(--tm)}#tutorial .tu-tag b{color:#F2F6F7}
-#tutorial .tu-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+#tutorial .tu-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}#tutorial .tu-row3.two{grid-template-columns:repeat(2,1fr);max-width:520px;margin:0 auto}#tutorial .tu-note{margin:12px 0 0;max-width:340px;font-size:12px;line-height:1.5;color:var(--tm);opacity:.85}
 #tutorial .tu-cell{margin:0;opacity:0;transform:translateY(30px) scale(.95);transition:opacity .6s ease,transform .85s cubic-bezier(.2,.9,.3,1.08)}#tutorial .tu-cell.show{opacity:1;transform:none}
 #tutorial .tu-cell .t{display:block;text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ta);font-weight:800;margin:0 0 8px}
 #tutorial .tu-cell figcaption{margin:12px 2px 0;text-align:center;font-size:14px;font-weight:600;min-height:40px;transition:opacity .3s;color:#F2F6F7}
@@ -654,20 +654,25 @@ document.addEventListener('click',function(e){if(!w.contains(e.target))open(fals
 document.addEventListener('keydown',function(e){if(e.key==='Escape')open(false)});
 dd.addEventListener('click',function(e){var b=e.target.closest('button[data-id]');if(!b)return;if(window.TU_PICK)window.TU_PICK(b.dataset.id);else location.href='/provahtml/tutorial?s='+b.dataset.id});
 })();</script><script>(function(){
-var B='/provahtml/tut/';function U(k){return B+k+'.webp'}
+var B='/provahtml/tut/',DIR='';function U(k){return B+DIR+k+'.webp'}
 var SEC=[
 {id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
 {id:'medico',n:'Studi sanitari',e:'Dentisti, fisioterapisti, psicologi',ic:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'},
 {id:'sport',n:'Centro sportivo',e:'Tennis, padel, calcetto',ic:'<ellipse cx="14.5" cy="9.5" rx="5.5" ry="7" transform="rotate(40 14.5 9.5)"/><path d="M10.6 13.4L4 20"/><circle cx="19" cy="19" r="1.6"/>'},
 {id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'}];
-var P=[
+var PP=[
 {dk:[['d1',960,561],['d2',868,676],['d3',924,668],['d4',924,641],['d5',924,601],['d6',924,560],['d7',924,760]],l:'Iscriviti',k:'Attivo in pochi minuti',s:'Dall\'email all\'agenda pronta: tutti i passi, fino alla fine.',fr:[
  ['r1','Crea l\'account','Email, telefono e password',195,720],['r2','Scegli il settore','Il tipo di attività decide le domande',195,808],['r3','Dai un nome all\'attività','Compare sulla pagina di prenotazione',250,808],['r4','Aggiungi i servizi','Nome, durata e prezzo',250,808],['r5','Indica gli orari','Giorni e orari in cui ricevi',250,808],['r6','Imposta le regole','Anticipo, preavviso e annullamenti',250,808],['r7','Controlla e apri l\'agenda','Tutto pronto',250,808]]},
 {dk:[['dmenu',1165,174],['dqr',640,589],['dposter',640,635]],l:'Condividi',k:'Fatti trovare dai clienti',s:'La tua pagina è già online: condividila come preferisci.',fr:[
  ['menu','Condividi il link','Dal menu, con un tocco',275,174],['qr','Mostra il QR','Il cliente inquadra e prenota',195,611],['poster','Stampa la locandina','Pronta per vetrina o bancone',195,666]]},
 {l:'Ricevi prenotazioni',k:'I clienti prenotano, tu lo sai subito',s:'Da soli o in chat con Lia: stesso servizio, stesso orario. Poi la notifica arriva in agenda.'}];
+var CFS={"medico": {"dir": "medico/", "T": [25, 55, 85, 140, 190, 225, 250, 270], "reg": {"fr": [["r1", "Crea l'account", "Email, telefono e password", 195, 720], ["r2", "Scegli il settore", "Il tipo di attività decide le domande", 195, 809], ["r3", "Dai un nome allo studio", "Compare sulla pagina di prenotazione", 251, 809], ["r4", "Aggiungi i servizi", "Nome, durata e prezzo", 251, 809], ["r5", "Indica gli orari", "Giorni e orari in cui ricevi", 251, 809], ["r6", "Privacy dei pazienti", "Consenso e riservatezza già pensati per te", 251, 809], ["r7", "Imposta le regole", "Anticipo, preavviso e annullamenti", 251, 809], ["r8", "Controlla e apri l'agenda", "Tutto pronto", 251, 809]], "dk": [["d1", 960, 561], ["d2", 868, 676], ["d3", 924, 645], ["d4", 924, 641], ["d5", 924, 601], ["d6", 924, 646], ["d7", 924, 560], ["d8", 924, 760]]}, "sh": {"fr": [["menu", "Condividi il link", "Dal menu, con un tocco", 275, 174], ["qr", "Mostra il QR", "Il cliente inquadra e prenota", 195, 611], ["poster", "Stampa la locandina", "Pronta per vetrina o bancone", 195, 666]], "dk": [["dmenu", 1165, 174], ["dqr", 640, 589], ["dposter", 640, 635]]}, "book": {"s": "Il paziente sceglie giorno e orario dal calendario. Poi la notifica arriva in agenda.", "tag": "Esempio: <b>Prima visita · martedì 10 novembre, 12:30</b>", "note": "Lia, la segretaria virtuale, non è prevista per gli studi sanitari, per tutelare la privacy dei pazienti.", "cells": [["Il paziente", "self", "Sceglie visita, giorno e orario"], ["Il tuo calendario", "cal", "In attesa di prenotazioni"]], "cf": {"self": 9.55}}}, "domicilio": {"dir": "domicilio/", "T": [25, 55, 80, 110, 150, 185, 220, 250, 270], "reg": {"fr": [["r1", "Crea l'account", "Email, telefono e password", 195, 720], ["r2", "Scegli il settore", "Il tipo di attività decide le domande", 195, 809], ["r3", "Dai un nome all'attività", "Compare sulla pagina di prenotazione", 251, 809], ["r4", "Dove lavori", "A casa del cliente, online o nel tuo locale", 251, 809], ["r5", "Aggiungi i servizi", "Durata e un prezzo per ogni modalità", 251, 809], ["r6", "Indica le zone", "Le città in cui vai a domicilio", 251, 809], ["r7", "Indica gli orari", "Giorni e orari in cui ricevi", 251, 809], ["r8", "Imposta le regole", "Anticipo, preavviso, annullamenti e spostamenti", 251, 809], ["r9", "Controlla e apri l'agenda", "Tutto pronto", 251, 809]], "dk": [["d1", 960, 561], ["d2", 868, 676], ["d3", 924, 645], ["d4", 924, 564], ["d5", 924, 658], ["d6", 924, 537], ["d7", 924, 601], ["d8", 924, 593], ["d9", 924, 760]]}, "sh": {"fr": [["menu", "Condividi il link", "Dal menu, con un tocco", 275, 174], ["qr", "Mostra il QR", "Il cliente inquadra e prenota", 195, 611], ["poster", "Stampa la locandina", "Pronta per vetrina o bancone", 195, 666]], "dk": [["dmenu", 1165, 174], ["dqr", 640, 589], ["dposter", 640, 635]]}, "book": {"s": "Da soli o in chat con Lia: stesso servizio, stesso orario. Poi la notifica arriva in agenda.", "tag": "Stesso servizio per entrambi: <b>Lezione a domicilio · martedì 10 novembre, 16:00</b>", "note": "", "cells": [["Prenota da solo", "self", "Sceglie servizio, giorno e orario"], ["Chat con Lia", "chat", "Scrive a Lia come in chat"], ["Il tuo calendario", "cal", "In attesa di prenotazioni"]], "cf": {"self": 10.55, "chat": 10.49}}}, "sport": {"dir": "sport/", "T": [25, 55, 85, 110, 150, 190, 215, 240, 255, 270], "reg": {"fr": [["r1", "Crea l'account", "Email, telefono e password", 195, 720], ["r2", "Scegli il settore", "Il tipo di attività decide le domande", 195, 809], ["r3", "Dai un nome al centro", "Compare sulla pagina di prenotazione", 251, 809], ["r4", "Scegli lo sport", "Tennis, padel, calcio e altri", 251, 809], ["r5", "Inserisci i campi", "Superficie, durata e prezzo di ogni campo", 195, 583], ["r6", "Campi pronti", "Tutti salvati, uno alla volta", 251, 809], ["r7", "Indica gli orari", "Giorni e orari di apertura dei campi", 251, 809], ["r8", "Chi può prenotare", "Soci e non soci, oppure solo i soci", 251, 809], ["r9", "Imposta le regole", "Anticipo, preavviso e annullamenti", 251, 809], ["r10", "Controlla e apri l'agenda", "Tutto pronto", 251, 809]], "dk": [["d1", 960, 561], ["d2", 868, 676], ["d3", 924, 582], ["d4", 924, 501], ["d5", 868, 509], ["d6", 924, 528], ["d7", 924, 601], ["d8", 924, 593], ["d9", 924, 560], ["d10", 924, 760]]}, "sh": {"fr": [["menu", "Condividi il link", "Dal menu, con un tocco", 275, 174], ["qr", "Mostra il QR", "Il cliente inquadra e prenota", 195, 611], ["poster", "Stampa la locandina", "Pronta per vetrina o bancone", 195, 666]], "dk": [["dmenu", 1165, 174], ["dqr", 640, 589], ["dposter", 640, 635]]}, "book": {"s": "Da soli o in chat con Lia: stesso campo, stesso orario. Poi la notifica arriva in agenda.", "tag": "Stesso campo per entrambi: <b>Campo 2 · martedì 10 novembre, 18:00</b>", "note": "", "cells": [["Prenota da solo", "self", "Sceglie campo, giorno e orario"], ["Chat con Lia", "chat", "Scrive a Lia come in chat"], ["Il tuo calendario", "cal", "In attesa di prenotazioni"]], "cf": {"self": 15.45, "chat": 15.0}}}};
+var PERBK={s:'Da soli o in chat con Lia: stesso servizio, stesso orario. Poi la notifica arriva in agenda.',tag:'Stesso servizio per entrambi: <b>Taglio donna · martedì 10 novembre, 12:00</b>',note:'',cells:[['Prenota da solo','self','Sceglie servizio, giorno e orario'],['Chat con Lia','chat','Scrive a Lia come in chat'],['Il tuo calendario','cal','In attesa di prenotazioni']],cf:{self:8.48,chat:8.51}};
+var P=PP,BKC=PERBK;
+function setP(id){var c=CFS[id];if(!c){DIR='';STEPT=PSTEPT;BKC=PERBK;P=PP;return}
+ DIR=c.dir;STEPT=c.T;BKC=c.book;P=[{dk:c.reg.dk,l:'Iscriviti',k:'Attivo in pochi minuti',s:PP[0].s,fr:c.reg.fr},{dk:c.sh.dk,l:'Condividi',k:'Fatti trovare dai clienti',s:PP[1].s,fr:c.sh.fr},{l:'Ricevi prenotazioni',k:'I clienti prenotano, tu lo sai subito',s:c.book.s}]}
 var root=document.getElementById('tuRoot'),MQ=matchMedia('(min-width:768px)'),S=[],CUR=null;
-var STEPT=[25,55,85,150,195,240,270];
+var STEPT=[25,55,85,150,195,240,270],PSTEPT=STEPT;
 function Sec(i){var p=P[i],TM=[],run=0,vids=[],box=document.createElement('div');box.className='tu-sec'+(i==2?' bk':'');root.appendChild(box);
  var DESK=MQ.matches;
  function after(ms,f,tok){TM.push(setTimeout(function(){if(tok===run)f()},ms))}
@@ -688,34 +693,34 @@ function Sec(i){var p=P[i],TM=[],run=0,vids=[],box=document.createElement('div')
    if(cr)tween(STEPT[k],k==n-1);setLab(lab,p.fr[k][1],p.fr[k][2]);cur.style.left=(xy[k][0]/W*100)+'%';cur.style.top=(xy[k][1]/H*100)+'%'}
   for(var k=0;k<n;k++)(function(k){after(500+k*D,function(){go(k)},tok);after(500+k*D+D-1050,function(){cur.classList.remove('tap');void cur.offsetWidth;cur.classList.add('tap')},tok)})(k);
   after(500+n*D+700,function(){start()},tok)}
- function book(tok){
-  box.querySelector('.tu-tx').insertAdjacentHTML('beforeend','<div class="tu-tag"><span>Stesso servizio per entrambi: <b>Taglio donna · martedì 10 novembre, 12:00</b></span></div>');
-  function cell(t,k){return '<figure class="tu-cell"><span class="t">'+t+'</span><div class="tu-ph"><video muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
-  box.querySelector('.tu-vis').insertAdjacentHTML('beforeend','<div class="tu-row3">'+cell('Prenota da solo','self')+cell('Chat con Lia','chat')+cell('Il tuo calendario','cal')+'</div>');
+ function book(tok){var K=BKC;
+  box.querySelector('.tu-tx').insertAdjacentHTML('beforeend','<div class="tu-tag"><span>'+K.tag+'</span></div>'+(K.note?'<p class="tu-note">'+K.note+'</p>':''));
+  function cell(t,k){return '<figure class="tu-cell"><span class="t">'+t+'</span><div class="tu-ph"><video muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+DIR+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
+  box.querySelector('.tu-vis').insertAdjacentHTML('beforeend','<div class="tu-row3'+(K.cells.length==2?' two':'')+'">'+K.cells.map(function(c){return cell(c[0],c[1])}).join('')+'</div>');
   var cells=[].slice.call(box.querySelectorAll('.tu-cell')),vs=[].slice.call(box.querySelectorAll('video')),cs=[].slice.call(box.querySelectorAll('figcaption'));vids=vs;
   function cap(el,t){el.style.opacity=0;setTimeout(function(){el.textContent=t;el.style.opacity=1},200)}
-  var T0=900,CONF=9000,total=T0+CONF+6800;
+  var cm=Math.max(K.cf.self||0,K.cf.chat||0),T0=900,CONF=Math.round(cm*1000+520),total=T0+CONF+6800,ci=K.cells.map(function(c){return c[1]}).indexOf('cal');
   cells.forEach(function(c,j){after(80+j*160,function(){c.classList.add('show')},tok)});
-  cap(cs[0],'Sceglie servizio, giorno e orario');cap(cs[1],'Scrive a Lia come in chat');cap(cs[2],'In attesa di prenotazioni');
+  K.cells.forEach(function(c,j){cap(cs[j],c[2])});
   function play(v){try{v.currentTime=0}catch(e){}var r=v.play();if(r&&r.catch)r.catch(function(){})}
-  after(T0,function(){play(vs[0]);play(vs[1])},tok);
-  after(T0+CONF+150,function(){cap(cs[0],'Prenotazione confermata');cap(cs[1],'Prenotazione confermata')},tok);
-  after(T0+CONF-100,function(){play(vs[2])},tok);
-  after(T0+CONF+1500,function(){cap(cs[2],'Arriva la notifica: la campanella si accende')},tok);
-  after(T0+CONF+5000,function(){cap(cs[2],'Eccola, con tutti i dettagli')},tok);
+  after(T0,function(){K.cells.forEach(function(c,j){if(c[1]!=='cal')play(vs[j])})},tok);
+  K.cells.forEach(function(c,j){if(c[1]!=='cal')after(T0+Math.round(K.cf[c[1]]*1000)+700,function(){cap(cs[j],'Prenotazione confermata')},tok)});
+  after(T0+CONF-100,function(){play(vs[ci])},tok);
+  after(T0+CONF+1500,function(){cap(cs[ci],'Arriva la notifica: la campanella si accende')},tok);
+  after(T0+CONF+5000,function(){cap(cs[ci],'Eccola, con tutti i dettagli')},tok);
   after(total+600,function(){start()},tok)}
  function start(){stop();var tok=run;head();if(p.fr)frames(tok);else book(tok)}
  var vis=false;
  new IntersectionObserver(function(e){var v=e[0].isIntersecting;if(v&&!vis){vis=true;start()}else if(!v&&vis){vis=false;stop();head()}},{threshold:.3}).observe(box);
  head();return {stop:stop,start:start}}
-function build(){root.innerHTML='';S.forEach(function(s){s.stop()});S=[];P.forEach(function(_,i){S.push(Sec(i))})}
+function build(){setP(CUR);root.innerHTML='';S.forEach(function(s){s.stop()});S=[];P.forEach(function(_,i){S.push(Sec(i))})}
 
 var INTRO={persona:'Guarda come si parte, passo dopo passo.',medico:'Guarda come si parte, passo dopo passo.',sport:'Guarda come si parte, passo dopo passo.',domicilio:'Guarda come si parte, passo dopo passo.'};
 function show(id,push){var s=SEC.filter(function(x){return x.id==id})[0]||SEC[0];id=s.id;CUR=id;
  document.getElementById('tuH1').textContent=s.n;document.title='Tutorial · '+s.n+' · Prenolia';
- if(id==='persona')build();else{S.forEach(function(x){x.stop()});S=[];root.innerHTML='<div class="tu-soon"><b>'+s.n+'</b>Il tutorial con le schermate reali di questo settore è in preparazione.<br>Nel frattempo puoi provare Prenolia gratis.<br><a href="https://prenolia.it/registrati">Inizia ora</a></div>'}
+ build()
  if(push)try{history.replaceState(null,'','/provahtml/tutorial?s='+id)}catch(e){}}
 window.TU_PICK=function(id){if(window.TU_CLOSE)window.TU_CLOSE();var nvEl=document.getElementById('nv'),bg=document.getElementById('bgr');if(nvEl&&nvEl.classList.contains('open')){nvEl.classList.remove('open');if(bg)bg.setAttribute('aria-expanded','false')}show(id,true);window.scrollTo({top:0,behavior:'smooth'})};
-var mqL=function(){if(CUR==='persona')build()};MQ.addListener?MQ.addListener(mqL):MQ.addEventListener('change',mqL);
+var mqL=function(){build()};MQ.addListener?MQ.addListener(mqL):MQ.addEventListener('change',mqL);
 var q=(location.search.match(/[?&]s=(\w+)/)||[])[1];show(q,false);
 })();</script></body></html>
