@@ -155,6 +155,10 @@
       "destination": "/registrati.html"
     },
     {
+      "source": "/sketch",
+      "destination": "/sketch/index.html"
+    },
+    {
       "source": "/provahtml",
       "destination": "/provahtml/index.html"
     },
