@@ -762,9 +762,6 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 
 @media (max-width:600px){
 #profilo .pf-car .c{transform-origin:50% 0}
-#profilo .pf-car .c .sb{position:absolute;left:0;right:0;top:0;height:26px;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:4px 24px 0 26px;color:#E8F1F3;font-size:11px;pointer-events:none}
-#profilo .pf-car .c .sb b{font-weight:700;letter-spacing:.01em}
-#profilo .pf-car .c .sb i{display:flex;align-items:center;gap:5px}
 }
 </style>
 <script>
@@ -876,7 +873,7 @@ function goV(n,first){var x=K[cs],v=x.v[n],im=IMG[x.k][n];cv=n;clearTimeout(auto
 var SH={'Calendario':'Agenda','Campi':'Campi','Funzionalità':'Menu','Mese':'Mese','Statistiche':'Numeri','Clienti':'Clienti'};
 var car=document.getElementById('pfCar'),carCs=[],carProg=0,carT=0,carMQ=matchMedia('(max-width:600px)');
 document.getElementById('pfCta').onclick=function(){lbOpenF()};
-function buildCar(k){car.innerHTML='';carCs=[];(IMG[k]||[]).forEach(function(p,n){var c=document.createElement('div');c.className='c';var sb=document.createElement('div');sb.className='sb';sb.innerHTML='<b>9:41</b><i><svg viewBox="0 0 18 12" width="17" height="11" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 27 12" width="25" height="11" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="currentColor" opacity=".55"/><rect x="2" y="2" width="19" height="8" rx="2.2" fill="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".55"/></svg></i>';c.appendChild(sb);var im=document.createElement('img');im.alt='';im.decoding='async';im.draggable=false;im.src=p[1];c.appendChild(im);c.onclick=function(){if(n===cv)lbOpenF();else{manual=true;goV(n)}};car.appendChild(c);carCs.push(c)});car.scrollLeft=0;carUpd();requestAnimationFrame(function(){car.style.opacity=1})}
+function buildCar(k){car.innerHTML='';carCs=[];(IMG[k]||[]).forEach(function(p,n){var c=document.createElement('div');c.className='c';var im=document.createElement('img');im.alt='';im.decoding='async';im.draggable=false;im.src=p[1];c.appendChild(im);c.onclick=function(){if(n===cv)lbOpenF();else{manual=true;goV(n)}};car.appendChild(c);carCs.push(c)});car.scrollLeft=0;carUpd();requestAnimationFrame(function(){car.style.opacity=1})}
 function carTo(n,first){var c=carCs[n];if(!c||!carMQ.matches)return;carProg=Date.now();car.scrollTo({left:c.offsetLeft-(car.clientWidth-c.offsetWidth)/2,behavior:first?'auto':'smooth'})}
 function carUpd(){var mid=car.scrollLeft+car.clientWidth/2;carCs.forEach(function(c){var d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid),t=Math.min(d/260,1);c.style.transform='scale('+(1-.07*t)+')';c.style.opacity=1-.45*t})}
 car.addEventListener('scroll',function(){carUpd();clearTimeout(carT);carT=setTimeout(function(){if(Date.now()-carProg<900||!carMQ.matches)return;var mid=car.scrollLeft+car.clientWidth/2,best=0,bd=1e9;carCs.forEach(function(c,i){var d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<bd){bd=d;best=i}});if(best!==cv){manual=true;goV(best)}},140)},{passive:true});
