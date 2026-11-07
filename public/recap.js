@@ -74,8 +74,19 @@
 
   /* ---- cosa mostrare ---- */
   function kOf(n) { return n.type + ":" + n.id; }
-  function isSeen(k) { return ls("g", SEEN + k) === "1"; }
-  function markSeen(k) { ls("s", SEEN + k, "1"); }
+  function isExpKey(k) { return k.indexOf("sub_expired:") === 0; }
+  function ss(op, k, v) {
+    try { if (op === "g") return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) {}
+    return null;
+  }
+  // l'avviso di abbonamento scaduto torna "da leggere" a ogni nuovo accesso: si ricorda solo per la sessione in corso
+  function isSeen(k) { return (isExpKey(k) ? ss("g", SEEN + k) : ls("g", SEEN + k)) === "1"; }
+  function markSeen(k) { if (isExpKey(k)) ss("s", SEEN + k, "1"); else ls("s", SEEN + k, "1"); }
+  function expiredNotice() {
+    var l = visibleNotices();
+    for (var i = 0; i < l.length; i++) if (l[i].type === "sub_expired") return l[i];
+    return null;
+  }
   function noticeAlive(n) {
     // il promemoria del lunedi' gia' letto sparisce dopo 5 ore; gli altri restano finche' servono (lo dice il server)
     if (n.type !== "closures_reminder" && n.type !== "weekly_recap" && n.type !== "support_reply") return true;
@@ -101,9 +112,13 @@
     ls("s", VIS, "1");
     document.body.classList.add("liaRecapOn");
     var un = unreadKeys(), lit = un.length > 0;
+    var ex = expiredNotice();
     btn.setAttribute("data-lit", lit ? "1" : "0");
+    btn.setAttribute("data-exp", ex ? "1" : "0");
+    var im = btn.querySelector("img");
+    if (im) { var want = ex ? "/lia-a-red.png" : "/lia-a.png"; if (im.getAttribute("src") !== want) im.setAttribute("src", want); }
     dot.hidden = !lit;
-    btn.setAttribute("aria-label", lit ? "Avvisi: ci sono novit\u00e0" : "Avvisi");
+    btn.setAttribute("aria-label", ex ? "Avvisi: abbonamento scaduto" : lit ? "Avvisi: ci sono novit\u00e0" : "Avvisi");
     tip.hidden = true;
   }
 
@@ -114,7 +129,7 @@
     if (tip.getAttribute("data-k") === key) return;
     tip.setAttribute("data-k", key);
     ls("s", TIPK, String(n + 1));
-    tip.textContent = un.some(function (k) { return k.indexOf("month_recap:") === 0; }) ? "Il recap del mese \u00e8 pronto" : "Hai un avviso da leggere";
+    tip.textContent = un.some(isExpKey) ? "Il tuo abbonamento \u00e8 scaduto" : un.some(function (k) { return k.indexOf("month_recap:") === 0; }) ? "Il recap del mese \u00e8 pronto" : "Hai un avviso da leggere";
     tip.hidden = false;
     var r = btn.getBoundingClientRect(), w = 176;
     var left = Math.max(8, Math.min(window.innerWidth - w - 8, r.right - w + 14));
@@ -197,6 +212,16 @@
       tile("Clienti nuovi", m.new_clients || 0, "prima volta da te") +
       "</div>" + top + "</div>";
   }
+  function expiredCard(n) {
+    var m = n.meta || {}, trial = !!m.trial, ge = "";
+    try { if (m.grace_ends) ge = new Date(m.grace_ends).toLocaleDateString("it-IT", { day: "numeric", month: "long", timeZone: "Europe/Rome" }); } catch (e) {}
+    var title = trial ? "La prova gratuita \u00e8 finita" : "Il tuo abbonamento \u00e8 scaduto";
+    var text = trial ? "Per continuare a usare Prenolia attiva il piano Smart." : "Per continuare a usare Prenolia devi rinnovare il piano Smart.";
+    var small = m.state === "suspended" ? "La tua pagina di prenotazione \u00e8 ferma finch\u00e9 non rinnovi." : ge ? "Dopo il " + ge + " la tua pagina di prenotazione smette di funzionare." : "";
+    var cta = trial ? "Attiva il piano" : "Rinnova abbonamento";
+    return '<div class="lr-exp" role="alert"><div class="lr-exp-top"><span class="lr-exp-ic"><img src="/lia-a-red.png" alt="" width="28" height="25" draggable="false"></span><div><b>' + title + "</b><p>" + text + "</p>" + (small ? '<p class="s">' + esc(small) + "</p>" : "") + "</div></div>" +
+      '<button type="button" class="lr-exp-go" data-type="sub_expired">' + cta + " " + CHEV + "</button></div>";
+  }
   function noticeRow(n, un) {
     var t = noticeText(n);
     return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "announcement" ? " ann a-" + esc(n.meta && n.meta.kind || "notice") : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
@@ -268,6 +293,9 @@
   function render() {
     var h = '<div class="lr-head"><h2 id="liaRecapTitle">Avvisi</h2><button type="button" class="lr-x" aria-label="Chiudi">' + X + "</button></div>";
     var body = "", mi = monthItem(), list = visibleNotices();
+    var exn = expiredNotice();
+    if (exn) body += expiredCard(exn);
+    list = list.filter(function (n) { return n.type !== "sub_expired"; });
     if (mi) body += monthCard(!isSeen(kOf(mi)));
     if (list.length) {
       if (mi && !data.gym) body += '<p class="lr-sec">Avvisi</p>';
@@ -275,7 +303,7 @@
       body += list.filter(function (n) { return !isG(n); }).map(function (n) { return noticeRow(n, !isSeen(kOf(n))); }).join("");
       body += gymBlock(list.filter(isG));
     }
-    if (!mi && !list.length) {
+    if (!mi && !list.length && !exn) {
       body = '<div class="lr-empty"><b>Nessun avviso</b>Qui trovi i promemoria di Lia: chiusure, abbonamenti in scadenza e altro.</div>';
     }
     panel.innerHTML = h + '<div class="lr-body">' + body + "</div>" + (mi ? '<div class="lr-ft">Incasso stimato dai prezzi dei servizi.</div>' : "");
@@ -285,6 +313,9 @@
     });
     panel.querySelectorAll(".lr-it").forEach(function (b) {
       b.addEventListener("click", function () { go(b.getAttribute("data-type"), b.getAttribute("data-mid")); });
+    });
+    panel.querySelectorAll(".lr-exp-go").forEach(function (b) {
+      b.addEventListener("click", function () { go("sub_expired"); });
     });    markMore();
   }
 
@@ -297,7 +328,7 @@
     closePanel();
     if ((type === "member_expiring" || type === "medical_expiring") && window.liaGymMember) return window.liaGymMember(mid);
     if (type === "closures_reminder") { if (data && data.gym && window.liaGym) { var om = document.getElementById("menuTabOther"); if (om) om.click(); return setTimeout(function () { window.liaGym.openSetting("chiusure"); }, 80); } return openSettings("blocks"); }
-    if (type === "sub_expiring") return openSettings("subscription");
+    if (type === "sub_expiring" || type === "sub_expired") return openSettings("subscription");
     if (type === "support_reply") { var os = document.getElementById("menuTabOther"); if (os) os.click(); return setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); if (window.liaSupportList) window.liaSupportList(); }, 80); }
     if (type === "feedback_ask" && window.liaFeedbackOpen) window.liaFeedbackOpen(true);
   }
