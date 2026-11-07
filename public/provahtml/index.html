@@ -1015,8 +1015,6 @@ function back(){chal='';code.value='';cw.style.display='none';code.tabIndex=-1;e
 fetch('/api/business-auth',{credentials:'same-origin'}).then(function(r){if(r.ok)return r.json()}).then(function(j){if(j&&j.agenda_token){b.addEventListener('click',function(ev){ev.stopImmediatePropagation();enter(j)},true)}}).catch(function(){});
 })();
 
-(function(){var a=document.getElementById('nvacc'),dd=document.getElementById('dd'),n=document.getElementById('nv');if(!a||!dd||!n)return;
-a.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();a.style.display='none';n.appendChild(dd);document.getElementById('ddb').click()})})();
 </script>
 <script>
 (function(){
