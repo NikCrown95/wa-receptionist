@@ -20,7 +20,7 @@ const rawData = (path) => {
   if (t === 'support_requests') return [{ id: 'r1', created_at: iso(50), topic: 'Aiuto con gli orari', kind: 'support', business_name: 'Salone Luna', business_id: B2 }];
   if (t === 'gym_bookings') return [];
   if (t === 'stripe_events') return path.includes('payment_failed') ? [{ id: 'e1', received_at: iso(1000) }] : [{ id: 'e2', type: 'invoice.paid', received_at: iso(60) }];
-  if (t === 'subscriptions') return path.includes('cancelled_at=not.is.null') ? [] : path.includes('plans(') ? [{ id: 's1', status: 'active', plans: { price_eur: 19.99 } }, { id: 's2', business_id: B2, status: 'trial', businesses: { name: 'Salone Luna' }, trial_ends_at: new Date(now + 2 * 864e5).toISOString() }] : [{ id: 's1', business_id: B1, status: 'active', current_period_end: new Date(now + 20 * 3600e3).toISOString(), businesses: { name: 'Barbiere Mario' } }, { id: 's2', business_id: B2, status: 'trial', trial_ends_at: new Date(now + 2 * 864e5).toISOString(), businesses: { name: 'Salone Luna' } }];
+  if (t === 'subscriptions') return path.includes('cancelled_at=not.is.null') ? [] : path.includes('plans(') ? [{ id: 's1', status: 'active', plans: { price_eur: 18.99 } }, { id: 's2', business_id: B2, status: 'trial', businesses: { name: 'Salone Luna' }, trial_ends_at: new Date(now + 2 * 864e5).toISOString() }] : [{ id: 's1', business_id: B1, status: 'active', current_period_end: new Date(now + 20 * 3600e3).toISOString(), businesses: { name: 'Barbiere Mario' } }, { id: 's2', business_id: B2, status: 'trial', trial_ends_at: new Date(now + 2 * 864e5).toISOString(), businesses: { name: 'Salone Luna' } }];
   if (t === 'shop_orders') return [{ id: 'o1', created_at: iso(10), business_id: B1, business_name: 'Barbiere Mario', total_eur: 15 }];
   if (t === 'app_settings') return Object.keys(settings).filter((k) => path.includes(k)).map((k) => ({ key: k, value: settings[k] }));
   if (t === 'ai_usage_costed_v') return Array.from({ length: 10 }, (_, i) => ({ at: new Date(now - i * 864e5 - 3600e3).toISOString(), cost_eur: 0.64 }));
@@ -66,7 +66,7 @@ const run = async (method, query, body) => {
   assert.ok(k.includes('credit') && k.includes('exp:x1') && k.includes('susp:' + B2) && k.includes('trial:' + B2) && k.includes('ren:' + B1), k.join());
   assert.ok(r.json.counts.crit + r.json.counts.warn + r.json.counts.info === r.json.problems.length);
   r = await run('GET', { view: 'home' }); assert.strictEqual(r.code, 200);
-  assert.strictEqual(r.json.mrr, 19.99); assert.strictEqual(r.json.trials, 1); assert.strictEqual(r.json.trials_soon, 1);
+  assert.strictEqual(r.json.mrr, 18.99); assert.strictEqual(r.json.trials, 1); assert.strictEqual(r.json.trials_soon, 1);
   assert.ok(r.json.channels_today.some((c) => c.label === 'Calendario pubblico'));
 
   // modifiche: validazioni
