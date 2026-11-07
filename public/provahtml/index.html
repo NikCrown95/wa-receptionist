@@ -782,6 +782,18 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 @keyframes rbLook{0%,12%{transform:none}18%,38%{transform:translateX(-20%)}46%,66%{transform:translateX(20%)}74%,100%{transform:none}}
 @keyframes rbHead{0%,12%{transform:none}18%,38%{transform:rotate(-8deg)}46%,66%{transform:rotate(8deg)}74%,100%{transform:none}}
 @keyframes rbBlk{0%,82%,92%,100%{transform:scaleY(1)}86%,88%{transform:scaleY(.08)}}
+</style><style id="ftfun">
+@keyframes ftHop{0%,52%,100%{transform:translateY(0) scale(1,1)}6%{transform:translateY(0) scale(1.12,.86)}20%{transform:translateY(-.26em) scale(.93,1.1) rotate(-6deg)}34%{transform:translateY(0) scale(1.1,.88)}40%{transform:translateY(0) scale(1,1)}44%{transform:translateY(-.2em) scale(.96,1.05) rotate(5deg)}50%{transform:translateY(0) scale(1.06,.93)}}
+.ft-lia{display:inline-block;transform-origin:50% 100%;animation:ftHop 2.4s cubic-bezier(.3,.7,.4,1) infinite}
+@keyframes ftGlow{0%,100%{box-shadow:0 0 0 0 rgba(76,236,252,.0),0 8px 26px rgba(75,179,214,.35)}50%{box-shadow:0 0 0 7px rgba(76,236,252,.12),0 8px 36px rgba(76,236,252,.6)}}
+@keyframes ftSweep{0%,35%{transform:translateX(-180%) skewX(-20deg)}70%,100%{transform:translateX(380%) skewX(-20deg)}}
+@keyframes ftArrow{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.ft-band .ft-cta{font-size:17px;font-weight:800;padding:15px 30px 15px 32px;gap:10px;border:0;color:#04222A;background:linear-gradient(135deg,#B6F5F5,#4CECFC 45%,#4BB3D6);animation:ftGlow 2.6s ease-in-out infinite;transition:transform .2s}
+.ft-band .ft-cta:hover{transform:translateY(-2px) scale(1.03)}
+.ft-band .ft-cta:active{transform:scale(.97)}
+.ft-band .ft-cta .sh{display:block!important;width:50%;z-index:1;background:linear-gradient(105deg,rgba(255,255,255,0),rgba(255,255,255,.9) 50%,rgba(255,255,255,0));transform:translateX(-180%) skewX(-20deg);animation:ftSweep 2.6s ease-in-out infinite!important}
+.ft-band .ft-cta svg{width:18px;height:18px;animation:ftArrow 1.3s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.ft-lia,.ft-band .ft-cta,.ft-band .ft-cta svg{animation:none!important}.ft-band .ft-cta .sh{display:none!important}}
 </style>
 <script>
 (function(){
