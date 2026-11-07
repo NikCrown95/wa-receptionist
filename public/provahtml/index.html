@@ -537,7 +537,7 @@ body.lbo{overflow:hidden}
 .tsw{display:none}
 @media (max-width:600px){
 .m3 .tsw{display:block;position:relative;width:100%;max-width:340px;height:136px;margin:22px auto 22px;text-align:left;-webkit-mask-image:linear-gradient(#000 66%,transparent);mask-image:linear-gradient(#000 66%,transparent);pointer-events:none}
-.tsw .ts{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:18px;background:rgba(16,36,44,.95);border:1px solid #2c4a54;box-shadow:0 10px 28px rgba(0,0,0,.45);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .6s,filter .6s}
+.tsw .ts{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:18px;background:rgba(16,36,44,.95);border:1px solid #2c4a54;box-shadow:0 10px 28px rgba(0,0,0,.45);transition:transform .45s cubic-bezier(.2,.9,.3,1.1),opacity .4s,filter .4s}
 .tsw .ic{flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center}
 .tsw .ic svg{width:20px;height:20px}
 .tsw .ic.med svg{filter:drop-shadow(0 0 6px rgba(156,235,235,.4))}
@@ -554,12 +554,12 @@ var IC={
  s:['#1F4D3A','<svg viewBox="0 0 24 24" fill="none" stroke="#9DF0C2" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M4.5 8.5c4 1 11 1 15 0M4.5 15.5c4-1 11-1 15 0"/></svg>'],
  m:['#17445C','<svg viewBox="0 0 24 24" fill="none" stroke="#9CEBEB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>'],
  d:['#5C3F17','<svg viewBox="0 0 24 24" fill="none" stroke="#FFD08A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.8"/><path d="M2.5 19h19"/></svg>']};
-var D=[['h','Taglio donna','Sab · 12:00 · Giulia R.'],['s','Campo da padel','Dom · 18:00 · 4 giocatori'],['m','Visita di controllo','Lun · 09:30 · Marco B.'],['d','Lezione online','Mar · 17:00 · Sara T.'],['h','Barba e taglio','Sab · 15:30 · Luca M.'],['s','Campo da tennis','Mer · 19:00 · Anna P.'],['m','Igiene dentale','Gio · 11:00 · Elena V.'],['d','Consulenza a domicilio','Ven · 16:30 · Paolo N.']];
-var n=0,live=[],vis=false;
+var D=[['h','Taglio donna','Sab · 12:00 · Giulia R.'],['h','Manicure','Ven · 15:00 · Chiara L.'],['h','Barba e taglio','Sab · 15:30 · Luca M.'],['s','Allenamento personale','Mar · 07:30 · Davide S.'],['s','Lezione di tennis','Gio · 17:00 · Anna P.'],['m','Seduta di fisioterapia','Lun · 09:30 · Marco B.'],['h','Massaggio','Sab · 11:00 · Elena V.'],['d','Lezione online','Mar · 17:00 · Sara T.']];
+var live=[],vis=false;
 function place(){live.forEach(function(t,k){var r=live.length-1-k;t.style.transform='translateY('+(r*58)+'px) scale('+(1-r*.045)+')';t.style.opacity=r>2?0:(r===0?1:r===1?.78:.5);t.style.filter=r?'blur('+(r*.6)+'px)':'none';t.style.zIndex=10-r});while(live.length>4)live.shift().remove()}
-function add(){var d=D[n++%D.length],c=IC[d[0]],t=document.createElement('div');t.className='ts';t.innerHTML='<div class="ic'+(d[0]==='m'?' med':'')+'" style="background:'+c[0]+'">'+c[1]+'</div><div><b>'+d[1]+'</b><span class="d">'+d[2]+'</span></div><div class="tm">ora</div>';t.style.transform='translateY(-70px) scale(.96)';t.style.opacity=0;w.appendChild(t);void t.offsetWidth;live.push(t);place()}
-function tick(){if(mq.matches&&vis&&!document.hidden)add();setTimeout(tick,2300)}
-if(red){add();add()}else{add();setTimeout(add,900);setTimeout(tick,3200)}
+function add(d){var c=IC[d[0]],t=document.createElement('div');t.className='ts';t.innerHTML='<div class="ic'+(d[0]==='m'?' med':'')+'" style="background:'+c[0]+'">'+c[1]+'</div><div><b>'+d[1]+'</b><span class="d">'+d[2]+'</span></div><div class="tm">ora</div>';t.style.transform='translateY(-70px) scale(.96)';t.style.opacity=0;w.appendChild(t);void t.offsetWidth;live.push(t);place()}
+window.addEventListener('m3job',function(e){if(mq.matches&&vis&&!document.hidden)add(D[e.detail%D.length])});
+if(red){add(D[0]);add(D[1])}
 if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(w);else vis=true;
 })();</script></div>
   <div class="pf-in">
@@ -802,11 +802,11 @@ function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
 if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(w)}
 (async function loop(){var e=document.createElement('span');e.textContent='';var f=document.getElementById('m3j');if(f&&f.parentNode)f.parentNode.removeChild(f);w.appendChild(e);
 while(true){if(!vis){await sleep(400);continue}
-var i=k%J.length,t=J[i];se.style.opacity=0;setTimeout(function(){se.textContent=SE[i];se.style.opacity=1},120);
-for(var c=1;c<=t.length;c++){e.textContent=t.slice(0,c);await sleep(45)}
-await sleep(800);
-for(var c=t.length;c>=0;c--){e.textContent=t.slice(0,c);await sleep(22)}
-await sleep(60);k++}})()})();
+var i=k%J.length,t=J[i];try{window.dispatchEvent(new CustomEvent('m3job',{detail:i}))}catch(x){}se.style.opacity=0;setTimeout(function(){se.textContent=SE[i];se.style.opacity=1},120);
+for(var c=1;c<=t.length;c++){e.textContent=t.slice(0,c);await sleep(30)}
+await sleep(420);
+for(var c=t.length;c>=0;c--){e.textContent=t.slice(0,c);await sleep(14)}
+await sleep(40);k++}})()})();
 </script>
 <script>(function(){
 var SEC=[{id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
