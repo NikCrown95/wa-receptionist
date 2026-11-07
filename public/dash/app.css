@@ -3645,3 +3645,42 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .nx-ch i{width:10px;height:10px}
 .nx-ch .nm{flex:1 1 auto}
 .nx-ch small{margin-left:auto;padding-left:8px;font-size:.82rem;font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ===== scheda appuntamento (novembre 2026): variante "A rifinita" =====
+   stato in alto, orario e servizio in un blocco colorato, cliente con azioni e dettagli in un solo riquadro,
+   note in un solo riquadro, "Modifica" in primo piano e "Annulla appuntamento" come testo rosso sotto */
+#calSubApp #sheet.apv .ap-top{position:static;top:auto;right:auto;padding:0;gap:0;min-height:42px;justify-content:space-between}
+#calSubApp #sheet.apv .ap-ttl{display:flex}
+#calSubApp #sheet.apv .ap-top .ap-ib{margin-right:-8px}
+#calSubApp #sheet.apv .grabber{margin:6px auto 0}
+#calSubApp .sheet#sheet.apv{padding-top:8px}
+#calSubApp #sheet.apv .ap-menu{top:56px}
+#calSubApp #sheet .ap-hero{border-radius:22px;padding:18px 18px 16px;gap:0;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 20%,var(--card)),color-mix(in srgb,var(--c) 7%,var(--card)));border:1px solid color-mix(in srgb,var(--c) 32%,var(--line2))}
+#calSubApp #sheet .ap-hero .sv{font-size:1.2rem;letter-spacing:-.015em;gap:9px}
+#calSubApp #sheet .ap-hero .sv i{width:10px;height:10px}
+#calSubApp #sheet .ap-hero .tm{display:flex;align-items:baseline;gap:12px;margin-top:12px;font-weight:600;font-size:3.1rem;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+#calSubApp #sheet .ap-hero .tm small{font-weight:500;font-size:1.25rem;color:var(--muted);letter-spacing:-.02em;margin:0}
+#calSubApp #sheet .ap-hero .dy{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;color:var(--ink)}
+#calSubApp #sheet .ap-hero .dy span{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:600;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+#calSubApp #sheet .ap-hero .dy .who em{font-style:normal;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:.64rem;font-weight:800;background:var(--accent);color:var(--on-accent)}
+#calSubApp #sheet .ap-card{border:1px solid var(--line2);border-radius:20px;background:var(--card);padding:14px}
+#calSubApp #sheet .ap-card .ap-cli{display:block;border:0;background:none;padding:0;border-radius:0}
+#calSubApp #sheet .ap-card .clh{display:flex;align-items:center;gap:12px}
+#calSubApp #sheet .ap-card .ap-cli .ph{white-space:nowrap}
+#calSubApp #sheet .ap-card .acts{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:14px}
+#calSubApp #sheet .ap-card .acts:empty{display:none}
+#calSubApp #sheet .ap-card .acts .ab{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 4px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--accent-ink);font-weight:700;font-size:.8rem;text-decoration:none;white-space:nowrap}
+#calSubApp #sheet .ap-card .acts .ab.w{color:var(--wa,#1f9d57)}
+#calSubApp #sheet .ap-card .acts .ab.w svg{width:20px;height:20px}
+#calSubApp #sheet .ap-card .dt-list{gap:0;margin-top:14px}
+#calSubApp #sheet .ap-card .dt-list:empty{display:none;margin:0}
+#calSubApp #sheet .ap-card .dt-list .dt-row{border:0;border-top:1px solid var(--line);border-radius:0;background:none;padding:12px 0 0;margin-top:12px}
+#calSubApp #sheet .ap-card .dt-list .dt-row:first-child{margin-top:0}
+#calSubApp #sheet .nt-sheet{display:block;border:1px solid var(--line2);border-radius:20px;background:var(--card);padding:4px 14px}
+#calSubApp #sheet .nt-sheet:empty{display:none}
+#calSubApp #sheet .nt-sheet>div{border-bottom:1px solid var(--line)}
+#calSubApp #sheet .nt-sheet>div:last-child{border-bottom:0}
+#calSubApp #sheet .nt-sheet>div:not(:has(.nt-fx,.nt-vc,.nt-last)){display:none}
+#calSubApp #sheet .nt-sheet .nt-fx,#calSubApp #sheet .nt-sheet .nt-vc,#calSubApp #sheet .nt-sheet .nt-last{background:none;border:0;border-radius:0;padding:12px 0;margin:0}
+#calSubApp #sheet.apv .ap-foot{flex-direction:column-reverse;gap:6px;padding-top:2px}
+#calSubApp #sheet.apv .ap-btn.d{background:none;border:0;color:var(--danger);min-height:44px;font-weight:700}
