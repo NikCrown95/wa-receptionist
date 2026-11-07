@@ -570,7 +570,7 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
       <h2>Agenda, clienti e numeri. Tutto sotto controllo.</h2>
       <p class="pf-s">Scegli il tuo settore e guarda com'è fatta per te.</p>
       <div class="pf-tabs" id="pfTabs" role="tablist"></div>
-      <div class="pf-sc" id="pfSc"><button type="button" class="pf-scb" data-d="-1" aria-label="Settore precedente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><div class="pf-sci" id="pfScI"></div><div class="pf-sct"><small>Il tuo settore</small><b id="pfScN"></b><span id="pfScE"></span></div><button type="button" class="pf-scb" data-d="1" aria-label="Settore successivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="pf-scd" id="pfScD"></div>
+      <div class="pf-sc" id="pfSc"><button type="button" class="pf-scb" data-d="-1" aria-label="Settore precedente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><div class="pf-sci" id="pfScI"></div><div class="pf-sct"><small>Il tuo settore</small><b id="pfScN"></b><span id="pfScE"></span></div><button type="button" class="pf-scb" data-d="1" aria-label="Settore successivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="pf-scd" id="pfScD"></div><div class="pf-dd" id="pfDd"><button type="button" class="pf-ddb" id="pfDdB" aria-haspopup="listbox" aria-expanded="false"><span class="pf-ddi" id="pfDdI"></span><span id="pfDdN"></span><svg class="pf-ddc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="pf-ddm" id="pfDdM" role="listbox"></div></div>
     </div>
     <div class="pf-r" id="pfStage" aria-label="Schermate del profilo del titolare">
       <div class="pf-glow"></div>
@@ -723,6 +723,22 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 #profilo .pf-l{gap:6px}
 #profilo .pf-in{margin-top:18px}
 }
+
+#profilo .pf-dd{display:none}
+@media (max-width:600px){
+#profilo .pf-dd{display:block;position:relative;align-self:center;margin:12px 0 0;z-index:20}
+#profilo .pf-ddb{display:inline-flex;align-items:center;gap:10px;padding:11px 16px 11px 13px;border-radius:15px;background:#0F2229;border:1px solid #2B8A94;color:#F2F6F7;font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.28)}
+#profilo .pf-ddi{display:grid;place-items:center;width:22px;height:22px;color:#7FDCDC}
+#profilo .pf-ddi svg{width:21px;height:21px}
+#profilo .pf-ddc{width:16px;height:16px;color:#93A8AE;transition:transform .25s}
+#profilo .pf-dd.open .pf-ddc{transform:rotate(180deg)}
+#profilo .pf-ddm{position:absolute;left:50%;top:calc(100% + 8px);transform:translateX(-50%) translateY(-6px);min-width:250px;padding:6px;border-radius:16px;background:#0F2229;border:1px solid #2B8A94;box-shadow:0 18px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;text-align:left}
+#profilo .pf-dd.open .pf-ddm{opacity:1;pointer-events:auto;transform:translateX(-50%)}
+#profilo .pf-ddm button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:0;border-radius:11px;background:none;color:#C5D0D6;font:inherit;font-size:14.5px;cursor:pointer;text-align:left}
+#profilo .pf-ddm button .pf-ddi{color:#93A8AE}
+#profilo .pf-ddm button[aria-selected="true"]{background:#132A32;color:#7FDCDC;font-weight:600}
+#profilo .pf-ddm button[aria-selected="true"] .pf-ddi{color:#7FDCDC}
+}
 </style>
 <script>
 (function(){
@@ -802,6 +818,16 @@ function cur(){for(var i=0;i<bs.length;i++)if(bs[i].getAttribute('aria-pressed')
 function sync(){var i=cur(),k=K[i].k;sc.classList.remove('scs');void sc.offsetWidth;sc.classList.add('scs');document.getElementById('pfScI').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+TI[k]+'</svg>';document.getElementById('pfScN').textContent=SCN[k][0];document.getElementById('pfScE').textContent=SCN[k][1];[].forEach.call(dots.children,function(d,j){d.className=j===i?'on':''})}
 sc.addEventListener('click',function(e){var b=e.target.closest('.pf-scb');if(!b)return;manual=true;bs[(cur()+parseInt(b.dataset.d,10)+bs.length)%bs.length].click()});
 var sx=null;sc.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});sc.addEventListener('touchend',function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>40){manual=true;bs[(cur()+(dx<0?1:-1)+bs.length)%bs.length].click()}});
+new MutationObserver(sync).observe(tabs,{attributes:true,subtree:true,attributeFilter:['aria-pressed']});sync()})();
+(function(){var dd=document.getElementById('pfDd');if(!dd)return;var bs=[].slice.call(tabs.children),B=document.getElementById('pfDdB'),M=document.getElementById('pfDdM');
+function ico(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+TI[k]+'</svg>'}
+function cur(){for(var i=0;i<bs.length;i++)if(bs[i].getAttribute('aria-pressed')==='true')return i;return 0}
+M.innerHTML=K.map(function(x,i){return '<button type="button" role="option" data-i="'+i+'"><span class="pf-ddi">'+ico(x.k)+'</span>'+SCN[x.k][0]+'</button>'}).join('');
+function sync(){var i=cur(),k=K[i].k;document.getElementById('pfDdI').innerHTML=ico(k);document.getElementById('pfDdN').textContent=SCN[k][0];[].forEach.call(M.children,function(b,j){b.setAttribute('aria-selected',j===i?'true':'false')})}
+function close(){dd.classList.remove('open');B.setAttribute('aria-expanded','false')}
+B.addEventListener('click',function(e){e.stopPropagation();var o=dd.classList.toggle('open');B.setAttribute('aria-expanded',o?'true':'false')});
+M.addEventListener('click',function(e){var b=e.target.closest('button[data-i]');if(!b)return;bs[+b.dataset.i].click();manual=true;clearTimeout(auto);close()});
+document.addEventListener('click',function(e){if(!dd.contains(e.target))close()});
 new MutationObserver(sync).observe(tabs,{attributes:true,subtree:true,attributeFilter:['aria-pressed']});sync()})();
 var PL={};function pl(u){return PL[u]||(PL[u]=new Promise(function(r){var i=new Image();i.onload=function(){(i.decode?i.decode():Promise.resolve()).then(r,r)};i.onerror=r;i.src=u}))}
 function plSec(k){(IMG[k]||[]).forEach(function(p){pl(p[0]);pl(p[1])})}
