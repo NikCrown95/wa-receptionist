@@ -670,20 +670,6 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 #profilo .pf-nav .ls{display:inline}
 #profilo .pf-cap{order:3}
 }
-
-#profilo .pf-tabs .ti,#profilo .pf-tabs .ts{display:none}
-@media (max-width:600px){
-#profilo .pf-in{gap:0!important}
-#profilo .pf-tabs{display:flex!important;flex-wrap:nowrap;overflow:visible;gap:4px;margin:14px 0 0!important;padding:0 12px!important;align-self:stretch;justify-content:stretch;contain:none}
-#profilo .pf-tabs button{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 7px;font-size:11px;font-weight:600;border-radius:11px 11px 0 0;border:1px solid var(--line);border-bottom:0;background:#0B1C21;color:#93A8AE;position:relative;top:0;transition:color .3s,background .3s,border-color .3s}
-#profilo .pf-tabs .ti{display:block;width:19px;height:19px}
-#profilo .pf-tabs .ts{display:block}
-#profilo .pf-tabs .tf{display:none}
-#profilo .pf-tabs button[aria-pressed="true"]{background:#0F2229;border-color:#27414A;color:#7FDCDC;padding-bottom:8px;margin-bottom:-1px;z-index:2}
-#profilo .pf-carw{margin:0 -20px!important;padding-top:0}
-#profilo .pf-carw::before{content:"prenolia.it/dashboard";display:flex;align-items:center;gap:7px;box-sizing:border-box;height:32px;margin:0 12px;padding:0 12px;background:#0F2229;border:1px solid #27414A;border-radius:0 12px 0 0;font-size:11px;font-weight:600;color:#93A8AE;letter-spacing:.01em}
-#profilo .pf-cta{display:none!important}
-}
 </style>
 <script>
 (function(){
@@ -754,9 +740,9 @@ var G={'Calendario':'Ecco il tuo *calendario*: gli appuntamenti sono tutti qui, 
 K.forEach(function(x){x.v.forEach(function(v){if(G[v.n])v.d=G[v.n]})});
 (function(){var z=document.querySelector('#pfCap .sz'),bb=z.parentNode;Object.keys(G).forEach(function(n){var e=document.createElement('span');e.className='sz';e.setAttribute('aria-hidden','true');e.innerHTML=G[n].replace(/\*([^*]+)\*/g,'<b>$1</b>');bb.insertBefore(e,z)});bb.removeChild(z)})();
 var IMG={"h": [["/provahtml/img/h0-t.webp?v=2", "/provahtml/img/h0-p.webp?v=2"], ["/provahtml/img/h1-t.webp?v=2", "/provahtml/img/h1-p.webp?v=2"], ["/provahtml/img/h2-t.webp?v=2", "/provahtml/img/h2-p.webp?v=2"], ["/provahtml/img/h3-t.webp?v=2", "/provahtml/img/h3-p.webp?v=2"], ["/provahtml/img/h4-t.webp?v=2", "/provahtml/img/h4-p.webp?v=2"]], "m": [["/provahtml/img/m0-t.webp?v=2", "/provahtml/img/m0-p.webp?v=2"], ["/provahtml/img/m1-t.webp?v=2", "/provahtml/img/m1-p.webp?v=2"], ["/provahtml/img/m2-t.webp?v=2", "/provahtml/img/m2-p.webp?v=2"], ["/provahtml/img/m3-t.webp?v=2", "/provahtml/img/m3-p.webp?v=2"], ["/provahtml/img/m4-t.webp?v=2", "/provahtml/img/m4-p.webp?v=2"]], "d": [["/provahtml/img/d0-t.webp?v=2", "/provahtml/img/d0-p.webp?v=2"], ["/provahtml/img/d1-t.webp?v=2", "/provahtml/img/d1-p.webp?v=2"], ["/provahtml/img/d2-t.webp?v=2", "/provahtml/img/d2-p.webp?v=2"], ["/provahtml/img/d3-t.webp?v=2", "/provahtml/img/d3-p.webp?v=2"], ["/provahtml/img/d4-t.webp?v=2", "/provahtml/img/d4-p.webp?v=2"]], "c": [["/provahtml/img/c0-t.webp?v=2", "/provahtml/img/c0-p.webp?v=2"], ["/provahtml/img/c1-t.webp?v=2", "/provahtml/img/c1-p.webp?v=2"], ["/provahtml/img/c2-t.webp?v=2", "/provahtml/img/c2-p.webp?v=2"], ["/provahtml/img/c3-t.webp?v=2", "/provahtml/img/c3-p.webp?v=2"]]};
-var TI={h:'<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M6 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M8.6 8.6l10.4 10.4M8.6 15.4l10.4 -10.4"/></svg>',c:'<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0M5.5 5.5a9 9 0 0 1 0 13M18.5 5.5a9 9 0 0 0 0 13"/></svg>',m:'<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg>',d:'<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l-2 0l9 -9l9 9l-2 0M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/></svg>'},TS={h:'Persona',c:'Sport',m:'Studi',d:'Domicilio'};var tabs=document.getElementById('pfTabs'),set=document.getElementById('pfSet'),nav=document.getElementById('pfNav'),cap=document.getElementById('pfCap');if(!tabs)return;
+var tabs=document.getElementById('pfTabs'),set=document.getElementById('pfSet'),nav=document.getElementById('pfNav'),cap=document.getElementById('pfCap');if(!tabs)return;
 var cs=-1,cv=-1,busy=null,auto=null,manual=false,DUR=7000;
-K.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.innerHTML=TI[x.k]+'<span class="tf">'+x.l+'</span><span class="ts">'+TS[x.k]+'</span>';b.setAttribute('aria-label',x.l);b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.onclick=function(){manual=false;goS(i)};tabs.appendChild(b)});
+K.forEach(function(x,i){var b=document.createElement('button');b.type='button';b.textContent=x.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');b.onclick=function(){manual=false;goS(i)};tabs.appendChild(b)});
 var PL={};function pl(u){return PL[u]||(PL[u]=new Promise(function(r){var i=new Image();i.onload=function(){(i.decode?i.decode():Promise.resolve()).then(r,r)};i.onerror=r;i.src=u}))}
 function plSec(k){(IMG[k]||[]).forEach(function(p){pl(p[0]);pl(p[1])})}
 function mk(){var k=K[cs].k,n=IMG[k].length,st='';buildCar(k);for(var i=0;i<n;i++)st+='<img alt="" class="pre" decoding="async">';set.innerHTML='<div class="dv tb">'+st+'</div><div class="dv ph">'+st+'</div><button type="button" class="pf-zm" aria-label="Ingrandisci le schermate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="p1" d="M15 3h6v6M21 3l-7 7"/><path class="p2" d="M9 21H3v-6M3 21l7-7"/></svg></button>';[].forEach.call(set.querySelectorAll('.dv.tb img'),function(e,i){e.src=IMG[k][i][0]});[].forEach.call(set.querySelectorAll('.dv.ph img'),function(e,i){e.src=IMG[k][i][1]})}
