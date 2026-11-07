@@ -242,6 +242,29 @@
     return out;
   }
 
+  /* avvisi lunghi: se il testo e' tagliato (2 righe) compare "Mostra tutto" che lo apre e lo richiude */
+  function markMore() {
+    if (!panel || panel.hidden) return;
+    panel.querySelectorAll(".lr-it:not(.ann)").forEach(function (row) {
+      if (row.querySelector(".lr-more")) return;
+      var tx = row.querySelector(".tx"), b = tx && tx.querySelector("b"), d = tx && tx.querySelector(":scope>span");
+      if (!tx || !b) return;
+      var cut = b.scrollHeight > b.clientHeight + 1 || (d && d.scrollHeight > d.clientHeight + 1);
+      if (!cut) return;
+      var m = document.createElement("i");
+      m.className = "lr-more"; m.setAttribute("role", "button"); m.tabIndex = 0; m.textContent = "Mostra tutto";
+      var flip = function (e) {
+        e.stopPropagation(); e.preventDefault();
+        var open = row.classList.toggle("open");
+        m.textContent = open ? "Mostra meno" : "Mostra tutto";
+        m.setAttribute("aria-expanded", open ? "true" : "false");
+      };
+      m.addEventListener("click", flip);
+      m.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") flip(e); });
+      tx.appendChild(m);
+    });
+  }
+
   function render() {
     var h = '<div class="lr-head"><h2 id="liaRecapTitle">Avvisi</h2><button type="button" class="lr-x" aria-label="Chiudi">' + X + "</button></div>";
     var body = "", mi = monthItem(), list = visibleNotices();
@@ -262,7 +285,7 @@
     });
     panel.querySelectorAll(".lr-it").forEach(function (b) {
       b.addEventListener("click", function () { go(b.getAttribute("data-type"), b.getAttribute("data-mid")); });
-    });
+    });    markMore();
   }
 
   /* un tocco su un avviso porta direttamente dove si risolve */
@@ -288,6 +311,7 @@
     pinned = {}; visibleNotices().forEach(function (n) { pinned[kOf(n)] = 1; });
     render();
     panel.hidden = false; scrim.hidden = false;
+    markMore(); setTimeout(markMore, 350);
     btn.setAttribute("aria-expanded", "true");
     // dopo l'apertura tutto risulta letto: i puntini restano nel pannello aperto, l'icona si spegne
     unreadKeys().forEach(markSeen); paintBtn();
