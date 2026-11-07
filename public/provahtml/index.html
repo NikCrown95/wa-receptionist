@@ -658,8 +658,9 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 #profilo .pf-car::-webkit-scrollbar{display:none}
 #profilo .pf-car .c{flex:none;width:260px;height:400px;overflow:hidden;scroll-snap-align:center;border-radius:36px 36px 0 0;transform-origin:50% 100%;cursor:pointer;-webkit-mask-image:linear-gradient(#000 74%,transparent 99%);mask-image:linear-gradient(#000 74%,transparent 99%)}
 #profilo .pf-car .c img{display:block;width:260px;height:auto;pointer-events:none;-webkit-user-drag:none}
-#profilo .pf-cta{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font:inherit;font-size:13px;font-weight:700;color:#071318;background:#9CEBEB;border:0;border-radius:30px;padding:9px 15px;box-shadow:0 8px 22px rgba(75,179,214,.35);cursor:pointer}
-#profilo .pf-cta svg{width:15px;height:15px}
+#profilo .pf-cta{position:absolute;right:26px;bottom:8px;left:auto;transform:none;width:34px;height:34px;display:grid;place-items:center;padding:0;border:0;background:none;box-shadow:none;color:#7FDCDC;opacity:.8;font-size:0;line-height:0;cursor:pointer;z-index:3}
+#profilo .pf-cta svg{width:16px;height:16px;transition:transform .25s cubic-bezier(.2,.9,.3,1.2)}
+#profilo .pf-cta:active svg{transform:scale(1.2)}
 #profilo .pf-nav{order:2;gap:5px;justify-content:center;width:100%;min-height:0}
 #profilo .pf-nav button{font-size:12.5px;font-weight:600;padding:7px 10px;min-height:0;border:1px solid var(--line2);border-radius:999px;background:transparent;color:#C5D0D6;overflow:hidden}
 #profilo .pf-nav button::before{display:none}
