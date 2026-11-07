@@ -554,8 +554,9 @@ var IC={
  h:['#3A2E5C','<svg viewBox="0 0 24 24" fill="none" stroke="#D9C8FF" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 7.5L20 17M8 16.5L20 7"/></svg>'],
  s:['#1F4D3A','<svg viewBox="0 0 24 24" fill="none" stroke="#9DF0C2" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M4.5 8.5c4 1 11 1 15 0M4.5 15.5c4-1 11-1 15 0"/></svg>'],
  m:['#17445C','<svg viewBox="0 0 24 24" fill="none" stroke="#9CEBEB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>'],
- d:['#5C3F17','<svg viewBox="0 0 24 24" fill="none" stroke="#FFD08A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.8"/><path d="M2.5 19h19"/></svg>']};
-var D=[['h','Taglio donna','Sab · 12:00 · Giulia R.'],['h','Manicure','Ven · 15:00 · Chiara L.'],['h','Barba e taglio','Sab · 15:30 · Luca M.'],['s','Allenamento personale','Mar · 07:30 · Davide S.'],['s','Lezione di tennis','Gio · 17:00 · Anna P.'],['m','Seduta di fisioterapia','Lun · 09:30 · Marco B.'],['h','Massaggio','Sab · 11:00 · Elena V.'],['d','Lezione online','Mar · 17:00 · Sara T.']];
+ d:['#5C3F17','<svg viewBox="0 0 24 24" fill="none" stroke="#FFD08A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.8"/><path d="M2.5 19h19"/></svg>'],
+ f:['#1F4D3A','<svg viewBox="0 0 24 24" fill="none" stroke="#9DF0C2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.2l3.4 2.5-1.3 4h-4.2l-1.3-4zM12 8.2V3.6M15.4 10.7l4.3-1.4M14.1 14.7l2.7 3.6M9.9 14.7l-2.7 3.6M8.6 10.7L4.3 9.3"/></svg>']};
+var D=[['h','Taglio donna','Sab · 12:00 · Giulia R.'],['h','Manicure','Ven · 15:00 · Chiara L.'],['h','Barba e taglio','Sab · 15:30 · Luca M.'],['s','Allenamento personale','Mar · 07:30 · Davide S.'],['s','Campo da tennis','Gio · 17:00 · Campo 2'],['f','Campo da calcio','Ven · 21:00 · Campo 1'],['m','Seduta di fisioterapia','Lun · 09:30 · Marco B.'],['h','Massaggio','Sab · 11:00 · Elena V.'],['d','Lezione online','Mar · 17:00 · Sara T.']];
 var live=[],vis=false;
 function place(){live.forEach(function(t,k){var r=live.length-1-k;t.style.transform='translateY('+(r*58)+'px) scale('+(1-r*.045)+')';t.style.opacity=r>2?0:(r===0?1:r===1?.78:.5);t.style.filter=r?'blur('+(r*.6)+'px)':'none';t.style.zIndex=10-r});while(live.length>4)live.shift().remove()}
 function add(d){var c=IC[d[0]],t=document.createElement('div');t.className='ts';t.innerHTML='<div class="ic'+(d[0]==='m'?' med':'')+'" style="background:'+c[0]+'">'+c[1]+'</div><div><b>'+d[1]+'</b><span class="d">'+d[2]+'</span></div><div class="tm">ora</div>';t.style.transform='translateY(-70px) scale(.96)';t.style.opacity=0;w.appendChild(t);void t.offsetWidth;live.push(t);place()}
@@ -795,9 +796,9 @@ var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){io.disconnec
 })();
 </script>
 <script>
-(function(){var w=document.getElementById('m3w');if(!w)return;var J=['Parrucchiere','Estetista','Barbiere','Personal trainer','Istruttore di tennis','Fisioterapista','Massaggiatore','Insegnante privato'];
+(function(){var w=document.getElementById('m3w');if(!w)return;var J=['Parrucchiere','Estetista','Barbiere','Personal trainer','Circolo di tennis','Centro sportivo','Fisioterapista','Massaggiatore','Insegnante privato'];
 if(matchMedia('(prefers-reduced-motion:reduce)').matches||!matchMedia('(max-width:600px)').matches)return;
-var SE=['Servizi alla persona','Servizi alla persona','Servizi alla persona','Centri sportivi','Centri sportivi','Studi medici','Servizi alla persona','Servizi a domicilio e online'];var se=document.getElementById('m3s');
+var SE=['Servizi alla persona','Servizi alla persona','Servizi alla persona','Centri sportivi','Centri sportivi','Centri sportivi','Studi medici','Servizi alla persona','Servizi a domicilio e online'];var se=document.getElementById('m3s');
 var k=0,vis=true;
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
 if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(w)}
