@@ -682,7 +682,7 @@ document.addEventListener('click',function(e){if(!w.contains(e.target))open(fals
 document.addEventListener('keydown',function(e){if(e.key==='Escape')open(false)});
 dd.addEventListener('click',function(e){var b=e.target.closest('button[data-id]');if(!b)return;if(window.TU_PICK)window.TU_PICK(b.dataset.id);else location.href='/provahtml/tutorial?s='+b.dataset.id});
 })();</script><script>(function(){
-var B='/provahtml/tut/',DIR='';function U(k){return B+DIR+k+'.webp'}
+var B='/provahtml/tut/',DIR='';function U(k){return B+DIR+k+'.webp?v=2'}
 var SEC=[
 {id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
 {id:'medico',n:'Studi sanitari',e:'Dentisti, fisioterapisti, psicologi',ic:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'},
