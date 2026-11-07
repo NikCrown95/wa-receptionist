@@ -751,6 +751,14 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 }
 
 @media (max-width:600px){section.hero{min-height:760px}}
+
+@media (max-width:600px){
+#profilo .pf-car .c{position:relative}
+#profilo .pf-car .c::before{content:"";position:absolute;inset:0;z-index:2;border:1px solid #3F5B64;border-radius:36px 36px 0 0;box-shadow:inset 0 0 0 5px #050B0E,inset 0 0 0 6px #22343B;pointer-events:none}
+#profilo .pf-car .c::after{content:"";position:absolute;left:50%;top:9px;width:54px;height:15px;margin-left:-27px;border-radius:9px;background:#050B0E;z-index:3;pointer-events:none}
+}
+
+@media (max-width:600px){#profilo .pf-car .c{background:#08151A}#profilo .pf-car .c img{margin-top:26px}}
 </style>
 <script>
 (function(){
