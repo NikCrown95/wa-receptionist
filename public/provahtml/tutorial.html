@@ -123,6 +123,7 @@
 #tutorial .tu-tag{margin:14px 0 0}#tutorial .tu-tag span{display:inline-block;padding:7px 13px;border:1px solid var(--tl);border-radius:999px;font-size:13px;color:var(--tm)}#tutorial .tu-tag b{color:#F2F6F7}
 #tutorial .tu-row3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}#tutorial .tu-row3.two{grid-template-columns:repeat(2,1fr);max-width:520px;margin:0 auto}#tutorial .tu-note{margin:12px 0 0;max-width:340px;font-size:12px;line-height:1.5;color:var(--tm);opacity:.85}
 #tutorial .tu-cell{margin:0;opacity:0;transform:translateY(30px) scale(.95);transition:opacity .6s ease,transform .85s cubic-bezier(.2,.9,.3,1.08)}#tutorial .tu-cell.show{opacity:1;transform:none}
+#tutorial .tu-cell .tu-ph::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:rgba(4,10,13,.55);opacity:0;transition:opacity 1s ease}#tutorial .tu-cell.dim .tu-ph::after{opacity:1}
 #tutorial .tu-cell .t{display:block;text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ta);font-weight:800;margin:0 0 8px}
 #tutorial .tu-cell figcaption{margin:12px 2px 0;text-align:center;font-size:14px;font-weight:600;min-height:40px;transition:opacity .3s;color:#F2F6F7}
 #tutorial .tu-soon{margin:20px auto;max-width:720px;padding:34px 24px;border:1px dashed var(--tl);border-radius:22px;text-align:center;color:var(--tm)}#tutorial .tu-soon b{display:block;color:#F2F6F7;font-size:20px;margin-bottom:8px}
@@ -695,7 +696,7 @@ function Sec(i){var p=P[i],TM=[],run=0,vids=[],box=document.createElement('div')
   after(500+n*D+700,function(){start()},tok)}
  function book(tok){var K=BKC;
   box.querySelector('.tu-tx').insertAdjacentHTML('beforeend','<div class="tu-tag"><span>'+K.tag+'</span></div>'+(K.note?'<p class="tu-note">'+K.note+'</p>':''));
-  function cell(t,k){return '<figure class="tu-cell"><span class="t">'+t+'</span><div class="tu-ph"><video muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+DIR+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
+  function cell(t,k){return '<figure class="tu-cell'+(k==='cal'?' dim':'')+'"><span class="t">'+t+'</span><div class="tu-ph"><video muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+DIR+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
   box.querySelector('.tu-vis').insertAdjacentHTML('beforeend','<div class="tu-row3'+(K.cells.length==2?' two':'')+'">'+K.cells.map(function(c){return cell(c[0],c[1])}).join('')+'</div>');
   var cells=[].slice.call(box.querySelectorAll('.tu-cell')),vs=[].slice.call(box.querySelectorAll('video')),cs=[].slice.call(box.querySelectorAll('figcaption'));vids=vs;
   function cap(el,t){el.style.opacity=0;setTimeout(function(){el.textContent=t;el.style.opacity=1},200)}
@@ -705,6 +706,7 @@ function Sec(i){var p=P[i],TM=[],run=0,vids=[],box=document.createElement('div')
   function play(v){try{v.currentTime=0}catch(e){}var r=v.play();if(r&&r.catch)r.catch(function(){})}
   after(T0,function(){K.cells.forEach(function(c,j){if(c[1]!=='cal')play(vs[j])})},tok);
   K.cells.forEach(function(c,j){if(c[1]!=='cal')after(T0+Math.round(K.cf[c[1]]*1000)+700,function(){cap(cs[j],'Prenotazione confermata')},tok)});
+  after(T0+CONF-400,function(){cells[ci].classList.remove('dim')},tok);
   after(T0+CONF-100,function(){play(vs[ci])},tok);
   after(T0+CONF+1500,function(){cap(cs[ci],'Arriva la notifica: la campanella si accende')},tok);
   after(T0+CONF+5000,function(){cap(cs[ci],'Eccola, con tutti i dettagli')},tok);
