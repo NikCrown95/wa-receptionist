@@ -531,7 +531,37 @@ body.lbo{overflow:hidden}
   </div>
 </section></div>
 
-<section class="pf" id="profilo"><div class="wrap"><div class="m3"><h2 class="m3-t">Per chi è?</h2><div class="m3-w" id="m3w"><span id="m3j">Parrucchiere</span></div><p class="m3-sec" id="m3s">Servizi alla persona</p></div>
+<section class="pf" id="profilo"><div class="wrap"><div class="m3"><h2 class="m3-t">Per chi è?</h2><div class="m3-w" id="m3w"><span id="m3j">Parrucchiere</span></div><p class="m3-sec" id="m3s">Servizi alla persona</p>
+<div class="tsw" id="tsw" aria-hidden="true"></div>
+<style>
+.tsw{display:none}
+@media (max-width:600px){
+.m3 .tsw{display:block;position:relative;width:100%;max-width:340px;height:136px;margin:22px auto 22px;text-align:left;-webkit-mask-image:linear-gradient(#000 66%,transparent);mask-image:linear-gradient(#000 66%,transparent);pointer-events:none}
+.tsw .ts{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:18px;background:rgba(16,36,44,.95);border:1px solid #2c4a54;box-shadow:0 10px 28px rgba(0,0,0,.45);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .6s,filter .6s}
+.tsw .ic{flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center}
+.tsw .ic svg{width:20px;height:20px}
+.tsw .ic.med svg{filter:drop-shadow(0 0 6px rgba(156,235,235,.4))}
+.tsw b{display:block;font-size:13.5px;line-height:1.25;color:#F2F6F7;font-weight:700;letter-spacing:0}
+.tsw span.d{font-size:12.5px;color:#9BA6B5;font-weight:400;letter-spacing:0}
+.tsw .tm{margin-left:auto;font-size:11px;color:#9BA6B5;align-self:flex-start;font-weight:400}
+}
+</style>
+<script>(function(){
+var w=document.getElementById('tsw');if(!w)return;
+var mq=matchMedia('(max-width:600px)'),red=matchMedia('(prefers-reduced-motion:reduce)').matches;
+var IC={
+ h:['#3A2E5C','<svg viewBox="0 0 24 24" fill="none" stroke="#D9C8FF" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 7.5L20 17M8 16.5L20 7"/></svg>'],
+ s:['#1F4D3A','<svg viewBox="0 0 24 24" fill="none" stroke="#9DF0C2" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M4.5 8.5c4 1 11 1 15 0M4.5 15.5c4-1 11-1 15 0"/></svg>'],
+ m:['#17445C','<svg viewBox="0 0 24 24" fill="none" stroke="#9CEBEB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>'],
+ d:['#5C3F17','<svg viewBox="0 0 24 24" fill="none" stroke="#FFD08A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.8"/><path d="M2.5 19h19"/></svg>']};
+var D=[['h','Taglio donna','Sab · 12:00 · Giulia R.'],['s','Campo da padel','Dom · 18:00 · 4 giocatori'],['m','Visita di controllo','Lun · 09:30 · Marco B.'],['d','Lezione online','Mar · 17:00 · Sara T.'],['h','Barba e taglio','Sab · 15:30 · Luca M.'],['s','Campo da tennis','Mer · 19:00 · Anna P.'],['m','Igiene dentale','Gio · 11:00 · Elena V.'],['d','Consulenza a domicilio','Ven · 16:30 · Paolo N.']];
+var n=0,live=[],vis=false;
+function place(){live.forEach(function(t,k){var r=live.length-1-k;t.style.transform='translateY('+(r*58)+'px) scale('+(1-r*.045)+')';t.style.opacity=r>2?0:(r===0?1:r===1?.78:.5);t.style.filter=r?'blur('+(r*.6)+'px)':'none';t.style.zIndex=10-r});while(live.length>4)live.shift().remove()}
+function add(){var d=D[n++%D.length],c=IC[d[0]],t=document.createElement('div');t.className='ts';t.innerHTML='<div class="ic'+(d[0]==='m'?' med':'')+'" style="background:'+c[0]+'">'+c[1]+'</div><div><b>'+d[1]+'</b><span class="d">'+d[2]+'</span></div><div class="tm">ora</div>';t.style.transform='translateY(-70px) scale(.96)';t.style.opacity=0;w.appendChild(t);void t.offsetWidth;live.push(t);place()}
+function tick(){if(mq.matches&&vis&&!document.hidden)add();setTimeout(tick,2300)}
+if(red){add();add()}else{add();setTimeout(add,900);setTimeout(tick,3200)}
+if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(w);else vis=true;
+})();</script></div>
   <div class="pf-in">
     <div class="pf-l">
       <p class="pf-big">La tua Dashboard</p>
