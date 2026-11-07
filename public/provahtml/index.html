@@ -739,6 +739,14 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 #profilo .pf-ddm button[aria-selected="true"]{background:#132A32;color:#7FDCDC;font-weight:600}
 #profilo .pf-ddm button[aria-selected="true"] .pf-ddi{color:#7FDCDC}
 }
+
+@media (max-width:600px){
+#profilo .pf-cta::before{display:none!important;animation:none!important}
+#profilo .pf-cta .p1,#profilo .pf-cta .p2{animation:none!important}
+#profilo .pf-cta svg{width:20px;height:20px;transform-origin:50% 50%;animation:pfBr 1.8s ease-in-out infinite}
+@keyframes pfBr{0%,100%{transform:scale(1)}50%{transform:scale(1.28)}}
+@media (prefers-reduced-motion:reduce){#profilo .pf-cta svg{animation:none}}
+}
 </style>
 <script>
 (function(){
