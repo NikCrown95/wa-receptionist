@@ -5,7 +5,7 @@ const promoter = require('../lib/promoter.js');
 const referral = require('../lib/referral.js');
 
 // ---------- finto database ----------
-const DB = { referral_partners: [], referrals: [], businesses: [], subscriptions: [], audit_logs: [], auth_throttle: [], app_settings: [], plans: [{ name: 'Base', price_eur: 39.99 }, { name: 'Base+Lia', price_eur: 21.99 }] };
+const DB = { referral_partners: [], referrals: [], businesses: [], subscriptions: [], audit_logs: [], auth_throttle: [], app_settings: [], plans: [{ name: 'Base', price_eur: 39.99 }, { name: 'Base+Lia', price_eur: 18.99 }] };
 let seq = 1;
 const uid = () => '00000000-0000-4000-8000-' + String(seq++).padStart(12, '0');
 function rows(path) {
@@ -51,7 +51,7 @@ const send = async (m, p, b) => { const r = await fetch('http://sb.test/rest/v1/
 
 const NOW = new Date('2026-10-30T10:00:00Z');
 const D = (s) => new Date(s + 'T10:00:00Z').toISOString();
-const ev = (ref, biz, sub, partnerReward = 21.99) => promoter.evaluate(ref, biz, sub, { now: NOW, trialDays: 14, partnerReward });
+const ev = (ref, biz, sub, partnerReward = 18.99) => promoter.evaluate(ref, biz, sub, { now: NOW, trialDays: 14, partnerReward });
 const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', created_at: D(reg) });
 
 (async () => {
@@ -105,8 +105,8 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   assert.ok(v.months.every((m) => m.state === 'paid' || m.state === 'cur')); assert.strictEqual(v.m2.state, 'pend');
 
   // ---- accesso e pagina
-  const partner = { id: uid(), name: 'Marco Rossi', code: 'marco-3f9a', reward_eur: 21.99, active: true, created_at: D('2026-09-01') };
-  const other = { id: uid(), name: 'Anna Verdi', code: 'anna-77aa', reward_eur: 21.99, active: true, created_at: D('2026-09-01') };
+  const partner = { id: uid(), name: 'Marco Rossi', code: 'marco-3f9a', reward_eur: 18.99, active: true, created_at: D('2026-09-01') };
+  const other = { id: uid(), name: 'Anna Verdi', code: 'anna-77aa', reward_eur: 18.99, active: true, created_at: D('2026-09-01') };
   DB.referral_partners.push(partner, other);
   const now = Date.now(), dayMs = 86400000, iso = (n) => new Date(now + n * dayMs).toISOString();
   const bTrial = { id: uid(), name: 'Studio <b>Aurora</b>', business_type: 'dentista', created_at: iso(-6) };
@@ -119,8 +119,8 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
     { id: uid(), business_id: bOld.id, status: 'active', started_at: iso(-430), current_period_end: iso(10) });
   DB.referrals.push(
     { id: uid(), referred_business_id: bTrial.id, referred_name: 'x', partner_id: partner.id, code: partner.code, status: 'trial', created_at: iso(-6) },
-    { id: uid(), referred_business_id: bPaid.id, referred_name: 'x', partner_id: partner.id, code: partner.code, status: 'paid', paid_at: iso(-380), reward_eur: 21.99, created_at: iso(-400) },
-    { id: uid(), referred_business_id: bOld.id, referred_name: 'x', partner_id: partner.id, code: partner.code, status: 'paid', paid_at: iso(-420), reward_eur: 21.99, reward_paid_at: iso(-410), created_at: iso(-440) });
+    { id: uid(), referred_business_id: bPaid.id, referred_name: 'x', partner_id: partner.id, code: partner.code, status: 'paid', paid_at: iso(-380), reward_eur: 18.99, created_at: iso(-400) },
+    { id: uid(), referred_business_id: bOld.id, referred_name: 'x', partner_id: partner.id, code: partner.code, status: 'paid', paid_at: iso(-420), reward_eur: 18.99, reward_paid_at: iso(-410), created_at: iso(-440) });
 
   const handler = require('../api/promoter.js');
   const call = async (method, body, cookie) => {
@@ -154,8 +154,8 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   assert.strictEqual(paidB.m1.state, 'due'); assert.strictEqual(paidB.m2.state, 'due', 'dopo piu\' di un anno ed ancora iscritta: matura la seconda');
   const oldB = r.json.businesses.find((b) => b.name === 'Corbo');
   assert.strictEqual(oldB.m1.state, 'got');
-  assert.strictEqual(r.json.totals.due, 21.99 * 3, 'prima+seconda di Elena + seconda di Corbo = 3 mensilita\'');
-  assert.strictEqual(r.json.totals.got, 21.99);
+  assert.strictEqual(r.json.totals.due, 18.99 * 3, 'prima+seconda di Elena + seconda di Corbo = 3 mensilita\'');
+  assert.strictEqual(r.json.totals.got, 18.99);
   assert.ok(DB.referrals.filter((x) => x.reward2_at).length === 2, 'la seconda mensilita\' e\' scritta sulle righe');
   const w = log.filter((l) => l.startsWith('PATCH referrals')).length;
   await call('GET', undefined, ck);
@@ -181,7 +181,7 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   DB.auth_throttle.length = 0;
 
   // ---- account dimostrativo: dati simulati, nessuna scrittura
-  const demo = { id: uid(), name: 'Nico Corona', code: 'corona-10', reward_eur: 21.99, active: true, note: '[demo] dati simulati', created_at: D('2026-10-01') };
+  const demo = { id: uid(), name: 'Nico Corona', code: 'corona-10', reward_eur: 18.99, active: true, note: '[demo] dati simulati', created_at: D('2026-10-01') };
   DB.referral_partners.push(demo);
   const nWrites = log.filter((l) => /^(POST|PATCH|DELETE) (referrals|businesses|subscriptions)/.test(l)).length;
   r = await call('POST', { action: 'login', name: 'nico corona', code: 'Corona 10' });
@@ -204,7 +204,7 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   let a = await referral.partnerAction({ action: 'partner_assign', id: partner.id, business_id: bNew.id }, ctx);
   assert.strictEqual(a.ok, true); assert.strictEqual(a.status, 'paid');
   let row = DB.referrals.find((x) => x.referred_business_id === bNew.id);
-  assert.strictEqual(row.partner_id, partner.id); assert.strictEqual(row.assigned_manually, true); assert.strictEqual(row.reward_eur, 21.99);
+  assert.strictEqual(row.partner_id, partner.id); assert.strictEqual(row.assigned_manually, true); assert.strictEqual(row.reward_eur, 18.99);
   assert.strictEqual(row.paid_at, iso(-75), 'primo pagamento = primo "segnato come pagato"');
   assert.strictEqual(row.created_at, bNew.created_at, 'registrazione = quella vera dell\'attivita\'');
 
@@ -260,7 +260,7 @@ const B = (name, reg) => ({ id: uid(), name, business_type: 'parrucchiere', crea
   await assert.rejects(() => referral.partnerAction({ action: 'partner_payout', id: partner.id }, ctx), /nessun premio/);
   // nuovo promoter: premio di base = un mese di Smart
   const c = await referral.partnerAction({ action: 'partner_create', name: 'Luca Neri' }, ctx);
-  assert.strictEqual(DB.referral_partners.find((p) => p.code === c.code).reward_eur, 21.99);
+  assert.strictEqual(DB.referral_partners.find((p) => p.code === c.code).reward_eur, 18.99);
 
   console.log('OK: promoter — mesi calcolati, accesso e limiti, assegnazione a mano, seconda mensilità e pagamenti');
 })().catch((e) => { console.error('ERRORE', e && e.stack || e); process.exit(1); });

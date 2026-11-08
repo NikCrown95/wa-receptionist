@@ -8,7 +8,7 @@ alter table public.referrals
   add column if not exists assigned_manually boolean not null default false;  -- collegata a mano dalla super dashboard
 
 -- premio di base per un nuovo promoter: un mese di Smart (si puo' sempre cambiare persona per persona)
-alter table public.referral_partners alter column reward_eur set default 21.99;
+alter table public.referral_partners alter column reward_eur set default 18.99;
 
 -- una stessa attivita' non puo' essere collegata a due promoter
 create unique index if not exists referrals_one_per_business
