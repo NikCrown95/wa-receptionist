@@ -86,7 +86,7 @@
     [0, .5, 1].forEach(function (t) { var y = pT + iH * t; s.appendChild(svg('line', { class: 'gl', x1: pL, x2: W - pR, y1: y, y2: y })); var l = svg('text', { x: pL - 6, y: y + 3, 'text-anchor': 'end' }); l.textContent = grp(Math.round(max * (1 - t))); s.appendChild(l); });
     var X = function (i) { return pL + (n > 1 ? i / (n - 1) : .5) * iW; }, Y = function (v) { return pT + iH - v / max * iH; };
     var pts = series.map(function (x, i) { return { x: X(i), y: Y(valOf(x)) }; }), d = smooth(pts);
-    s.appendChild(svg('path', { d: d + ' L' + X(n - 1).toFixed(1) + ',' + (pT + iH) + ' L' + X(0).toFixed(1) + ',' + (pT + iH) + ' Z', fill: 'url(#' + gid + ')' }));
+    s.appendChild(svg('path', { class: 'ar', d: d + ' L' + X(n - 1).toFixed(1) + ',' + (pT + iH) + ' L' + X(0).toFixed(1) + ',' + (pT + iH) + ' Z', fill: 'url(#' + gid + ')' }));
     s.appendChild(svg('path', { class: 'ln', d: d }));
     var cur = svg('line', { class: 'cur', y1: pT, y2: pT + iH, x1: 0, x2: 0 }); s.appendChild(cur);
     var dots = pts.map(function (p, i) { var c = svg('circle', { class: 'dt', cx: p.x, cy: p.y, r: n <= 20 ? 3.5 : 0 }); s.appendChild(c); return c; });
@@ -200,6 +200,27 @@
       .catch(function () { failed = true; })
       .then(function () { busy = false; if (active) draw(); });
   }
+  // effetto d'apertura, come nelle statistiche delle altre attivita': barre che crescono, linea che si disegna, punto che pulsa sull'ultimo dato
+  function reveal(wrap) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var bs = wrap.querySelectorAll('svg.gch .b1');
+    [].forEach.call(bs, function (r) { r.style.transformBox = 'fill-box'; r.style.transformOrigin = 'bottom'; r.style.transform = 'scaleY(0)'; });
+    var ln = wrap.querySelector('svg.gch .ln'), ar = wrap.querySelector('svg.gch .ar');
+    if (ln && ln.getTotalLength) { var len = ln.getTotalLength(); ln.style.strokeDasharray = len; ln.style.strokeDashoffset = len; if (ar) ar.style.opacity = '0'; }
+    var fl = wrap.querySelectorAll('.hbar-row .fill');
+    [].forEach.call(fl, function (f) { f.setAttribute('data-w', f.style.width); f.style.width = '0'; });
+    var dts = wrap.querySelectorAll('svg.gch .dt'), last = dts.length ? dts[dts.length - 1] : null;
+    requestAnimationFrame(function () {
+      [].forEach.call(bs, function (r, i) { r.style.transition = 'transform .5s cubic-bezier(.2,.8,.2,1) ' + Math.min(i * 12, 260) + 'ms'; r.style.transform = 'scaleY(1)'; });
+      if (ln && ln.getTotalLength) { ln.style.transition = 'stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)'; ln.style.strokeDashoffset = '0'; if (ar) { ar.style.transition = 'opacity .7s ease .25s'; ar.style.opacity = '1'; } }
+      [].forEach.call(fl, function (f, i) { f.style.transition = 'width .7s cubic-bezier(.2,.8,.2,1) ' + (i * 70) + 'ms'; f.style.width = f.getAttribute('data-w'); });
+    });
+    if (last) {
+      var pd = svg('circle', { cx: last.getAttribute('cx'), cy: last.getAttribute('cy'), r: 4.5, fill: 'var(--accent)', opacity: .9, 'pointer-events': 'none' });
+      pd.innerHTML = '<animate attributeName="r" values="4;12" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".7;0" dur="2.2s" repeatCount="indefinite"/>';
+      last.parentNode.appendChild(pd);
+    }
+  }
   var SPORT = 'tennis'; // tennis e padel: giocatori e soci; calcio, pallavolo e altri: solo prenotazioni e ore
   function isSimple() { return SPORT !== 'tennis' && SPORT !== 'padel'; }
   function draw() {
@@ -221,9 +242,11 @@
     bars(wrap.querySelector('#cgsRev'), d.series, function (x) { return x.rev; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + eur(x.rev) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni'); });
     line(wrap.querySelector('#cgsBk'), d.series, function (x) { return x.n; }, function (x) { return '<b>' + esc(titleOf(x)) + '</b>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + '<br>' + hrs(x.min) + ' di campo · ' + x.pl + ' giocatori'; });
     hbars(wrap.querySelector('#byservice'), d.byC.map(function (x) { return { name: x.c.name, color: courtColor(x.c), pct: x.pct, amt: x.pct + '%', tip: '<b>' + esc(x.c.name) + ' · ' + x.pct + '%</b>' + hrs(x.min) + ' su ' + hrs(x.cap) + '<br>' + x.n + (x.n === 1 ? ' prenotazione' : ' prenotazioni') + ' · ' + eur(x.rev) }; }), 'Aggiungi i campi da Impostazioni › Campi e orari.');
+    reveal(wrap);
   }
 
   document.addEventListener('lia:section', function (e) { active = e.detail === 'stats'; if (active) { shell(); load(); } else tipHide(); });
+  document.addEventListener('lia:data-changed', function () { DATA = null; window.liaHistoryPromise = null; if (active) load(true); else DATA = null; });
   document.addEventListener('lia:campichanged', function () { DATA = null; window.liaHistoryPromise = null; if (active) load(true); });
   var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (active && DATA) draw(); }, 220); });
   try { new MutationObserver(function () { if (active && DATA) draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) { }
