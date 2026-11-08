@@ -514,7 +514,7 @@
       var rnb = ab('Rinnova', '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 'pri', function () { renewSheet(m); });
     }
     ab('Prenota', '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', '', function () { if (window.liaGymBookFor) window.liaGymBookFor(m.id); else toast('Calendario non pronto.', 'bad'); });
-    var dg = String(m.phone || '').replace(/[^\d]/g, ''); if (dg && !/^(39|00)/.test(dg) && dg.length <= 10) dg = '39' + dg; dg = dg.replace(/^00/, '');
+    var dg = (function (p) { var s = String(p == null ? '' : p).trim().replace(/\(0\)/g, ''), d = s.replace(/\D/g, ''); if (!d) return ''; if (s.charAt(0) === '+') return d; if (d.slice(0, 2) === '00') return d.slice(2); if (/^3\d{8,9}$/.test(d) || /^0\d{5,10}$/.test(d)) return '39' + d; return d; })(m.phone);
     if (dg) ab('WhatsApp', '<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>', '', null, 'https://wa.me/' + dg);
     ab('Chiama', '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>', '', null, 'tel:' + String(m.phone || '').replace(/[^\d+]/g, ''));
     body.appendChild(acts);

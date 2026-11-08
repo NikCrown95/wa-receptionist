@@ -133,7 +133,7 @@
   function clMoney(v){if(v===null||v===undefined||v==='')return '';var n=Number(v);if(!isFinite(n))return '';return n.toLocaleString('it-IT',{minimumFractionDigits:0,maximumFractionDigits:2})+' \u20ac';}
   function clHm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
   function clDate(d){return d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});}
-  function clWa(p){var d=String(p||'').replace(/[^\d+]/g,'');if(d.charAt(0)==='+')return d.slice(1);d=d.replace(/^00/,'');if(/^3\d{8,9}$/.test(d))d='39'+d;return d;}
+  function clWa(p){var s=String(p==null?'':p).trim().replace(/\(0\)/g,'');var d=s.replace(/\D/g,'');if(!d)return '';if(s.charAt(0)==='+')return d;if(d.slice(0,2)==='00')return d.slice(2);if(/^3\d{8,9}$/.test(d)||/^0\d{5,10}$/.test(d))return '39'+d;return d;}
   function clLoadNotes(){ if(window.liaNotes)window.liaNotes.ensure(); }
   function clList(){
     var q=document.getElementById('clientSearch').value.trim().toLowerCase();
@@ -180,7 +180,7 @@
       cal:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
       x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'};
     function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-    var tel=String(c.phone).replace(/\s+/g,'');
+    var tel=String(c.phone).replace(/[^\d+]/g,'');
     var ML={sede:'In sede',domicilio:'A domicilio',online:'Online'};
     function mline(h){var m=h.mode||'sede',o='';if(window.liaMultiMode||m!=='sede')o+='<span class="cd-md">'+ML[m]+'</span>';if(m==='domicilio'&&h.address)o+=' <span class="cd-ad">\u{1F4CD} '+esc(h.address)+'</span>';return o?'<div class="cd-ml">'+o+'</div>':'';}
     var nx=c.next?('<div class="cd-next"><div class="cd-dd">'+c.next.start.getDate()+'<small>'+c.next.start.toLocaleDateString('it-IT',{month:'short'})+'</small></div><div><b>'+esc(c.next.service||'Appuntamento')+'</b>'+mline(c.next)+'<div style="color:var(--muted);font-size:.85rem;margin-top:2px">'+c.next.start.toLocaleDateString('it-IT',{weekday:'long'})+' alle '+clHm(c.next.start)+'</div></div></div>'):'<div style="color:var(--muted);font-size:.92rem">Nessun appuntamento in programma</div>';
