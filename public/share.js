@@ -90,7 +90,7 @@
         if (window.__liaCampi || document.body.classList.contains("campiOn")) throw new Error("no"); // un circolo non e' una palestra
         return fin({ name: gb.name || "", business_type: "palestra", public_link: gb.public_link || "", gym_offers: null }, g);
       });
-    }).then(function (res) { biz = res; return res; }).catch(function () { loading = null; if (!readCache()) biz = null; return null; });
+    }).then(function (res) { biz = res; warmGuide(); return res; }).catch(function () { loading = null; if (!readCache()) biz = null; return null; });
     return loading;
   }
 
@@ -750,6 +750,8 @@
     document.body.appendChild(guide);
     var body = guide.querySelector("#mnGBody"), scr = guide.querySelector(".mnGuide");
     var img = function (k) { return "/guida/" + k + ".jpg?v=5"; };
+    function shotUrl(st, wd) { var w = st[5]; return wd ? "/guida/" + ((w && w.i) || st[0]) + "-w.jpg?v=8" : img(st[0]); }
+    function preShot(st) { if (!st) return; try { var im = new Image(); im.decoding = "async"; im.src = shotUrl(st, !!(st[5] && wideMq.matches)); } catch (e) {} }
     var wideMq = window.matchMedia("(min-width:900px)");
     var wideChange = function () { if (guide && !guide.hidden && cur && cur[1] < flat[cur[0]].steps.length) step(cur[0], cur[1]); };
     if (wideMq.addEventListener) wideMq.addEventListener("change", wideChange); else if (wideMq.addListener) wideMq.addListener(wideChange);
@@ -759,7 +761,7 @@
         '<div class="mnGH"><button type="button" class="mnBack" data-close="1" aria-label="Indietro">' + I.back + '</button><div class="gpHd"><h2 id="mnGuideT">Guida</h2></div></div>' +
         '<div class="gpHd"><p>Scegli la tua domanda: ti mostro la schermata vera di Prenolia e dove toccare, passo dopo passo.</p></div>' +
         '<label class="mnSearch">' + I.search + '<input type="search" id="mnGuideQ" placeholder="Cerca, per esempio “QR” o “prezzo”" aria-label="Cerca nella guida" autocomplete="off" value="' + esc2(term).replace(/"/g, "&quot;") + '"></label>';
-      if (!D) { body.innerHTML = h + '<p class="mnEmpty">Un attimo…</p>'; return; }
+      if (!D) { body.innerHTML = h + '<div class="gpSk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>'; return; }
       var n = 0;
       D.forEach(function (g) {
         var r = "", gn = 0;
@@ -791,12 +793,18 @@
       if (wd) bx = w.r || bx;
       for (var i = 0; i < n; i++) seg += '<i class="' + (i <= si ? "on" : "") + '"></i>';
       body.innerHTML = back + '<span class="gpCt">' + (si + 1) + " di " + n + '</span></div><div class="gpSeg">' + seg + "</div>" +
-        '<div class="gpStage' + (wd ? " wd" : "") + '">' + (wd ? "" : '<div class="gpPhone">') + '<div class="gpShot">' + '<img src="' + (wd ? "/guida/" + (w.i || st[0]) + "-w.jpg?v=8" : img(st[0])) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
+        '<div class="gpStage' + (wd ? " wd" : "") + '">' + (wd ? "" : '<div class="gpPhone">') + '<div class="gpShot">' + '<img decoding="async" src="' + shotUrl(st, wd) + '" alt="Schermata: ' + esc2(st[1]) + '">' +
         (bx ? '<span class="gpRing" style="left:' + bx[0] + "%;top:" + bx[1] + "%;width:" + bx[2] + "%;height:" + bx[3] + '%"></span>' : "") + "</div>" + (wd ? "" : "</div>") +
         '<div class="gpCopy"><span class="gpN">Passo ' + (si + 1) + "</span><h3>" + esc2(st[1]) + "</h3><p>" + esc2(st[2]) + "</p>" + (st[3] ? '<span class="gpWhere">' + esc2(st[3]) + "</span>" : "") +
         '<div class="gpNav"><button type="button" class="gpBtn" data-go="' + (si - 1) + '"' + (si ? "" : " disabled") + '>Indietro</button><button type="button" class="gpBtn pri" data-go="' + (si + 1) + '">' + (si === n - 1 ? "Fine" : "Avanti") + "</button></div></div></div>";
       scr.scrollTop = 0;
+      preShot(x.steps[si + 1]);
     }
+    /* appena si tocca una domanda parte gia' il download della prima schermata */
+    body.addEventListener("pointerdown", function (ev) {
+      var a = ev.target.closest && ev.target.closest("[data-q]"); if (!a) return;
+      var i = find(a.getAttribute("data-q")); if (i >= 0 && flat[i].steps[0]) preShot(flat[i].steps[0]);
+    }, { passive: true });
     body.addEventListener("click", function (ev) {
       var t = ev.target, a = t.closest("[data-q]"), g = t.closest("[data-go]"), h = t.closest("[data-home]"), c = t.closest("[data-close]");
       if (c) { closeGuide(); return; }
@@ -817,12 +825,24 @@
       return { home: home, modes: any, pack: document.body.classList.contains("lia-pack-on"), referral: !!(refInfo && refInfo.available && refInfo.link) };
     }
     var pre = window.liaSettingsData ? Promise.resolve() : (window.liaSettingsRefresh ? Promise.resolve(window.liaSettingsRefresh()).catch(function () {}) : Promise.resolve());
-    Promise.all([loadPaths(), pre, refInfo ? Promise.resolve() : refFetch().then(function (d) { if (d && d.available && d.link) refInfo = d; }).catch(function () {})]).then(function (r) {
-      var d = r[0], mi = modesInfo();
-      if (!d) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; }
-      D = d.map(function (g) { return { g: g.g, q: g.q.filter(function (x) { return !x.need || mi[x.need]; }) }; }).filter(function (g) { return g.q.length; });
+    var raw = null;
+    function applyD() {
+      var mi = modesInfo();
+      D = raw.map(function (g) { return { g: g.g, q: g.q.filter(function (x) { return !x.need || mi[x.need]; }) }; }).filter(function (g) { return g.q.length; });
+      flat = [];
       D.forEach(function (g) { g.q.forEach(function (x) { x.g = g.g; flat.push(x); }); });
+    }
+    /* l'elenco compare appena arrivano le domande; le domande legate a domicilio/online/pacchetti si aggiungono quando arrivano le impostazioni */
+    loadPaths().then(function (d) {
+      if (!d) { body.innerHTML = '<p class="mnEmpty">Non riesco a caricare la guida. Riprova fra poco.</p>'; return; }
+      raw = d; applyD();
       if (!cur) home();
+      Promise.all([pre, refInfo ? Promise.resolve() : refFetch().then(function (r) { if (r && r.available && r.link) refInfo = r; }).catch(function () {})]).then(function () {
+        var id = cur && flat[cur[0]] ? flat[cur[0]].id : null, c = cur, n0 = flat.length;
+        applyD();
+        if (id) { var i = find(id); if (i >= 0) cur = [i, c[1]]; else { cur = null; home(); } }
+        else if (!cur && flat.length !== n0) home();
+      });
     });
   }
   function buildGuide(b) {
@@ -912,14 +932,22 @@
   function openGuide() {
     ls("s", NEWK, "1");
     var nw = document.querySelector("#menuTabGuide .mnNew"); if (nw) nw.hidden = true;
-    load().then(function (b) {
+    function show(b) {
       b = b || { name: "", plan: "", gym: false, classes: true, personal: true, rental: false, links: [] };
       if (!guide) buildGuide(b); else if (guide.__gpReset) guide.__gpReset();
       lastFocus = document.activeElement;
       guide.hidden = false; markGuide(true); guideTop();
       var sc = guide.querySelector(".mnGuide"); if (sc) sc.scrollTop = 0;
       var bk = $("mnGuideBack") || guide.querySelector(".mnBack"); if (bk) bk.focus();
-    });
+    }
+    /* se i dati dell'attivita' sono gia' in memoria la Guida si apre subito, senza aspettare la rete */
+    if (biz) show(biz); else load().then(show);
+  }
+  /* a dashboard aperta si scarica in anticipo l'elenco delle domande: quando si tocca "Guida" e' gia' pronto */
+  var guideWarm = false;
+  function warmGuide() {
+    if (guideWarm) return; guideWarm = true;
+    setTimeout(function () { try { if (biz && !window.LIA_GUIDE) loadPaths(); } catch (e) {} }, 2500);
   }
   var guidePrev = [], guidePrevLbl = "";
   function markGuide(on) {
@@ -981,7 +1009,7 @@
     try {
       if (!buildMenu()) return;
       var cc = readCache();
-      if (cc) { biz = cc; paintMenu(); }
+      if (cc) { biz = cc; paintMenu(); warmGuide(); }
       else {
         var c0 = $("mnShareCard"), mb = document.querySelector(".mainBiz"), nm0 = $("mnBizName");
         if (c0) c0.hidden = false;

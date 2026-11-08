@@ -461,3 +461,10 @@ body:has(#mnRefPage:not([hidden])) #fabNew{display:none!important}
 @media (max-height:599px){
   body.mnOn.mnB.mnRef #burgerMenu > button[data-sub],body.mnOn.mnB.mnRef #burgerMenu > .logoutBtn{min-height:clamp(30px,calc((100vh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px);min-height:clamp(30px,calc((100dvh - env(safe-area-inset-top,0px) - 346px)/var(--mnN,9)),50px)}
 }
+
+/* Guida: segnaposto mentre arrivano le domande e spazio riservato alla schermata larga prima che l'immagine arrivi */
+.gpSk{display:grid;gap:10px;padding:6px 0}
+.gpSk i{display:block;height:58px;border-radius:14px;background:linear-gradient(90deg,var(--line) 0%,var(--line2) 50%,var(--line) 100%);background-size:200% 100%;animation:gpSk 1.3s ease-in-out infinite}
+@keyframes gpSk{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.gpStage.wd .gpShot{min-height:min(52vh,360px);min-width:min(100%,520px)}
+@media (prefers-reduced-motion:reduce){.gpSk i{animation:none}}
