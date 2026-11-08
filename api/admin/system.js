@@ -201,12 +201,35 @@ async function calculatorBase(now) {
 }
 
 // ----------------------------- PROBLEMI -----------------------------
+// Attivita' con prenotazioni arrivate nelle ultime 24 ore (da almeno 2 ore) che nessuno ha visto:
+// campanella mai aperta dopo la prenotazione, nessun dispositivo con notifiche push, email al titolare spenta.
+async function unseenBookingsData(now) {
+  const since = new Date(now.getTime() - 24 * 3600000).toISOString();
+  const grace = new Date(now.getTime() - 2 * 3600000).toISOString();
+  const [ev, push] = await Promise.all([
+    sbAll(`notification_events?select=business_id,created_at,businesses(name,notif_seen_at,notify_email,active)&event_type=eq.booked&created_at=gte.${q(since)}&created_at=lt.${q(grace)}&order=created_at.asc`),
+    sbAll('push_subscriptions?select=business_id'),
+  ]);
+  const withPush = {};
+  (push || []).forEach((p) => { withPush[p.business_id] = 1; });
+  const byBiz = {};
+  (ev || []).forEach((e) => {
+    const b = e.businesses;
+    if (!b || b.active === false || b.notify_email === true || withPush[e.business_id]) return;
+    const seen = b.notif_seen_at ? Date.parse(b.notif_seen_at) : 0;
+    if (Date.parse(e.created_at) <= seen) return;
+    const x = byBiz[e.business_id] || (byBiz[e.business_id] = { id: e.business_id, name: b.name || 'Un’attività', count: 0 });
+    x.count++;
+  });
+  return Object.keys(byBiz).map((k) => byBiz[k]);
+}
+
 async function problemsView() {
   const now = new Date();
   const soft = async (p, fb) => { try { return await p; } catch (e) { console.error('system:problems', e && e.message); return fb; } };
   const sinceAi = new Date(now.getTime() - 12 * 3600000).toISOString();
   const since7 = new Date(now.getTime() - 7 * 86400000).toISOString();
-  const [credit, resend, exp, down, access, subs, failed, supportNew] = await Promise.all([
+  const [credit, resend, exp, down, access, subs, failed, supportNew, unseenBookings] = await Promise.all([
     soft(creditData(now), null),
     soft(resendData(now), null),
     soft(expiries(), []),
@@ -215,6 +238,7 @@ async function problemsView() {
     soft(sbAll('subscriptions?select=id,business_id,status,trial_ends_at,current_period_end,businesses(name)&status=in.(trial,active)&order=id.asc'), []),
     soft(sbAll(`stripe_events?select=id,received_at&type=eq.invoice.payment_failed&received_at=gte.${q(since7)}`), []),
     soft(sbAll('support_requests?select=id,created_at,business_name,topic,message&kind=eq.support&status=eq.new&order=created_at.desc'), []),
+    soft(unseenBookingsData(now), []),
   ]);
   const aiDown = [];
   const seen = {};
@@ -224,7 +248,7 @@ async function problemsView() {
     if (!seen[kind]) { seen[kind] = 1; aiDown.push({ kind, at: d.sent_at }); }
   });
   const problems = health.buildProblems({
-    credit, resend, aiDown, expiries: exp, failedPayments: failed, supportNew,
+    credit, resend, aiDown, expiries: exp, failedPayments: failed, supportNew, unseenBookings,
     access: (access || []).map((a) => ({ id: a.business_id, name: (a.businesses && a.businesses.name) || 'Un’attività', state: a.state, grace_ends: a.grace_ends })),
     trials: (subs || []).filter((s) => s.status === 'trial' && s.trial_ends_at).map((s) => ({ id: s.business_id, name: (s.businesses && s.businesses.name) || 'Un’attività', trial_ends_at: s.trial_ends_at })),
     renewals: (subs || []).filter((s) => s.status === 'active' && s.current_period_end).map((s) => ({ id: s.business_id, name: (s.businesses && s.businesses.name) || 'Un’attività', current_period_end: s.current_period_end })),

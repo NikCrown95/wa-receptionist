@@ -448,6 +448,13 @@ module.exports = async (req, res) => {
         "return=representation"
       );
       if (!cr.ok || !Array.isArray(cr.data) || !cr.data.length) return res.status(404).json({ error: "Appuntamento non trovato o gia' annullato." });
+      // Email al titolare per la disdetta del cliente (solo se l'ha attivata nelle Impostazioni). Non blocca mai l'annullamento.
+      try {
+        const ca = cr.data[0];
+        let csvc = "";
+        if (ca.service_id) { const sr = await sb("GET", "services?id=eq." + encodeURIComponent(ca.service_id) + "&select=name&limit=1"); if (sr.ok && Array.isArray(sr.data) && sr.data[0]) csvc = sr.data[0].name; }
+        await require("../lib/owner-booking-mail.js").sendOwnerBookingMail(biz.id, "cancelled", { customerName: ca.customer_name, service: csvc, startsAt: ca.starts_at, timezone: biz.timezone, channel: ca.channel || "selfservice", medical: require("../lib/verticals.js").isMedical(biz.business_type) });
+      } catch (e) { /* ignoro */ }
       return res.status(200).json({ ok: true });
     }
 
@@ -645,7 +652,7 @@ module.exports = async (req, res) => {
         if (!r.ok && r.status === 400 && (apRow.source || apRow.customer_email || apRow.units || apRow.promo_price_eur != null)) { delete apRow.promo_price_eur; delete apRow.source; delete apRow.customer_email; delete apRow.units; r = await sb("POST", "appointments", apRow, "return=representation"); } // colonna source o customer_email non ancora creata: salva comunque la prenotazione
         if (r.ok) {
           // Avviso sul telefono del titolare (se ha attivato le notifiche). Non blocca mai la prenotazione.
-          await require("../lib/push.js").notifyNewBooking(biz.id, { name: name, service: service.name, startsAt: start.toISOString(), timezone: biz.timezone, medical: medical });
+          await require("../lib/push.js").notifyNewBooking(biz.id, { name: name, service: service.name, startsAt: start.toISOString(), timezone: biz.timezone, medical: medical, channel: "selfservice" });
           // Email di conferma (solo se il cliente ha lasciato l'indirizzo). Non blocca mai la prenotazione.
           let emailSent = false;
           const newId = Array.isArray(r.data) && r.data[0] ? r.data[0].id : null;

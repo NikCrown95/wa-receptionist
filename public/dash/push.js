@@ -102,14 +102,33 @@
     }).catch(function(){});
   }
 
+  // Email per ogni prenotazione (facoltativa)
+  function emailPaint(on,to){
+    var sw=$('pnEmailSw');if(!sw)return;
+    sw.setAttribute('aria-checked',on?'true':'false');sw.disabled=false;
+    var sub=$('pnEmailSub');
+    if(sub)sub.textContent=to?(on?'Ti scriviamo a '+to+' quando arriva o salta una prenotazione.':'Ti scriviamo a '+to+' quando arriva o salta una prenotazione, anche se il telefono è spento.'):'Ti scriviamo quando arriva o salta una prenotazione, anche se il telefono è spento.';
+  }
+  var emailTo='';
+  function emailLoad(){
+    api('GET').then(function(d){emailTo=(d&&d.email_to)||'';emailPaint(!!(d&&d.email),emailTo);}).catch(function(){});
+  }
+  function emailToggle(){
+    var sw=$('pnEmailSw');if(!sw||sw.disabled)return;
+    var next=sw.getAttribute('aria-checked')!=='true';
+    sw.disabled=true;emailPaint(next,emailTo);msg('');
+    api('POST',{email_set:next}).then(function(){sw.disabled=false;}).catch(function(){emailPaint(!next,emailTo);msg('Non sono riuscito a salvare. Riprova.',true);});
+  }
+  if($('pnEmailSw'))$('pnEmailSw').addEventListener('click',emailToggle);
+
   if($('pnEnable'))$('pnEnable').addEventListener('click',enable);
   if($('pnTest'))$('pnTest').addEventListener('click',test);
   if($('pnOff'))$('pnOff').addEventListener('click',disable);
   document.addEventListener('click',function(ev){
     var r=ev.target.closest&&ev.target.closest('.stRow[data-st="notifications"]');
-    if(r){msg('');refresh();}
+    if(r){msg('');refresh();emailLoad();}
   });
-  setTimeout(function(){refresh();sync();},1500);
+  setTimeout(function(){refresh();sync();emailLoad();},1500);
 })();
 
 // --- App installabile (Android/Chrome): il service worker va registrato subito all'apertura, non solo per le notifiche ---

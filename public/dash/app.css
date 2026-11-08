@@ -2371,6 +2371,7 @@ body #notifToast{--n-on:#06161b;padding:8px 12px;gap:12px;border-radius:16px}
 .np-em{padding:44px 22px 40px;text-align:center;color:var(--muted)}
 .np-em svg{color:var(--accent-ink);opacity:.8;margin-bottom:10px}
 .np-em b{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
+.np-upd{padding:8px 16px 12px;color:var(--muted);font-size:.7rem;text-align:center;opacity:.85}
 .np-ft{padding:10px 16px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem;text-align:center}
 #notifToast{position:fixed;z-index:65;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 66px);display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:18px;background:color-mix(in srgb,var(--card2) 94%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line2);box-shadow:0 16px 40px rgba(0,0,0,.4);cursor:pointer;animation:npIn .26s cubic-bezier(.3,.7,.2,1)}
 #notifToast[hidden]{display:none}
