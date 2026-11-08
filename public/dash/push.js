@@ -160,3 +160,48 @@
     })();
   }catch(e){}
 })();
+
+// --- Invito a installare l'app: schermata con le istruzioni (si apre toccando l'avviso di Lia) ---
+(function(){
+  var deferred=null;
+  function tok(){return (new URLSearchParams(location.search).get('t')||'').trim();}
+  function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;});
+  function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  function step(n,html){var r=mk('div','inStep');r.appendChild(mk('span','inNum',String(n)));var t=mk('div','inTxt');t.innerHTML=html;r.appendChild(t);return r;}
+  function off(){try{fetch('/api/agenda?t='+encodeURIComponent(tok())+'&app=1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'off'}),cache:'no-store'}).catch(function(){});}catch(e){}}
+  window.liaInstallOpen=function(){
+    var ios=isIOS();
+    var bg=mk('div','liaSheetBg'),sh=mk('div','liaSheet');
+    sh.setAttribute('role','dialog');sh.setAttribute('aria-modal','true');sh.setAttribute('aria-label','Installa l’app di Prenolia');
+    var body=mk('div');sh.appendChild(mk('div','grab'));sh.appendChild(body);
+    body.appendChild(mk('h2',null,'Installa l’app di Prenolia'));
+    body.appendChild(mk('p','lsub','Si apre con un tocco dalla Home del telefono e ti avvisa subito quando arriva una prenotazione, anche con l’app chiusa.'));
+    var list=mk('div','inSteps');
+    if(ios){
+      list.appendChild(step(1,'Apri questa pagina con <b>Safari</b>.'));
+      list.appendChild(step(2,'Tocca <b>Condividi</b> (il quadrato con la freccia verso l’alto) in basso.'));
+      list.appendChild(step(3,'Scegli <b>Aggiungi alla schermata Home</b> e conferma con <b>Aggiungi</b>.'));
+    }else{
+      list.appendChild(step(1,'Tocca i <b>tre puntini ⋮</b> in alto a destra nel browser.'));
+      list.appendChild(step(2,'Scegli <b>Installa app</b> (oppure <b>Aggiungi a schermata Home</b>).'));
+      list.appendChild(step(3,'Conferma. L’icona di Prenolia compare nella Home.'));
+    }
+    body.appendChild(list);
+    var inst=null;
+    if(!ios&&deferred){
+      inst=mk('button','lb lsave','Installa l’app');inst.type='button';
+      inst.addEventListener('click',function(){try{deferred.prompt();deferred.userChoice.finally(function(){deferred=null;close();});}catch(e){close();}});
+      body.appendChild(inst);
+    }
+    var ok=mk('button','lb '+(inst?'lcancel':'lsave'),'Ho capito');ok.type='button';
+    var no=mk('button','lb lcancel','Non mi interessa più');no.type='button';
+    body.appendChild(ok);body.appendChild(no);
+    document.body.appendChild(bg);document.body.appendChild(sh);
+    function close(){bg.classList.remove('on');sh.classList.remove('on');document.removeEventListener('keydown',esc);setTimeout(function(){bg.remove();sh.remove();},300);}
+    function esc(e){if(e.key==='Escape')close();}
+    document.addEventListener('keydown',esc);bg.addEventListener('click',close);ok.addEventListener('click',close);
+    no.addEventListener('click',function(){off();close();});
+    requestAnimationFrame(function(){bg.classList.add('on');sh.classList.add('on');});
+  };
+})();

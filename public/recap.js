@@ -37,10 +37,11 @@
     bars: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-11"/></svg>',
     reply: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>',
     mega: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h3l8 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M19 9a4 4 0 0 1 0 6"/></svg>',
+    bulb: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
     clock: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
-  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6", announcement: "k7" };
-  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply, announcement: IC.mega };
+  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6", announcement: "k7", install_invite: "k7" };
+  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply, announcement: IC.mega, install_invite: IC.bulb };
 
   function build() {
     var bell = document.getElementById("bellBtn");
@@ -87,7 +88,20 @@
     for (var i = 0; i < l.length; i++) if (l[i].type === "sub_expired") return l[i];
     return null;
   }
+  function isMobile() { return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+  function isApp() { return window.navigator.standalone === true || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches); }
+  // dice al server se la dashboard si apre dal browser o dall'app installata (una volta per sessione); serve all'invito a installarla
+  function pingApp() {
+    try {
+      if (!isMobile() || !token) return;
+      var mode = isApp() ? "app" : "browser";
+      if (ss("g", "liaAppPing:" + mode) === "1") return;
+      ss("s", "liaAppPing:" + mode, "1");
+      fetch("/api/agenda?t=" + encodeURIComponent(token) + "&app=1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: mode }), cache: "no-store" }).catch(function () {});
+    } catch (e) {}
+  }
   function noticeAlive(n) {
+    if (n.type === "install_invite") return isMobile() && !isApp();
     // il promemoria del lunedi' gia' letto sparisce dopo 5 ore; gli altri restano finche' servono (lo dice il server)
     if (n.type !== "closures_reminder" && n.type !== "weekly_recap" && n.type !== "support_reply") return true;
     if (pinned[kOf(n)]) return true;
@@ -172,6 +186,9 @@
     }
     if (n.type === "support_reply") {
       return { title: "Prenolia ti ha risposto", text: meta.excerpt || "Apri la risposta alla tua richiesta.", cta: "Leggi la risposta", time: ago(n.created_at) };
+    }
+    if (n.type === "install_invite") {
+      return { title: "Hai installato l\u2019app?", text: "Apri l\u2019agenda con un tocco e ricevi gli avvisi delle prenotazioni, anche con l\u2019app chiusa.", cta: "Come si fa", time: "" };
     }
     if (n.type === "feedback_ask") {
       return { title: "Come ti trovi con Prenolia?", text: "Ci vuole un minuto: dicci cosa funziona e cosa manca.", cta: "Rispondi", time: "" };
@@ -330,6 +347,7 @@
     if (type === "closures_reminder") { if (data && data.gym && window.liaGym) { var om = document.getElementById("menuTabOther"); if (om) om.click(); return setTimeout(function () { window.liaGym.openSetting("chiusure"); }, 80); } return openSettings("blocks"); }
     if (type === "sub_expiring" || type === "sub_expired") return openSettings("subscription");
     if (type === "support_reply") { var os = document.getElementById("menuTabOther"); if (os) os.click(); return setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); if (window.liaSupportList) window.liaSupportList(); }, 80); }
+    if (type === "install_invite" && window.liaInstallOpen) return window.liaInstallOpen();
     if (type === "feedback_ask" && window.liaFeedbackOpen) window.liaFeedbackOpen(true);
   }
 
@@ -374,6 +392,7 @@
   function init() {
     if (!build()) { if (init.n++ < 20) setTimeout(init, 400); return; }
     if (ls("g", VIS) === "1") { btn.hidden = false; document.body.classList.add("liaRecapOn"); }
+    pingApp();
     load();
     document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") load(true); });
     setInterval(function () { load(true); }, 5 * 60 * 1000);

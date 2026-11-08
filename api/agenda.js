@@ -1703,6 +1703,21 @@ module.exports = async (req, res) => {
       }));
     }
 
+    // Uso dell'app (per l'invito a installarla): il telefono dice se si apre dal browser o dall'app installata, oppure che l'invito non interessa
+    // (colonne businesses.app_*: vedi supabase/migrations/20261109_app_install_invite.sql)
+    if (q.app === "1" && req.method === "POST") {
+      res.setHeader("Cache-Control", "no-store");
+      const mode = String((req.body || {}).mode || "");
+      try {
+        const now = new Date().toISOString();
+        if (mode === "browser") await sb("PATCH", "businesses?id=eq." + biz.id + "&app_first_browser_at=is.null", { app_first_browser_at: now }, "return=minimal");
+        else if (mode === "app") await sb("PATCH", "businesses?id=eq." + biz.id + "&app_installed_at=is.null", { app_installed_at: now }, "return=minimal");
+        else if (mode === "off") await sb("PATCH", "businesses?id=eq." + biz.id, { app_invite_off: true }, "return=minimal");
+        else return res.status(400).json({ error: "Richiesta non valida" });
+      } catch (e) { /* prima della migrazione: niente da salvare */ }
+      return res.status(200).json({ ok: true });
+    }
+
     // Notifiche push sul telefono: chiave pubblica, registrazione del dispositivo, prova (tabella push_subscriptions:
     // vedi supabase/migrations/20261008_push_notifications.sql)
     if (q.push === "1") {
