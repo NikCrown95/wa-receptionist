@@ -741,7 +741,7 @@ module.exports = async (req, res) => {
             }
             cl.push({ name: cn, duration_min: dur, capacity: cap, category: cat, slots });
           }
-          const gcfg = Object.assign({}, (biz.booking_rules && biz.booking_rules.gym) || {}, { classes: offC, personal: offP });
+          const gcfg = Object.assign({}, (biz.booking_rules && biz.booking_rules.gym) || {}, { classes: offC, personal: offP, trainer: body.trainer === true });
           if (gymHrs) gcfg.hours = gymHrs;
           patch.booking_rules = Object.assign({}, (patch.booking_rules && typeof patch.booking_rules === "object" ? patch.booking_rules : (biz.booking_rules && typeof biz.booking_rules === "object" ? biz.booking_rules : {})), { gym: gcfg });
           const p1 = await sb("PATCH", "businesses?id=eq." + biz.id, patch, "return=minimal");

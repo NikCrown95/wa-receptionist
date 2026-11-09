@@ -456,13 +456,14 @@ function sportInfo(){return SPORTS.filter(function(x){return x[0]===S.sportLbl})
 function partySport(){var si=sportInfo();return !!si&&(si[1]==="tennis"||si[1]==="padel")}
 function courtName(c){var n=c.n.trim();var si=sportInfo();if(si&&si[1]==="calcio"&&c.fmt&&!/\b(a|da)\s?(5|7|11)\b/i.test(n))n+=" · a "+c.fmt;return n}
 var SUBT={prenota:"Come prenotano e annullano i tuoi clienti.",dove:"Dove ricevi o vai dai clienti.",sport:"Lo sport dei tuoi campi.",campi:"Nome, superficie, durata e prezzo di ogni campo.",regole:"Chi può prenotare e cosa ricordare ai giocatori.",tipo:"Il tipo di attività decide le domande successive.",attivita:"Nome e mestiere, come li vedranno i clienti.",servizi:"Cosa offri, quanto dura e quanto costa.",offerta:"Corsi di gruppo, personal training o entrambi.",pacchetti:"Abbonamenti e pacchetti che vendi ai tuoi iscritti.",iscritti:"Come funzionano gli iscritti dopo la registrazione.",lezioni:"Le lezioni e i posti disponibili.",calendario:"Giorni e ora di ogni lezione.",zona:"Le città in cui vai a domicilio.",orari:"Giorni e orari in cui ricevi.",privacy:"Le garanzie per i tuoi pazienti e il tuo consenso.",fine:"Un ultimo controllo prima di aprire l'agenda."};
-var NAMES={dove:"Dove lavori",sport:"Sport",campi:"Campi",regole:"Regole",prenota:"Prenotazioni",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",pacchetti:"Pacchetti",iscritti:"Iscritti",offerta:"Cosa offri",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
+var NAMES={dove:"Dove lavori",sport:"Sport",campi:"Campi",regole:"Regole",prenota:"Prenotazioni",tipo:"Tipo di attività",attivita:"La tua attività",servizi:"Servizi",pacchetti:"Pacchetti",iscritti:"Iscritti",offerta:"Palestra o trainer",lezioni:"Lezioni",calendario:"Calendario",zona:"Zone a domicilio",orari:"Orari",privacy:"Privacy dei pazienti",fine:"Riepilogo"};
 var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
 var S={rl:{adv:null,notice:null,cancel:null,travel:null},sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,online:false,half:false,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],plans:[],pd:{n:"",kind:"entries",q:"",p:"",c:null},cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","orari","prenota","fine"];
   if(v==="domicilio")return["tipo","attivita","dove","servizi","zona","orari","prenota","fine"];
+  if(v==="palestra"&&S.gk==="pt")return["tipo","attivita","offerta","pacchetti","orari","iscritti","prenota","fine"];
   if(v==="palestra")return["tipo","attivita","offerta"].concat(S.gcl!==false?["lezioni","calendario"]:["orari"]).concat(S.gcl===false||S.gpt?["pacchetti"]:[]).concat(["iscritti","prenota","fine"]);
   if(v==="campi")return["tipo","attivita","sport","campi","orari"].concat(partySport()?["regole"]:[]).concat(["prenota","fine"]);
   if(v==="sanitario")return["tipo","attivita","servizi","orari","privacy","prenota","fine"];return["tipo"]}
@@ -504,7 +505,7 @@ function validate(k){
     if(k==="servizi"&&S.items.some(function(x){var ks=S.v==="domicilio"?itModes(x):["x"];return ks.some(function(k2){var p=mPrice(x,k2);return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti.";
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
   if(k==="pacchetti"&&S.pd&&String(S.pd.n).trim()){var pe=planErr(S.pd);if(pe)return pe}
-  if(k==="offerta"&&S.gcl===false&&!S.gpt)return"Scegli almeno una delle due.";
+  if(k==="offerta"&&!S.gk)return"Scegli se sei una palestra o un personal trainer.";
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
   if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
   if(k==="campi"){if(!S.courts.length||S.cph!==2)return"";
@@ -606,7 +607,7 @@ function listBox(gym,dom){
 function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   base.rules={min_notice_min:S.rl.notice,cancel_limit_hours:S.rl.cancel,max_advance_days:S.rl.adv};if(S.v==="domicilio")base.rules.travel_min=S.rl.travel;
-  if(S.v==="palestra"){base.classes=S.gcl!==false;base.personal=!!S.gpt||S.gcl===false;
+  if(S.v==="palestra"){base.trainer=S.gk==="pt";base.classes=S.gcl!==false;base.personal=!!S.gpt||S.gcl===false;
     base.plans=(S.gcl===false||S.gpt?S.plans:[]).map(function(x){var pr=String(x.p).trim().replace(",",".");return{name:x.n.trim(),kind:x.kind,qty:Number(x.q),price_eur:pr===""?null:Number(pr),covers:planCov(x)}});
     if(S.gcl===false){base.hours=[];S.hours.forEach(function(d,i){if(d.on)base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});base.courses=[];return base}
     base.courses=S.items.map(function(x){var sl=[];x.days.forEach(function(d){sl.push({weekday:d,time:x.time})});
@@ -691,16 +692,20 @@ function render(){
       v.appendChild(mx)}
   }
   if(k==="offerta"){
-    v.appendChild(head(lab,"Cosa offri?","Puoi scegliere entrambe. Gli iscritti prenotano da soli con il loro numero di telefono."));
+    v.appendChild(head(lab,"Sei una palestra o un personal trainer?","Scegli quello che ti descrive meglio. I tuoi iscritti prenotano da soli con il loro numero di telefono."));
     var og=h("div",{class:"offg"});
     function offCard(title,sub,on,fn){var c=h("button",{type:"button",class:"offc"+(on?" on":"")},[h("span",{class:"offk"},[on?"✓":""]),h("span",null,[h("b",{text:title}),h("small",{text:sub})])]);c.onclick=function(){fn();S.err="";render()};return c}
-    og.appendChild(offCard("Corsi di gruppo","Lezioni con posti limitati e calendario settimanale",S.gcl!==false,function(){S.gcl=S.gcl===false;if(S.gcl===false&&!S.gpt)S.gpt=true}));
-    og.appendChild(offCard("Personal training","Sessioni 1 a 1 e pacchetti: l'iscritto sceglie giorno e ora",!!S.gpt||S.gcl===false,function(){var cur=!!S.gpt||S.gcl===false;if(cur){if(S.gcl===false)return;S.gpt=false}else S.gpt=true}));
+    og.appendChild(offCard("Palestra","Corsi di gruppo con posti limitati e calendario settimanale",S.gk==="gym",function(){S.gk="gym";S.gcl=true}));
+    og.appendChild(offCard("Personal trainer","Lezioni 1 a 1 vendute a pacchetti: ogni iscritto ha i suoi ingressi",S.gk==="pt",function(){S.gk="pt";S.gcl=false;S.gpt=true}));
     v.appendChild(og);
-    v.appendChild(h("p",{class:"hint",text:"Pacchetti, abbonamenti e iscritti li imposti dopo, dall'agenda."}));
+    if(S.gk==="gym"){
+      v.appendChild(h("div",{class:"card",style:"display:grid;gap:10px;margin-top:14px"},[h("div",null,[h("b",{text:"Offri anche personal training?"}),h("small",{text:"Sessioni 1 a 1, oltre ai corsi di gruppo.",style:"display:block;color:var(--muted)"})]),
+        h("div",{class:"chips"},[chip("No",!S.gpt,function(){S.gpt=false;render()}),chip("Sì",!!S.gpt,function(){S.gpt=true;render()})])]));
+    }
+    v.appendChild(h("p",{class:"hint",text:S.gk==="pt"?"Pacchetti e iscritti: i pacchetti li scrivi nel prossimo passo, gli iscritti li aggiungi dopo, dall'agenda.":"Abbonamenti e iscritti li imposti dopo, dall'agenda."}));
   }
   if(k==="pacchetti"){
-    v.appendChild(head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
+    v.appendChild(S.gk==="pt"?head(lab,"Che pacchetti offri?","Scrivi quelli che proponi ai tuoi iscritti, per esempio 10 lezioni. Puoi saltare questo passo e aggiungerli dopo."):head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
     var pwrap=h("div",{class:"plans"});
     if(S.plans.length){var pl=h("div",{class:"rows"});S.plans.forEach(function(x,i){var r=h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv"+(String(x.p).trim()===""?" dim":""),text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})]);
       r.appendChild(h("button",{class:"edit",type:"button",text:"Togli",onclick:function(){S.plans.splice(i,1);render()}}));pl.appendChild(r)});pwrap.appendChild(pl)}
@@ -708,10 +713,10 @@ function render(){
     sgs=sgs.filter(function(g){return!S.plans.some(function(x){return x.n===g[0]})&&S.pd.n!==g[0]});
     if(sgs.length){var sb7=h("div",{class:"sugs"});sb7.appendChild(h("span",{class:"stepl",text:"Tocca per compilare"}));var ch7=h("div",{class:"chips"});sgs.forEach(function(g){ch7.appendChild(chip("+ "+g[0],false,function(){S.pd={n:g[0],kind:g[1],q:g[2],p:S.pd.p||"",c:g[3]};render()}))});sb7.appendChild(ch7);pwrap.appendChild(sb7)}
     var fc=h("div",{class:"card",style:"display:grid;gap:12px"});
-    var pn=h("input",{class:"inp",placeholder:"es. Pacchetto 10 sessioni","aria-label":"Nome del pacchetto",maxlength:"60",value:S.pd.n});pn.oninput=function(){S.pd.n=pn.value};
+    var pn=h("input",{class:"inp",placeholder:S.gk==="pt"?"es. Pacchetto 10 lezioni":"es. Pacchetto 10 sessioni","aria-label":"Nome del pacchetto",maxlength:"60",value:S.pd.n});pn.oninput=function(){S.pd.n=pn.value};
     fc.appendChild(field("Nome",pn));
     var kc=h("div",{class:"chips"});kc.appendChild(chip("A ingressi",S.pd.kind==="entries",function(){S.pd.kind="entries";render()}));kc.appendChild(chip("A durata",S.pd.kind==="time",function(){S.pd.kind="time";render()}));
-    fc.appendChild(h("div",null,[h("label",{text:"Tipo"}),kc]));
+    if(S.gk!=="pt")fc.appendChild(h("div",null,[h("label",{text:"Tipo"}),kc]));
     var qi=h("input",{class:"inp",inputmode:"numeric",placeholder:S.pd.kind==="time"?"30":"10","aria-label":"Quantità",value:S.pd.q});qi.oninput=function(){S.pd.q=qi.value};
     var pi=h("input",{class:"inp",inputmode:"decimal",placeholder:"facoltativo","aria-label":"Prezzo",value:S.pd.p});pi.oninput=function(){S.pd.p=pi.value};
     fc.appendChild(h("div",{class:"two"},[field(S.pd.kind==="time"?"Giorni di validità":"Numero di ingressi",qi),field("Prezzo €",pi)]));
@@ -721,7 +726,7 @@ function render(){
   }
   if(k==="iscritti"){
     var pers=S.gcl===false||!!S.gpt,pk=pers?"pacchetto":"abbonamento";
-    v.appendChild(head(lab,"I tuoi iscritti","Nell'agenda avrai l'elenco di chi frequenta la tua palestra. Funziona così."));
+    v.appendChild(head(lab,"I tuoi iscritti",(S.gk==="pt"?"Nell'agenda avrai l'elenco di chi si allena con te. Funziona così.":"Nell'agenda avrai l'elenco di chi frequenta la tua palestra. Funziona così.")));
     var ex=h("div",{class:"card",style:"display:grid;gap:16px"});
     [["1","Aggiungi chi si iscrive","Inserisci nome, cognome e numero di telefono. Lo fai una volta sola."],
      ["2","Assegnagli il "+pk,pers?"Scegli quello che ha comprato, per esempio 10 sessioni di personal.":"Scegli l'abbonamento che ha sottoscritto."],
@@ -860,7 +865,7 @@ function render(){
     v.appendChild(rc);
   }
   if(k==="orari"){
-    v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):(S.v==="palestra"?head(lab,"Quando ricevi per il personal?","Giorni e orari in cui i tuoi iscritti possono prenotare le sessioni."):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare.")));
+    v.appendChild(S.v==="campi"?head(lab,"Quando sono aperti i campi?","Giorni e orari in cui i clienti possono prenotare. Valgono per tutti i campi."):(S.v==="palestra"?(S.gk==="pt"?head(lab,"Quando ricevi?","Giorni e orari in cui i tuoi iscritti possono prenotare le lezioni."):head(lab,"Quando ricevi per il personal?","Giorni e orari in cui i tuoi iscritti possono prenotare le sessioni.")):head(lab,"Quando ricevi?","Scegli i giorni e gli orari in cui i clienti possono prenotare.")));
     var c4=h("div",{class:"card hrs"});
     S.hours.forEach(function(d,i){var r=h("div",{class:"day"});var l=h("label",{class:"tgl"});l.style.margin="0";var cb=h("input",{type:"checkbox"});cb.checked=d.on;
       l.appendChild(cb);l.appendChild(document.createTextNode(DAYN[i]));
@@ -901,7 +906,7 @@ function render(){
     } else if(S.v==="palestra"){
       var lb=h("div",{class:"rows"});
       S.items.forEach(function(x){lb.appendChild(h("div",{class:"rr"},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:x.days.slice().sort().map(function(d){return DAYN[d-1].slice(0,3)}).join(" · ")+" alle "+x.time})]),h("span",{class:"rv",text:fmtMin(x.d)+" · "+x.k+(Number(x.k)===1?" posto":" posti")})]))});
-      if(S.gcl===false){v.appendChild(sec("Cosa offri","offerta",h("div",{class:"rr"},[h("div",null,[h("b",{text:"Personal training"}),h("small",{text:"Gli iscritti prenotano le sessioni 1 a 1"})])])));var wkg=h("div",{class:"week"});S.hours.forEach(function(d,i){wkg.appendChild(h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),h("span",{class:"tm",text:d.on?d.from:"–"}),h("span",{class:"tm e",text:d.on?d.to:"chiuso"})]))});v.appendChild(sec("Orari","orari",wkg))}
+      if(S.gcl===false){v.appendChild(sec("Cosa offri","offerta",h("div",{class:"rr"},[h("div",null,[h("b",{text:S.gk==="pt"?"Personal trainer":"Personal training"}),h("small",{text:S.gk==="pt"?"Gli iscritti prenotano le lezioni 1 a 1 con i loro ingressi":"Gli iscritti prenotano le sessioni 1 a 1"})])])));var wkg=h("div",{class:"week"});S.hours.forEach(function(d,i){wkg.appendChild(h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),h("span",{class:"tm",text:d.on?d.from:"–"}),h("span",{class:"tm e",text:d.on?d.to:"chiuso"})]))});v.appendChild(sec("Orari","orari",wkg))}
       if(S.gcl===false||S.gpt)v.appendChild(sec("Pacchetti","pacchetti",S.plans.length?h("div",{class:"rows"},S.plans.map(function(x,i){return h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv",text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})])})):h("p",{class:"hint",text:"Nessun pacchetto per ora: li aggiungi dall'agenda."}),S.plans.length));
       if(S.gcl!==false){v.appendChild(sec("Cosa offri","offerta",h("div",{class:"rr"},[h("div",null,[h("b",{text:S.gpt?"Corsi di gruppo e personal training":"Corsi di gruppo"})])])));v.appendChild(sec("Lezioni","lezioni",lb,S.items.length))}
     } else {
@@ -920,7 +925,7 @@ function render(){
     var nx=h("div",{class:"next"},[h("b",{text:"Cosa succede dopo"}),
       h("ul",null,[h("li",{text:"La prova gratuita dura 14 giorni."}),
         h("li",{text:S.v==="campi"?"La pagina di prenotazione è già attiva: i clienti scelgono campo, giorno e ora.":S.v==="palestra"?"La pagina di prenotazione è già attiva: possono prenotare solo gli iscritti che registri tu.":"La pagina di prenotazione è già attiva. Dal menu dell'agenda puoi condividere il link o mostrare il QR code."}),
-        h("li",{text:S.v==="campi"?"Campi, orari e prezzi si modificano quando vuoi dall'agenda.":S.v==="palestra"?"Lezioni e abbonamenti si modificano quando vuoi dall'agenda.":"Servizi, orari e prezzi si modificano quando vuoi da Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I pazienti vedono il consenso privacy prima di prenotare."})]:[]))]);
+        h("li",{text:S.v==="campi"?"Campi, orari e prezzi si modificano quando vuoi dall'agenda.":S.v==="palestra"?(S.gk==="pt"?"Pacchetti, orari e iscritti si modificano quando vuoi dall'agenda.":"Lezioni e abbonamenti si modificano quando vuoi dall'agenda."):"Servizi, orari e prezzi si modificano quando vuoi da Impostazioni."})].concat(S.v==="sanitario"?[h("li",{text:"I pazienti vedono il consenso privacy prima di prenotare."})]:[]))]);
     v.appendChild(nx);
   }
   if(S.err)v.appendChild(h("div",{class:"err",role:"alert",text:S.err}));
