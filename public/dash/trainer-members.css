@@ -142,3 +142,7 @@
 @media(max-width:420px){.ptNm .nmGrid{grid-template-columns:1fr 1fr;gap:10px}}
 .ptNm .nmHd p{font-size:.86rem}
 .ptNm .nmBt .lb{margin:0!important;height:52px;min-height:0;align-self:end}
+/* la scheda sta in alto: la tastiera non la copre */
+.liaSheet.ptNm{top:max(12px,env(safe-area-inset-top,0px));bottom:auto;border:1px solid var(--line2,var(--line));border-radius:26px;box-shadow:0 20px 60px rgba(0,0,0,.45);transform:translateY(-115%);max-height:calc(100vh - 24px);padding-bottom:22px}
+.liaSheet.ptNm.on{transform:none}
+@media(max-width:560px){.liaSheet.ptNm{left:10px;right:10px}}
