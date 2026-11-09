@@ -192,3 +192,22 @@ html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb
   transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
 html.ptb #calSubApp .sheet#sheet.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
 html.ptb #calSubApp #sheet .ap-body{overflow-y:auto}
+
+/* PT scheda: compatta, sotto l'header, senza tagli */
+html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb #calSubApp .sheet#sheet:focus-visible{
+  top:calc(50% + 30px);max-height:calc(100vh - 170px);max-height:calc(100dvh - 170px);
+  padding:8px 14px 14px;gap:6px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+html.ptb #calSubApp .sheet#sheet.on{transform:translate(-50%,-50%) scale(1)}
+html.ptb #calSubApp #sheet .ap-body{overflow:visible;gap:8px}
+html.ptb #calSubApp #sheet .ap-hero{padding:8px 12px;border-radius:14px}
+html.ptb #calSubApp #sheet .ap-hero .tm{font-size:1.4rem}
+html.ptb #calSubApp #sheet .ap-hero .sv{font-size:.88rem}
+html.ptb #calSubApp #sheet .ap-card .ap-cli{padding:8px 12px 6px}
+html.ptb #calSubApp #sheet .ap-card .ap-cli .av{width:34px;height:34px}
+html.ptb #calSubApp #sheet .ap-card .ap-cli button,html.ptb #calSubApp #sheet .ap-card .ap-cli a.rb{min-height:38px}
+html.ptb #calSubApp #sheet .ptIs{padding:8px 12px 10px}
+html.ptb #calSubApp #sheet .ptIsB b{font-size:1.5rem}
+html.ptb #calSubApp #sheet .ptIsG{margin-top:6px}
+html.ptb #calSubApp #sheet .nt-sheet>*{padding-top:8px;padding-bottom:8px}
+html.ptb #calSubApp #sheet .ap-foot:not(.edit){padding-top:4px}
+html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn{min-height:44px}
