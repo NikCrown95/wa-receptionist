@@ -291,28 +291,45 @@
     view.classList.add('hasPtC');
     injecting = false;
   }
-  var X_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  function xBtn() { var b = document.getElementById('sheet-close'); if (b && !b.getAttribute('data-x')) { b.innerHTML = X_SVG; b.setAttribute('data-x', '1'); b.setAttribute('aria-label', 'Chiudi'); } }
-  var shOpenAt = 0, shWasOn = false;
+  var X_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  var shOpenAt = 0, shWasOn = false, shield = 0;
+  function ptClose() {
+    var sh = document.getElementById('sheet'); if (!sh) return;
+    var ed = document.getElementById('ap-edit'), cn = document.getElementById('ap-cancel-edit');
+    if (ed && !ed.hidden && cn) { cn.click(); return; }
+    shield = Date.now() + 600;
+    var bg = document.getElementById('sheet-bg'), cf = document.getElementById('confirm');
+    sh.classList.remove('on'); if (bg) bg.classList.remove('on'); if (cf) cf.classList.remove('on');
+    var mn = document.getElementById('ap-menu'); if (mn) mn.hidden = true;
+  }
+  function xBtn() {
+    var b = document.getElementById('sheet-close');
+    if (!b || b.getAttribute('data-x')) return;
+    b.innerHTML = X_SVG; b.setAttribute('data-x', '1'); b.setAttribute('aria-label', 'Chiudi');
+    var fired = 0;
+    var go = function (ev) { ev.preventDefault(); ev.stopPropagation(); if (Date.now() - fired < 400) return; fired = Date.now(); ptClose(); };
+    b.addEventListener('touchend', go, { passive: false });
+    b.addEventListener('pointerup', go);
+    b.addEventListener('click', go);
+  }
   setInterval(function () {
     var sh = document.getElementById('sheet'), on = !!(sh && sh.classList.contains('on'));
     if (on && !shWasOn) shOpenAt = Date.now();
     shWasOn = on; if (on) xBtn();
   }, 120);
-  function outsideClose(ev) {
+  function outside(ev) {
     var sh = document.getElementById('sheet');
-    if (!sh || !sh.classList.contains('on') || Date.now() - shOpenAt < 350) return;
+    if (!sh || !sh.classList.contains('on') || Date.now() - shOpenAt < 350) return false;
     var t = ev.target;
-    if (t && t.closest && (t.closest('#sheet') || t.closest('.confirm') || t.closest('#ap-menu'))) return;
-    var cl = document.getElementById('sheet-close'); if (cl) cl.click();
+    if (t && t.closest && (t.closest('#sheet') || t.closest('.confirm') || t.closest('#ap-menu'))) return false;
+    return true;
   }
-  var pdn = null;
-  document.addEventListener('pointerdown', function (ev) { pdn = { x: ev.clientX, y: ev.clientY, t: Date.now() }; }, true);
-  document.addEventListener('pointerup', function (ev) {
-    if (pdn && Math.abs(ev.clientX - pdn.x) < 12 && Math.abs(ev.clientY - pdn.y) < 12 && Date.now() - pdn.t < 600) outsideClose(ev);
-    pdn = null;
-  }, true);
-  document.addEventListener('click', outsideClose, true);
+  ['touchend', 'click'].forEach(function (n) {
+    document.addEventListener(n, function (ev) {
+      if (Date.now() < shield) { ev.preventDefault(); ev.stopPropagation(); return; }
+      if (outside(ev)) { ev.preventDefault(); ev.stopPropagation(); ptClose(); }
+    }, true);
+  });
 
   (function watch() {
     var v = document.getElementById('ap-view');
