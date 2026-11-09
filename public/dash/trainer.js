@@ -2,7 +2,7 @@
 (function () {
   if (!window.__LIA_PT) return;
   /* niente "Sconti e promozioni" e niente combinazioni di servizi ("Pacchetti") in Impostazioni: qui i pacchetti sono i servizi */
-  var hs = document.createElement('style'); hs.textContent = '.stRow[data-st="promos"],.stRow[data-st="combos"],.stPage[data-st="promos"],.stPage[data-st="combos"],.stRow[data-st="staff"],.stPage[data-st="staff"],.stPage[data-st="staffdetail"],#pfTeamCard{display:none!important}'; document.head.appendChild(hs);
+  var hs = document.createElement('style'); hs.textContent = '.stRow[data-st="promos"],.stRow[data-st="combos"],.stPage[data-st="promos"],.stPage[data-st="combos"],.stRow[data-st="staff"],.stPage[data-st="staff"],.stPage[data-st="staffdetail"],#pfTeamCard,.nx-more{display:none!important}'; document.head.appendChild(hs);
   /* esempi del modulo "Nuovo pacchetto": niente taglio capelli */
   function ph() { [['svcNewName', 'Es. Pacchetto 10 coaching'], ['svcNewPrice', 'Es. 450'], ['svcNewMin', 'Es. 60']].forEach(function (x) { var e = document.getElementById(x[0]); if (e) e.placeholder = x[1]; }); }
   function cx() { [].forEach.call(document.querySelectorAll('.stHint'), function (e) { if (/chiesto di chiamarti/.test(e.textContent)) e.textContent = 'Fino a quanto tempo prima del coaching l\u2019iscritto può annullare da solo. Se annulla dopo questo termine, il coaching di quel giorno viene perso e l\u2019ingresso viene scalato.'; }); }

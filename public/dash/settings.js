@@ -442,7 +442,7 @@ function liaPosterCanvas(o){
     c.drawImage(tpl,140,1022,270,330,377,1022,270,330);
   }
   /* didascalia sotto "Calendario": campi e palestre non scelgono un servizio */
-  var cap=o.kind==='campi'?['Scegli il campo,','giorno e ora.']:o.kind==='palestra'?['Scegli il corso,','giorno e ora.']:null;
+  var cap=o.kind==='campi'?['Scegli il campo,','giorno e ora.']:o.kind==='palestra'?(window.__LIA_PT?['Scegli il giorno','e l\u2019ora.']:['Scegli il corso,','giorno e ora.']):null;
   if(cap){
     /* il testo originale occupa x 160-383, y 1275-1347: si copre tutta la zona (y 1264-1360) e si riscrive */
     var ccx=o.lia===false?509:272;

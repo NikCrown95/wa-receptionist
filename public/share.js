@@ -317,6 +317,7 @@
   }
   /* tipo di attivita' come lo ha scelto l'attivita' (dentista, parrucchiere, ...): "altro" non dice niente, in quel caso si usa la categoria dell'icona se c'e' */
   function typeLabel(raw, isGym, k) {
+    if (raw && String(raw.business_type || "").toLowerCase().trim() === "personal trainer") return "Personal trainer";
     if (isGym) return "Palestra";
     var t = String((raw && raw.business_type) || "").replace(/_/g, " ").trim().toLowerCase();
     if (t && t !== "altro") return t.charAt(0).toUpperCase() + t.slice(1);
@@ -733,10 +734,11 @@
   function usePaths(b) { return true; }
   function loadPaths() {
     var gk = biz && biz.gym ? (biz.classes !== false && biz.personal !== false ? "entrambi" : biz.classes !== false ? "corsi" : "personal") : "";
+    if (window.__LIA_PT) gk = "pt";
     if (window.LIA_GUIDE && (window.__LIA_GUIDE_GYM || "") === gk) return Promise.resolve(window.LIA_GUIDE);
     if (window.LIA_GUIDE) window.LIA_GUIDE = null;
     return new Promise(function (res) {
-      var sc = document.createElement("script"); window.__LIA_GUIDE_GYM = gk; sc.src = gk ? "/guida/percorsi-gym-" + gk + ".js?v=1" : isCourts() ? "/guida/percorsi-campi-" + ({ tennis: "tennis", padel: "tennis", pallavolo: "pallavolo" }[campiSport((biz && biz.raw) || {})] || "calcio") + ".js?v=2" : window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=9";
+      var sc = document.createElement("script"); window.__LIA_GUIDE_GYM = gk; sc.src = window.__LIA_PT ? "/guida/percorsi-pt.js?v=1" : gk ? "/guida/percorsi-gym-" + gk + ".js?v=1" : isCourts() ? "/guida/percorsi-campi-" + ({ tennis: "tennis", padel: "tennis", pallavolo: "pallavolo" }[campiSport((biz && biz.raw) || {})] || "calcio") + ".js?v=2" : window.__LIA_MED ? "/guida/percorsi-med.js?v=1" : "/guida/percorsi.js?v=9";
       sc.onload = function () { res(window.LIA_GUIDE || null); }; sc.onerror = function () { res(null); };
       document.head.appendChild(sc);
     });
