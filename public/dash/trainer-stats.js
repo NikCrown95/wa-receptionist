@@ -82,8 +82,8 @@
 
     var panels = el('div', 'panels'); box.appendChild(panels);
     var r1 = el('div', 'row2'); panels.appendChild(r1);
-    var a = panel('Incassi nel tempo', 'Pacchetti venduti: contano nel giorno in cui li registri.'); a.appendChild(lineChart(series(pk, P, function (x) { return x.price; }), true)); r1.appendChild(a);
-    var c2 = panel('Lezioni svolte nel tempo', 'Quanto lavori nel periodo.'); c2.appendChild(barChart(series(ls.filter(function (x) { return x.at <= now; }), P, function () { return 1; }))); r1.appendChild(c2);
+    var sI = series(pk, P, function (x) { return x.price; }), a = panel('Incassi nel tempo', 'Pacchetti venduti: contano nel giorno in cui li registri.'); if (sI.some(function (q) { return q.v; })) a.appendChild(lineChart(sI, true)); else a.appendChild(el('p', 'sub', 'Nessun incasso in questo periodo.')); r1.appendChild(a);
+    var c2 = panel('Lezioni svolte nel tempo', 'Quanto lavori nel periodo.'); var sL = series(ls.filter(function (x) { return x.at <= now; }), P, function () { return 1; }); if (sL.some(function (q) { return q.v; })) c2.appendChild(barChart(sL)); else c2.appendChild(el('p', 'sub', 'Nessuna lezione svolta in questo periodo.')); r1.appendChild(c2);
 
     var r2 = el('div', 'row2'); panels.appendChild(r2);
     var by = {}; sold.forEach(function (x) { var k = x.name || 'Pacchetto'; (by[k] = by[k] || { n: 0, v: 0 }); by[k].n++; by[k].v += x.price; });
@@ -92,29 +92,21 @@
     if (!names.length) pp.appendChild(el('p', 'sub', 'Nessun pacchetto venduto in questo periodo.'));
     else { var hb = el('div', 'hbars'), mx = by[names[0]].v || by[names[0]].n || 1; names.slice(0, 6).forEach(function (n, i) { var row = el('div', 'hbar-row'), lab = el('div', 'lab'), dot = el('i'); dot.style.background = COL[i % COL.length]; lab.appendChild(dot); lab.appendChild(el('span', null, n)); row.appendChild(lab); var tr = el('div', 'track'), f = el('div', 'fill'); f.style.width = Math.round((by[n].v || by[n].n) / mx * 100) + '%'; f.style.background = COL[i % COL.length]; tr.appendChild(f); row.appendChild(tr); row.appendChild(el('div', 'amt', eur(by[n].v) + ' · ' + by[n].n)); hb.appendChild(row); }); pp.appendChild(hb); }
     r2.appendChild(pp);
-    var rn = mem.filter(function (m) { return m.left <= 2; }).sort(function (x, y) { return x.left - y.left; });
-    var pr = panel('Da rinnovare a breve', 'Iscritti con 2 ingressi o meno: i prossimi pacchetti da vendere.');
-    if (!rn.length) pr.appendChild(el('p', 'sub', 'Nessuno per ora: tutti gli iscritti hanno ingressi a sufficienza.'));
-    rn.slice(0, 8).forEach(function (m) {
-      var row = el('div', 'ptRn'); row.appendChild(el('span', 'ptRnN', m.name));
-      var st = el('span', 'ptRnS ' + (m.left <= 0 ? 'bad' : 'warn'), m.left <= 0 ? 'Da rinnovare' : m.left + (m.left === 1 ? ' ingresso' : ' ingressi')); row.appendChild(st); pr.appendChild(row);
-    });
-    r2.appendChild(pr);
 
-    var r3 = el('div', 'row2 row-full'); panels.appendChild(r3);
     var first = {}; pk.forEach(function (x) { var k = pn(x.m.phone); if (!first[k] || x.at < first[k]) first[k] = x.at; });
     var pts = [], y = now.getFullYear(), mo = now.getMonth(), i;
     for (i = 11; i >= 0; i--) { var dd = new Date(y, mo - i, 1), end = new Date(y, mo - i + 1, 1), c = 0; for (var k in first) if (first[k] < end) c++; pts.push({ l: MS[dd.getMonth()], v: c }); }
-    var gp = panel('Crescita iscritti', 'Iscritti totali, ultimi 12 mesi.'); gp.appendChild(lineChart(pts, false)); r3.appendChild(gp);
+    var gp = panel('Crescita iscritti', 'Iscritti totali, ultimi 12 mesi.'); gp.appendChild(lineChart(pts, false)); r2.appendChild(gp);
 
     var det = el('details', 'stats-method'); det.appendChild(el('summary', null, 'Come vengono calcolate le statistiche?'));
     var bd = el('div', 'stats-method-body');
-    [['Incassi', 'Somma dei prezzi dei pacchetti registrati nel periodo, nel giorno in cui li hai assegnati all\'iscritto.'], ['Lezioni svolte', 'Lezioni già trascorse e non annullate nel periodo.'], ['Iscritti in corso', 'Iscritti che hanno ancora almeno un ingresso.'], ['Da rinnovare', 'Iscritti con due ingressi o meno.']].forEach(function (x) { var p = el('p'); p.appendChild(el('strong', null, x[0] + ' ')); p.appendChild(document.createTextNode(x[1])); bd.appendChild(p); });
+    [['Incassi', 'Somma dei prezzi dei pacchetti registrati nel periodo, nel giorno in cui li hai assegnati all\'iscritto.'], ['Lezioni svolte', 'Lezioni già trascorse e non annullate nel periodo.'], ['Iscritti in corso', 'Iscritti che hanno ancora almeno un ingresso.']].forEach(function (x) { var p = el('p'); p.appendChild(el('strong', null, x[0] + ' ')); p.appendChild(document.createTextNode(x[1])); bd.appendChild(p); });
     det.appendChild(bd); box.appendChild(det);
   }
 
   function load() {
     var rp = fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { if (j && Array.isArray(j.members)) D = j; });
+    window.liaHistoryCache = null; window.liaHistoryPromise = null;
     var hp = (window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).then(function (h) { HIST = (h && h.appointments) || []; }, function () { HIST = []; });
     return Promise.all([rp, hp]).then(draw, function () { if (box) { box.textContent = ''; box.appendChild(el('p', 'sub', 'Non riesco a caricare le statistiche: riprova.')); } });
   }
@@ -143,8 +135,14 @@
   function start() {
     if (started) return; if (!init()) return; started = true;
     draw(); load();
-    // ricarica quando si apre la pagina Statistiche
-    document.addEventListener('click', function (e) { var t = e.target.closest && e.target.closest('[data-tab="stats"],[data-go="stats"],[data-panel="stats"]'); if (t) setTimeout(load, 50); });
+    // ricarica ogni volta che si apre la pagina Statistiche, quando si torna sull'app e dopo le modifiche agli iscritti
+    var pnl = document.getElementById('panelStats'), was = false;
+    function vis() { return !!(pnl && pnl.offsetParent !== null && !pnl.hidden); }
+    function check() { var v = vis(); if (v && !was) load(); was = v; }
+    if (pnl) new MutationObserver(check).observe(pnl, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] });
+    setInterval(check, 1500);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && vis()) load(); });
+    var prev = window.liaPtRefresh; if (prev) window.liaPtRefresh = function () { var r = prev.apply(this, arguments); load(); return r; };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   setTimeout(start, 600); setTimeout(start, 1800);
