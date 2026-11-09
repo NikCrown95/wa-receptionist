@@ -134,10 +134,11 @@
       });
     });
   };
-  function refresh() { window.liaClients = null; if (window.liaEnsureClients) window.liaEnsureClients(); }
+  window.liaPtOpenNew = function (svcs) { newMember(svcs); };
+  function refresh() { if (window.liaPtRefresh) { window.liaPtRefresh(); return; } window.liaClients = null; if (window.liaEnsureClients) window.liaEnsureClients(); }
 
-  function newMember() {
-    var svcs = (ROSTER && ROSTER.services) || [];
+  function newMember(svcsIn) {
+    var svcs = svcsIn || (ROSTER && ROSTER.services) || [];
     var bg = document.createElement('div'); bg.className = 'liaSheetBg';
     var sh = document.createElement('div'); sh.className = 'liaSheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
     sh.innerHTML = '<div class="grab"></div><h2>Nuovo iscritto</h2><p class="lsub">Inseriscilo dopo che ha pagato: potrà prenotare da solo fino a esaurimento degli ingressi.</p>' +

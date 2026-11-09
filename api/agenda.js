@@ -416,7 +416,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/pt-packs.js").isTrainer({ business_type: bt })) {
           // Personal trainer: stessa dashboard dei servizi alla persona, con "iscritti" e "pacchetti" e gli ingressi di ciascun iscritto (public/dash/trainer.js).
           variantKey = "pt";
-          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script>").replace("</body>", '<script src="/dash/trainer.js?v=1"></script></body>');
+          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=2"></script><script src="/dash/trainer-iscritti.js?v=1"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -1413,7 +1413,7 @@ module.exports = async (req, res) => {
       if (!ptl.isTrainer(biz)) return res.status(404).json({ error: "Non disponibile per questa attività." });
       const pkgs = (biz.services || []).filter((x) => x.active !== false && Number(x.entries) >= 1).map((x) => ({ id: x.id, name: x.name, entries: Number(x.entries), duration_min: x.duration_min, price_eur: x.price_eur }));
       if (req.method === "GET") {
-        if (q.roster === "1") return res.status(200).json({ members: await ptl.rosterOf(sb, biz.id), services: pkgs });
+        if (q.roster === "1") return res.status(200).json({ members: await ptl.rosterOf(sb, biz.id), services: pkgs, business: biz.name });
         const phone = String(q.phone || "").trim();
         const packs = phone ? await ptl.packsOf(sb, biz.id, phone) : [];
         return res.status(200).json({ services: pkgs, packs: packs.map((p) => ({ id: p.id, name: p.pack_name, total: p.entries_total, used: p.used, left: p.left, price_eur: p.price_eur, created_at: p.created_at })) });
