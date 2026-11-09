@@ -272,14 +272,13 @@
     var cp = curPack(m), st = m.status || stOf(m), ls = lessons(m), pct = cp && cp.total ? Math.round(cp.left / cp.total * 100) : 0;
     var box = el('div', 'ptIs ' + st.s);
     var next = ls.up[0];
-    box.innerHTML = '<div class="ptIsH"><span class="ptIsT">Pacchetto</span><span class="ptIsS">' + esc(st.label) + '</span></div>' +
-      '<div class="ptIsN"><b>' + esc(cp ? cp.name : '—') + '</b></div>' +
+    box.innerHTML = '<div class="ptIsH"><b class="ptIsN">' + esc(cp ? cp.name : '\u2014') + '</b><span class="ptIsS">' + esc(st.label) + '</span></div>' +
       '<div class="ptIsL"><span class="ptIsB"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'lezione rimasta' : 'lezioni rimaste') + (cp ? ' su ' + cp.total : '') + '</small></span></div>' +
       '<span class="ptIsP"><i style="width:' + pct + '%"></i></span>' +
-      '<div class="ptIsG"><span><small>Fatte</small><b>' + (cp ? cp.used || 0 : 0) + '</b></span><span><small>In programma</small><b>' + ls.up.length + '</b></span><span><small>Prossima</small><b>' + (next ? dshort(next.start) : '—') + '</b></span></div>';
+      '<div class="ptIsG"><span><small>Fatte</small><b>' + (cp ? cp.used || 0 : 0) + '</b></span><span><small>In programma</small><b>' + ls.up.length + '</b></span><span><small>Prossima</small><b>' + (next ? dshort(next.start) : '\u2014') + '</b></span></div>';
     injecting = true;
     if (old) old.remove();
-    card.insertAdjacentElement('afterend', box);
+    var rows = document.getElementById('sheet-rows'); if (rows && rows.parentNode === card) card.insertBefore(box, rows); else card.appendChild(box);
     injecting = false;
   }
   (function watch() {
