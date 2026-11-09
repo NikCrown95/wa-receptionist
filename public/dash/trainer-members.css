@@ -125,3 +125,20 @@
 .ptNm .lerr{margin-top:12px}
 .ptNm .lb{margin-top:12px}
 @media(max-width:420px){.ptNm .nmGrid{grid-template-columns:1fr}}
+.ptNm .nmHd{margin:0 0 12px}
+.ptNm .nmHd>div:first-of-type{flex:1;min-width:0}
+.ptNm .nmSt{display:flex;align-items:center;gap:5px;flex:none}
+.ptNm .nmSt i{width:18px;height:5px;border-radius:5px;background:var(--line2,var(--line))}.ptNm .nmSt i.on{background:var(--accent)}
+.ptNm .nmSt em{margin-left:5px;font-style:normal;font-size:.76rem;font-weight:700;color:var(--muted)}
+.ptNm .nmS1[hidden],.ptNm .nmS2[hidden]{display:none}
+.ptNm .nmSec{margin:12px 2px 8px}
+.ptNm .nmF input{height:50px}
+.ptNm .nmPk{max-height:38vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.ptNm .nmP{padding:12px 14px}
+.ptNm .nmSum{margin:10px 2px 0}
+.ptNm .nmBt{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-top:16px}
+.ptNm .nmBt .lb{margin:0}
+.ptNm .lerr{margin-top:10px}
+@media(max-width:420px){.ptNm .nmGrid{grid-template-columns:1fr 1fr;gap:10px}}
+.ptNm .nmHd p{font-size:.86rem}
+.ptNm .nmBt .lb{margin:0!important;height:52px;min-height:0;align-self:end}

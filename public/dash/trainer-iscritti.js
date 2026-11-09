@@ -145,8 +145,9 @@
     var bg = el('div', 'liaSheetBg'), sh = el('div', 'liaSheet ptNm'); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
     var who = m ? '<div class="nmWho"><span class="nmAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div><b>' + esc(m.name) + '</b><small>' + esc(m.phone) + '</small></div></div>' : '';
     var data = m ? '' : '<div class="nmSec">Dati dell’iscritto</div><div class="nmGrid"><div class="nmF"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off" autocapitalize="words" placeholder="Giulia"></div><div class="nmF"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off" autocapitalize="words" placeholder="Bianchi"></div></div><div class="nmF"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off" placeholder="333 123 4567"></div>';
-    sh.innerHTML = '<div class="grab"></div><div class="nmHd"><span class="nmIc">' + SV(m ? '<rect x="3" y="7" width="18" height="12" rx="3"/><path d="M3 11h18M7 15h3"/>' : '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 22) + '</span><div><h2>' + (m ? 'Nuovo pacchetto' : 'Nuovo iscritto') + '</h2><p>' + (m ? 'Rinnovo o nuovo acquisto, dopo il pagamento.' : 'Registralo dopo il pagamento: potrà prenotare da solo.') + '</p></div></div>' + who + data +
-      '<div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div><div class="lerr" role="alert" hidden></div><button type="button" class="lb lsave">' + (m ? 'Assegna pacchetto' : 'Salva iscritto') + '</button><button type="button" class="lb lcancel">Annulla</button>';
+    sh.innerHTML = '<div class="grab"></div><div class="nmHd"><span class="nmIc">' + SV(m ? '<rect x="3" y="7" width="18" height="12" rx="3"/><path d="M3 11h18M7 15h3"/>' : '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 22) + '</span><div><h2>' + (m ? 'Nuovo pacchetto' : 'Nuovo iscritto') + '</h2><p>' + (m ? 'Rinnovo o nuovo acquisto, dopo il pagamento.' : 'Registralo dopo il pagamento.') + '</p></div>' + (m ? '' : '<span class="nmSt"></span>') + '</div>' + who + '<div class="nmS1">' + data + '</div>' +
+      '<div class="nmS2"><div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div></div><div class="lerr" role="alert" hidden></div>' +
+      '<div class="nmBt"><button type="button" class="lb lcancel">Annulla</button><button type="button" class="lb lsave">' + (m ? 'Assegna' : 'Continua') + '</button></div>';
     document.body.appendChild(bg); document.body.appendChild(sh);
     var $ = function (q) { return sh.querySelector(q); }, pk = $('.nmPk'), sum = $('.nmSum'), err = $('.lerr');
     function sumTx() { var x = svcs.filter(function (v) { return v.id === sel; })[0]; sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + (x.entries === 1 ? ' lezione' : ' lezioni') + '</b> da solo, negli orari che hai aperto.' : ''; }
@@ -164,20 +165,29 @@
     }
     drawPk();
     function close() { bg.classList.remove('on'); sh.classList.remove('on'); setTimeout(function () { bg.remove(); sh.remove(); }, 300); }
-    bg.addEventListener('click', close); $('.lcancel').addEventListener('click', close);
+    bg.addEventListener('click', close);
     requestAnimationFrame(function () { bg.classList.add('on'); sh.classList.add('on'); });
-    $('.lsave').addEventListener('click', function () {
-      var b = this;
-      function fail(t) { err.textContent = t; err.hidden = false; }
-      var body = { action: 'assign', service_id: sel };
+    var step = m ? 2 : 1, saveB = $('.lsave'), cancelB = $('.lcancel');
+    function fail(t) { err.textContent = t; err.hidden = false; }
+    function show() {
+      sh.querySelector('.nmS1').hidden = step !== 1; sh.querySelector('.nmS2').hidden = step !== 2; err.hidden = true;
+      var st = $('.nmSt'); if (st) st.innerHTML = '<i class="' + (step === 1 ? 'on' : '') + '"></i><i class="' + (step === 2 ? 'on' : '') + '"></i><em>' + step + ' di 2</em>';
+      cancelB.textContent = step === 2 && !m ? 'Indietro' : 'Annulla'; saveB.textContent = step === 1 ? 'Continua' : (m ? 'Assegna' : 'Salva iscritto');
+    }
+    show();
+    sh.addEventListener('keydown', function (e) { if (e.key === 'Enter' && step === 1 && e.target.tagName === 'INPUT') { e.preventDefault(); saveB.click(); } });
+    cancelB.addEventListener('click', function () { if (step === 2 && !m) { step = 1; show(); } else close(); });
+    saveB.addEventListener('click', function () {
+      var b = this, body = { action: 'assign', service_id: sel };
+      if (step === 1) {
+        var f1 = $('#nmF').value.trim(), l1 = $('#nmL').value.trim(), p1 = $('#nmP').value.trim();
+        if (f1.length < 2 || l1.length < 2) return fail('Scrivi nome e cognome.');
+        if (pn(p1).length < 6) return fail('Scrivi il numero di telefono.');
+        step = 2; show(); return;
+      }
       if (!svcs.length || !sel) return fail('Crea prima un pacchetto da Impostazioni.');
       if (m) { body.name = m.name; body.phone = m.phone; }
-      else {
-        var f = $('#nmF').value.trim(), l = $('#nmL').value.trim(), p = $('#nmP').value.trim();
-        if (f.length < 2 || l.length < 2) return fail('Scrivi nome e cognome.');
-        if (pn(p).length < 6) return fail('Scrivi il numero di telefono.');
-        body.first_name = f; body.last_name = l; body.phone = p;
-      }
+      else { body.first_name = $('#nmF').value.trim(); body.last_name = $('#nmL').value.trim(); body.phone = $('#nmP').value.trim(); }
       b.disabled = true; err.hidden = true;
       post(body).then(function () { close(); return window.liaPtRefresh(); }).catch(function (e) { b.disabled = false; fail(e.message); });
     });
