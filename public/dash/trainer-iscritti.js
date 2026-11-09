@@ -23,6 +23,13 @@
 
   function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultimi coaching' } : { s: 'ok', label: 'In corso' }; }
   function curPack(m) { return m.packs.filter(function (p) { return p.left > 0; })[0] || m.packs[m.packs.length - 1] || null; }
+  // Nell'elenco: se l'iscritto ha piu' pacchetti ancora attivi (es. dopo un rinnovo con ingressi residui) si mostra la somma
+  function listPack(m) {
+    var c = curPack(m), act = m.packs.filter(function (p) { return p.left > 0; });
+    if (!c || act.length < 2) return c;
+    var t = 0, u = 0, l = 0; act.forEach(function (p) { t += p.total; u += p.used || 0; l += p.left; });
+    return Object.assign({}, c, { total: t, used: u, left: l });
+  }
   function lessons(m) {
     var k = pn(m.phone), now = new Date(), up = [], past = [];
     HIST.forEach(function (a) {
@@ -119,7 +126,7 @@
       tbl.appendChild(hd);
       if (!ms.length) { tbl.appendChild(el('div', 'mxEmpty', mem.length ? 'Nessun risultato. Prova a cambiare i filtri.' : 'Ancora nessun iscritto. Aggiungi il primo con "Nuovo iscritto".')); return; }
       (S.more || qq ? ms : ms.slice(0, 30)).forEach(function (m) {
-        var cp = curPack(m), ls = lessons(m), nx = ls.up[0], r = el('div', 'mzRow st-' + m.status.s);
+        var cp = listPack(m), ls = lessons(m), nx = ls.up[0], r = el('div', 'mzRow st-' + m.status.s);
         r.tabIndex = 0; r.setAttribute('role', 'button');
         var sc = nx ? '<span class="mzX ' + m.status.s + '"><span class="mzXn"><b>' + nx.start.getDate() + '</b><small>' + MS[nx.start.getMonth()] + '</small></span><span class="mzXd"><small>alle</small><b>' + hm(nx.start) + '</b></span></span>' : '<span class="mzMute">Nessuna</span>';
         var gen = /a$/i.test(m.first) ? 'gf' : 'gm', ini = (m.first[0] || '') + (m.last[0] || '');
