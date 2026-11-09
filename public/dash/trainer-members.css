@@ -146,3 +146,16 @@
 .liaSheet.ptNm{top:max(12px,env(safe-area-inset-top,0px));bottom:auto;border:1px solid var(--line2,var(--line));border-radius:26px;box-shadow:0 20px 60px rgba(0,0,0,.45);transform:translateY(-115%);max-height:calc(100vh - 24px);padding-bottom:22px}
 .liaSheet.ptNm.on{transform:none}
 @media(max-width:560px){.liaSheet.ptNm{left:10px;right:10px}}
+
+/* Scheda appuntamento (personal trainer): non finisce sotto l'intestazione e mostra i dati dell'iscritto */
+html.ptb #calSubApp .sheet#sheet{max-height:calc(100vh - 96px);max-height:calc(100dvh - 96px)}
+.ptIs{--c:#3FAF82;flex:none;padding:14px 16px 16px;border-radius:18px;border:1px solid var(--line2,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--c) 14%,var(--card)) 0%,var(--card) 75%)}
+.ptIs.warn{--c:#D9A441}.ptIs.bad{--c:#D9695F}
+.ptIsH{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ptIsT{font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ptIsS{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
+.ptIsN{margin-top:6px;font-size:1rem;font-weight:700}
+.ptIsL{margin-top:8px}.ptIsB{display:flex;align-items:baseline;gap:8px}.ptIsB b{font-size:2rem;line-height:1;font-weight:800;letter-spacing:-.03em}.ptIsB small{color:var(--muted);font-size:.86rem;font-weight:600}
+.ptIsP{display:block;height:7px;border-radius:7px;background:var(--line2,var(--line));margin-top:10px;overflow:hidden}.ptIsP i{display:block;height:100%;border-radius:7px;background:var(--c)}
+.ptIsG{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2,var(--line))}
+.ptIsG span{min-width:0}.ptIsG small{display:block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.ptIsG b{display:block;margin-top:2px;font-size:.98rem;font-weight:700;white-space:nowrap}

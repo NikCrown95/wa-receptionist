@@ -259,6 +259,35 @@
     drawTabs(); drawPane();
   }
 
+  // --- Scheda dell'appuntamento: dati dell'iscritto (ingressi rimasti, pacchetto, lezioni) ---
+  document.documentElement.classList.add('ptb');
+  var injecting = false, injT = null;
+  function injectIs() {
+    var view = document.getElementById('ap-view'), card = document.getElementById('ap-card');
+    if (!view || !card || !D) return;
+    var tel = view.querySelector('#ap-cli a[href^="tel:"]'), ph = tel ? pn(tel.getAttribute('href').slice(4)) : '';
+    var old = view.querySelector('.ptIs');
+    var m = ph ? (D.members || []).filter(function (x) { return pn(x.phone) === ph; })[0] : null;
+    if (!m) { if (old) { injecting = true; old.remove(); injecting = false; } return; }
+    var cp = curPack(m), st = m.status || stOf(m), ls = lessons(m), pct = cp && cp.total ? Math.round(cp.left / cp.total * 100) : 0;
+    var box = el('div', 'ptIs ' + st.s);
+    var next = ls.up[0];
+    box.innerHTML = '<div class="ptIsH"><span class="ptIsT">Pacchetto</span><span class="ptIsS">' + esc(st.label) + '</span></div>' +
+      '<div class="ptIsN"><b>' + esc(cp ? cp.name : '—') + '</b></div>' +
+      '<div class="ptIsL"><span class="ptIsB"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'lezione rimasta' : 'lezioni rimaste') + (cp ? ' su ' + cp.total : '') + '</small></span></div>' +
+      '<span class="ptIsP"><i style="width:' + pct + '%"></i></span>' +
+      '<div class="ptIsG"><span><small>Fatte</small><b>' + (cp ? cp.used || 0 : 0) + '</b></span><span><small>In programma</small><b>' + ls.up.length + '</b></span><span><small>Prossima</small><b>' + (next ? dshort(next.start) : '—') + '</b></span></div>';
+    injecting = true;
+    if (old) old.remove();
+    card.insertAdjacentElement('afterend', box);
+    injecting = false;
+  }
+  (function watch() {
+    var v = document.getElementById('ap-view');
+    if (!v) { setTimeout(watch, 800); return; }
+    new MutationObserver(function () { if (injecting) return; clearTimeout(injT); injT = setTimeout(injectIs, 60); }).observe(v, { childList: true, subtree: true });
+  })();
+
   function init() { if (!document.querySelector('.clientsWrap')) return; render(); load(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
