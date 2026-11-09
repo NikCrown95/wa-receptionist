@@ -242,3 +242,4 @@ html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb
 .ptCb{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:12px;color:var(--text);font-size:.86rem;font-weight:600;text-decoration:none}
 .ptCb.w{color:#3FAF82}
 html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn{white-space:nowrap;font-size:.92rem;padding-left:10px;padding-right:10px}
+html.ptb #calSubApp #sheet #sheet-close{width:44px;height:44px;border-radius:14px;margin-left:-6px}
