@@ -129,7 +129,7 @@
           '<span class="mzC mzI" data-l="Ingressi">' + pips(cp) + '</span>' +
           '<span class="mzC mzE" data-l="Prossimo coaching">' + sc + '</span>' +
           '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span><span class="mzC mzA"></span>' +
-          '<span class="mzC mzSm ' + m.status.s + '"><span><small>Pacchetto</small><b>' + (cp ? esc(cp.name) : '—') + '</b></span><span><small>Prossima</small><b class="mzSd">' + (nx ? dshort(nx.start) : '—') + '</b></span><span><small>Ingressi</small><b>' + (cp ? cp.left + ' / ' + cp.total : '—') + '</b></span></span>';
+          '<span class="mzC mzSm ' + m.status.s + '"><span><small>Pacchetto</small><b>' + (cp ? esc(String(cp.name).replace(/^pacchetto\s+/i, '').replace(/^./, function (c) { return c.toUpperCase(); })) : '—') + '</b></span><span><small>Prossima</small><b class="mzSd">' + (nx ? dshort(nx.start) : '—') + '</b></span><span><small>Ingressi</small><b>' + (cp ? cp.left + ' / ' + cp.total : '—') + '</b></span></span>';
         var A = r.querySelector('.mzA');
         if (D.services && D.services.length) { var rb = btn('', 'mzRn', function (e) { e.stopPropagation(); assign(m); }); rb.innerHTML = SV('<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 16) + '<span>Rinnova</span>'; rb.setAttribute('aria-label', 'Nuovo pacchetto'); A.appendChild(rb); }
         function open() { S.mid = pn(m.phone); S.tab = 'lez'; render(); toTop(); }
