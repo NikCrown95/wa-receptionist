@@ -416,7 +416,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/pt-packs.js").isTrainer({ business_type: bt })) {
           // Personal trainer: stessa dashboard dei servizi alla persona, con "iscritti" e "pacchetti" e gli ingressi di ciascun iscritto (public/dash/trainer.js).
           variantKey = "pt";
-          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=3\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=2"></script><script src="/dash/trainer-iscritti.js?v=3"></script><script src="/dash/trainer-stats.js?v=2"></script></body>');
+          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=3\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=2"></script><script src="/dash/trainer-iscritti.js?v=3"></script><script src="/dash/trainer-stats.js?v=3"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
