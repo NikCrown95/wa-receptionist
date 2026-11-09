@@ -155,7 +155,7 @@
     var svcs = (D && D.services) || [], sel = svcs[0] ? svcs[0].id : null;
     var bg = el('div', 'liaSheetBg'), sh = el('div', 'liaSheet ptNm'); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
     var who = m ? '<div class="nmWho"><span class="nmAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div><b>' + esc(m.name) + '</b><small>' + esc(m.phone) + '</small></div></div>' : '';
-    var data = m ? '' : '<div class="nmSec">Dati dell’iscritto</div><div class="nmGrid"><div class="nmF"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off" autocapitalize="words" placeholder="Giulia"></div><div class="nmF"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off" autocapitalize="words" placeholder="Bianchi"></div></div><div class="nmF"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off" placeholder="333 123 4567"></div>';
+    var data = m ? '' : '<div class="nmSec">Dati dell’iscritto</div><div class="nmGrid"><div class="nmF"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off" autocapitalize="words" placeholder="Giulia"></div><div class="nmF"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off" autocapitalize="words" placeholder="Bianchi"></div></div><div class="nmF"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off" placeholder="333 123 4567"></div><div class="nmF"><label for="nmC">Codice di accesso</label><div style="display:flex;gap:8px"><input id="nmC" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Lettere e numeri, min. 4" style="flex:1;min-width:0"><button type="button" id="nmGen" style="flex:none;border:1px solid var(--line2);background:var(--card2);color:var(--ink);border-radius:12px;padding:0 14px;font:inherit;font-weight:700;cursor:pointer">Genera</button></div><small style="display:block;margin-top:6px;opacity:.7">Lo darai all’iscritto: serve per prenotare.</small></div>';
     sh.innerHTML = '<div class="grab"></div><div class="nmHd"><span class="nmIc">' + SV(m ? '<rect x="3" y="7" width="18" height="12" rx="3"/><path d="M3 11h18M7 15h3"/>' : '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 22) + '</span><div><h2>' + (m ? 'Nuovo pacchetto' : 'Nuovo iscritto') + '</h2><p>' + (m ? 'Rinnovo o nuovo acquisto, dopo il pagamento.' : 'Registralo dopo il pagamento.') + '</p></div>' + (m ? '' : '<span class="nmSt"></span>') + '</div>' + who + '<div class="nmS1">' + data + '</div>' +
       '<div class="nmS2"><div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div></div><div class="lerr" role="alert" hidden></div>' +
       '<div class="nmBt"><button type="button" class="lb lcancel">Annulla</button><button type="button" class="lb lsave">' + (m ? 'Assegna' : 'Continua') + '</button></div>';
@@ -194,14 +194,16 @@
         var f1 = $('#nmF').value.trim(), l1 = $('#nmL').value.trim(), p1 = $('#nmP').value.trim();
         if (f1.length < 2 || l1.length < 2) return fail('Scrivi nome e cognome.');
         if (pn(p1).length < 6) return fail('Scrivi il numero di telefono.');
+        if (!/^[A-Za-z0-9]{4,20}$/.test($('#nmC').value.replace(/\s+/g, ''))) return fail('Il codice deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli).');
         step = 2; show(); return;
       }
       if (!svcs.length || !sel) return fail('Crea prima un pacchetto da Impostazioni.');
-      if (m) { body.name = m.name; body.phone = m.phone; }
-      else { body.first_name = $('#nmF').value.trim(); body.last_name = $('#nmL').value.trim(); body.phone = $('#nmP').value.trim(); }
+      if (m) { if (!m.code) return fail('Imposta prima il codice di accesso dell’iscritto (nella sua scheda).'); body.name = m.name; body.phone = m.phone; }
+      else { body.first_name = $('#nmF').value.trim(); body.last_name = $('#nmL').value.trim(); body.phone = $('#nmP').value.trim(); body.access_code = $('#nmC').value.replace(/\s+/g, ''); }
       b.disabled = true; err.hidden = true;
       post(body).then(function () { close(); return window.liaPtRefresh(); }).catch(function (e) { b.disabled = false; fail(e.message); });
     });
+    var gb = $('#nmGen'); if (gb) gb.addEventListener('click', function () { var A = 'abcdefghjkmnpqrstuvwxyz23456789', c = '', i, a = new Uint8Array(6); (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a) : a.forEach(function (_, k) { a[k] = Math.floor(Math.random() * 256); }); for (i = 0; i < 6; i++) c += A[a[i] % A.length]; $('#nmC').value = c; });
     if (!m) setTimeout(function () { var i = $('#nmF'); if (i) i.focus(); }, 350);
   }
   function assign(m) { sheet(m); }
@@ -227,6 +229,23 @@
     if (dg) ab('WhatsApp', '<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>', '', null, 'https://wa.me/' + dg);
     ab('Chiama', '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>', '', null, 'tel:' + String(m.phone || '').replace(/[^\d+]/g, ''));
     body.appendChild(acts);
+    var cb = el('div', 'mvCode'); cb.style.cssText = 'margin:12px 0;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card2);display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+    function codeView() {
+      cb.innerHTML = '<div style="flex:1;min-width:0"><small style="display:block;opacity:.7;font-weight:700;letter-spacing:.04em">CODICE DI ACCESSO</small><b style="font-size:1.1rem;letter-spacing:.06em;word-break:break-all">' + (m.code ? esc(m.code) : '<span style="opacity:.6;font-weight:600;letter-spacing:0">non impostato</span>') + '</b></div><button type="button" class="mvCodeB" style="border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:12px;min-height:40px;padding:0 14px;font:inherit;font-weight:700;cursor:pointer">' + (m.code ? 'Cambia' : 'Imposta') + '</button>';
+      cb.querySelector('.mvCodeB').addEventListener('click', codeEdit);
+    }
+    function codeEdit() {
+      cb.innerHTML = '<input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Nuovo codice (lettere e numeri)" value="' + esc(m.code || '') + '" style="flex:1;min-width:140px;min-height:40px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);padding:0 12px;font:inherit"><button type="button" class="cSv" style="border:0;background:var(--accent);color:#06222a;border-radius:12px;min-height:40px;padding:0 14px;font:inherit;font-weight:800;cursor:pointer">Salva</button><button type="button" class="cNo" style="border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:12px;min-height:40px;padding:0 12px;font:inherit;cursor:pointer">Annulla</button><p class="cEr" style="flex-basis:100%;margin:0;color:var(--danger);font-size:.85rem;font-weight:600" hidden></p>';
+      var inp = cb.querySelector('input'), er = cb.querySelector('.cEr'); inp.focus();
+      cb.querySelector('.cNo').addEventListener('click', codeView);
+      cb.querySelector('.cSv').addEventListener('click', function () {
+        var v = inp.value.replace(/\s+/g, ''), bt = this;
+        if (!/^[A-Za-z0-9]{4,20}$/.test(v)) { er.textContent = 'Da 4 a 20 tra lettere e numeri, senza spazi o simboli.'; er.hidden = false; return; }
+        bt.disabled = true;
+        post({ action: 'set_code', phone: m.phone, access_code: v }).then(function () { m.code = v; codeView(); }).catch(function (e) { bt.disabled = false; er.textContent = e.message; er.hidden = false; });
+      });
+    }
+    codeView(); body.appendChild(cb);
     var gs = el('div', 'mvGs');
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
     gt('INGRESSI USATI', m.total - m.left, m.total); gt('COACHING IN PROGRAMMA', ls.up.length, 0, 'coaching');

@@ -416,7 +416,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/pt-packs.js").isTrainer({ business_type: bt })) {
           // Personal trainer: stessa dashboard dei servizi alla persona, con "iscritti" e "pacchetti" e gli ingressi di ciascun iscritto (public/dash/trainer.js).
           variantKey = "pt";
-          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=22\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=3"></script><script src="/dash/trainer-iscritti.js?v=22"></script><script src="/dash/trainer-stats.js?v=4"></script><script src="/dash/trainer-avail.js?v=11"></script></body>');
+          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=22\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=3"></script><script src="/dash/trainer-iscritti.js?v=23"></script><script src="/dash/trainer-stats.js?v=4"></script><script src="/dash/trainer-avail.js?v=11"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -1466,9 +1466,28 @@ module.exports = async (req, res) => {
         if (!sv) return res.status(400).json({ error: "Scegli un pacchetto." });
         const nm = String(pb.first_name || pb.last_name ? (String(pb.first_name || "").trim() + " " + String(pb.last_name || "").trim()) : (pb.name || "")).trim().replace(/\s+/g, " ").slice(0, 120), ph = String(pb.phone || "").trim().slice(0, 40);
         if (!nm || ptl.phoneNorm(ph).length < 6) return res.status(400).json({ error: "Servono nome e telefono dell'iscritto." });
-        const ins = await sb("POST", "pt_packs", { business_id: biz.id, customer_name: nm, customer_phone: ph, service_id: sv.id, pack_name: sv.name, entries_total: sv.entries, price_eur: sv.price_eur }, "return=representation");
+        // Il codice e' per persona: se l'iscritto ha gia' dei pacchetti (rinnovo) si riusa il suo
+        const have = await ptl.packsOf(sb, biz.id, ph);
+        let code = (have.find((p) => p.access_code) || {}).access_code || "";
+        if (!code) {
+          code = String(pb.access_code || "").replace(/\s+/g, "");
+          if (!ptl.codeValid(code)) return res.status(400).json({ error: "Il codice di accesso deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli)." });
+          if (await ptl.codeTaken(sb, biz.id, code, ph)) return res.status(409).json({ error: "Questo codice è già usato da un altro iscritto: scegline uno diverso." });
+        }
+        const ins = await sb("POST", "pt_packs", { business_id: biz.id, customer_name: nm, customer_phone: ph, service_id: sv.id, pack_name: sv.name, entries_total: sv.entries, price_eur: sv.price_eur, access_code: code }, "return=representation");
         if (!ins.ok) return res.status(500).json({ error: "Non siamo riusciti ad assegnare il pacchetto. Riprova." });
         return res.status(200).json({ ok: true });
+      }
+      if (pb.action === "set_code") {
+        const ph = String(pb.phone || "").trim(), code = String(pb.access_code || "").replace(/\s+/g, "");
+        const have = ptl.phoneNorm(ph).length >= 6 ? await ptl.packsOf(sb, biz.id, ph) : [];
+        if (!have.length) return res.status(404).json({ error: "Iscritto non trovato." });
+        if (!ptl.codeValid(code)) return res.status(400).json({ error: "Il codice di accesso deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli)." });
+        if (await ptl.codeTaken(sb, biz.id, code, ph)) return res.status(409).json({ error: "Questo codice è già usato da un altro iscritto: scegline uno diverso." });
+        const up = await sb("PATCH", "pt_packs?business_id=eq." + biz.id + "&id=in.(" + have.map((p) => p.id).join(",") + ")", { access_code: code }, "return=minimal");
+        if (!up.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare il codice. Riprova." });
+        ptl.codeReset(ph);
+        return res.status(200).json({ ok: true, code: code });
       }
       if (pb.action === "remove") {
         const id = String(pb.id || "");
