@@ -275,3 +275,11 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 :root:root #ptMx .mzAdd{border-radius:99px;padding:12px 22px 12px 18px;gap:10px;font-size:.96rem;font-weight:700;box-shadow:0 8px 22px -6px color-mix(in srgb,var(--accent) 55%,transparent)}
 :root:root #ptMx .mzAdd:active{transform:scale(.97)}
 @media(max-width:620px){:root:root #ptMx .mzAdd{width:48px;height:48px;padding:0;justify-content:center;border-radius:50%}}
+
+/* Stato (etichetta con contorno) e pulsante "Rinnova" */
+:root:root #ptMx .mzRow>.mzC:nth-child(6) .mzSt{--sc:#7fd0a8;background:transparent!important;border:1px solid color-mix(in srgb,var(--sc) 55%,transparent)!important;color:var(--sc)!important;border-radius:8px;padding:5px 11px;font-size:.76rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+:root:root #ptMx .mzRow>.mzC:nth-child(6) .mzSt::before{display:none}
+:root:root #ptMx .mzRow.st-warn>.mzC:nth-child(6) .mzSt{--sc:#E8B955}
+:root:root #ptMx .mzRow.st-bad>.mzC:nth-child(6) .mzSt{--sc:#F08A82}
+:root:root #ptMx .mzRow>.mzA .mzRn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;background:var(--accent)!important;border:0!important;color:var(--on-accent,#fff)!important;border-radius:12px;height:42px;min-width:0;padding:0 18px;font-size:.92rem;font-weight:700;box-shadow:none}
+:root:root #ptMx .mzRow>.mzA .mzRn:active{transform:scale(.97)}
