@@ -1,4 +1,4 @@
-// --- Personal trainer: Statistiche su pacchetti, incassi, lezioni e iscritti (niente appuntamenti/clienti) ---
+// --- Personal trainer: Statistiche su pacchetti, incassi, coaching e iscritti (niente appuntamenti/clienti) ---
 (function () {
   if (!window.__LIA_PT) return;
   var P = 'month', D = null, HIST = [], box = null, started = false, sig = '', tipEl = null;
@@ -150,7 +150,7 @@
     var cards = [
       { l: 'Incassi', v: eur(income), d: delta(income, incomePrev) },
       { l: 'Pacchetti venduti', v: String(sold.length), d: delta(sold.length, soldPrev.length) },
-      { l: 'Lezioni svolte', v: String(done), d: lp.length > done ? { t: 'Su ' + lp.length + ' in programma nel periodo', c: 'flat' } : delta(done, donePrev) },
+      { l: 'Coaching svolti', v: String(done), d: lp.length > done ? { t: 'Su ' + lp.length + ' in programma nel periodo', c: 'flat' } : delta(done, donePrev) },
       { l: 'Iscritti in corso', v: String(active), d: { t: 'Su ' + mem.length + ' iscritti totali', c: 'flat' } }
     ];
     var kp = el('div', 'kpis');
@@ -162,9 +162,9 @@
     var sI = series(pk, P, function (x) { return x.price; }), a = panel('Incassi nel tempo', 'Euro incassati dai pacchetti, nel giorno in cui li registri.'); r1.appendChild(a);
     if (sI.some(function (q) { return q.v; })) lineChart(a, sI, { money: true, aria: 'Incassi nel tempo', tip: function (p) { return '<b>' + eur(p.v) + '</b>' + p.full + (p.n ? ' · ' + plural(p.n, 'pacchetto', 'pacchetti') : ''); } });
     else a.appendChild(el('p', 'ptEmpty', 'Nessun incasso in questo periodo.'));
-    var sL = series(ls.filter(function (x) { return x.at <= now; }), P, function () { return 1; }), c2 = panel('Lezioni svolte nel tempo', 'Quante lezioni hai tenuto nel periodo.'); r1.appendChild(c2);
-    if (sL.some(function (q) { return q.v; })) barChart(c2, sL, { aria: 'Lezioni svolte nel tempo', tip: function (p) { return '<b>' + plural(p.v, 'lezione', 'lezioni') + '</b>' + p.full; } });
-    else c2.appendChild(el('p', 'ptEmpty', 'Nessuna lezione svolta in questo periodo.'));
+    var sL = series(ls.filter(function (x) { return x.at <= now; }), P, function () { return 1; }), c2 = panel('Coaching svolti nel tempo', 'Quanti coaching hai tenuto nel periodo.'); r1.appendChild(c2);
+    if (sL.some(function (q) { return q.v; })) barChart(c2, sL, { aria: 'Coaching svolti nel tempo', tip: function (p) { return '<b>' + plural(p.v, 'coaching', 'coaching') + '</b>' + p.full; } });
+    else c2.appendChild(el('p', 'ptEmpty', 'Nessun coaching svolto in questo periodo.'));
 
     var r2 = el('div', 'row2'); panels.appendChild(r2);
     var by = {}; sold.forEach(function (x) { var k = x.name || 'Pacchetto'; (by[k] = by[k] || { n: 0, v: 0 }); by[k].n++; by[k].v += x.price; });
@@ -194,7 +194,7 @@
 
     var det = el('details', 'stats-method'); det.appendChild(el('summary', null, 'Come vengono calcolate le statistiche?'));
     var bd = el('div', 'stats-method-body');
-    [['Incassi', 'Somma dei prezzi dei pacchetti registrati nel periodo, nel giorno in cui li hai assegnati all\'iscritto.'], ['Lezioni svolte', 'Lezioni già trascorse e non annullate nel periodo.'], ['Iscritti in corso', 'Iscritti che hanno ancora almeno un ingresso.']].forEach(function (x) { var p = el('p'); p.appendChild(el('strong', null, x[0] + ' ')); p.appendChild(document.createTextNode(x[1])); bd.appendChild(p); });
+    [['Incassi', 'Somma dei prezzi dei pacchetti registrati nel periodo, nel giorno in cui li hai assegnati all\'iscritto.'], ['Coaching svolti', 'Coaching già trascorsi e non annullate nel periodo.'], ['Iscritti in corso', 'Iscritti che hanno ancora almeno un ingresso.']].forEach(function (x) { var p = el('p'); p.appendChild(el('strong', null, x[0] + ' ')); p.appendChild(document.createTextNode(x[1])); bd.appendChild(p); });
     det.appendChild(bd); box.appendChild(det);
   }
 

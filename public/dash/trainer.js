@@ -13,12 +13,13 @@
     [/\bdei clienti\b/g, 'degli iscritti'], [/\bai clienti\b/g, 'agli iscritti'], [/\bdai clienti\b/g, 'dagli iscritti'],
     [/\bClienti\b/g, 'Iscritti'], [/\bclienti\b/g, 'iscritti'],
     [/\bCliente\b/g, 'Iscritto'], [/\bcliente\b/g, 'iscritto'],
-    [/\bVisite\b/g, 'Lezioni'], [/\bvisite\b/g, 'lezioni'], [/\bvisita\b/g, 'lezione'], [/\bNessuna visita\b/g, 'Nessuna lezione'],
+    [/\bNessuna visita\b/g, 'Nessun coaching'], [/\bVisite\b/g, 'Coaching'], [/\bvisite\b/g, 'coaching'], [/\bvisita\b/g, 'coaching'],
+    [/\bNuovo appuntamento\b/g, 'Nuova prenotazione coaching'], [/\bAnnulla appuntamento\b/g, 'Annulla prenotazione'], [/\bNessun appuntamento\b/g, 'Nessuna prenotazione'], [/\bAppuntamenti\b/g, 'Prenotazioni'],
     [/\bServizi\b/g, 'Pacchetti'], [/\bservizi\b/g, 'pacchetti'],
     [/\bServizio\b/g, 'Pacchetto'], [/\bservizio\b/g, 'pacchetto']
   ];
   function swap(t) {
-    if (!t || !/clien|serviz|Clien|Serviz|visit|Visit/.test(t)) return t;
+    if (!t || !/clien|serviz|Clien|Serviz|visit|Visit|ppuntament/.test(t)) return t;
     for (var i = 0; i < RULES.length; i++) t = t.replace(RULES[i][0], RULES[i][1]);
     return t;
   }
@@ -190,7 +191,7 @@
     if (!lab) return;
     var l2 = document.createElement('label');
     l2.className = lab.className;
-    l2.innerHTML = '<span>Ingressi (lezioni incluse)</span><input class="set-input" id="svcNewEntries" type="number" min="1" max="1000" step="1" inputmode="numeric" placeholder="10">';
+    l2.innerHTML = '<span>Ingressi (coaching inclusi)</span><input class="set-input" id="svcNewEntries" type="number" min="1" max="1000" step="1" inputmode="numeric" placeholder="10">';
     lab.insertAdjacentElement('afterend', l2);
   }
   var _dec = decorate;

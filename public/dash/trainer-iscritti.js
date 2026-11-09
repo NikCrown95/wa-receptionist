@@ -21,7 +21,7 @@
   function pd(x) { return new Date(String(x || '').replace(' ', 'T').replace(/(\.\d{3})\d+/, '$1')); }
   function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
-  function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultime lezioni' } : { s: 'ok', label: 'In corso' }; }
+  function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultimi coaching' } : { s: 'ok', label: 'In corso' }; }
   function curPack(m) { return m.packs.filter(function (p) { return p.left > 0; })[0] || m.packs[m.packs.length - 1] || null; }
   function lessons(m) {
     var k = pn(m.phone), now = new Date(), up = [], past = [];
@@ -34,7 +34,7 @@
   }
 
   function load() {
-    // Prima l'elenco degli iscritti (subito), poi le lezioni dallo storico: se lo storico e' lento l'elenco si vede lo stesso
+    // Prima l'elenco degli iscritti (subito), poi i coaching dallo storico: se lo storico e' lento l'elenco si vede lo stesso
     var rp = fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json().then(function (j) { if (!r.ok || !j || !Array.isArray(j.members)) throw new Error((j && j.error) || 'Elenco non disponibile'); return j; }); });
     var hp = (window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).then(function (h) { return (h && h.appointments) || []; }, function () { return []; });
     return rp.then(function (j) {
@@ -82,7 +82,7 @@
     add.innerHTML = SV('<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 20) + '<span>Nuovo iscritto</span>'; add.setAttribute('aria-label', 'Nuovo iscritto'); head.appendChild(add); host.appendChild(head);
     var kp = el('div', 'mzKp');
     [['all', 'users', 'Iscritti', cnt.all, '', ''], ['ok', 'check', 'In corso', valid, ring(pc(valid), 'ok'), 'ok'],
-     ['warn', 'clock', 'Ultime lezioni', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'], ['bad', 'alert', 'Da rinnovare', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
+     ['warn', 'clock', 'Ultimi coaching', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'], ['bad', 'alert', 'Da rinnovare', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
       var on = k[0] === 'ok' ? S.flt === 'valid' : S.flt === k[0] && k[0] !== 'all';
       var b = el('button', 'mzK ' + (k[5] || 'all')); b.type = 'button'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
       b.innerHTML = '<span class="mzKi">' + SV(IC[k[1]], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span><span class="lg">' + k[2] + '</span><span class="sh">' + (k[0] === 'ok' ? 'In corso' : k[2]) + '</span></span></span><span class="mzKr">' + k[4] + '</span>';
@@ -111,7 +111,7 @@
         var x, y; if (S.srt.indexOf('left') === 0) { x = a.left; y = b.left; } else { x = (a.last + ' ' + a.first).toLowerCase(); y = (b.last + ' ' + b.first).toLowerCase(); }
         return (x < y ? -1 : x > y ? 1 : 0) * d;
       });
-      var hd = el('div', 'mzTh'); ['Nome', 'Telefono', 'Pacchetto', 'Ingressi', 'Prossima lezione', 'Stato', 'Azioni'].forEach(function (h, i) { hd.appendChild(el('span', i === 0 ? 'on' : '', h)); });
+      var hd = el('div', 'mzTh'); ['Nome', 'Telefono', 'Pacchetto', 'Ingressi', 'Prossimo coaching', 'Stato', 'Azioni'].forEach(function (h, i) { hd.appendChild(el('span', i === 0 ? 'on' : '', h)); });
       tbl.appendChild(hd);
       if (!ms.length) { tbl.appendChild(el('div', 'mxEmpty', mem.length ? 'Nessun risultato. Prova a cambiare i filtri.' : 'Ancora nessun iscritto. Aggiungi il primo con "Nuovo iscritto".')); return; }
       (S.more || qq ? ms : ms.slice(0, 30)).forEach(function (m) {
@@ -123,7 +123,7 @@
           '<span class="mzC mzP" data-l="Telefono">' + esc(m.phone) + '</span>' +
           '<span class="mzC" data-l="Pacchetto">' + (cp ? '<span class="mzPl pl' + (Math.max(0, Object.keys(names).indexOf(cp.name)) % 4) + '">' + esc(cp.name) + '</span>' : '—') + '</span>' +
           '<span class="mzC mzI" data-l="Ingressi">' + pips(cp) + '</span>' +
-          '<span class="mzC mzE" data-l="Prossima lezione">' + sc + '</span>' +
+          '<span class="mzC mzE" data-l="Prossimo coaching">' + sc + '</span>' +
           '<span class="mzC"><span class="mzSt ' + m.status.s + '">' + esc(m.status.label) + '</span></span><span class="mzC mzA"></span>' +
           '<span class="mzC mzSm ' + m.status.s + '"><span><small>Pacchetto</small><b>' + (cp ? esc(cp.name) : '—') + '</b></span><span><small>Prossima</small><b class="mzSd">' + (nx ? dshort(nx.start) : '—') + '</b></span><span><small>Ingressi</small><b>' + (cp ? cp.left + ' / ' + cp.total : '—') + '</b></span></span>';
         var A = r.querySelector('.mzA');
@@ -150,7 +150,7 @@
       '<div class="nmBt"><button type="button" class="lb lcancel">Annulla</button><button type="button" class="lb lsave">' + (m ? 'Assegna' : 'Continua') + '</button></div>';
     document.body.appendChild(bg); document.body.appendChild(sh);
     var $ = function (q) { return sh.querySelector(q); }, pk = $('.nmPk'), sum = $('.nmSum'), err = $('.lerr');
-    function sumTx() { var x = svcs.filter(function (v) { return v.id === sel; })[0]; sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + (x.entries === 1 ? ' lezione' : ' lezioni') + '</b> da solo, negli orari che hai aperto.' : ''; }
+    function sumTx() { var x = svcs.filter(function (v) { return v.id === sel; })[0]; sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + (x.entries === 1 ? ' coaching' : ' coaching') + '</b> da solo, negli orari che hai aperto.' : ''; }
     function drawPk() {
       pk.textContent = '';
       if (!svcs.length) { pk.appendChild(el('p', 'nmNo', 'Non hai ancora creato nessun pacchetto. Aggiungilo da Impostazioni > Pacchetti.')); sum.textContent = ''; return; }
@@ -218,18 +218,18 @@
     body.appendChild(acts);
     var gs = el('div', 'mvGs');
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
-    gt('INGRESSI USATI', m.total - m.left, m.total); gt('LEZIONI IN PROGRAMMA', ls.up.length, 0, ls.up.length === 1 ? 'lezione' : 'lezioni');
+    gt('INGRESSI USATI', m.total - m.left, m.total); gt('COACHING IN PROGRAMMA', ls.up.length, 0, 'coaching');
     gt('INGRESSI RIMASTI', m.left, m.total);
     body.appendChild(gs);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
     function drawTabs() {
       tabs.textContent = '';
-      [['lez', 'Lezioni'], ['pac', 'Pacchetti']].forEach(function (t) { var b = el('button', null, t[1]); b.type = 'button'; b.setAttribute('aria-pressed', S.tab === t[0] ? 'true' : 'false'); b.addEventListener('click', function () { S.tab = t[0]; drawTabs(); drawPane(); }); tabs.appendChild(b); });
+      [['lez', 'Coaching'], ['pac', 'Pacchetti']].forEach(function (t) { var b = el('button', null, t[1]); b.type = 'button'; b.setAttribute('aria-pressed', S.tab === t[0] ? 'true' : 'false'); b.addEventListener('click', function () { S.tab = t[0]; drawTabs(); drawPane(); }); tabs.appendChild(b); });
     }
     function ev(x, past) {
       var r = el('div', 'mxEv');
-      r.innerHTML = '<span class="mxDt"><b>' + x.start.getDate() + '</b><span>' + MS[x.start.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(x.service || 'Lezione') + '</b><span>' + hm(x.start) + (past ? ' · svolta' : ' · prenotata') + '</span></span>';
+      r.innerHTML = '<span class="mxDt"><b>' + x.start.getDate() + '</b><span>' + MS[x.start.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(x.service || 'Coaching') + '</b><span>' + hm(x.start) + (past ? ' · svolta' : ' · prenotata') + '</span></span>';
       if (past) r.appendChild(el('span', 'gxChip ok', 'Svolta'));
       return r;
     }
@@ -237,9 +237,9 @@
       pane.textContent = '';
       if (S.tab === 'lez') {
         pane.appendChild(el('div', 'mxSec', 'In programma'));
-        var l1 = el('div', 'mxLs'); if (!ls.up.length) l1.appendChild(el('div', 'mxEmpty', 'Nessuna lezione in programma.')); ls.up.slice(0, 12).forEach(function (x) { l1.appendChild(ev(x, false)); }); pane.appendChild(l1);
-        pane.appendChild(el('div', 'mxSec', 'Ultime lezioni'));
-        var l2 = el('div', 'mxLs'); if (!ls.past.length) l2.appendChild(el('div', 'mxEmpty', 'Ancora nessuna lezione.')); ls.past.slice(0, 10).forEach(function (x) { l2.appendChild(ev(x, true)); }); pane.appendChild(l2);
+        var l1 = el('div', 'mxLs'); if (!ls.up.length) l1.appendChild(el('div', 'mxEmpty', 'Nessun coaching in programma.')); ls.up.slice(0, 12).forEach(function (x) { l1.appendChild(ev(x, false)); }); pane.appendChild(l1);
+        pane.appendChild(el('div', 'mxSec', 'Ultimi coaching'));
+        var l2 = el('div', 'mxLs'); if (!ls.past.length) l2.appendChild(el('div', 'mxEmpty', 'Ancora nessun coaching.')); ls.past.slice(0, 10).forEach(function (x) { l2.appendChild(ev(x, true)); }); pane.appendChild(l2);
       } else {
         var paid = m.packs.reduce(function (t, p) { return t + (Number(p.price_eur) || 0); }, 0);
         var tot = el('div', 'mxTot'); tot.innerHTML = '<div><span>Totale versato</span><b>' + eur(paid) + '</b></div><span class="gxChip ok">' + m.packs.length + (m.packs.length === 1 ? ' pacchetto' : ' pacchetti') + '</span>'; pane.appendChild(tot);
@@ -343,7 +343,7 @@
     function build() {
       svcStep = stp('svc'); if (!svcStep || pk) return;
       pk = el('div', 'ptPk'); pk.hidden = true;
-      pk.innerHTML = '<h4 class="nx-q">Chi è l’iscritto?</h4><p class="nx-qs">Solo gli iscritti con lezioni residue.</p><div class="ptPs"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" placeholder="Cerca per nome o telefono" autocomplete="off" aria-label="Cerca iscritto"></div><div class="ptPl"></div>';
+      pk.innerHTML = '<h4 class="nx-q">Chi è l’iscritto?</h4><p class="nx-qs">Solo gli iscritti con coaching residui.</p><div class="ptPs"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" placeholder="Cerca per nome o telefono" autocomplete="off" aria-label="Cerca iscritto"></div><div class="ptPl"></div>';
       svcStep.parentNode.insertBefore(pk, svcStep);
       pk.querySelector('input').addEventListener('input', fill);
     }
@@ -354,7 +354,7 @@
       if (!D) { l.appendChild(el('p', 'ptPe', 'Carico gli iscritti…')); return; }
       var all = valid(), list = all.filter(function (m) { return !q || (m.name || '').toLowerCase().indexOf(q) !== -1 || (qd && pn(m.phone).indexOf(qd) !== -1); });
       if (!all.length) {
-        var e = el('div', 'ptPe'); e.innerHTML = '<b>Nessun iscritto con lezioni residue</b><span>Aggiungi un iscritto e assegnagli un pacchetto.</span>';
+        var e = el('div', 'ptPe'); e.innerHTML = '<b>Nessun iscritto con coaching residui</b><span>Aggiungi un iscritto e assegnagli un pacchetto.</span>';
         var b = el('button', 'ptPn', 'Nuovo iscritto'); b.type = 'button';
         b.addEventListener('click', function () { var sc = document.getElementById('newScrim'); if (sc) sc.click(); setTimeout(function () { if (window.liaPtOpenNew) window.liaPtOpenNew(); }, 60); });
         e.appendChild(b); l.appendChild(e); return;
@@ -386,7 +386,7 @@
       var c = w.querySelector('.ptWc'); if (!c) { c = el('div', 'ptWc'); w.insertBefore(c, h ? h.nextSibling : w.firstChild); }
       var d = (ov.getAttribute('data-who') || '').split('|');
       var cl = document.getElementById('nwClient');
-      c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' lezione rimasta' : ' lezioni rimaste') : '') + '</small></span>';
+      c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' coaching rimasto' : ' coaching rimasti') : '') + '</small></span>';
     }
     function sync() {
       if (ov.hidden) { if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
