@@ -40,8 +40,8 @@
     bulb: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
     clock: '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
   };
-  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6", announcement: "k7", install_invite: "k7" };
-  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply, announcement: IC.mega, install_invite: IC.bulb };
+  var CLS = { closures_reminder: "k1", feedback_ask: "k2", sub_expiring: "k3", member_expiring: "k3", pt_low: "k3", medical_expiring: "k4", weekly_recap: "k5", support_reply: "k6", announcement: "k7", install_invite: "k7" };
+  var ICN = { closures_reminder: IC.closures, feedback_ask: IC.feedback, sub_expiring: IC.sub, member_expiring: IC.clock, pt_low: IC.clock, medical_expiring: IC.med, weekly_recap: IC.bars, support_reply: IC.reply, announcement: IC.mega, install_invite: IC.bulb };
 
   function build() {
     var bell = document.getElementById("bellBtn");
@@ -198,6 +198,7 @@
       try { ud = new Date(meta.until + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) {}
       return { title: meta.name || "Iscritto", text: md < 0 ? "Certificato scaduto da " + (-md) + (md === -1 ? " giorno" : " giorni") + ". Non pu\u00f2 prenotare." : "Certificato medico " + (md === 0 ? "scade oggi" : md === 1 ? "scade domani" : "scade tra " + md + " giorni") + (ud ? ", " + ud : ""), cta: "Apri la scheda", time: "" };
     }
+    if (n.type === "pt_low") return { title: meta.name || "Iscritto", text: "Gli resta un solo coaching. Ricordagli il rinnovo.", cta: "Apri la scheda", time: "" };
     if (n.type === "member_expiring") {
       var dl = Number(meta.days_left) || 0, ed = "";
       try { ed = new Date(meta.ends_on + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "long" }); } catch (e) {}
@@ -241,7 +242,7 @@
   }
   function noticeRow(n, un) {
     var t = noticeText(n);
-    return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "announcement" ? " ann a-" + esc(n.meta && n.meta.kind || "notice") : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && n.meta.member_id || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
+    return '<button type="button" class="lr-it' + (un ? " un" : "") + (n.type === "announcement" ? " ann a-" + esc(n.meta && n.meta.kind || "notice") : "") + (n.type === "medical_expiring" ? " med" + (Number(n.meta && n.meta.days_left) < 0 ? " bad" : "") : "") + '" data-type="' + esc(n.type) + '" data-mid="' + esc(n.meta && (n.meta.member_id || n.meta.phone) || "") + '"><span class="ic ' + (CLS[n.type] || "k1") + '">' + (ICN[n.type] || IC.closures) + "</span>" +
       '<span class="tx"><b>' + esc(t.title) + "</b><span>" + esc(t.text) + "</span></span>" + (t.time ? "<time>" + esc(t.time) + "</time>" : "") + (un ? '<i class="lr-dot"></i>' : "") + "</button>";
   }
 
@@ -345,6 +346,7 @@
     closePanel();
     if ((type === "member_expiring" || type === "medical_expiring") && window.liaGymMember) return window.liaGymMember(mid);
     if (type === "closures_reminder") { if (data && data.gym && window.liaGym) { var om = document.getElementById("menuTabOther"); if (om) om.click(); return setTimeout(function () { window.liaGym.openSetting("chiusure"); }, 80); } return openSettings("blocks"); }
+    if (type === "pt_low") { var oc = document.getElementById("menuTabClients"); if (oc) oc.click(); return setTimeout(function () { if (window.liaPtOpenMember) window.liaPtOpenMember(mid); }, 120); }
     if (type === "sub_expiring" || type === "sub_expired") return openSettings("subscription");
     if (type === "support_reply") { var os = document.getElementById("menuTabOther"); if (os) os.click(); return setTimeout(function () { if (window.liaSettingsOpen) window.liaSettingsOpen("help"); if (window.liaSupportList) window.liaSupportList(); }, 80); }
     if (type === "install_invite" && window.liaInstallOpen) return window.liaInstallOpen();

@@ -208,6 +208,7 @@
   }
   function assign(m) { sheet(m); }
   window.liaPtOpenNew = function () { sheet(null); };
+  window.liaPtOpenMember = function (ph) { if (!ph) return; S.mid = pn(ph); S.tab = 'lez'; render(); toTop(); };
   function post(b) {
     return fetch(url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Errore'); return j; }); });
   }
