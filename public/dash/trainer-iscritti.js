@@ -79,7 +79,7 @@
     var head = el('div', 'mzHead');
     head.innerHTML = '<div><div class="mzCrumb">' + esc(D.business || 'Personal trainer') + ' / Gestione</div><h1>Iscritti</h1><p>Gestisci iscritti e pacchetti</p></div>';
     var add = btn('', 'mzAdd', function () { window.liaPtOpenNew && window.liaPtOpenNew(D.services); });
-    add.innerHTML = SV(IC.plus, 18) + '<span>Nuovo iscritto</span>'; head.appendChild(add); host.appendChild(head);
+    add.innerHTML = SV('<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 20) + '<span>Nuovo iscritto</span>'; add.setAttribute('aria-label', 'Nuovo iscritto'); head.appendChild(add); host.appendChild(head);
     var kp = el('div', 'mzKp');
     [['all', 'users', 'Iscritti', cnt.all, '', ''], ['ok', 'check', 'In corso', valid, ring(pc(valid), 'ok'), 'ok'],
      ['warn', 'clock', 'Ultime lezioni', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'], ['bad', 'alert', 'Da rinnovare', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
