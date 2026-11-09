@@ -389,11 +389,11 @@
       c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' lezione rimasta' : ' lezioni rimaste') : '') + '</small></span>';
     }
     function sync() {
-      if (ov.hidden) { if (pk) pk.hidden = true; ov.removeAttribute('data-who'); return; }
+      if (ov.hidden) { if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
       build(); if (!pk) return;
       var sv = stp('svc'), on = sv && !sv.hidden;
-      pk.hidden = !on;
-      if (on) { fill(); ov.removeAttribute('data-who'); try { load(); } catch (e) {} }
+      if (pk.hidden === !!on) pk.hidden = !on;
+      if (on && !pk._on) { pk._on = true; fill(); if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); try { load(); } catch (e) {} } if (!on) pk._on = false;
       var w = stp('who'); if (w && !w.hidden) whoCard();
     }
     ov.classList.add('ptn');
