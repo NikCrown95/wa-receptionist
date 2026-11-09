@@ -86,11 +86,11 @@
 :root:root #ptMx .mzAv i{inset:0!important}
 :root:root #ptMx .mzRow .mzAv{border:1px solid rgba(255,255,255,.18)!important}
 :root:root #ptMx .mzRow.st-ok{--k:16%;--bd:rgba(63,175,130,.4)}
-:root:root #ptMx .mzRow.st-warn{--k:30%;--bd:#E0A93B}
-:root:root #ptMx .mzRow.st-bad{--k:30%;--bd:#E0635A}
+:root:root #ptMx .mzRow.st-warn{--k:22%;--bd:rgba(224,169,59,.4)}
+:root:root #ptMx .mzRow.st-bad{--k:22%;--bd:rgba(224,99,90,.4)}
 :root:root #ptMx .mzRow.st-ok,:root:root #ptMx .mzRow.st-ok:nth-child(even),:root:root #ptMx .mzRow.st-ok:hover,
 :root:root #ptMx .mzRow.st-warn,:root:root #ptMx .mzRow.st-warn:nth-child(even),:root:root #ptMx .mzRow.st-warn:hover,
 :root:root #ptMx .mzRow.st-bad,:root:root #ptMx .mzRow.st-bad:nth-child(even),:root:root #ptMx .mzRow.st-bad:hover{
   background:linear-gradient(135deg,color-mix(in srgb,var(--g) var(--k),#162830) 0%,#121F25 72%)!important;
   border:1.5px solid var(--bd)!important}
-:root:root #ptMx .mzRow.st-warn,:root:root #ptMx .mzRow.st-bad{border-width:2px!important}
+:root:root #ptMx .mzRow.st-warn::before,:root:root #ptMx .mzRow.st-bad::before{display:block!important}
