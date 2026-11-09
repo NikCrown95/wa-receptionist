@@ -283,7 +283,7 @@
     box.innerHTML = '<div class="ptCh"><span class="ptCa"' + (avBg ? ' style="background:' + avBg + '"' : '') + '>' + esc(ini) + '</span><div><b>' + esc(nm) + '</b><small>' + esc(when) + '</small></div></div>' +
       '<div class="ptCg"><span class="ptCt"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'rimasta' : 'rimaste') + '</small></span><span class="ptCt"><b>' + (cp ? cp.used || 0 : 0) + '</b><small>fatte</small></span><span class="ptCt"><b>' + ls.up.length + '</b><small>in agenda</small></span></div>' +
       '<div class="ptCp"><div class="ptCn"><span>' + esc(cp ? cp.name : '—') + '</span><span class="ptCs">' + esc(st.label) + '</span></div><span class="ptIsP"><i style="width:' + pct + '%"></i></span></div>' +
-      '<div class="ptCc"><span class="ptCph">' + esc(m.phone || ph) + '</span><a class="ptCb" href="tel:' + esc(String(m.phone || ph).replace(/\s+/g, '')) + '">' + ico('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>') + 'Chiama</a>' + (wa ? '<a class="ptCb w" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + ico('<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>') + 'WhatsApp</a>' : '') + '</div>';
+      '<div class="ptCc"><a class="ptCb" href="tel:' + esc(String(m.phone || ph).replace(/\s+/g, '')) + '">' + ico('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>') + 'Chiama</a>' + (wa ? '<a class="ptCb w" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + ico('<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>') + 'WhatsApp</a>' : '') + '</div>';
     injecting = true;
     if (old) old.remove();
     var prev = view.querySelector('.ptC'); if (prev) prev.remove();
