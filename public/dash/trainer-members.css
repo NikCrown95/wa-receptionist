@@ -218,3 +218,27 @@ html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb
 html.ptb #calSubApp #sheet .ap-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 html.ptb #calSubApp #sheet .ap-top{min-height:36px}
 html.ptb #calSubApp #sheet .nt-sheet>*{padding-top:6px;padding-bottom:6px}
+
+/* PT scheda appuntamento: variante C (tre numeri) */
+html.ptb #ap-view.hasPtC>.ap-hero,html.ptb #ap-view.hasPtC>.ap-card,html.ptb #ap-view.hasPtC>.nt-sheet{display:none!important}
+html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb #calSubApp .sheet#sheet:focus-visible{max-width:420px}
+.ptC{--c:#3FAF82;display:flex;flex-direction:column;gap:12px;padding:2px 2px 4px}
+.ptC.warn{--c:#D9A441}.ptC.bad{--c:#D9695F}
+.ptCh{display:flex;align-items:center;gap:12px}
+.ptCh b{display:block;font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
+.ptCh small{display:block;margin-top:2px;color:var(--muted);font-size:.88rem}
+.ptCa{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.9rem;background:#E8806F;color:#2a0f0b}
+.ptCg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ptCt{border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:14px;background:var(--card2);padding:10px 6px;text-align:center}
+.ptCt b{display:block;font-size:1.6rem;line-height:1.1;font-weight:800}
+.ptCt:first-child b{color:var(--c)}
+.ptCt small{display:block;margin-top:2px;color:var(--muted);font-size:.78rem;font-weight:600}
+.ptCp{display:flex;flex-direction:column;gap:8px}
+.ptCn{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.92rem;font-weight:600}
+.ptCs{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);white-space:nowrap}
+.ptCp .ptIsP{margin-top:0}.ptCp .ptIsP i{background:var(--c)}
+.ptCc{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid color-mix(in srgb,var(--line2) 55%,transparent)}
+.ptCph{flex:1;min-width:0;color:var(--muted);font-size:.9rem;overflow:hidden;text-overflow:ellipsis}
+.ptCb{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:12px;color:var(--text);font-size:.86rem;font-weight:600;text-decoration:none}
+.ptCb.w{color:#3FAF82}
+html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn{white-space:nowrap;font-size:.92rem;padding-left:10px;padding-right:10px}

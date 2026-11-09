@@ -266,19 +266,29 @@
     var view = document.getElementById('ap-view'), card = document.getElementById('ap-card');
     if (!view || !card || !D) return;
     var tel = view.querySelector('#ap-cli a[href^="tel:"]'), ph = tel ? pn(tel.getAttribute('href').slice(4)) : '';
-    var old = view.querySelector('.ptIs');
+    var old = view.querySelector('.ptC');
     var m = ph ? (D.members || []).filter(function (x) { return pn(x.phone) === ph; })[0] : null;
-    if (!m) { if (old) { injecting = true; old.remove(); injecting = false; } return; }
+    if (!m) { injecting = true; if (old) old.remove(); view.classList.remove('hasPtC'); injecting = false; return; }
     var cp = curPack(m), st = m.status || stOf(m), ls = lessons(m), pct = cp && cp.total ? Math.round(cp.left / cp.total * 100) : 0;
-    var box = el('div', 'ptIs ' + st.s);
     var next = ls.up[0];
-    box.innerHTML = '<div class="ptIsH"><b class="ptIsN">' + esc(cp ? cp.name : '\u2014') + '</b><span class="ptIsS">' + esc(st.label) + '</span></div>' +
-      '<div class="ptIsL"><span class="ptIsB"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'lezione rimasta' : 'lezioni rimaste') + (cp ? ' su ' + cp.total : '') + '</small></span></div>' +
-      '<span class="ptIsP"><i style="width:' + pct + '%"></i></span>' +
-      '<div class="ptIsG"><span><small>Fatte</small><b>' + (cp ? cp.used || 0 : 0) + '</b></span><span><small>In programma</small><b>' + ls.up.length + '</b></span><span><small>Prossima</small><b>' + (next ? dshort(next.start) : '\u2014') + '</b></span></div>';
+    var nmEl = view.querySelector('#ap-cli .nm'), avEl = view.querySelector('#ap-cli .av');
+    var nm = nmEl ? nmEl.textContent.trim() : m.name, ini = nm.split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+    var avBg = avEl ? (avEl.style.background || avEl.style.backgroundColor || '') : '';
+    var tm = view.querySelector('#ap-hero .tm span'), te = view.querySelector('#ap-hero .tm small'), dy = view.querySelectorAll('#ap-hero .dy span');
+    var dyEl = view.querySelector('#ap-hero .dy'); var dyTx = dy.length ? dy[0].textContent : (dyEl ? dyEl.textContent.split('\u00b7')[0].trim() : '');
+    var when = [dyTx, tm ? tm.textContent + (te ? '–' + te.textContent.replace('→', '').replace(/\s+/g, '') : '') : ((view.querySelector('#ap-hero .tm') || {}).textContent || '').replace('→', '–').replace(/\s+/g, '')].filter(Boolean).join(' · ');
+    var wa = (function (p) { var q = String(p == null ? '' : p).trim(), d = q.replace(/\D/g, ''); if (!d) return ''; if (q.charAt(0) === '+') return d; if (d.slice(0, 2) === '00') return d.slice(2); if (/^3\d{8,9}$/.test(d) || /^0\d{6,10}$/.test(d)) return '39' + d; return d; })(m.phone || ph);
+    var ico = function (d) { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+    var box = el('div', 'ptC ' + st.s);
+    box.innerHTML = '<div class="ptCh"><span class="ptCa"' + (avBg ? ' style="background:' + avBg + '"' : '') + '>' + esc(ini) + '</span><div><b>' + esc(nm) + '</b><small>' + esc(when) + '</small></div></div>' +
+      '<div class="ptCg"><span class="ptCt"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'rimasta' : 'rimaste') + '</small></span><span class="ptCt"><b>' + (cp ? cp.used || 0 : 0) + '</b><small>fatte</small></span><span class="ptCt"><b>' + ls.up.length + '</b><small>in agenda</small></span></div>' +
+      '<div class="ptCp"><div class="ptCn"><span>' + esc(cp ? cp.name : '—') + '</span><span class="ptCs">' + esc(st.label) + '</span></div><span class="ptIsP"><i style="width:' + pct + '%"></i></span></div>' +
+      '<div class="ptCc"><span class="ptCph">' + esc(m.phone || ph) + '</span><a class="ptCb" href="tel:' + esc(String(m.phone || ph).replace(/\s+/g, '')) + '">' + ico('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>') + 'Chiama</a>' + (wa ? '<a class="ptCb w" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + ico('<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>') + 'WhatsApp</a>' : '') + '</div>';
     injecting = true;
     if (old) old.remove();
-    var rows = document.getElementById('sheet-rows'); if (rows && rows.parentNode === card) card.insertBefore(box, rows); else card.appendChild(box);
+    var prev = view.querySelector('.ptC'); if (prev) prev.remove();
+    view.insertBefore(box, view.firstChild);
+    view.classList.add('hasPtC');
     injecting = false;
   }
   (function watch() {
