@@ -263,10 +263,10 @@
 
   var PAL = ["#8B7BE8", "#E58AA8", "#4FA3E0", "#E8A04B", "#4FBF8F", "#C97BD6"];
   function colorOf(id) {
-    if (id === "neg") return "#2B8A94";
+    if (id === "neg") return "var(--avc,#2B8A94)";
     if (id === "chi") return "#E5826A";
     for (var i = 0; i < S.staff.length; i++) if (S.staff[i].id === id) return PAL[i % PAL.length];
-    return "#2B8A94";
+    return "var(--avc,#2B8A94)";
   }
   function avatar(id) {
     var a = mk("span", "avAv"); a.style.setProperty("--c", colorOf(id));
