@@ -490,7 +490,7 @@
     }
     nav.appendChild(mk("div", "avSep"));
     var n = closureItems().length;
-    item("chi", "Chiusure e assenze", n ? n + " in programma" : "Nessuna in programma");
+    item("chi", window.__LIA_PT ? "Disponibilità e assenze" : "Chiusure e assenze", n ? n + " in programma" : "Nessuna in programma");
     if ((!S.team || !S.staff.length) && !isGym()) {
       var h = mk("div", "avSide-hint");
       h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
@@ -516,7 +516,11 @@
       tt.appendChild(mk("h2", null, "Chiusure e assenze"));
       tt.appendChild(mk("p", null, "Ferie, festivi, permessi: un giorno, più giorni o solo alcune ore."));
       hd.appendChild(tt); box.appendChild(hd);
-      renderChi(box);
+      if (window.__LIA_PT && window.liaPtAvail) {
+        tt.textContent = ""; tt.appendChild(mk("h2", null, "Disponibilità e assenze")); tt.appendChild(mk("p", null, "Giorno per giorno: quando ci sei e quando no."));
+        var pw = mk("div"); box.appendChild(pw);
+        window.liaPtAvail(pw, { hours: S.hours, blocks: S.blocks, post: post, reload: reload, toast: toast });
+      } else renderChi(box);
     } else editor(box, sel);
     if (sc) sc.scrollTop = y;
   }
