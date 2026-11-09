@@ -7,7 +7,7 @@
   var DS = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
   var DL = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
   var MO = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-  var P = { mode: "ab", sel: [], H: {}, per: false, anchor: null, month: null, work: {}, sig: "" };
+  var P = { mode: "ab", open: false, sel: [], H: {}, per: false, anchor: null, month: null, work: {}, sig: "" };
   var ctx = null, host = null, drag = null, saving = false;
 
   function pad(n) { return ("0" + n).slice(-2); }
@@ -115,7 +115,7 @@
       ".ptAv .pvH div.o{background:color-mix(in srgb,var(--ink) 5%,transparent)}" +
       ".ptAv .pvH div.n{opacity:.3;background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--ink) 12%,transparent) 4px 5px)}" +
       ".ptAv .pvH div.p{background:var(--ps);border-color:var(--pc);color:#fff}" +
-      ".ptAv .pvIn{animation:pvIn .22s ease-out}@keyframes pvIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.ptAv .pvPer{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;height:34px;padding:0 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}.ptAv .pvPer[aria-pressed=true]{background:var(--pb);border-color:var(--ps);color:var(--pc)}.ptAv .pvClr{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;height:32px;padding:0 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ptAv .pvAp{margin-top:2px}.ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
+      ".ptAv .pvNext{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}.ptAv .pvIn{animation:pvIn .22s ease-out}@keyframes pvIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.ptAv .pvPer{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;height:34px;padding:0 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}.ptAv .pvPer[aria-pressed=true]{background:var(--pb);border-color:var(--ps);color:var(--pc)}.ptAv .pvClr{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;height:32px;padding:0 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ptAv .pvAp{margin-top:2px}.ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
       ".ptAv .pvRp{border:1px solid var(--ps);border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--pc) 7%,var(--card))}" +
       ".ptAv .pvRp .k{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pc);font-weight:700;margin-bottom:4px}" +
       ".ptAv .pvRp .l{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.9rem}" +
@@ -126,6 +126,7 @@
       ".ptAv .pvGo:disabled{opacity:.45}" +
       ".ptAv .pvGo.sec{background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:600}" +
       "@media(max-width:620px){.ptAv .pvD{min-height:46px}}";
+    s.textContent += ".ptAvOv{--pc:#d9766d;--pb:color-mix(in srgb,#d9766d 18%,transparent);--ps:color-mix(in srgb,#d9766d 70%,transparent);position:fixed;inset:0;z-index:2147483000;background:rgba(3,10,13,.62);display:flex;align-items:center;justify-content:center;padding:16px;animation:pvFade .18s ease-out}\n.ptAvOv.av{--pc:#45b08c;--pb:color-mix(in srgb,#45b08c 18%,transparent);--ps:color-mix(in srgb,#45b08c 70%,transparent)}\n@keyframes pvFade{from{opacity:0}to{opacity:1}}\n.ptAvBox{width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--card,#10232a);border:1px solid var(--ps);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5);color:var(--ink,#e8f0f2);animation:pvPop .2s ease-out}\n@keyframes pvPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}\n.ptAvOv .pvLab{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.ptAvOv .pvLab b{font-weight:700;font-size:1.02rem}.ptAvOv .pvLab .s{color:var(--muted,#8fa9b0);font-size:.82rem;font-weight:500;width:100%}\n.ptAvOv .pvX{width:36px;height:36px;border-radius:50%;border:1px solid var(--line,#1f3a43);background:transparent;color:var(--ink,#e8f0f2);display:grid;place-items:center;cursor:pointer}\n.ptAvOv .pvQ{display:flex;flex-wrap:wrap;gap:6px}.ptAvOv .pvQ button{border:1px solid var(--line,#1f3a43);background:transparent;color:var(--ink,#e8f0f2);border-radius:99px;padding:8px 13px;font:inherit;font-size:.84rem;font-weight:600;cursor:pointer}\n.ptAvOv .pvH{display:grid;gap:3px;touch-action:none;user-select:none;-webkit-user-select:none}\n.ptAvOv .pvH div{height:50px;border-radius:7px;border:1px solid var(--line,#1f3a43);color:var(--muted,#8fa9b0);font-size:.72rem;font-weight:600;text-align:center;padding-top:5px}\n.ptAvOv .pvH div.o{background:rgba(255,255,255,.04)}.ptAvOv .pvH div.n{opacity:.3}.ptAvOv .pvH div.p{background:var(--ps);border-color:var(--pc);color:#fff}\n.ptAvOv .pvGo{border:0;border-radius:99px;background:var(--ps);color:#fff;padding:14px;font:inherit;font-weight:700;font-size:.96rem;cursor:pointer}\n";
     document.head.appendChild(s);
   }
 
@@ -152,7 +153,7 @@
     var sg = el("div", "pvSg"); sg.setAttribute("role", "group");
     [["ab", "Assenze, chiusure e ferie"], ["av", "Disponibilità"]].forEach(function (m) {
       var b = el("button", null, m[1]); b.type = "button"; b.setAttribute("aria-pressed", P.mode === m[0] ? "true" : "false");
-      b.addEventListener("click", function () { P.mode = m[0]; syncH(); draw(); });
+      b.addEventListener("click", function () { P.mode = m[0]; closeSheet(); syncH(); draw(); });
       sg.appendChild(b);
     });
     host.appendChild(sg);
@@ -188,43 +189,13 @@
     card.appendChild(el("div", "pvHint", P.per ? (P.anchor ? "Ora tocca l'ultimo giorno del periodo." : "Tocca il primo e l'ultimo giorno del periodo.") : "1. Tocca i giorni (anche più di uno). I giorni senza orari seguono l'apertura."));
     host.appendChild(card);
 
-    /* 2) ore */
-    var c2 = el("div", "pvCard pvIn"), sel = P.sel.slice().sort(), lab = el("div", "pvLab");
-    if (sel.length) {
-      var cx = dt(sel[0]);
-      lab.appendChild(el("b", null, sel.length === 1 ? DL[dow(sel[0])] + " " + cx.getDate() + " " + MO[cx.getMonth()] : sel.length + " giorni scelti"));
-      var cl = el("button", "pvClr", "Deseleziona"); cl.type = "button";
-      cl.addEventListener("click", function () { P.sel = []; P.anchor = null; syncH(); draw(); });
-      lab.appendChild(cl);
-      var base = baseOf(sel[0]).map(function (r) { return Math.floor(r[0] / 60) + ":" + pad(r[0] % 60) + "–" + Math.floor(r[1] / 60) + ":" + pad(r[1] % 60); }).join(" e ");
-      lab.appendChild(el("span", "s", (sel.length === 1 ? "Apertura: " + base + ". " : "") + (P.mode === "ab" ? "Trascina o tocca le ore in cui non ci sei." : "Trascina o tocca le ore in cui ci sei.")));
-    }
-    c2.appendChild(lab);
-    if (sel.length) {
-      var q = el("div", "pvQ");
-      var Q = P.mode === "ab"
-        ? [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Tutto il giorno", 0, 24], ["Libero", -1, -1]]
-        : [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Orari di apertura", -1, -1]];
-      Q.forEach(function (x) {
-        var b = el("button", null, x[0]); b.type = "button";
-        b.addEventListener("click", function () { quick(x); });
-        q.appendChild(b);
-      });
-      c2.appendChild(q);
-      var r = range(), cols = r[1] - r[0], gr = el("div", "pvH"); gr.style.gridTemplateColumns = "repeat(" + cols + ",minmax(0,1fr))";
-      var anyOpen = function (h) { return sel.some(function (d) { return openHour(d, h); }); };
-      for (var h = r[0]; h < r[1]; h++) {
-        var on2 = anyOpen(h), pa = !!P.H[h];
-        var c = el("div", !on2 ? "n" : pa ? "p" : "o", String(h)); c.dataset.h = String(h); if (!on2) c.dataset.off = "1";
-        gr.appendChild(c);
-      }
-      bindDrag(gr);
-      c2.appendChild(gr);
-      var ap = el("button", "pvGo pvAp", "Applica a " + (sel.length === 1 ? "questo giorno" : sel.length + " giorni")); ap.type = "button";
-      ap.addEventListener("click", apply);
-      c2.appendChild(ap);
-    }
-    if (sel.length) host.appendChild(c2);
+    /* 2) le ore si scelgono in un riquadro in primo piano */
+    if (P.sel.length) {
+      var nb = el("button", "pvGo pvNext", "Scegli le ore · " + (P.sel.length === 1 ? "1 giorno" : P.sel.length + " giorni")); nb.type = "button";
+      nb.addEventListener("click", function () { P.open = true; sheet(); });
+      host.appendChild(nb);
+    } else closeSheet();
+    if (P.open && P.sel.length) sheet();
 
     /* riepilogo */
     host.appendChild(summary());
@@ -238,6 +209,41 @@
       host.appendChild(un);
     }
     if (scroller) scroller.scrollTop = y;
+  }
+
+  var ovT = 0;
+  function closeSheet() { P.open = false; var o = document.getElementById("ptAvSheet"); if (o) o.remove(); }
+  function sheet() {
+    var old = document.getElementById("ptAvSheet"), fresh = !old; if (old) old.remove();
+    var sel = P.sel.slice().sort();
+    var ov = el("div", "ptAvOv " + P.mode); ov.id = "ptAvSheet"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
+    if (fresh) ovT = Date.now();
+    ov.addEventListener("click", function (e) { if (e.target === ov && Date.now() - ovT > 450) closeSheet(); });
+    var box = el("div", "ptAvBox"); ov.appendChild(box);
+    var hd = el("div", "pvLab"), cx = dt(sel[0]);
+    hd.appendChild(el("b", null, sel.length === 1 ? DL[dow(sel[0])] + " " + cx.getDate() + " " + MO[cx.getMonth()] : sel.length + " giorni scelti"));
+    var x = el("button", "pvX"); x.type = "button"; x.setAttribute("aria-label", "Chiudi");
+    x.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    x.addEventListener("click", closeSheet); hd.appendChild(x);
+    var base = baseOf(sel[0]).map(function (r) { return Math.floor(r[0] / 60) + ":" + pad(r[0] % 60) + "–" + Math.floor(r[1] / 60) + ":" + pad(r[1] % 60); }).join(" e ");
+    hd.appendChild(el("span", "s", (sel.length === 1 ? "Apertura: " + base + ". " : "") + (P.mode === "ab" ? "Trascina o tocca le ore in cui non ci sei." : "Trascina o tocca le ore in cui ci sei.")));
+    box.appendChild(hd);
+    var q = el("div", "pvQ");
+    var Q = P.mode === "ab"
+      ? [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Tutto il giorno", 0, 24], ["Libero", -1, -1]]
+      : [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Orari di apertura", -1, -1]];
+    Q.forEach(function (it) { var b = el("button", null, it[0]); b.type = "button"; b.addEventListener("click", function () { quick(it); }); q.appendChild(b); });
+    box.appendChild(q);
+    var r = range(), gr = el("div", "pvH"); gr.style.gridTemplateColumns = "repeat(" + (r[1] - r[0]) + ",minmax(0,1fr))";
+    for (var h = r[0]; h < r[1]; h++) {
+      var on2 = sel.some(function (d) { return openHour(d, h); }), pa = !!P.H[h];
+      var c = el("div", !on2 ? "n" : pa ? "p" : "o", String(h)); c.dataset.h = String(h); if (!on2) c.dataset.off = "1";
+      gr.appendChild(c);
+    }
+    bindDrag(gr); box.appendChild(gr);
+    var ap = el("button", "pvGo", "Applica a " + (sel.length === 1 ? "questo giorno" : sel.length + " giorni")); ap.type = "button";
+    ap.addEventListener("click", apply); box.appendChild(ap);
+    document.body.appendChild(ov);
   }
 
   function tapDay(d) {
@@ -257,7 +263,7 @@
     var H = {}, oh = {};
     P.sel.forEach(function (d) { openHours(d).forEach(function (h) { oh[h] = 1; }); });
     if (x[1] !== -1) Object.keys(oh).forEach(function (h) { h = Number(h); if (h >= x[1] && h < x[2]) H[h] = 1; });
-    P.H = H; draw();
+    P.H = H; sheet();
   }
   function apply() {
     if (!P.sel.length) return;
@@ -265,7 +271,7 @@
       var H = {}; openHours(d).forEach(function (h) { if (P.H[h]) H[h] = 1; });
       setDay(d, P.mode === "ab" ? H : fromOpen(d, H));
     });
-    P.sel = []; P.anchor = null; P.H = {}; draw();
+    P.sel = []; P.anchor = null; P.H = {}; closeSheet(); draw();
   }
 
   /* ---- trascinamento ---- */
