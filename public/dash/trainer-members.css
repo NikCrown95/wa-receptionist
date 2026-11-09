@@ -94,3 +94,34 @@
   background:linear-gradient(135deg,color-mix(in srgb,var(--g) var(--k),#162830) 0%,#121F25 72%)!important;
   border:1.5px solid var(--bd)!important}
 :root:root #ptMx .mzRow.st-warn::before,:root:root #ptMx .mzRow.st-bad::before{display:block!important}
+
+/* Scheda "Nuovo iscritto" / "Nuovo pacchetto" */
+.ptNm{padding-bottom:max(22px,env(safe-area-inset-bottom))}
+.ptNm .nmHd{display:flex;align-items:center;gap:14px;margin:2px 0 18px}
+.ptNm .nmHd h2{margin:0;font-size:1.35rem;letter-spacing:-.02em}
+.ptNm .nmHd p{margin:3px 0 0;color:var(--muted);font-size:.9rem;line-height:1.35}
+.ptNm .nmIc{flex:none;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:var(--accent-soft,color-mix(in srgb,var(--accent) 16%,transparent));color:var(--accent)}
+.ptNm .nmWho{display:flex;align-items:center;gap:12px;padding:12px 14px;margin:0 0 6px;border:1px solid var(--line2,var(--line));border-radius:16px;background:var(--card2)}
+.ptNm .nmWho b{display:block;font-size:1rem}.ptNm .nmWho small{color:var(--muted);font-size:.84rem}
+.ptNm .nmAv{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.86rem;background:var(--accent-soft,color-mix(in srgb,var(--accent) 16%,transparent));color:var(--accent)}
+.ptNm .nmSec{margin:20px 2px 10px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ptNm .nmWho+.nmSec{margin-top:16px}
+.ptNm .nmGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ptNm .nmF{min-width:0}
+.ptNm .nmF label{display:block;margin:0 0 6px 2px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.ptNm .nmF input{width:100%;box-sizing:border-box;height:52px;padding:0 16px;border-radius:15px;border:1.5px solid var(--line2,var(--line));background:var(--card2);color:var(--ink);font:inherit;font-size:1rem;outline:0;transition:border-color .15s,box-shadow .15s}
+.ptNm .nmF input::placeholder{color:color-mix(in srgb,var(--muted) 55%,transparent)}
+.ptNm .nmF input:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+.ptNm .nmPk{display:grid;gap:10px}
+.ptNm .nmP{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;text-align:left;border-radius:16px;border:1.5px solid var(--line2,var(--line));background:var(--card2);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.ptNm .nmP.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card2))}
+.ptNm .nmRd{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line2,var(--line));display:grid;place-items:center;transition:border-color .15s}
+.ptNm .nmP.on .nmRd{border-color:var(--accent)}
+.ptNm .nmP.on .nmRd::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.ptNm .nmPt{flex:1;min-width:0}.ptNm .nmPt b{display:block;font-size:.98rem;font-weight:700}.ptNm .nmPt small{display:block;margin-top:2px;color:var(--muted);font-size:.84rem}
+.ptNm .nmPr{font-weight:700;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ptNm .nmNo{margin:0;padding:14px 16px;border-radius:16px;border:1.5px dashed var(--line2,var(--line));color:var(--muted);font-size:.9rem}
+.ptNm .nmSum{margin:14px 2px 4px;color:var(--muted);font-size:.9rem;line-height:1.4}.ptNm .nmSum b{color:var(--ink)}
+.ptNm .lerr{margin-top:12px}
+.ptNm .lb{margin-top:12px}
+@media(max-width:420px){.ptNm .nmGrid{grid-template-columns:1fr}}

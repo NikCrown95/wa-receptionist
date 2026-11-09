@@ -139,21 +139,52 @@
   }
 
   // Assegna un nuovo pacchetto a un iscritto (scelta del pacchetto in un foglio)
-  function assign(m) {
-    var svcs = D.services || [];
-    var bg = el('div', 'liaSheetBg'), sh = el('div', 'liaSheet'); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
-    sh.innerHTML = '<div class="grab"></div><h2>Nuovo pacchetto</h2><p class="lsub">' + esc(m.name) + '</p><div class="lf"><label for="apS">Pacchetto sottoscritto</label><select id="apS" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit">' +
-      svcs.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.name) + ' · ' + x.entries + ' ingressi</option>'; }).join('') + '</select></div><div class="lerr" role="alert" hidden></div><button type="button" class="lb lsave">Assegna</button><button type="button" class="lb lcancel">Annulla</button>';
+  // Scheda "Nuovo iscritto" / "Nuovo pacchetto": dati dell'iscritto + pacchetto acquistato (schede da scegliere, niente menu a tendina)
+  function sheet(m) {
+    var svcs = (D && D.services) || [], sel = svcs[0] ? svcs[0].id : null;
+    var bg = el('div', 'liaSheetBg'), sh = el('div', 'liaSheet ptNm'); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
+    var who = m ? '<div class="nmWho"><span class="nmAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div><b>' + esc(m.name) + '</b><small>' + esc(m.phone) + '</small></div></div>' : '';
+    var data = m ? '' : '<div class="nmSec">Dati dell’iscritto</div><div class="nmGrid"><div class="nmF"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off" autocapitalize="words" placeholder="Giulia"></div><div class="nmF"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off" autocapitalize="words" placeholder="Bianchi"></div></div><div class="nmF"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off" placeholder="333 123 4567"></div>';
+    sh.innerHTML = '<div class="grab"></div><div class="nmHd"><span class="nmIc">' + SV(m ? '<rect x="3" y="7" width="18" height="12" rx="3"/><path d="M3 11h18M7 15h3"/>' : '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 22) + '</span><div><h2>' + (m ? 'Nuovo pacchetto' : 'Nuovo iscritto') + '</h2><p>' + (m ? 'Rinnovo o nuovo acquisto, dopo il pagamento.' : 'Registralo dopo il pagamento: potrà prenotare da solo.') + '</p></div></div>' + who + data +
+      '<div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div><div class="lerr" role="alert" hidden></div><button type="button" class="lb lsave">' + (m ? 'Assegna pacchetto' : 'Salva iscritto') + '</button><button type="button" class="lb lcancel">Annulla</button>';
     document.body.appendChild(bg); document.body.appendChild(sh);
+    var $ = function (q) { return sh.querySelector(q); }, pk = $('.nmPk'), sum = $('.nmSum'), err = $('.lerr');
+    function sumTx() { var x = svcs.filter(function (v) { return v.id === sel; })[0]; sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + (x.entries === 1 ? ' lezione' : ' lezioni') + '</b> da solo, negli orari che hai aperto.' : ''; }
+    function drawPk() {
+      pk.textContent = '';
+      if (!svcs.length) { pk.appendChild(el('p', 'nmNo', 'Non hai ancora creato nessun pacchetto. Aggiungilo da Impostazioni > Pacchetti.')); sum.textContent = ''; return; }
+      svcs.forEach(function (x) {
+        var on = x.id === sel, b = el('button', 'nmP' + (on ? ' on' : '')); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', on ? 'true' : 'false');
+        var sub = x.entries + (x.entries === 1 ? ' ingresso' : ' ingressi') + (x.duration_min ? ' · ' + x.duration_min + ' min' : '');
+        b.innerHTML = '<span class="nmRd"></span><span class="nmPt"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span>' + (x.price_eur != null && x.price_eur !== '' ? '<span class="nmPr">' + eur(x.price_eur) + '</span>' : '');
+        b.addEventListener('click', function () { sel = x.id; drawPk(); });
+        pk.appendChild(b);
+      });
+      sumTx();
+    }
+    drawPk();
     function close() { bg.classList.remove('on'); sh.classList.remove('on'); setTimeout(function () { bg.remove(); sh.remove(); }, 300); }
-    bg.addEventListener('click', close); sh.querySelector('.lcancel').addEventListener('click', close);
+    bg.addEventListener('click', close); $('.lcancel').addEventListener('click', close);
     requestAnimationFrame(function () { bg.classList.add('on'); sh.classList.add('on'); });
-    sh.querySelector('.lsave').addEventListener('click', function () {
-      var b = this, err = sh.querySelector('.lerr'); b.disabled = true; err.hidden = true;
-      post({ action: 'assign', service_id: sh.querySelector('#apS').value, name: m.name, phone: m.phone }).then(function () { close(); return window.liaPtRefresh(); })
-        .catch(function (e) { b.disabled = false; err.textContent = e.message; err.hidden = false; });
+    $('.lsave').addEventListener('click', function () {
+      var b = this;
+      function fail(t) { err.textContent = t; err.hidden = false; }
+      var body = { action: 'assign', service_id: sel };
+      if (!svcs.length || !sel) return fail('Crea prima un pacchetto da Impostazioni.');
+      if (m) { body.name = m.name; body.phone = m.phone; }
+      else {
+        var f = $('#nmF').value.trim(), l = $('#nmL').value.trim(), p = $('#nmP').value.trim();
+        if (f.length < 2 || l.length < 2) return fail('Scrivi nome e cognome.');
+        if (pn(p).length < 6) return fail('Scrivi il numero di telefono.');
+        body.first_name = f; body.last_name = l; body.phone = p;
+      }
+      b.disabled = true; err.hidden = true;
+      post(body).then(function () { close(); return window.liaPtRefresh(); }).catch(function (e) { b.disabled = false; fail(e.message); });
     });
+    if (!m) setTimeout(function () { var i = $('#nmF'); if (i) i.focus(); }, 350);
   }
+  function assign(m) { sheet(m); }
+  window.liaPtOpenNew = function () { sheet(null); };
   function post(b) {
     return fetch(url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Errore'); return j; }); });
   }
