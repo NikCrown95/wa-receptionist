@@ -21,7 +21,7 @@
   function pd(x) { return new Date(String(x || '').replace(' ', 'T').replace(/(\.\d{3})\d+/, '$1')); }
   function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
-  function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Esaurito' } : m.left <= 2 ? { s: 'warn', label: 'In esaurimento' } : { s: 'ok', label: 'Attivo' }; }
+  function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultime lezioni' } : { s: 'ok', label: 'In corso' }; }
   function curPack(m) { return m.packs.filter(function (p) { return p.left > 0; })[0] || m.packs[m.packs.length - 1] || null; }
   function lessons(m) {
     var k = pn(m.phone), now = new Date(), up = [], past = [];
@@ -81,11 +81,11 @@
     var add = btn('', 'mzAdd', function () { window.liaPtOpenNew && window.liaPtOpenNew(D.services); });
     add.innerHTML = SV(IC.plus, 18) + '<span>Nuovo iscritto</span>'; head.appendChild(add); host.appendChild(head);
     var kp = el('div', 'mzKp');
-    [['all', 'users', 'Iscritti', cnt.all, '', ''], ['ok', 'check', 'Con ingressi', valid, ring(pc(valid), 'ok'), 'ok'],
-     ['warn', 'clock', 'In esaurimento', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'], ['bad', 'alert', 'Esauriti', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
+    [['all', 'users', 'Iscritti', cnt.all, '', ''], ['ok', 'check', 'In corso', valid, ring(pc(valid), 'ok'), 'ok'],
+     ['warn', 'clock', 'Ultime lezioni', cnt.warn, ring(pc(cnt.warn), 'warn'), 'warn'], ['bad', 'alert', 'Da rinnovare', cnt.bad, ring(pc(cnt.bad), 'bad'), 'bad']].forEach(function (k) {
       var on = k[0] === 'ok' ? S.flt === 'valid' : S.flt === k[0] && k[0] !== 'all';
       var b = el('button', 'mzK ' + (k[5] || 'all')); b.type = 'button'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.innerHTML = '<span class="mzKi">' + SV(IC[k[1]], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span><span class="lg">' + k[2] + '</span><span class="sh">' + (k[0] === 'ok' ? 'Con ingressi' : k[2]) + '</span></span></span><span class="mzKr">' + k[4] + '</span>';
+      b.innerHTML = '<span class="mzKi">' + SV(IC[k[1]], 24) + '</span><span class="mzKt"><b>' + k[3] + '</b><span><span class="lg">' + k[2] + '</span><span class="sh">' + (k[0] === 'ok' ? 'In corso' : k[2]) + '</span></span></span><span class="mzKr">' + k[4] + '</span>';
       b.addEventListener('click', function () { S.flt = k[0] === 'ok' ? (S.flt === 'valid' ? 'all' : 'valid') : k[0] === 'all' ? 'all' : (S.flt === k[0] ? 'all' : k[0]); S.more = false; render(); });
       kp.appendChild(b);
     });
