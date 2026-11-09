@@ -3692,5 +3692,8 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .inTxt{font-size:.92rem;line-height:1.45;color:var(--ink)}
 
 /* personal trainer, settimana: ore in cui non ci sei (assenze, chiusure, ferie) a strisce */
-#calSubApp .wkTc.absent{position:relative;background:color-mix(in srgb,#e5484d 14%,transparent)}
-#calSubApp .wkTc.absF::after{content:'Assente';position:absolute;left:4px;top:3px;font-size:10px;font-weight:600;color:#e5484d;pointer-events:none}
+#calSubApp .wkTc.absent{position:relative;background:color-mix(in srgb,#e5484d 5%,transparent);box-shadow:inset 1px 0 0 color-mix(in srgb,#e5484d 55%,transparent),inset -1px 0 0 color-mix(in srgb,#e5484d 55%,transparent)}
+#calSubApp .wkTc.absent.absT{box-shadow:inset 1px 0 0 color-mix(in srgb,#e5484d 55%,transparent),inset -1px 0 0 color-mix(in srgb,#e5484d 55%,transparent),inset 0 1px 0 color-mix(in srgb,#e5484d 55%,transparent);border-radius:8px 8px 0 0}
+#calSubApp .wkTc.absent.absB{box-shadow:inset 1px 0 0 color-mix(in srgb,#e5484d 55%,transparent),inset -1px 0 0 color-mix(in srgb,#e5484d 55%,transparent),inset 0 -1px 0 color-mix(in srgb,#e5484d 55%,transparent);border-radius:0 0 8px 8px}
+#calSubApp .wkTc.absent.absT.absB{box-shadow:inset 0 0 0 1px color-mix(in srgb,#e5484d 55%,transparent);border-radius:8px}
+#calSubApp .wkTc.absM::after{content:'Assente';position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:11px;font-weight:600;color:#ff8a8d;pointer-events:none}
