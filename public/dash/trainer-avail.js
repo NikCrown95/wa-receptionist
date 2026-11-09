@@ -115,7 +115,7 @@
       ".ptAv .pvH div.o{background:color-mix(in srgb,var(--ink) 5%,transparent)}" +
       ".ptAv .pvH div.n{opacity:.3;background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--ink) 12%,transparent) 4px 5px)}" +
       ".ptAv .pvH div.p{background:var(--ps);border-color:var(--pc);color:#fff}" +
-      ".ptAv .pvPer{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;height:34px;padding:0 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}.ptAv .pvPer[aria-pressed=true]{background:var(--pb);border-color:var(--ps);color:var(--pc)}.ptAv .pvClr{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;height:32px;padding:0 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ptAv .pvAp{margin-top:2px}.ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
+      ".ptAv .pvIn{animation:pvIn .22s ease-out}@keyframes pvIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.ptAv .pvPer{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;height:34px;padding:0 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}.ptAv .pvPer[aria-pressed=true]{background:var(--pb);border-color:var(--ps);color:var(--pc)}.ptAv .pvClr{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;height:32px;padding:0 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ptAv .pvAp{margin-top:2px}.ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
       ".ptAv .pvRp{border:1px solid var(--ps);border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--pc) 7%,var(--card))}" +
       ".ptAv .pvRp .k{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pc);font-weight:700;margin-bottom:4px}" +
       ".ptAv .pvRp .l{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.9rem}" +
@@ -189,9 +189,8 @@
     host.appendChild(card);
 
     /* 2) ore */
-    var c2 = el("div", "pvCard"), sel = P.sel.slice().sort(), lab = el("div", "pvLab");
-    if (!sel.length) { lab.appendChild(el("b", null, "2. Poi scegli le ore")); lab.appendChild(el("span", "s", "Seleziona prima uno o più giorni nel calendario.")); }
-    else {
+    var c2 = el("div", "pvCard pvIn"), sel = P.sel.slice().sort(), lab = el("div", "pvLab");
+    if (sel.length) {
       var cx = dt(sel[0]);
       lab.appendChild(el("b", null, sel.length === 1 ? DL[dow(sel[0])] + " " + cx.getDate() + " " + MO[cx.getMonth()] : sel.length + " giorni scelti"));
       var cl = el("button", "pvClr", "Deseleziona"); cl.type = "button";
@@ -225,7 +224,7 @@
       ap.addEventListener("click", apply);
       c2.appendChild(ap);
     }
-    host.appendChild(c2);
+    if (sel.length) host.appendChild(c2);
 
     /* riepilogo */
     host.appendChild(summary());
