@@ -60,6 +60,10 @@
     return h + '</span><em class="mzPn">' + k + '/' + n + '</em>';
   }
 
+  function toTop() {
+    function go() { try { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; for (var n = root; n && n !== document.body; n = n.parentElement) { if (n.scrollTop) n.scrollTop = 0; } var sc = document.querySelectorAll('main,.page,.view,.content,#ptMx'); for (var i = 0; i < sc.length; i++) if (sc[i].scrollTop) sc[i].scrollTop = 0; } catch (e) { } }
+    go(); if (window.requestAnimationFrame) requestAnimationFrame(go); setTimeout(go, 60); setTimeout(go, 250);
+  }
   function render() {
     var wrap = document.querySelector('.clientsWrap');
     if (!wrap) return;
@@ -128,7 +132,7 @@
           '<span class="mzC mzSm ' + m.status.s + '"><span><small>Pacchetto</small><b>' + (cp ? esc(cp.name) : '—') + '</b></span><span><small>Prossima</small><b class="mzSd">' + (nx ? dshort(nx.start) : '—') + '</b></span><span><small>Ingressi</small><b>' + (cp ? cp.left + ' / ' + cp.total : '—') + '</b></span></span>';
         var A = r.querySelector('.mzA');
         if (D.services && D.services.length) { var rb = btn('', 'mzRn', function (e) { e.stopPropagation(); assign(m); }); rb.innerHTML = SV('<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/>', 16) + '<span>Rinnova</span>'; rb.setAttribute('aria-label', 'Nuovo pacchetto'); A.appendChild(rb); }
-        function open() { S.mid = pn(m.phone); S.tab = 'lez'; render(); try { window.scrollTo(0, 0); } catch (e) { } }
+        function open() { S.mid = pn(m.phone); S.tab = 'lez'; render(); toTop(); }
         r.addEventListener('click', open); r.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
         tbl.appendChild(r);
       });
