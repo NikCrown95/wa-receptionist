@@ -3690,3 +3690,6 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .inStep{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card)}
 .liaSheet .inNum{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:800;font-size:.82rem}
 .liaSheet .inTxt{font-size:.92rem;line-height:1.45;color:var(--ink)}
+
+/* personal trainer, settimana: ore in cui non ci sei (assenze, chiusure, ferie) a strisce */
+#calSubApp .wkTc.absent{background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--muted) 30%,transparent) 5px 6px)}
