@@ -161,7 +161,7 @@
       b.addEventListener("click", function () { P.mode = m[0]; closeSheet(); syncH(); draw(); });
       sg.appendChild(b);
     });
-    host.appendChild(sg);
+    /* solo assenze: l'interruttore con la disponibilita' non si mostra */
 
     /* 1) giorni */
     var card = el("div", "pvCard"), ms = monthStart(), md = dt(ms);
@@ -191,7 +191,7 @@
       cal.appendChild(b);
     })(ms.slice(0, 8) + pad(k), k);
     card.appendChild(cal);
-    card.appendChild(el("div", "pvHint", P.per ? (P.anchor ? "Ora tocca l'ultimo giorno del periodo." : "Tocca il primo e l'ultimo giorno del periodo.") : "1. Tocca i giorni (anche più di uno). I giorni senza orari seguono l'apertura."));
+    card.appendChild(el("div", "pvHint", P.per ? (P.anchor ? "Ora tocca l'ultimo giorno del periodo." : "Tocca il primo e l'ultimo giorno del periodo.") : "Tocca i giorni (anche più di uno), poi scegli le ore."));
     host.appendChild(card);
 
     /* 2) le ore si scelgono in un riquadro in primo piano */
