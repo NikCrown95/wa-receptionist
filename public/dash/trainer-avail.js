@@ -7,7 +7,7 @@
   var DS = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
   var DL = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
   var MO = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-  var P = { mode: "ab", act: null, cp: null, month: null, work: {}, sig: "" };
+  var P = { mode: "ab", sel: [], H: {}, per: false, anchor: null, month: null, work: {}, sig: "" };
   var ctx = null, host = null, drag = null, saving = false;
 
   function pad(n) { return ("0" + n).slice(-2); }
@@ -115,7 +115,7 @@
       ".ptAv .pvH div.o{background:color-mix(in srgb,var(--ink) 5%,transparent)}" +
       ".ptAv .pvH div.n{opacity:.3;background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--ink) 12%,transparent) 4px 5px)}" +
       ".ptAv .pvH div.p{background:var(--ps);border-color:var(--pc);color:#fff}" +
-      ".ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
+      ".ptAv .pvPer{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;height:34px;padding:0 12px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}.ptAv .pvPer[aria-pressed=true]{background:var(--pb);border-color:var(--ps);color:var(--pc)}.ptAv .pvClr{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:99px;height:32px;padding:0 12px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}.ptAv .pvAp{margin-top:2px}.ptAv .pvHint{color:var(--muted);font-size:.8rem;font-weight:500}" +
       ".ptAv .pvRp{border:1px solid var(--ps);border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--pc) 7%,var(--card))}" +
       ".ptAv .pvRp .k{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pc);font-weight:700;margin-bottom:4px}" +
       ".ptAv .pvRp .l{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.9rem}" +
@@ -132,6 +132,16 @@
   function tick() { return host && host.isConnected; }
   function isPast(d) { return d < today(); }
   function monthStart() { return P.month || (P.month = today().slice(0, 7) + "-01"); }
+  function editable(d) { return !isPast(d) && baseOf(d).length > 0; }
+
+  /* ore "in lavorazione" (H): valgono per tutti i giorni scelti finche' non premi Applica */
+  function painted(d) { return P.mode === "ab" ? copyOf(cur(d)) : openSet(d); }
+  function syncH() {
+    var sel = P.sel; P.H = {};
+    if (!sel.length) return;
+    var f = JSON.stringify(keys(painted(sel[0])));
+    if (sel.every(function (d) { return JSON.stringify(keys(painted(d))) === f; })) P.H = painted(sel[0]);
+  }
 
   function draw() {
     if (!tick()) return;
@@ -142,12 +152,12 @@
     var sg = el("div", "pvSg"); sg.setAttribute("role", "group");
     [["ab", "Assenze, chiusure e ferie"], ["av", "Disponibilità"]].forEach(function (m) {
       var b = el("button", null, m[1]); b.type = "button"; b.setAttribute("aria-pressed", P.mode === m[0] ? "true" : "false");
-      b.addEventListener("click", function () { P.mode = m[0]; draw(); });
+      b.addEventListener("click", function () { P.mode = m[0]; syncH(); draw(); });
       sg.appendChild(b);
     });
     host.appendChild(sg);
 
-    /* calendario */
+    /* 1) giorni */
     var card = el("div", "pvCard"), ms = monthStart(), md = dt(ms);
     var hd = el("div", "pvHd"), tt = el("b", null, MO[md.getMonth()] + " " + md.getFullYear());
     var ar = el("div", "pvArr"), pv = el("button", null, "‹"), nx = el("button", null, "›");
@@ -157,15 +167,17 @@
     nx.disabled = md >= lim;
     pv.addEventListener("click", function () { var x = dt(ms); x.setMonth(x.getMonth() - 1); P.month = ymd(x).slice(0, 7) + "-01"; draw(); });
     nx.addEventListener("click", function () { var x = dt(ms); x.setMonth(x.getMonth() + 1); P.month = ymd(x).slice(0, 7) + "-01"; draw(); });
-    ar.appendChild(pv); ar.appendChild(nx); hd.appendChild(tt); hd.appendChild(ar); card.appendChild(hd);
+    var pr = el("button", "pvPer", "Periodo"); pr.type = "button"; pr.setAttribute("aria-pressed", P.per ? "true" : "false");
+    pr.addEventListener("click", function () { P.per = !P.per; P.anchor = null; draw(); });
+    ar.appendChild(pr); ar.appendChild(pv); ar.appendChild(nx); hd.appendChild(tt); hd.appendChild(ar); card.appendChild(hd);
     var cal = el("div", "pvCal");
     DS.forEach(function (d) { cal.appendChild(el("div", "pvDw", d)); });
     for (var i = 0; i < dow(ms); i++) cal.appendChild(el("div"));
     var n = new Date(md.getFullYear(), md.getMonth() + 1, 0).getDate(), dirty = {};
     dirtyDays().forEach(function (d) { dirty[d] = 1; });
     for (var k = 1; k <= n; k++) (function (d, num) {
-      var closed = !baseOf(d).length, off = isPast(d) || closed;
-      var b = el("button", "pvD" + (keys(cur(d)).length ? " k" : "") + (P.act === d ? " a" : "") + (d === today() ? " t" : "") + (off ? " x" : "") + (dirty[d] ? " u" : ""));
+      var off = !editable(d), on = P.sel.indexOf(d) > -1;
+      var b = el("button", "pvD" + (keys(cur(d)).length ? " k" : "") + (on ? " a" : "") + (d === today() ? " t" : "") + (off ? " x" : "") + (dirty[d] ? " u" : ""));
       b.type = "button"; b.appendChild(document.createTextNode(String(num)));
       var lb = label(d); if (lb) b.appendChild(el("small", null, lb === "tutto il giorno" ? "tutto il g." : lb));
       if (off) b.disabled = true;
@@ -173,41 +185,45 @@
       cal.appendChild(b);
     })(ms.slice(0, 8) + pad(k), k);
     card.appendChild(cal);
-    var hint = el("div", "pvHint", "Tocca un giorno e imposta le sue ore. I giorni senza orari seguono l'apertura.");
-    card.appendChild(hint);
+    card.appendChild(el("div", "pvHint", P.per ? (P.anchor ? "Ora tocca l'ultimo giorno del periodo." : "Tocca il primo e l'ultimo giorno del periodo.") : "1. Tocca i giorni (anche più di uno). I giorni senza orari seguono l'apertura."));
     host.appendChild(card);
 
-    /* ore del giorno */
-    var c2 = el("div", "pvCard");
-    var lab = el("div", "pvLab"), a = P.act;
-    if (!a) { lab.appendChild(el("b", null, "Scegli un giorno nel calendario")); }
+    /* 2) ore */
+    var c2 = el("div", "pvCard"), sel = P.sel.slice().sort(), lab = el("div", "pvLab");
+    if (!sel.length) { lab.appendChild(el("b", null, "2. Poi scegli le ore")); lab.appendChild(el("span", "s", "Seleziona prima uno o più giorni nel calendario.")); }
     else {
-      var cx = dt(a);
-      lab.appendChild(el("b", null, DL[dow(a)] + " " + cx.getDate() + " " + MO[cx.getMonth()]));
-      var base = baseOf(a), bt = base.map(function (r) { return Math.floor(r[0] / 60) + ":" + pad(r[0] % 60) + "–" + Math.floor(r[1] / 60) + ":" + pad(r[1] % 60); }).join(" e ");
-      lab.appendChild(el("span", "s", "Apertura: " + bt + (P.mode === "ab" ? ". Trascina sulle ore in cui non ci sei." : ". Trascina sulle ore in cui ci sei.")));
+      var cx = dt(sel[0]);
+      lab.appendChild(el("b", null, sel.length === 1 ? DL[dow(sel[0])] + " " + cx.getDate() + " " + MO[cx.getMonth()] : sel.length + " giorni scelti"));
+      var cl = el("button", "pvClr", "Deseleziona"); cl.type = "button";
+      cl.addEventListener("click", function () { P.sel = []; P.anchor = null; syncH(); draw(); });
+      lab.appendChild(cl);
+      var base = baseOf(sel[0]).map(function (r) { return Math.floor(r[0] / 60) + ":" + pad(r[0] % 60) + "–" + Math.floor(r[1] / 60) + ":" + pad(r[1] % 60); }).join(" e ");
+      lab.appendChild(el("span", "s", (sel.length === 1 ? "Apertura: " + base + ". " : "") + (P.mode === "ab" ? "Trascina o tocca le ore in cui non ci sei." : "Trascina o tocca le ore in cui ci sei.")));
     }
     c2.appendChild(lab);
-    if (a) {
+    if (sel.length) {
       var q = el("div", "pvQ");
       var Q = P.mode === "ab"
         ? [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Tutto il giorno", 0, 24], ["Libero", -1, -1]]
-        : [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Orari di apertura", -1, -1], ["Non ci sono", 0, -2]];
+        : [["Mattina", 0, 13], ["Pomeriggio", 13, 18], ["Sera", 18, 24], ["Orari di apertura", -1, -1]];
       Q.forEach(function (x) {
         var b = el("button", null, x[0]); b.type = "button";
-        b.addEventListener("click", function () { quick(a, x); });
+        b.addEventListener("click", function () { quick(x); });
         q.appendChild(b);
       });
       c2.appendChild(q);
       var r = range(), cols = r[1] - r[0], gr = el("div", "pvH"); gr.style.gridTemplateColumns = "repeat(" + cols + ",minmax(0,1fr))";
-      var b0 = cur(a), op = openSet(a);
+      var anyOpen = function (h) { return sel.some(function (d) { return openHour(d, h); }); };
       for (var h = r[0]; h < r[1]; h++) {
-        var on = openHour(a, h), painted = P.mode === "ab" ? !!b0[h] : !!op[h];
-        var c = el("div", !on ? "n" : painted ? "p" : "o", String(h)); c.dataset.h = String(h); if (!on) c.dataset.off = "1";
+        var on2 = anyOpen(h), pa = !!P.H[h];
+        var c = el("div", !on2 ? "n" : pa ? "p" : "o", String(h)); c.dataset.h = String(h); if (!on2) c.dataset.off = "1";
         gr.appendChild(c);
       }
-      bindDrag(gr, a);
+      bindDrag(gr);
       c2.appendChild(gr);
+      var ap = el("button", "pvGo pvAp", "Applica a " + (sel.length === 1 ? "questo giorno" : sel.length + " giorni")); ap.type = "button";
+      ap.addEventListener("click", apply);
+      c2.appendChild(ap);
     }
     host.appendChild(c2);
 
@@ -219,41 +235,57 @@
     host.appendChild(go);
     if (dirtyDays().length) {
       var un = el("button", "pvGo sec", "Annulla le modifiche"); un.type = "button";
-      un.addEventListener("click", function () { P.work = {}; draw(); });
+      un.addEventListener("click", function () { P.work = {}; syncH(); draw(); });
       host.appendChild(un);
     }
     if (scroller) scroller.scrollTop = y;
   }
 
-  function tapDay(d) { P.act = d; draw(); }
-  function quick(d, x) {
-    var oh = openHours(d), pick = {};
-    if (x[1] === -1) { setDay(d, {}); draw(); return; }               /* libero / orari di apertura */
-    if (x[2] === -2) { var all = {}; oh.forEach(function (h) { all[h] = 1; }); setDay(d, all); draw(); return; } /* non ci sono */
-    oh.forEach(function (h) { if (h >= x[1] && h < x[2]) pick[h] = 1; });
-    if (P.mode === "ab") setDay(d, pick); else setDay(d, fromOpen(d, pick));
-    draw();
+  function tapDay(d) {
+    if (!editable(d)) return;
+    var i = P.sel.indexOf(d);
+    if (P.per) {
+      if (!P.anchor) { P.anchor = d; if (i < 0) P.sel.push(d); }
+      else {
+        var a = P.anchor < d ? P.anchor : d, z = P.anchor < d ? d : P.anchor;
+        for (var x = a; x <= z; x = addD(x, 1)) if (editable(x) && P.sel.indexOf(x) < 0) P.sel.push(x);
+        P.anchor = null;
+      }
+    } else if (i > -1) P.sel.splice(i, 1); else P.sel.push(d);
+    syncH(); draw();
+  }
+  function quick(x) {
+    var H = {}, oh = {};
+    P.sel.forEach(function (d) { openHours(d).forEach(function (h) { oh[h] = 1; }); });
+    if (x[1] !== -1) Object.keys(oh).forEach(function (h) { h = Number(h); if (h >= x[1] && h < x[2]) H[h] = 1; });
+    P.H = H; draw();
+  }
+  function apply() {
+    if (!P.sel.length) return;
+    P.sel.forEach(function (d) {
+      var H = {}; openHours(d).forEach(function (h) { if (P.H[h]) H[h] = 1; });
+      setDay(d, P.mode === "ab" ? H : fromOpen(d, H));
+    });
+    P.sel = []; P.anchor = null; P.H = {}; draw();
   }
 
   /* ---- trascinamento ---- */
-  function bindDrag(gr, d) {
+  function bindDrag(gr) {
     function hit(e) {
       var t = document.elementFromPoint(e.clientX, e.clientY);
       if (!t || !t.dataset || !t.dataset.h || t.dataset.off) return;
       var h = Number(t.dataset.h); if (drag.last === h) return; drag.last = h;
-      if (drag.v === null) drag.v = drag.set[h] ? 0 : 1;
-      if (drag.v) drag.set[h] = 1; else delete drag.set[h];
+      if (drag.v === null) drag.v = P.H[h] ? 0 : 1;
+      if (drag.v) P.H[h] = 1; else delete P.H[h];
       t.className = drag.v ? "p" : "o";
-      setDay(d, P.mode === "ab" ? copyOf(drag.set) : fromOpen(d, drag.set));
-      drag.dirty = true;
     }
     gr.addEventListener("pointerdown", function (e) {
-      drag = { v: null, last: null, set: P.mode === "ab" ? copyOf(cur(d)) : openSet(d), dirty: false };
+      drag = { v: null, last: null };
       try { gr.setPointerCapture(e.pointerId); } catch (x) { }
       hit(e);
     });
     gr.addEventListener("pointermove", function (e) { if (drag) hit(e); });
-    function end() { if (!drag) return; var dd = drag.dirty; drag = null; if (dd) draw(); }
+    function end() { drag = null; }
     gr.addEventListener("pointerup", end); gr.addEventListener("pointercancel", end);
   }
 
@@ -299,7 +331,8 @@
     ctx = c; host = box;
     var sig = JSON.stringify([c.hours, c.blocks]);
     if (sig !== P.sig) { P.sig = sig; srv = fromServer(); /* dati nuovi dal server: le modifiche non salvate restano solo se i giorni non sono cambiati */ if (!Object.keys(P.work).length) P.work = {}; }
-    if (!P.act) { var t = today(), g = 0; while (g++ < 40 && !baseOf(t).length) t = addD(t, 1); P.act = t; P.month = t.slice(0, 7) + "-01"; }
+    if (!P.month) P.month = today().slice(0, 7) + "-01";
+    P.sel = P.sel.filter(editable);
     draw();
   };
 })();
