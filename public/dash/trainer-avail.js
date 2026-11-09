@@ -142,7 +142,7 @@
     var sg = el("div", "pvSg"); sg.setAttribute("role", "group");
     [["ab", "Assenze, chiusure e ferie"], ["av", "Disponibilità"]].forEach(function (m) {
       var b = el("button", null, m[1]); b.type = "button"; b.setAttribute("aria-pressed", P.mode === m[0] ? "true" : "false");
-      b.addEventListener("click", function () { P.mode = m[0]; P.cp = null; draw(); });
+      b.addEventListener("click", function () { P.mode = m[0]; draw(); });
       sg.appendChild(b);
     });
     host.appendChild(sg);
@@ -173,7 +173,7 @@
       cal.appendChild(b);
     })(ms.slice(0, 8) + pad(k), k);
     card.appendChild(cal);
-    var hint = el("div", "pvHint", P.cp === "one" ? "Tocca i giorni su cui copiare le stesse ore." : P.cp === "to" ? "Tocca l'ultimo giorno: copio le ore su tutti i giorni fino a lì." : "Tocca un giorno e imposta le sue ore. I giorni senza orari seguono l'apertura.");
+    var hint = el("div", "pvHint", "Tocca un giorno e imposta le sue ore. I giorni senza orari seguono l'apertura.");
     card.appendChild(hint);
     host.appendChild(card);
 
@@ -184,14 +184,6 @@
     else {
       var cx = dt(a);
       lab.appendChild(el("b", null, DL[dow(a)] + " " + cx.getDate() + " " + MO[cx.getMonth()]));
-      var nv = el("div", "pvNav");
-      var b1 = el("button", null, "Giorno dopo →"); b1.type = "button";
-      b1.addEventListener("click", function () { var x = addD(a, 1), g = 0; while (g++ < 40 && (isPast(x) || !baseOf(x).length)) x = addD(x, 1); P.act = x; P.cp = null; P.month = x.slice(0, 7) + "-01"; draw(); });
-      var b2 = el("button", null, "Copia su…"); b2.type = "button"; b2.setAttribute("aria-pressed", P.cp === "one" ? "true" : "false");
-      b2.addEventListener("click", function () { P.cp = P.cp === "one" ? null : "one"; draw(); });
-      var b3 = el("button", null, "Fino a…"); b3.type = "button"; b3.setAttribute("aria-pressed", P.cp === "to" ? "true" : "false");
-      b3.addEventListener("click", function () { P.cp = P.cp === "to" ? null : "to"; draw(); });
-      nv.appendChild(b1); nv.appendChild(b2); nv.appendChild(b3); lab.appendChild(nv);
       var base = baseOf(a), bt = base.map(function (r) { return Math.floor(r[0] / 60) + ":" + pad(r[0] % 60) + "–" + Math.floor(r[1] / 60) + ":" + pad(r[1] % 60); }).join(" e ");
       lab.appendChild(el("span", "s", "Apertura: " + bt + (P.mode === "ab" ? ". Trascina sulle ore in cui non ci sei." : ". Trascina sulle ore in cui ci sei.")));
     }
@@ -233,20 +225,7 @@
     if (scroller) scroller.scrollTop = y;
   }
 
-  function tapDay(d) {
-    if (P.cp && P.act && d !== P.act) {
-      var from = P.act;
-      if (P.cp === "to" && d > from) { for (var x = addD(from, 1); x <= d; x = addD(x, 1)) if (baseOf(x).length && !isPast(x)) copyTo(from, x); }
-      else if (P.cp === "one") copyTo(from, d);
-      draw(); return;
-    }
-    P.act = d; P.cp = null; draw();
-  }
-  function copyTo(src, dst) {
-    var b = {}, oh = {}; openHours(dst).forEach(function (h) { oh[h] = 1; });
-    Object.keys(cur(src)).forEach(function (h) { if (oh[h]) b[h] = 1; });
-    setDay(dst, b);
-  }
+  function tapDay(d) { P.act = d; draw(); }
   function quick(d, x) {
     var oh = openHours(d), pick = {};
     if (x[1] === -1) { setDay(d, {}); draw(); return; }               /* libero / orari di apertura */
