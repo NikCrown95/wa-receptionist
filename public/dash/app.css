@@ -3692,7 +3692,7 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .inTxt{font-size:.92rem;line-height:1.45;color:var(--ink)}
 
 /* personal trainer: "Mostra giorno completo" (riquadro a sinistra di Giorno) e righe delle ore in cui non ci sei */
-#calSubApp .controls .ptFull{order:5;flex:none;display:flex;align-items:center;gap:7px;min-height:38px;padding:0 10px;border:1.5px solid var(--line2);border-radius:12px;background:transparent;color:var(--muted);font-family:inherit;font-size:.82rem;font-weight:700;line-height:1.1;white-space:nowrap;cursor:pointer}
+#calSubApp .controls .ptFull{order:5;flex:none;display:flex;align-items:center;gap:7px;max-width:112px;min-height:38px;padding:0 9px;border:1.5px solid var(--line2);border-radius:12px;background:transparent;color:var(--muted);font-family:inherit;font-size:.7rem;font-weight:700;line-height:1.1;text-align:left;cursor:pointer}
 #calSubApp .controls .ptFull[hidden]{display:none}
 #calSubApp .controls .ptFull i{flex:none;width:15px;height:15px;border-radius:5px;border:1.5px solid var(--line2);box-sizing:border-box}
 #calSubApp .controls .ptFull[aria-pressed="true"]{border-color:var(--accent);color:var(--accent-ink)}
