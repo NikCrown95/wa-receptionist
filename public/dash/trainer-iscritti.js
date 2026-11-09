@@ -39,7 +39,7 @@
     var hp = (window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).then(function (h) { return (h && h.appointments) || []; }, function () { return []; });
     return rp.then(function (j) {
       D = j; (D.members || []).forEach(function (m) { var n = split(m.name); m.first = n.f; m.last = n.l; m.status = stOf(m); });
-      render();
+      render(); if (window.liaPtPickRefresh) window.liaPtPickRefresh();
       return hp.then(function (h) { HIST = h; if (!document.querySelector('.liaSheet')) render(); });
     }).catch(function (e) {
       if (!root) { var w = document.querySelector('.clientsWrap'); if (!w) return; root = el('div'); root.id = 'ptMx'; w.appendChild(root); }
@@ -330,6 +330,79 @@
       if (outside(ev)) { ev.preventDefault(); ev.stopPropagation(); ptClose(); }
     }, true);
   });
+
+  // ---- Nuovo appuntamento (PT): si sceglie solo l'iscritto, il pacchetto è quello in corso ----
+  (function ptNew() {
+    var ov = document.getElementById('newOv'); if (!ov) return;
+    var pk = null, svcStep = null, whoDone = false;
+    function steps() { return ov.querySelectorAll('.nx-step'); }
+    function stp(k) { return ov.querySelector('.nx-step[data-step="' + k + '"]'); }
+    function valid() { return ((D && D.members) || []).filter(function (m) { var cp = curPack(m); return cp && cp.left > 0; }).sort(function (a, b) { return String(m2n(a)).localeCompare(String(m2n(b)), 'it'); }); }
+    function m2n(m) { return (m.last || '') + ' ' + (m.first || m.name || ''); }
+    function ini(m) { return ((m.first || m.name || '?').charAt(0) + (m.last || '').charAt(0)).toUpperCase(); }
+    function build() {
+      svcStep = stp('svc'); if (!svcStep || pk) return;
+      pk = el('div', 'ptPk'); pk.hidden = true;
+      pk.innerHTML = '<h4 class="nx-q">Chi è l’iscritto?</h4><p class="nx-qs">Solo gli iscritti con lezioni residue.</p><div class="ptPs"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" placeholder="Cerca per nome o telefono" autocomplete="off" aria-label="Cerca iscritto"></div><div class="ptPl"></div>';
+      svcStep.parentNode.insertBefore(pk, svcStep);
+      pk.querySelector('input').addEventListener('input', fill);
+    }
+    function fill() {
+      if (!pk) return;
+      var l = pk.querySelector('.ptPl'), q = pk.querySelector('input').value.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+      l.innerHTML = '';
+      if (!D) { l.appendChild(el('p', 'ptPe', 'Carico gli iscritti…')); return; }
+      var all = valid(), list = all.filter(function (m) { return !q || (m.name || '').toLowerCase().indexOf(q) !== -1 || (qd && pn(m.phone).indexOf(qd) !== -1); });
+      if (!all.length) {
+        var e = el('div', 'ptPe'); e.innerHTML = '<b>Nessun iscritto con lezioni residue</b><span>Aggiungi un iscritto e assegnagli un pacchetto.</span>';
+        var b = el('button', 'ptPn', 'Nuovo iscritto'); b.type = 'button';
+        b.addEventListener('click', function () { var sc = document.getElementById('newScrim'); if (sc) sc.click(); setTimeout(function () { if (window.liaPtOpenNew) window.liaPtOpenNew(); }, 60); });
+        e.appendChild(b); l.appendChild(e); return;
+      }
+      if (!list.length) { l.appendChild(el('p', 'ptPe', 'Nessun iscritto trovato.')); return; }
+      list.forEach(function (m) {
+        var cp = curPack(m), st = m.status || stOf(m), r = el('button', 'ptPr ' + st.s); r.type = 'button';
+        r.innerHTML = '<span class="ptPa">' + esc(ini(m)) + '</span><span class="ptPt"><b>' + esc(m.name) + '</b><small>' + esc(cp.name) + '</small></span><span class="ptPc"><b>' + cp.left + '</b><small>' + (cp.left === 1 ? 'rimasta' : 'rimaste') + '</small></span>';
+        r.addEventListener('click', function () { choose(m, cp); });
+        l.appendChild(r);
+      });
+    }
+    function choose(m, cp) {
+      var ci = document.getElementById('nwClient'), ph = document.getElementById('nwPhone');
+      if (ci) { ci.value = m.name; ci.dispatchEvent(new Event('input', { bubbles: true })); }
+      if (ph) { ph.value = m.phone || ''; ph.dispatchEvent(new Event('input', { bubbles: true })); }
+      ov.setAttribute('data-who', m.name + '|' + cp.name + '|' + cp.left + '|' + cp.total);
+      var tries = 0;
+      (function go() {
+        var chips = ov.querySelectorAll('#nwServices .nx-ch'), hit = null;
+        Array.prototype.forEach.call(chips, function (c) { var n = c.querySelector('.nm'); if (n && n.textContent.trim() === cp.name) hit = c; });
+        if (hit) { hit.click(); return; }
+        if (++tries < 25) setTimeout(go, 150);
+      })();
+    }
+    function whoCard() {
+      var w = stp('who'); if (!w) return;
+      var h = w.querySelector('.nx-q'); if (h) h.textContent = 'Conferma l’appuntamento';
+      var c = w.querySelector('.ptWc'); if (!c) { c = el('div', 'ptWc'); w.insertBefore(c, h ? h.nextSibling : w.firstChild); }
+      var d = (ov.getAttribute('data-who') || '').split('|');
+      var cl = document.getElementById('nwClient');
+      c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' lezione rimasta' : ' lezioni rimaste') : '') + '</small></span>';
+    }
+    function sync() {
+      if (ov.hidden) { if (pk) pk.hidden = true; ov.removeAttribute('data-who'); return; }
+      build(); if (!pk) return;
+      var sv = stp('svc'), on = sv && !sv.hidden;
+      pk.hidden = !on;
+      if (on) { fill(); ov.removeAttribute('data-who'); try { load(); } catch (e) {} }
+      var w = stp('who'); if (w && !w.hidden) whoCard();
+    }
+    ov.classList.add('ptn');
+    var obs = new MutationObserver(function () { sync(); });
+    obs.observe(ov, { attributes: true, attributeFilter: ['hidden'] });
+    var t0 = setInterval(function () { var sv = stp('svc'); if (sv) { clearInterval(t0); obs.observe(ov, { attributes: true, subtree: true, attributeFilter: ['hidden'] }); sync(); } }, 200);
+    document.addEventListener('lia:data-changed', function () { if (pk && !pk.hidden) fill(); });
+    window.liaPtPickRefresh = function () { if (pk && !pk.hidden) fill(); };
+  })();
 
   (function watch() {
     var v = document.getElementById('ap-view');

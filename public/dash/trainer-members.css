@@ -249,3 +249,24 @@ html.ptb #calSubApp #sheet.apv .ap-top{position:static!important;display:flex;al
 html.ptb #calSubApp #sheet.apv .ap-ttl{display:flex!important;order:1;flex:1;justify-content:flex-start}
 html.ptb #calSubApp #sheet.apv #ap-more{order:2;margin:0;width:36px;height:36px;border-radius:50%}
 html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margin:0;width:36px;height:36px;border-radius:50%;background:color-mix(in srgb,var(--line2) 45%,transparent);border:0;color:var(--ink,#fff)}
+
+/* Nuovo appuntamento PT: scelta dell'iscritto */
+#newOv.ptn .nx-step[data-step="svc"]{display:none!important}
+#newOv.ptn .nx-step[data-step="who"]>.nx-f,#newOv.ptn .nx-step[data-step="who"]>.nx-more,#newOv.ptn .nx-step[data-step="who"]>button:not(#nwConfirm){display:none!important}
+#newOv.ptn .nx-step[data-step="who"] .nx-f{display:none!important}
+.ptPk{display:flex;flex-direction:column;gap:10px}
+.ptPk .nx-q{margin:0}.ptPk .nx-qs{margin:0 0 2px}
+.ptPs{display:flex;align-items:center;gap:8px;padding:0 12px;height:46px;border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:14px;background:var(--card2);color:var(--muted)}
+.ptPs input{flex:1;min-width:0;height:100%;border:0;outline:0;background:none;color:var(--ink,#fff);font-size:1rem}
+.ptPl{display:flex;flex-direction:column;gap:8px;max-height:min(46vh,380px);overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -2px;padding:2px}
+.ptPr{--c:#3FAF82;display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 12px;border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:16px;background:var(--card2);color:var(--ink,#fff);cursor:pointer}
+.ptPr.warn{--c:#D9A441}.ptPr.bad{--c:#D9695F}
+.ptPr:active{background:color-mix(in srgb,var(--c) 12%,var(--card2))}
+.ptPa{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.84rem;background:#E8806F;color:#2a0f0b}
+.ptPt{flex:1;min-width:0}.ptPt b{display:block;font-size:1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ptPt small{display:block;margin-top:1px;color:var(--muted);font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptPc{flex:none;text-align:center;min-width:54px;padding:6px 8px;border-radius:12px;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c)}
+.ptPc b{display:block;font-size:1.2rem;line-height:1.1;font-weight:800}.ptPc small{display:block;font-size:.7rem;font-weight:700}
+.ptPe{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;padding:22px 12px;color:var(--muted);font-size:.92rem}
+.ptPe b{color:var(--ink,#fff);font-size:1rem}
+.ptPn{margin-top:8px;padding:11px 18px;border-radius:12px;border:0;background:var(--accent,#3a8f98);color:#fff;font-weight:700;font-size:.95rem}
+.ptWc{display:flex;align-items:center;gap:12px;padding:12px;margin:0 0 12px;border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:16px;background:var(--card2)}
