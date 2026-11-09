@@ -3692,6 +3692,4 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .inTxt{font-size:.92rem;line-height:1.45;color:var(--ink)}
 
 /* personal trainer, settimana: ore in cui non ci sei (assenze, chiusure, ferie) a strisce */
-#calSubApp .wkTc.absent{position:relative}
-#calSubApp .wkTc.absent::after{content:'Assente';position:absolute;left:3px;right:3px;top:3px;bottom:3px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid color-mix(in srgb,#e5484d 50%,transparent);background:color-mix(in srgb,#e5484d 12%,transparent);font-size:11px;font-weight:600;color:#ff8a8d;pointer-events:none;z-index:0}
-#calSubApp .wkTc.absent .wkPill{position:relative;z-index:1}
+#calSubApp .wkTc.absent::after{content:'Assente';order:-1;position:static;flex:none;display:block;width:100%;height:26px;line-height:26px;padding:0 7px;box-sizing:border-box;border-radius:7px;border:0;border-left:3px solid #e5484d;background:color-mix(in srgb,#e5484d 17%,var(--card));color:var(--ink);font-size:.8rem;font-weight:600;text-align:left;pointer-events:none}
