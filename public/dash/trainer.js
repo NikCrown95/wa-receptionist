@@ -13,11 +13,12 @@
     [/\bdei clienti\b/g, 'degli iscritti'], [/\bai clienti\b/g, 'agli iscritti'], [/\bdai clienti\b/g, 'dagli iscritti'],
     [/\bClienti\b/g, 'Iscritti'], [/\bclienti\b/g, 'iscritti'],
     [/\bCliente\b/g, 'Iscritto'], [/\bcliente\b/g, 'iscritto'],
+    [/\bVisite\b/g, 'Lezioni'], [/\bvisite\b/g, 'lezioni'], [/\bvisita\b/g, 'lezione'], [/\bNessuna visita\b/g, 'Nessuna lezione'],
     [/\bServizi\b/g, 'Pacchetti'], [/\bservizi\b/g, 'pacchetti'],
     [/\bServizio\b/g, 'Pacchetto'], [/\bservizio\b/g, 'pacchetto']
   ];
   function swap(t) {
-    if (!t || !/clien|serviz|Clien|Serviz/.test(t)) return t;
+    if (!t || !/clien|serviz|Clien|Serviz|visit|Visit/.test(t)) return t;
     for (var i = 0; i < RULES.length; i++) t = t.replace(RULES[i][0], RULES[i][1]);
     return t;
   }
@@ -90,14 +91,14 @@
     if (go) go.onclick = function () {
       go.disabled = true;
       post({ action: 'assign', service_id: box.querySelector('.ptSel').value, name: name, phone: phone })
-        .then(function () { return loadPacks(phone); }).then(function (dd) { render(box, dd, phone, name); })
+        .then(function () { refresh(); return loadPacks(phone); }).then(function (dd) { render(box, dd, phone, name); })
         .catch(function (e) { go.disabled = false; fail(e.message); });
     };
     box.querySelectorAll('[data-rm]').forEach(function (b) {
       b.onclick = function () {
         b.disabled = true;
         post({ action: 'remove', id: b.getAttribute('data-rm') })
-          .then(function () { return loadPacks(phone); }).then(function (dd) { render(box, dd, phone, name); })
+          .then(function () { refresh(); return loadPacks(phone); }).then(function (dd) { render(box, dd, phone, name); })
           .catch(function (e) { b.disabled = false; fail(e.message); });
       };
     });
@@ -117,6 +118,58 @@
     });
   }
 
+
+  /* ---------- 3) elenco iscritti (diverso dai clienti): solo chi ha un pacchetto ---------- */
+  function pn(p) { var d = String(p || '').replace(/\D/g, ''); if (d.indexOf('0039') === 0) d = d.slice(4); else if (d.indexOf('39') === 0 && d.length > 10) d = d.slice(2); return d; }
+  var ROSTER = null;
+  window.liaPtMerge = function (clients) {
+    return fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+      ROSTER = d; var by = {};
+      clients.forEach(function (c) { by[pn(c.phone)] = c; });
+      return (d.members || []).map(function (m) {
+        var c = by[pn(m.phone)] || { phone: m.phone, email: '', visits: 0, last: '', lastDate: null, ago: null, past: [], next: null, svc: '', noshow: 0 };
+        c.name = m.name; c.phone = m.phone;
+        c.svc = m.left + (m.left === 1 ? ' ingresso' : ' ingressi') + ' rimasti';
+        return c;
+      });
+    });
+  };
+  function refresh() { window.liaClients = null; if (window.liaEnsureClients) window.liaEnsureClients(); }
+
+  function newMember() {
+    var svcs = (ROSTER && ROSTER.services) || [];
+    var bg = document.createElement('div'); bg.className = 'liaSheetBg';
+    var sh = document.createElement('div'); sh.className = 'liaSheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
+    sh.innerHTML = '<div class="grab"></div><h2>Nuovo iscritto</h2><p class="lsub">Inseriscilo dopo che ha pagato: potrà prenotare da solo fino a esaurimento degli ingressi.</p>' +
+      '<div class="lrow"><div class="lf"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off"></div><div class="lf"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off"></div></div>' +
+      '<div class="lf"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off"></div>' +
+      '<div class="lf"><label for="nmS">Pacchetto sottoscritto</label><select id="nmS" class="ptSel" style="width:100%">' + svcs.map(function (x) { return '<option value="' + esc(x.id) + '">' + esc(x.name) + ' · ' + x.entries + ' ingressi</option>'; }).join('') + '</select></div>' +
+      '<div class="lerr" role="alert" hidden></div><button type="button" class="lb lsave">Salva</button><button type="button" class="lb lcancel">Annulla</button>';
+    document.body.appendChild(bg); document.body.appendChild(sh);
+    var $ = function (q) { return sh.querySelector(q); }, err = $('.lerr');
+    function close() { bg.classList.remove('on'); sh.classList.remove('on'); setTimeout(function () { bg.remove(); sh.remove(); }, 300); }
+    bg.addEventListener('click', close); $('.lcancel').addEventListener('click', close);
+    requestAnimationFrame(function () { bg.classList.add('on'); sh.classList.add('on'); });
+    $('.lsave').addEventListener('click', function () {
+      var f = $('#nmF').value.trim(), l = $('#nmL').value.trim(), p = $('#nmP').value.trim(), b = this;
+      function fail(m) { err.textContent = m; err.hidden = false; }
+      if (!svcs.length) return fail('Crea prima un pacchetto da Impostazioni.');
+      if (f.length < 2 || l.length < 2) return fail('Scrivi nome e cognome.');
+      if (pn(p).length < 6) return fail('Scrivi il numero di telefono.');
+      b.disabled = true; err.hidden = true;
+      fetch(url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'assign', service_id: $('#nmS').value, first_name: f, last_name: l, phone: p }) })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Errore'); }); })
+        .then(function () { close(); refresh(); }).catch(function (e) { b.disabled = false; fail(e.message); });
+    });
+  }
+  function addNewBtn() {
+    var sm = document.getElementById('clientSummary');
+    if (!sm || document.getElementById('ptNewBtn')) return;
+    var b = document.createElement('button'); b.type = 'button'; b.id = 'ptNewBtn'; b.className = 'ptGo'; b.textContent = '+ Nuovo iscritto'; b.style.margin = '6px 0 10px';
+    b.onclick = function () { if (ROSTER) newMember(); else window.liaPtMerge([]).then(newMember); };
+    sm.insertAdjacentElement('beforebegin', b);
+  }
+
   var css = document.createElement('style');
   css.textContent = '.ptBox{margin:14px 0;padding:14px;border:1px solid var(--line,#e5e7eb);border-radius:14px;background:var(--card,#fff)}' +
     '.ptH{font-weight:700;margin-bottom:8px}.ptEmpty{color:var(--muted,#6b7280);font-size:.9rem}' +
@@ -125,7 +178,7 @@
     '.ptAdd{display:flex;gap:8px;margin-top:10px}.ptSel{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--line,#d1d5db);font:inherit;background:#fff}' +
     '.ptGo{padding:10px 16px;border:0;border-radius:10px;background:var(--accent,#0f766e);color:#fff;font:inherit;font-weight:600;cursor:pointer}' +
     '.ptGo:disabled{opacity:.6}.ptErr{color:#b42318;font-size:.88rem;margin-top:8px}' +
-    '.ptEnW{margin-top:8px}';
+    '.ptEnW{margin-top:8px}.cd [data-del=ask]{display:none}';
   document.head.appendChild(css);
 
   /* campo "Ingressi" nel modulo di nuovo pacchetto */
@@ -140,7 +193,7 @@
     lab.insertAdjacentElement('afterend', l2);
   }
   var _dec = decorate;
-  decorate = function () { _dec(); addEntriesField(); };
+  decorate = function () { _dec(); addEntriesField(); addNewBtn(); };
 
   function init() { walk(document.body); decorate(); start(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

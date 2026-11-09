@@ -1413,6 +1413,7 @@ module.exports = async (req, res) => {
       if (!ptl.isTrainer(biz)) return res.status(404).json({ error: "Non disponibile per questa attività." });
       const pkgs = (biz.services || []).filter((x) => x.active !== false && Number(x.entries) >= 1).map((x) => ({ id: x.id, name: x.name, entries: Number(x.entries), duration_min: x.duration_min, price_eur: x.price_eur }));
       if (req.method === "GET") {
+        if (q.roster === "1") return res.status(200).json({ members: await ptl.rosterOf(sb, biz.id), services: pkgs });
         const phone = String(q.phone || "").trim();
         const packs = phone ? await ptl.packsOf(sb, biz.id, phone) : [];
         return res.status(200).json({ services: pkgs, packs: packs.map((p) => ({ id: p.id, name: p.pack_name, total: p.entries_total, used: p.used, left: p.left, price_eur: p.price_eur, created_at: p.created_at })) });
@@ -1421,7 +1422,7 @@ module.exports = async (req, res) => {
       if (pb.action === "assign") {
         const sv = pkgs.find((x) => x.id === String(pb.service_id || ""));
         if (!sv) return res.status(400).json({ error: "Scegli un pacchetto." });
-        const nm = String(pb.name || "").trim().replace(/\s+/g, " ").slice(0, 120), ph = String(pb.phone || "").trim().slice(0, 40);
+        const nm = String(pb.first_name || pb.last_name ? (String(pb.first_name || "").trim() + " " + String(pb.last_name || "").trim()) : (pb.name || "")).trim().replace(/\s+/g, " ").slice(0, 120), ph = String(pb.phone || "").trim().slice(0, 40);
         if (!nm || ptl.phoneNorm(ph).length < 6) return res.status(400).json({ error: "Servono nome e telefono dell'iscritto." });
         const ins = await sb("POST", "pt_packs", { business_id: biz.id, customer_name: nm, customer_phone: ph, service_id: sv.id, pack_name: sv.name, entries_total: sv.entries, price_eur: sv.price_eur }, "return=representation");
         if (!ins.ok) return res.status(500).json({ error: "Non siamo riusciti ad assegnare il pacchetto. Riprova." });

@@ -112,7 +112,9 @@
         return {name:x.name,phone:x.phone,email:x.email||'',visits:x.visits,last:x.lastDate?humanAgo(x.lastDate):'',lastDate:x.lastDate,
           ago:x.lastDate?Math.max(0,Math.round((now-x.lastDate)/86400000)):null,past:x.past,next:x.next,svc:top,noshow:ns[k]||0};
       }).sort(function(a,b){return b.visits-a.visits;});
-      window.liaClients=CLIENTS;renderClients();return CLIENTS;
+      var fin=function(){window.liaClients=CLIENTS;renderClients();return CLIENTS;};
+      if(window.__LIA_PT&&window.liaPtMerge)return window.liaPtMerge(CLIENTS).then(function(l){CLIENTS=l;return fin();},fin);
+      return fin();
     }).catch(function(){return [];}).finally(function(){window.liaClientsPromise=null;});
     return window.liaClientsPromise;
   };
