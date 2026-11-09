@@ -120,7 +120,7 @@
       ".ptAv .pvRp .k{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pc);font-weight:700;margin-bottom:4px}" +
       ".ptAv .pvRp .l{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.9rem}" +
       ".ptAv .pvRp .k+.l{border-top:0}" +
-      ".ptAv .pvRp .l b{font-weight:700;color:var(--pc);text-align:right}" +
+      ".ptAv .pvRp .l{align-items:center}.ptAv .pvRp .l span{flex:1}.ptAv .pvRp .l b{font-weight:700;color:var(--pc);text-align:right}.ptAv .pvRm{width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}" +
       ".ptAv .pvRp .em{color:var(--muted);font-size:.86rem}" +
       ".ptAv .pvGo{border:0;border-radius:99px;background:var(--ps);color:#fff;padding:14px;font:inherit;font-weight:700;font-size:.96rem;cursor:pointer}" +
       ".ptAv .pvGo:disabled{opacity:.45}" +
@@ -304,11 +304,15 @@
     var g = [];
     days.forEach(function (d) {
       var s = label(d), l = g[g.length - 1];
-      if (l && l.s === s && addD(l.b, 1) === d) l.b = d; else g.push({ a: d, b: d, s: s });
+      if (l && l.s === s && addD(l.b, 1) === d) { l.b = d; l.d.push(d); } else g.push({ a: d, b: d, s: s, d: [d] });
     });
     function dl(d) { var x = dt(d); return DS[dow(d)] + " " + x.getDate() + " " + MO[x.getMonth()].slice(0, 3); }
     g.slice(0, 40).forEach(function (x) {
       var row = el("div", "l"); row.appendChild(el("span", null, x.a === x.b ? dl(x.a) : dl(x.a) + " – " + dl(x.b))); row.appendChild(el("b", null, x.s));
+      var rm = el("button", "pvRm"); rm.type = "button"; rm.setAttribute("aria-label", "Togli " + (x.a === x.b ? dl(x.a) : dl(x.a) + " – " + dl(x.b)));
+      rm.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      rm.addEventListener("click", function () { x.d.forEach(function (d) { setDay(d, {}); P.sel = P.sel.filter(function (z) { return z !== d; }); }); syncH(); draw(); });
+      row.appendChild(rm);
       box.appendChild(row);
     });
     if (g.length > 40) box.appendChild(el("div", "em", "…e altri " + (g.length - 40) + " periodi."));
