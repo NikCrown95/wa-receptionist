@@ -211,3 +211,10 @@ html.ptb #calSubApp #sheet .ptIsG{margin-top:6px}
 html.ptb #calSubApp #sheet .nt-sheet>*{padding-top:8px;padding-bottom:8px}
 html.ptb #calSubApp #sheet .ap-foot:not(.edit){padding-top:4px}
 html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn{min-height:44px}
+
+/* PT scheda: footer sempre visibile, scorre solo il corpo se serve */
+html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb #calSubApp .sheet#sheet:focus-visible{
+  top:calc(50% + 26px);max-height:calc(100vh - 124px);max-height:calc(100dvh - 124px);overflow:hidden;gap:6px}
+html.ptb #calSubApp #sheet .ap-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html.ptb #calSubApp #sheet .ap-top{min-height:36px}
+html.ptb #calSubApp #sheet .nt-sheet>*{padding-top:6px;padding-bottom:6px}
