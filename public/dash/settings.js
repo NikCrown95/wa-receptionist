@@ -854,7 +854,7 @@ function pfRenderPoster(box,b,opts){
     });
     stText('rlNoticeHint',RL.notice===15?'I clienti possono prenotare fino a 15 minuti prima dell\u2019orario.':'I clienti vedono solo gli orari che iniziano tra almeno '+rlLabel(RL_N,RL.notice).replace(/^1 ora$/,'1 ora')+' da adesso.');
     stText('rlAdvanceHint','I clienti vedono i giorni da oggi fino a '+rlLabel(RL_A,RL.advance)+' avanti.');
-    stText('rlCancelHint',RL.cancel===0?'I clienti possono annullare in qualsiasi momento, anche pochi minuti prima.':'Se mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' all\u2019appuntamento, il cliente non può annullare da solo e vede il tuo numero di telefono.');
+    stText('rlCancelHint',RL.cancel===0?'I clienti possono annullare in qualsiasi momento, anche pochi minuti prima.':(window.__LIA_PT?'Se l\u2019iscritto annulla quando mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' al coaching, non può più farlo da solo: il coaching di quel giorno è perso e l\u2019ingresso viene scalato.':'Se mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' all\u2019appuntamento, il cliente non può annullare da solo e vede il tuo numero di telefono.'));
     var tc=stEl('rlTravelCard');if(tc){var on=false;try{on=svcHomeOn()}catch(e){}tc.hidden=!on}
     stText('rlTravelHint',RL.travel===0?'Nessuna attesa: dopo un lavoro a domicilio puoi essere prenotato subito.':'Dopo un lavoro a domicilio, e prima di arrivarci, servono almeno '+rlLabel(RL_T,RL.travel).toLowerCase()+' tra un appuntamento e l\u2019altro. I clienti vedono solo gli orari adatti.');
     stText('stSumRules','Preavviso '+rlLabel(RL_N,RL.notice)+' \u00b7 annullo '+(RL.cancel===0?'sempre':rlLabel(RL_C,RL.cancel).replace(' prima','')));

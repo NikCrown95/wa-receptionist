@@ -5,7 +5,9 @@
   var hs = document.createElement('style'); hs.textContent = '.stRow[data-st="promos"],.stRow[data-st="combos"],.stPage[data-st="promos"],.stPage[data-st="combos"],.stRow[data-st="staff"],.stPage[data-st="staff"],.stPage[data-st="staffdetail"],#pfTeamCard{display:none!important}'; document.head.appendChild(hs);
   /* esempi del modulo "Nuovo pacchetto": niente taglio capelli */
   function ph() { [['svcNewName', 'Es. Pacchetto 10 coaching'], ['svcNewPrice', 'Es. 450'], ['svcNewMin', 'Es. 60']].forEach(function (x) { var e = document.getElementById(x[0]); if (e) e.placeholder = x[1]; }); }
-  ph(); document.addEventListener('DOMContentLoaded', ph); setTimeout(ph, 1500);
+  function cx() { [].forEach.call(document.querySelectorAll('.stHint'), function (e) { if (/chiesto di chiamarti/.test(e.textContent)) e.textContent = 'Fino a quanto tempo prima del coaching l\u2019iscritto può annullare da solo. Se annulla dopo questo termine, il coaching di quel giorno viene perso e l\u2019ingresso viene scalato.'; }); }
+  function all() { ph(); cx(); }
+  all(); document.addEventListener('DOMContentLoaded', all); setTimeout(all, 1500); document.addEventListener('click', function () { setTimeout(all, 60); }, true);
   function tok() { return (new URLSearchParams(location.search).get('t') || '').trim(); }
   function url(extra) { return '/api/agenda?t=' + encodeURIComponent(tok()) + '&pt=1' + (extra || ''); }
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
