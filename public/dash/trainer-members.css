@@ -179,3 +179,16 @@ html.ptb #calSubApp #sheet .ap-hero{border:0}
 html.ptb #calSubApp #sheet .ap-card{border:1px solid color-mix(in srgb,var(--line2) 60%,transparent);border-radius:20px}
 html.ptb #calSubApp #sheet .nt-sheet>*{border-color:color-mix(in srgb,var(--line2) 60%,transparent)!important;border-radius:18px}
 .ptIs{border-top:1px solid color-mix(in srgb,var(--line2,var(--line)) 55%,transparent)}
+
+/* Scheda appuntamento PT: riquadro centrato con i 4 bordi visibili */
+html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb #calSubApp .sheet#sheet:focus-visible{
+  left:50%;right:auto;top:50%;bottom:auto;margin:0;
+  width:min(520px,calc(100vw - 32px));max-width:none;
+  max-height:calc(100vh - 56px);max-height:calc(100dvh - 56px);
+  border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);border-radius:26px;
+  padding:14px 18px 18px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5);
+  transform:translate(-50%,-46%) scale(.96);opacity:0;pointer-events:none;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
+html.ptb #calSubApp .sheet#sheet.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+html.ptb #calSubApp #sheet .ap-body{overflow-y:auto}
