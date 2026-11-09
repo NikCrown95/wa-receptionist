@@ -170,3 +170,12 @@ html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn.d{flex:.9}
 .ptIsP{display:block;height:7px;border-radius:7px;background:var(--line2,var(--line));margin-top:9px;overflow:hidden}.ptIsP i{display:block;height:100%;border-radius:7px;background:var(--c)}
 .ptIsG{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .ptIsG span{min-width:0}.ptIsG small{display:block;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.ptIsG b{display:block;margin-top:1px;font-size:.95rem;font-weight:700;white-space:nowrap}
+
+/* Scheda appuntamento: riquadro chiuso, bordi morbidi */
+html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb #calSubApp .sheet#sheet:focus-visible{outline:0!important;border:1px solid color-mix(in srgb,var(--line2) 65%,transparent);border-bottom:0;box-shadow:0 -14px 44px rgba(0,0,0,.32)}
+html.ptb #calSubApp #sheet .ap-body{overflow-y:auto;-webkit-overflow-scrolling:touch}
+html.ptb #calSubApp #sheet .ap-body>*{flex:none}
+html.ptb #calSubApp #sheet .ap-hero{border:0}
+html.ptb #calSubApp #sheet .ap-card{border:1px solid color-mix(in srgb,var(--line2) 60%,transparent);border-radius:20px}
+html.ptb #calSubApp #sheet .nt-sheet>*{border-color:color-mix(in srgb,var(--line2) 60%,transparent)!important;border-radius:18px}
+.ptIs{border-top:1px solid color-mix(in srgb,var(--line2,var(--line)) 55%,transparent)}
