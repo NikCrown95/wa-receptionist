@@ -283,3 +283,10 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 :root:root #ptMx .mzRow.st-bad>.mzC:nth-child(6) .mzSt{--sc:#F08A82}
 :root:root #ptMx .mzRow>.mzA .mzRn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;background:var(--accent)!important;border:0!important;color:var(--on-accent,#fff)!important;border-radius:12px;height:42px;min-width:0;padding:0 18px;font-size:.92rem;font-weight:700;box-shadow:none}
 :root:root #ptMx .mzRow>.mzA .mzRn:active{transform:scale(.97)}
+
+/* Più discreti: stato e Rinnova */
+:root:root #ptMx .mzRow>.mzC:nth-child(6) .mzSt{border:0!important;background:color-mix(in srgb,var(--sc) 12%,transparent)!important;border-radius:99px;padding:4px 10px;font-size:.74rem;font-weight:600;letter-spacing:0;text-transform:none}
+:root:root #ptMx .mzRow>.mzA .mzRn{height:34px;padding:0 13px;gap:6px;font-size:.84rem;font-weight:600;border-radius:99px;background:transparent!important;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent)!important;color:#8fd0d7!important}
+:root:root #ptMx .mzRow>.mzA .mzRn svg{width:14px;height:14px}
+:root:root #ptMx .mzRow>.mzA .mzRn:active{background:color-mix(in srgb,var(--accent) 18%,transparent)!important}
+@media(max-width:620px){:root:root #ptMx .mzRow>.mzA .mzRn{height:38px}}
