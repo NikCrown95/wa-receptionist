@@ -18,6 +18,7 @@
   function split(name) { var p = String(name || '').trim().split(/\s+/); return { f: p[0] || '', l: p.slice(1).join(' ') }; }
   function eur(v) { var n = Number(v); return isFinite(n) ? n.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' €' : ''; }
   function dshort(d) { return d.getDate() + ' ' + MS[d.getMonth()]; }
+  function pd(x) { return new Date(String(x || '').replace(' ', 'T').replace(/(\.\d{3})\d+/, '$1')); }
   function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
   function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Esaurito' } : m.left <= 2 ? { s: 'warn', label: 'In esaurimento' } : { s: 'ok', label: 'Attivo' }; }
@@ -26,22 +27,26 @@
     var k = pn(m.phone), now = new Date(), up = [], past = [];
     HIST.forEach(function (a) {
       if (a.status === 'cancelled' || pn(a.customer_phone) !== k) return;
-      var st = new Date(a.starts_at); (st > now ? up : past).push({ id: a.id, start: st, service: a.service || '' });
+      var st = pd(a.starts_at); (st > now ? up : past).push({ id: a.id, start: st, service: a.service || '' });
     });
     up.sort(function (a, b) { return a.start - b.start; }); past.sort(function (a, b) { return b.start - a.start; });
     return { up: up, past: past };
   }
 
   function load() {
-    var tasks = [fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json(); })];
-    tasks.push((window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).catch(function () { return {}; }));
-    return Promise.all(tasks).then(function (r) {
-      D = r[0]; HIST = (r[1] && r[1].appointments) || [];
-      (D.members || []).forEach(function (m) { var n = split(m.name); m.first = n.f; m.last = n.l; m.status = stOf(m); });
+    // Prima l'elenco degli iscritti (subito), poi le lezioni dallo storico: se lo storico e' lento l'elenco si vede lo stesso
+    var rp = fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json().then(function (j) { if (!r.ok || !j || !Array.isArray(j.members)) throw new Error((j && j.error) || 'Elenco non disponibile'); return j; }); });
+    var hp = (window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).then(function (h) { return (h && h.appointments) || []; }, function () { return []; });
+    return rp.then(function (j) {
+      D = j; (D.members || []).forEach(function (m) { var n = split(m.name); m.first = n.f; m.last = n.l; m.status = stOf(m); });
       render();
+      return hp.then(function (h) { HIST = h; if (!document.querySelector('.liaSheet')) render(); });
+    }).catch(function (e) {
+      if (!root) { var w = document.querySelector('.clientsWrap'); if (!w) return; root = el('div'); root.id = 'ptMx'; w.appendChild(root); }
+      root.textContent = ''; root.appendChild(el('div', 'mxEmpty', 'Non riesco a caricare gli iscritti: ' + ((e && e.message) || 'riprova.')));
     });
   }
-  window.liaPtRefresh = function () { window.liaHistoryCache = null; window.liaHistoryPromise = null; return load().catch(function () { }); };
+  window.liaPtRefresh = function () { window.liaHistoryCache = null; window.liaHistoryPromise = null; return load(); };
 
   function ring(p, c) { return '<span class="mzRing ' + c + '" style="--p:' + p + '"><b>' + p + '%</b></span>'; }
   function mzRing(cp) {
@@ -159,7 +164,7 @@
     var back = el('button', 'mvBack'); back.type = 'button'; back.innerHTML = SV('<path d="M15 6l-6 6 6 6"/>', 16) + '<span>Iscritti</span>'; back.addEventListener('click', function () { S.mid = null; render(); }); top.appendChild(back);
     var pct = cp && cp.total ? Math.round(cp.left / cp.total * 100) : 0;
     var hero = el('div', 'mvHero ' + st.s);
-    var plan = cp ? '<div class="mvPl"><div class="mvPt"><b>' + esc(cp.name) + '</b>' + (cp.price_eur != null ? '<span>' + eur(cp.price_eur) + ' · pagato</span>' : '') + '</div><span class="mvPb"><i style="width:' + pct + '%"></i></span><div class="mvPd"><span>dal ' + dshort(new Date(cp.created_at)) + '</span><b>' + cp.left + ' ingressi rimasti</b></div></div>' : '<div class="mvPl"><div class="mvPt"><b>Nessun pacchetto</b></div></div>';
+    var plan = cp ? '<div class="mvPl"><div class="mvPt"><b>' + esc(cp.name) + '</b>' + (cp.price_eur != null ? '<span>' + eur(cp.price_eur) + ' · pagato</span>' : '') + '</div><span class="mvPb"><i style="width:' + pct + '%"></i></span><div class="mvPd"><span>dal ' + dshort(pd(cp.created_at)) + '</span><b>' + cp.left + ' ingressi rimasti</b></div></div>' : '<div class="mvPl"><div class="mvPt"><b>Nessun pacchetto</b></div></div>';
     hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.name) + '</b><span>' + esc(m.phone) + '</span></div></div><div class="mvMeta"><span class="mvChip">' + esc(st.label) + '</span></div><span class="mvSep"></span>' + plan;
     hero.insertBefore(top, hero.firstChild.nextSibling); host.appendChild(hero);
     var body = el('div', 'mxBody mvBody'); host.appendChild(body);
@@ -199,7 +204,7 @@
         var tot = el('div', 'mxTot'); tot.innerHTML = '<div><span>Totale versato</span><b>' + eur(paid) + '</b></div><span class="gxChip ok">' + m.packs.length + (m.packs.length === 1 ? ' pacchetto' : ' pacchetti') + '</span>'; pane.appendChild(tot);
         var l = el('div', 'mxLs');
         m.packs.slice().reverse().forEach(function (p) {
-          var d = new Date(p.created_at), r = el('div', 'mxEv');
+          var d = pd(p.created_at), r = el('div', 'mxEv');
           r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.name) + '</b><span>' + p.left + ' di ' + p.total + ' ingressi rimasti</span></span><b>' + (p.price_eur != null ? eur(p.price_eur) : '') + '</b>';
           var rm = btn('Togli', 'ghost sm', function () {
             rm.textContent = 'Sicuro?'; rm.onclick = function () { rm.disabled = true; post({ action: 'remove', id: p.id }).then(function () { return window.liaPtRefresh(); }).catch(function (e) { rm.disabled = false; rm.textContent = e.message; }); };
@@ -213,6 +218,6 @@
     drawTabs(); drawPane();
   }
 
-  function init() { if (!document.querySelector('.clientsWrap')) return; load().catch(function () { }); }
+  function init() { if (!document.querySelector('.clientsWrap')) return; render(); load(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
