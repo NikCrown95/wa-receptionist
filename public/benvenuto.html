@@ -506,6 +506,7 @@ function validate(k){
     if(k==="lezioni"&&S.items.some(function(x){var n=Number(x.k);return!(n>=1&&n<=200&&Math.floor(n)===n)}))return"Scrivi quanti posti ha ogni lezione."}
   if(k==="pacchetti"&&S.pd&&String(S.pd.n).trim()){var pe=planErr(S.pd);if(pe)return pe}
   if(k==="offerta"&&!S.gk)return"Scegli se sei una palestra o un personal trainer.";
+  if(k==="pacchetti"&&S.gk==="pt"&&!S.plans.length)return"Aggiungi almeno un pacchetto, per esempio 10 lezioni.";
   if(k==="calendario"&&S.items.some(function(x){return!x.days.length}))return"Scegli almeno un giorno per ogni lezione.";
   if(k==="sport"&&!S.sportLbl)return"Scegli lo sport.";
   if(k==="campi"){if(!S.courts.length||S.cph!==2)return"";
@@ -525,8 +526,8 @@ function validate(k){
 function offBoth(){return S.gcl!==false&&!!S.gpt}
 function planCov(x){var c=x.c||"personal";return c==="personal"?["personal"]:(c==="both"?["tutti","personal"]:["tutti"])}
 function planErr(x){var q=Number(String(x.q).replace(",","."));if(!String(x.n).trim())return"Dai un nome al pacchetto.";if(!(q>=1&&q<=(x.kind==="time"?3660:1000)&&Math.floor(q)===q))return x.kind==="time"?"Scrivi per quanti giorni vale.":"Scrivi quanti ingressi comprende.";var pr=String(x.p).trim().replace(",",".");if(pr!==""&&!(Number(pr)>=0))return"Controlla il prezzo.";return""}
-function planLine(x){return(x.kind==="time"?x.q+(Number(x.q)===1?" giorno":" giorni"):x.q+(Number(x.q)===1?" ingresso":" ingressi"))}
-function planWho(x){var c=planCov(x);return c.length>1?"Corsi e personal":(c[0]==="personal"?"Personal":"Corsi")}
+function planLine(x){return(x.kind==="time"?x.q+(Number(x.q)===1?" giorno":" giorni"):x.q+(Number(x.q)===1?" ingresso":" ingressi"))+(S.gk==="pt"?" · "+(x.dm||60)+" min":"")}
+function planWho(x){if(S.gk==="pt")return"Lezione";var c=planCov(x);return c.length>1?"Corsi e personal":(c[0]==="personal"?"Personal":"Corsi")}
 function newItem(n,min){
   var personal=/personal|1 a 1|consulenza/i.test(n||"");
   return{n:n||"",d:min||(S.v==="palestra"?60:30),p:"",k:personal?"1":"12",cat:personal?"personal":"corsi",days:[],time:"18:00",m:null,mp:null}}
@@ -607,6 +608,13 @@ function listBox(gym,dom){
 function payload(){
   var base={action:"onboarding_save",kind:S.v,name:S.nome.trim()};if(S.logo)base.logo=S.logo;
   base.rules={min_notice_min:S.rl.notice,cancel_limit_hours:S.rl.cancel,max_advance_days:S.rl.adv};if(S.v==="domicilio")base.rules.travel_min=S.rl.travel;
+  if(S.v==="palestra"&&S.gk==="pt"){
+    base.kind="persona";base.trade="personal trainer";base.trainer=true;
+    base.services=S.plans.map(function(x){var p=String(x.p).trim().replace(",",".");return{name:x.n.trim(),duration_min:Number(x.dm)||60,price_eur:p===""?null:Number(p),entries:Number(x.q)}});
+    base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
+      if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
+      else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
+    return base}
   if(S.v==="palestra"){base.trainer=S.gk==="pt";base.classes=S.gcl!==false;base.personal=!!S.gpt||S.gcl===false;
     base.plans=(S.gcl===false||S.gpt?S.plans:[]).map(function(x){var pr=String(x.p).trim().replace(",",".");return{name:x.n.trim(),kind:x.kind,qty:Number(x.q),price_eur:pr===""?null:Number(pr),covers:planCov(x)}});
     if(S.gcl===false){base.hours=[];S.hours.forEach(function(d,i){if(d.on)base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});base.courses=[];return base}
@@ -705,7 +713,7 @@ function render(){
     v.appendChild(h("p",{class:"hint",text:S.gk==="pt"?"Pacchetti e iscritti: i pacchetti li scrivi nel prossimo passo, gli iscritti li aggiungi dopo, dall'agenda.":"Abbonamenti e iscritti li imposti dopo, dall'agenda."}));
   }
   if(k==="pacchetti"){
-    v.appendChild(S.gk==="pt"?head(lab,"Che pacchetti offri?","Scrivi quelli che proponi ai tuoi iscritti, per esempio 10 lezioni. Puoi saltare questo passo e aggiungerli dopo."):head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
+    v.appendChild(S.gk==="pt"?head(lab,"Che pacchetti offri?","Scrivi quelli che proponi ai tuoi iscritti, per esempio 10 lezioni da un'ora. Gli altri li aggiungi dopo, dall'agenda."):head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
     var pwrap=h("div",{class:"plans"});
     if(S.plans.length){var pl=h("div",{class:"rows"});S.plans.forEach(function(x,i){var r=h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv"+(String(x.p).trim()===""?" dim":""),text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})]);
       r.appendChild(h("button",{class:"edit",type:"button",text:"Togli",onclick:function(){S.plans.splice(i,1);render()}}));pl.appendChild(r)});pwrap.appendChild(pl)}
@@ -720,8 +728,9 @@ function render(){
     var qi=h("input",{class:"inp",inputmode:"numeric",placeholder:S.pd.kind==="time"?"30":"10","aria-label":"Quantità",value:S.pd.q});qi.oninput=function(){S.pd.q=qi.value};
     var pi=h("input",{class:"inp",inputmode:"decimal",placeholder:"facoltativo","aria-label":"Prezzo",value:S.pd.p});pi.oninput=function(){S.pd.p=pi.value};
     fc.appendChild(h("div",{class:"two"},[field(S.pd.kind==="time"?"Giorni di validità":"Numero di ingressi",qi),field("Prezzo €",pi)]));
+    if(S.gk==="pt"){var dc=h("div",{class:"chips"});[30,45,60,90].forEach(function(m){dc.appendChild(chip(m+" min",(S.pd.dm||60)===m,function(){S.pd.dm=m;render()}))});fc.appendChild(h("div",null,[h("label",{text:"Durata della lezione"}),dc]))}
     if(offBoth()){var cc7=h("div",{class:"chips"});[["tutti","Corsi"],["personal","Personal"],["both","Entrambi"]].forEach(function(o){cc7.appendChild(chip(o[1],(S.pd.c||"personal")===o[0],function(){S.pd.c=o[0];render()}))});fc.appendChild(h("div",null,[h("label",{text:"Vale per"}),cc7]))}
-    var ab=h("button",{class:"chip",type:"button",text:"Aggiungi pacchetto"});ab.onclick=function(){var e=planErr(S.pd);if(e){S.err=e;render();return}S.err="";S.plans.push(S.pd);S.pd={n:"",kind:"entries",q:"",p:"",c:null};render()};
+    var ab=h("button",{class:"chip",type:"button",text:"Aggiungi pacchetto"});ab.onclick=function(){var e=planErr(S.pd);if(e){S.err=e;render();return}S.err="";S.pd.dm=S.pd.dm||60;S.plans.push(S.pd);S.pd={n:"",kind:"entries",q:"",p:"",c:null};render()};
     fc.appendChild(ab);pwrap.appendChild(fc);v.appendChild(pwrap);
   }
   if(k==="iscritti"){

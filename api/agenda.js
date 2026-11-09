@@ -389,7 +389,7 @@ module.exports = async (req, res) => {
     }
     res.statusCode = 404; res.setHeader("Content-Type", "text/plain; charset=utf-8"); return res.end("Link non valido");
   }
-  const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.notes === "1" || q.push === "1" || q.manifest === "1" || q.notifications === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1" || q.shop === "1" || q.recap === "1" || q.referral === "1" || q.export === "1" || q.registry === "1" || q.support === "1" || q.promos === "1" || q.courts === "1";
+  const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.notes === "1" || q.push === "1" || q.manifest === "1" || q.notifications === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1" || q.shop === "1" || q.recap === "1" || q.referral === "1" || q.export === "1" || q.registry === "1" || q.support === "1" || q.promos === "1" || q.courts === "1" || q.pt === "1";
 
   // 1) La pagina
   if (!wantsData) {
@@ -412,6 +412,11 @@ module.exports = async (req, res) => {
           // Circoli e centri sportivi: stessa dashboard, ma il calendario mostra i campi (public/campi/).
           variantKey = "campi";
           html = PAGE_READY.replace("<head>", '<head><script>window.__liaCampi=1</script><link rel="stylesheet" href="/gym/stats-core.css?v=e2a1490d"><link rel="stylesheet" href="/gym/stats.css?v=da95ebee"><link rel="stylesheet" href="/campi/campi.css?v=580c2d33">').replace("</body>", '<script src="/campi/campi.js?v=86207e57"></script><script src="/campi/stats.js?v=4d228c8e"></script><script src="/campi/campi-set.js?v=f63f9a7d"></script><script src="/campi/campi-avail.js?v=d057fb5e"></script></body>');
+        }
+        else if (require("../lib/pt-packs.js").isTrainer({ business_type: bt })) {
+          // Personal trainer: stessa dashboard dei servizi alla persona, con "iscritti" e "pacchetti" e gli ingressi di ciascun iscritto (public/dash/trainer.js).
+          variantKey = "pt";
+          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script>").replace("</body>", '<script src="/dash/trainer.js?v=1"></script></body>');
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -612,7 +617,7 @@ module.exports = async (req, res) => {
           staff_choice: biz.staff_choice === true,
           capacity_hours: capacityHours(biz),
           business: { logo_url: logoLib.logoUrl(biz), name: biz.name, onboarded: biz.onboarded_at !== null, service_areas: Array.isArray(biz.service_areas) ? biz.service_areas : [], offers_online: biz.offers_online === true, half_hour_ok: biz.half_hour_ok === true, slug: biz.slug || null, business_type: biz.business_type || null, timezone: tz, address: biz.address || null, plan_name: planName, public_link: gymNoOnline(biz) ? "" : (biz.public_link || biz.booking_url || site.bookingUrl(biz.slug, biz.business_type, reqBase(req))), gym_offers: biz.business_type === "palestra" ? gymOffers(biz) : null, telegram: biz.__bot && biz.__bot.username ? "https://t.me/" + biz.__bot.username + "?start=" + encodeURIComponent(biz.slug) : (biz.telegram || biz.telegram_username || "https://t.me/liaprenotabot?start=" + encodeURIComponent(biz.slug)), tg_own: !!(biz.__bot && biz.__bot.username), tg_owner: biz.__bot && biz.__bot.username ? !!biz.__bot.owner_linked : !!biz.owner_telegram_chat_id, tg_recap: biz.recap_enabled !== false },
-          services: (() => { const sv = biz.services.filter(s => !isPackage(s)); const lab = modes.labels(sv); return sv.map(s => ({ id:s.id, name:s.__rawName || s.name, label:lab[s.id], mode:modes.modeOf(s), group_id:s.group_id || null, half_hour:s.half_hour === true, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place, max_units:maxUnits(s) })); })(),
+          services: (() => { const sv = biz.services.filter(s => !isPackage(s)); const lab = modes.labels(sv); return sv.map(s => ({ id:s.id, name:s.__rawName || s.name, label:lab[s.id], mode:modes.modeOf(s), group_id:s.group_id || null, half_hour:s.half_hour === true, duration_min:s.duration_min, buffer_min:s.buffer_min || 0, price_eur:s.price_eur, at_customer_place:!!s.at_customer_place, max_units:maxUnits(s), entries:s.entries||null })); })(),
           packages: biz.services.filter(isPackage).map(s => ({ id:s.id, name:s.name, duration_min:s.duration_min, price_eur:s.price_eur, service_ids:s.package_service_ids })),
           hours: hours.map(h => ({ id:h.id, weekday:h.weekday, opens:String(h.opens).slice(0,5), closes:String(h.closes).slice(0,5) })),
           closed_dates: await (async function(){
@@ -796,7 +801,7 @@ module.exports = async (req, res) => {
               const gid = mlist.length > 1 ? crypto.randomUUID() : null;
               for (const m of mlist) { const row = { business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true }; if (gid || m.mode === "online") { row.mode = m.mode; if (gid) row.group_id = gid; } sl2.push(row); }
             } else {
-              sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true });
+              sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true, ...(body.trainer === true && Number.isInteger(Number(x.entries)) && Number(x.entries) >= 1 && Number(x.entries) <= 1000 ? { entries: Number(x.entries) } : {}) });
             }
           }
           const hrs = Array.isArray(body.hours) ? body.hours : [];
@@ -846,13 +851,15 @@ module.exports = async (req, res) => {
 
       if (action === "service_create") {
         const name=String(body.name||"").trim(), duration_min=Number(body.duration_min), price_eur=Number(body.price_eur);
+        const ptTr = require("../lib/pt-packs.js").isTrainer(biz); let ptEn = 0;
+        if (ptTr) { ptEn = Number(body.entries); if (!Number.isInteger(ptEn) || ptEn < 1 || ptEn > 1000) return res.status(400).json({ error: "Scrivi quanti ingressi comprende il pacchetto (da 1 a 1000)." }); }
         if (Array.isArray(body.modes)) {
           // servizio con una o piu' modalita' (in sede / a domicilio / online), ognuna col suo prezzo
           const ms = modes.cleanModes(body.modes);
           if (!name || name.length > 80 || !Number.isInteger(duration_min) || duration_min <= 0 || duration_min > 720 || !ms) return res.status(400).json({ error: "Servizio non valido" });
           const gid = crypto.randomUUID(), half = body.half_hour === true;
           { const cur = await sb("GET", "services?business_id=eq." + biz.id + "&active=eq.true&select=*"); const bad = modes.violation(biz, cur.ok ? cur.data : [], ms, half); if (bad) return res.status(400).json({ error: bad }); }
-          const rowsNew = ms.map((m) => ({ business_id: biz.id, name, duration_min, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true, mode: m.mode, group_id: gid, half_hour: half }));
+          const rowsNew = ms.map((m) => ({ business_id: biz.id, name, duration_min, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true, mode: m.mode, group_id: gid, half_hour: half, ...(ptEn ? { entries: ptEn } : {}) }));
           let rr = await sb("POST", "services", rowsNew, "return=representation");
           if (!rr.ok && ms.length === 1 && ms[0].mode !== "online") {
             // colonne nuove non ancora create: un servizio in sede o a domicilio si salva come prima
@@ -864,7 +871,7 @@ module.exports = async (req, res) => {
           return res.status(200).json({ ok: true });
         }
         if(!name || !Number.isInteger(duration_min) || duration_min<=0 || !Number.isFinite(price_eur) || price_eur<0) return res.status(400).json({error:"Servizio non valido"});
-        const r=await sb("POST","services",{business_id:biz.id,name,duration_min,buffer_min:0,price_eur,at_customer_place:body.at_customer_place===true,active:true},"return=representation");
+        const r=await sb("POST","services",{business_id:biz.id,name,duration_min,buffer_min:0,price_eur,at_customer_place:body.at_customer_place===true,active:true,...(ptEn?{entries:ptEn}:{})},"return=representation");
         if(!r.ok) return res.status(500).json({error:"Errore nel salvataggio del servizio"});
         return res.status(200).json({ok:true});
       }
@@ -914,6 +921,7 @@ module.exports = async (req, res) => {
         if(!/^[0-9a-f-]{36}$/.test(id)||!name||!Number.isInteger(duration_min)||duration_min<=0||!Number.isFinite(price_eur)||price_eur<0) return res.status(400).json({error:"Servizio non valido"});
         const upd={name,duration_min,price_eur}; if(typeof body.at_customer_place==="boolean") upd.at_customer_place=body.at_customer_place;
         if(body.max_units!==undefined){ const mu=Number(body.max_units); if(!Number.isInteger(mu)||mu<1||mu>8) return res.status(400).json({error:"Durata massima non valida"}); upd.max_units=mu; }
+        if(body.entries!==undefined && require("../lib/pt-packs.js").isTrainer(biz)){ const en=Number(body.entries); if(!Number.isInteger(en)||en<1||en>1000) return res.status(400).json({error:"Il numero di ingressi deve essere tra 1 e 1000"}); upd.entries=en; }
         const r=await sb("PATCH","services?id=eq."+id+"&business_id=eq."+biz.id,upd,"return=representation");
         if(!r.ok||!Array.isArray(r.data)||!r.data.length) return res.status(404).json({error:"Servizio non trovato"});
         return res.status(200).json({ok:true});
@@ -1398,8 +1406,41 @@ module.exports = async (req, res) => {
       return res.status(200).json({ services: svcList, times: times });
     }
 
+    // Personal trainer: pacchetti e ingressi degli iscritti (tabella pt_packs: vedi supabase/migrations/20261109_personal_trainer_packs.sql)
+    if (q.pt === "1") {
+      res.setHeader("Cache-Control", "no-store");
+      const ptl = require("../lib/pt-packs.js");
+      if (!ptl.isTrainer(biz)) return res.status(404).json({ error: "Non disponibile per questa attività." });
+      const pkgs = (biz.services || []).filter((x) => x.active !== false && Number(x.entries) >= 1).map((x) => ({ id: x.id, name: x.name, entries: Number(x.entries), duration_min: x.duration_min, price_eur: x.price_eur }));
+      if (req.method === "GET") {
+        const phone = String(q.phone || "").trim();
+        const packs = phone ? await ptl.packsOf(sb, biz.id, phone) : [];
+        return res.status(200).json({ services: pkgs, packs: packs.map((p) => ({ id: p.id, name: p.pack_name, total: p.entries_total, used: p.used, left: p.left, price_eur: p.price_eur, created_at: p.created_at })) });
+      }
+      const pb = req.body || {};
+      if (pb.action === "assign") {
+        const sv = pkgs.find((x) => x.id === String(pb.service_id || ""));
+        if (!sv) return res.status(400).json({ error: "Scegli un pacchetto." });
+        const nm = String(pb.name || "").trim().replace(/\s+/g, " ").slice(0, 120), ph = String(pb.phone || "").trim().slice(0, 40);
+        if (!nm || ptl.phoneNorm(ph).length < 6) return res.status(400).json({ error: "Servono nome e telefono dell'iscritto." });
+        const ins = await sb("POST", "pt_packs", { business_id: biz.id, customer_name: nm, customer_phone: ph, service_id: sv.id, pack_name: sv.name, entries_total: sv.entries, price_eur: sv.price_eur }, "return=representation");
+        if (!ins.ok) return res.status(500).json({ error: "Non siamo riusciti ad assegnare il pacchetto. Riprova." });
+        return res.status(200).json({ ok: true });
+      }
+      if (pb.action === "remove") {
+        const id = String(pb.id || "");
+        if (!/^[0-9a-f-]{36}$/.test(id)) return res.status(400).json({ error: "Pacchetto non valido." });
+        const used = await sb("GET", "appointments?pt_pack_id=eq." + id + "&business_id=eq." + biz.id + "&select=id&limit=1");
+        if (used.ok && Array.isArray(used.data) && used.data.length) return res.status(409).json({ error: "Questo pacchetto ha già lezioni prenotate: non si può togliere." });
+        const del = await sb("DELETE", "pt_packs?id=eq." + id + "&business_id=eq." + biz.id, null, "return=minimal");
+        if (!del.ok) return res.status(500).json({ error: "Non siamo riusciti a togliere il pacchetto." });
+        return res.status(200).json({ ok: true });
+      }
+      return res.status(400).json({ error: "Richiesta non valida" });
+    }
+
     // Annullare un appuntamento, o crearne uno nuovo a mano
-    if (req.method === "POST" && q.notes !== "1" && q.push !== "1") {
+    if (req.method === "POST" && q.notes !== "1" && q.push !== "1" && q.pt !== "1") {
       const body = req.body || {};
 
       if (body.create) {
@@ -1433,6 +1474,16 @@ module.exports = async (req, res) => {
         const today = todayStr(tz);
         if (dateStr < today) return res.status(400).json({ error: "Quella data è già passata" });
 
+        // Personal trainer: la lezione scala un ingresso dal pacchetto dell'iscritto (senza ingressi non si prenota)
+        let ptPack = null;
+        const ptl = require("../lib/pt-packs.js");
+        if (ptl.isTrainer(biz)) {
+          if (list.length !== 1) return res.status(400).json({ error: "Scegli un solo pacchetto per volta." });
+          if (!phoneIn) return res.status(400).json({ error: "Serve il telefono dell'iscritto.", field: "phone" });
+          ptPack = ptl.pickPack(await ptl.packsOf(sb, biz.id, phoneIn), list[0].id);
+          if (!ptPack) return res.status(409).json({ error: "Questo iscritto non ha ingressi disponibili per questo pacchetto. Assegnagli prima il pacchetto dalla sua scheda." });
+        }
+
         let cUnits = 1;
         if (list.length === 1 && body.units !== undefined && body.units !== null && body.units !== "") { const ud = unitsOf(list[0], body.units); if (ud.error) return res.status(400).json({ error: ud.error }); cUnits = ud.units; }
         const slots = await freeSlotsFor(biz, list, dateStr, cUnits);
@@ -1463,6 +1514,7 @@ module.exports = async (req, res) => {
               customer_address: require("../lib/verticals.js").isMedical(biz.business_type) ? null : (body.address || null),
               notes: require("../lib/verticals.js").isMedical(biz.business_type) ? null : (body.notes || null),
               channel: "manuale",
+              ...(ptPack ? { pt_pack_id: ptPack.id } : {}),
               ...(promoNow[sv.id] != null ? { promo_price_eur: promoNow[sv.id] } : {}),
               starts_at: st.toISOString(),
               ends_at: en.toISOString(),

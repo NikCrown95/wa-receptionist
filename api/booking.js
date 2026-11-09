@@ -581,6 +581,17 @@ module.exports = async (req, res) => {
       if (emailErr) return res.status(400).json({ error: emailErr });
       const email = mail.normalizeEmail(body.email);
       const medical = require("../lib/verticals.js").isMedical(biz.business_type);
+      // Personal trainer: si prenota solo se si e' iscritti con nome, cognome e telefono, e solo finche' restano ingressi
+      let ptPack = null;
+      { const ptl = require("../lib/pt-packs.js");
+        if (ptl.isTrainer(biz)) {
+          if (name.split(/\s+/).filter(Boolean).length < 2) return res.status(400).json({ error: "Scrivi nome e cognome." });
+          const mineP = (await ptl.packsOf(sb, biz.id, phone)).filter((p) => ptl.sameName(p.customer_name, name));
+          if (!mineP.length) return res.status(403).json({ error: "Non risulti tra gli iscritti. Controlla nome, cognome e telefono, oppure contatta il tuo personal trainer." });
+          ptPack = ptl.pickPack(mineP, service.id);
+          if (!ptPack) return res.status(403).json({ error: "Non hai ingressi disponibili per questo pacchetto. Contatta il tuo personal trainer." });
+        }
+      }
       if (medical) {
         if (body.consent !== true) return res.status(400).json({ error: "Per prenotare serve il tuo consenso al trattamento dei dati." });
         body.address = ""; // nessun indirizzo del paziente
@@ -637,6 +648,7 @@ module.exports = async (req, res) => {
           customer_name: name,
           customer_phone: phone,
           customer_address: body.address || null,
+          ...(ptPack ? { pt_pack_id: ptPack.id } : {}),
           starts_at: start.toISOString(),
           ends_at: end.toISOString(),
           blocked_until: blocked.toISOString(),
