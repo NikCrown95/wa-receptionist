@@ -244,3 +244,8 @@ html.ptb #calSubApp .sheet#sheet,html.ptb #calSubApp .sheet#sheet:focus,html.ptb
 html.ptb #calSubApp #sheet .ap-foot:not(.edit) .ap-btn{white-space:nowrap;font-size:.92rem;padding-left:10px;padding-right:10px}
 html.ptb #calSubApp #sheet #sheet-close{width:44px;height:44px;border-radius:14px;margin-left:-6px}
 .ptCc .ptCb{flex:1;justify-content:center;padding:11px 12px}
+
+/* PT: la X di chiusura è sempre visibile (anche in visualizzazione) */
+html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important}
+html.ptb #calSubApp #sheet.apv .ap-top{position:static!important;display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0;gap:8px}
+html.ptb #calSubApp #sheet.apv .ap-ttl{display:flex!important;flex:1;justify-content:center}

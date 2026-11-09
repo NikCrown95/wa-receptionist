@@ -299,12 +299,20 @@
     if (on && !shWasOn) shOpenAt = Date.now();
     shWasOn = on; if (on) xBtn();
   }, 120);
-  document.addEventListener('click', function (ev) {
+  function outsideClose(ev) {
     var sh = document.getElementById('sheet');
     if (!sh || !sh.classList.contains('on') || Date.now() - shOpenAt < 350) return;
-    if (ev.target.closest && (ev.target.closest('#sheet') || ev.target.closest('.confirm') || ev.target.closest('#ap-menu'))) return;
+    var t = ev.target;
+    if (t && t.closest && (t.closest('#sheet') || t.closest('.confirm') || t.closest('#ap-menu'))) return;
     var cl = document.getElementById('sheet-close'); if (cl) cl.click();
+  }
+  var pdn = null;
+  document.addEventListener('pointerdown', function (ev) { pdn = { x: ev.clientX, y: ev.clientY, t: Date.now() }; }, true);
+  document.addEventListener('pointerup', function (ev) {
+    if (pdn && Math.abs(ev.clientX - pdn.x) < 12 && Math.abs(ev.clientY - pdn.y) < 12 && Date.now() - pdn.t < 600) outsideClose(ev);
+    pdn = null;
   }, true);
+  document.addEventListener('click', outsideClose, true);
 
   (function watch() {
     var v = document.getElementById('ap-view');
