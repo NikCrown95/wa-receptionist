@@ -243,6 +243,11 @@
     bindDrag(gr); box.appendChild(gr);
     var ap = el("button", "pvGo", "Applica a " + (sel.length === 1 ? "questo giorno" : sel.length + " giorni")); ap.type = "button";
     ap.addEventListener("click", apply); box.appendChild(ap);
+    try {
+      var rc = host.getBoundingClientRect(), W = window.innerWidth;
+      ov.style.paddingLeft = Math.max(16, Math.round(rc.left)) + "px";
+      ov.style.paddingRight = Math.max(16, Math.round(W - rc.right)) + "px";
+    } catch (e) { }
     document.body.appendChild(ov);
   }
 
