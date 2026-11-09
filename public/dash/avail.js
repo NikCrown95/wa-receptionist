@@ -491,7 +491,7 @@
     nav.appendChild(mk("div", "avSep"));
     var n = closureItems().length;
     item("chi", window.__LIA_PT ? "Assenze e ferie" : "Chiusure e assenze", n ? n + " in programma" : "Nessuna in programma");
-    if ((!S.team || !S.staff.length) && !isGym()) {
+    if ((!S.team || !S.staff.length) && !isGym() && !window.__LIA_PT) {
       var h = mk("div", "avSide-hint");
       h.appendChild(mk("span", null, "Hai collaboratori? Aggiungili e imposta gli orari di ognuno."));
       var go = mk("button", "avMini lnk", "Apri Chi lavora da te"); go.type = "button";
