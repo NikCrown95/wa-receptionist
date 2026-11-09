@@ -4,6 +4,11 @@
 (function () {
   "use strict";
   if (!window.__LIA_PT) return;
+  try {
+    var tc = document.createElement("style");
+    tc.textContent = "@media(max-width:620px){.avSide{gap:6px}.avSide .avSi{flex:1 1 0;min-width:0;padding:8px 10px;gap:8px}.avSide .avSi .avAv{width:32px;height:32px;flex:none}.avSide .avSi .avSt{min-width:0}.avSide .avSi .avSt b{font-size:.84rem;line-height:1.15;white-space:normal}.avSide .avSi .avSt small{display:none}}";
+    document.head.appendChild(tc);
+  } catch (e) { }
   var DS = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
   var DL = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
   var MO = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
