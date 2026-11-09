@@ -370,6 +370,40 @@ module.exports = async (req, res) => {
   res.setHeader("Referrer-Policy", "no-referrer");
 
   const q = req.query || {};
+  // Calendario del telefono: /cal/CODICE.ics (vedi vercel.json). Link segreto in sola lettura, senza accesso alla dashboard.
+  if (q.cal !== undefined && !q.t && req.method === "GET") {
+    const cf = require("../lib/calendar-feed.js");
+    const code = String(q.cal || "").replace(/\.ics$/i, "");
+    const plain = (st, tx) => { res.statusCode = st; res.setHeader("Content-Type", "text/plain; charset=utf-8"); return res.end(tx); };
+    if (!cf.validToken(code)) return plain(404, "Link non valido");
+    try {
+      const br = await sb("GET", "businesses?cal_token=eq." + code + "&active=eq.true&select=id,name,business_type&limit=1");
+      const b = br.ok && Array.isArray(br.data) ? br.data[0] : null;
+      if (!b) return plain(404, "Link non valido");
+      const pt = require("../lib/pt-packs.js");
+      const trainer = pt.isTrainer(b);
+      const from = new Date(Date.now() - 30 * 864e5).toISOString(), to = new Date(Date.now() + 150 * 864e5).toISOString();
+      const ar = await sb("GET", "appointments?business_id=eq." + b.id + "&status=eq.confirmed&starts_at=gte." + encodeURIComponent(from) + "&starts_at=lt." + encodeURIComponent(to) + "&order=starts_at.asc&limit=1500&select=id,customer_name,customer_phone,starts_at,ends_at,services(name)");
+      if (!ar.ok || !Array.isArray(ar.data)) return plain(503, "Calendario non disponibile, riprova tra poco");
+      const left = {};
+      if (trainer) { try { (await pt.rosterOf(sb, b.id)).forEach((m) => { left[pt.phoneNorm(m.phone)] = m.left; }); } catch (e) {} }
+      const events = ar.data.map((a) => {
+        const name = String(a.customer_name || "").trim() || "Iscritto";
+        const sv = Array.isArray(a.services) ? a.services[0] : a.services;
+        const svc = sv && sv.name ? String(sv.name) : "";
+        const n = trainer ? left[pt.phoneNorm(a.customer_phone)] : undefined;
+        const d = [];
+        if (trainer && Number.isFinite(n)) d.push("Coaching ancora da prenotare: " + n);
+        d.push("Prenotazione di Prenolia");
+        return { id: a.id, title: trainer ? "Coaching · " + name : (svc ? svc + " · " + name : name), description: d.join("\n"), startsAt: a.starts_at, endsAt: a.ends_at };
+      });
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+      res.setHeader("Content-Disposition", 'inline; filename="prenolia.ics"');
+      res.setHeader("Cache-Control", "private, max-age=300");
+      return res.end(cf.buildIcs(events, { name: "Prenolia" }));
+    } catch (e) { return plain(503, "Calendario non disponibile, riprova tra poco"); }
+  }
   // Link breve del pannello: prenolia.it/a/CODICE porta al pannello dell'attività
   // Codice breve dell'attivita' per accorciare l'indirizzo mostrato dal browser (/a/CODICE)
   if (q.short === "1" && req.method === "GET") {
@@ -416,7 +450,7 @@ module.exports = async (req, res) => {
         else if (require("../lib/pt-packs.js").isTrainer({ business_type: bt })) {
           // Personal trainer: stessa dashboard dei servizi alla persona, con "iscritti" e "pacchetti" e gli ingressi di ciascun iscritto (public/dash/trainer.js).
           variantKey = "pt";
-          html = PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=d43433c7\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=1a355c96"></script><script src="/dash/trainer-iscritti.js?v=29a84ee8"></script><script src="/dash/trainer-stats.js?v=a4996057"></script><script src="/dash/trainer-avail.js?v=2897aaef"></script></body>');
+          html = require("../lib/calendar-feed.js").patchPtPage(PAGE_READY.replace("<head>", "<head><script>window.__LIA_PT=true</script><link rel=\"stylesheet\" href=\"/gym/members.css?v=0c3d3265\"><link rel=\"stylesheet\" href=\"/dash/trainer-members.css?v=d43433c7\"><style>.clientsWrap>:not(#ptMx){display:none!important}</style>").replace("</body>", '<script src="/dash/trainer.js?v=1a355c96"></script><script src="/dash/trainer-iscritti.js?v=29a84ee8"></script><script src="/dash/trainer-stats.js?v=a4996057"></script><script src="/dash/trainer-avail.js?v=2897aaef"></script><script src="/dash/trainer-calendar.js?v=19f6d41e"></script></body>'));
         }
         else if (require("../lib/verticals.js").isMedical(bt)) {
           // Studi sanitari: stessa dashboard, ma senza note libere, Lia, Telegram e WhatsApp (niente dati sulla salute).
@@ -501,6 +535,24 @@ module.exports = async (req, res) => {
         // se il sistema referral non e' ancora attivo nel database, la card resta nascosta
         return res.status(200).json({ available: false });
       }
+    }
+
+    // ====== Calendario sul telefono (iPhone/iPad): link personale per aggiungere le prenotazioni a Calendario ======
+    if (q.callink === "1") {
+      if (req.method !== "POST") return res.status(405).json({ error: "Richiesta non valida" });
+      const cf = require("./../lib/calendar-feed.js");
+      const act = String((req.body || {}).action || "");
+      if (act !== "link" && act !== "reset") return res.status(400).json({ error: "Richiesta non valida" });
+      const cur = await sb("GET", "businesses?id=eq." + biz.id + "&select=cal_token&limit=1");
+      if (!cur.ok) return res.status(503).json({ error: "Il calendario non è ancora attivo. Riprova tra poco." });
+      let tk = Array.isArray(cur.data) && cur.data[0] ? cur.data[0].cal_token : null;
+      if (!cf.validToken(tk) || act === "reset") {
+        tk = require("crypto").randomBytes(16).toString("hex");
+        const w = await sb("PATCH", "businesses?id=eq." + biz.id, { cal_token: tk }, "return=representation");
+        if (!w.ok) return res.status(500).json({ error: "Non sono riuscito a creare il link. Riprova." });
+      }
+      const base = (process.env.PUBLIC_URL ? require("./../lib/site.js").baseUrl() : reqBase(req)).replace(/^https?:/, "");
+      return res.status(200).json({ ok: true, webcal: "webcal:" + base + "/cal/" + tk + ".ics" });
     }
 
     // ====== Shop: ordini di locandine e bigliettini (pagamento manuale, lo gestisce il titolare di Lia) ======

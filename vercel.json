@@ -152,6 +152,10 @@
   ],
   "rewrites": [
     {
+      "source": "/cal/:file",
+      "destination": "/api/agenda?cal=:file"
+    },
+    {
       "source": "/",
       "destination": "/teaser/index.html"
     },
