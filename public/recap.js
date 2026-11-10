@@ -396,7 +396,13 @@
     fetch("/api/agenda?t=" + encodeURIComponent(token) + "&recap=1", { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("recap"); return r.json(); })
       .then(function (d) {
+        var before = data ? visibleNotices().filter(function (n) { return !isSeen(kOf(n)); }).map(kOf) : null;
         data = d;
+        // un avviso nuovo e non letto, arrivato mentre la dashboard e' aperta: suono (non al primo caricamento)
+        if (before) {
+          var fresh = visibleNotices().filter(function (n) { return !isSeen(kOf(n)) && before.indexOf(kOf(n)) < 0 && n.type !== "install_invite" && n.type !== "sub_expired"; });
+          if (fresh.length && window.liaChime) window.liaChime();
+        }
         if (refreshOpen && !panel.hidden) render();
         paintBtn();
         if (thenOpen) openPanel();
