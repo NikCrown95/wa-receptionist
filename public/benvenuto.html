@@ -277,6 +277,15 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .rr.sc{position:relative;border-top:0;margin-top:8px;padding:9px 12px 9px 18px;border-radius:12px;border:1px solid rgba(var(--c),.3);background:linear-gradient(135deg,rgba(var(--c),.14),var(--card) 70%)}
 .rr.sc:first-child{margin-top:0}
 .rr.sc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:rgb(var(--c))}
+.rr.sc.dm{flex-direction:column;align-items:stretch;gap:8px;padding:10px 12px 10px 18px}
+.dmh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.dmg{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:6px}
+.dmc{background:rgba(var(--c),.1);border:1px solid rgba(var(--c),.22);border-radius:10px;padding:6px 4px;text-align:center}
+.dmc.off{opacity:.35}
+.dml{display:flex;align-items:center;justify-content:center;gap:4px;font-size:.7rem;color:var(--muted)}
+.dml svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dmc b{display:block;font-size:.95rem;font-weight:700;margin-top:2px;text-align:center}
+.dmc.nd b{font-size:.72rem;font-weight:500;color:var(--muted)}
 .rr.sc.av{justify-content:flex-start;padding-left:12px}.rr.sc.av::before{display:none}
 .rav svg{width:24px;height:24px;fill:none;stroke:#06121c;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .rav{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#06121c;background:rgb(var(--c));box-shadow:0 0 0 3px rgba(var(--c),.25)}
@@ -990,7 +999,12 @@ function render(){
         var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio")?h("small",{class:itModes(x).indexOf("casa")>=0?"home-tag":"",text:itModes(x).map(function(k){var q=mPrice(x,k);return(k==="casa"?"A casa":(k==="sede"?"Nel locale":"Online"))+(q!==""?" € "+q:"")}).join(" · ")}):null]);
         var hasP=S.v==="domicilio"?itModes(x).some(function(k){return mPrice(x,k)!==""}):p!=="";
         var rt=S.v==="domicilio"?fmtMin(x.d)+(hasP?"":" · prezzo da definire"):fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €");
-        sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[sb2.children.length%SCOL.length]},[left,h("span",{class:"rv"+(hasP?"":" dim"),text:rt})]))});
+        var cc=SCOL[sb2.children.length%SCOL.length];
+        if(mixedWh()){var wl9=whList(),on9=itModes(x),IC9={casa:'<path d="M5 12l-2 0l9 -9l9 9l-2 0"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"/>',sede:'<path d="M3 21l18 0"/><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4"/><path d="M5 21l0 -10.15"/><path d="M19 21l0 -10.15"/><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4"/>',online:'<path d="M3 19l18 0"/><path d="M5 6m0 1a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1z"/>'},LB9={casa:"Casa",sede:"Locale",online:"Online"};
+          var cells=wl9.map(function(k){var q=mPrice(x,k),on=on9.indexOf(k)>=0,lb=h("span",{class:"dml"});lb.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+IC9[k]+'</svg>'+LB9[k];
+            return h("div",{class:"dmc"+(on?"":" off")+(on&&q===""?" nd":"")},[lb,h("b",{text:!on?"–":(q===""?"da definire":q+" €")})])});
+          sb2.appendChild(h("div",{class:"rr sc dm",style:"--c:"+cc+";--n:"+wl9.length},[h("div",{class:"dmh"},[h("b",{text:x.n.trim()}),h("span",{class:"rv",text:fmtMin(x.d)})]),h("div",{class:"dmg"},cells)]));return}
+        sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+cc},[left,h("span",{class:"rv"+(hasP?"":" dim"),text:rt})]))});
       v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
       if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team"){var tb=h("div",{class:"rows"});
         var svTx=function(a){return a.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")};
