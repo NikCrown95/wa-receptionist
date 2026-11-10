@@ -988,7 +988,9 @@ function render(){
       var sb2=h("div",{class:"rows"});
       S.items.forEach(function(x){var p=String(x.p).trim().replace(",",".");
         var left=h("div",null,[h("b",{text:x.n.trim()}),(S.v==="domicilio")?h("small",{class:itModes(x).indexOf("casa")>=0?"home-tag":"",text:itModes(x).map(function(k){var q=mPrice(x,k);return(k==="casa"?"A casa":(k==="sede"?"Nel locale":"Online"))+(q!==""?" € "+q:"")}).join(" · ")}):null]);
-        sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[sb2.children.length%SCOL.length]},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
+        var hasP=S.v==="domicilio"?itModes(x).some(function(k){return mPrice(x,k)!==""}):p!=="";
+        var rt=S.v==="domicilio"?fmtMin(x.d)+(hasP?"":" · prezzo da definire"):fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €");
+        sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[sb2.children.length%SCOL.length]},[left,h("span",{class:"rv"+(hasP?"":" dim"),text:rt})]))});
       v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
       if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team"){var tb=h("div",{class:"rows"});
         var svTx=function(a){return a.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")};
