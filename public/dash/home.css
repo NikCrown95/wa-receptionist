@@ -1,6 +1,10 @@
 /* Home con le scorciatoie (solo smartphone): prima schermata della dashboard */
 @media(min-width:700px){#menuTabHome{display:none!important}}
 #panelHome{overflow:visible}
+@media(max-width:699px){
+  body.lia-sec-home #sectionLabel{display:none}
+  body.lia-sec-home .mainTopRow{padding:10px 16px 6px}
+}
 #panelHome .hmWrap{box-sizing:border-box;width:100%;max-width:560px;margin:0 auto;padding:10px 16px calc(96px + env(safe-area-inset-bottom,0px))}
 #panelHome .hmDay{display:block;width:100%;box-sizing:border-box;margin:0 0 12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #panelHome .hmDay:active{transform:scale(.99)}

@@ -107,7 +107,11 @@
     }).catch(function(){if(my===seq)day.hidden=true;});
   }
   function refresh(){sync();}
-  document.addEventListener('lia:section',function(e){if(e&&e.detail==='home'){refresh();loadDay();}});
+  document.addEventListener('lia:section',function(e){
+    /* nella Home l'intestazione e' piu' bassa e senza la scritta "Home" (vedi home.css) */
+    document.body.classList.toggle('lia-sec-home',!!(e&&e.detail==='home'));
+    if(e&&e.detail==='home'){refresh();loadDay();}
+  });
   /* il menu (con Disponibilita' e il QR) viene costruito subito dopo il caricamento: riallineo i riquadri */
   [0,500,1500,3500].forEach(function(ms){setTimeout(refresh,ms);});
   var menu=$('burgerMenu');
