@@ -157,6 +157,22 @@
     },
     {
       "source": "/",
+      "destination": "/provahtml/index.html"
+    },
+    {
+      "source": "/domande",
+      "destination": "/provahtml/domande.html"
+    },
+    {
+      "source": "/tutorial",
+      "destination": "/provahtml/tutorial.html"
+    },
+    {
+      "source": "/scegli-settore",
+      "destination": "/provahtml/scegli-settore.html"
+    },
+    {
+      "source": "/teaser",
       "destination": "/teaser/index.html"
     },
     {
@@ -170,22 +186,6 @@
     {
       "source": "/sketch",
       "destination": "/sketch/index.html"
-    },
-    {
-      "source": "/provahtml",
-      "destination": "/provahtml/index.html"
-    },
-    {
-      "source": "/provahtml/domande",
-      "destination": "/provahtml/domande.html"
-    },
-    {
-      "source": "/provahtml/tutorial",
-      "destination": "/provahtml/tutorial.html"
-    },
-    {
-      "source": "/provahtml/scegli-settore",
-      "destination": "/provahtml/scegli-settore.html"
     },
     {
       "source": "/promoter",
@@ -232,7 +232,7 @@
       "destination": "/api/palestra?b=:slug"
     },
     {
-      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|promoter|reset|sicurezza|privacy|termini|cookie|accordo-sanitari|palestra|circolo|teaser|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
+      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|registrati|promoter|reset|sicurezza|privacy|termini|cookie|accordo-sanitari|palestra|circolo|teaser|domande|tutorial|scegli-settore|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
       "destination": "/api/booking?b=:slug"
     }
   ],
@@ -240,6 +240,26 @@
     "dub1"
   ],
   "redirects": [
+    {
+      "source": "/provahtml",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/provahtml/domande",
+      "destination": "/domande",
+      "permanent": true
+    },
+    {
+      "source": "/provahtml/tutorial",
+      "destination": "/tutorial",
+      "permanent": true
+    },
+    {
+      "source": "/provahtml/scegli-settore",
+      "destination": "/scegli-settore",
+      "permanent": true
+    },
     {
       "source": "/invito/:code",
       "destination": "/registrati.html?ref=:code",
