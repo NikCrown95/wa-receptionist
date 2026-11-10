@@ -184,10 +184,6 @@
       "destination": "/registrati.html"
     },
     {
-      "source": "/sketch",
-      "destination": "/sketch/index.html"
-    },
-    {
       "source": "/promoter",
       "destination": "/promoter.html"
     },
