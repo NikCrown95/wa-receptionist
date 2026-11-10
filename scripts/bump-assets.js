@@ -3,8 +3,6 @@
    cosi' i browser scaricano la versione nuova. Da lanciare dopo ogni modifica ai file in public/:
    node scripts/bump-assets.js */
 const fs = require("fs"), path = require("path"), crypto = require("crypto");
-/* i temi Nero e Rosa si rigenerano dai CSS (scripts/build-themes.js) prima di calcolare le versioni */
-require("./build-themes.js").build();
 const root = path.join(__dirname, "..");
 const file = path.join(root, "api", "agenda.js");
 let src = fs.readFileSync(file, "utf8"), changed = 0;
