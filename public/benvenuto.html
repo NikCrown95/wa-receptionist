@@ -273,6 +273,8 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .rr.sc{position:relative;border-top:0;margin-top:8px;padding:9px 12px 9px 18px;border-radius:12px;border:1px solid rgba(var(--c),.3);background:linear-gradient(135deg,rgba(var(--c),.14),var(--card) 70%)}
 .rr.sc:first-child{margin-top:0}
 .rr.sc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:rgb(var(--c))}
+.rr.sc.av{justify-content:flex-start;padding-left:12px}.rr.sc.av::before{display:none}
+.rav{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#06121c;background:rgb(var(--c));box-shadow:0 0 0 3px rgba(var(--c),.25)}
 .rr.sc .rv{font-weight:700;color:rgb(var(--c))}.rr.sc .rv.dim{color:var(--muted);font-weight:500}
 .rr>div{min-width:0}
 .rr b{display:block;font-weight:600;font-size:.97rem;overflow-wrap:anywhere}
@@ -984,8 +986,11 @@ function render(){
         sb2.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[sb2.children.length%SCOL.length]},[left,h("span",{class:"rv"+(p===""?" dim":""),text:fmtMin(x.d)+" · "+(p===""?"prezzo da definire":p+" €")})]))});
       v.appendChild(sec("Servizi","servizi",sb2,S.items.length));
       if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team"){var tb=h("div",{class:"rows"});
-        tb.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[0]},[h("div",null,[h("b",{text:S.owner.trim()+" (tu)"}),h("small",{text:S.osv.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")})])]));
-        S.team.forEach(function(m,i){tb.appendChild(h("div",{class:"rr sc",style:"--c:"+SCOL[(i+1)%SCOL.length]},[h("div",null,[h("b",{text:m.n}),h("small",{text:m.sv.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")})])]))});
+        var svTx=function(a){return a.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")};
+        var ini=function(n){var w=String(n).trim().split(/\s+/);return((w[0]||"?").charAt(0)+(w.length>1?w[w.length-1].charAt(0):"")).toUpperCase()};
+        var prow=function(n,sub,i,tag){return h("div",{class:"rr sc av",style:"--c:"+SCOL[i%SCOL.length]},[h("span",{class:"rav","aria-hidden":"true",text:ini(n)}),h("div",null,[h("b",{text:n+(tag||"")}),h("small",{text:sub})])])};
+        tb.appendChild(prow(S.owner.trim(),svTx(S.osv),0," (tu)"));
+        S.team.forEach(function(m,i){tb.appendChild(prow(m.n.trim(),svTx(m.sv),i+1))});
         v.appendChild(sec("Collaboratori","team",tb,S.team.length+1))}
       var wk=h("div",{class:"week"});
       S.hours.forEach(function(d,i){var c=h("div",{class:"wd"+(d.on?" on":"")},[h("span",{class:"dl",text:DAYS[i]}),d.on?h("span",{class:"tm",text:d.from}):h("span",{class:"tm",text:"–"}),d.on?h("span",{class:"tm e",text:d.to}):h("span",{class:"tm e",text:"chiuso"})]);wk.appendChild(c)});
