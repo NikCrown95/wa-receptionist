@@ -2240,7 +2240,7 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 @keyframes clIn{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
 @media(min-width:700px){
   #panelClients .clientsWrap{max-width:none}
-  #clSplit{display:grid;grid-template-columns:minmax(0,1fr) 0px;gap:0;align-items:start;transition:grid-template-columns .32s cubic-bezier(.3,.7,.2,1),gap .32s cubic-bezier(.3,.7,.2,1)}
+  #clSplit{display:grid;grid-template-columns:minmax(0,1fr) 0px;gap:0;align-items:start}
   #clSplit.cl-open{grid-template-columns:minmax(0,1fr) 430px;gap:18px}
   .cl-detcol{display:block;position:sticky;top:12px;max-height:calc(100vh - 120px);overflow:hidden;min-width:0;opacity:0;transform:translateX(24px);pointer-events:none;visibility:hidden;transition:opacity .25s,transform .32s cubic-bezier(.3,.7,.2,1),visibility 0s linear .32s}
   #clSplit.cl-open .cl-detcol{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition-delay:0s;overflow-y:auto;padding:4px 2px 20px}

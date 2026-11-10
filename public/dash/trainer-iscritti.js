@@ -46,7 +46,7 @@
     var hp = (window.liaGetHistory ? window.liaGetHistory() : Promise.resolve({})).then(function (h) { return (h && h.appointments) || []; }, function () { return []; });
     return rp.then(function (j) {
       D = j; (D.members || []).forEach(function (m) { var n = split(m.name); m.first = n.f; m.last = n.l; m.status = stOf(m); });
-      render(); if (window.liaPtPickRefresh) window.liaPtPickRefresh();
+      render(); if (window.liaPtPickRefresh) window.liaPtPickRefresh(); try { injectIs(); } catch (e) {}
       return hp.then(function (h) { HIST = h; if (!document.querySelector('.liaSheet')) render(); });
     }).catch(function (e) {
       if (!root) { var w = document.querySelector('.clientsWrap'); if (!w) return; root = el('div'); root.id = 'ptMx'; w.appendChild(root); }
@@ -315,6 +315,9 @@
       '<div class="ptCg"><span class="ptCt"><b>' + (cp ? cp.left : 0) + '</b><small>' + (cp && cp.left === 1 ? 'rimasta' : 'rimaste') + '</small></span><span class="ptCt"><b>' + (cp ? cp.used || 0 : 0) + '</b><small>fatte</small></span><span class="ptCt"><b>' + ls.up.length + '</b><small>in agenda</small></span></div>' +
       '<div class="ptCp"><div class="ptCn"><span>' + esc(cp ? cp.name : '—') + '</span><span class="ptCs">' + esc(st.label) + '</span></div><span class="ptIsP"><i style="width:' + pct + '%"></i></span></div>' +
       '<div class="ptCc"><a class="ptCb" href="tel:' + esc(String(m.phone || ph).replace(/\s+/g, '')) + '">' + ico('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>') + 'Chiama</a>' + (wa ? '<a class="ptCb w" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + ico('<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>') + 'WhatsApp</a>' : '') + '</div>';
+    var sig = box.innerHTML;
+    if (old && old.getAttribute('data-sig') === sig && view.firstChild === old) { view.classList.add('hasPtC'); return; }
+    box.setAttribute('data-sig', sig);
     injecting = true;
     if (old) old.remove();
     var prev = view.querySelector('.ptC'); if (prev) prev.remove();
@@ -438,7 +441,15 @@
   (function watch() {
     var v = document.getElementById('ap-view');
     if (!v) { setTimeout(watch, 800); return; }
-    new MutationObserver(function () { if (injecting) return; clearTimeout(injT); injT = setTimeout(injectIs, 60); }).observe(v, { childList: true, subtree: true });
+    /* Il riquadro dell'iscritto si mette nello stesso momento in cui la scheda si costruisce (callback del MutationObserver: prima che il browser disegni),
+       cosi' la scheda compare subito completa. Le modifiche fatte dal riquadro stesso vengono ignorate, altrimenti si rigenerava in continuo. */
+    var isC = function (n) { return n.nodeType === 1 && n.classList.contains('ptC'); };
+    new MutationObserver(function (recs) {
+      if (injecting) return;
+      var mine = recs.length > 0 && recs.every(function (r) { return [].every.call(r.addedNodes, isC) && [].every.call(r.removedNodes, isC); });
+      if (mine) return;
+      injectIs();
+    }).observe(v, { childList: true, subtree: true });
   })();
 
   function init() { if (!document.querySelector('.clientsWrap')) return; render(); load(); }

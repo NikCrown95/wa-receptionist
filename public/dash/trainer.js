@@ -120,9 +120,11 @@
       var phone = pe.textContent.trim(), name = h2.textContent.trim();
       var box = document.createElement('div');
       box.className = 'ptBox';
-      box.innerHTML = '<div class="ptEmpty">Carico i pacchetti…</div>';
+      var warm = cache[phone];
+      if (warm) render(box, warm, phone, name);
+      else { box.style.minHeight = '96px'; box.innerHTML = '<div class="ptEmpty">Carico i pacchetti…</div>'; }
       acts.insertAdjacentElement('afterend', box);
-      loadPacks(phone).then(function (d) { render(box, d, phone, name); }).catch(function () { box.remove(); });
+      loadPacks(phone).then(function (d) { box.style.minHeight = ''; render(box, d, phone, name); }).catch(function () { if (!warm) box.remove(); });
     });
   }
 
