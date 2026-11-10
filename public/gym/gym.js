@@ -976,7 +976,6 @@
   // ---------- Scheda palestra: stessa struttura delle altre attività, riempita con i dati della palestra ----------
   var pfObs = null, pfBusy = false;
   // l'intestazione compare una volta sola, già completa (niente scatti tra testo standard e testo della palestra)
-  ['/gym/hero.jpg', '/gym/logo.png'].forEach(function (u) { try { new Image().src = u; } catch (e) { } });
   // aperto/chiuso: dalla prima all'ultima lezione del giorno (gli stessi orari mostrati in "Orari di apertura"), nel fuso della palestra
   function pfOpenNow() {
     var on = document.getElementById('pfOpenNow'), D = S.data; if (!on || !D || !D.schedule) return;

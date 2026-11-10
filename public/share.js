@@ -308,9 +308,7 @@
     var c = $("mnShareCard"), p = $("menuTabProfile");
     if (c) c.classList.toggle("cur", !!p && p.getAttribute("aria-current") === "true");
   }
-  /* logo dell'attivita' al posto dell'icona (per slug), come per palestra e centro estetico */
-  var SKINS = { style2: "/brand/style2.jpg" };
-  /* il menu raggruppato (Agenda / La tua attivita' / Account) vale per le attivita' normali e per i circoli; le palestre hanno voci e nomi diversi */
+    /* il menu raggruppato (Agenda / La tua attivita' / Account) vale per le attivita' normali e per i circoli; le palestre hanno voci e nomi diversi */
   function grpSync() {
     var b = document.body;
     b.classList.toggle("mnB", !!biz); // attivita' normali, circoli e palestre: stesso menu a gruppi (Agenda / La tua attivita' / Account)
@@ -334,14 +332,14 @@
     var live = window.liaSettingsData && window.liaSettingsData.business, raw = live || biz.raw || {};
     var k = window.liaHeroKindOf ? window.liaHeroKindOf(window.__liaCampi ? { business_type: "centro_sportivo", name: "circolo", sport: campiSport(raw) } : raw) : null;
     var isGym = window.__liaCampi ? false : live && live.business_type ? String(live.business_type) === "palestra" : (biz.gym || String(raw.business_type || "") === "palestra"); // i dati freschi battono una copia vecchia salvata sul dispositivo
-    av.className = "mnAv" + (isGym ? " gym" : k ? (k.key === "estetista" ? " est" : k.key === "cartomante" ? " car" : "") : "");
-    if (isGym) { card.style.setProperty("--mnh", "36"); av.innerHTML = ""; }
+    av.className = "mnAv";
+    if (isGym) { card.style.setProperty("--mnh", "36"); av.textContent = String(raw.name || biz.name || "P").charAt(0).toUpperCase(); }
     else if (k) {
       card.style.setProperty("--mnh", String(k.h));
       av.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" ' + S + ' stroke-width="1.7">' + k.icon + "</svg>";
     } else av.textContent = String(raw.name || biz.name || "A").charAt(0).toUpperCase();
     var pdat = window.liaProfileData && window.liaProfileData.business, logoImg = (pdat && pdat.logo_url) || (live && live.logo_url) || "";
-    var skinImg = logoImg || SKINS[String(raw.slug || "").toLowerCase()] || "";
+    var skinImg = logoImg;
     if (skinImg) { av.className = "mnAv skin" + (logoImg ? " lg" : ""); av.innerHTML = ""; av.style.setProperty("--skin", "url(" + skinImg + ")"); } else av.style.removeProperty("--skin");
     try {
       var mbEl = document.querySelector(".mainBiz"), mbRow = mbEl && mbEl.parentNode;
