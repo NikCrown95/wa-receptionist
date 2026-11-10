@@ -253,7 +253,7 @@
     codeView();
     var gs = el('div', 'mvGs');
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
-    gt('INGRESSI USATI', m.total - m.left, m.total); gt('COACHING IN PROGRAMMA', ls.up.length, 0, 'coaching');
+    gt('INGRESSI USATI', m.total - m.left, m.total); gt('IN PROGRAMMA', ls.up.length, 0, 'coaching');
     gt('INGRESSI RIMASTI', m.left, m.total); gs.appendChild(cb);
     body.appendChild(gs);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);

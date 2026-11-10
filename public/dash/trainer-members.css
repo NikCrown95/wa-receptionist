@@ -343,3 +343,15 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvCode .mvV{flex-wrap:wrap}
 .mxD .mvCode .mvCv{font-size:1.06rem;letter-spacing:.02em}
 .mxD .mvCode .mvCodeB{height:auto;padding:0;border:0;margin:0 0 0 6px;font-size:.75rem;font-weight:500;align-self:baseline}
+
+/* Pagina iscritto compatta: correzioni (pulsanti su una riga, distanze uguali, tab e titoli piu' leggeri) */
+.mxD .mvBody{padding-top:0;margin-top:8px;gap:8px}
+.mxD .mvActs{display:flex;gap:8px}
+.mxD .mvA{flex:1 1 0;min-width:0;justify-content:center;white-space:nowrap;padding:0 6px;gap:6px}
+.mxD .mvA.pri{flex:1.45 1 0}
+.mxD .mvA svg{flex:none}
+.mxD .mvGs{gap:8px}
+.mxD .mvBody .mxTabs{margin:6px 0 2px;padding:3px;border-radius:12px}
+.mxD .mvBody .mxTabs button{min-height:30px;font-size:.78rem;font-weight:500}
+.mxD .mvBody .mxSec{margin:12px 2px 6px;font-size:.69rem;font-weight:500;letter-spacing:.04em}
+.mxD .mvBody .mxEmpty{padding:16px 14px;font-size:.8rem}
