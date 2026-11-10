@@ -189,6 +189,8 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .editdone{padding:0 14px 8px;text-align:right}
 .list>.lh2:first-child{border-top:0}
 .lh3{display:none}
+.addplus{display:none}
+.empty .mob{display:none}
 .lh{border-top:1px solid var(--line);margin-top:8px}
 .pane>*{flex-shrink:0}
 .addwrap{padding:4px 14px 14px;background:rgba(45,210,220,.05)}
@@ -208,6 +210,19 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .c-gym.lr{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
   .c-gym.lr .f-n{grid-column:1/3}.c-gym.lr .f-x{grid-column:3;grid-row:1}
   .c-gym.lr .f-d{grid-column:1}.c-gym.lr .f-p{grid-column:2/4}
+  .list.k-svc{display:flex;flex-direction:column}
+  .list.k-svc>.lr.draft{order:1;border-top:0;padding:12px 14px}
+  .list.k-svc>.lr.draft .f-n{grid-column:1/4;grid-row:1}
+  .list.k-svc>.lr.draft .f-d{grid-column:1;grid-row:2}
+  .list.k-svc>.lr.draft .f-p{grid-column:2;grid-row:2}
+  .list.k-svc>.lr.draft .f-x{display:none}
+  .list.k-svc>.lr.draft .addplus{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;grid-column:3;grid-row:2;width:44px;height:46px;border-radius:12px;background:var(--grad);color:var(--on-accent);font-size:1.7rem;font-weight:600;line-height:1}
+  .list.k-svc>.lr.draft .addplus:active{transform:scale(.96)}
+  .list.k-svc>.lh2{order:2;border-top:1px solid var(--line)}
+  .list.k-svc>.added{order:3}
+  .list.k-svc>.lh3,.list.k-svc>.addwrap{display:none}
+  .list.k-svc .empty{padding:10px 14px 14px;text-align:left;font-size:.84rem;border-top:0}
+  .list.k-svc .empty .dsk{display:none}.list.k-svc .empty .mob{display:inline}
 }
 .orbrow{display:flex;flex-direction:row;align-items:center;gap:22px;margin-top:10px}
 .orb{position:relative;width:210px;height:210px;flex:none}
@@ -559,7 +574,8 @@ function rowFor(it,idx,kind,gym,dom,draft,onAdd){
       bt.onclick=function(){var c2=itModes(it).slice(),i=c2.indexOf(k);if(i>=0){if(c2.length<2)return;c2.splice(i,1)}else c2.push(k);it.m={};wl.forEach(function(q){it.m[q]=c2.indexOf(q)>=0});if(!it.mp)it.mp={};render()};
       row.appendChild(bt);row.appendChild(pw);mm.appendChild(row)});
     r.appendChild(mm)}
-  if(draft)r.appendChild(h("span",{class:"f-x"}));
+  if(draft){r.appendChild(h("span",{class:"f-x"}));
+    if(kind==="svc")r.appendChild(h("button",{class:"addplus",type:"button","aria-label":"Aggiungi il servizio",text:"+",onclick:function(){if(!onAdd()){var i0=r.querySelector(".f-n");if(i0){i0.focus();i0.animate&&i0.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}}))}
   else r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
   r.dataset.i=draft?"d":idx;
   return r}
@@ -590,10 +606,12 @@ function sumRow(it,idx,gym,dom){
 function listBox(gym,dom){
   var kind=gym?"gym":(dom?"dom":"svc");
   if(!S.draft){S.draft=newItem("",0)}
-  var box=h("div",{class:"list"});
+  var box=h("div",{class:"list k-"+kind});
   box.appendChild(h("div",{class:"lh2"},[h("span",{text:(gym?"Lezioni aggiunte":"Servizi aggiunti")+(S.items.length?" · "+S.items.length:"")})]));
   var ad=h("div",{class:"added"});box.appendChild(ad);
-  if(!S.items.length)ad.appendChild(h("p",{class:"empty",text:gym?"Scrivi sotto la prima lezione, oppure tocca un suggerimento.":"Scrivi sotto il primo servizio e premi Aggiungi."}));
+  if(!S.items.length){
+    if(kind==="svc")ad.appendChild(h("p",{class:"empty"},[h("span",{class:"dsk",text:"Scrivi sotto il primo servizio e premi Aggiungi."}),h("span",{class:"mob",text:"I servizi che aggiungi compaiono qui."})]));
+    else ad.appendChild(h("p",{class:"empty",text:gym?"Scrivi sotto la prima lezione, oppure tocca un suggerimento.":"Scrivi sotto il primo servizio e premi Aggiungi."}))}
   S.items.forEach(function(it,idx){
     if(S.edit===idx){ad.appendChild(rowFor(it,idx,kind,gym,dom,false));var dn=h("div",{class:"editdone"},[h("button",{class:"morel",type:"button",text:"Fatto",onclick:function(){S.edit=null;render()}})]);ad.appendChild(dn)}
     else ad.appendChild(sumRow(it,idx,gym,dom))});
