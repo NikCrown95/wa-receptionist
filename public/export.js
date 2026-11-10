@@ -70,7 +70,7 @@
       });
       h += "</div>";
       if (S.per === "custom") h += '<div class="xpDates"><label>Dal<input type="date" id="xpFrom" value="' + esc(S.from) + '"></label><label>Al<input type="date" id="xpTo" value="' + esc(S.to) + '"></label></div>';
-      h += '<p class="xpNote">' + (meta.type === "campi" ? "Vale per le date delle prenotazioni e delle chiusure. Clienti, campi, orari e regole escono sempre per intero." : "Vale per le date degli appuntamenti e delle prenotazioni. Clienti, iscritti, servizi e orari escono sempre per intero.") + "</p></div>";
+      h += '<p class="xpNote">' + (meta.type === "campi" ? "Vale per le date delle prenotazioni e delle chiusure. Clienti, campi, orari e regole escono sempre per intero." : meta.type === "pt" ? "Vale per le date dei coaching e delle assenze. Iscritti, pacchetti e orari escono sempre per intero." : "Vale per le date degli appuntamenti e delle prenotazioni. Clienti, iscritti, servizi e orari escono sempre per intero.") + "</p></div>";
     }
 
     h += '<div class="xpBlock"><div class="xpHead"><span class="xpKick">' + (usesPeriod() ? "3" : "2") + " · Formato</span></div><div class=\"xpList\">";
@@ -83,7 +83,7 @@
     if (S.fmt === "pdf") h += '<p class="xpNote">Il PDF è pensato per essere letto: alcune colonne poco utili restano fuori. Excel e CSV le contengono tutte.</p>';
     h += "</div>";
 
-    h += '<p class="xpPriv">' + ICON_LOCK + "<span>Il file contiene i dati personali dei tuoi " + (meta.type === "gym" ? "iscritti" : "clienti") + ": conservalo con cura.</span></p>";
+    h += '<p class="xpPriv">' + ICON_LOCK + "<span>Il file contiene i dati personali dei tuoi " + (meta.type === "gym" || meta.type === "pt" ? "iscritti" : "clienti") + ": conservalo con cura.</span></p>";
     h += '<div class="xpFoot"><p class="xpSum" id="xpSum">' + esc(summary()) + '</p><button type="button" class="xpGo" data-a="go"' + (ids.length && !busy ? "" : " disabled") + ">" + ICON_DOWN + "<span>" + (busy ? "Preparo il file…" : "Scarica " + NAMES[S.fmt]) + '</span></button><p class="xpMsg" id="xpMsg" role="status"></p></div>';
     root.innerHTML = h;
   }
