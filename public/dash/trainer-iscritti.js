@@ -231,13 +231,15 @@
     if (dg) ab('WhatsApp', '<path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/>', '', null, 'https://wa.me/' + dg);
     ab('Chiama', '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>', '', null, 'tel:' + String(m.phone || '').replace(/[^\d+]/g, ''));
     body.appendChild(acts);
-    var cb = el('div', 'mvCode'); cb.style.cssText = 'margin:12px 0;padding:12px 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card2);display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+    var cb = el('div', 'mvG mvCode');
     function codeView() {
-      cb.innerHTML = '<div style="flex:1;min-width:0"><small style="display:block;opacity:.7;font-weight:700;letter-spacing:.04em">CODICE DI ACCESSO</small><b style="font-size:1.1rem;letter-spacing:.06em;word-break:break-all">' + (m.code ? esc(m.code) : '<span style="opacity:.6;font-weight:600;letter-spacing:0">non impostato</span>') + '</b></div><button type="button" class="mvCodeB" style="border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:12px;min-height:40px;padding:0 14px;font:inherit;font-weight:700;cursor:pointer">' + (m.code ? 'Cambia' : 'Imposta') + '</button>';
+      cb.classList.remove('ed');
+      cb.innerHTML = '<span class="mvK">CODICE DI ACCESSO</span><span class="mvV"><b class="mvCv">' + (m.code ? esc(m.code) : '<small>non impostato</small>') + '</b></span><button type="button" class="mvCodeB">' + (m.code ? 'Cambia' : 'Imposta') + '</button>';
       cb.querySelector('.mvCodeB').addEventListener('click', codeEdit);
     }
     function codeEdit() {
-      cb.innerHTML = '<input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Nuovo codice (lettere e numeri)" value="' + esc(m.code || '') + '" style="flex:1;min-width:140px;min-height:40px;border-radius:12px;border:1px solid var(--line2);background:var(--bg);color:var(--ink);padding:0 12px;font:inherit"><button type="button" class="cSv" style="border:0;background:var(--accent);color:#06222a;border-radius:12px;min-height:40px;padding:0 14px;font:inherit;font-weight:800;cursor:pointer">Salva</button><button type="button" class="cNo" style="border:1px solid var(--line2);background:transparent;color:var(--ink);border-radius:12px;min-height:40px;padding:0 12px;font:inherit;cursor:pointer">Annulla</button><p class="cEr" style="flex-basis:100%;margin:0;color:var(--danger);font-size:.85rem;font-weight:600" hidden></p>';
+      cb.classList.add('ed');
+      cb.innerHTML = '<span class="mvK">CODICE DI ACCESSO</span><div class="mvCe"><input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Lettere e numeri, da 4 a 20" value="' + esc(m.code || '') + '"><button type="button" class="cSv">Salva</button><button type="button" class="cNo">Annulla</button></div><p class="cEr" hidden></p>';
       var inp = cb.querySelector('input'), er = cb.querySelector('.cEr'); inp.focus();
       cb.querySelector('.cNo').addEventListener('click', codeView);
       cb.querySelector('.cSv').addEventListener('click', function () {
@@ -247,11 +249,11 @@
         post({ action: 'set_code', phone: m.phone, access_code: v }).then(function () { m.code = v; codeView(); }).catch(function (e) { bt.disabled = false; er.textContent = e.message; er.hidden = false; });
       });
     }
-    codeView(); body.appendChild(cb);
+    codeView();
     var gs = el('div', 'mvGs');
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
     gt('INGRESSI USATI', m.total - m.left, m.total); gt('COACHING IN PROGRAMMA', ls.up.length, 0, 'coaching');
-    gt('INGRESSI RIMASTI', m.left, m.total);
+    gt('INGRESSI RIMASTI', m.left, m.total); gs.appendChild(cb);
     body.appendChild(gs);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
