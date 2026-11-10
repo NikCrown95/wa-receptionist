@@ -59,8 +59,15 @@
   /* la card "Oggi" usa gli appuntamenti veri; per palestre, campi e personal trainer (che non hanno appuntamenti di questo tipo) non si mostra */
   function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
   function hm(d){return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
-  function pl(n){return n+(n===1?' appuntamento':' appuntamenti');}
+  function pill(st,en,now){
+    if(now>=st&&now<en)return 'fino alle '+hm(en);
+    var mins=Math.max(1,Math.round((st-now)/60000));
+    if(mins<60)return 'tra '+mins+' min';
+    var h=Math.floor(mins/60),m=mins%60;
+    return m?'tra '+h+' h '+m+' min':(h===1?'tra 1 ora':'tra '+h+' ore');
+  }
   var seq=0;
+  function el(cls,txt){var e=document.createElement('span');e.className=cls;if(txt!=null)e.textContent=txt;return e;}
   function loadDay(){
     if(window.__LIA_PT||window.__liaCampi||window.liaGymOpen||typeof window.liaGetHistory!=='function'){day.hidden=true;return;}
     var my=++seq;
@@ -69,28 +76,32 @@
       var now=new Date(),list=((data&&data.appointments)||[]).filter(function(a){
         return a&&a.status==='confirmed'&&a.starts_at&&sameDay(new Date(a.starts_at),now);
       }).sort(function(a,b){return new Date(a.starts_at)-new Date(b.starts_at);});
-      var next=null;
-      for(var i=0;i<list.length;i++){if(new Date(list[i].ends_at||list[i].starts_at)>now){next=list[i];break;}}
-      var date='Oggi, '+now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric'});
-      var h='<span class="hmDayTop"><span class="hmDayDate"></span><span class="hmDayCount"></span></span>';
-      day.innerHTML=h+'<span class="hmDayRow"></span>';
-      day.querySelector('.hmDayDate').textContent=date;
-      var row=day.querySelector('.hmDayRow');
+      var next=null,done=0;
+      list.forEach(function(a){
+        var en=new Date(a.ends_at||a.starts_at);
+        if(en<=now)done++;
+        else if(!next)next=a;
+      });
+      day.textContent='';
       if(!list.length){
-        day.querySelector('.hmDayCount').textContent='';
-        row.innerHTML='<span class="hmDayNone"></span>';
-        row.firstChild.textContent='Oggi non hai appuntamenti';
+        day.appendChild(el('hmDayLbl','Oggi'));
+        day.appendChild(el('hmDayNone','Oggi non hai appuntamenti'));
+      }else if(next){
+        var st=new Date(next.starts_at),en=new Date(next.ends_at||next.starts_at);
+        var top=el('hmDayTop');top.appendChild(el('hmDayLbl',(now>=st&&now<en)?'Appuntamento in corso':'Prossimo appuntamento'));top.appendChild(el('hmDayPill',pill(st,en,now)));
+        day.appendChild(top);
+        day.appendChild(el('hmDayTime',hm(st)));
+        day.appendChild(el('hmDayName',next.customer_name||''));
+        if(next.service)day.appendChild(el('hmDaySvc',next.service));
       }else{
-        day.querySelector('.hmDayCount').textContent=pl(list.length);
-        if(next){
-          row.innerHTML='<span class="hmDayTime"></span><span class="hmDayInfo"><span class="hmDayName"></span><span class="hmDaySvc"></span></span>';
-          row.querySelector('.hmDayTime').textContent=hm(new Date(next.starts_at));
-          row.querySelector('.hmDayName').textContent=next.customer_name||'';
-          row.querySelector('.hmDaySvc').textContent=next.service||'';
-        }else{
-          row.innerHTML='<span class="hmDayNone"></span>';
-          row.firstChild.textContent='Per oggi hai finito';
-        }
+        day.appendChild(el('hmDayLbl','Oggi'));
+        day.appendChild(el('hmDayNone','Per oggi hai finito'));
+      }
+      if(list.length){
+        var bar=el('hmDayBar'),fill=el('hmDayFill');
+        fill.style.width=Math.round(done/list.length*100)+'%';
+        bar.appendChild(fill);day.appendChild(bar);
+        day.appendChild(el('hmDayProg',done+' di '+list.length+(list.length===1?' appuntamento fatto':' appuntamenti fatti')));
       }
       day.hidden=false;
     }).catch(function(){if(my===seq)day.hidden=true;});
