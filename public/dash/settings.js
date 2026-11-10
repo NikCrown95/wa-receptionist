@@ -1306,7 +1306,13 @@ function pfRenderPoster(box,b,opts){
   /* Finche' non c'e' la partita IVA i pagamenti arrivano su PayPal: metti false per tornare al pagamento con carta (Stripe) */
   var ST_MANUAL_PAY=true;
   function stManualPay(){var B=window.liaBilling;return ST_MANUAL_PAY&&!(B&&B.has_stripe)}
-  function stRenderManual(){var B=window.liaBilling,M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(!manual)return;var pb=stEl('subManualPaid');if(pb&&!pb.__b){pb.__b=1;pb.addEventListener('click',function(){var bn=((stD().b)||{}).name||'';pb.disabled=true;stMsg('subManualMsg','');stSend('support',{topic:'Pagamento PayPal',message:'Ho pagato con PayPal. Attività: '+(bn||'(nome non disponibile)')+'.'}).then(function(){stMsg('subManualMsg','Grazie! Appena vediamo il pagamento attiviamo il servizio.')}).catch(function(e){pb.disabled=false;stMsg('subManualMsg',(e&&e.message)||'Non sono riuscito a inviare. Riprova.',true)})})}}
+  var ST_PAYPAL_URL='https://www.paypal.com/ncp/payment/BSSUWR99L8AJ4';
+  function stRenderManual(){var M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(!manual)return;var btn=stEl('subManualBtn'),fm=stEl('subManualForm');if(!btn||!fm||btn.__b)return;btn.__b=1;
+    btn.addEventListener('click',function(){var b=(stD().b)||{},bz=stEl('subManualBiz'),ml=stEl('subManualMail');if(bz&&!bz.value)bz.value=b.name||'';if(ml&&!ml.value)ml.value=b.email||'';fm.hidden=false;btn.hidden=true;var f=(stEl('subManualName'));if(f)try{f.focus()}catch(e){}});
+    fm.addEventListener('submit',function(ev){ev.preventDefault();var go=stEl('subManualGo'),biz=(stEl('subManualBiz').value||'').trim(),nm=(stEl('subManualName').value||'').trim(),ml=(stEl('subManualMail').value||'').trim();
+      if(biz.length<2||nm.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(ml)){stMsg('subManualMsg','Compila tutti i campi, con un\u2019email valida.',true);return}
+      go.disabled=true;stMsg('subManualMsg','Un attimo\u2026');
+      stSend('support',{topic:'Pagamento PayPal',contact:ml,message:'Sta per pagare con PayPal ('+new Date().toLocaleString('it-IT')+').\nAttivit\u00e0: '+biz+'\nNome: '+nm+'\nEmail: '+ml}).then(function(){window.location.href=ST_PAYPAL_URL}).catch(function(e){go.disabled=false;stMsg('subManualMsg',(e&&e.message)||'Non sono riuscito a continuare. Riprova.',true)})})}
   function stRenderPay(){
     var B=window.liaBilling,card=stEl('subPay'),btn=stEl('subPayBtn'),cc=stEl('subCancelCard');stRenderManual();if(!card)return;if(stManualPay()){card.hidden=true;return}
     if(!B||!B.configured||!B.status){card.hidden=true;return}
