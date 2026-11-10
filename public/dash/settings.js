@@ -1221,18 +1221,18 @@ function pfRenderPoster(box,b,opts){
     else if(wb)wb.disabled=false;
   }
   function stRenderContacts(){
-    var b=stD().b,p=stEl('coPhone'),i=stEl('coIg'),f=stEl('coFb'),tg=stEl('coTag');
-    if(tg&&!tg.getAttribute('data-dirty'))tg.value=b.public_tagline||'';
+    var b=stD().b,p=stEl('coPhone'),i=stEl('coIg'),f=stEl('coFb');
     if(p&&!p.getAttribute('data-dirty'))p.value=b.public_phone||'';
     if(i&&!i.getAttribute('data-dirty'))i.value=b.public_instagram?('@'+String(b.public_instagram).replace(/^@/,'')):'';
     if(f&&!f.getAttribute('data-dirty'))f.value=b.public_facebook||'';
     [['coLegal','legal_name'],['coVat','vat_number'],['coPriv','privacy_email']].forEach(function(m){var e=stEl(m[0]);if(e&&!e.getAttribute('data-dirty'))e.value=b[m[1]]||''});
     var pl=stEl('coPrivLink');if(pl&&b.privacy_link){pl.textContent='';var a=document.createElement('a');a.href=b.privacy_link;a.target='_blank';a.rel='noopener';a.textContent='Vedi la tua informativa privacy';pl.appendChild(a)}
     var n=[b.public_phone,b.public_instagram,b.public_facebook].filter(Boolean).length;
-    stText('stSumContacts',n?(n+(n===1?' contatto inserito':' contatti inseriti')):'Descrizione, telefono, Instagram e Facebook');
+    stText('stSumContacts',n?(n+(n===1?' contatto inserito':' contatti inseriti')):'Telefono, Instagram e Facebook');
   }
   function stRenderInfo(){
-    var D=stD(),n=stEl('biName'),a=stEl('biAddr');
+    var D=stD(),n=stEl('biName'),a=stEl('biAddr'),tg=stEl('biTag');
+    if(tg&&!tg.getAttribute('data-dirty'))tg.value=D.b.public_tagline||'';
     if(n&&!n.getAttribute('data-dirty'))n.value=D.b.name||'';
     if(a&&!a.getAttribute('data-dirty'))a.value=D.b.address||'';
     stText('stSumInfo',D.b.address||D.b.name||'Nome e indirizzo');
@@ -1541,14 +1541,14 @@ function pfRenderPoster(box,b,opts){
      document.addEventListener('click',function(e){var g=e.target.closest&&e.target.closest('[data-go]');if(!g)return;var k=g.getAttribute('data-go');
       if(k==='plan')k='subscription';stGo(k)});
     var pm=stEl('plManage');if(pm)pm.addEventListener('click',function(){var m=stEl('menuTabOther');if(m)m.click();setTimeout(function(){stGo('subscription')},0)});
-    var biN=stEl('biName'),biA=stEl('biAddr'),biS=stEl('biSave');
-    [biN,biA].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
+    var biN=stEl('biName'),biA=stEl('biAddr'),biT=stEl('biTag'),biS=stEl('biSave');
+    [biN,biA,biT].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
     if(biS)biS.addEventListener('click',function(){
       var n=(biN.value||'').trim(),a=(biA.value||'').trim();
       if(n.length<2){stMsg('biMsg','Scrivi il nome dell’attività.');return}
       biS.disabled=true;stMsg('biMsg','Salvo…');
-      api('POST',{action:'business_update',name:n,address:a}).then(function(r){
-        biN.removeAttribute('data-dirty');biA.removeAttribute('data-dirty');
+      api('POST',{action:'business_update',name:n,address:a,tagline:biT?biT.value:''}).then(function(r){
+        biN.removeAttribute('data-dirty');biA.removeAttribute('data-dirty');if(biT)biT.removeAttribute('data-dirty');
         var bn=document.getElementById('businessName');if(bn)bn.textContent=n;
         try{if(S)S.bizName=n}catch(e){}
         stMsg('biMsg','Salvato.');
@@ -1623,13 +1623,13 @@ function pfRenderPoster(box,b,opts){
   })();
   stRenderHelp();
   (function(){
-    var tg=stEl('coTag'),ph=stEl('coPhone'),ig=stEl('coIg'),fb=stEl('coFb'),lg=stEl('coLegal'),vt=stEl('coVat'),pv=stEl('coPriv'),sv=stEl('coSave');
+    var ph=stEl('coPhone'),ig=stEl('coIg'),fb=stEl('coFb'),lg=stEl('coLegal'),vt=stEl('coVat'),pv=stEl('coPriv'),sv=stEl('coSave');
     if(!sv)return;
-    [tg,ph,ig,fb,lg,vt,pv].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
+    [ph,ig,fb,lg,vt,pv].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
     sv.addEventListener('click',function(){
       sv.disabled=true;stMsg('coMsg','Salvo…');
-      api('POST',{action:'contacts_update',tagline:tg?tg.value:'',phone:ph.value,instagram:ig.value,facebook:fb.value,legal_name:lg.value,vat_number:vt.value,privacy_email:pv.value}).then(function(){
-        [tg,ph,ig,fb,lg,vt,pv].forEach(function(x){x&&x.removeAttribute('data-dirty')});
+      api('POST',{action:'contacts_update',phone:ph.value,instagram:ig.value,facebook:fb.value,legal_name:lg.value,vat_number:vt.value,privacy_email:pv.value}).then(function(){
+        [ph,ig,fb,lg,vt,pv].forEach(function(x){x&&x.removeAttribute('data-dirty')});
         stMsg('coMsg','Salvato.');
         return loadBusinessProfile();
       }).catch(function(e){stMsg('coMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.',true)}).then(function(){sv.disabled=false;setTimeout(function(){stMsg('coMsg','')},4000)});
