@@ -1,9 +1,9 @@
 
 (function(){
-  var panels = { cal: document.getElementById('panelCal'), clients: document.getElementById('panelClients'), registry: document.getElementById('panelRegistry'), stats: document.getElementById('panelStats'), profile: document.getElementById('panelProfile'), other: document.getElementById('panelOther') };
-  var LABELS = { cal: 'Calendario', clients: 'Clienti', registry: 'Registro prenotazioni', stats: 'Statistiche', profile: 'Scheda attività', other: 'Impostazioni' };
+  var panels = { home: document.getElementById('panelHome'), cal: document.getElementById('panelCal'), clients: document.getElementById('panelClients'), registry: document.getElementById('panelRegistry'), stats: document.getElementById('panelStats'), profile: document.getElementById('panelProfile'), other: document.getElementById('panelOther') };
+  var LABELS = { home: 'Home', cal: 'Calendario', clients: 'Clienti', registry: 'Registro prenotazioni', stats: 'Statistiche', profile: 'Scheda attività', other: 'Impostazioni' };
 
-  var menuTabs = { cal: document.getElementById('menuTabCal'), clients: document.getElementById('menuTabClients'), registry: document.getElementById('menuTabRegistry'), stats: document.getElementById('menuTabStats'), profile: document.getElementById('menuTabProfile'), other: document.getElementById('menuTabOther') };
+  var menuTabs = { home: document.getElementById('menuTabHome'), cal: document.getElementById('menuTabCal'), clients: document.getElementById('menuTabClients'), registry: document.getElementById('menuTabRegistry'), stats: document.getElementById('menuTabStats'), profile: document.getElementById('menuTabProfile'), other: document.getElementById('menuTabOther') };
   var burgerBtn = document.getElementById('burgerBtn');
   var burgerMenu = document.getElementById('burgerMenu');
   var menuBackdrop = document.getElementById('menuBackdrop');
@@ -13,8 +13,8 @@
     var panelHost=document.querySelector('.tabPanels');if(panelHost)panelHost.classList.toggle('profileScroll',which==='profile'||which==='plan');
     try{localStorage.setItem('lia_active_section',which);}catch(e){}
     Object.keys(panels).forEach(function(k){
-      menuTabs[k].setAttribute('aria-current', k === which ? 'true' : 'false');
-      panels[k].classList.toggle('on', k === which);
+      if(menuTabs[k])menuTabs[k].setAttribute('aria-current', k === which ? 'true' : 'false');
+      if(panels[k])panels[k].classList.toggle('on', k === which);
     });
     if((which==='profile'||which==='plan')&&panelHost)panelHost.scrollTop=0;if(which==='plan'&&panels.plan)panels.plan.scrollTop=0;
     document.getElementById('sectionLabel').textContent = LABELS[which];
@@ -37,6 +37,7 @@
     if (burgerBtn.getAttribute('aria-expanded') === 'true') closeMenu(); else openMenu();
   });
   menuBackdrop.addEventListener('click', closeMenu);
+  if(menuTabs.home)menuTabs.home.addEventListener('click', function(){ show('home'); closeMenu(); });
   menuTabs.cal.addEventListener('click', function(){ show('cal'); closeMenu(); });
   menuTabs.clients.addEventListener('click', function(){ show('clients'); closeMenu(); });
   menuTabs.registry.addEventListener('click', function(){ show('registry'); closeMenu(); });
@@ -45,9 +46,13 @@
   menuTabs.other.addEventListener('click', function(){ show('other'); closeMenu(); });
   var logoutBtn=document.getElementById('logoutBtn');if(logoutBtn)logoutBtn.addEventListener('click',function(){logoutBtn.disabled=true;fetch('/api/business-auth',{method:'DELETE'}).finally(function(){try{localStorage.removeItem('lia_active_section');}catch(e){}location.replace('/login.html');});});
   var businessHome=document.getElementById('businessHome');if(businessHome){var goBusinessHome=function(){show('cal');document.dispatchEvent(new CustomEvent('lia:calendar-home'));};businessHome.addEventListener('click',goBusinessHome);businessHome.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();goBusinessHome();}});}
-  var initialSection='cal';
-  try{var _ne=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||{};if(_ne.type==='reload'){var savedSection=localStorage.getItem('lia_active_section');if(savedSection&&panels[savedSection])initialSection=savedSection;}}catch(e){}
+  /* smartphone: si parte dalla Home con le scorciatoie; iPad e computer partono dal calendario come prima */
+  var isPhone=function(){return !!(window.matchMedia&&window.matchMedia('(max-width:699px)').matches);};
+  var initialSection=(panels.home&&isPhone())?'home':'cal';
+  try{var _ne=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||{};if(_ne.type==='reload'){var savedSection=localStorage.getItem('lia_active_section');if(savedSection&&panels[savedSection]&&(savedSection!=='home'||isPhone()))initialSection=savedSection;}}catch(e){}
   show(initialSection);
+  /* se lo schermo diventa largo mentre si e' nella Home (iPad ruotato, finestra allargata) si torna al calendario */
+  if(window.matchMedia){var _mq=window.matchMedia('(max-width:699px)');var _wide=function(){if(!_mq.matches&&panels.home&&panels.home.classList.contains('on'))show('cal');};if(_mq.addEventListener)_mq.addEventListener('change',_wide);else if(_mq.addListener)_mq.addListener(_wide);}
 
   // ---- mobile: header always visible; desktop keeps auto-hide behavior ----
   (function(){
