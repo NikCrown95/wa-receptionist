@@ -223,6 +223,7 @@
     var plan = cp ? '<div class="mvPl"><div class="mvPt"><b>' + esc(cp.name) + '</b>' + (cp.price_eur != null ? '<span>' + eur(cp.price_eur) + ' · pagato</span>' : '') + '</div><span class="mvPb"><i style="width:' + pct + '%"></i></span><div class="mvPd"><span>dal ' + dshort(pd(cp.created_at)) + '</span><b>' + cp.left + ' ingressi rimasti</b></div></div>' : '<div class="mvPl"><div class="mvPt"><b>Nessun pacchetto</b></div></div>';
     hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.name) + '</b><span>' + esc(m.phone) + '</span></div></div><div class="mvMeta"><span class="mvChip">' + esc(st.label) + '</span></div><span class="mvSep"></span>' + plan;
     hero.insertBefore(top, hero.firstChild.nextSibling); host.appendChild(hero);
+    (function () { var idr = hero.querySelector('.mvId'), mt = hero.querySelector('.mvMeta'), ch = mt && mt.querySelector('.mvChip'); if (idr && ch) { idr.appendChild(ch); mt.remove(); } })();
     var body = el('div', 'mxBody mvBody'); host.appendChild(body);
     var acts = el('div', 'mvActs');
     function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvA ' + (cls || '')); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = SV(icon) + '<span>' + label + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); }
@@ -234,7 +235,7 @@
     var cb = el('div', 'mvG mvCode');
     function codeView() {
       cb.classList.remove('ed');
-      cb.innerHTML = '<span class="mvK">CODICE DI ACCESSO</span><span class="mvV"><b class="mvCv">' + (m.code ? esc(m.code) : '<small>non impostato</small>') + '</b></span><button type="button" class="mvCodeB">' + (m.code ? 'Cambia' : 'Imposta') + '</button>';
+      cb.innerHTML = '<span class="mvK">CODICE</span><span class="mvV"><b class="mvCv">' + (m.code ? esc(m.code) : '<small>non impostato</small>') + '</b><button type="button" class="mvCodeB">' + (m.code ? 'Cambia' : 'Imposta') + '</button></span>';
       cb.querySelector('.mvCodeB').addEventListener('click', codeEdit);
     }
     function codeEdit() {

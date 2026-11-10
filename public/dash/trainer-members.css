@@ -311,3 +311,35 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvCode .cSv{flex:none;height:42px;padding:0 14px;border:0;border-radius:12px;background:var(--accent);color:#06222a;font:inherit;font-weight:800;cursor:pointer}
 .mxD .mvCode .cNo{flex:none;height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line2,var(--line));background:transparent;color:var(--ink);font:inherit;cursor:pointer}
 .mxD .mvCode .cEr{margin:0;color:var(--danger,#E5645C);font-size:.85rem;font-weight:600}
+
+/* Pagina iscritto: versione compatta (font piu' piccoli e leggeri, stessi spazi ovunque) */
+.mxD .mvHero{padding:12px;gap:10px;border-radius:16px}
+.mxD .mvHero .mvTop{margin:0}
+.mxD .mvHero .mvBack{height:28px;padding:0 10px 0 6px;font-size:.75rem;font-weight:500;border-radius:14px}
+.mxD .mvHero .mvAv{width:36px;height:36px;font-size:.82rem;font-weight:500}
+.mxD .mvId{gap:10px}
+.mxD .mvNm{gap:1px}
+.mxD .mvNm b{font-size:1rem;font-weight:500;letter-spacing:0}
+.mxD .mvNm span{font-size:.75rem;font-weight:400}
+.mxD .mvId .mvChip{height:22px;padding:0 9px;font-size:.69rem;font-weight:500;align-self:center}
+.mxD .mvSep{margin:0}
+.mxD .mvPl{gap:6px}
+.mxD .mvPt b{font-size:.82rem;font-weight:500}
+.mxD .mvPt span{font-size:.75rem;font-weight:400}
+.mxD .mvPb{height:4px}
+.mxD .mvPd{font-size:.75rem;font-weight:400}
+.mxD .mvPd b{font-weight:500}
+.mxD .mvBody{gap:8px;margin-top:8px}
+.mxD .mvActs{gap:6px}
+.mxD .mvA{height:38px;flex-direction:row;gap:6px;border-radius:12px;font-size:.75rem;font-weight:500}
+.mxD .mvA svg{width:15px;height:15px}
+.mxD .mvA.pri{font-weight:600}
+.mxD .mvGs{gap:6px}
+.mxD .mvG{padding:8px 10px;border-radius:12px;gap:3px}
+.mxD .mvK{font-size:.69rem;font-weight:500;letter-spacing:.04em}
+.mxD .mvV b{font-size:1.06rem;font-weight:500}
+.mxD .mvV small{font-size:.75rem;font-weight:400}
+.mxD .mvB{height:4px}
+.mxD .mvCode .mvV{flex-wrap:wrap}
+.mxD .mvCode .mvCv{font-size:1.06rem;letter-spacing:.02em}
+.mxD .mvCode .mvCodeB{height:auto;padding:0;border:0;margin:0 0 0 6px;font-size:.75rem;font-weight:500;align-self:baseline}
