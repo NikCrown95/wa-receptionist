@@ -938,7 +938,7 @@ function render(){
         if(ph===2&&!String(c.surf||"").trim()){S.err="Scegli la superficie del campo.";render();return}
         S.err="";if(!last){nxt();return}
         var hh0=cd.offsetHeight;cd.style.height=hh0+"px";cd.style.overflow="hidden";cd.getBoundingClientRect();cd.classList.add("closing");cd.style.height="64px";setTimeout(function(){c.done=true;c.ph=0;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},1000)},460)}});
-      an.appendChild(h("span",{text:last?(more?"Salva e passa al campo successivo":"Salva campo"):"Avanti"}));
+      an.appendChild(h("span",{text:last?(more?"Salva e continua":"Salva campo"):"Avanti"}));
       if(ph>0){var bk=h("button",{class:"chip",type:"button",text:"‹ Indietro",onclick:function(){c.ph=ph-1;S.err="";render()}});cd.appendChild(h("div",{class:"times"},[bk,h("div",{style:"flex:1"},[an])]))}else cd.appendChild(an);
       v.appendChild(cd)});
     v.appendChild(h("p",{class:"ready"},[h("b",{text:nD+" di "+S.courts.length}),allD?" campi compilati. Premi Avanti per continuare.":" campi compilati. Avanti si accende alla fine."]));
