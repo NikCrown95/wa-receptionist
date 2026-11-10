@@ -96,7 +96,7 @@
     var my=++seq;
     var TX={pt:['Coaching in corso','Prossimo coaching','Oggi non hai coaching','coaching fatto','coaching fatti'],
       campi:['Prenotazione in corso','Prossima prenotazione','Oggi non hai prenotazioni','prenotazione fatta','prenotazioni fatte'],
-      med:['Visita in corso','Prossima visita','Oggi non hai visite','visita fatta','visite fatte']}[vt]||['Appuntamento in corso','Prossimo appuntamento',TX[2],'appuntamento fatto','appuntamenti fatti'];
+      med:['Visita in corso','Prossima visita','Oggi non hai visite','visita fatta','visite fatte']}[vt]||['Appuntamento in corso','Prossimo appuntamento','Oggi non hai appuntamenti','appuntamento fatto','appuntamenti fatti'];
     window.liaGetHistory().then(function(data){
       if(my!==seq)return;
       var now=new Date(),list=((data&&data.appointments)||[]).filter(function(a){
