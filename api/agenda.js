@@ -551,7 +551,8 @@ module.exports = async (req, res) => {
         const w = await sb("PATCH", "businesses?id=eq." + biz.id, { cal_token: tk }, "return=representation");
         if (!w.ok) return res.status(500).json({ error: "Non sono riuscito a creare il link. Riprova." });
       }
-      const base = (process.env.PUBLIC_URL ? require("./../lib/site.js").baseUrl() : reqBase(req)).replace(/^https?:/, "");
+      // Stesso indirizzo da cui il titolare sta aprendo la dashboard: liì il calendario esiste di sicuro (PUBLIC_URL potrebbe puntare a un altro sito)
+      const base = (reqBase(req) || require("./../lib/site.js").baseUrl()).replace(/^https?:/, "");
       return res.status(200).json({ ok: true, webcal: "webcal:" + base + "/cal/" + tk + ".ics" });
     }
 
