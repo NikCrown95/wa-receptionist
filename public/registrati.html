@@ -175,6 +175,8 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
 
       <label class="chk"><input type="checkbox" id="terms" required><span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">Informativa privacy</a> e accetto i <a href="/termini" target="_blank" rel="noopener">Termini di servizio</a>, compresa la nomina di Prenolia a responsabile del trattamento dei dati dei miei clienti.</span></label>
 
+      <label class="chk"><input type="checkbox" id="terms2" required><span>Approvo specificamente, ai sensi degli artt. 1341 e 1342 c.c., le clausole 9, 10, 11, 15, 16 e 17 dei <a href="/termini#approvazione-specifica" target="_blank" rel="noopener">Termini di servizio</a> (limitazioni di responsabilità, pagamenti e rimborsi, sospensione, modifiche, cessione, legge e foro competente).</span></label>
+
       <button class="btn" id="go" type="submit">Crea il mio account</button>
       <div class="err" id="err" role="alert"></div>
     </form>
@@ -260,6 +262,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
     ev.preventDefault();
     err.style.display = 'none';
     if (!document.getElementById('terms').checked) { show("Per continuare devi accettare l'Informativa privacy e i Termini di servizio."); return; }
+    if (!document.getElementById('terms2').checked) { show("Per continuare devi approvare specificamente le clausole indicate."); return; }
     go.disabled = true; go.innerHTML = '<span class="spin" aria-hidden="true"></span>'; go.setAttribute('aria-label', 'Creazione in corso');
     fetch('/api/business-auth?action=signup', {
       method: 'POST',
@@ -271,6 +274,7 @@ label{display:block;font-size:.84rem;color:var(--muted);margin:16px 0 6px;font-w
         password: document.getElementById('pw').value,
         hp: document.getElementById('hp').value,
         accept_terms: true,
+        accept_onerous: true,
         ref: ref
       })
     }).then(function (r) {

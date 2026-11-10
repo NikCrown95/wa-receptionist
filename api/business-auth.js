@@ -349,6 +349,7 @@ module.exports = async (req, res) => {
       if (name.length < 2 || name.length > 80) return res.status(400).json({ error: "Il nome dell'attività non è valido." });
       if (!EMAIL_RE.test(email) || email.length > 200) return res.status(400).json({ error: "Controlla l'indirizzo email." });
       if (!/^[+\d][\d\s().-]{4,29}$/.test(phone)) return res.status(400).json({ error: "Controlla il numero di telefono." });
+      if (body.accept_onerous !== true) return res.status(400).json({ error: "Per registrarti devi approvare specificamente le clausole indicate." });
       if (body.accept_terms !== true) return res.status(400).json({ error: "Per registrarti devi accettare l'Informativa privacy e i Termini di servizio." });
       const problem = passwordProblem(password);
       if (problem) return res.status(400).json({ error: problem });
