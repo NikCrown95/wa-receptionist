@@ -1221,14 +1221,15 @@ function pfRenderPoster(box,b,opts){
     else if(wb)wb.disabled=false;
   }
   function stRenderContacts(){
-    var b=stD().b,p=stEl('coPhone'),i=stEl('coIg'),f=stEl('coFb');
+    var b=stD().b,p=stEl('coPhone'),i=stEl('coIg'),f=stEl('coFb'),tg=stEl('coTag');
+    if(tg&&!tg.getAttribute('data-dirty'))tg.value=b.public_tagline||'';
     if(p&&!p.getAttribute('data-dirty'))p.value=b.public_phone||'';
     if(i&&!i.getAttribute('data-dirty'))i.value=b.public_instagram?('@'+String(b.public_instagram).replace(/^@/,'')):'';
     if(f&&!f.getAttribute('data-dirty'))f.value=b.public_facebook||'';
     [['coLegal','legal_name'],['coVat','vat_number'],['coPriv','privacy_email']].forEach(function(m){var e=stEl(m[0]);if(e&&!e.getAttribute('data-dirty'))e.value=b[m[1]]||''});
     var pl=stEl('coPrivLink');if(pl&&b.privacy_link){pl.textContent='';var a=document.createElement('a');a.href=b.privacy_link;a.target='_blank';a.rel='noopener';a.textContent='Vedi la tua informativa privacy';pl.appendChild(a)}
     var n=[b.public_phone,b.public_instagram,b.public_facebook].filter(Boolean).length;
-    stText('stSumContacts',n?(n+(n===1?' contatto inserito':' contatti inseriti')):'Telefono, Instagram e Facebook');
+    stText('stSumContacts',n?(n+(n===1?' contatto inserito':' contatti inseriti')):'Descrizione, telefono, Instagram e Facebook');
   }
   function stRenderInfo(){
     var D=stD(),n=stEl('biName'),a=stEl('biAddr');
@@ -1622,13 +1623,13 @@ function pfRenderPoster(box,b,opts){
   })();
   stRenderHelp();
   (function(){
-    var ph=stEl('coPhone'),ig=stEl('coIg'),fb=stEl('coFb'),lg=stEl('coLegal'),vt=stEl('coVat'),pv=stEl('coPriv'),sv=stEl('coSave');
+    var tg=stEl('coTag'),ph=stEl('coPhone'),ig=stEl('coIg'),fb=stEl('coFb'),lg=stEl('coLegal'),vt=stEl('coVat'),pv=stEl('coPriv'),sv=stEl('coSave');
     if(!sv)return;
-    [ph,ig,fb,lg,vt,pv].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
+    [tg,ph,ig,fb,lg,vt,pv].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
     sv.addEventListener('click',function(){
       sv.disabled=true;stMsg('coMsg','Salvo…');
-      api('POST',{action:'contacts_update',phone:ph.value,instagram:ig.value,facebook:fb.value,legal_name:lg.value,vat_number:vt.value,privacy_email:pv.value}).then(function(){
-        [ph,ig,fb,lg,vt,pv].forEach(function(x){x.removeAttribute('data-dirty')});
+      api('POST',{action:'contacts_update',tagline:tg?tg.value:'',phone:ph.value,instagram:ig.value,facebook:fb.value,legal_name:lg.value,vat_number:vt.value,privacy_email:pv.value}).then(function(){
+        [tg,ph,ig,fb,lg,vt,pv].forEach(function(x){x&&x.removeAttribute('data-dirty')});
         stMsg('coMsg','Salvato.');
         return loadBusinessProfile();
       }).catch(function(e){stMsg('coMsg',(e&&e.message)||'Non sono riuscito a salvare. Riprova.',true)}).then(function(){sv.disabled=false;setTimeout(function(){stMsg('coMsg','')},4000)});
