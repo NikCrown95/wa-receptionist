@@ -98,6 +98,7 @@ input.inp[type=time]::-webkit-calendar-picker-indicator{display:none}
 .rlbig.enter,.rlsum.enter{animation:center .6s cubic-bezier(.22,1,.36,1) both}
 @media (prefers-reduced-motion:reduce){.rlbig.enter,.rlsum.enter{animation:none}}
 .offg{display:grid;gap:12px}
+.list .pkform{border:0;border-top:1px solid var(--line);border-radius:0;background:none}
 .plans{display:grid;gap:12px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.two>div{min-width:0}
 .offc{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:14px;align-items:center;padding:18px;border:1.5px solid var(--line2);border-radius:18px;background:var(--card);min-height:76px;transition:border-color .2s,box-shadow .2s}
 .offc b{display:block;font-size:1rem}.offc small{display:block;color:var(--muted);font-size:.84rem;margin-top:2px}
@@ -223,6 +224,13 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .list:is(.k-svc,.k-dom)>.lh2{order:2;border-top:1px solid var(--line)}
   .list:is(.k-svc,.k-dom)>.added{order:3;flex:1 1 0;min-height:0;max-height:none}
   .pane>.list:is(.k-svc,.k-dom){flex:1 1 0;min-height:250px}
+  .list.k-pk>.pkform{order:1;border-top:0}
+  .list.k-pk>.added{min-height:170px}
+  .pane>.list.k-pk{flex:none;min-height:0}
+  .list.k-pk>.pkform{gap:8px;padding:12px 14px}
+  .list.k-pk>.pkform .chips{gap:6px}
+  .list.k-pk>.pkform .chip{padding:0 8px;min-height:40px;font-size:.86rem}
+  .list.k-pk>.pkform .inp{height:44px}
   .list:is(.k-svc,.k-dom)>.lh3,.list:is(.k-svc,.k-dom)>.addwrap{display:none}
   .list:is(.k-svc,.k-dom) .empty{padding:10px 14px 14px;text-align:left;font-size:.84rem;border-top:0}
   .list:is(.k-svc,.k-dom) .empty .dsk{display:none}.list:is(.k-svc,.k-dom) .empty .mob{display:inline}
@@ -792,13 +800,16 @@ function render(){
   }
   if(k==="pacchetti"){
     v.appendChild(S.gk==="pt"?head(lab,"Che pacchetti offri?","Scrivi quelli che proponi ai tuoi iscritti, per esempio 10 lezioni da un'ora. Gli altri li aggiungi dopo, dall'agenda."):head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
-    var pwrap=h("div",{class:"plans"});
-    if(S.plans.length){var pl=h("div",{class:"rows"});S.plans.forEach(function(x,i){var r=h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv"+(String(x.p).trim()===""?" dim":""),text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})]);
-      r.appendChild(h("button",{class:"edit",type:"button",text:"Togli",onclick:function(){S.plans.splice(i,1);render()}}));pl.appendChild(r)});pwrap.appendChild(pl)}
+    var pwrap=h("div",{class:"list k-svc k-pk"});
+    pwrap.appendChild(h("div",{class:"lh2"},[h("span",{text:"Pacchetti aggiunti"+(S.plans.length?" · "+S.plans.length:"")})]));
+    var pad=h("div",{class:"added"});pwrap.appendChild(pad);
+    if(!S.plans.length)pad.appendChild(h("p",{class:"empty",text:"I pacchetti che aggiungi compaiono qui."}));
+    S.plans.forEach(function(x,i){var r=h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv"+(String(x.p).trim()===""?" dim":""),text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})]);
+      r.appendChild(h("button",{class:"edit",type:"button",text:"Togli",onclick:function(){S.plans.splice(i,1);render()}}));pad.appendChild(r)});
     var sgs=[];if(false)sgs.push(["Pacchetto 10 sessioni","entries","10","personal"]);if(false)sgs.push(["Abbonamento mensile","time","30","tutti"]);
     sgs=sgs.filter(function(g){return!S.plans.some(function(x){return x.n===g[0]})&&S.pd.n!==g[0]});
     if(sgs.length){var sb7=h("div",{class:"sugs"});sb7.appendChild(h("span",{class:"stepl",text:"Tocca per compilare"}));var ch7=h("div",{class:"chips"});sgs.forEach(function(g){ch7.appendChild(chip("+ "+g[0],false,function(){S.pd={n:g[0],kind:g[1],q:g[2],p:S.pd.p||"",c:g[3]};render()}))});sb7.appendChild(ch7);pwrap.appendChild(sb7)}
-    var fc=h("div",{class:"card",style:"display:grid;gap:12px"});
+    var fc=h("div",{class:"card pkform",style:"display:grid;gap:12px"});
     var pn=h("input",{class:"inp",placeholder:S.gk==="pt"?"es. Pacchetto 10 lezioni":"es. Pacchetto 10 sessioni","aria-label":"Nome del pacchetto",maxlength:"60",value:S.pd.n});pn.oninput=function(){S.pd.n=pn.value};
     fc.appendChild(field("Nome",pn));
     var kc=h("div",{class:"chips"});kc.appendChild(chip("A ingressi",S.pd.kind==="entries",function(){S.pd.kind="entries";render()}));kc.appendChild(chip("A durata",S.pd.kind==="time",function(){S.pd.kind="time";render()}));
