@@ -89,4 +89,5 @@ post("/api/business-auth?action=forgot",{email:document.getElementById("em").val
 document.getElementById("fs").addEventListener("submit",function(e){e.preventDefault();var b=document.getElementById("gos"),er=document.getElementById("errs");er.style.display="none";b.disabled=true;
 post("/api/business-auth?action=reset",{token:token,password:np.value}).then(function(){document.getElementById("oks").style.display="block";b.style.display="none";setTimeout(function(){location.replace("/login.html")},2500)}).catch(function(x){show(er,x.message);b.disabled=false})});
 })();
-</script></body></html>
+</script><script src="/cookie-notice.js" defer></script>
+</body></html>

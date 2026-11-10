@@ -170,7 +170,7 @@
 @media (max-width:760px){.nv{padding-top:8px}.nv>a:not(.nvacc),.nv .tuw>a.tun{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;font-size:17px;font-weight:600;color:#E3EEF0}.nv>a:not(.nvacc)::after{display:block;position:static;content:'';width:8px;height:8px;margin-right:6px;border:0;border-top:2px solid #6E8A90;border-right:2px solid #6E8A90;border-radius:0;background:none;opacity:1;transform:rotate(45deg)}.nv .tuw>a.tun svg{width:18px;height:18px;margin-right:2px;color:#6E8A90;transform:rotate(-90deg)!important}.nv>a.nvacc{margin-top:14px;padding:12px 0;width:100%;text-align:center;border:1px solid rgba(127,220,220,.4);border-radius:12px;font-size:16px;font-weight:600;color:#9CEBEB}.nv>a.nvacc::after{display:none}.nv.open{position:absolute;top:calc(100% + 4px);left:-8px;right:-8px;width:auto;z-index:50;padding:6px 14px 16px;background:rgba(8,19,23,.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid #1F3A40;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.55);max-height:calc(100vh - 90px);overflow:auto}.nv.open>a:first-child{border-top:0}}@media(max-width:767px){.top{position:relative;z-index:60}.hero.tuh{position:relative;z-index:60}.tu-tabs{z-index:10}}</style></head><body>
 <title>Tutorial · Prenolia: l'agenda online con la segretaria virtuale</title><meta name="robots" content="noindex,nofollow">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700&display=swap">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
 :root{--bg:#08151A;--card:#0F2229;--card2:#132A32;--line:#1B2F36;--line2:#27414A;--ink:#F2F6F7;--muted:#93A8AE;--aink:#7FDCDC;
 /* colori reali della chat di prenotazione */
@@ -764,4 +764,5 @@ function show(id,push){var s=SEC.filter(function(x){return x.id==id})[0]||SEC[0]
 window.TU_PICK=function(id){if(window.TU_CLOSE)window.TU_CLOSE();var nvEl=document.getElementById('nv'),bg=document.getElementById('bgr');if(nvEl&&nvEl.classList.contains('open')){nvEl.classList.remove('open');if(bg)bg.setAttribute('aria-expanded','false')}show(id,true);window.scrollTo({top:0,behavior:'smooth'})};
 var mqL=function(){build()};MQ.addListener?MQ.addListener(mqL):MQ.addEventListener('change',mqL);
 var q=(location.search.match(/[?&]s=(\w+)/)||[])[1];show(q,false);
-})();</script></body></html>
+})();</script><script src="/cookie-notice.js" defer></script>
+</body></html>
