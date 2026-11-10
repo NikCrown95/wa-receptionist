@@ -423,7 +423,7 @@ module.exports = async (req, res) => {
     }
     res.statusCode = 404; res.setHeader("Content-Type", "text/plain; charset=utf-8"); return res.end("Link non valido");
   }
-  const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.notes === "1" || q.push === "1" || q.manifest === "1" || q.notifications === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1" || q.shop === "1" || q.recap === "1" || q.referral === "1" || q.export === "1" || q.registry === "1" || q.support === "1" || q.promos === "1" || q.courts === "1" || q.pt === "1";
+  const wantsData = req.method === "POST" || q.format === "json" || q.history === "1" || q.notes === "1" || q.push === "1" || q.manifest === "1" || q.notifications === "1" || q.slots === "1" || q.settings === "1" || q.profile === "1" || q.shop === "1" || q.recap === "1" || q.recap_seen === "1" || q.referral === "1" || q.export === "1" || q.registry === "1" || q.support === "1" || q.promos === "1" || q.courts === "1" || q.pt === "1";
 
   // 1) La pagina
   if (!wantsData) {
@@ -1838,10 +1838,26 @@ module.exports = async (req, res) => {
       }
     }
 
+    // Pannello di Lia: avvisi letti condivisi tra i dispositivi (colonna businesses.recap_seen: vedi supabase/migrations/20261110_recap_seen.sql)
+    if (q.recap_seen === "1" && req.method === "POST") {
+      res.setHeader("Cache-Control", "no-store");
+      const keys = Array.isArray(req.body && req.body.keys) ? req.body.keys.map(String).filter(function (k) { return k && k.length <= 120; }).slice(0, 20) : [];
+      if (!keys.length) return res.status(400).json({ error: "Dato non valido" });
+      const cur = await sb("GET", "businesses?id=eq." + biz.id + "&select=recap_seen&limit=1");
+      if (!cur.ok) return res.status(200).json({ ok: false });
+      const map = Object.assign({}, (cur.data && cur.data[0] && cur.data[0].recap_seen) || {});
+      const now = Date.now();
+      keys.forEach(function (k) { if (!map[k]) map[k] = now; });
+      Object.keys(map).forEach(function (k) { if (now - Number(map[k]) > 120 * 86400000) delete map[k]; });
+      await sb("PATCH", "businesses?id=eq." + biz.id, { recap_seen: map }, "return=minimal");
+      return res.status(200).json({ ok: true });
+    }
+
     if (q.recap === "1" && req.method === "GET") {
       res.setHeader("Cache-Control", "no-store");
       try {
         const out = await buildLiaPanel(biz, { sb, zonedTimeToUtc, addDays, weekdayOf, freeSlotsFor, getAccess });
+        try { const sr = await sb("GET", "businesses?id=eq." + biz.id + "&select=recap_seen&limit=1"); out.seen = (sr.ok && sr.data && sr.data[0] && sr.data[0].recap_seen) || {}; } catch (e) { out.seen = {}; }
         return res.status(200).json(out);
       } catch (e) {
         console.error("recap error", e);

@@ -89,8 +89,14 @@
     return null;
   }
   // l'avviso di abbonamento scaduto torna "da leggere" a ogni nuovo accesso: si ricorda solo per la sessione in corso
-  function isSeen(k) { return (isExpKey(k) ? ss("g", SEEN + k) : ls("g", SEEN + k)) === "1"; }
-  function markSeen(k) { if (isExpKey(k)) ss("s", SEEN + k, "1"); else ls("s", SEEN + k, "1"); }
+  // gli avvisi letti sono condivisi tra i dispositivi: il server li ricorda (data.seen), il dispositivo li ricorda anche in locale
+  function isSeen(k) { if (!isExpKey(k) && data && data.seen && data.seen[k]) return true; return (isExpKey(k) ? ss("g", SEEN + k) : ls("g", SEEN + k)) === "1"; }
+  function markSeen(k) {
+    if (isExpKey(k)) { ss("s", SEEN + k, "1"); return; }
+    ls("s", SEEN + k, "1");
+    if (data) { data.seen = data.seen || {}; if (data.seen[k]) return; data.seen[k] = Date.now(); }
+    try { fetch("/api/agenda?t=" + encodeURIComponent(token) + "&recap_seen=1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ keys: [k] }), keepalive: true }).catch(function () {}); } catch (e) {}
+  }
   function expiredNotice() {
     var l = visibleNotices();
     for (var i = 0; i < l.length; i++) if (l[i].type === "sub_expired") return l[i];
