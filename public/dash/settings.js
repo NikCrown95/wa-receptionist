@@ -1277,7 +1277,7 @@ function pfRenderPoster(box,b,opts){
     });
   })();
   function stRenderSub(){
-    var D=stD(),now=stEl('subNow'),plans=stEl('subPlans');if(!now||!plans)return;
+    var D=stD(),now=stEl('subNow'),plans=stEl('subPlans');if(!now||!plans)return;stRenderManual();
     now.innerHTML='';plans.innerHTML='';now.style.display='';
     var P=window.LIA_PLANS,end=stEnd(D.sub),cancelled=!!(D.sub&&D.sub.status==='cancelled');
     var chg=stEl('subChange'),cc=stEl('subCancelCard');
@@ -1303,8 +1303,9 @@ function pfRenderPoster(box,b,opts){
     return fetch('/api/billing?t='+encodeURIComponent(token),{cache:'no-store'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d&&d.error||'');return d})}).then(function(d){window.liaBilling=d;window.liaBillingAt=Date.now();return d}).catch(function(){return window.liaBilling||null});
   }
   function stLoadBilling(){stBillingGet(false).then(function(){stRenderPay()})}
+  function stRenderManual(){var B=window.liaBilling,M=stEl('subManual');if(!M)return;var manual=!(B&&B.configured);M.hidden=!manual;if(manual){var bn=((stD().b)||{}).name||'';stText('subManualNote',bn?'Se PayPal ti chiede una nota, scrivi: '+bn+'.':'Se PayPal ti chiede una nota, scrivi il nome della tua attività.')}}
   function stRenderPay(){
-    var B=window.liaBilling,card=stEl('subPay'),btn=stEl('subPayBtn'),cc=stEl('subCancelCard');if(!card)return;
+    var B=window.liaBilling,card=stEl('subPay'),btn=stEl('subPayBtn'),cc=stEl('subCancelCard');stRenderManual();if(!card)return;
     if(!B||!B.configured||!B.status){card.hidden=true;return}
     var D=stD(),price=stEur(B.price_eur!=null?B.price_eur:25)+' al mese',now=Date.now(),DAY=86400000;
     var title='',tx='',label='',mode='checkout';
