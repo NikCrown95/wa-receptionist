@@ -262,11 +262,12 @@ h1 .m{color:#9CEBEB}
 .cap i.on{background:linear-gradient(90deg,#9CEBEB,#4BB3D6)}
 .cap.h{opacity:0}
 #cap{display:none!important}
-.sectors{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:440px}
+.sectors{display:flex;flex-wrap:wrap;gap:4px 22px;width:100%;max-width:560px}
 .tabs{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
-.sectors button{white-space:nowrap;text-align:center;font:inherit;font-size:13.5px;font-weight:600;padding:8px 15px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;transition:all .3s;min-height:38px}
-.sectors button:last-child:nth-child(odd){grid-column:1/-1}
-.sectors button[aria-pressed="true"]{color:var(--bg);background:var(--aink);border-color:var(--aink)}
+.sectors button{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font:inherit;font-size:14.5px;font-weight:600;padding:9px 2px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);cursor:pointer;transition:color .3s,border-color .3s}
+.sectors button svg{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sectors button:hover{color:var(--ink)}
+.sectors button[aria-pressed="true"]{color:var(--aink);border-bottom-color:var(--aink)}
 @media (max-width:900px){.nv{gap:20px}.nv a{font-size:15px}}
 @media (max-width:760px){
   .top{position:relative;padding-top:4px;flex-wrap:wrap}
@@ -274,7 +275,7 @@ h1 .m{color:#9CEBEB}
   .nv{display:none;order:3;width:100%;flex-direction:column;align-items:flex-start;gap:0;padding-top:6px}
   .nv.open{display:flex}.nv a{padding:12px 0;width:100%;font-size:17px;border-top:1px solid var(--line)}.nv a::after{display:none}
   .hero{display:flex;flex-direction:column;align-items:stretch;gap:32px;min-height:0;padding:20px 0 48px}
-  .sectors button{padding:8px 6px;font-size:12.5px}
+  .sectors{gap:2px 16px}.sectors button{font-size:13.5px}
   .hl{padding-top:0}
   .stage{width:100%;max-width:360px;height:470px;margin:0 auto}
 }
@@ -819,7 +820,8 @@ var MQ=matchMedia('(max-width:600px)');function hh(c){return c.classList.contain
 function fit(){if(!MQ.matches)return;var ks=[].slice.call(chat.children).filter(function(c){return c!==lh&&!c.classList.contains('gone')});var g=parseFloat(getComputedStyle(chat).rowGap)||0;function tot(){var t=hh(lh)+(lh.style.display==='none'?0:g);ks.forEach(function(c){t+=c.offsetHeight+g});return t}while(ks.length>1&&tot()>chat.clientHeight){ks.shift().classList.add('gone')}}
 function clear(){[].slice.call(chat.children).forEach(function(c){if(c!==lh)chat.removeChild(c)})}
 function setCap(n){if(!n){cap.classList.add('h');return}cap.classList.remove('h');[].forEach.call(cap.children,function(s,q){s.classList.toggle('on',q<n)})}
-TABS.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.textContent=t.l;b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');
+var TABICO={"h": "<path d=\"M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2-2a2 2 0 0 1-2-2a2 2 0 0 1-2 2m0-12a2 2 0 0 1 2 2a2 2 0 0 1 2-2a2 2 0 0 1-2-2a2 2 0 0 1-2 2m-7 12a6 6 0 0 1 6-6a6 6 0 0 1-6-6a6 6 0 0 1-6 6a6 6 0 0 1 6 6\"/>", "c": "<ellipse cx=\"14.5\" cy=\"9.5\" rx=\"5.5\" ry=\"7\" transform=\"rotate(40 14.5 9.5)\"/><path d=\"M10.6 13.4L4 20\"/><circle cx=\"19\" cy=\"19\" r=\"1.6\"/>", "m": "<path d=\"M6 4H5a2 2 0 0 0-2 2v3.5a5.5 5.5 0 0 0 11 0V6a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 1 0 12 0v-3\"/><path d=\"M11 3v6\"/><circle cx=\"17\" cy=\"10\" r=\"2\"/>", "d": "<path d=\"M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z\"/>", "p": "<path d=\"M2 12h1\"/><path d=\"M6 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2\"/><path d=\"M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\"/><path d=\"M9 12h6\"/><path d=\"M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1z\"/><path d=\"M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2\"/><path d=\"M22 12h-1\"/>"};
+TABS.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+TABICO[t.k]+'</svg><span>'+t.l+'</span>';b.setAttribute('role','tab');b.setAttribute('aria-pressed','false');
  b.onclick=function(){manual=true;cur=i;loop()};sec.appendChild(b)});
 function mark(i){med=TABS[i].k==='m';applyTitle();[].forEach.call(sec.children,function(e,j){e.setAttribute('aria-pressed',j===i?'true':'false')})}
 async function play(i,id){
