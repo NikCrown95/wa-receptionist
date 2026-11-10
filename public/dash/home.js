@@ -92,12 +92,13 @@
   function loadDay(){
     var vt=V();
     if(vt==='gym'){loadGym();return;}
-    if(typeof window.liaGetHistory!=='function'){day.hidden=true;return;}
+    var tk=(new URLSearchParams(location.search).get('t')||'').trim();
+    if(!tk){day.hidden=true;return;}
     var my=++seq;
     var TX={pt:['Coaching in corso','Prossimo coaching','Oggi non hai coaching','coaching fatto','coaching fatti'],
       campi:['Prenotazione in corso','Prossima prenotazione','Oggi non hai prenotazioni','prenotazione fatta','prenotazioni fatte'],
       med:['Visita in corso','Prossima visita','Oggi non hai visite','visita fatta','visite fatte']}[vt]||['Appuntamento in corso','Prossimo appuntamento','Oggi non hai appuntamenti','appuntamento fatto','appuntamenti fatti'];
-    window.liaGetHistory().then(function(data){
+    function paint(data){
       if(my!==seq)return;
       var now=new Date(),list=((data&&data.appointments)||[]).filter(function(a){
         return a&&a.status==='confirmed'&&a.starts_at&&sameDay(new Date(a.starts_at),now);
@@ -130,7 +131,15 @@
         day.appendChild(el('hmDayProg',done+' di '+list.length+(list.length===1?' '+TX[3]:' '+TX[4])));
       }
       day.hidden=false;
-    }).catch(function(){if(my===seq)day.hidden=true;});
+    }
+    /* mostro subito l'ultimo stato di oggi salvato (se c'e'), poi leggo solo la giornata di oggi (leggera) e aggiorno */
+    var ck='liaHomeDay:'+tk.slice(0,16),n0=new Date(),ymd=n0.getFullYear()+'-'+(n0.getMonth()+1)+'-'+n0.getDate();
+    try{var c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.ymd===ymd&&c.data)paint(c.data);}catch(e){}
+    fetch('/api/agenda?t='+encodeURIComponent(tk)+'&format=json&days=1',{cache:'no-store'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error('x');return d;});}).then(function(d){
+      var data={appointments:d.appointments||[]};
+      try{localStorage.setItem(ck,JSON.stringify({ymd:ymd,data:data}));}catch(e){}
+      paint(data);
+    }).catch(function(){if(my===seq&&day.hidden)day.hidden=true;});
   }
   function loadGym(){
     var my=++seq,t=(new URLSearchParams(location.search).get('t')||'').trim();
