@@ -584,7 +584,7 @@ function rowFor(it,idx,kind,gym,dom,draft,onAdd){
       row.appendChild(bt);row.appendChild(pw);mm.appendChild(row)});
     r.appendChild(mm)}
   if(draft){r.appendChild(h("span",{class:"f-x"}));
-    if(kind==="svc")r.appendChild(h("button",{class:"addplus",type:"button","aria-label":"Aggiungi il servizio",text:"+",onclick:function(){if(!onAdd()){var i0=r.querySelector(".f-n");if(i0){i0.focus();i0.animate&&i0.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}}))}
+    if(kind==="svc")r.appendChild(h("button",{class:"addplus",type:"button","aria-label":"Aggiungi il servizio",text:"+",onclick:function(){if(!onAdd()){var i0=r.querySelector(".f-n");if(i0){if(!isPhone())i0.focus();i0.animate&&i0.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}}))}
   else r.appendChild(h("button",{class:"rm f-x",type:"button","aria-label":"Rimuovi","title":"Rimuovi",text:"×",onclick:function(){if(r.classList.contains("lout"))return;var h0=r.offsetHeight;r.style.height=h0+"px";r.style.overflow="hidden";r.getBoundingClientRect();r.classList.add("lout");r.style.height="0px";setTimeout(function(){S.items.splice(idx,1);render()},320)}}));
   r.dataset.i=draft?"d":idx;
   return r}
@@ -599,9 +599,10 @@ function addDraft(){
   if(nr&&from&&nr.animate){var to=nr.getBoundingClientRect(),dy=from.top-to.top;
     nr.animate([{transform:"translateY("+dy+"px) scale(.985)",opacity:.0,boxShadow:"0 0 0 3px rgba(45,210,220,.55),0 0 26px rgba(45,210,220,.5)",offset:0},{opacity:1,offset:.25},{transform:"none",opacity:1,boxShadow:"0 0 0 3px rgba(45,210,220,.45),0 0 22px rgba(45,210,220,.4)",offset:.75},{transform:"none",opacity:1,boxShadow:"0 0 0 0 rgba(45,210,220,0),0 0 0 rgba(45,210,220,0)",offset:1}],{duration:850,easing:"cubic-bezier(.22,1,.36,1)"});
     var nd=document.querySelector(".lr.draft");if(nd&&nd.animate)nd.animate([{backgroundColor:"rgba(45,210,220,.16)"},{backgroundColor:"rgba(45,210,220,0)"}],{duration:700,easing:"ease-out"})}
-  var nin=document.querySelector(".lr.draft .f-n");if(nin){nin.focus();try{nin.scrollIntoView({block:"nearest"})}catch(e){}}
+  var nin=document.querySelector(".lr.draft .f-n");if(nin&&!isPhone()){nin.focus();try{nin.scrollIntoView({block:"nearest"})}catch(e){}}
   return true}
 var SCOL=["45,210,220","59,156,255","242,184,75","162,139,255","255,138,122"];
+function isPhone(){try{return window.matchMedia("(max-width:640px)").matches}catch(e){return false}}
 function sumRow(it,idx,gym,dom){
   var c=SCOL[idx%SCOL.length],p=String(it.p).trim().replace(",",".");
   var sub=[it.d?it.d+" min":""],right="";
@@ -628,7 +629,7 @@ function listBox(gym,dom){
   box.appendChild(h("div",{class:"lh c-"+kind},[h("span",{text:gym?"Nuova lezione":"Nuovo servizio"}),h("span",{text:"Durata"}),dom?null:h("span",{text:gym?"Posti":"Prezzo"}),h("span")]));
   box.appendChild(rowFor(S.draft,0,kind,gym,dom,true,addDraft));
   var bw=h("div",{class:"addwrap"});
-  bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
+  bw.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){if(!addDraft()){var i=box.querySelector(".draft .f-n");if(i){if(!isPhone())i.focus();i.animate&&i.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:260})}}}},[h("span",{class:"pl",text:"+"}),h("span",{text:gym?"Aggiungi la lezione":"Aggiungi il servizio"})]));
   box.appendChild(bw);
   S.focusLast=false;
   return box}
