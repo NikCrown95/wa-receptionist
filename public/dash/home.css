@@ -6,18 +6,19 @@
   body.lia-sec-home .mainTopRow{padding:10px 16px 6px}
 }
 #panelHome .hmWrap{box-sizing:border-box;width:100%;max-width:560px;margin:0 auto;padding:10px 16px calc(96px + env(safe-area-inset-bottom,0px))}
-#panelHome .hmDay{display:block;width:100%;box-sizing:border-box;margin:0 0 12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#panelHome .hmDay{--c:#4BB3D6;position:relative;overflow:hidden;display:block;width:100%;box-sizing:border-box;margin:0 0 12px;padding:16px 16px 16px 20px;border:1px solid color-mix(in srgb,var(--c) 24%,var(--line));border-radius:14px;background:linear-gradient(110deg,color-mix(in srgb,var(--c) 13%,var(--card)) 0%,var(--card) 62%);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#panelHome .hmDay::before{content:'';position:absolute;left:0;top:22px;bottom:22px;width:3px;border-radius:0 3px 3px 0;background:var(--c)}
 #panelHome .hmDay:active{transform:scale(.99)}
 #panelHome .hmDay[hidden]{display:none}
 #panelHome .hmDayTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-#panelHome .hmDayLbl{display:block;font-size:12px;color:var(--muted)}
-#panelHome .hmDayPill{flex:none;padding:3px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent-ink);font-size:12px;font-weight:600;white-space:nowrap}
+#panelHome .hmDayLbl{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 85%,var(--muted))}
+#panelHome .hmDayPill{flex:none;padding:3px 10px;border-radius:20px;background:linear-gradient(145deg,color-mix(in srgb,var(--c) 88%,#fff),color-mix(in srgb,var(--c) 78%,#000));color:#04161C;font-size:12px;font-weight:700;white-space:nowrap}
 #panelHome .hmDayTime{display:block;margin-top:12px;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;color:var(--ink)}
 #panelHome .hmDayName{display:block;margin-top:10px;font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #panelHome .hmDaySvc{display:block;margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #panelHome .hmDayNone{display:block;margin-top:8px;font-size:18px;font-weight:600;color:var(--ink)}
-#panelHome .hmDayBar{display:block;height:4px;margin-top:16px;border-radius:2px;background:var(--accent-soft);overflow:hidden}
-#panelHome .hmDayFill{display:block;height:100%;border-radius:2px;background:var(--accent)}
+#panelHome .hmDayBar{display:block;height:4px;margin-top:16px;border-radius:2px;background:color-mix(in srgb,var(--c) 18%,transparent);overflow:hidden}
+#panelHome .hmDayFill{display:block;height:100%;border-radius:2px;background:var(--c)}
 #panelHome .hmDayProg{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 #panelHome .hmGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 #panelHome .hmTile{--c:#6FD0E8;box-sizing:border-box;position:relative;overflow:hidden;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;min-width:0;min-height:112px;padding:16px 8px 16px 18px;border:1px solid color-mix(in srgb,var(--c) 24%,var(--line));border-radius:14px;background:linear-gradient(110deg,color-mix(in srgb,var(--c) 13%,var(--card)) 0%,var(--card) 62%);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
