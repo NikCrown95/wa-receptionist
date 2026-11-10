@@ -882,7 +882,10 @@ module.exports = async (req, res) => {
                 if (!sv.length) return res.status(400).json({ error: "Scegli almeno un servizio per " + mn + "." });
                 members.push({ name: mn, services: sv });
               }
-              teamIn = { owner: on, members };
+              let ownerSv = (Array.isArray(body.team.owner_services) ? body.team.owner_services : []).map((x) => String(x || "").trim().toLowerCase()).filter((x, i, a2) => known.has(x) && a2.indexOf(x) === i);
+              if (!ownerSv.length) return res.status(400).json({ error: "Scegli almeno un servizio per te." });
+              if (ownerSv.length >= known.size) ownerSv = null;
+              teamIn = { owner: on, ownerServices: ownerSv, members };
             }
           }
           let areas = [];
@@ -920,7 +923,7 @@ module.exports = async (req, res) => {
             const sv = await sb("GET", "services?business_id=eq." + biz.id + "&select=id,name");
             const byName = {};
             (sv.ok && Array.isArray(sv.data) ? sv.data : []).forEach((x) => { const k = String(x.name).toLowerCase(); (byName[k] = byName[k] || []).push(x.id); });
-            const people = [{ name: teamIn.owner, owner: true, services: null }].concat(teamIn.members.map((m) => ({ name: m.name, owner: false, services: m.services })));
+            const people = [{ name: teamIn.owner, owner: true, services: teamIn.ownerServices }].concat(teamIn.members.map((m) => ({ name: m.name, owner: false, services: m.services })));
             const cr = await sb("POST", "resources", people.map((p, i) => ({ business_id: biz.id, name: p.name, active: true, is_staff: true, is_owner: p.owner, sort_order: i })), "return=representation");
             if (!cr.ok || !Array.isArray(cr.data) || cr.data.length !== people.length) return res.status(500).json({ error: "Non siamo riusciti a salvare i collaboratori. Riprova." });
             const idAt = (i) => { const r = cr.data.find((x) => x.sort_order === i); return r ? r.id : null; };
