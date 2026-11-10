@@ -1306,7 +1306,7 @@ function pfRenderPoster(box,b,opts){
   /* Finche' non c'e' la partita IVA i pagamenti arrivano su PayPal: metti false per tornare al pagamento con carta (Stripe) */
   var ST_MANUAL_PAY=true;
   function stManualPay(){var B=window.liaBilling;return ST_MANUAL_PAY&&!(B&&B.has_stripe)}
-  function stRenderManual(){var B=window.liaBilling,M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(manual){var bn=((stD().b)||{}).name||'';stText('subManualNote',bn?'Se PayPal ti chiede una nota, scrivi: '+bn+'.':'Se PayPal ti chiede una nota, scrivi il nome della tua attività.')}}
+  function stRenderManual(){var B=window.liaBilling,M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(!manual)return;var pb=stEl('subManualPaid');if(pb&&!pb.__b){pb.__b=1;pb.addEventListener('click',function(){var bn=((stD().b)||{}).name||'';pb.disabled=true;stMsg('subManualMsg','');stSend('support',{topic:'Pagamento PayPal',message:'Ho pagato con PayPal. Attività: '+(bn||'(nome non disponibile)')+'.'}).then(function(){stMsg('subManualMsg','Grazie! Appena vediamo il pagamento attiviamo il servizio.')}).catch(function(e){pb.disabled=false;stMsg('subManualMsg',(e&&e.message)||'Non sono riuscito a inviare. Riprova.',true)})})}}
   function stRenderPay(){
     var B=window.liaBilling,card=stEl('subPay'),btn=stEl('subPayBtn'),cc=stEl('subCancelCard');stRenderManual();if(!card)return;if(stManualPay()){card.hidden=true;return}
     if(!B||!B.configured||!B.status){card.hidden=true;return}
