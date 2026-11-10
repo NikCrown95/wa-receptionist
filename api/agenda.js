@@ -865,6 +865,26 @@ module.exports = async (req, res) => {
             if (!Number.isInteger(wd) || wd < 1 || wd > 7 || !HM.test(op) || !HM.test(cl2) || op >= cl2) return res.status(400).json({ error: "Controlla gli orari: l'apertura deve venire prima della chiusura." });
             hc.push({ resource_id: resource.id, weekday: wd, opens: op, closes: cl2 });
           }
+          // Collaboratori (solo servizi alla persona e studi sanitari): chi lavora con il titolare e cosa sa fare ognuno.
+          let teamIn = null;
+          if ((kind === "persona" || kind === "sanitario") && body.team && typeof body.team === "object") {
+            const mem = Array.isArray(body.team.members) ? body.team.members : [];
+            if (mem.length) {
+              const on = String(body.team.owner_name || "").trim().replace(/\s+/g, " ");
+              if (on.length < 2 || on.length > 40) return res.status(400).json({ error: "Scrivi il tuo nome (massimo 40 lettere)." });
+              if (mem.length > 19) return res.status(400).json({ error: "Puoi aggiungere fino a 19 collaboratori." });
+              const known = new Set(sl2.map((x) => String(x.name).toLowerCase()));
+              const members = [];
+              for (const m of mem) {
+                const mn = String((m && m.name) || "").trim().replace(/\s+/g, " ");
+                if (mn.length < 2 || mn.length > 40) return res.status(400).json({ error: "Scrivi il nome di ogni collaboratore (massimo 40 lettere)." });
+                const sv = (Array.isArray(m.services) ? m.services : []).map((x) => String(x || "").trim().toLowerCase()).filter((x, i, a) => known.has(x) && a.indexOf(x) === i);
+                if (!sv.length) return res.status(400).json({ error: "Scegli almeno un servizio per " + mn + "." });
+                members.push({ name: mn, services: sv });
+              }
+              teamIn = { owner: on, members };
+            }
+          }
           let areas = [];
           if (kind === "domicilio") {
             areas = (Array.isArray(body.areas) ? body.areas : []).map((a) => String(a || "").trim().replace(/\s+/g, " ").slice(0, 60)).filter((a) => a.length >= 2);
@@ -887,6 +907,37 @@ module.exports = async (req, res) => {
           await sb("DELETE", "opening_hours?resource_id=eq." + resource.id, null, "return=minimal");
           const hi = await sb("POST", "opening_hours", hc, "return=minimal");
           if (!hi.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare gli orari. Riprova." });
+          // Persone: si rifanno da zero a ogni salvataggio (un nuovo tentativo non crea doppioni).
+          const oldS = await sb("GET", "resources?business_id=eq." + biz.id + "&is_staff=eq.true&select=id");
+          const oldIds = oldS.ok && Array.isArray(oldS.data) ? oldS.data.map((r) => r.id).filter(Boolean) : [];
+          if (oldIds.length) {
+            const lst = oldIds.join(",");
+            await sb("DELETE", "resource_services?resource_id=in.(" + lst + ")", null, "return=minimal").catch(() => {});
+            await sb("DELETE", "opening_hours?resource_id=in.(" + lst + ")", null, "return=minimal").catch(() => {});
+            await sb("DELETE", "resources?id=in.(" + lst + ")", null, "return=minimal").catch(() => {});
+          }
+          if (teamIn) {
+            const sv = await sb("GET", "services?business_id=eq." + biz.id + "&select=id,name");
+            const byName = {};
+            (sv.ok && Array.isArray(sv.data) ? sv.data : []).forEach((x) => { const k = String(x.name).toLowerCase(); (byName[k] = byName[k] || []).push(x.id); });
+            const people = [{ name: teamIn.owner, owner: true, services: null }].concat(teamIn.members.map((m) => ({ name: m.name, owner: false, services: m.services })));
+            const cr = await sb("POST", "resources", people.map((p, i) => ({ business_id: biz.id, name: p.name, active: true, is_staff: true, is_owner: p.owner, sort_order: i })), "return=representation");
+            if (!cr.ok || !Array.isArray(cr.data) || cr.data.length !== people.length) return res.status(500).json({ error: "Non siamo riusciti a salvare i collaboratori. Riprova." });
+            const idAt = (i) => { const r = cr.data.find((x) => x.sort_order === i); return r ? r.id : null; };
+            const ohRows = [], rsRows = [];
+            people.forEach((p, i) => {
+              const rid = idAt(i);
+              if (!rid) return;
+              hc.forEach((h) => ohRows.push({ resource_id: rid, weekday: h.weekday, opens: h.opens, closes: h.closes }));
+              if (p.services) p.services.forEach((n) => (byName[n] || []).forEach((sid) => rsRows.push({ resource_id: rid, service_id: sid })));
+            });
+            if (ohRows.length) { const o2 = await sb("POST", "opening_hours", ohRows, "return=minimal"); if (!o2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare gli orari dei collaboratori. Riprova." }); }
+            if (rsRows.length) { const r2 = await sb("POST", "resource_services", rsRows, "return=minimal"); if (!r2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare i servizi dei collaboratori. Riprova." }); }
+            const tm = await sb("PATCH", "businesses?id=eq." + biz.id, { team_mode: "team" }, "return=minimal");
+            if (!tm.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare i collaboratori. Riprova." });
+          } else if (biz.team_mode === "team") {
+            await sb("PATCH", "businesses?id=eq." + biz.id, { team_mode: "solo" }, "return=minimal").catch(() => {});
+          }
         }
         if (obLogo) await logoLib.saveLogo(sb, biz, obLogo).catch(() => false);
         const done = await sb("PATCH", "businesses?id=eq." + biz.id, { onboarded_at: new Date().toISOString() }, "return=minimal");
