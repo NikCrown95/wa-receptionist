@@ -274,6 +274,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
 .rr.sc:first-child{margin-top:0}
 .rr.sc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;background:rgb(var(--c))}
 .rr.sc.av{justify-content:flex-start;padding-left:12px}.rr.sc.av::before{display:none}
+.rav svg{width:24px;height:24px;fill:none;stroke:#06121c;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .rav{flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#06121c;background:rgb(var(--c));box-shadow:0 0 0 3px rgba(var(--c),.25)}
 .rr.sc .rv{font-weight:700;color:rgb(var(--c))}.rr.sc .rv.dim{color:var(--muted);font-weight:500}
 .rr>div{min-width:0}
@@ -988,7 +989,7 @@ function render(){
       if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team"){var tb=h("div",{class:"rows"});
         var svTx=function(a){return a.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")};
         var ini=function(n){var w=String(n).trim().split(/\s+/);return((w[0]||"?").charAt(0)+(w.length>1?w[w.length-1].charAt(0):"")).toUpperCase()};
-        var prow=function(n,sub,i,tag){return h("div",{class:"rr sc av",style:"--c:"+SCOL[i%SCOL.length]},[h("span",{class:"rav","aria-hidden":"true",text:ini(n)}),h("div",null,[h("b",{text:n+(tag||"")}),h("small",{text:sub})])])};
+        var prow=function(n,sub,i,tag){return h("div",{class:"rr sc av",style:"--c:"+SCOL[i%SCOL.length]},[(function(){var e=h("span",{class:"rav","aria-hidden":"true"});e.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20.2c0-3.9 3.2-6.7 7.2-6.7s7.2 2.8 7.2 6.7"/></svg>';return e})(),h("div",null,[h("b",{text:n+(tag||"")}),h("small",{text:sub})])])};
         tb.appendChild(prow(S.owner.trim(),svTx(S.osv),0," (tu)"));
         S.team.forEach(function(m,i){tb.appendChild(prow(m.n.trim(),svTx(m.sv),i+1))});
         v.appendChild(sec("Collaboratori","team",tb,S.team.length+1))}
