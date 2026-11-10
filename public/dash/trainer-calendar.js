@@ -31,7 +31,7 @@
 
   function setLink(j) {
     var a = $("calAdd");
-    a.href = j.webcal;
+    a.href = j.webcal; wlink = j.webcal;
     a.setAttribute("aria-disabled", "false");
   }
   function load() {
@@ -39,6 +39,29 @@
     a.setAttribute("aria-disabled", "true"); a.removeAttribute("href"); msg("");
     call("link").then(setLink).catch(function (e) { msg(e.message, true); });
   }
+
+  /* Se il telefono non apre Calendario (altro browser, app sulla Home...), si offre il link da copiare in Safari */
+  var wlink = "", fbTimer = 0;
+  function showFb() { var f = $("calFb"); if (f) f.style.display = "block"; }
+  function stopFb() { clearTimeout(fbTimer); }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) stopFb(); });
+  window.addEventListener("pagehide", stopFb);
+  window.addEventListener("blur", stopFb);
+  $("calAdd").addEventListener("click", function () {
+    if (this.getAttribute("aria-disabled") === "true") return;
+    stopFb(); fbTimer = setTimeout(showFb, 2000);
+  });
+  $("calCopy").addEventListener("click", function () {
+    function ok() { msg("Link copiato. Aprilo in Safari: incollalo nella barra in alto."); }
+    function old() {
+      var t = document.createElement("textarea"); t.value = wlink; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0, 9999);
+      try { document.execCommand("copy") ? ok() : msg("Non riesco a copiarlo. Riprova.", true); } catch (e) { msg("Non riesco a copiarlo. Riprova.", true); }
+      document.body.removeChild(t);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(wlink).then(ok, old); else old();
+  });
+  if (/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent) || navigator.standalone) showFb();
 
   var armed = false, timer = 0;
   function disarm() { armed = false; clearTimeout(timer); $("calReset").textContent = "Crea un nuovo link"; }
