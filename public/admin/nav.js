@@ -12,7 +12,8 @@
     { label: 'Costi', href: '/admin/costi.html' },
     { label: 'Referral', href: '/admin/referral.html' },
     { label: 'Annunci', href: '/admin/annunci.html' },
-    { label: 'Sistema', href: '/admin/sistema.html' }
+    { label: 'Sistema', href: '/admin/sistema.html' },
+    { label: 'Registro aggiornamenti', href: '/admin/aggiornamenti.html' }
   ];
   var nav = document.getElementById('mainNav');
   if (!nav) return;

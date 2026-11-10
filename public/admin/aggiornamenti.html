@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Prenolia Admin – Registro aggiornamenti</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--logo:url("/brand/prenolia-dark.png");
+  --bg:#050608; --bg2:#0A0D12; --card:#0E131B; --card2:#161D29; --line:#1C2532; --line2:#2A3648;
+  --ink:#F9F6F0; --muted:#9BA6B5;
+  --accent:#2DD2DC; --on-accent:#031016; --accent-soft:#0B2C33; --accent-ink:#A5EDF2;
+  --sec:#8CC6FF; --sec-soft:#0A2547;
+  --green:#3FE08A; --amber:#F5C15E; --red:#FF8A8A;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{--logo:url("/brand/prenolia-dark.png");}
+html{background:var(--bg);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;}
+h1,h2,p{margin:0;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px;}
+.logo{display:block;width:120px;height:30px;background:var(--logo) center / contain no-repeat;}
+
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-row{max-width:1120px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;flex:none;}
+.top-row nav{display:flex;gap:4px;}
+.top-row nav a{padding:8px 14px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;}
+.top-row nav a.on{background:var(--card2);color:var(--ink);}
+.spacer{flex:1;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 100px;}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);}
+@media (min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+.kpi{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);}
+.kpi .lbl{font-size:.85rem;color:var(--muted);font-weight:500;}
+.kpi .val{margin-top:8px;font-size:1.9rem;font-weight:700;letter-spacing:-0.03em;}
+.kpi .sub{margin-top:4px;font-size:.8rem;color:var(--green);font-weight:600;}
+
+.panels{margin-top:16px;display:grid;gap:16px;}
+.panel{padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);}
+.panel h2{font-size:1.05rem;font-weight:600;letter-spacing:-0.015em;}
+.panel .sub{margin-top:2px;font-size:.85rem;color:var(--muted);}
+.row2{display:grid;gap:16px;}
+@media (min-width:860px){.row2{grid-template-columns:1fr 1fr;}}
+
+.linechart{margin-top:18px;width:100%;height:auto;overflow:visible;}
+.linechart .grid-l{stroke:var(--line);stroke-width:1;}
+.linechart .area{fill:url(#areaGrad);}
+.linechart .line{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.linechart .dot{fill:var(--bg);stroke:var(--accent);stroke-width:2;}
+.linechart .axis{font-size:11px;fill:var(--muted);}
+
+.pairbars{margin-top:18px;width:100%;height:auto;}
+.pairbars .new{fill:var(--accent);}
+.pairbars .lost{fill:var(--red);}
+.pairbars .axis{font-size:10.5px;fill:var(--muted);}
+.legend2{margin-top:10px;display:flex;gap:18px;font-size:.85rem;color:var(--muted);}
+.legend2 span{display:inline-flex;align-items:center;gap:6px;}
+.legend2 i{width:9px;height:9px;border-radius:3px;}
+
+.hbars{margin-top:18px;display:grid;gap:14px;}
+.hbar-row{display:grid;grid-template-columns:120px 1fr 90px;align-items:center;gap:12px;}
+.hbar-row .lab{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:500;}
+.hbar-row .lab i{width:9px;height:9px;border-radius:50%;flex:none;}
+.track{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.fill{height:100%;border-radius:6px;}
+.hbar-row .amt{text-align:right;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.note{margin-top:22px;color:var(--muted);font-size:.85rem;text-align:center;}
+
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+.kpi .sub.m{color:var(--muted);font-weight:500;}
+.kpi .sub.warn{color:var(--amber);}
+.grid2c{display:grid;gap:16px;align-items:start;}
+@media (min-width:960px){.grid2c{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);}}
+.side{display:grid;gap:16px;}
+.rowh{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;min-height:52px;}
+.rowh:last-child{border-bottom:0;}
+.rowh .n{font-weight:600;font-size:.94rem;}
+.rowh .a{font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right;}
+.rowh .a.ok{color:var(--green);}.rowh .a.warn{color:var(--amber);}.rowh .a.crit{color:var(--red);}
+.rowh .bar{grid-column:1/-1;height:8px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.rowh .bar i{display:block;height:100%;border-radius:6px;background:var(--accent);}
+.rowh .bar.warn i{background:var(--amber);}.rowh .bar.crit i{background:var(--red);}
+.rowh small{grid-column:1/-1;color:var(--muted);font-size:.8rem;margin-top:-2px;}
+.empty-s{color:var(--muted);font-size:.9rem;padding:10px 0;line-height:1.5;}
+.panel h2 .live-note{font-weight:500;color:var(--muted);font-size:.8rem;margin-left:8px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}}
+
+.field{display:grid;gap:6px;min-width:0;}
+.field label{font-size:.82rem;color:var(--muted);font-weight:500;}
+.field label b{color:var(--ink);font-variant-numeric:tabular-nums;}
+.inp{min-height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font-family:inherit;font-size:16px;width:100%;min-width:0;}
+.inp:focus{outline:none;border-color:var(--accent);}
+input[type=range]{width:100%;accent-color:var(--accent);height:34px;margin:0;}
+.fields{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:14px;border:0;background:var(--accent);color:var(--on-accent);font-family:inherit;font-size:.96rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2);}
+.btn.small{min-height:40px;padding:0 14px;font-size:.88rem;}
+.btn:disabled{opacity:.55;cursor:default;}
+.big{font-size:2rem;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1;}
+.hint{color:var(--muted);font-size:.84rem;line-height:1.5;}
+.bar{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .3s;}
+.bar.warn i{background:var(--amber);}.bar.crit i{background:var(--red);}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);}
+.cols{display:grid;gap:16px;align-items:start;grid-template-columns:minmax(0,1fr);}
+.cols>*,.stack>*{min-width:0;}
+@media (min-width:960px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}}
+.ok-t{color:var(--green);}.warn-t{color:var(--amber);}.crit-t{color:var(--red);}
+.msg{font-size:.88rem;margin-top:10px;min-height:1.2em;}
+.msg.err{color:var(--red);}.msg.good{color:var(--green);}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;}
+.stat3 div{background:var(--card2);border-radius:14px;padding:12px;min-width:0;}
+.stat3 b{display:block;font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;}
+.stat3 span{color:var(--muted);font-size:.76rem;}
+.exp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);}
+.exp:last-child{border-bottom:0;}
+.exp b{display:block;font-weight:600;font-size:.96rem;overflow-wrap:anywhere;}
+.exp span.s{color:var(--muted);font-size:.82rem;}
+.days{font-weight:800;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+.exp .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.exp .acts .inp{width:auto;flex:1 1 150px;}
+.addrow{display:grid;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));align-items:end;}
+.pagehd h1{font-size:1.6rem;letter-spacing:-0.02em;margin:0;}
+.pagehd p{color:var(--muted);margin:6px 0 0;font-size:.95rem;line-height:1.45;}
+.pagehd{margin-bottom:18px;}
+@media (max-width:760px){.panel{padding:16px;border-radius:18px;}.big{font-size:1.7rem;}.panel .btn{width:100%;}.exp .acts .btn{width:auto;flex:1 1 auto;}}
+</style>
+<link rel="manifest" href="/admin/manifest.webmanifest"><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Prenolia Admin"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" type="image/png" sizes="64x64" href="/admin/icons/admin-64.png?v=6"><link rel="icon" type="image/png" sizes="512x512" href="/admin/icons/admin-512.png?v=6"><link rel="apple-touch-icon" href="/admin/icons/admin-apple-180.png?v=6">
+<link rel="stylesheet" href="/admin/mobile.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo" role="img" aria-label="Prenolia"></span></div>
+    <nav id="mainNav"></nav>
+    <div class="spacer"></div>
+  </div>
+</header>
+<script src="/admin/auth.js"></script>
+<script src="/admin/nav.js"></script>
+
+<style>
+.vw{max-width:560px;margin:0 auto;}
+.vw .panel{padding:22px;}
+.vh{display:flex;align-items:center;gap:12px;}
+.vh .ic{width:40px;height:40px;border-radius:50%;background:var(--card2);display:grid;place-items:center;color:var(--muted);flex:none;}
+.vh b{display:block;font-size:1.05rem;font-weight:600;}
+.vh span.s{display:block;color:var(--muted);font-size:.86rem;}
+.vlist{margin-top:14px;display:grid;gap:10px;}
+.ent{border:1px solid var(--line2);border-radius:16px;padding:12px 14px;background:var(--card);}
+.ent .nm{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.98rem;}
+.ent .nm .sp{flex:1;}
+.ent .ln{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:.9rem;min-width:0;}
+.ent .ln .k{color:var(--muted);font-size:.78rem;width:64px;flex:none;}
+.ent .ln .v{flex:1;min-width:0;overflow-wrap:anywhere;}
+.ent .ln .v.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;}
+.ent .note{margin-top:8px;color:var(--muted);font-size:.84rem;white-space:pre-line;overflow-wrap:anywhere;}
+.mini{min-height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;flex:none;}
+.mini:active{transform:scale(.97);}
+.mini.dg{color:var(--red);}
+.pwf{-webkit-text-security:disc;text-security:disc;}
+.pwf.show{-webkit-text-security:none;text-security:none;}
+.tools{display:flex;gap:8px;margin-top:14px;}
+.tools .inp{flex:1;}
+.vfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.vfoot .btn{flex:1 1 140px;}
+.form{display:grid;gap:12px;margin-top:14px;}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);background:var(--card2);border:1px solid var(--line2);color:var(--ink);padding:10px 16px;border-radius:12px;font-size:.9rem;z-index:80;max-width:90vw;}
+.toast[hidden]{display:none;}
+.warnbox{background:#3A2E12;color:#F5C15E;padding:12px 14px;border-radius:14px;font-size:.88rem;line-height:1.45;}
+</style>
+<div class="wrap">
+ <div class="vw">
+  <div class="pagehd" style="margin-bottom:14px"><h1>Registro aggiornamenti</h1></div>
+
+  <div class="panel" id="vLoad"><p class="hint">Carico…</p></div>
+
+  <div class="panel" id="vSetup" hidden>
+    <div class="vh"><div class="ic" aria-hidden="true">&#9201;</div><div><b>Prima configurazione</b><span class="s">Scegli la password principale</span></div></div>
+    <form class="form" id="fSetup" autocomplete="off">
+      <div class="warnbox">Questa password cifra tutto nel tuo dispositivo e non viene mai salvata. Se la perdi, i dati non si possono recuperare.</div>
+      <div class="field"><label for="sp1">Password principale (almeno 12 caratteri)</label><input class="inp" id="sp1" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="sp2">Ripeti la password</label><input class="inp" id="sp2" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <button class="btn" type="submit" id="sGo">Crea registro</button>
+      <div class="msg" id="sMsg" role="status"></div>
+    </form>
+  </div>
+
+  <div class="panel" id="vLock" hidden>
+    <div class="vh"><div class="ic" aria-hidden="true">&#9201;</div><div><b>Registro aggiornamenti</b><span class="s">Nessun aggiornamento recente</span></div></div>
+    <form class="form" id="fLock" autocomplete="off">
+      <div class="field"><label for="lp">Password principale</label><input class="inp" id="lp" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <button class="btn" type="submit" id="lGo">Sblocca</button>
+      <div class="msg" id="lMsg" role="status"></div>
+    </form>
+  </div>
+
+  <div class="panel" id="vOpen" hidden>
+    <div class="vh">
+      <div class="ic" aria-hidden="true">&#9201;</div>
+      <div style="flex:1;min-width:0"><b>Registro aggiornamenti</b><span class="s">Si blocca da solo tra <span id="tm">2:00</span></span></div>
+      <button class="btn small ghost" type="button" id="bLock">Blocca</button>
+    </div>
+    <div class="tools"><input class="inp" id="q" type="search" placeholder="Cerca un servizio" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+    <div class="vlist" id="list"></div>
+
+    <form class="form" id="fEnt" autocomplete="off" hidden>
+      <h2 id="eTitle" style="font-size:1rem">Nuovo accesso</h2>
+      <div class="field"><label for="en">Servizio</label><input class="inp" id="en" type="text" maxlength="60" autocomplete="off" placeholder="Per esempio GitHub"></div>
+      <div class="field"><label for="ee">Email o nome utente</label><input class="inp" id="ee" type="text" maxlength="120" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="ep">Password</label>
+        <div style="display:flex;gap:8px"><input class="inp pwf" id="ep" type="text" maxlength="200" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="mini" type="button" id="eGen">Genera</button></div></div>
+      <div class="field"><label for="eu">Indirizzo del sito (facoltativo)</label><input class="inp" id="eu" type="text" maxlength="120" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="eo">Note (facoltativo)</label><textarea class="inp" id="eo" maxlength="400" style="min-height:80px;padding:10px 14px;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:8px"><button class="btn" type="submit" style="flex:1" id="eSave">Salva</button><button class="btn ghost" type="button" id="eCancel">Annulla</button></div>
+      <div class="msg" id="eMsg" role="status"></div>
+    </form>
+
+    <form class="form" id="fPw" autocomplete="off" hidden>
+      <h2 style="font-size:1rem">Cambia password principale</h2>
+      <div class="field"><label for="np1">Nuova password (almeno 12 caratteri)</label><input class="inp" id="np1" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="np2">Ripeti la nuova password</label><input class="inp" id="np2" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div style="display:flex;gap:8px"><button class="btn" type="submit" style="flex:1" id="pSave">Cambia password</button><button class="btn ghost" type="button" id="pCancel">Annulla</button></div>
+      <div class="msg" id="pMsg" role="status"></div>
+    </form>
+
+    <div class="vfoot" id="foot">
+      <button class="btn" type="button" id="bAdd">Aggiungi accesso</button>
+      <button class="btn ghost" type="button" id="bPw">Cambia password principale</button>
+    </div>
+    <div class="msg" id="oMsg" role="status"></div>
+  </div>
+  <p class="hint" id="vSetupHint" hidden style="margin-top:14px;color:var(--amber)">Manca la tabella: esegui in Supabase lo script <b>20261110_admin_vault.sql</b>.</p>
+ </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+<script>
+(function () {
+  var IT = 600000, IDLE = 120, HIDDEN_MAX = 60, CLIP = 30;
+  var enc = new TextEncoder(), dec = new TextDecoder();
+  var S = { key: null, salt: null, it: IT, version: 0, items: null, exists: false };
+  var editing = null, shown = {}, idle = IDLE, tick = null, hiddenAt = 0, fails = 0, clipT = null, toastT = null;
+
+  function $(i) { return document.getElementById(i); }
+  function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+  function say(id, t, k) { var m = $(id); m.textContent = t || ''; m.className = 'msg' + (k ? ' ' + k : ''); }
+  function show(which) { ['vLoad', 'vSetup', 'vLock', 'vOpen'].forEach(function (n) { $(n).hidden = n !== which; }); }
+  function toast(t) { var n = $('toast'); n.textContent = t; n.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { n.hidden = true; }, 2600); }
+
+  function b64(buf) { var a = new Uint8Array(buf), s = ''; for (var i = 0; i < a.length; i++) s += String.fromCharCode(a[i]); return btoa(s); }
+  function unb64(s) { var b = atob(s), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+  function derive(pw, salt, it) {
+    return crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']).then(function (m) {
+      return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: it, hash: 'SHA-256' }, m, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    });
+  }
+  function seal() {
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, S.key, enc.encode(JSON.stringify({ items: S.items }))).then(function (ct) {
+      return JSON.stringify({ v: 1, kdf: 'PBKDF2-SHA256', it: S.it, salt: b64(S.salt), iv: b64(iv), ct: b64(ct) });
+    });
+  }
+  function openBlob(key, blob) {
+    var o = JSON.parse(blob);
+    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(o.iv) }, key, unb64(o.ct)).then(function (pt) { return JSON.parse(dec.decode(pt)); });
+  }
+  function api(method, body) {
+    return window.liaApi('/api/admin/vault', body ? { method: method, body: JSON.stringify(body) } : undefined);
+  }
+  function persist() {
+    return seal().then(function (blob) { return api('POST', { blob: blob, version: S.version }); }).then(function (j) { S.version = j.version; S.exists = true; });
+  }
+  function uid() { try { return crypto.randomUUID(); } catch (e) { return String(Date.now()) + Math.random().toString(16).slice(2); } }
+
+  // ---------- blocco automatico ----------
+  function fmtT(s) { return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
+  function poke() { idle = IDLE; $('tm').textContent = fmtT(idle); }
+  function startTimer() {
+    clearInterval(tick); poke();
+    tick = setInterval(function () { idle--; $('tm').textContent = fmtT(Math.max(idle, 0)); if (idle <= 0) lock(); }, 1000);
+  }
+  function lock() {
+    clearInterval(tick); tick = null;
+    S.key = null; S.items = null; shown = {}; editing = null;
+    $('list').innerHTML = ''; $('q').value = '';
+    ['en', 'ee', 'ep', 'eu', 'eo', 'np1', 'np2', 'lp', 'sp1', 'sp2'].forEach(function (i) { $(i).value = ''; });
+    $('fEnt').hidden = true; $('fPw').hidden = true; $('foot').hidden = false; say('oMsg', ''); say('lMsg', '');
+    show('vLock');
+  }
+  ['pointerdown', 'keydown', 'scroll', 'input'].forEach(function (ev) { document.addEventListener(ev, function () { if (S.key) poke(); }, { passive: true }); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) hiddenAt = Date.now();
+    else if (S.key && hiddenAt && Date.now() - hiddenAt > HIDDEN_MAX * 1000) lock();
+  });
+
+  // ---------- appunti ----------
+  function copy(text, what) {
+    function ok() { toast(what + ' copiato. Si cancella dagli appunti tra ' + CLIP + ' secondi.'); clearTimeout(clipT); clipT = setTimeout(function () { try { navigator.clipboard.writeText(' '); } catch (e) {} }, CLIP * 1000); }
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(ok, fallback); } else fallback();
+    function fallback() {
+      var t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0;top:0'; document.body.appendChild(t); t.focus(); t.select();
+      try { document.execCommand('copy'); ok(); } catch (e) { toast('Non riesco a copiare.'); }
+      document.body.removeChild(t);
+    }
+  }
+
+  // ---------- elenco ----------
+  function paint() {
+    var box = $('list'); box.innerHTML = '';
+    var q = $('q').value.trim().toLowerCase();
+    var items = (S.items || []).slice().sort(function (a, b) { return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1; })
+      .filter(function (r) { return !q || (r.name + ' ' + r.email + ' ' + (r.url || '')).toLowerCase().indexOf(q) > -1; });
+    if (!items.length) { box.appendChild(el('p', 'hint', (S.items || []).length ? 'Nessun risultato.' : 'Nessun accesso salvato. Tocca “Aggiungi accesso”.')); return; }
+    items.forEach(function (r) {
+      var c = el('div', 'ent'), nm = el('div', 'nm');
+      nm.appendChild(el('span', null, r.name)); nm.appendChild(el('span', 'sp'));
+      var ed = el('button', 'mini', 'Modifica'); ed.type = 'button'; ed.addEventListener('click', function () { openForm(r); });
+      var dl = el('button', 'mini dg', 'Elimina'); dl.type = 'button'; var armed = false;
+      dl.addEventListener('click', function () {
+        if (!armed) { armed = true; dl.textContent = 'Conferma'; setTimeout(function () { armed = false; dl.textContent = 'Elimina'; }, 3000); return; }
+        var prev = S.items; S.items = S.items.filter(function (x) { return x.id !== r.id; });
+        persist().then(function () { paint(); toast('Eliminato'); }).catch(function (e) { S.items = prev; paint(); say('oMsg', e.message, 'err'); });
+      });
+      nm.appendChild(ed); nm.appendChild(dl); c.appendChild(nm);
+      if (r.email) { var l1 = el('div', 'ln'); l1.appendChild(el('span', 'k', 'Accesso')); l1.appendChild(el('span', 'v', r.email)); var cp1 = el('button', 'mini', 'Copia'); cp1.type = 'button'; cp1.addEventListener('click', function () { copy(r.email, 'Accesso'); }); l1.appendChild(cp1); c.appendChild(l1); }
+      var l2 = el('div', 'ln'); l2.appendChild(el('span', 'k', 'Password'));
+      l2.appendChild(el('span', 'v mono', shown[r.id] ? r.password : '••••••••••••'));
+      var ey = el('button', 'mini', shown[r.id] ? 'Nascondi' : 'Mostra'); ey.type = 'button'; ey.addEventListener('click', function () { shown[r.id] = !shown[r.id]; paint(); });
+      var cp2 = el('button', 'mini', 'Copia'); cp2.type = 'button'; cp2.addEventListener('click', function () { copy(r.password, 'Password'); });
+      l2.appendChild(ey); l2.appendChild(cp2); c.appendChild(l2);
+      if (r.url) c.appendChild(el('div', 'note', r.url));
+      if (r.note) c.appendChild(el('div', 'note', r.note));
+      box.appendChild(c);
+    });
+  }
+  $('q').addEventListener('input', paint);
+
+  // ---------- aggiungi / modifica ----------
+  function openForm(r) {
+    editing = r || null;
+    $('eTitle').textContent = r ? 'Modifica accesso' : 'Nuovo accesso';
+    $('en').value = r ? r.name : ''; $('ee').value = r ? r.email : ''; $('ep').value = r ? r.password : '';
+    $('eu').value = r ? (r.url || '') : ''; $('eo').value = r ? (r.note || '') : '';
+    say('eMsg', ''); $('fEnt').hidden = false; $('fPw').hidden = true; $('foot').hidden = true; $('list').hidden = true; $('q').parentNode.hidden = true;
+    $('en').focus();
+  }
+  function closeForms() { $('fEnt').hidden = true; $('fPw').hidden = true; $('foot').hidden = false; $('list').hidden = false; $('q').parentNode.hidden = false; editing = null; }
+  $('bAdd').addEventListener('click', function () { openForm(null); });
+  $('eCancel').addEventListener('click', closeForms);
+  $('eGen').addEventListener('click', function () {
+    var sets = ['abcdefghijkmnpqrstuvwxyz', 'ABCDEFGHJKLMNPQRSTUVWXYZ', '23456789', '!@#$%&*?-_+='], all = sets.join(''), out = [], rnd = crypto.getRandomValues(new Uint32Array(24));
+    sets.forEach(function (s, i) { out.push(s.charAt(rnd[i] % s.length)); });
+    for (var i = 4; i < 20; i++) out.push(all.charAt(rnd[i] % all.length));
+    for (var j = out.length - 1; j > 0; j--) { var k = rnd[(j + 4) % 24] % (j + 1); var t = out[j]; out[j] = out[k]; out[k] = t; }
+    $('ep').value = out.join(''); $('ep').classList.add('show');
+  });
+  $('fEnt').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var name = $('en').value.trim(), pw = $('ep').value;
+    if (!name) { say('eMsg', 'Scrivi il nome del servizio.', 'err'); return; }
+    if (!pw) { say('eMsg', 'Scrivi la password.', 'err'); return; }
+    var rec = { id: editing ? editing.id : uid(), name: name, email: $('ee').value.trim(), password: pw, url: $('eu').value.trim(), note: $('eo').value.trim() };
+    var prev = S.items;
+    S.items = editing ? S.items.map(function (x) { return x.id === editing.id ? rec : x; }) : S.items.concat([rec]);
+    $('eSave').disabled = true; say('eMsg', 'Salvo…');
+    persist().then(function () { closeForms(); paint(); toast('Salvato'); }).catch(function (e) { S.items = prev; say('eMsg', e.message, 'err'); }).then(function () { $('eSave').disabled = false; });
+  });
+
+  // ---------- cambio password principale ----------
+  $('bPw').addEventListener('click', function () { say('pMsg', ''); $('fPw').hidden = false; $('fEnt').hidden = true; $('foot').hidden = true; $('list').hidden = true; $('q').parentNode.hidden = true; $('np1').focus(); });
+  $('pCancel').addEventListener('click', closeForms);
+  $('fPw').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var a = $('np1').value, b = $('np2').value;
+    if (a.length < 12) { say('pMsg', 'Usa almeno 12 caratteri.', 'err'); return; }
+    if (a !== b) { say('pMsg', 'Le due password non coincidono.', 'err'); return; }
+    var old = { key: S.key, salt: S.salt }, salt = crypto.getRandomValues(new Uint8Array(16));
+    $('pSave').disabled = true; say('pMsg', 'Cifro di nuovo…');
+    derive(a, salt, S.it).then(function (k) { S.key = k; S.salt = salt; return persist(); })
+      .then(function () { $('np1').value = ''; $('np2').value = ''; closeForms(); toast('Password cambiata'); })
+      .catch(function (e) { S.key = old.key; S.salt = old.salt; say('pMsg', e.message, 'err'); })
+      .then(function () { $('pSave').disabled = false; });
+  });
+
+  // ---------- creazione, sblocco, blocco ----------
+  $('fSetup').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var a = $('sp1').value, b = $('sp2').value;
+    if (a.length < 12) { say('sMsg', 'Usa almeno 12 caratteri.', 'err'); return; }
+    if (a !== b) { say('sMsg', 'Le due password non coincidono.', 'err'); return; }
+    $('sGo').disabled = true; say('sMsg', 'Preparo la cifratura…');
+    var salt = crypto.getRandomValues(new Uint8Array(16));
+    derive(a, salt, IT).then(function (k) { S.key = k; S.salt = salt; S.it = IT; S.items = []; S.version = 0; return persist(); })
+      .then(function () { $('sp1').value = ''; $('sp2').value = ''; say('sMsg', ''); show('vOpen'); paint(); startTimer(); })
+      .catch(function (e) { S.key = null; say('sMsg', e.message, 'err'); })
+      .then(function () { $('sGo').disabled = false; });
+  });
+  $('fLock').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var pw = $('lp').value;
+    if (!pw) { say('lMsg', 'Inserisci la password.', 'err'); return; }
+    $('lGo').disabled = true; say('lMsg', 'Controllo…');
+    api('GET').then(function (j) {
+      if (!j.exists) { $('lp').value = ''; init(); throw new Error('Il registro non esiste ancora.'); }
+      var o = JSON.parse(j.blob);
+      return derive(pw, unb64(o.salt), o.it).then(function (k) {
+        return openBlob(k, j.blob).then(function (data) {
+          S.key = k; S.salt = unb64(o.salt); S.it = o.it; S.version = j.version; S.items = (data && data.items) || []; S.exists = true;
+          fails = 0; $('lp').value = ''; say('lMsg', ''); show('vOpen'); paint(); startTimer();
+        }, function () {
+          fails++; var wait = Math.min(30, Math.pow(2, fails)); throw Object.assign(new Error('Password non corretta. Riprova tra ' + wait + ' secondi.'), { wait: wait });
+        });
+      });
+    }).catch(function (e) {
+      say('lMsg', e.message, 'err');
+      var w = (e && e.wait) || 0;
+      setTimeout(function () { $('lGo').disabled = false; }, w * 1000);
+      if (!w) $('lGo').disabled = false;
+    });
+  });
+  $('bLock').addEventListener('click', lock);
+
+  function init() {
+    show('vLoad');
+    api('GET').then(function (j) {
+      if (j.table === false) { $('vSetupHint').hidden = false; $('vLoad').innerHTML = '<p class="hint">Pagina non ancora attiva.</p>'; return; }
+      if (!j.exists) show('vSetup'); else show('vLock');
+    }).catch(function (e) { $('vLoad').innerHTML = ''; $('vLoad').appendChild(el('p', 'hint', e.message)); });
+  }
+  if (!window.crypto || !window.crypto.subtle) { $('vLoad').innerHTML = '<p class="hint">Questo browser non supporta la cifratura: apri la pagina in HTTPS con un browser aggiornato.</p>'; return; }
+  init();
+})();
+</script>
+</body>
+</html>
