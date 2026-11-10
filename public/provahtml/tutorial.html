@@ -671,7 +671,8 @@ var fl=document.getElementById('ftlogo'),lg=document.querySelector('.logo');if(f
 var SEC=[{id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
 {id:'medico',n:'Studi sanitari',e:'Dentisti, fisioterapisti, psicologi',ic:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'},
 {id:'sport',n:'Centro sportivo',e:'Tennis, padel, calcetto',ic:'<ellipse cx="14.5" cy="9.5" rx="5.5" ry="7" transform="rotate(40 14.5 9.5)"/><path d="M10.6 13.4L4 20"/><circle cx="19" cy="19" r="1.6"/>'},
-{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'}];
+{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'},
+{id:'personal',n:'Personal trainer',e:'Coaching e pacchetti di ingressi',ic:'<path d="M2 12h1"/><path d="M6 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/><path d="M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M9 12h6"/><path d="M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1z"/><path d="M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><path d="M22 12h-1"/>'}];
 window.TU_SEC=SEC;
 var w=document.getElementById('tuw'),nav=document.getElementById('tuNav'),dd=document.getElementById('tuDd');if(!w||!nav||!dd)return;
 dd.innerHTML=SEC.map(function(s){return '<button type="button" role="menuitem" data-id="'+s.id+'"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+s.ic+'</svg></span><span><b>'+s.n+'</b><small>'+s.e+'</small></span></button>'}).join('');
@@ -687,7 +688,8 @@ var SEC=[
 {id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
 {id:'medico',n:'Studi sanitari',e:'Dentisti, fisioterapisti, psicologi',ic:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'},
 {id:'sport',n:'Centro sportivo',e:'Tennis, padel, calcetto',ic:'<ellipse cx="14.5" cy="9.5" rx="5.5" ry="7" transform="rotate(40 14.5 9.5)"/><path d="M10.6 13.4L4 20"/><circle cx="19" cy="19" r="1.6"/>'},
-{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'}];
+{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'},
+{id:'personal',n:'Personal trainer',e:'Coaching e pacchetti di ingressi',ic:'<path d="M2 12h1"/><path d="M6 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/><path d="M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M9 12h6"/><path d="M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1z"/><path d="M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><path d="M22 12h-1"/>'}];
 var PP=[
 {dk:[['d1',960,561],['d2',868,676],['d3',924,668],['d4',924,641],['d5',924,601],['d6',924,560],['d7',924,760]],l:'Iscriviti',k:'Attivo in pochi minuti',s:'Dall\'email all\'agenda pronta: tutti i passi, fino alla fine.',fr:[
  ['r1','Crea l\'account','Email, telefono e password',195,720],['r2','Scegli il settore','Il tipo di attività decide le domande',195,808],['r3','Dai un nome all\'attività','Compare sulla pagina di prenotazione',250,808],['r4','Aggiungi i servizi','Nome, durata e prezzo',250,808],['r5','Indica gli orari','Giorni e orari in cui ricevi',250,808],['r6','Imposta le regole','Anticipo, preavviso e annullamenti',250,808],['r7','Controlla e apri l\'agenda','Tutto pronto',250,808]]},
@@ -756,10 +758,10 @@ root.addEventListener('click',function(e){var r=e.target.closest('.tu-row');if(!
  if(TAB>=0)setTimeout(function(){var bx=r.nextElementSibling;if(!bx)return;var need=bx.getBoundingClientRect().bottom-(window.innerHeight-12),rt=r.getBoundingClientRect().top-8;if(need>0&&rt>0)window.scrollBy({top:Math.min(need,rt),behavior:'smooth'})},120)});
 function build(){setP(CUR);root.innerHTML='';S.forEach(function(s){s.stop()});S=[];P.forEach(function(_,i){S.push(Sec(i))});rows();TAB=-1;applyTab()}
 
-var INTRO={persona:'Guarda come si parte, passo dopo passo.',medico:'Guarda come si parte, passo dopo passo.',sport:'Guarda come si parte, passo dopo passo.',domicilio:'Guarda come si parte, passo dopo passo.'};
+var INTRO={persona:'Guarda come si parte, passo dopo passo.',medico:'Guarda come si parte, passo dopo passo.',sport:'Guarda come si parte, passo dopo passo.',domicilio:'Guarda come si parte, passo dopo passo.',personal:'Guarda come si parte, passo dopo passo.'};
 function show(id,push){var s=SEC.filter(function(x){return x.id==id})[0]||SEC[0];id=s.id;CUR=id;
  document.getElementById('tuH1').textContent=s.n;document.title='Tutorial · '+s.n+' · Prenolia';
- build()
+ if(id!=='persona'&&!CFS[id]){S.forEach(function(x){x.stop()});S=[];root.innerHTML='<div style="padding:56px 0;text-align:center;color:var(--muted);font-size:17px;line-height:1.6">Le schermate di questo tutorial sono in preparazione.</div>'}else build()
  if(push)try{history.replaceState(null,'','/provahtml/tutorial?s='+id)}catch(e){}}
 window.TU_PICK=function(id){if(window.TU_CLOSE)window.TU_CLOSE();var nvEl=document.getElementById('nv'),bg=document.getElementById('bgr');if(nvEl&&nvEl.classList.contains('open')){nvEl.classList.remove('open');if(bg)bg.setAttribute('aria-expanded','false')}show(id,true);window.scrollTo({top:0,behavior:'smooth'})};
 var mqL=function(){build()};MQ.addListener?MQ.addListener(mqL):MQ.addEventListener('change',mqL);

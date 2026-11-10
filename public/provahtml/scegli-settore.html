@@ -26,7 +26,8 @@ h1{font-size:clamp(30px,9vw,40px);line-height:1.05;letter-spacing:-.045em;font-w
 var SEC=[{id:'persona',n:'Servizi alla persona',e:'Parrucchieri, barbieri, estetiste',ic:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>'},
 {id:'medico',n:'Studi sanitari',e:'Dentisti, fisioterapisti, psicologi',ic:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>'},
 {id:'sport',n:'Centro sportivo',e:'Tennis, padel, calcetto',ic:'<ellipse cx="14.5" cy="9.5" rx="5.5" ry="7" transform="rotate(40 14.5 9.5)"/><path d="M10.6 13.4L4 20"/><circle cx="19" cy="19" r="1.6"/>'},
-{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'}];
+{id:'domicilio',n:'Servizi a domicilio',e:'Ripetizioni, idraulici, elettricisti',ic:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-4.5v-6h-7v6H4a1 1 0 0 1-1-1z"/>'},
+{id:'personal',n:'Personal trainer',e:'Coaching e pacchetti di ingressi',ic:'<path d="M2 12h1"/><path d="M6 8H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/><path d="M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M9 12h6"/><path d="M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1a1 1 0 0 0-1 1z"/><path d="M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><path d="M22 12h-1"/>'}];
 document.getElementById('l').innerHTML=SEC.map(function(s){return '<a class="c" href="/provahtml/tutorial?s='+s.id+'"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+s.ic+'</svg></span><span><b>'+s.n+'</b><small>'+s.e+'</small></span><i class="ar"></i></a>'}).join('');
 </script><script src="/cookie-notice.js" defer></script>
 </body></html>
