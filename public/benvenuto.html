@@ -878,7 +878,7 @@ function render(){
     var si=sportInfo(),isC=si&&si[1]==="calcio";
     if(S.cph!==2||!S.courts.length){
       if(!S.cn)S.cn=Math.max(1,S.courts.length);
-      v.appendChild(head(lab,"Quanti campi hai?","Poi compili un campo alla volta: nome, prezzo e poco altro."));
+      v.appendChild(head(lab,"Quanti campi hai?","Poi compili un campo alla volta, una domanda per volta."));
       var sc0=h("div",{class:"card cnt"});
       var mn=h("button",{class:"chip rnd",type:"button","aria-label":"Un campo in meno",text:"−",onclick:function(){S.cn=Math.max(1,S.cn-1);render()}});
       var pl=h("button",{class:"chip rnd",type:"button","aria-label":"Un campo in più",text:"+",onclick:function(){S.cn=Math.min(30,S.cn+1);render()}});
@@ -898,35 +898,47 @@ function render(){
           h("span",{class:"cn",text:(c.done?"✓ ":"")+courtName(c)}),h("span",{class:"cd",text:pp.join(" · ")}),h("span",{class:"ce",text:c.done?"Modifica":"Apri"})]);
         v.appendChild(sm);return}
       var cd=h("div",{class:"card"+(S.flash!=null&&idx===S.oc?" enter":"")});
-      var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
-      top.appendChild(ni);
-      if(S.courts.length>1)top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.cn=S.courts.length;S.oc=S.courts.findIndex(function(x){return!x.done});render()}}));
-      cd.appendChild(top);
-      if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
-      var pr=h("div",{class:"times"});
-      if(!partySport()){
-        var p1=h("input",{class:"inp",value:c.pg,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo del campo in euro"});p1.oninput=function(){c.pg=p1.value;c.pm=p1.value};
-        pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),p1]));
-        cd.appendChild(h("label",{text:"Prezzo per ogni prenotazione (facoltativo)"}));cd.appendChild(pr);
+      var ph=c.ph||0,PH=5;
+      var Q=function(t,sub){cd.appendChild(h("b",{text:t,style:"font-size:1.15rem;display:block"}));if(sub)cd.appendChild(h("small",{text:sub,style:"display:block;color:var(--muted);margin-top:-4px"}))};
+      var nxt=function(){c.ph=ph+1;render()};
+      if(ph===0){
+        Q("Come si chiama il campo?");
+        var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:c.n,placeholder:"es. Campo 1",maxlength:"50","aria-label":"Nome del campo"});ni.oninput=function(){c.n=ni.value};
+        top.appendChild(ni);
+        if(S.courts.length>1)top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il campo",text:"×",onclick:function(){S.courts.splice(idx,1);S.cn=S.courts.length;S.oc=S.courts.findIndex(function(x){return!x.done});render()}}));
+        cd.appendChild(top);
+        if(isC){cd.appendChild(h("label",{text:"Formato"}));var fc=h("div",{class:"chips"});["5","7","11"].forEach(function(f){fc.appendChild(chip("A "+f,c.fmt===f,function(){c.fmt=f;render()}))});cd.appendChild(fc)}
+      }else if(ph===1){
+        var pr=h("div",{class:"times"});
+        if(!partySport()){
+          Q("Quanto costa ogni prenotazione?","Facoltativo: puoi lasciarlo vuoto.");
+          var p1=h("input",{class:"inp",value:c.pg,placeholder:"Prezzo",inputmode:"decimal","aria-label":"Prezzo del campo in euro"});p1.oninput=function(){c.pg=p1.value;c.pm=p1.value};
+          pr.appendChild(h("div",{class:"eur",style:"flex:1"},[h("span",{text:"€"}),p1]));cd.appendChild(pr);
+        }else{
+          Q("Quanto costa a giocatore all'ora?","Facoltativo: puoi lasciarlo vuoto.");
+          var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
+          var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
+          pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pm])]));pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Non soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pg])]));cd.appendChild(pr)}
+      }else if(ph===2){
+        Q("Che superficie ha?","Facoltativo.");
+        if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});cd.appendChild(sc)}
+        else{var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};cd.appendChild(sfi)}
+      }else if(ph===3){
+        Q("Il campo è coperto?");
+        var cc9=h("div",{class:"chips"});cc9.appendChild(chip("Sì",!!c.indoor,function(){c.indoor=true;render()}));cc9.appendChild(chip("No",!c.indoor,function(){c.indoor=false;render()}));cd.appendChild(cc9);
       }else{
-      var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
-      var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
-      pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pm])]));pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Non soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pg])]));
-      cd.appendChild(h("label",{text:"Prezzo a giocatore all'ora (facoltativo)"}));cd.appendChild(pr)}
-      if(!c.more){var mb=h("button",{class:"chip",type:"button",style:"justify-self:start;text-align:left",text:[c.surf,c.indoor?"coperto":"",(c.d||60)+" min"].filter(Boolean).join(" · ")+" — Modifica"});mb.onclick=function(){c.more=true;render()};cd.appendChild(mb)}
-      else{var dt=h("div",{class:"dets"});
-        dt.appendChild(h("label",{text:"Superficie (facoltativa)"}));
-        if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});dt.appendChild(sc)}
-        else{var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};dt.appendChild(sfi)}
-        var lc=h("label",{class:"tgl"}),cb2=h("input",{type:"checkbox"});cb2.checked=c.indoor;cb2.onchange=function(){c.indoor=cb2.checked};lc.appendChild(cb2);lc.appendChild(document.createTextNode("Campo coperto"));
-        var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};
-        dt.appendChild(h("div",{class:"times cov"},[lc,field("Durata di ogni prenotazione",dsel)]));cd.appendChild(dt)}
-
+        Q("Quanto dura ogni prenotazione?");
+        var dc9=h("div",{class:"chips"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){dc9.appendChild(chip(m+" min",c.d==m,function(){c.d=m;render()}))});cd.appendChild(dc9);
+      }
       var more=S.courts.some(function(x,j){return j!==idx&&!x.done});
-      var an=h("button",{class:"chip addnext",type:"button",onclick:function(){if(cd.classList.contains("closing"))return;if(!String(c.n).trim()){S.err="Dai un nome al campo.";render();return}
-        var bad=[c.pm,c.pg].some(function(q){q=String(q).trim().replace(",",".");return q!==""&&(!isFinite(Number(q))||Number(q)<0)});if(bad){S.err="Controlla il prezzo: scrivi solo numeri, oppure lascialo vuoto.";render();return}
-        S.err="";var hh0=cd.offsetHeight;cd.style.height=hh0+"px";cd.style.overflow="hidden";cd.getBoundingClientRect();cd.classList.add("closing");cd.style.height="64px";setTimeout(function(){c.done=true;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},1000)},460)}});
-      an.appendChild(h("span",{text:more?"Salva e passa al campo successivo":"Salva campo"}));cd.appendChild(an);
+      var last=ph===PH-1;
+      var an=h("button",{class:"chip addnext",type:"button",onclick:function(){if(cd.classList.contains("closing"))return;
+        if(ph===0&&!String(c.n).trim()){S.err="Dai un nome al campo.";render();return}
+        var bad=ph===1&&[c.pm,c.pg].some(function(q){q=String(q).trim().replace(",",".");return q!==""&&(!isFinite(Number(q))||Number(q)<0)});if(bad){S.err="Controlla il prezzo: scrivi solo numeri, oppure lascialo vuoto.";render();return}
+        S.err="";if(!last){nxt();return}
+        var hh0=cd.offsetHeight;cd.style.height=hh0+"px";cd.style.overflow="hidden";cd.getBoundingClientRect();cd.classList.add("closing");cd.style.height="64px";setTimeout(function(){c.done=true;c.ph=0;var nx2=S.courts.findIndex(function(x,j){return j>idx&&!x.done});if(nx2<0)nx2=S.courts.findIndex(function(x){return!x.done});S.oc=nx2;S.flash=idx;render();setTimeout(function(){S.flash=null},1000)},460)}});
+      an.appendChild(h("span",{text:last?(more?"Salva e passa al campo successivo":"Salva campo"):"Avanti"}));
+      if(ph>0){var bk=h("button",{class:"chip",type:"button",text:"‹ Indietro",onclick:function(){c.ph=ph-1;S.err="";render()}});cd.appendChild(h("div",{class:"times"},[bk,h("div",{style:"flex:1"},[an])]))}else cd.appendChild(an);
       v.appendChild(cd)});
     v.appendChild(h("p",{class:"ready"},[h("b",{text:nD+" di "+S.courts.length}),allD?" campi compilati. Premi Avanti per continuare.":" campi compilati. Avanti si accende alla fine."]));
     }
