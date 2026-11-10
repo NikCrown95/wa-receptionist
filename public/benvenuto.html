@@ -731,10 +731,10 @@ function render(){
   }
   if(k==="team"){
     if(S.tph===0){
-      v.appendChild(head(lab,"Quante persone lavorano?","Conta anche te. Se lavori da solo, lascia 1."));
+      v.appendChild(head(lab,"Quanti collaboratori hai?","Non contare te. Se lavori da solo, lascia 0."));
       var ng=h("div",{style:"display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"});
-      for(var q=1;q<=8;q++)(function(q){var nbt=chip(String(q),S.tn===q,function(){setTn(q)});nbt.style.cssText="min-height:52px;font-size:18px;justify-content:center";ng.appendChild(nbt)})(q);
-      v.appendChild(ng);v.appendChild(h("p",{class:"hint",text:"Conta anche te. Se lavori da solo, lascia 1."}));
+      for(var q=0;q<=7;q++)(function(q){var nbt=chip(String(q),S.tn===q+1,function(){setTn(q+1)});nbt.style.cssText="min-height:52px;font-size:18px;justify-content:center";ng.appendChild(nbt)})(q);
+      v.appendChild(ng);v.appendChild(h("p",{class:"hint",text:"Non contare te. Se lavori da solo, lascia 0."}));
       if(S.tn>1){var oc=h("div",{class:"card"});oc.appendChild(field("Il tuo nome",inp(S.owner,"Il tuo nome",function(x){S.owner=x},{maxlength:"40",autocomplete:"given-name"})));v.appendChild(oc)}
     }else{
       var tmb=S.team[S.tph-1];
