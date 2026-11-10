@@ -290,3 +290,13 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 :root:root #ptMx .mzRow>.mzA .mzRn svg{width:14px;height:14px}
 :root:root #ptMx .mzRow>.mzA .mzRn:active{background:color-mix(in srgb,var(--accent) 18%,transparent)!important}
 @media(max-width:620px){:root:root #ptMx .mzRow>.mzA .mzRn{height:38px}}
+
+/* Nuovo iscritto: codice di accesso generato da solo, al passo 2 */
+.ptNm .nmCd{margin-top:14px}
+.ptNm .nmCd label{display:block;margin:0 0 6px 3px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.ptNm .nmCr{display:flex;gap:8px}
+.ptNm .nmCr input{flex:1;min-width:0;width:100%;box-sizing:border-box;height:50px;padding:0 16px;border-radius:15px;border:1.5px solid var(--line2,var(--line));background:var(--card2);color:var(--ink);font:inherit;font-size:1.05rem;font-weight:700;letter-spacing:.08em;outline:0}
+.ptNm .nmCr input:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+.ptNm .nmCr button{flex:none;height:50px;padding:0 16px;border-radius:15px;border:1.5px solid var(--line2,var(--line));background:var(--card2);color:var(--accent);font:inherit;font-weight:700;cursor:pointer}
+.ptNm .nmCd small{display:block;margin:6px 3px 0;color:var(--muted);font-size:.8rem;line-height:1.35}
+.ptNm .nmPk{max-height:30vh}
