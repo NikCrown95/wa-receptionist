@@ -804,8 +804,8 @@ function render(){
     pwrap.appendChild(h("div",{class:"lh2"},[h("span",{text:"Pacchetti aggiunti"+(S.plans.length?" · "+S.plans.length:"")})]));
     var pad=h("div",{class:"added"});pwrap.appendChild(pad);
     if(!S.plans.length)pad.appendChild(h("p",{class:"empty",text:"I pacchetti che aggiungi compaiono qui."}));
-    S.plans.forEach(function(x,i){var r=h("div",{class:"rr sc",style:"--c:"+SCOL[i%SCOL.length]},[h("div",null,[h("b",{text:x.n.trim()}),h("small",{text:planWho(x)+" · "+planLine(x)})]),h("span",{class:"rv"+(String(x.p).trim()===""?" dim":""),text:String(x.p).trim()===""?"prezzo da definire":String(x.p).trim().replace(".",",")+" €"})]);
-      r.appendChild(h("button",{class:"edit",type:"button",text:"Togli",onclick:function(){S.plans.splice(i,1);render()}}));pad.appendChild(r)});
+    S.plans.forEach(function(x,i){var pr=String(x.p).trim(),r=h("div",{class:"sr",style:"--c:"+SCOL[i%SCOL.length]},[h("div",{class:"mid"},[h("b",{text:x.n.trim()}),h("span",{text:planWho(x)+" · "+planLine(x)})]),pr===""?null:h("span",{class:"pr",text:pr.replace(".",",")+" €"})]);
+      r.appendChild(h("button",{class:"srm",type:"button","aria-label":"Rimuovi",text:"×",onclick:function(ev){ev.stopPropagation();S.plans.splice(i,1);render()}}));pad.appendChild(r)});
     var sgs=[];if(false)sgs.push(["Pacchetto 10 sessioni","entries","10","personal"]);if(false)sgs.push(["Abbonamento mensile","time","30","tutti"]);
     sgs=sgs.filter(function(g){return!S.plans.some(function(x){return x.n===g[0]})&&S.pd.n!==g[0]});
     if(sgs.length){var sb7=h("div",{class:"sugs"});sb7.appendChild(h("span",{class:"stepl",text:"Tocca per compilare"}));var ch7=h("div",{class:"chips"});sgs.forEach(function(g){ch7.appendChild(chip("+ "+g[0],false,function(){S.pd={n:g[0],kind:g[1],q:g[2],p:S.pd.p||"",c:g[3]};render()}))});sb7.appendChild(ch7);pwrap.appendChild(sb7)}
