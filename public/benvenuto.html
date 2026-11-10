@@ -928,7 +928,7 @@ function render(){
         var cc9=h("div",{class:"chips"});cc9.appendChild(chip("Sì",!!c.indoor,function(){c.indoor=true;render()}));cc9.appendChild(chip("No",!c.indoor,function(){c.indoor=false;render()}));cd.appendChild(cc9);
       }else{
         Q("Quanto dura ogni prenotazione?");
-        var dc9=h("div",{class:"chips"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){dc9.appendChild(chip(m+" min",c.d==m,function(){c.d=m;render()}))});cd.appendChild(dc9);
+        var dsel=h("select",{class:"inp","aria-label":"Durata della prenotazione"});(CDURS.indexOf(c.d)<0?CDURS.concat([c.d]).sort(function(a,b){return a-b}):CDURS).forEach(function(m){var o=h("option",{value:m,text:m+" min"});if(m==c.d)o.selected=true;dsel.appendChild(o)});dsel.onchange=function(){c.d=+dsel.value};cd.appendChild(dsel);
       }
       var more=S.courts.some(function(x,j){return j!==idx&&!x.done});
       var last=ph===PH-1;
