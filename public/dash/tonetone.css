@@ -41,4 +41,19 @@ html body .regTile{background:linear-gradient(145deg,color-mix(in srgb,var(--c) 
 html body .regRow.x .regTile{background:var(--card2);color:var(--muted)}
 html body .regCh.pg i{background:var(--tt4)}html body .regCh.wc i{background:var(--tt3)}
 html body .regCh.pg i svg,html body .regCh.wc i svg{stroke:#04161C}
+
+/* ---- sottomenu di Impostazioni: schede, campi spaziati, pulsanti nella palette ---- */
+html body #panelOther .stCard{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:18px;border-color:color-mix(in srgb,var(--tt1) 14%,var(--line))}
+html body #panelOther .stCard>h4{margin:0}
+html body #panelOther .sfField{gap:8px}
+html body #panelOther .sfField label{font-size:.84rem;font-weight:700;color:var(--ink)}
+html body #panelOther .stF .set-input,html body #panelOther select.set-input,html body #panelOther .sfField .set-input{min-height:50px;border-radius:14px;border:1px solid color-mix(in srgb,var(--tt1) 16%,var(--line2))}
+html body #panelOther textarea.set-input{padding:12px 14px;line-height:1.45}
+html body #panelOther .set-input:focus,html body #panelOther select.set-input:focus{border-color:var(--tt1);box-shadow:0 0 0 3px color-mix(in srgb,var(--tt1) 18%,transparent)}
+html body #panelOther .sfField small,html body #panelOther .stHint{font-size:.8rem;line-height:1.45;color:var(--muted)}
+html body #panelOther .stBtn:not(.ghost):not(.danger):not(.outline-danger){min-height:52px;border-radius:15px;color:#04161C;background:linear-gradient(145deg,color-mix(in srgb,var(--tt1) 88%,#fff),color-mix(in srgb,var(--tt1) 78%,#000));box-shadow:0 8px 18px color-mix(in srgb,var(--tt1) 22%,transparent)}
+html body #panelOther .stBtn.ghost{background:color-mix(in srgb,var(--tt1) 13%,var(--card));color:var(--tt6);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tt1) 35%,var(--line))}
+html body #panelOther #biLogoDel{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line2)}
+html body #panelOther .stBack{border-color:color-mix(in srgb,var(--tt1) 30%,var(--line));color:var(--tt6)}
+html body #panelOther .stMsg{color:var(--tt6)}
 }
