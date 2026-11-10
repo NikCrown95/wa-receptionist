@@ -478,7 +478,7 @@ var TOKEN=(new URLSearchParams(location.search).get("t")||"").trim();
 var API="/api/agenda?settings=1&t="+encodeURIComponent(TOKEN);
 var S={rl:{adv:null,notice:null,cancel:null,travel:null},sportLbl:"",courts:[],open_to:"all",fit:false,ok1:false,ok2:false,v:null,online:false,half:false,step:0,nome:"",logo:"",mestiere:"Parrucchiere",altro:"",items:[],plans:[],pd:{n:"",kind:"entries",q:"",p:"",c:null},cities:[],err:"",busy:false,ready:false,
   pause:{on:false,from:"13:00",to:"14:30"},hours:DAYN.map(function(_,i){return{on:i>=1&&i<=5,from:"09:00",to:"19:00"}})};
-S.tm=null;S.owner="";S.team=[];S.td={n:"",sv:[]};
+S.tm="solo";S.owner="";S.team=[];S.td={n:"",sv:[]};S.tn=1;S.tph=0;
 function flow(){var v=S.v;if(v==="persona")return["tipo","attivita","servizi","team","orari","prenota","fine"];
   if(v==="domicilio")return["tipo","attivita","dove","servizi","zona","orari","prenota","fine"];
   if(v==="palestra"&&S.gk==="pt")return["tipo","attivita","offerta","pacchetti","orari","iscritti","prenota","fine"];
@@ -513,7 +513,9 @@ function chip(t,pressed,fn){var b=h("button",{class:"chip",type:"button","aria-p
 function addMember(){var d=S.td;if(!String(d.n).trim())return"Scrivi il nome del collaboratore.";
   var sv=d.sv.filter(function(x){return S.items.indexOf(x)>=0});if(!sv.length)return"Scegli almeno un servizio per "+d.n.trim()+".";
   S.team.push({n:d.n.trim(),sv:sv});S.td={n:"",sv:[]};return""}
-function go(n){S.step=Math.max(0,S.step+n);S.err="";render()}
+function go(n){S.step=Math.max(0,S.step+n);S.err="";if(flow()[S.step]==="team")S.tph=n>0?0:Math.max(0,S.tn-1);render()}
+function setTn(n){S.tn=n;S.tm=n>1?"team":"solo";while(S.team.length<n-1)S.team.push({n:"",sv:[]});S.team.length=Math.max(0,n-1);S.err="";render()}
+function teamPhaseErr(){if(S.tn<2)return"";if(S.tph===0)return S.owner.trim().length<2?"Scrivi il tuo nome.":"";var m=S.team[S.tph-1];if(!m||m.n.trim().length<2)return"Scrivi il nome del collaboratore.";if(!m.sv.some(function(x){return S.items.indexOf(x)>=0}))return"Scegli almeno un servizio per "+m.n.trim()+".";return""}
 function tradeName(){return S.mestiere==="Altro"?S.altro.trim():S.mestiere}
 function rlKeys(){return S.v==="domicilio"?["adv","notice","cancel","travel"]:["adv","notice","cancel"]}
 function rlDone(){return rlKeys().every(function(x){return S.rl[x]!==null})}
@@ -534,9 +536,8 @@ function validate(k){
     if(S.courts.some(function(c){return!c.done}))return"Salva tutti i campi: premi «Salva» su quello aperto.";
     if(S.courts.some(function(c){return!c.n.trim()}))return"Dai un nome a ogni campo, oppure rimuovilo.";
     if(S.courts.some(function(c){return[c.pm,c.pg].some(function(p){p=String(p).trim().replace(",",".");return p!==""&&(!isFinite(Number(p))||Number(p)<0)})}))return"Controlla i prezzi: scrivi solo numeri, oppure lasciali vuoti."}
-  if(k==="team"){if(S.tm===null)return"Scegli se lavori da solo o con collaboratori.";
-    if(S.tm==="team"){if(S.owner.trim().length<2)return"Scrivi il tuo nome.";if(!S.team.length)return"Aggiungi almeno un collaboratore, oppure scegli «Lavoro da solo».";
-      var bad=S.team.filter(function(m){return!m.sv.some(function(x){return S.items.indexOf(x)>=0})})[0];if(bad)return"Scegli almeno un servizio per "+bad.n+"."}}
+  if(k==="team"&&S.tm==="team"){if(S.owner.trim().length<2)return"Scrivi il tuo nome.";
+    var bm=S.team.filter(function(m){return m.n.trim().length<2||!m.sv.some(function(x){return S.items.indexOf(x)>=0})})[0];if(bm)return bm.n.trim().length<2?"Scrivi il nome di ogni collaboratore.":"Scegli almeno un servizio per "+bm.n.trim()+"."}
   if(k==="privacy"&&!(S.ok1&&S.ok2))return"Per continuare spunta entrambe le caselle.";
   if(k==="zona"&&!S.cities.length)return"Aggiungi almeno una città dove vai a domicilio.";
   if(k==="dove"){whInit();if(!S.wh.casa)return"Scegli «A casa del cliente»: questa attività va dai clienti."}
@@ -657,7 +658,7 @@ function payload(){
       else base.hours.push({weekday:i+1,opens:d.from,closes:d.to})});
     return base}
   base.trade=tradeName().toLowerCase();
-  if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team")base.team={owner_name:S.owner.trim(),members:S.team.map(function(m){return{name:m.n,services:m.sv.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()})}})};
+  if((S.v==="persona"||S.v==="sanitario")&&S.tm==="team")base.team={owner_name:S.owner.trim(),members:S.team.map(function(m){return{name:m.n.trim(),services:m.sv.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()})}})};
   base.services=S.items.map(function(x){var md=S.v==="domicilio"?itModes(x):[];var modes=md.map(function(k){var q=mPrice(x,k);return{mode:k==="casa"?"domicilio":k,price_eur:q===""?null:Number(q)}});var p=String(x.p).trim().replace(",",".");var p1=modes.length?modes[0].price_eur:(p===""?null:Number(p));return{name:x.n.trim(),duration_min:x.d,price_eur:p1,at_customer_place:md.indexOf("casa")>=0,modes:modes}});
   base.hours=[];S.hours.forEach(function(d,i){if(!d.on)return;
     if(S.pause.on){base.hours.push({weekday:i+1,opens:d.from,closes:S.pause.from});base.hours.push({weekday:i+1,opens:S.pause.to,closes:d.to})}
@@ -690,7 +691,7 @@ function render(){
     var st=h("div",{class:"stack"});
     VERT.forEach(function(x){
       var b=h("button",{class:"opt",type:"button","aria-pressed":S.v===x[0]?"true":"false"},[h("span",{class:"ic"},[svg(x[0])]),h("span",null,[h("b",{text:x[1]}),h("span",{class:"d"},[h("span",{class:"dsk",text:x[2]}),h("span",{class:"mob",text:x[3]})])]),h("span",{class:"rd"})]);
-      b.onclick=function(){if(S.v!==x[0]){S.v=x[0];S.items=[];S.tm=null;S.team=[];S.td={n:"",sv:[]};if(x[0]==="campi"&&!S.hoursSet){S.hoursSet=true;S.hours=DAYN.map(function(){return{on:true,from:"08:00",to:"22:00"}})}S.mestiere=x[0]==="sanitario"?"Dentista":(x[0]==="domicilio"?"Idraulico":"Parrucchiere");S.altro=""}S.err="";render()};st.appendChild(b)});
+      b.onclick=function(){if(S.v!==x[0]){S.v=x[0];S.items=[];S.tm="solo";S.team=[];S.td={n:"",sv:[]};S.tn=1;S.tph=0;if(x[0]==="campi"&&!S.hoursSet){S.hoursSet=true;S.hours=DAYN.map(function(){return{on:true,from:"08:00",to:"22:00"}})}S.mestiere=x[0]==="sanitario"?"Dentista":(x[0]==="domicilio"?"Idraulico":"Parrucchiere");S.altro=""}S.err="";render()};st.appendChild(b)});
     v.appendChild(st);
   }
   if(k==="attivita"){
@@ -729,35 +730,21 @@ function render(){
       v.appendChild(mx)}
   }
   if(k==="team"){
-    v.appendChild(head(lab,"Chi lavora con te?","Se hai dei collaboratori, aggiungili e scegli cosa sa fare ognuno."));
-    var TO=[["solo","Lavoro da solo","Vai avanti, non serve altro"],["team","Ho dei collaboratori","Li aggiungi e scegli cosa fanno"]];
-    if(S.tm==="team"){var tch=h("div",{class:"chips"});TO.forEach(function(x){tch.appendChild(chip(x[1],S.tm===x[0],function(){S.tm=x[0];S.err="";render()}))});v.appendChild(tch)}
-    else{var stt=h("div",{class:"stack"});
-      TO.forEach(function(x){var b=h("button",{class:"opt nic",type:"button","aria-pressed":S.tm===x[0]?"true":"false"},[h("span",null,[h("b",{text:x[1]}),h("span",{class:"d",text:x[2]})]),h("span",{class:"rd"})]);
-        b.onclick=function(){S.tm=x[0];S.err="";render()};stt.appendChild(b)});
-      v.appendChild(stt)}
-    if(S.tm==="team"){
+    if(S.tph===0){
+      v.appendChild(head(lab,"Quante persone lavorano?","Conta anche te. Se lavori da solo, lascia 1."));
+      var ng=h("div",{style:"display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"});
+      for(var q=1;q<=8;q++)(function(q){var nbt=chip(String(q),S.tn===q,function(){setTn(q)});nbt.style.cssText="min-height:52px;font-size:18px;justify-content:center";ng.appendChild(nbt)})(q);
+      v.appendChild(ng);v.appendChild(h("p",{class:"hint",text:"Conta anche te. Se lavori da solo, lascia 1."}));
+      if(S.tn>1){var oc=h("div",{class:"card"});oc.appendChild(field("Il tuo nome",inp(S.owner,"Il tuo nome",function(x){S.owner=x},{maxlength:"40",autocomplete:"given-name"})));v.appendChild(oc)}
+    }else{
+      var tmb=S.team[S.tph-1];
+      v.appendChild(head(lab,"Collaboratore "+S.tph+" di "+(S.tn-1),"Come si chiama e cosa sa fare?"));
       var tc=h("div",{class:"card"});
-      tc.appendChild(field("Il tuo nome",inp(S.owner,"Il tuo nome",function(x){S.owner=x},{maxlength:"40",autocomplete:"given-name"})));
-      tc.appendChild(h("label",{text:"Nuovo collaboratore"}));
-      var mi=inp(S.td.n,"Nome del collaboratore",function(x){S.td.n=x},{maxlength:"40"});
-      mi.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();var e1=addMember();S.err=e1;render()}};
-      tc.appendChild(mi);
-      if(S.items.length){tc.appendChild(h("label",{text:"Cosa sa fare"}));
-        var sch=h("div",{class:"chips"});
-        S.items.forEach(function(it){var on=S.td.sv.indexOf(it)>=0;sch.appendChild(chip(it.n.trim()||"Senza nome",on,function(){var i=S.td.sv.indexOf(it);if(i>=0)S.td.sv.splice(i,1);else S.td.sv.push(it);S.err="";render()}))});
-        tc.appendChild(sch)}
-      tc.appendChild(h("button",{class:"chip addnext",type:"button",onclick:function(){var e2=addMember();S.err=e2;render()}},[h("span",{class:"pl",text:"+"}),h("span",{text:"Aggiungi collaboratore"})]));
-      v.appendChild(tc);
-      var tl=h("div",{class:"list"});
-      tl.appendChild(h("div",{class:"lh2"},[h("span",{text:"Collaboratori aggiunti"+(S.team.length?" · "+S.team.length:"")})]));
-      var ta=h("div",{class:"added"});tl.appendChild(ta);
-      if(!S.team.length)ta.appendChild(h("p",{class:"empty",text:"I collaboratori che aggiungi compaiono qui."}));
-      S.team.forEach(function(m,i){
-        var r=h("div",{class:"sr",style:"--c:"+SCOL[(i+1)%SCOL.length]},[h("div",{class:"mid"},[h("b",{text:m.n}),h("span",{text:m.sv.filter(function(x){return S.items.indexOf(x)>=0}).map(function(x){return x.n.trim()}).join(" · ")})])]);
-        r.appendChild(h("button",{class:"srm",type:"button","aria-label":"Rimuovi",text:"×",onclick:function(){S.team.splice(i,1);render()}}));
-        ta.appendChild(r)});
-      v.appendChild(tl)}
+      tc.appendChild(field("Nome",inp(tmb.n,"Nome del collaboratore",function(x){tmb.n=x},{maxlength:"40"})));
+      tc.appendChild(h("label",{text:"Cosa sa fare"}));
+      var sch=h("div",{class:"chips"});
+      S.items.forEach(function(it){var on=tmb.sv.indexOf(it)>=0;sch.appendChild(chip(it.n.trim()||"Senza nome",on,function(){var i=tmb.sv.indexOf(it);if(i>=0)tmb.sv.splice(i,1);else tmb.sv.push(it);S.err="";render()}))});
+      tc.appendChild(sch);v.appendChild(tc)}
   }
   if(k==="offerta"){
     v.appendChild(head(lab,"Sei una palestra o un personal trainer?","Scegli quello che ti descrive meglio. I tuoi iscritti prenotano da soli con il loro numero di telefono."));
@@ -959,7 +946,7 @@ function render(){
     function sec(title,stepName,body,count){
       var idx=flow().indexOf(stepName);
       var hd=h("div",{class:"sh"},[h("h3",{text:title}),count!=null?h("span",{class:"cnt",text:String(count)}):null]);
-      var eb=h("button",{class:"edit",type:"button",text:"Modifica"});eb.onclick=function(){S.step=idx;S.err="";render()};hd.appendChild(eb);
+      var eb=h("button",{class:"edit",type:"button",text:"Modifica"});eb.onclick=function(){S.step=idx;S.err="";if(flow()[idx]==="team")S.tph=0;render()};hd.appendChild(eb);
       return h("section",{class:"rcard"},[hd,body])}
     var fmtMin=function(m){return m>=60&&m%60===0?(m/60)+" h":m+" min"};
     if(S.v==="campi"){
@@ -1003,7 +990,7 @@ function render(){
   }
   if(S.err)v.appendChild(h("div",{class:"err",role:"alert",text:S.err}));
   var nav=h("div",{class:"nav"});
-  if(S.step>0)nav.appendChild(h("button",{class:"btn ghost",type:"button",text:"Indietro",onclick:function(){go(-1)}}));
+  if(S.step>0)nav.appendChild(h("button",{class:"btn ghost",type:"button",text:"Indietro",onclick:function(){if(k==="team"&&S.tph>0){S.tph--;S.err="";render()}else go(-1)}}));
   var last=k==="fine";
   var nb=h("button",{class:"btn",type:"button",text:S.busy?"Un attimo…":(last?"Apri la mia agenda":"Avanti")});if(S.busy)nb.disabled=true;if(k==="prenota"){if(rlDone())nb.classList.add("pulse");else nb.classList.add("off")}if(k==="campi"){var okc=S.cph===2&&S.courts.length&&S.courts.every(function(c){return c.done});if(S.cph===2&&!okc)nb.classList.add("off");if(okc)nb.classList.add("pulse")}
   nb.onclick=function(){
@@ -1012,7 +999,7 @@ function render(){
     if(k==="campi"&&S.cph!==2){var si9=sportInfo();while(S.courts.length<S.cn){var n9=S.courts.length+1,pv=S.courts[S.courts.length-1];S.courts.push({n:"Campo "+n9,fmt:"5",surf:pv?pv.surf:(si9&&si9[2][0]||""),indoor:pv?pv.indoor:false,d:si9?si9[3]:60,pm:"",pg:"",done:false})}S.courts.length=Math.min(S.courts.length,S.cn);S.cph=2;S.oc=S.courts.findIndex(function(c){return!c.done});if(S.oc<0)S.oc=0;S.err="";render();return}
     if(k==="pacchetti"&&S.pd&&String(S.pd.n).trim()){var pe2=planErr(S.pd);if(pe2){S.err=pe2;render();return}S.plans.push(S.pd);S.pd={n:"",kind:"entries",q:"",p:"",c:null}}
     if((k==="servizi"||k==="lezioni")&&S.draft&&String(S.draft.n).trim()){S.items.push(S.draft);S.draft=null}
-    if(k==="team"&&S.tm==="team"&&String(S.td.n).trim()){var em=addMember();if(em){S.err=em;render();return}}
+    if(k==="team"&&S.tm==="team"){var pe=teamPhaseErr();if(pe){S.err=pe;render();return}if(S.tph<S.tn-1){S.tph++;S.err="";render();return}}
     var e=validate(k);if(e){S.err=e;render();return}
     if(last){save();return}
     go(1)};
