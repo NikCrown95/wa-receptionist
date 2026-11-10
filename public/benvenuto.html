@@ -911,9 +911,10 @@ function render(){
       }else{
       var pm=h("input",{class:"inp",value:c.pm,placeholder:"Soci",inputmode:"decimal","aria-label":"Prezzo soci in euro"});pm.oninput=function(){c.pm=pm.value};
       var pg=h("input",{class:"inp",value:c.pg,placeholder:"Non soci",inputmode:"decimal","aria-label":"Prezzo non soci in euro"});pg.oninput=function(){c.pg=pg.value};
-      pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pm]));pr.appendChild(h("div",{class:"eur"},[h("span",{text:"€"}),pg]));
+      pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pm])]));pr.appendChild(h("div",{style:"flex:1;min-width:0"},[h("label",{text:"Non soci"}),h("div",{class:"eur"},[h("span",{text:"€"}),pg])]));
       cd.appendChild(h("label",{text:"Prezzo a giocatore all'ora (facoltativo)"}));cd.appendChild(pr)}
-      {var dt=h("div",{class:"dets"});
+      if(!c.more){var mb=h("button",{class:"chip",type:"button",style:"justify-self:start;text-align:left",text:[c.surf,c.indoor?"coperto":"",(c.d||60)+" min"].filter(Boolean).join(" · ")+" — Modifica"});mb.onclick=function(){c.more=true;render()};cd.appendChild(mb)}
+      else{var dt=h("div",{class:"dets"});
         dt.appendChild(h("label",{text:"Superficie (facoltativa)"}));
         if(si&&si[2].length){var sc=h("div",{class:"chips"});si[2].forEach(function(x){sc.appendChild(chip(x,c.surf===x,function(){c.surf=c.surf===x?"":x;render()}))});dt.appendChild(sc)}
         else{var sfi=h("input",{class:"inp",value:c.surf,placeholder:"es. Parquet",maxlength:"40","aria-label":"Superficie"});sfi.oninput=function(){c.surf=sfi.value};dt.appendChild(sfi)}
