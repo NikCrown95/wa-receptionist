@@ -2,6 +2,7 @@
   var host=document.getElementById('regBody');
   if(!host)return;
   var token=(new URLSearchParams(location.search).get('t')||'').trim();
+  var CK='liaReg:'+token.slice(0,16);
   var loadedOnce=false,busy=false,isGym=false;
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -20,14 +21,18 @@
   };
   CH.web=CH.selfservice;
 
-  function parts(date,tz,opt){
-    try{return new Intl.DateTimeFormat('it-IT',Object.assign({timeZone:tz},opt)).format(date);}catch(e){return new Intl.DateTimeFormat('it-IT',opt).format(date);}
+  var FM={};
+  function fmt(loc,tz,opt){
+    var k=loc+'|'+tz+'|'+JSON.stringify(opt);
+    if(FM[k])return FM[k];
+    var o=Object.assign({timeZone:tz},opt),f;
+    try{f=new Intl.DateTimeFormat(loc,o);}catch(e){f=new Intl.DateTimeFormat(loc,opt);}
+    return (FM[k]=f);
   }
+  function parts(date,tz,opt){return fmt('it-IT',tz,opt).format(date);}
   function dayKey(date,tz){
-    try{
-      var p=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
-      return p;
-    }catch(e){return date.toISOString().slice(0,10);}
+    try{return fmt('en-CA',tz,{year:'numeric',month:'2-digit',day:'2-digit'}).format(date);}
+    catch(e){return date.toISOString().slice(0,10);}
   }
   function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   function initials(n){
@@ -100,10 +105,14 @@
   function load(force){
     if(busy||!token)return;
     busy=true;
-    if(!loadedOnce)host.innerHTML='<div class="regMsg">Carico le prenotazioni…</div>';
+    if(!loadedOnce){
+      var c=null;try{c=JSON.parse(sessionStorage.getItem(CK)||'null');}catch(e){}
+      if(c&&c.items){isGym=!!c.gym;render(c);loadedOnce=true;}
+      else host.innerHTML='<div class="regMsg">Carico le prenotazioni…</div>';
+    }
     fetch('/api/agenda?t='+encodeURIComponent(token)+'&registry=1',{cache:'no-store'})
       .then(function(r){if(!r.ok)throw new Error('http');return r.json();})
-      .then(function(d){loadedOnce=true;isGym=!!d.gym;render(d);})
+      .then(function(d){loadedOnce=true;isGym=!!d.gym;try{sessionStorage.setItem(CK,JSON.stringify(d));}catch(e){}render(d);})
       .catch(fail)
       .then(function(){busy=false;});
   }
