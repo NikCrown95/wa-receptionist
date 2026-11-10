@@ -5,6 +5,7 @@
 
 const { getAccess, BOOKING_BLOCKED_MESSAGE } = require("../lib/access.js");
 const mail = require("../lib/mail.js");
+const rl = require("../lib/ratelimit.js");
 const { phoneProblem, emailProblem, clientSource } = require("../lib/validate.js");
 const promos = require("../lib/promos.js");
 const travel = require("../lib/travel.js");
@@ -606,6 +607,8 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === "POST") {
+      // Prenotazioni create da un solo dispositivo: massimo 12 ogni 10 minuti (contro i bot che riempiono l'agenda)
+      if (!(await rl.allow("book:ip:" + rl.ipOf(req), 12, 600000))) return res.status(429).json({ error: "Troppe richieste in poco tempo. Riprova tra qualche minuto." });
       const body = req.body || {};
       const service = biz.services.find((s) => s.id === body.service);
       if (!service) return res.status(400).json({ error: "Servizio non valido" });
