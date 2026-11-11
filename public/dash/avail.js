@@ -342,104 +342,191 @@
   function field(label, node, id) {
     var f = mk("div", "avField"); var l = mk("label", null, label); if (id) l.setAttribute("for", id); f.appendChild(l); f.appendChild(node); return f;
   }
-  function renderChi(box) {
-    var form = mk("div", "avCard");
-    form.appendChild(mk("h3", "avH", "Nuova chiusura"));
+  /* ---------- percorso guidato: nuova chiusura (Chi, Quando, Ore, Conferma) ---------- */
+  var W = { step: 0, who: "neg", days: [], per: false, anc: null, month: null, q: null, hf: null, ht: null, kind: "ferie", res: null, busy: false };
+  function wzReset() { W.step = 0; W.who = "neg"; W.days = []; W.per = false; W.anc = null; W.q = null; W.hf = null; W.ht = null; W.kind = "ferie"; W.res = null; W.busy = false; }
+  function wzRuns(days) {
+    var sorted = days.slice().sort(), runs = [], cur = null;
+    sorted.forEach(function (d) { if (cur && addDays(cur.to, 1) === d) cur.to = d; else { cur = { from: d, to: d }; runs.push(cur); } });
+    return runs;
+  }
+  function wzDaysText(days) { return wzRuns(days).map(function (r) { return plabel(r.from, r.to); }).join(" · "); }
+  function wzRange() {
+    var lo = 24, hi = 0;
+    (S.hours || []).forEach(function (h) { lo = Math.min(lo, Math.floor(m(String(h.opens).slice(0, 5)) / 60)); hi = Math.max(hi, Math.ceil(m(String(h.closes).slice(0, 5)) / 60)); });
+    if (lo >= hi) { lo = 8; hi = 20; }
+    return [lo, hi];
+  }
+  function wzWhoName() { var p = W.who === "neg" ? null : person(W.who); return p ? p.name : "Tutta l'attività"; }
+  function wzHoursText() {
+    if (W.who !== "neg") return "tutto il giorno";
+    if (W.q === "all") return "tutto il giorno";
+    if (W.hf == null) return "";
+    return "dalle " + W.hf + ":00 alle " + (W.ht + 1) + ":00";
+  }
+  function wzValid(key) {
+    if (key === "chi") return !!W.who;
+    if (key === "quando") return W.days.length > 0;
+    if (key === "ore") return W.who !== "neg" || W.q === "all" || W.hf != null;
+    return true;
+  }
+  function wzRun(host, n) {
+    if (W.busy) return;
+    var conflicts = 0, runs = wzRuns(W.days), run;
+    var full = W.who !== "neg" || W.q === "all";
+    if (!full && W.days.length > 31) { toast("Per le chiusure a ore scegli al massimo 31 giorni.", true); return; }
+    W.busy = true; drawWz(host);
+    var chain = function (list, fn) { return list.reduce(function (p, it) { return p.then(function () { return fn(it).then(function (r) { conflicts += (r && r.conflicts) || 0; }); }); }, Promise.resolve()); };
+    if (W.who === "neg" && full) run = chain(runs, function (r) { var b = { action: "block_create", date: r.from }; if (r.to > r.from) b.date_to = r.to; return post(b); });
+    else if (W.who === "neg") run = chain(W.days.slice().sort(), function (d) { return post({ action: "block_create", date: d, from: pad(W.hf) + ":00", to: pad(W.ht + 1) + ":00" }); });
+    else run = chain(runs, function (r) { return post({ action: "staff_off_add", resource_id: W.who, kind: W.kind, date_from: r.from, date_to: r.to }); });
+    run.then(function () { W.busy = false; W.res = { conflicts: conflicts, who: wzWhoName(), days: wzDaysText(W.days), hours: wzHoursText() }; W.step = n; return reload(); })
+      .catch(function (e) { W.busy = false; toast(e.message, true); reload().catch(function () { }); });
+  }
+  function wzChip(label, on, fn) { var b = mk("button", "avChip", label); b.type = "button"; b.setAttribute("aria-pressed", on ? "true" : "false"); b.addEventListener("click", fn); return b; }
+  function drawWz(host) {
+    host.textContent = "";
     var staffOk = S.team && S.staff.length > 0;
-    var who = mk("div", "avRow");
-    var persons = [["neg", "Tutta l'attività"]]; if (staffOk) S.staff.forEach(function (s) { persons.push([s.id, s.name]); });
-    if (persons.length > 1) form.appendChild(field("Chi", who));
-    var quick = mk("div", "avRow");
-    var d1 = dateField(C.from, today()); d1.id = "avD1";
-    var d2 = dateField(C.to, today()); d2.id = "avD2";
-    var dur = mk("div", "avSeg");
-    var hrsBox = mk("div", "avField"); hrsBox.hidden = true;
-    var kindBox = mk("div", "avRow");
-    var warn = mk("div", "avWarn"); warn.hidden = true;
-    var add = mk("button", "avBtn pri", "Aggiungi chiusura"); add.type = "button";
+    if (!staffOk || (W.who !== "neg" && !person(W.who))) W.who = "neg";
+    var order = staffOk ? ["chi", "quando", "ore", "ok"] : ["quando", "ore", "ok"], n = order.length;
+    var card = mk("div", "avCard avWz"); host.appendChild(card);
+    var again = function () { drawWz(host); };
+    if (W.step >= n) {
+      var d = mk("div", "wzDone"), ck = mk("div", "wzCk"); ck.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+      d.appendChild(ck); d.appendChild(mk("b", null, "Chiusura aggiunta"));
+      var r = W.res || {}; d.appendChild(mk("span", "wzSub", [r.who, r.days, r.hours].filter(Boolean).join(" · ")));
+      if (r.conflicts) d.appendChild(mk("div", "avWarn", r.conflicts === 1 ? "C'è 1 appuntamento già preso in quel periodo. Resta in agenda: avvisa tu il cliente." : "Ci sono " + r.conflicts + " appuntamenti già presi in quel periodo. Restano in agenda: avvisa tu i clienti."));
+      var nb = mk("button", "avBtn pri", "Aggiungi un'altra chiusura"); nb.type = "button"; nb.addEventListener("click", function () { wzReset(); again(); });
+      d.appendChild(nb); card.appendChild(d); return;
+    }
+    var key = order[W.step];
+    var top = mk("div", "wzTop");
+    var bk = mk("button", "wzBack", "‹"); bk.type = "button"; bk.setAttribute("aria-label", "Indietro");
+    bk.style.visibility = W.step > 0 ? "visible" : "hidden"; bk.addEventListener("click", function () { if (W.step > 0) { W.step--; again(); } });
+    top.appendChild(bk); top.appendChild(mk("h3", "avH", "Nuova chiusura")); card.appendChild(top);
+    var bar = mk("div", "wzBar"); for (var k = 0; k < n; k++) bar.appendChild(mk("i", k <= W.step ? "on" : null)); card.appendChild(bar);
+    card.appendChild(mk("div", "wzStep", "Passo " + (W.step + 1) + " di " + n));
+    var ctx = function () {
+      var c = mk("div", "wzCtx");
+      c.appendChild(document.createTextNode(wzWhoName() + (key !== "quando" && key !== "chi" && W.days.length ? " · " + wzDaysText(W.days) : "")));
+      card.appendChild(c);
+    };
 
-    function redrawWho() { chips(who, persons, function (k) { return C.who === k; }, function (k) { C.who = k; if (k !== "neg") C.part = false; redrawAll(); }); }
-    function qd(a, b) { C.from = a; C.to = b; d1.value = a; d2.value = b; }
-    function redrawQuick() {
-      var t = today(), sun = addDays(t, 6 - dow(t)), nm = addDays(t, 7 - dow(t));
-      quick.textContent = "";
-      [["Oggi", t, t], ["Domani", addDays(t, 1), addDays(t, 1)], ["Questa settimana", t, sun], ["Prossima settimana", nm, addDays(nm, 6)]].forEach(function (q) {
-        var b = mk("button", "avChip", q[0]); b.type = "button"; b.setAttribute("aria-pressed", C.from === q[1] && C.to === q[2] ? "true" : "false");
-        b.addEventListener("click", function () { qd(q[1], q[2]); redrawQuick(); }); quick.appendChild(b);
+    if (key === "chi") {
+      card.appendChild(mk("div", "wzQ", "Chi si assenta?"));
+      card.appendChild(mk("div", "wzHelp", "Scegli se chiude tutta l'attività o solo una persona."));
+      var list = [["neg", "Tutta l'attività", "Nessuno può prenotare"]];
+      S.staff.forEach(function (st) { list.push([st.id, st.name, "Solo " + st.name + " non è prenotabile"]); });
+      list.forEach(function (it) {
+        var b = mk("button", "wzOpt"); b.type = "button"; b.setAttribute("aria-pressed", W.who === it[0] ? "true" : "false");
+        var av = mk("span", "avAv" + (it[0] === "neg" ? " shop" : ""), it[0] === "neg" ? "" : String(it[1]).charAt(0).toUpperCase());
+        if (it[0] === "neg") av.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M10 20v-5h4v5"/></svg>';
+        else av.style.background = "hsl(" + hue(it[0]) + " 45% 42%)";
+        b.appendChild(av);
+        var t = mk("span", "wzOt"); t.appendChild(mk("b", null, it[1])); t.appendChild(mk("small", null, it[2])); b.appendChild(t);
+        b.addEventListener("click", function () { W.who = it[0]; W.q = null; W.hf = W.ht = null; again(); });
+        card.appendChild(b);
       });
     }
-    function redrawDur() {
-      dur.textContent = "";
-      var isNeg = C.who === "neg";
-      [[false, "Tutto il giorno"], [true, "Solo alcune ore"]].forEach(function (o) {
-        var b = mk("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", C.part === o[0] ? "true" : "false");
-        if (o[0] && !isNeg) b.disabled = true;
-        b.addEventListener("click", function () { C.part = o[0]; redrawAll(); }); dur.appendChild(b);
+
+    if (key === "quando") {
+      if (staffOk) ctx();
+      card.appendChild(mk("div", "wzQ", "Quando?"));
+      var t0 = today(), sun = addDays(t0, 6 - dow(t0));
+      var qs = mk("div", "avRow");
+      qs.appendChild(wzChip("Periodo", W.per, function () { W.per = !W.per; W.anc = null; W.days = []; again(); }));
+      [["Oggi", [t0]], ["Domani", [addDays(t0, 1)]], ["Questa settimana", (function () { var a = []; for (var d = t0; d <= sun; d = addDays(d, 1)) a.push(d); return a; })()]].forEach(function (q) {
+        qs.appendChild(wzChip(q[0], q[1].length === W.days.length && q[1].every(function (x) { return W.days.indexOf(x) > -1; }), function () { W.days = q[1].slice(); W.per = false; W.anc = null; again(); }));
       });
-      hrsBox.textContent = ""; hrsBox.hidden = !(C.part && isNeg);
-      if (C.part && isNeg) {
-        hrsBox.appendChild(mk("label", null, "Quali ore"));
-        var r = mk("div", "avRow");
-        [["Mattina", "09:00", "13:00"], ["Pausa pranzo", "13:00", "14:30"], ["Pomeriggio", "14:30", "19:00"], ["Fine giornata", "17:00", "19:00"]].forEach(function (q) {
-          var b = mk("button", "avChip", q[0]); b.type = "button"; b.setAttribute("aria-pressed", C.tf === q[1] && C.tt === q[2] ? "true" : "false");
-          b.addEventListener("click", function () { C.tf = q[1]; C.tt = q[2]; redrawDur(); }); r.appendChild(b);
+      card.appendChild(qs);
+      var ms = W.month || t0.slice(0, 7) + "-01", md = new Date(ms + "T12:00:00");
+      var cc = mk("div", "wzCal"), hd = mk("div", "wzCalH");
+      hd.appendChild(mk("b", null, MO[md.getMonth()] + " " + md.getFullYear()));
+      var ar = mk("div", "wzArr"), pv = mk("button", null, "‹"), nx = mk("button", null, "›");
+      pv.type = nx.type = "button"; pv.setAttribute("aria-label", "Mese precedente"); nx.setAttribute("aria-label", "Mese successivo");
+      pv.disabled = ms <= t0.slice(0, 7) + "-01";
+      var lim = new Date(t0.slice(0, 7) + "-01T12:00:00"); lim.setMonth(lim.getMonth() + 12); nx.disabled = md >= lim;
+      pv.addEventListener("click", function () { var x = new Date(ms + "T12:00:00"); x.setMonth(x.getMonth() - 1); W.month = ymd(x).slice(0, 7) + "-01"; again(); });
+      nx.addEventListener("click", function () { var x = new Date(ms + "T12:00:00"); x.setMonth(x.getMonth() + 1); W.month = ymd(x).slice(0, 7) + "-01"; again(); });
+      ar.appendChild(pv); ar.appendChild(nx); hd.appendChild(ar); cc.appendChild(hd);
+      var gr = mk("div", "wzGrid");
+      DS.forEach(function (x) { gr.appendChild(mk("div", "wzDw", x.slice(0, 1))); });
+      for (var e = 0; e < dow(ms); e++) gr.appendChild(mk("div"));
+      var dn = new Date(md.getFullYear(), md.getMonth() + 1, 0).getDate();
+      for (var dd = 1; dd <= dn; dd++) (function (ds, num) {
+        var b = mk("button", "wzD" + (W.days.indexOf(ds) > -1 ? " on" : "") + (ds === t0 ? " t" : ""), String(num)); b.type = "button";
+        if (ds < t0) b.disabled = true;
+        b.addEventListener("click", function () {
+          if (W.per) {
+            if (!W.anc) { W.anc = ds; W.days = [ds]; }
+            else { var a = W.anc < ds ? W.anc : ds, z = W.anc < ds ? ds : W.anc; W.days = []; for (var q2 = a; q2 <= z && W.days.length < 93; q2 = addDays(q2, 1)) W.days.push(q2); W.anc = null; }
+          } else { var ix = W.days.indexOf(ds); if (ix > -1) W.days.splice(ix, 1); else W.days.push(ds); }
+          again();
         });
-        hrsBox.appendChild(r);
-        var tr = mk("div", "avTimes");
-        tr.appendChild(mk("span", "avHint", "Dalle"));
-        tr.appendChild(selT(C.tf, "Dalle ore", function (v) { C.tf = v; if (m(C.tt) <= m(v)) C.tt = step(v, 4); redrawDur(); }));
-        tr.appendChild(mk("span", "avHint", "alle"));
-        tr.appendChild(selT(C.tt, "Alle ore", function (v) { C.tt = v; if (m(C.tf) >= m(v)) C.tf = step(v, -4); redrawDur(); }));
-        hrsBox.appendChild(tr);
-        hrsBox.appendChild(mk("span", "avHint", "Vale per ogni giorno del periodo scelto."));
-      }
-      if (!isNeg) { hrsBox.hidden = false; hrsBox.textContent = ""; hrsBox.appendChild(mk("span", "avHint", "Le assenze a ore dei collaboratori arrivano presto. Per ora si segnano i giorni interi.")); }
+        gr.appendChild(b);
+      })(ms.slice(0, 8) + pad(dd), dd);
+      cc.appendChild(gr); card.appendChild(cc);
+      card.appendChild(mk("div", "wzHelp c", W.per ? (W.anc ? "Ora tocca l'ultimo giorno." : "Tocca il primo e l'ultimo giorno.") : "Tocca i giorni (anche più di uno)."));
+      if (W.days.length) card.appendChild(mk("div", "wzPick", wzDaysText(W.days)));
     }
-    function redrawKind() {
-      kindBox.textContent = ""; var show = C.who !== "neg";
-      kindBox.parentNode.hidden = !show; if (!show) return;
-      [["ferie", "Ferie"], ["riposo", "Riposo"]].forEach(function (k) {
-        var b = mk("button", "avChip", k[1]); b.type = "button"; b.setAttribute("aria-pressed", C.kind === k[0] ? "true" : "false");
-        b.addEventListener("click", function () { C.kind = k[0]; redrawKind(); }); kindBox.appendChild(b);
-      });
-    }
-    function redrawAll() { redrawWho(); redrawQuick(); redrawDur(); redrawKind(); }
 
-    form.appendChild(field("Quando", quick));
-    var dr = mk("div", "avRow"); dr.appendChild(field("Dal", d1, "avD1")); dr.appendChild(field("Al", d2, "avD2")); form.appendChild(dr);
-    d1.addEventListener("change", function () { C.from = d1.value; if (!d2.value || d2.value < d1.value) { C.to = d1.value; d2.value = d1.value; } else C.to = d2.value; redrawQuick(); });
-    d2.addEventListener("change", function () { C.to = d2.value; redrawQuick(); });
-    form.appendChild(field("Per quanto tempo", dur));
-    form.appendChild(hrsBox);
-    var kf = field("Tipo di assenza", kindBox); form.appendChild(kf);
-    form.appendChild(warn);
-    form.appendChild(add);
-    redrawAll();
-
-    add.addEventListener("click", function () {
-      var a = d1.value, b = d2.value || a;
-      if (!a) { toast("Scegli un giorno o una scelta rapida.", true); return; }
-      if (b < a) { toast("L'ultimo giorno è prima del primo.", true); return; }
-      if (C.who === "neg" && C.part && m(C.tf) >= m(C.tt)) { toast("L'ora di fine deve essere dopo quella di inizio.", true); return; }
-      var days = []; for (var d = a; d <= b && days.length < 93; d = addDays(d, 1)) days.push(d);
-      if (C.who === "neg" && C.part && days.length > 31) { toast("Per le chiusure a ore scegli al massimo 31 giorni.", true); return; }
-      busy = true; add.disabled = true;
-      var run, conflicts = 0;
-      if (C.who === "neg" && !C.part) {
-        var body = { action: "block_create", date: a }; if (b > a) body.date_to = b;
-        run = post(body).then(function (r) { conflicts = r.conflicts || 0; });
-      } else if (C.who === "neg") {
-        run = days.reduce(function (p, day) { return p.then(function () { return post({ action: "block_create", date: day, from: C.tf, to: C.tt }).then(function (r) { conflicts += r.conflicts || 0; }); }); }, Promise.resolve());
+    if (key === "ore") {
+      ctx();
+      if (W.who === "neg") {
+        card.appendChild(mk("div", "wzQ", "Per quali ore?"));
+        var rg = wzRange(), lo = rg[0], hi = rg[1];
+        var qr = mk("div", "avRow");
+        qr.appendChild(wzChip("Tutto il giorno", W.q === "all", function () { W.q = "all"; W.hf = W.ht = null; again(); }));
+        if (lo < 13 && hi > 13) {
+          qr.appendChild(wzChip("Mattina", W.q === "am", function () { W.q = "am"; W.hf = lo; W.ht = 12; again(); }));
+          qr.appendChild(wzChip("Pomeriggio", W.q === "pm", function () { W.q = "pm"; W.hf = 13; W.ht = hi - 1; again(); }));
+        }
+        card.appendChild(qr);
+        if (W.q !== "all") {
+          card.appendChild(mk("div", "wzHelp", "Oppure tocca la prima e l'ultima ora in cui chiudi."));
+          var hg = mk("div", "wzHrs");
+          for (var h = lo; h < hi; h++) (function (h) {
+            var on = W.hf != null && h >= W.hf && h <= W.ht;
+            var b = mk("button", on ? "on" : null, String(h)); b.type = "button";
+            b.addEventListener("click", function () {
+              if (W.hf == null || W.hf !== W.ht) { W.hf = W.ht = h; } else { var a = Math.min(W.hf, h), z = Math.max(W.hf, h); W.hf = a; W.ht = z; }
+              W.q = null; again();
+            });
+            hg.appendChild(b);
+          })(h);
+          card.appendChild(hg);
+          if (W.hf != null) card.appendChild(mk("div", "wzPick", "Chiuso " + wzHoursText()));
+        }
       } else {
-        run = post({ action: "staff_off_add", resource_id: C.who, kind: C.kind, date_from: a, date_to: b }).then(function (r) { conflicts = r.conflicts || 0; });
+        card.appendChild(mk("div", "wzQ", "Che tipo di assenza?"));
+        var kr = mk("div", "avRow");
+        [["ferie", "Ferie"], ["riposo", "Riposo"]].forEach(function (kk) { kr.appendChild(wzChip(kk[1], W.kind === kk[0], function () { W.kind = kk[0]; again(); })); });
+        card.appendChild(kr);
+        card.appendChild(mk("div", "wzHelp", "L'assenza vale per tutto il giorno. Le assenze a ore dei collaboratori arrivano presto."));
       }
-      run.then(function () {
-        busy = false; C.from = ""; C.to = "";
-        toast(conflicts ? "Chiusura aggiunta. Attenzione: " + conflicts + (conflicts === 1 ? " appuntamento già preso in quel periodo." : " appuntamenti già presi in quel periodo.") : "Chiusura aggiunta.");
-        return reload();
-      }).catch(function (e) { busy = false; add.disabled = false; toast(e.message, true); reload().catch(function () {}); });
+    }
+
+    if (key === "ok") {
+      card.appendChild(mk("div", "wzQ", "Controlla e conferma"));
+      var sm = mk("div", "wzSum");
+      [["Chi", wzWhoName()], ["Quando", wzDaysText(W.days)], ["Ore", wzHoursText()]].concat(W.who !== "neg" ? [["Tipo", W.kind === "ferie" ? "Ferie" : "Riposo"]] : []).forEach(function (row) {
+        var r2 = mk("div"); r2.appendChild(mk("span", null, row[0])); r2.appendChild(mk("b", null, row[1])); sm.appendChild(r2);
+      });
+      card.appendChild(sm);
+    }
+
+    var go = mk("button", "avBtn pri", key === "ok" ? (W.busy ? "Salvo…" : "Conferma chiusura") : "Avanti"); go.type = "button";
+    go.disabled = W.busy || !wzValid(key);
+    go.addEventListener("click", function () {
+      if (key === "ok") { wzRun(host, n); return; }
+      if (key === "ore" && W.who === "neg" && W.q !== "all" && W.days.length > 31) { toast("Per le chiusure a ore scegli al massimo 31 giorni.", true); return; }
+      W.step++; again();
     });
-    box.appendChild(form);
+    card.appendChild(go);
+  }
+
+  function renderChi(box) {
+    var wz = mk("div", "avWzHost"); box.appendChild(wz); drawWz(wz);
 
     var lc = mk("div", "avCard"); lc.appendChild(mk("h3", "avH", "In programma"));
     var items = closureItems();

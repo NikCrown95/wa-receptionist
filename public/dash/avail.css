@@ -248,3 +248,50 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 :root:root .avLayer .avPz b{color:var(--muted)!important}
 :root:root .avLayer .avPzChip,:root:root .avLayer .avAddP{background:transparent!important;border:1px dashed var(--line2)!important;color:var(--muted)!important}
 :root:root .avLayer .avPzChip.on{background:var(--accent-soft)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important}
+
+/* Nuova chiusura: percorso guidato in passi (Chi, Quando, Ore, Conferma) */
+.avWz{gap:10px}
+.avWz .wzTop{display:flex;align-items:center;gap:10px}
+.avWz .wzBack{flex:none;width:36px;height:36px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--accent-ink);font:inherit;font-size:1.3rem;line-height:1;cursor:pointer;display:grid;place-items:center}
+.avWz .wzBar{display:flex;gap:5px}
+.avWz .wzBar i{flex:1;height:4px;border-radius:4px;background:var(--line2)}
+.avWz .wzBar i.on{background:var(--accent)}
+.avWz .wzStep{font-size:.76rem;font-weight:700;color:var(--muted)}
+.avWz .wzQ{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;margin-top:2px}
+.avWz .wzHelp{font-size:.84rem;color:var(--muted);line-height:1.4}
+.avWz .wzHelp.c{text-align:center}
+.avWz .wzCtx{align-self:flex-start;max-width:100%;padding:5px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:.8rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.avWz .wzOpt{display:flex;align-items:center;gap:13px;width:100%;text-align:left;border:1px solid var(--line2);background:var(--card2);color:var(--ink);border-radius:16px;padding:13px;font:inherit;cursor:pointer;min-height:68px}
+.avWz .wzOpt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.avWz .wzOpt .avAv{width:42px;height:42px;border-radius:13px}
+.avWz .wzOt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.avWz .wzOt b{font-size:.97rem}
+.avWz .wzOt small{font-size:.8rem;color:var(--muted)}
+.avWz .wzCal{border:1px solid var(--line);background:var(--card2);border-radius:16px;padding:10px}
+.avWz .wzCalH{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:.95rem}
+.avWz .wzArr{display:flex;gap:6px}
+.avWz .wzArr button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-size:1.1rem;cursor:pointer}
+.avWz .wzArr button:disabled{opacity:.35;cursor:default}
+.avWz .wzGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.avWz .wzDw{text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);padding:2px 0}
+.avWz .wzD{aspect-ratio:1;min-height:38px;border-radius:11px;border:1px solid transparent;background:var(--card);color:var(--ink);font:inherit;font-size:.88rem;font-weight:700;cursor:pointer;padding:0}
+.avWz .wzD.t{border-color:var(--line2)}
+.avWz .wzD.on{background:var(--accent);color:var(--on-accent)}
+.avWz .wzD:disabled{opacity:.32;cursor:default}
+.avWz .wzPick{font-size:.86rem;font-weight:700;color:var(--accent-ink)}
+.avWz .wzHrs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.avWz .wzHrs button{min-height:44px;border-radius:11px;border:1px solid var(--line2);background:var(--card2);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.avWz .wzHrs button.on{background:var(--danger);border-color:var(--danger);color:#fff}
+.avWz .wzSum{border:1px solid var(--accent);border-radius:16px;padding:4px 14px;background:var(--card2)}
+.avWz .wzSum div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.avWz .wzSum div:last-child{border:0}
+.avWz .wzSum span{color:var(--muted)}
+.avWz .wzSum b{text-align:right;font-weight:700}
+.avWz > .avBtn.pri{margin-top:6px}
+.avWz .wzDone{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:14px 6px}
+.avWz .wzDone b{font-size:1.15rem}
+.avWz .wzCk{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);margin-bottom:4px}
+.avWz .wzSub{font-size:.86rem;color:var(--muted)}
+.avWz .wzDone .avWarn{text-align:left;align-self:stretch}
+.avWz .wzDone .avBtn{align-self:stretch;margin-top:8px}
+.avWz .wzDone .avWarn{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--ink);font-size:.84rem;line-height:1.4;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--line2))}
