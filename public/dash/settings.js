@@ -1234,6 +1234,7 @@ function pfRenderPoster(box,b,opts){
   function stRenderInfo(){
     var D=stD(),n=stEl('biName'),a=stEl('biAddr'),tg=stEl('biTag');
     if(tg&&!tg.getAttribute('data-dirty'))tg.value=D.b.public_tagline||'';
+    if(window.liaFitTag)setTimeout(window.liaFitTag,0);
     if(n&&!n.getAttribute('data-dirty'))n.value=D.b.name||'';
     if(a&&!a.getAttribute('data-dirty'))a.value=D.b.address||'';
     stText('stSumInfo',D.b.address||D.b.name||'Nome e indirizzo');
@@ -1554,6 +1555,17 @@ function pfRenderPoster(box,b,opts){
     var pm=stEl('plManage');if(pm)pm.addEventListener('click',function(){var m=stEl('menuTabOther');if(m)m.click();setTimeout(function(){stGo('subscription')},0)});
     var biN=stEl('biName'),biA=stEl('biAddr'),biT=stEl('biTag'),biS=stEl('biSave');
     [biN,biA,biT].forEach(function(x){if(x)x.addEventListener('input',function(){x.setAttribute('data-dirty','1')})});
+    /* Descrizione: il riquadro e' appena piu' grande del testo (la frase di esempio o quello che scrivi) */
+    if(biT){var fitW=0,fitBusy=false;var fit=function(){
+      if(fitBusy||!biT.clientWidth)return;fitBusy=true;
+      var cs=getComputedStyle(biT),m=document.createElement('div');
+      m.style.cssText='position:absolute;visibility:hidden;left:-9999px;top:0;white-space:pre-wrap;overflow-wrap:break-word;box-sizing:border-box;width:'+biT.clientWidth+'px;font:'+cs.font+';line-height:'+cs.lineHeight+';letter-spacing:'+cs.letterSpacing+';padding:'+cs.paddingTop+' '+cs.paddingRight+' '+cs.paddingBottom+' '+cs.paddingLeft;
+      m.textContent=(biT.value||biT.placeholder||' ')+'\u200b';document.body.appendChild(m);
+      var h=m.offsetHeight+(biT.offsetHeight-biT.clientHeight);document.body.removeChild(m);
+      biT.style.height=Math.max(60,h)+'px';fitBusy=false};
+      biT.addEventListener('input',fit);
+      if(window.ResizeObserver)new ResizeObserver(function(){var w=biT.clientWidth;if(w!==fitW){fitW=w;fit()}}).observe(biT);
+      window.liaFitTag=fit;fit()}
     if(biS)biS.addEventListener('click',function(){
       var n=(biN.value||'').trim(),a=(biA.value||'').trim();
       if(n.length<2){stMsg('biMsg','Scrivi il nome dell’attività.');return}

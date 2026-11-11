@@ -3696,7 +3696,6 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 
 /* Dati attività: il testo (e il segnaposto) della Descrizione ora ha aria sopra e sotto, invece di stare attaccato al bordo alto */
 #panelOther #biTag{padding:12px 12px;line-height:1.4;box-sizing:border-box}
-#panelOther #biTag:placeholder-shown{padding-top:21px}
 
 /* Modifica servizio: con il solo prezzo (niente modalità) il campo è uguale a Nome e Durata, senza riquadro dentro il riquadro */
 .liaSheet .lmodes{margin-top:16px;gap:7px}
@@ -3706,3 +3705,4 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .lmodes .lmrow.single .lmprice label{display:block}
 .liaSheet .lmodes .lmrow.single .lmprice input{display:block;width:100%;box-sizing:border-box;min-height:50px;padding:0 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card);font-size:1rem}
 .liaSheet .lmodes .lmrow.single .lmprice input:focus{outline:none;border-color:var(--accent)}
+#panelOther #biTag{min-height:60px!important;overflow:hidden}
