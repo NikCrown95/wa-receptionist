@@ -28,7 +28,7 @@
     {k:'st',t:'Statistiche',s:'Andamento',i:IC.st,go:function(){click($('menuTabStats'));},ok:function(){return !!$('menuTabStats');}}
   ];
   var day=document.createElement('button');
-  day.type='button';day.className='hmDay';day.hidden=true;
+  day.type='button';day.className='hmDay hmSk';day.hidden=false;day.innerHTML='<span class="hmDayTop"><span class="hmDayLbl">&nbsp;</span></span><span class="hmDayTime">&nbsp;</span><span class="hmDayName">&nbsp;</span><span class="hmDaySvc">&nbsp;</span><span class="hmDayBar"></span><span class="hmDayProg">&nbsp;</span>';
   day.setAttribute('aria-label','Apri il calendario di oggi');
   day.addEventListener('click',goCal);
   wrap.appendChild(day);
@@ -45,7 +45,7 @@
   });
   /* i riquadri compaiono solo se la funzione esiste per questa attivita'; se ne resta uno solo in fondo occupa tutta la riga */
   /* testi e ordine dei riquadri per verticale; le icone restano identiche (stessa misura in tutte) */
-  function V(){return window.__LIA_PT?'pt':window.__liaCampi?'campi':window.liaGymOpen?'gym':window.__LIA_MED?'med':'std';}
+  function V(){return window.__LIA_PT?'pt':window.__liaCampi?'campi':(window.__liaGym||window.liaGymOpen)?'gym':window.__LIA_MED?'med':'std';}
   var VL={
     pt:{cal:['Calendario','Agenda'],cli:['Iscritti','Pacchetti'],add:['Aggiungi','Coaching'],order:['cal','cli','add','av','qr','st']},
     gym:{cal:['Calendario','Lezioni'],add:['Aggiungi','Prenotazione'],cli:['Iscritti','Abbonamenti']},
@@ -109,7 +109,7 @@
         if(en<=now)done++;
         else if(!next)next=a;
       });
-      day.textContent='';
+      day.textContent='';day.classList.remove('hmSk');
       if(!list.length){
         day.appendChild(el('hmDayLbl','Oggi'));
         day.appendChild(el('hmDayNone',TX[2]));
@@ -139,18 +139,19 @@
       var data={appointments:d.appointments||[]};
       try{localStorage.setItem(ck,JSON.stringify({ymd:ymd,data:data}));}catch(e){}
       paint(data);
-    }).catch(function(){if(my===seq&&day.hidden)day.hidden=true;});
+    }).catch(function(){if(my===seq&&day.classList.contains('hmSk'))day.hidden=true;});
   }
   function loadGym(){
     var my=++seq,t=(new URLSearchParams(location.search).get('t')||'').trim();
     if(!t){day.hidden=true;return;}
     var n=new Date(),d=n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);
-    fetch('/api/palestra?t='+encodeURIComponent(t)+'&cal=1&from='+d+'&to='+d).then(function(r){return r.json();}).then(function(j){
+    var ck='liaHomeGym:'+t.slice(0,16);
+    function paintG(j){
       if(my!==seq)return;
       var ss=((j&&j.days&&j.days[0]&&j.days[0].sessions)||[]).filter(function(x){return x&&!x.cancelled;});
       var now=new Date(),nm=hm(now),next=null,done=0;
       ss.sort(function(a,b){return a.time<b.time?-1:1;}).forEach(function(x){if(x.time<nm)done++;else if(!next)next=x;});
-      day.textContent='';
+      day.textContent='';day.classList.remove('hmSk');
       if(!ss.length){day.appendChild(el('hmDayLbl','Oggi'));day.appendChild(el('hmDayNone','Oggi non hai lezioni'));}
       else if(next){
         var top=el('hmDayTop');top.appendChild(el('hmDayLbl','Prossima lezione'));day.appendChild(top);
@@ -161,7 +162,12 @@
       if(ss.length){var bar=el('hmDayBar'),fill=el('hmDayFill');fill.style.width=Math.round(done/ss.length*100)+'%';bar.appendChild(fill);day.appendChild(bar);
         day.appendChild(el('hmDayProg',ss.length+(ss.length===1?' lezione oggi':' lezioni oggi')));}
       day.hidden=false;
-    }).catch(function(){if(my===seq)day.hidden=true;});
+    }
+    try{var c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.d===d&&c.j)paintG(c.j);}catch(e){}
+    fetch('/api/palestra?t='+encodeURIComponent(t)+'&cal=1&from='+d+'&to='+d).then(function(r){return r.json();}).then(function(j){
+      try{localStorage.setItem(ck,JSON.stringify({d:d,j:{days:j&&j.days?[{sessions:(j.days[0]&&j.days[0].sessions)||[]}]:[]}}));}catch(e){}
+      paintG(j);
+    }).catch(function(){if(my===seq&&day.classList.contains('hmSk'))day.hidden=true;});
   }
   function refresh(){sync();}
   document.addEventListener('lia:section',function(e){
@@ -173,6 +179,8 @@
   [0,500,1500,3500].forEach(function(ms){setTimeout(refresh,ms);});
   var menu=$('burgerMenu');
   if(menu&&window.MutationObserver)new MutationObserver(function(){refresh();}).observe(menu,{childList:true});
+  /* parto subito, senza aspettare: la card e' gia' li' (scheletro o ultimo dato salvato) */
+  if(panel.classList.contains('on'))loadDay();
   /* la funzione che legge gli appuntamenti viene definita poco dopo l'apertura: riprovo a pagina caricata */
   function again(){if(panel.classList.contains('on'))loadDay();}
   if(document.readyState==='complete')setTimeout(again,0);else window.addEventListener('load',function(){setTimeout(again,0);});

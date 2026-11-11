@@ -33,3 +33,16 @@
 #panelHome .hmT1{display:block;font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #panelHome .hmT2{display:block;margin-top:2px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root[data-theme="light"] #panelHome .hmDay,:root[data-theme="light"] #panelHome .hmTile{box-shadow:0 3px 12px rgba(28,32,37,.055)}
+
+/* scheletro: la card ha subito la sua forma e il suo spazio, poi i testi arrivano al loro posto */
+#panelHome .hmDay.hmSk{pointer-events:none}
+#panelHome .hmDay.hmSk>span{position:relative;overflow:hidden;color:transparent;border-radius:6px;background:color-mix(in srgb,var(--c) 11%,transparent);animation:hmSk 1.4s ease-in-out infinite}
+#panelHome .hmDay.hmSk .hmDayTop{background:none;animation:none}
+#panelHome .hmDay.hmSk .hmDayLbl{width:42%;background:color-mix(in srgb,var(--c) 14%,transparent);border-radius:6px;animation:hmSk 1.4s ease-in-out infinite}
+#panelHome .hmDay.hmSk .hmDayTime{width:46%}
+#panelHome .hmDay.hmSk .hmDayName{width:60%}
+#panelHome .hmDay.hmSk .hmDaySvc{width:36%}
+#panelHome .hmDay.hmSk .hmDayProg{width:30%}
+@keyframes hmSk{0%,100%{opacity:.55}50%{opacity:1}}
+#panelHome .hmDay.hmSk .hmDayTop{min-height:24px;align-items:flex-start}
+#panelHome .hmDay.hmSk .hmDayBar{background:color-mix(in srgb,var(--c) 18%,transparent);animation:none}
