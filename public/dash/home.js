@@ -21,7 +21,7 @@
   /* ogni riquadro: id, titolo, sottotitolo, icona, come si apre, e quando esiste davvero nella dashboard */
   var TILES=[
     {k:'cal',t:'Calendario',s:'Agenda',i:IC.cal,go:goCal,ok:function(){return !!$('menuTabCal');}},
-    {k:'add',t:'Aggiungi',s:'Appuntamento',i:IC.add,go:function(){goCal();setTimeout(function(){click($('fabNew'));},160);},ok:function(){return !!$('fabNew');}},
+    {k:'add',t:'Aggiungi',s:'Appuntamento',i:IC.add,go:function(){if(V()==='std'&&typeof window.liaOpenNewAt==='function'){var n=new Date(),p=function(x){return (x<10?'0':'')+x;};window.liaOpenNewAt(n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate()));return;}goCal();setTimeout(function(){click($('fabNew'));},160);},ok:function(){return !!$('fabNew');}},
     {k:'cli',t:'Clienti',s:'Rubrica',i:IC.cli,go:function(){click($('menuTabClients'));},ok:function(){return !!$('menuTabClients');}},
     {k:'av',t:'Disponibilità',s:'Orari e ferie',i:IC.av,go:function(){click($('menuTabAvail'));},ok:function(){var m=$('menuTabAvail');return !!m&&m.style.display!=='none'&&typeof window.liaAvailOpen==='function';}},
     {k:'qr',t:'QR code',s:'La tua pagina',i:IC.qr,go:function(){click(document.querySelector('#mnShareCard [data-a="qr"]'));},ok:function(){var c=$('mnShareCard');return !!c&&!c.classList.contains('mnNoLink')&&!!c.querySelector('[data-a="qr"]');}},
@@ -191,7 +191,7 @@
     if(document.body.classList.contains('hmBackOn')!==on)document.body.classList.toggle('hmBackOn',on);
     var bh=$('businessHome');if(bh)bh.setAttribute('aria-label',on?'Torna alla Home':'Vai al calendario di oggi');
   }
-  document.addEventListener('lia:section',function(e){backState(e&&e.detail);});
+  document.addEventListener('lia:section',function(e){backState(e&&e.detail);if(e&&e.detail==='home'&&window.liaWarmNew)window.liaWarmNew();});
   /* il menu (con Disponibilita' e il QR) viene costruito subito dopo il caricamento: riallineo i riquadri */
   [0,500,1500,3500].forEach(function(ms){setTimeout(refresh,ms);});
   var menu=$('burgerMenu');
