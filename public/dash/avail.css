@@ -295,3 +295,7 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 .avWz .wzDone .avWarn{text-align:left;align-self:stretch}
 .avWz .wzDone .avBtn{align-self:stretch;margin-top:8px}
 .avWz .wzDone .avWarn{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--ink);font-size:.84rem;line-height:1.4;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--line2))}
+
+/* Chiusure e assenze: la scelta di chi si assenta sta nel percorso guidato, quindi la striscia in alto (Attività, team) non serve */
+.avChiOnly .avSide{display:none!important}
+@media(min-width:700px){.avChiOnly .avApp{grid-template-columns:minmax(0,1fr)}}

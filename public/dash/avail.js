@@ -596,6 +596,7 @@
     if (!layer || !S) return;
     if (sel !== "neg" && sel !== "chi" && (!S.team || !person(sel))) sel = "neg";
     paintSide();
+    layer.classList.toggle("avChiOnly", sel === "chi");
     var box = $("avBody"), sc = layer.querySelector(".avScroll"), y = sc ? sc.scrollTop : 0;
     box.textContent = "";
     if (sel === "chi") {
