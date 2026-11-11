@@ -168,6 +168,15 @@
     g.addEventListener("click", function () { closeMenu(); openGuide(); });
 
     menu.insertBefore(card, cal);
+    /* "La tua pagina": sostituisce i due pulsanti Condividi / Mostra il QR della scheda in alto (la scheda resta nel codice, nascosta, perche' la Home ne usa il QR) */
+    var pg = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>La tua pagina');
+    pg.type = "button"; pg.id = "menuTabPage"; pg.setAttribute("role", "menuitem"); pg.setAttribute("aria-current", "false"); pg.setAttribute("data-sub", "Link e QR code");
+    pg.addEventListener("click", function () {
+      closeMenu();
+      var go = function () { if (biz && biz.links && biz.links.length) openSheet(0); };
+      if (!biz) load().then(go); else go();
+    });
+    var stt = $("menuTabStats"); if (stt && stt.parentNode) stt.parentNode.insertBefore(pg, stt);
     /* Disponibilita': orari del negozio e del team, chiusure e assenze (non per le palestre, che hanno i loro orari) */
     var av = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Disponibilità');
     av.type = "button"; av.id = "menuTabAvail"; av.setAttribute("role", "menuitem"); av.setAttribute("aria-current", "false");
@@ -188,7 +197,7 @@
     /* menu raggruppato (solo attivita' normali, vedi body.mnB): una riga di spiegazione per voce e i titoli dei gruppi */
     [["menuTabCal", "Giorno, settimana e mese"], ["menuTabClients", "Rubrica, note e visite"], ["menuTabRegistry", "Le ultime prenotazioni"], ["menuTabStats", "Incassi e andamento"],
       ["menuTabAvail", "Orari, chiusure e ferie"], ["menuTabOther", "Servizi, team e abbonamento"], ["menuTabReferral", "Fai conoscere Prenolia"], ["menuTabGuide", "Come si usa Prenolia"]].forEach(function (d) { var e = $(d[0]); if (e) e.setAttribute("data-sub", d[1]); });
-    [["menuTabCal", "Agenda"], ["menuTabStats", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
+    [["menuTabCal", "Agenda"], ["menuTabPage", "La tua attività"], ["menuTabOther", "Account"]].forEach(function (d) { var e = $(d[0]); if (!e || !e.parentNode) return; var gl = mk("div", "mnGrp", d[1]); gl.setAttribute("role", "presentation"); e.parentNode.insertBefore(gl, e); });
     document.body.classList.add("mnOn");
     var pt = $("menuTabProfile");
     if (pt && window.MutationObserver) new MutationObserver(markCur).observe(pt, { attributes: true, attributeFilter: ["aria-current"] });
@@ -401,6 +410,7 @@
       c.hidden = !biz;
       var nl = !!biz && !biz.links.length;
       c.classList.toggle("mnNoLink", nl);
+      var pgb = $("menuTabPage"); if (pgb) pgb.hidden = !biz || nl;
       var kk = c.querySelector(".mnShareKick"); if (kk) kk.textContent = nl ? "La tua attività" : "La tua pagina di prenotazione";
     }
     if (!c || !biz) return;
