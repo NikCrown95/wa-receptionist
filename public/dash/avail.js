@@ -402,8 +402,8 @@
     var key = order[W.step];
     var top = mk("div", "wzTop");
     var bk = mk("button", "wzBack", "‹"); bk.type = "button"; bk.setAttribute("aria-label", "Indietro");
-    bk.style.visibility = W.step > 0 ? "visible" : "hidden"; bk.addEventListener("click", function () { if (W.step > 0) { W.step--; again(); } });
-    top.appendChild(bk); top.appendChild(mk("h3", "avH", "Nuova chiusura")); card.appendChild(top);
+    bk.style.display = W.step > 0 ? "" : "none"; bk.addEventListener("click", function () { if (W.step > 0) { W.step--; again(); } });
+    top.appendChild(bk); top.appendChild(mk("h3", "avH", "Chiusure e assenze")); card.appendChild(top);
     var bar = mk("div", "wzBar"); for (var k = 0; k < n; k++) bar.appendChild(mk("i", k <= W.step ? "on" : null)); card.appendChild(bar);
     card.appendChild(mk("div", "wzStep", "Passo " + (W.step + 1) + " di " + n));
     var ctx = function () {
@@ -603,7 +603,7 @@
       var hd = mk("div", "avHd flat"), tt = mk("div", "avHt"); hd.style.setProperty("--c", colorOf("chi"));
       tt.appendChild(mk("h2", null, "Chiusure e assenze"));
       tt.appendChild(mk("p", null, "Ferie, festivi, permessi: un giorno, più giorni o solo alcune ore."));
-      hd.appendChild(tt); box.appendChild(hd);
+      hd.appendChild(tt); if (window.__LIA_PT) box.appendChild(hd);
       if (window.__LIA_PT && window.liaPtAvail) {
         tt.textContent = ""; tt.appendChild(mk("h2", null, "Assenze, chiusure e ferie")); tt.appendChild(mk("p", null, "Segna i giorni e le ore in cui non puoi essere prenotato."));
         var pw = mk("div"); box.appendChild(pw);
