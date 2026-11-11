@@ -50,9 +50,9 @@
   }
   function inB(d, b) { return d >= b.s && d < b.e; }
   function delta(cur, prev) {
-    if (!prev) return cur ? { t: 'Nuovo rispetto al periodo precedente', c: 'up' } : { t: 'Nessun dato per il confronto', c: 'flat' };
+    if (!prev) return cur ? { t: 'Nuovo', c: 'up' } : { t: 'Nessun dato per il confronto', c: 'flat' };
     var d = (cur - prev) / prev * 100, c = d > 3 ? 'up' : d < -3 ? 'down' : 'flat';
-    return { t: (d > 0 ? '+' : '') + Math.round(d) + '% rispetto al periodo precedente', c: c };
+    return { t: (d > 0 ? '+' : '') + Math.round(d) + '% vs prima', c: c };
   }
   function packs() { var o = []; ((D && D.members) || []).forEach(function (m) { (m.packs || []).forEach(function (p) { o.push({ id: p.id, name: p.name, price: Number(p.price_eur) || 0, at: pd(p.created_at), m: m }); }); }); return o; }
   function lessons() { return HIST.filter(function (a) { return a.status !== 'cancelled'; }).map(function (a) { return { at: pd(a.starts_at) }; }); }
@@ -154,7 +154,7 @@
       { l: 'Iscritti in corso', v: String(active), d: { t: 'Su ' + mem.length + ' iscritti totali', c: 'flat' } }
     ];
     var kp = el('div', 'kpis');
-    cards.forEach(function (c) { var k = el('div', 'kpi'); k.appendChild(el('div', 'lbl', c.l)); k.appendChild(el('div', 'val', c.v)); k.appendChild(el('div', 'delta ' + c.d.c, c.d.t)); kp.appendChild(k); });
+    cards.forEach(function (c) { var k = el('div', 'kpi'); k.setAttribute('data-ic', /incass/i.test(c.l) ? 'eur' : /pacchett/i.test(c.l) ? 'pack' : /coaching/i.test(c.l) ? 'cal' : 'users'); k.appendChild(el('div', 'lbl', c.l)); k.appendChild(el('div', 'val', c.v)); k.appendChild(el('div', 'delta ' + c.d.c, c.d.t)); kp.appendChild(k); });
     box.appendChild(kp);
 
     var panels = el('div', 'panels'); box.appendChild(panels);

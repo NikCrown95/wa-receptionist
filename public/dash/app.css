@@ -3715,3 +3715,24 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 
   :root:root:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTop #liaRecapBtn{width:40px!important;height:40px!important;margin-left:auto!important}
 }
+
+/* statistiche: prime quattro card uguali, con icona, numero e variazione a pillola (tutte le verticali) */
+:root:root #statsSubApp .kpis,:root:root .gcs .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:760px){:root:root #statsSubApp .kpis,:root:root .gcs .kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
+:root:root #statsSubApp .kpis .kpi,:root:root .gcs .kpis .kpi{display:flex;flex-direction:column;align-items:flex-start;padding:14px 14px 13px;border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:none;color:var(--ink);min-width:0}
+:root:root #statsSubApp .kpis .kpi .lbl,:root:root .gcs .kpis .kpi .lbl{order:1;display:flex;align-items:center;gap:7px;min-height:0;font-size:.82rem;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);opacity:1}
+:root:root #statsSubApp .kpis .kpi .lbl::before,:root:root .gcs .kpis .kpi .lbl::before{content:"";flex:none;width:18px;height:18px;background:var(--accent-ink,var(--accent));-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+:root:root #statsSubApp .kpis .kpi .val,:root:root .gcs .kpis .kpi .val{order:2;margin:8px 0 2px;font-size:1.7rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+:root:root #statsSubApp .kpis .kpi .delta,:root:root .gcs .kpis .kpi .delta{order:3;display:inline-flex;align-items:center;margin-top:6px;padding:2px 9px;border-radius:999px;background:var(--card2);color:var(--muted);font-size:.74rem;font-weight:600;line-height:1.35;opacity:1;white-space:nowrap;max-width:100%}
+:root:root #statsSubApp .kpis .kpi .delta.up,:root:root .gcs .kpis .kpi .delta.up{background:color-mix(in srgb,#2fae78 16%,transparent);color:#52d49a}
+:root:root #statsSubApp .kpis .kpi .delta.down,:root:root .gcs .kpis .kpi .delta.down{background:color-mix(in srgb,#e5534b 16%,transparent);color:#ff8b84}
+:root[data-theme="light"]:root #statsSubApp .kpis .kpi .delta.up,:root[data-theme="light"]:root .gcs .kpis .kpi .delta.up{color:#12805A}
+:root[data-theme="light"]:root #statsSubApp .kpis .kpi .delta.down,:root[data-theme="light"]:root .gcs .kpis .kpi .delta.down{color:#C0392B}
+:root:root #statsSubApp .kpis .kpi .range,:root:root #statsSubApp .kpis .kpi .sub2,:root:root .gcs .kpis .kpi .range,:root:root .gcs .kpis .kpi .sub2{order:4;display:block;width:auto;margin:6px 0 0;padding:0;border:0;background:none;border-radius:0;font-size:.72rem;font-weight:500;letter-spacing:0;text-transform:none;color:var(--muted);line-height:1.35;white-space:normal;overflow:visible;text-overflow:clip;max-width:100%}
+.kpi[data-ic="eur"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 6.5A6.5 6.5 0 1 0 17 17.5M5 10h9M5 14h9'/></svg>")}
+.kpi[data-ic="cal"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='5' width='16' height='15' rx='3'/><path d='M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4'/></svg>")}
+.kpi[data-ic="trend"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 17l6-6 4 4 8-8M15 7h6v6'/></svg>")}
+.kpi[data-ic="users"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='8' r='3.5'/><path d='M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.5 3.5 0 0 1 0 7M21 20c0-2.6-1.6-4.8-4-5.6'/></svg>")}
+.kpi[data-ic="gauge"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 17a8 8 0 1 1 16 0M12 17l4-5'/></svg>")}
+.kpi[data-ic="clock"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M12 7.5V12l3 2'/></svg>")}
+.kpi[data-ic="pack"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='6' width='16' height='13' rx='3'/><path d='M4 11h16M9 6V4h6v2'/></svg>")}

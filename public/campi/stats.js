@@ -32,9 +32,9 @@
     return '#4BB3D6';
   }
   function delta(cur, prev, unit) {
-    if (unit === 'pt') { var d = cur - prev; return { text: (d > 0 ? '+' : '') + d + ' punti vs periodo prima', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' }; }
-    if (!prev) return cur ? { text: 'Nuovo rispetto al periodo prima', cls: 'up' } : { text: 'Nessuna variazione', cls: 'flat' };
-    var p = Math.round((cur - prev) / prev * 100); return { text: (p > 0 ? '+' : '') + p + '% vs periodo prima', cls: p > 0 ? 'up' : p < 0 ? 'down' : 'flat' };
+    if (unit === 'pt') { var d = cur - prev; return { text: (d > 0 ? '+' : '') + d + ' punti vs prima', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' }; }
+    if (!prev) return cur ? { text: 'Nuovo', cls: 'up' } : { text: 'Nessuna variazione', cls: 'flat' };
+    var p = Math.round((cur - prev) / prev * 100); return { text: (p > 0 ? '+' : '') + p + '% vs prima', cls: p > 0 ? 'up' : p < 0 ? 'down' : 'flat' };
   }
 
   // ---------- tooltip ----------
@@ -189,7 +189,8 @@
     root.innerHTML = '<header class="top"><div class="top-row"><div class="spacer"></div><div class="pseg" role="group" aria-label="Periodo">' + [['week', 'Settimana'], ['month', 'Mese'], ['year', 'Anno']].map(function (p) { return '<button type="button" data-p="' + p[0] + '" aria-pressed="' + (P === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div></div></header><div class="wrap" id="gcsWrap"></div>';
     [].forEach.call(root.querySelectorAll('[data-p]'), function (b) { b.onclick = function () { P = b.dataset.p; draw(); [].forEach.call(root.querySelectorAll('[data-p]'), function (x) { x.setAttribute('aria-pressed', String(x.dataset.p === P)); }); }; });
   }
-  function kpi(l, v, d, extra, range) { return '<div class="kpi"><div class="lbl">' + l + '</div><div class="val">' + v + '</div>' + (range ? '<div class="range">' + range + '</div>' : '') + (extra ? '<div class="sub2">' + extra + '</div>' : '') + '<div class="delta ' + d.cls + '">' + esc(d.text) + '</div></div>'; }
+  function icOf(l) { return /incass|fatturat/i.test(l) ? 'eur' : /prenotazion/i.test(l) ? 'cal' : /riempiment|occupazion/i.test(l) ? 'gauge' : /ore/i.test(l) ? 'clock' : 'users'; }
+  function kpi(l, v, d, extra, range) { return '<div class="kpi" data-ic="' + icOf(l) + '"><div class="lbl">' + l + '</div><div class="val">' + v + '</div><div class="delta ' + d.cls + '">' + esc(d.text) + '</div>' + (range ? '<div class="range">' + range + '</div>' : '') + (extra ? '<div class="sub2">' + extra + '</div>' : '') + '</div>'; }
   function load(force) {
     if (busy) return; if (DATA && COURTS && !force) { draw(); return; }
     busy = true; failed = false;

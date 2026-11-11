@@ -24,9 +24,9 @@
   function niceMax(v) { if (v <= 0) return 10; var p = Math.pow(10, Math.floor(Math.log(v) / Math.LN10)), n = v / p, m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10; return m * p; }
   function svg(tag, attrs) { var e = document.createElementNS(SVGNS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
   function delta(cur, prev, unit) {
-    if (unit === 'pt') { var d = cur - prev; return { text: (d > 0 ? '+' : '') + d + ' punti vs periodo prima', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' }; }
-    if (!prev) return cur ? { text: 'Nuovo rispetto al periodo prima', cls: 'up' } : { text: 'Nessuna variazione', cls: 'flat' };
-    var p = Math.round((cur - prev) / prev * 100); return { text: (p > 0 ? '+' : '') + p + '% vs periodo prima', cls: p > 0 ? 'up' : p < 0 ? 'down' : 'flat' };
+    if (unit === 'pt') { var d = cur - prev; return { text: (d > 0 ? '+' : '') + d + ' punti vs prima', cls: d > 0 ? 'up' : d < 0 ? 'down' : 'flat' }; }
+    if (!prev) return cur ? { text: 'Nuovo', cls: 'up' } : { text: 'Nessuna variazione', cls: 'flat' };
+    var p = Math.round((cur - prev) / prev * 100); return { text: (p > 0 ? '+' : '') + p + '% vs prima', cls: p > 0 ? 'up' : p < 0 ? 'down' : 'flat' };
   }
   function courseColor(c) { var n = (c.name + ' ' + (c.category || '')).toLowerCase(); return /hyrox/.test(n) ? 'var(--c-hyrox)' : /pilates/.test(n) ? 'var(--c-pilates)' : /circuit/.test(n) ? 'var(--c-circuit)' : 'var(--accent)'; }
 
@@ -135,7 +135,8 @@
     if (cache[P]) { draw(cache[P]); } else wrap.innerHTML = '<div class="gcSk gcSkL"><i></i><i></i><i></i><i></i></div>';
     G.api(null, G.API + '&stats=1&period=' + P).then(function (j) { var changed = JSON.stringify(cache[P]) !== JSON.stringify(j); cache[P] = j; if (my === token && active && changed) draw(j); }).catch(function (e) { if (my === token && !cache[P]) { wrap.innerHTML = ''; wrap.appendChild(el('div', 'gxWhy', e.message || 'Errore')); } });
   }
-  function kpi(l, v, d, extra, range) { return '<div class="kpi"><div class="lbl">' + l + '</div><div class="val">' + v + '</div>' + (range ? '<div class="range">' + range + '</div>' : '') + (extra ? '<div class="sub2">' + extra + '</div>' : '') + '<div class="delta ' + d.cls + '">' + esc(d.text) + '</div></div>'; }
+  function icOf(l) { return /incass|fatturat/i.test(l) ? 'eur' : /prenotazion/i.test(l) ? 'cal' : /riempiment|occupazion/i.test(l) ? 'gauge' : /ore/i.test(l) ? 'clock' : 'users'; }
+  function kpi(l, v, d, extra, range) { return '<div class="kpi" data-ic="' + icOf(l) + '"><div class="lbl">' + l + '</div><div class="val">' + v + '</div><div class="delta ' + d.cls + '">' + esc(d.text) + '</div>' + (range ? '<div class="range">' + range + '</div>' : '') + (extra ? '<div class="sub2">' + extra + '</div>' : '') + '</div>'; }
   function draw(d) {
     last = d; tipHide();
     var wrap = root.querySelector('#gcsWrap'); if (!wrap) return;

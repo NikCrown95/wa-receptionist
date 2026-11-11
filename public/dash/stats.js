@@ -121,11 +121,11 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
   function prevInPeriod(row,p){return rowInBounds(row,statsPeriodBounds(p,true));}
 
   function fmtDelta(cur, prev){
-    if (!prev) return cur ? {text:'Nuovo rispetto al periodo precedente', cls:'up'} : {text:'Nessun dato per il confronto', cls:'flat'};
+    if (!prev) return cur ? {text:'Nuovo', cls:'up'} : {text:'Nessun confronto', cls:'flat'};
     var d = ((cur - prev) / prev) * 100;
     var sign = d > 0 ? '+' : '';
     var cls = d > 3 ? 'up' : (d < -3 ? 'down' : 'flat');
-    return {text: sign + Math.round(d) + '% rispetto al periodo precedente', cls: cls};
+    return {text: sign + Math.round(d) + '% vs prima', cls: cls};
   }
 
   function el(tag, attrs, text){
@@ -334,20 +334,22 @@ function statsRevenueOf(r){ return statsIsClosedRow(r)?0:(Number(r.price)||0); }
     var rToday=new Date(bounds.now.getFullYear(),bounds.now.getMonth(),bounds.now.getDate());
     var revRange='dal '+fmtD(bounds.start)+' al '+fmtD(rToday<rLast?rToday:rLast);
     var projRange='dal '+fmtD(bounds.start)+' al '+fmtD(rLast);
+    var prevRevenue=prevRows.filter(function(r){return !r.cancelled;}).reduce(function(s,r){return s+statsRevenueOf(r);},0);
     var cards=[
-      {lbl:'Fatturato',val:eur.format(revenue),range:revRange,delta:{text:'Appuntamenti già trascorsi',cls:'flat'}},
-      {lbl:'Proiezione fatturato',val:eur.format(projectedRevenue),range:projRange,delta:{text:'Inclusi gli appuntamenti futuri in agenda',cls:'flat'}},
-      {lbl:'Appuntamenti confermati',val:String(count),delta:fmtDelta(count,prevCount)},
-      {lbl:'Totale clienti',val:String(Array.from(new Set(DATA.map(function(r){return r.customerKey;}).filter(Boolean))).length),delta:{text:'Clienti univoci per numero di telefono',cls:'flat'}}
+      {ic:'eur',lbl:'Fatturato',val:eur.format(revenue),range:revRange+' · incassato',delta:fmtDelta(revenue,prevRevenue)},
+      {ic:'trend',lbl:'Previsto',val:eur.format(projectedRevenue),range:projRange+' · con le prenotazioni future',delta:{text:'a fine periodo',cls:'flat'}},
+      {ic:'cal',lbl:'Prenotazioni',val:String(count),sub:'confermate nel periodo',delta:fmtDelta(count,prevCount)},
+      {ic:'users',lbl:'Clienti',val:String(Array.from(new Set(DATA.map(function(r){return r.customerKey;}).filter(Boolean))).length),sub:'in tutto, per numero di telefono',delta:newClients?{text:'+'+newClients+(newClients===1?' nuovo':' nuovi'),cls:'up'}:{text:'nessun nuovo',cls:'flat'}}
     ];
     var box=document.getElementById('kpis');
     box.textContent='';
     cards.forEach(function(c){
-      var k=el('div',{class:'kpi'});
+      var k=el('div',{class:'kpi','data-ic':c.ic||''});
       k.appendChild(el('div',{class:'lbl'},c.lbl));
       k.appendChild(el('div',{class:'val'},c.val));
-      if(c.range)k.appendChild(el('div',{class:'range'},c.range));
       k.appendChild(el('div',{class:'delta '+c.delta.cls},c.delta.text));
+      if(c.range)k.appendChild(el('div',{class:'range'},c.range));
+      if(c.sub)k.appendChild(el('div',{class:'sub2'},c.sub));
       box.appendChild(k);
     });
   }
@@ -498,7 +500,7 @@ rects.push(rect);
       function(i, touch){
         rects.forEach(function(r, j){ r.style.opacity = j === i ? '1' : '.35'; });
         var v = points[i].value, sp = svgToScreen(svg, padL + i*(bw+gap) + bw/2, parseFloat(rects[i].getAttribute('y')));
-        statsTipShow('<b>' + v + (v === 1 ? ' appuntamento' : ' appuntamenti') + '</b>' + points[i].label, sp.x, sp.y, touch);
+        statsTipShow('<b>' + v + (v === 1 ? ' prenotazione' : ' prenotazioni') + '</b>' + points[i].label, sp.x, sp.y, touch);
       },
       function(){ rects.forEach(function(r){ r.style.opacity = ''; }); });
     animateBars(svg);
@@ -520,7 +522,7 @@ rects.push(rect);
       var x = padL + i*(bw+gap);
       var y = padT + innerH - bh;
       var rect = svgEl('rect', {class:'bar', x:x, y:y, width:bw, height:Math.max(bh,2), rx:6});
-      var title = svgEl('title'); title.textContent = h + ':00 – ' + v + (v===1?' appuntamento':' appuntamenti');
+      var title = svgEl('title'); title.textContent = h + ':00 – ' + v + (v===1?' prenotazione':' prenotazioni');
       rect.appendChild(title);
       svg.appendChild(rect);
       var t = svgEl('text', {class:'axis', x:x+bw/2, y:H-6, 'text-anchor':'middle'});
@@ -715,7 +717,7 @@ rects.push(rect);
         var cell = el('div', {class:'heat-cell' + (open ? '' : ' closed'), 'data-stats-tip':'1'});
         if (v > 0) cell.style.background = 'color-mix(in srgb, var(--accent) ' + Math.round(15 + (v / max) * 75) + '%, var(--card2))';
         var when = day + ' ' + hh + ':00–' + (hh + 1) + ':00';
-        var html = !open ? '<b>Chiuso</b>' + when : '<b>' + v + (v === 1 ? ' appuntamento' : ' appuntamenti') + '</b>' + when;
+        var html = !open ? '<b>Chiuso</b>' + when : '<b>' + v + (v === 1 ? ' prenotazione' : ' prenotazioni') + '</b>' + when;
         function on(e){
           if (statsHeatOn && statsHeatOn !== cell) statsHeatOn.classList.remove('on');
           statsHeatOn = cell; cell.classList.add('on');
@@ -810,7 +812,7 @@ rects.push(rect);
     renderKpis(rows, prevRows);
 
     var subLabel = period === 'week' ? 'Ultimi 7 giorni' : (period === 'month' ? 'Ultimi 30 giorni' : 'Ultimi 12 mesi');
-    document.getElementById('trend-sub').textContent = subLabel + ', solo appuntamenti confermati.';
+    document.getElementById('trend-sub').textContent = subLabel + ', solo prenotazioni confermate.';
     document.getElementById('count-sub').textContent = subLabel + '.';
     renderLineChart(bucketsForPeriod(OPEN, period));
     renderCountChart(bucketsCount(OPEN, period));
