@@ -985,6 +985,8 @@
   /* ---------- Impostazioni: riga di scorciatoie ---------- */
   function mountSc() {
     var nav = document.querySelector("#panelOther .stMenu"); if (!nav) return;
+    var off = nav.querySelector(".mnSc"); if (off) off.remove();
+    return; /* riga "Vai subito a" tolta dalle Impostazioni */
     var gym = !!nav.querySelector("[data-gx]");
     var club = !gym && !!nav.querySelector("[data-cx]");
     var defs = gym
