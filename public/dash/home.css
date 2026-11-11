@@ -73,3 +73,12 @@
 #panelHome .hmIc svg{width:22px;height:22px}
 #panelHome .hmT1{font-size:14px}
 #panelHome .hmT2{font-size:12px}
+
+/* riquadri piu' grandi: icona sopra, titolo e sottotitolo sotto */
+#panelHome .hmTile{flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;min-height:156px;padding:20px 12px 18px 22px}
+#panelHome .hmTile::before{top:30px;bottom:30px}
+#panelHome .hmIc{width:56px;height:56px;border-radius:17px}
+#panelHome .hmIc svg{width:29px;height:29px}
+#panelHome .hmTxt{width:100%;flex:none}
+#panelHome .hmT1{font-size:16.5px}
+#panelHome .hmT2{font-size:13px;margin-top:3px}
