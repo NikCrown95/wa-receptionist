@@ -1897,7 +1897,7 @@ module.exports = async (req, res) => {
         }
         if (fbEv && ((fbEv.meta && fbEv.meta.done) || Date.now() - Date.parse(fbEv.created_at) > 45 * 86400000)) fbEv = null;
       } catch (e) { fbEv = null; }
-      const evBase = "notification_events?business_id=eq." + biz.id + "&or=" + encodeURIComponent("(created_at.gte." + sinceIso + ",and(event_type.in.(booked,cancelled,rental_booked,rental_cancelled),created_at.gte." + sinceBookIso + "))") + (biz.business_type === "palestra" ? "&event_type=in.(booked,cancelled,rental_booked,rental_cancelled)" : "&event_type=not.in.(closures_reminder,feedback_ask,weekly_recap)") + "&order=created_at.desc&limit=60&select=id,event_type,customer_name,service_name,starts_at,channel,created_at";
+      const evBase = "notification_events?business_id=eq." + biz.id + "&or=" + encodeURIComponent("(created_at.gte." + sinceIso + ",and(event_type.in.(booked,cancelled,rental_booked,rental_cancelled),created_at.gte." + sinceBookIso + "))") + (biz.business_type === "palestra" ? "&event_type=in.(booked,cancelled,rental_booked,rental_cancelled)" : "&event_type=not.in.(closures_reminder,feedback_ask,weekly_recap)") + "&order=created_at.desc&limit=60&select=id,event_type,appointment_id,customer_name,service_name,starts_at,channel,created_at";
       let ev = await sb("GET", evBase + ",meta");
       if (!ev.ok && ev.status === 400) ev = await sb("GET", evBase); // colonna meta non ancora creata: la campanella funziona come prima
       if (ev.ok && Array.isArray(ev.data)) {
@@ -1907,7 +1907,10 @@ module.exports = async (req, res) => {
             subEv = (await require("../lib/palestra.js").expiringEvents(biz)).map(function (x) { return { id: x.id, event_type: "sub_expiring", customer_name: x.customer_name, service_name: x.service_name, starts_at: x.starts_at, created_at: x.created_at, meta: { member_id: x.member_id, ends_on: x.ends_on, days_left: x.days_left, phone: x.customer_phone } }; });
           } catch (e) { console.error("Abbonamenti in scadenza non letti: " + e.message); }
         }
-        const evList = ev.data.filter(function (e) { return !fbEv || e.id !== fbEv.id; }).concat(false ? [{ id: fbEv.id, event_type: "feedback_ask", created_at: fbEv.created_at, meta: fbEv.meta || null }] : []).concat(subEv).sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
+        // Regola per tutte le verticali: se una prenotazione e' stata disdetta, resta solo la notifica di cancellazione (quella "Nuova prenotazione" non si mostra piu')
+        const cancelledIds = {};
+        ev.data.forEach(function (e) { if ((e.event_type === "cancelled" || e.event_type === "rental_cancelled") && e.appointment_id) cancelledIds[e.appointment_id] = 1; });
+        const evList = ev.data.filter(function (e) { return !fbEv || e.id !== fbEv.id; }).filter(function (e) { return !((e.event_type === "booked" || e.event_type === "rental_booked") && e.appointment_id && cancelledIds[e.appointment_id]); }).concat(false ? [{ id: fbEv.id, event_type: "feedback_ask", created_at: fbEv.created_at, meta: fbEv.meta || null }] : []).concat(subEv).sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
         let seenAt = 0;
         try { const sr = await sb("GET", "businesses?id=eq." + biz.id + "&select=notif_seen_at&limit=1"); if (sr.ok && sr.data && sr.data[0] && sr.data[0].notif_seen_at) seenAt = Date.parse(sr.data[0].notif_seen_at) || 0; } catch (e) { seenAt = 0; }
         return res.status(200).json({ mode: "events", seen_at: seenAt, now: new Date().toISOString(), events: evList.map(function (e) { return { id: String(e.id).indexOf("sub:") === 0 ? e.id : "e" + e.id, type: e.event_type, customer_name: e.customer_name || "", service: e.service_name || "", starts_at: e.starts_at, channel: e.channel || "", created_at: e.created_at, meta: e.meta || null }; }) });
