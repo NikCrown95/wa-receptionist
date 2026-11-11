@@ -3727,3 +3727,23 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .kpi[data-ic="gauge"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 17a8 8 0 1 1 16 0M12 17l4-5'/></svg>")}
 .kpi[data-ic="clock"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M12 7.5V12l3 2'/></svg>")}
 .kpi[data-ic="pack"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='6' width='16' height='13' rx='3'/><path d='M4 11h16M9 6V4h6v2'/></svg>")}
+
+/* Regole di prenotazione: pagina piu' intuitiva */
+#panelOther .rlSum{padding:14px 16px}
+#panelOther .rlSumT{display:flex;align-items:center;justify-content:space-between;margin:0 0 6px;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+#panelOther .rlSumT em{font-style:normal;letter-spacing:0;text-transform:none;font-size:.8rem;font-weight:700;opacity:0;transition:opacity .25s}
+#panelOther .rlSumT em.on{opacity:1}
+#panelOther .rlSr{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:.92rem;color:var(--muted)}
+#panelOther .rlSr svg{flex:none;color:var(--accent)}
+#panelOther .rlSr b{color:var(--ink);font-weight:600}
+#panelOther .rlHd{display:flex;align-items:center;gap:10px;margin:0 0 4px}
+#panelOther .rlHd h4{margin:0;font-size:1rem}
+#panelOther .rlIc{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line2);color:var(--accent)}
+#panelOther .rlCard>.stHint{margin:2px 0 12px 44px}
+#panelOther .rlCard .stChips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 12px}
+#panelOther .rlCard .stChips button{min-height:44px;padding:6px 4px;border-radius:12px;font-size:.84rem;text-align:center;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#panelOther .rlCard .stChips button i{margin:2px 0 0;font-size:.66rem}
+#panelOther .rlRes{margin:0;padding:9px 12px;border-radius:12px;background:var(--card2);font-size:.86rem;line-height:1.4;color:var(--ink)}
+#panelOther .rlRes:empty{display:none}
+#panelOther .rlNote{display:flex;gap:8px;align-items:flex-start;margin:4px 4px 0;font-size:.84rem;line-height:1.4;color:var(--muted)}
+#panelOther .rlNote svg{flex:none;margin-top:1px;color:var(--accent)}

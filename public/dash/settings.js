@@ -858,11 +858,20 @@ function pfRenderPoster(box,b,opts){
     stText('rlCancelHint',RL.cancel===0?'I clienti possono annullare in qualsiasi momento, anche pochi minuti prima.':(window.__LIA_PT?'Se l\u2019iscritto annulla quando mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' al coaching, non può più farlo da solo: il coaching di quel giorno è perso e l\u2019ingresso viene scalato.':'Se mancano meno di '+rlLabel(RL_C,RL.cancel).replace(' prima','')+' all\u2019appuntamento, il cliente non può annullare da solo e vede il tuo numero di telefono.'));
     var tc=stEl('rlTravelCard');if(tc){var on=false;try{on=svcHomeOn()}catch(e){}tc.hidden=!on}
     stText('rlTravelHint',RL.travel===0?'Nessuna attesa: dopo un lavoro a domicilio puoi essere prenotato subito.':'Dopo un lavoro a domicilio, e prima di arrivarci, servono almeno '+rlLabel(RL_T,RL.travel).toLowerCase()+' tra un appuntamento e l\u2019altro. I clienti vedono solo gli orari adatti.');
+    rlSummary();
     stText('stSumRules','Preavviso '+rlLabel(RL_N,RL.notice)+' \u00b7 annullo '+(RL.cancel===0?'sempre':rlLabel(RL_C,RL.cancel).replace(' prima','')));
   }
+  function rlSummary(){
+    var h=stEl('rlSumRows');if(!h)return;h.innerHTML='';
+    var rows=[['M12 7.5V12l3 2','Prenotano fino a ',rlLabel(RL_N,RL.notice)+' prima'],['M3.5 10h17M8 3v4M16 3v4','Vedono i giorni fino a ',rlLabel(RL_A,RL.advance)+' avanti'],RL.cancel===0?['M9 9l6 6M15 9l-6 6','Annullano ','in qualsiasi momento']:['M9 9l6 6M15 9l-6 6','Annullano fino a ',rlLabel(RL_C,RL.cancel)]];
+    var tc=stEl('rlTravelCard');if(tc&&!tc.hidden&&RL.travel>0)rows.push(['M3 14l2-5h11l3 4h2v3H3z','Tra due domicili lasci ',rlLabel(RL_T,RL.travel).toLowerCase()]);
+    rows.forEach(function(r){var d=document.createElement('div');d.className='rlSr';d.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+r[0]+'"/></svg>';var t=document.createElement('span');t.appendChild(document.createTextNode(r[1]));var b=document.createElement('b');b.textContent=r[2];t.appendChild(b);d.appendChild(t);h.appendChild(d)});
+  }
+  var rlSvT=null;
+  function rlSaved(){var e=stEl('rlSaved');if(!e)return;e.textContent='Salvato \u2713';e.className='on';clearTimeout(rlSvT);rlSvT=setTimeout(function(){e.className='';e.textContent=''},2000)}
   function rulesApply(d){var r=d&&d.booking_rules;if(r){RL.notice=Number(r.min_notice_min)||15;RL.cancel=r.cancel_limit_hours===0?0:(Number(r.cancel_limit_hours)||2);RL.advance=Number(r.max_advance_days)||90;RL.travel=Number(r.travel_min)||0}rlRender()}
   function rlSave(prev){
-    api('POST',{action:'booking_rules',min_notice_min:RL.notice,cancel_limit_hours:RL.cancel,max_advance_days:RL.advance,travel_min:(function(){try{return svcHomeOn()?RL.travel:undefined}catch(e){return undefined}})()}).then(function(){flash('Regole salvate.')}).catch(function(e){RL=prev;rlRender();alert(e.message)});
+    api('POST',{action:'booking_rules',min_notice_min:RL.notice,cancel_limit_hours:RL.cancel,max_advance_days:RL.advance,travel_min:(function(){try{return svcHomeOn()?RL.travel:undefined}catch(e){return undefined}})()}).then(function(){flash('Regole salvate.');rlSaved()}).catch(function(e){RL=prev;rlRender();alert(e.message)});
   }
   ['rlNotice','rlAdvance','rlCancel','rlTravel'].forEach(function(id){var g=stEl(id);if(!g)return;
     g.addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b)return;var v=Number(b.getAttribute('data-v'));
