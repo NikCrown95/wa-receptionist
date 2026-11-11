@@ -253,7 +253,7 @@
     codeView();
     var gs = el('div', 'mvGs');
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
-    gt('INGRESSI USATI', m.total - m.left, m.total); gt('IN PROGRAMMA', ls.up.length, 0, 'coaching');
+    gt('INGRESSI USATI', m.total - m.left, m.total); gt('IN AGENDA', ls.up.length, 0, 'coaching');
     gt('INGRESSI RIMASTI', m.left, m.total); gs.appendChild(cb);
     body.appendChild(gs);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
@@ -288,7 +288,7 @@
           r.appendChild(rm); l.appendChild(r);
         });
         pane.appendChild(l);
-        var ac = el('div', 'mxManage'); if (D.services && D.services.length) { var nb = btn('', 'mxAdd', function () { assign(m); }); nb.innerHTML = SV('<path d="M12 5v14M5 12h14"/>', 16) + '<span>Nuovo pacchetto</span>'; ac.appendChild(nb); } pane.appendChild(ac);
+        var ac = el('div', 'mxManage'); if (D.services && D.services.length) { var nb = btn('', 'mxNewPk', function () { assign(m); }); nb.innerHTML = SV('<path d="M12 5v14M5 12h14"/>', 16) + '<span>Nuovo pacchetto</span>'; ac.appendChild(nb); } pane.appendChild(ac);
       }
     }
     drawTabs(); drawPane();

@@ -359,11 +359,31 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 /* Pagina iscritto a tutta pagina (smartphone): l'intestazione dell'app resta, il resto occupa tutta la larghezza */
 @media(max-width:700px){
   #ptMx .mx.mxD{padding-left:0;padding-right:0;padding-top:0}
-  #ptMx .mxD .mvHero{margin:-16px -16px 0;border-radius:0 0 22px 22px;border-width:0 0 1px 0;padding:14px 16px 16px}
+  #ptMx .mxD .mvHero{margin:-16px -16px 0;border-radius:0;border-width:0 0 1px 0;padding:14px 16px 16px}
 }
 .mxD .mvA.pri svg{stroke-width:2.6}
 /* Pacchetti: pulsanti ben fatti */
 .mxD .mxEv .mxRm{grid-column:1/-1;justify-self:end;height:30px;padding:0 12px;border-radius:10px;border:1px solid color-mix(in srgb,#E5645C 45%,transparent);background:transparent;color:#E5645C;font:inherit;font-size:.75rem;font-weight:500;cursor:pointer}
 .mxD .mxManage{margin-top:10px}
-.mxD .mxAdd{all:unset;box-sizing:border-box;width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer}
-.mxD .mxAdd:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mxD .mxNewPk{all:unset;box-sizing:border-box;width:100%;height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer}
+.mxD .mxNewPk:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Pagina iscritto: ritmo uniforme (12px tra i blocchi, 8px dentro le griglie), intestazione piatta */
+.mxD .mvHero{border-radius:0;border-width:0 0 1px 0}
+.mxD .mvBody{margin-top:12px;gap:12px}
+.mxD .mvBody .mxTabs{margin:0}
+.mxD .mvBody .mxPane>.mxSec:first-child{margin-top:0}
+.mxD .mvBody .mxSec{margin:16px 2px 8px}
+.mxD .mvBody .mxEmpty{padding:12px 14px}
+.mxD .mvBody .mxTot{margin-bottom:8px}
+.mxD .mvBody .mxTot{padding:10px 12px;border-radius:12px}
+.mxD .mvBody .mxTot span:not(.gxChip){font-size:.69rem;font-weight:500;letter-spacing:.04em}
+.mxD .mvBody .mxTot b{font-size:1.06rem;font-weight:500}
+.mxD .mvBody .mxLs{border-radius:12px}
+.mxD .mvBody .mxEv{padding:10px 12px;gap:12px}
+.mxD .mvBody .mxEv .mxDt b{font-size:1rem;font-weight:500}
+.mxD .mvBody .mxEv .mxDt span{font-size:.69rem;font-weight:500;letter-spacing:.04em}
+.mxD .mvBody .mxEv .mxTx b{font-size:.85rem;font-weight:500}
+.mxD .mvBody .mxEv .mxTx span{font-size:.75rem}
+.mxD .mvBody .mxEv>b{font-size:.85rem;font-weight:500}
+.mxD .mvBody .mxEmpty,.mxD .mvBody .mxEmpty{font-size:.78rem}
