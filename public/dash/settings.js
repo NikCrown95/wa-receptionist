@@ -865,7 +865,7 @@ function pfRenderPoster(box,b,opts){
     var h=stEl('rlSumRows');if(!h)return;h.innerHTML='';
     var rows=[['M12 7.5V12l3 2','Prenotano fino a ',rlLabel(RL_N,RL.notice)+' prima'],['M3.5 10h17M8 3v4M16 3v4','Vedono i giorni fino a ',rlLabel(RL_A,RL.advance)+' avanti'],RL.cancel===0?['M9 9l6 6M15 9l-6 6','Annullano ','in qualsiasi momento']:['M9 9l6 6M15 9l-6 6','Annullano fino a ',rlLabel(RL_C,RL.cancel)]];
     var tc=stEl('rlTravelCard');if(tc&&!tc.hidden&&RL.travel>0)rows.push(['M3 14l2-5h11l3 4h2v3H3z','Tra due domicili lasci ',rlLabel(RL_T,RL.travel).toLowerCase()]);
-    rows.forEach(function(r){var d=document.createElement('div');d.className='rlSr';d.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+r[0]+'"/></svg>';var t=document.createElement('span');t.appendChild(document.createTextNode(r[1]));var b=document.createElement('b');b.textContent=r[2];t.appendChild(b);d.appendChild(t);h.appendChild(d)});
+    rows.forEach(function(r){var d=document.createElement('div');d.className='rlSr';var t=document.createElement('span');t.appendChild(document.createTextNode(r[1]));var b=document.createElement('b');b.textContent=r[2];t.appendChild(b);d.appendChild(t);h.appendChild(d)});
   }
   var rlSvT=null;
   function rlSaved(){var e=stEl('rlSaved');if(!e)return;e.textContent='Salvato \u2713';e.className='on';clearTimeout(rlSvT);rlSvT=setTimeout(function(){e.className='';e.textContent=''},2000)}
