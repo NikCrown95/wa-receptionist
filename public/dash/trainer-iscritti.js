@@ -218,29 +218,29 @@
     var cp = curPack(m), st = m.status, ls = lessons(m), host = el('div', 'mx mxD'); root.appendChild(host);
     var top = el('div', 'mvTop');
     var back = el('button', 'mvBack'); back.type = 'button'; back.innerHTML = SV('<path d="M15 6l-6 6 6 6"/>', 16) + '<span>Iscritti</span>'; back.addEventListener('click', function () { S.mid = null; render(); }); top.appendChild(back);
-    var pct = cp && cp.total ? Math.round(cp.left / cp.total * 100) : 0;
-    var hero = el('div', 'mvHero ' + st.s);
-    var plan = cp ? '<div class="mvPl"><div class="mvPt"><b>' + esc(cp.name) + '</b>' + (cp.price_eur != null ? '<span>' + eur(cp.price_eur) + ' · pagato</span>' : '') + '</div><span class="mvPb"><i style="width:' + pct + '%"></i></span><div class="mvPd"><span>dal ' + dshort(pd(cp.created_at)) + '</span><b>' + cp.left + ' ingressi rimasti</b></div></div>' : '<div class="mvPl"><div class="mvPt"><b>Nessun pacchetto</b></div></div>';
-    hero.innerHTML = '<span class="mvRing"></span><div class="mvId"><span class="mvAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.name) + '</b><span>' + esc(m.phone) + '</span></div></div><div class="mvMeta"><span class="mvChip">' + esc(st.label) + '</span></div><span class="mvSep"></span>' + plan;
-    hero.insertBefore(top, hero.firstChild.nextSibling); host.appendChild(hero);
-    (function () { var idr = hero.querySelector('.mvId'), mt = hero.querySelector('.mvMeta'), ch = mt && mt.querySelector('.mvChip'); if (idr && ch) { idr.appendChild(ch); mt.remove(); } })();
+    var hero = el('div', 'mvHero mvA2 ' + st.s);
+    hero.innerHTML = '<div class="mvId"><span class="mvAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.name) + '</b><span>' + esc(m.phone) + '</span></div><span class="mvChip">' + esc(st.label) + '</span></div>';
+    hero.insertBefore(top, hero.firstChild);
+    var tot = m.total || 0, lf = m.left || 0, fr = tot ? Math.max(0, Math.min(1, lf / tot)) : 0, CI = 2 * Math.PI * 54;
+    var rg = el('div', 'mvRg'); rg.innerHTML = '<svg viewBox="0 0 128 128" role="img" aria-label="' + lf + ' ingressi su ' + tot + '"><circle class="t" cx="64" cy="64" r="54"/><circle class="p" cx="64" cy="64" r="54" stroke-dasharray="' + (CI * fr).toFixed(1) + ' ' + CI.toFixed(1) + '" transform="rotate(-90 64 64)"/></svg><div class="mvRn"><b>' + lf + '</b><span>ingressi su ' + tot + '</span></div>';
+    hero.appendChild(rg); host.appendChild(hero);
     var body = el('div', 'mxBody mvBody'); host.appendChild(body);
     var acts = el('div', 'mvActs');
-    function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvA ' + (cls || '')); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = (icon.charAt(0) === '<' && icon.slice(0, 4) === '<svg' ? icon : SV(icon, 16)) + '<span>' + label + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); }
+    function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvR ' + (cls || '')); b.setAttribute('aria-label', label); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = '<span class="mvRi">' + (icon.slice(0, 4) === '<svg' ? icon.replace(/width="\d+" height="\d+"/, 'width="22" height="22"') : SV(icon, 22)) + '</span><span class="mvRl">' + (label === 'Nuovo pacchetto' ? 'Pacchetto' : label) + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); }
     if (D.services && D.services.length) ab('Nuovo pacchetto', '<path d="M12 5v14M5 12h14"/>', 'pri', function () { assign(m); });
     var dg = (function (p) { var s = String(p == null ? '' : p).trim(), d = s.replace(/\D/g, ''); if (!d) return ''; if (s.charAt(0) === '+') return d; if (d.slice(0, 2) === '00') return d.slice(2); if (/^3\d{8,9}$/.test(d) || /^0\d{6,10}$/.test(d)) return '39' + d; return d; })(m.phone);
     if (dg) ab('WhatsApp', '<svg width="17" height="17" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>', '', null, 'https://wa.me/' + dg);
     ab('Chiama', '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>', '', null, 'tel:' + String(m.phone || '').replace(/[^\d+]/g, ''));
     body.appendChild(acts);
-    var cb = el('div', 'mvG mvCode');
+    var cb = el('div', 'mvRw mvCode');
     function codeView() {
       cb.classList.remove('ed');
-      cb.innerHTML = '<span class="mvK">CODICE</span><span class="mvV"><b class="mvCv">' + (m.code ? esc(m.code) : '<small>non impostato</small>') + '</b><button type="button" class="mvCodeB">' + (m.code ? 'Cambia' : 'Imposta') + '</button></span>';
+      cb.innerHTML = '<span>Codice di accesso</span><b class="mvCv">' + (m.code ? esc(m.code) : '<i>non impostato</i>') + '<button type="button" class="mvCodeB">' + (m.code ? 'Cambia' : 'Imposta') + '</button></b>';
       cb.querySelector('.mvCodeB').addEventListener('click', codeEdit);
     }
     function codeEdit() {
       cb.classList.add('ed');
-      cb.innerHTML = '<span class="mvK">CODICE DI ACCESSO</span><div class="mvCe"><input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Lettere e numeri, da 4 a 20" value="' + esc(m.code || '') + '"><button type="button" class="cSv">Salva</button><button type="button" class="cNo">Annulla</button></div><p class="cEr" hidden></p>';
+      cb.innerHTML = '<span>Codice di accesso</span><div class="mvCe"><input type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="Lettere e numeri, da 4 a 20" value="' + esc(m.code || '') + '"><button type="button" class="cSv">Salva</button><button type="button" class="cNo">Annulla</button></div><p class="cEr" hidden></p>';
       var inp = cb.querySelector('input'), er = cb.querySelector('.cEr'); inp.focus();
       cb.querySelector('.cNo').addEventListener('click', codeView);
       cb.querySelector('.cSv').addEventListener('click', function () {
@@ -251,11 +251,13 @@
       });
     }
     codeView();
-    var gs = el('div', 'mvGs');
-    function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || '') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
-    gt('INGRESSI USATI', m.total - m.left, m.total); gt('IN AGENDA', ls.up.length, 0, 'coaching');
-    gt('INGRESSI RIMASTI', m.left, m.total); gs.appendChild(cb);
-    body.appendChild(gs);
+    var lsC = el('div', 'mvLs');
+    function rw(k, v) { var r = el('div', 'mvRw'); r.innerHTML = '<span>' + k + '</span><b>' + v + '</b>'; lsC.appendChild(r); }
+    rw('Pacchetto', cp ? esc(cp.name) + (cp.price_eur != null && cp.price_eur !== '' ? ' · ' + eur(cp.price_eur) : '') : 'Nessun pacchetto');
+    if (cp && cp.created_at) rw('Dal', dshort(pd(cp.created_at)));
+    rw('Ingressi usati', (m.total - m.left) + ' su ' + m.total);
+    rw('In agenda', ls.up.length + ' coaching');
+    lsC.appendChild(cb); body.appendChild(lsC);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
     function drawTabs() {

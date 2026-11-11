@@ -387,3 +387,38 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvBody .mxEv .mxTx span{font-size:.75rem}
 .mxD .mvBody .mxEv>b{font-size:.85rem;font-weight:500}
 .mxD .mvBody .mxEmpty,.mxD .mvBody .mxEmpty{font-size:.78rem}
+
+/* Scheda iscritto: anello al centro, azioni tonde, dati in lista */
+.mxD .mvA2{gap:0}
+.mxD .mvA2 .mvId{margin-top:10px}
+.mxD .mvRg{position:relative;width:136px;height:136px;margin:16px auto 2px}
+.mxD .mvRg svg{width:100%;height:100%;display:block}
+.mxD .mvRg .t,.mxD .mvRg .p{fill:none;stroke-width:10}
+.mxD .mvRg .t{stroke:rgba(255,255,255,.16)}
+.mxD .mvRg .p{stroke:#8ED3E8;stroke-linecap:round}
+.mxD .mvA2.warn .mvRg .p{stroke:#F0C15A}
+.mxD .mvA2.bad .mvRg .p{stroke:#FF8A82}
+.mxD .mvRn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.mxD .mvRn b{font-size:2rem;font-weight:500;line-height:1}
+.mxD .mvRn span{font-size:.75rem;color:rgba(255,255,255,.75)}
+.mxD .mvActs{display:flex;justify-content:center;gap:28px;margin-top:4px}
+.mxD .mvR{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-width:64px}
+.mxD .mvRi{width:48px;height:48px;border-radius:50%;border:1px solid var(--line2,var(--line));background:var(--card);display:grid;place-items:center;color:var(--ink)}
+.mxD .mvR.pri .mvRi{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#04141A)}
+.mxD .mvR.pri .mvRi svg{stroke-width:2.6}
+.mxD .mvRl{font-size:.75rem;font-weight:500;color:var(--muted)}
+.mxD .mvR:focus-visible .mvRi{outline:2px solid var(--accent);outline-offset:2px}
+.mxD .mvLs{border:1px solid var(--line);background:var(--card);border-radius:14px;overflow:hidden}
+.mxD .mvRw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-top:1px solid var(--line);font-size:.82rem}
+.mxD .mvLs>.mvRw:first-child{border-top:0}
+.mxD .mvRw>span{color:var(--muted);flex:none}
+.mxD .mvRw>b{font-weight:500;text-align:right;min-width:0;overflow-wrap:anywhere}
+.mxD .mvRw .mvCv i{font-style:normal;color:var(--muted);font-weight:400}
+.mxD .mvRw .mvCodeB{all:unset;margin-left:10px;color:var(--accent);font-size:.78rem;font-weight:500;cursor:pointer}
+.mxD .mvRw.ed{flex-direction:column;align-items:stretch;gap:8px}
+.mxD .mvRw .mvCe{display:flex;gap:8px}
+.mxD .mvRw .mvCe input{flex:1;min-width:0;height:40px;padding:0 12px;border-radius:12px;border:1.5px solid var(--line2,var(--line));background:var(--bg);color:var(--ink);font:inherit;outline:0}
+.mxD .mvRw .cSv{flex:none;height:40px;padding:0 14px;border:0;border-radius:12px;background:var(--accent);color:#06222a;font:inherit;font-weight:600;cursor:pointer}
+.mxD .mvRw .cNo{flex:none;height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line2,var(--line));background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.mxD .mvRw .cEr{margin:0;color:var(--danger,#E5645C);font-size:.8rem}
+.mxD .mvRw .mvCv,.mxD .mvCode .mvRw .mvCv{font-size:inherit;letter-spacing:0}
