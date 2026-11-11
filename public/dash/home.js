@@ -175,6 +175,23 @@
     document.body.classList.toggle('lia-sec-home',!!(e&&e.detail==='home'));
     if(e&&e.detail==='home'){refresh();loadDay();}
   });
+  /* fuori dalla Home (solo smartphone) logo e nome dell'attivita' riportano alla Home: sotto il nome compare "‹ Home" */
+  var mq=window.matchMedia?window.matchMedia('(max-width:699px)'):null;
+  function goHome(e){
+    var t=e.target&&e.target.closest?e.target.closest('#businessHome'):null;
+    if(!t||!document.body.classList.contains('hmBackOn'))return;
+    if(e.type==='keydown'&&e.key!=='Enter'&&e.key!==' ')return;
+    var m=$('menuTabHome');if(!m)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();click(m);
+  }
+  document.addEventListener('click',goHome,true);
+  document.addEventListener('keydown',goHome,true);
+  function backState(sec){
+    var on=!!(mq&&mq.matches)&&sec!=='home'&&!!$('menuTabHome');
+    if(document.body.classList.contains('hmBackOn')!==on)document.body.classList.toggle('hmBackOn',on);
+    var bh=$('businessHome');if(bh)bh.setAttribute('aria-label',on?'Torna alla Home':'Vai al calendario di oggi');
+  }
+  document.addEventListener('lia:section',function(e){backState(e&&e.detail);});
   /* il menu (con Disponibilita' e il QR) viene costruito subito dopo il caricamento: riallineo i riquadri */
   [0,500,1500,3500].forEach(function(ms){setTimeout(refresh,ms);});
   var menu=$('burgerMenu');

@@ -103,3 +103,11 @@
 :root:not([data-theme="light"]) #panelHome .hmDayPill{background:#7FDCDC;color:#04141A}
 :root:not([data-theme="light"]) #panelHome .hmDayFill{background:linear-gradient(90deg,#4BB3D6,#7FDCDC)}
 :root:not([data-theme="light"]) #panelHome .hmDayBar{background:rgba(127,220,220,.14)}
+
+/* tasto Home: logo e nome portano alla Home, sotto il nome "‹ Home" al posto della scritta della sezione */
+@media(max-width:699px){
+  body.hmBackOn #sectionLabel{display:none!important}
+  body.hmBackOn .mainBiz{cursor:pointer}
+  body.hmBackOn .mainBiz::after{content:'\2039  Home';display:block;font-size:.72rem;line-height:1.25;color:#7FDCDC;font-weight:600;letter-spacing:.01em}
+  :root[data-theme="light"] body.hmBackOn .mainBiz::after{color:#1F7F8A}
+}
