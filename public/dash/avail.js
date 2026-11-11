@@ -432,13 +432,7 @@
     if (key === "quando") {
       if (staffOk) ctx();
       card.appendChild(mk("div", "wzQ", "Quando?"));
-      var t0 = today(), sun = addDays(t0, 6 - dow(t0));
-      var qs = mk("div", "avRow");
-      qs.appendChild(wzChip("Periodo", W.per, function () { W.per = !W.per; W.anc = null; W.days = []; again(); }));
-      [["Oggi", [t0]], ["Domani", [addDays(t0, 1)]], ["Questa settimana", (function () { var a = []; for (var d = t0; d <= sun; d = addDays(d, 1)) a.push(d); return a; })()]].forEach(function (q) {
-        qs.appendChild(wzChip(q[0], q[1].length === W.days.length && q[1].every(function (x) { return W.days.indexOf(x) > -1; }), function () { W.days = q[1].slice(); W.per = false; W.anc = null; again(); }));
-      });
-      card.appendChild(qs);
+      var t0 = today();
       var ms = W.month || t0.slice(0, 7) + "-01", md = new Date(ms + "T12:00:00");
       var cc = mk("div", "wzCal"), hd = mk("div", "wzCalH");
       hd.appendChild(mk("b", null, MO[md.getMonth()] + " " + md.getFullYear()));
