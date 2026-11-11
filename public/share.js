@@ -431,9 +431,10 @@
       '<div class="mnQrCard"><div class="mnQrFrame"><i></i><i></i><i></i><i></i><div class="mnQrBox" id="mnQrBox"></div></div><div class="mnQrInfo"><b id="mnQrName"></b><span id="mnQrHint"></span></div></div>' +
       '<div class="mnLinkRow"><code id="mnLinkTxt"></code><button type="button" class="mnCopy" data-a="copy">' + I.copy + "<span>Copia</span></button></div>" +
       '<div class="mnActs">' +
+      '<button type="button" class="mnAct" data-a="gshare"><i>' + I.share + '</i><span class="mnT">Condividi<small>Scegli l\u2019app con cui inviarlo</small></span></button>' +
       '<button type="button" class="mnAct" data-a="wa"><i class="wa">' + I.wa + '</i><span class="mnT">Invia su WhatsApp</span></button>' +
       '<button type="button" class="mnAct" data-a="dl" id="mnDl"><i>' + I.down + '</i><span class="mnT">Scarica il QR</span></button>' +
-      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '<small>PDF pronto da stampare</small></span>' + I.chev + "</button>" +
+      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '<small>PDF pronto da stampare</small></span>' + I.down + "</button>" +
       "</div>" +
       '<p class="mnMsg" role="status"></p></div>';
     document.body.appendChild(sheet);
@@ -448,7 +449,12 @@
       else if (a === "copy") copyText(l.url, b);
       else if (a === "wa") window.open("https://wa.me/?text=" + encodeURIComponent("Prenota da " + (biz.name || "noi") + ": " + l.url), "_blank");
       else if (a === "dl") download(l);
-      else if (a === "poster") { closeSheet(); var p = $("menuTabProfile"); if (p) p.click(); setTimeout(function () { var t = $("pfPoster") || $("panelProfile"); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 280); }
+      else if (a === "gshare") {
+        var tx = "Prenota da " + (biz.name || "noi");
+        if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: tx, url: l.url }).catch(function () {});
+        else copyText(l.url, b);
+      }
+      else if (a === "poster") posterDirect();
     });
   }
   /* ---------- foglio "Locandina per la vetrina": prima la scura, poi si puo' scegliere la chiara e scaricare il PDF da stampare ---------- */
@@ -457,6 +463,31 @@
     var p = $("menuTabProfile"); if (p) p.click();
     setTimeout(function () { var t = $("pfPoster") || $("panelProfile"); if (t && t.scrollIntoView) t.scrollIntoView({ behavior: "smooth", block: "start" }); }, 280);
   }
+  /* "Locandina per la vetrina" dal foglio Condividi: scarica subito il PDF (versione scura), senza cambiare pagina */
+  function posterDirect() {
+    var raw = (biz && biz.raw) || {}, P = window.liaPoster;
+    if (!raw.public_link || !P || !P.fonts || !P.canvas || !P.pdf || !P.qr) { closeSheet(); posterPage(); return; }
+    if (pstBusy) return;
+    pstBusy = true; pstName = raw.name || biz.name || "La tua attivit\u00e0";
+    var m = sheet && sheet.querySelector(".mnMsg"); if (m) m.textContent = "Sto preparando la locandina\u2026";
+    pstBuild("dark").then(function (cv) { return P.pdf(cv); }).then(function (blob) {
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+      a.download = "locandina-" + slug(pstName) + "-scura.pdf";
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      if (m) { m.textContent = "Fatto. Controlla i download."; setTimeout(function () { if (m.textContent.indexOf("Fatto") === 0) m.textContent = ""; }, 5000); }
+    }).catch(function () { if (m) m.textContent = "Non sono riuscito a creare la locandina. Riprova."; })
+      .then(function () { pstBusy = false; });
+  }
+  /* appena si aprono le Impostazioni si scaricano in anticipo dati, font e sfondi della locandina: poi si apre subito */
+  function warmPoster() {
+    try {
+      load();
+      var P = window.liaPoster; if (!P) return;
+      if (P.fonts) P.fonts();
+      if (P.tpl) { P.tpl("dark"); P.tpl("light"); }
+    } catch (e) {}
+  }
+  document.addEventListener("lia:section", function (e) { if (e.detail === "other") setTimeout(warmPoster, 200); });
   function isCourts() { var b = (biz && biz.raw) || {}; return !!window.__liaCampi || String(b.business_type || "") === "centro_sportivo"; }
   function pstBuild(t, width) {
     var b = (biz && biz.raw) || {}, link = b.public_link || "", P = window.liaPoster;
@@ -587,6 +618,7 @@
       paintSheet();
       lastFocus = document.activeElement;
       sheet.hidden = false;
+      warmPoster();
       var c = sheet.querySelector(".mnClose"); if (c) c.focus();
     });
   }
