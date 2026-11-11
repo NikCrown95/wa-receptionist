@@ -422,3 +422,21 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvRw .cNo{flex:none;height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line2,var(--line));background:transparent;color:var(--ink);font:inherit;cursor:pointer}
 .mxD .mvRw .cEr{margin:0;color:var(--danger,#E5645C);font-size:.8rem}
 .mxD .mvRw .mvCv,.mxD .mvCode .mvRw .mvCv{font-size:inherit;letter-spacing:0}
+
+/* Card in alto: sfondo con alone di luce, anello con "10 / su 10", "In corso" evidenziato */
+#ptMx .mxD .mvHero.mvA2{margin:0;border-radius:22px;border:1px solid #1F4A57;background:linear-gradient(180deg,#10303C,#0B1D26);padding:14px 14px 16px;position:relative;overflow:hidden;isolation:isolate}
+#ptMx .mxD .mvHero.mvA2.warn{border-color:#4F4521}
+#ptMx .mxD .mvHero.mvA2.bad{border-color:#57302E}
+.mxD .mvA2 .mvRg{width:136px;height:136px;margin:14px auto 0}
+.mxD .mvA2 .mvRg::before{content:"";position:absolute;left:50%;top:50%;width:320px;height:320px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(79,195,200,.38),rgba(79,195,200,0) 65%);z-index:-1;pointer-events:none}
+.mxD .mvA2.warn .mvRg::before{background:radial-gradient(circle,rgba(240,193,90,.30),rgba(240,193,90,0) 65%)}
+.mxD .mvA2.bad .mvRg::before{background:radial-gradient(circle,rgba(255,138,130,.30),rgba(255,138,130,0) 65%)}
+.mxD .mvA2 .mvRn b{font-size:2.5rem;font-weight:500;line-height:1}
+.mxD .mvA2 .mvRn span{font-size:.875rem;margin-top:4px;color:rgba(255,255,255,.75)}
+.mxD .mvA2 .mvRl2{margin:10px 0 0;text-align:center;font-size:.82rem;color:rgba(255,255,255,.8)}
+.mxD .mvA2 .mvId .mvChip{height:auto;padding:6px 12px;font-size:.82rem;font-weight:600;border-radius:99px;display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,154,.16);border:1px solid rgba(74,222,154,.55);color:#8FF0C0;margin-left:auto}
+.mxD .mvA2 .mvId .mvChip::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ADE9A;flex:none}
+.mxD .mvA2.warn .mvId .mvChip{background:rgba(240,193,90,.16);border-color:rgba(240,193,90,.55);color:#F6D88A}
+.mxD .mvA2.warn .mvId .mvChip::before{background:#F0C15A}
+.mxD .mvA2.bad .mvId .mvChip{background:rgba(255,138,130,.16);border-color:rgba(255,138,130,.55);color:#FFB3AD}
+.mxD .mvA2.bad .mvId .mvChip::before{background:#FF8A82}

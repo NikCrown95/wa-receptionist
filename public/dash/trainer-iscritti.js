@@ -222,8 +222,8 @@
     hero.innerHTML = '<div class="mvId"><span class="mvAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div class="mvNm"><b>' + esc(m.name) + '</b><span>' + esc(m.phone) + '</span></div><span class="mvChip">' + esc(st.label) + '</span></div>';
     hero.insertBefore(top, hero.firstChild);
     var tot = m.total || 0, lf = m.left || 0, fr = tot ? Math.max(0, Math.min(1, lf / tot)) : 0, CI = 2 * Math.PI * 54;
-    var rg = el('div', 'mvRg'); rg.innerHTML = '<svg viewBox="0 0 128 128" role="img" aria-label="' + lf + ' ingressi su ' + tot + '"><circle class="t" cx="64" cy="64" r="54"/><circle class="p" cx="64" cy="64" r="54" stroke-dasharray="' + (CI * fr).toFixed(1) + ' ' + CI.toFixed(1) + '" transform="rotate(-90 64 64)"/></svg><div class="mvRn"><b>' + lf + '</b><span>ingressi su ' + tot + '</span></div>';
-    hero.appendChild(rg); host.appendChild(hero);
+    var rg = el('div', 'mvRg'); rg.innerHTML = '<svg viewBox="0 0 128 128" role="img" aria-label="' + lf + ' ingressi su ' + tot + '"><circle class="t" cx="64" cy="64" r="54"/><circle class="p" cx="64" cy="64" r="54" stroke-dasharray="' + (CI * fr).toFixed(1) + ' ' + CI.toFixed(1) + '" transform="rotate(-90 64 64)"/></svg><div class="mvRn"><b>' + lf + '</b><span>su ' + tot + '</span></div>';
+    hero.appendChild(rg); var rl = el('p', 'mvRl2'); rl.textContent = 'ingressi rimasti'; hero.appendChild(rl); host.appendChild(hero);
     var body = el('div', 'mxBody mvBody'); host.appendChild(body);
     var acts = el('div', 'mvActs');
     function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvR ' + (cls || '')); b.setAttribute('aria-label', label); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = '<span class="mvRi">' + (icon.slice(0, 4) === '<svg' ? icon.replace(/width="\d+" height="\d+"/, 'width="22" height="22"') : SV(icon, 22)) + '</span><span class="mvRl">' + (label === 'Nuovo pacchetto' ? 'Pacchetto' : label) + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); }
