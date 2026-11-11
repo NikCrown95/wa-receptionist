@@ -6,7 +6,7 @@ window.liaModesBlock=function(host,init,getMin){
   var showHalf=half||!!AL.half,multi=['domicilio','online'].some(vis);
   var DEF=[['sede','In sede','A casa tua'],['domicilio','A domicilio','A casa del cliente'],['online','Online','In videochiamata']];
   host.innerHTML='';host.className=(host.className?host.className+' ':'')+'lmodes';
-  var cap=document.createElement('div');cap.className='lmcap';cap.textContent=multi?'Modalità e prezzo':'Prezzo';host.appendChild(cap);
+  var cap=document.createElement('div');cap.className='lmcap';cap.textContent=multi?'Modalità e prezzo':'Prezzo (€)';host.appendChild(cap);
   var hint=document.createElement('p');hint.className='lmhint';if(multi)host.appendChild(hint);
   function paintHint(){var d=typeof getMin==='function'?parseInt(getMin(),10):0;hint.textContent=d>=5?'Il prezzo è per '+d+' minuti.':'Spunta come lo fai e scrivi il prezzo di ognuna.'}
   DEF.forEach(function(d){
@@ -17,7 +17,7 @@ window.liaModesBlock=function(host,init,getMin){
     var tx=document.createElement('span');var b=document.createElement('b');b.textContent=d[1];var sm=document.createElement('small');sm.textContent=d[2];tx.appendChild(b);tx.appendChild(sm);
     if(multi){lab.appendChild(cb);lab.appendChild(tx);wrap.appendChild(lab)}else{cb.checked=true}
     var pf=document.createElement('div');pf.className='lmprice';
-    var pl=document.createElement('label');pl.textContent='Prezzo (€)';
+    var pl=document.createElement('label');if(multi)pl.textContent='Prezzo (€)';
     var pi=document.createElement('input');pi.type='text';pi.inputMode='decimal';pi.autocomplete='off';pi.value=on&&M[d[0]]!==''?String(M[d[0]]).replace('.',','):'';
     pi.setAttribute('aria-label','Prezzo '+d[1]);pl.appendChild(pi);pf.appendChild(pl);wrap.appendChild(pf);
     if(!multi)wrap.className='lmrow on single';
