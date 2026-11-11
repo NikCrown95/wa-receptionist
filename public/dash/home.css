@@ -82,3 +82,9 @@
 #panelHome .hmTxt{width:100%;flex:none}
 #panelHome .hmT1{font-size:16.5px}
 #panelHome .hmT2{font-size:13px;margin-top:3px}
+#panelHome .hmTile{min-height:138px;gap:11px;padding:16px 10px 16px 20px}
+#panelHome .hmTile::before{top:26px;bottom:26px}
+#panelHome .hmIc{width:48px;height:48px;border-radius:15px}
+#panelHome .hmIc svg{width:25px;height:25px}
+#panelHome .hmT1{font-size:15px}
+#panelHome .hmT2{font-size:12.5px;margin-top:2px}
