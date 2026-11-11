@@ -3706,3 +3706,12 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .lmodes .lmrow.single .lmprice input{display:block;width:100%;box-sizing:border-box;min-height:50px;padding:0 14px;border:1px solid var(--line2);border-radius:14px;background:var(--card);font-size:1rem}
 .liaSheet .lmodes .lmrow.single .lmprice input:focus{outline:none;border-color:var(--accent)}
 #panelOther #biTag{min-height:60px!important;overflow:hidden}
+
+/* telefono: logo e nome dell'attivita' dentro una capsula (la capsula e' disegnata dietro il nome e arriva fino al logo) */
+@media(max-width:699px){
+  :root:root:root body:not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz{position:relative;z-index:0}
+  :root:root:root body:not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz::before{content:"";position:absolute;z-index:-1;left:-46px;right:0;top:-6px;bottom:-6px;border-radius:999px;background:var(--card);border:1px solid var(--line2);pointer-events:none}
+  :root:root:root body:not(:has(#panelProfile.on)) .mainTopRow #mbAv{position:relative;z-index:1;border-radius:50%!important;width:34px!important;height:34px!important;margin-right:10px!important;margin-left:4px!important}
+  :root:root:root body:not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz{padding-right:12px;margin-left:-4px}
+  :root:root:root body:not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz::before{left:-52px}
+}
