@@ -3709,11 +3709,11 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 
 /* telefono: logo e nome dentro una card (disegnata dietro il nome, fino al logo); campanella e menu in riquadri separati */
 @media(max-width:699px){
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz{position:relative;z-index:0;padding-right:16px;margin-left:-6px;min-height:36px;flex:0 1 auto!important;display:flex!important;flex-direction:column;justify-content:center}
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz::before{content:"";position:absolute;z-index:-1;left:-52px;right:0;top:-6px;bottom:-6px;border-radius:14px;background:var(--card);border:1px solid var(--line2);pointer-events:none}
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv{position:relative;z-index:1;width:36px!important;height:36px!important;border-radius:10px!important;margin-right:12px!important;margin-left:7px!important}
+  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz{position:relative;z-index:0;padding-right:12px;margin-left:-5px;min-height:28px;flex:0 1 auto!important;display:flex!important;flex-direction:column;justify-content:center}
+  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz::before{content:"";position:absolute;z-index:-1;left:-38px;right:0;top:-5px;bottom:-5px;border-radius:12px;background:var(--card);border:1px solid var(--line2);pointer-events:none}
+  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv{position:relative;z-index:1;width:28px!important;height:28px!important;border-radius:8px!important;margin-right:9px!important;margin-left:6px!important}
 
-  :root:root:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTop #liaRecapBtn{width:40px!important;height:40px!important;margin-left:auto!important}
+  :root:root:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTop #liaRecapBtn{width:36px!important;height:36px!important;margin-left:auto!important}
 }
 
 /* statistiche: prime quattro card uguali, con icona, numero e variazione a pillola (tutte le verticali) */
@@ -3736,3 +3736,7 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .kpi[data-ic="gauge"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 17a8 8 0 1 1 16 0M12 17l4-5'/></svg>")}
 .kpi[data-ic="clock"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M12 7.5V12l3 2'/></svg>")}
 .kpi[data-ic="pack"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='6' width='16' height='13' rx='3'/><path d='M4 11h16M9 6V4h6v2'/></svg>")}
+
+@media(max-width:699px){
+  :root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz #businessName{font-size:1.02rem;line-height:1.1}
+}
