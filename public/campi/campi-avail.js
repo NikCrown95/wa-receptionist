@@ -494,10 +494,12 @@
     layer.innerHTML =
       '<div class="avScroll"><div class="avIn">' +
       '<div class="avTop"><button type="button" class="mnBack" id="avBack" aria-label="Indietro">' + IC.back + '</button><div><h2 id="avT">Disponibilità</h2><p class="avSubT">Quando i campi si possono prenotare e quando sono chiusi.</p></div></div>' +
+      '<button type="button" class="avBkSet" id="avBkSet"><span aria-hidden="true">\u2039</span> Impostazioni</button>' +
       '<div class="avApp"><nav id="avSide" class="avSide" aria-label="Orari di"></nav><section id="avBody" class="avMain"></section></div>' +
       '</div></div>';
     document.body.appendChild(layer);
     $("avBack").addEventListener("click", function () { close(); });
+    $("avBkSet").addEventListener("click", function () { close(); });
     var menu = $("burgerMenu");
     if (menu) menu.addEventListener("click", function (ev) { var bt = ev.target.closest && ev.target.closest("button"); if (bt && bt.id !== "menuTabAvail") close(false); });
   }
@@ -527,8 +529,9 @@
     prevCur = [];
   }
   /* t: "neg"/"club" = orari del centro sportivo, "chi" = lavori e indisponibilità (predefinito, come per le altre attività) */
-  function open(t) {
+  function open(t, from) {
     if (!layer) build();
+    layer.classList.toggle("avFromSet", from === "settings");
     pending = t === "neg" || t === "club" ? "club" : "chi";
     layer.hidden = false; markMenu(true); place();
     try { var sc0 = layer.querySelector(".avScroll"); if (sc0) sc0.scrollTop = 0; } catch (e) {}

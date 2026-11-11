@@ -403,7 +403,7 @@
       g[1].forEach(function (k) {
         var p = byK[k], b = el('button', 'stRow'); b.type = 'button'; b.setAttribute('data-cx', k);
         b.innerHTML = '<span class="stIc ' + p[1] + '">' + svg(p[2]) + '</span><span class="stTx"><b>' + p[3] + '</b><small>' + p[4] + '</small></span><span class="stCh" aria-hidden="true">›</span>';
-        b.addEventListener('click', function () { if ((k === 'hours' || k === 'closures') && window.liaAvailOpen) window.liaAvailOpen(k === 'hours' ? 'club' : 'chi'); else openPane(k); }); list.appendChild(b); rowOf[k] = b;
+        b.addEventListener('click', function () { if ((k === 'hours' || k === 'closures') && window.liaAvailOpen) window.liaAvailOpen(k === 'hours' ? 'club' : 'chi', 'settings'); else openPane(k); }); list.appendChild(b); rowOf[k] = b;
         var pane = el('section', 'stPage cx-page'); pane.setAttribute('data-st', 'cx-' + k);
         var hd = el('header', 'stPh'), bk = el('button', 'stBack'); bk.type = 'button'; bk.innerHTML = '<span aria-hidden="true">‹</span> Impostazioni';
         bk.addEventListener('click', function () { sh.classList.remove('inPage'); var wr = document.querySelector('#panelOther .otherWrap'); if (wr) wr.scrollTop = 0; });

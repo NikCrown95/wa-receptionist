@@ -299,3 +299,8 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
 /* Chiusure e assenze: la scelta di chi si assenta sta nel percorso guidato, quindi la striscia in alto (Attività, team) non serve */
 .avChiOnly .avSide{display:none!important}
 @media(min-width:700px){.avChiOnly .avApp{grid-template-columns:minmax(0,1fr)}}
+
+/* aperta dalle Impostazioni: pulsante per tornare al menu Impostazioni */
+.avBkSet{display:none}
+.avFromSet .avBkSet{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;margin:0 0 0 -4px;padding:6px 12px 6px 8px;border:1px solid var(--line2);border-radius:999px;background:var(--card);color:var(--accent-ink);font:inherit;font-size:.86rem;font-weight:700;cursor:pointer}
+.avBkSet span{font-size:1.25rem;line-height:1;margin-top:-2px}
