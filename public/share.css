@@ -475,3 +475,13 @@ body.mnOn.mnB #burgerMenu > button[data-sub][hidden]{display:none}
 body.mnOn.mnB #burgerMenu > button[data-sub]:not(#menuTabGuide)::after{display:block;content:'\203A';grid-column:3;grid-row:1;align-self:center;font-size:1.35rem;line-height:1;font-weight:400;color:var(--line2);white-space:normal;overflow:visible}
 body.mnOn.mnB #burgerMenu > button[data-sub][aria-current="true"]{position:relative;background:linear-gradient(90deg,color-mix(in srgb,var(--accent-ink) 11%,transparent),transparent 82%);color:var(--accent-ink)}
 body.mnOn.mnB #burgerMenu > button[data-sub][aria-current="true"]::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--accent-ink)}
+
+/* righe piu' compatte, senza barra laterale sulla voce attiva */
+body.mnOn.mnB #burgerMenu > button[data-sub][aria-current="true"]::before{display:none}
+body.mnOn.mnB #burgerMenu{scrollbar-width:none}
+body.mnOn.mnB #burgerMenu::-webkit-scrollbar{display:none}
+@media all{
+  body.mnOn.mnB #burgerMenu > button[data-sub],body.mnOn.mnB #burgerMenu > .logoutBtn{min-height:clamp(34px,calc((100vh - env(safe-area-inset-top,0px) - 220px)/var(--mnN,10)),42px);min-height:clamp(34px,calc((100dvh - env(safe-area-inset-top,0px) - 220px)/var(--mnN,10)),42px)}
+}
+body.mnOn.mnB #burgerMenu .mnGrp{padding:10px 12px 3px}
+body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
