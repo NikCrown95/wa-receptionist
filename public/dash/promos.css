@@ -27,3 +27,20 @@
 #promoBody .prSub s{opacity:.8;}
 #promoBody .prEnd{flex:none;min-height:40px;padding:0 14px;border-radius:12px;border:1.5px solid var(--danger);background:transparent;color:var(--danger);font-family:inherit;font-size:.86rem;font-weight:700;cursor:pointer;}
 #promoBody .prEnd:disabled,#promoBody .stBtn:disabled{opacity:.5;}
+
+/* Nuova promozione a passi: servizio, sconto, durata */
+#promoBody .prSteps{gap:14px}
+#promoBody .prStep{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
+#promoBody .prSh{display:flex;align-items:center;gap:9px;font-size:.95rem;font-weight:700}
+#promoBody .prN{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);font-size:.78rem;font-weight:800}
+#promoBody .prSvcs{display:flex;flex-direction:column;gap:8px}
+#promoBody .prSvcs.scr{max-height:300px;overflow-y:auto;overscroll-behavior:contain}
+#promoBody .prSv{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:0 14px;border-radius:13px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:inherit;font-size:.92rem;text-align:left;cursor:pointer}
+#promoBody .prSv span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#promoBody .prSv b{flex:none;font-weight:700;color:var(--muted)}
+#promoBody .prSv.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+#promoBody .prSv.on b{color:var(--accent-ink)}
+#promoBody .prCalc{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-size:.9rem;color:var(--muted)}
+#promoBody .prCalc s{opacity:.85}
+#promoBody .prCalc b{font-size:1.25rem;color:var(--accent-ink)}
+#promoBody .prCalc i{font-style:normal}

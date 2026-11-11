@@ -3,7 +3,8 @@
   if(!host)return;
   var token=(new URLSearchParams(location.search).get('t')||'').trim();
   var D=null,busy=false,loading=false;
-  var F={service:'',preset:7,from:'',to:'',price:'',err:''};
+  var F={service:'',disc:null,preset:7,from:'',to:'',price:'',err:''};
+  var DISCS=[10,20,30,50];
   var PRESETS=[[3,'3 giorni'],[7,'1 settimana'],[14,'2 settimane'],[30,'1 mese'],[0,'Scegli le date']];
   var MESI=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 
@@ -12,6 +13,7 @@
   function addD(iso,n){var p=iso.split('-');var d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]+n));return d.toISOString().slice(0,10);}
   function lab(iso){var p=String(iso||'').split('-');return p.length===3?(+p[2])+' '+MESI[+p[1]-1]:'';}
   function num(v){return parseFloat(String(v||'').replace(',','.'));}
+  function promoPrice(){var s=svc();if(!s)return NaN;if(F.disc>0)return Math.round(s.price*(1-F.disc/100)*100)/100;return num(F.price);}
   function svc(){return D&&D.services.filter(function(s){return s.id===F.service})[0]||null;}
   function range(){
     if(!D)return {a:'',b:''};
@@ -25,9 +27,10 @@
   }
 
   function validate(){
-    var s=svc(),p=num(F.price),r=range();
+    var s=svc(),p=promoPrice(),r=range();
     if(!s)return 'Scegli un servizio';
-    if(!(p>0))return 'Inserisci il nuovo prezzo';
+    if(F.disc===null)return 'Scegli quanto sconto fare';
+    if(!(p>0))return 'Scrivi il nuovo prezzo';
     if(!(p<s.price))return 'Il nuovo prezzo deve essere più basso di '+eur(s.price);
     if(!r.a||!r.b)return 'Scegli le date';
     if(r.a<D.today)return 'La data di inizio è già passata';
@@ -50,13 +53,17 @@
     if(!D.available){host.innerHTML='<div class="prMsg"><b>Non ancora attivo</b>Questa funzione si attiva a breve. Riprova più tardi.</div>';return;}
     if(!D.services.length){host.innerHTML='<div class="prMsg"><b>Nessun servizio</b>Crea prima un servizio in "Servizi e prezzi".</div>';return;}
     if(!F.service)F.service=D.services[0].id;
-    var s=svc(),p=num(F.price),r=range(),html='';
-    html+='<div class="stCard stAdd"><h4>Nuova promozione</h4><div class="stForm">';
-    html+='<label class="stF"><span>Servizio</span><select class="set-select" id="prSvc">'+D.services.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===F.service?' selected':'')+'>'+esc(x.name)+' — '+eur(x.price)+'</option>';}).join('')+'</select></label>';
-    html+='<div class="stF"><span>Durata dell\'offerta</span><div class="prChips">'+PRESETS.map(function(c){return '<button type="button" class="ch" data-pre="'+c[0]+'" aria-pressed="'+(F.preset===c[0]?'true':'false')+'">'+c[1]+'</button>';}).join('')+'</div></div>';
+    var s=svc(),p=promoPrice(),r=range(),html='';
+    html+='<div class="stCard stAdd"><h4>Nuova promozione</h4><div class="stForm prSteps">';
+    html+='<div class="prStep"><div class="prSh"><span class="prN">1</span>Quale servizio?</div><div class="prSvcs'+(D.services.length>5?' scr':'')+'" role="radiogroup" aria-label="Servizio">'+D.services.map(function(x){return '<button type="button" class="prSv'+(x.id===F.service?' on':'')+'" role="radio" aria-checked="'+(x.id===F.service?'true':'false')+'" data-svc="'+esc(x.id)+'"><span>'+esc(x.name)+'</span><b>'+eur(x.price)+'</b></button>';}).join('')+'</div></div>';
+    html+='<div class="prStep"><div class="prSh"><span class="prN">2</span>Quanto sconto?</div><div class="prChips">'+DISCS.map(function(d){return '<button type="button" class="ch" data-disc="'+d+'" aria-pressed="'+(F.disc===d?'true':'false')+'">−'+d+'%</button>';}).join('')+'<button type="button" class="ch" data-disc="0" aria-pressed="'+(F.disc===0?'true':'false')+'">Scrivi il prezzo</button></div>';
+    if(F.disc===0)html+='<label class="stF prPriceF"><span>Nuovo prezzo (€)</span><input class="set-input" id="prPrice" type="text" inputmode="decimal" placeholder="Es. '+esc(String(Math.max(1,Math.floor(s.price*0.8))))+'" value="'+esc(F.price)+'"></label>';
+    if(p>0&&p<s.price)html+='<div class="prCalc"><s>'+esc(eur(s.price))+'</s><i aria-hidden="true">→</i><b>'+esc(eur(p))+'</b><span>· risparmi '+esc(eur(s.price-p))+'</span></div>';
+    html+='</div>';
+    html+='<div class="prStep"><div class="prSh"><span class="prN">3</span>Per quanto tempo?</div><div class="prChips">'+PRESETS.map(function(c){return '<button type="button" class="ch" data-pre="'+c[0]+'" aria-pressed="'+(F.preset===c[0]?'true':'false')+'">'+c[1]+'</button>';}).join('')+'</div>';
     if(F.preset===0)html+='<div class="stRow2"><label class="stF"><span>Dal</span><input class="set-input" type="date" id="prFrom" min="'+esc(D.today)+'" value="'+esc(F.from)+'"></label><label class="stF"><span>Al</span><input class="set-input" type="date" id="prTo" min="'+esc(F.from||D.today)+'" value="'+esc(F.to)+'"></label></div>';
     else html+='<div class="prWhen">Da oggi, <b>'+esc(lab(r.a))+'</b> a <b>'+esc(lab(r.b))+'</b></div>';
-    html+='<label class="stF"><span>Nuovo prezzo (€)</span><input class="set-input" id="prPrice" type="text" inputmode="decimal" placeholder="Es. '+esc(String(Math.max(1,Math.floor(s.price*0.8))))+'" value="'+esc(F.price)+'"></label>';
+    html+='</div>';
     if(p>0&&p<s.price){
       var pct=Math.round((1-p/s.price)*100);
       html+='<div class="prPrev"><small>Così lo vedranno i clienti</small><div class="prPrevRow"><div class="prPrevN"><b>'+esc(s.name)+'</b></div><div class="prPrevP"><s>'+esc(eur(s.price))+'</s><b>'+esc(eur(p))+'</b></div></div><div class="prStrip"><b>−'+pct+'% · risparmi '+esc(eur(s.price-p))+'</b>'+(r.b?'<em>fino al '+esc(lab(r.b))+'</em>':'')+'</div></div>';
@@ -76,6 +83,10 @@
   function keepFocus(fn){fn();}
 
   host.addEventListener('click',function(e){
+    var sv=e.target.closest&&e.target.closest('[data-svc]');
+    if(sv){F.service=sv.getAttribute('data-svc');F.err='';render();return;}
+    var dc=e.target.closest&&e.target.closest('[data-disc]');
+    if(dc){F.disc=+dc.getAttribute('data-disc');F.err='';render();if(F.disc===0){var pi=document.getElementById('prPrice');if(pi)pi.focus();}return;}
     var c=e.target.closest&&e.target.closest('[data-pre]');
     if(c){F.preset=+c.getAttribute('data-pre');F.err='';if(F.preset===0&&!F.from){F.from=D.today;F.to=D.today;}render();return;}
     var en=e.target.closest&&e.target.closest('.prEnd');
@@ -88,14 +99,13 @@
       var er=validate();F.err=er;
       if(er){var el=document.getElementById('prErr');if(el)el.textContent=er;return;}
       var r=range();busy=true;render();
-      api('POST',{action:'promo_create',service_id:F.service,promo_price_eur:num(F.price),starts_on:r.a,ends_on:r.b})
-        .then(function(){busy=false;F.price='';F.err='';return load();})
+      api('POST',{action:'promo_create',service_id:F.service,promo_price_eur:promoPrice(),starts_on:r.a,ends_on:r.b})
+        .then(function(){busy=false;F.price='';F.disc=null;F.err='';return load();})
         .catch(function(x){busy=false;F.err=x.message;render();});
     }
   });
   host.addEventListener('change',function(e){
-    if(e.target.id==='prSvc'){F.service=e.target.value;F.err='';render();}
-    else if(e.target.id==='prFrom'){F.from=e.target.value;if(F.to&&F.to<F.from)F.to=F.from;F.err='';render();}
+    if(e.target.id==='prFrom'){F.from=e.target.value;if(F.to&&F.to<F.from)F.to=F.from;F.err='';render();}
     else if(e.target.id==='prTo'){F.to=e.target.value;F.err='';render();}
   });
   host.addEventListener('input',function(e){
