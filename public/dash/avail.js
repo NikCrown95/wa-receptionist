@@ -659,6 +659,8 @@
     if (!layer) build();
     pending = t === "neg" || t === "team" || t === "chi" ? t : "chi";
     layer.hidden = false; markMenu(true); place();
+    try { var sc0 = layer.querySelector(".avScroll"); if (sc0) sc0.scrollTop = 0; } catch (e) {}
+    requestAnimationFrame(place); setTimeout(place, 120); setTimeout(place, 400);
     var body = $("avBody");
     if (!S) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     var c = cached();

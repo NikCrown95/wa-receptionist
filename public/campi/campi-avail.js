@@ -254,75 +254,174 @@
   function closureItems() {
     return D.closures.slice().sort(function (a, b) { return a.starts_on < b.starts_on ? -1 : a.starts_on > b.starts_on ? 1 : 0; });
   }
-  function renderChi(box) {
-    var form = mk("div", "avCard");
-    form.appendChild(mk("h3", "avH", "Nuova chiusura"));
-    var who = mk("div", "avRow"), quick = mk("div", "avRow");
-    var d1 = dateField(C.from, today()); d1.id = "avD1";
-    var d2 = dateField(C.to, today()); d2.id = "avD2";
-    var dur = mk("div", "avSeg");
-    var hrsBox = mk("div", "avField"); hrsBox.hidden = true;
-    var add = mk("button", "avBtn pri", "Aggiungi chiusura"); add.type = "button";
-    var persons = [["", "Tutto il centro sportivo"]].concat(D.courts.map(function (x) { return [x.id, x.name]; }));
+  /* ---------- percorso guidato: nuova chiusura (Cosa, Quando, Ore, Motivo, Conferma) ---------- */
+  var W = { step: 0, who: "", days: [], month: null, q: null, hf: null, ht: null, why: "", res: null, busy: false };
+  var WHY = ["Torneo", "Lavori", "Maltempo", "Manutenzione", "Altro"];
+  function wzReset() { W.step = 0; W.who = ""; W.days = []; W.q = null; W.hf = null; W.ht = null; W.why = ""; W.res = null; W.busy = false; }
+  function wzRuns(days) {
+    var sorted = days.slice().sort(), runs = [], cur = null;
+    sorted.forEach(function (d) { if (cur && addDays(cur.to, 1) === d) cur.to = d; else { cur = { from: d, to: d }; runs.push(cur); } });
+    return runs;
+  }
+  function wzDaysText(days) { return wzRuns(days).map(function (r) { return plabel(r.from, r.to); }).join(" · "); }
+  function wzRange() {
+    var lo = 24, hi = 0;
+    (HS[""] || []).forEach(function (d) { toRanges(d).forEach(function (r) { lo = Math.min(lo, Math.floor(m(r[0]) / 60)); hi = Math.max(hi, Math.ceil(m(r[1]) / 60)); }); });
+    if (lo >= hi) { lo = 8; hi = 22; }
+    return [lo, hi];
+  }
+  function wzWhoName() { var c = W.who ? courtOf(W.who) : null; return c ? c.name : "Tutto il centro sportivo"; }
+  function wzHoursText() {
+    if (W.q === "all") return "tutto il giorno";
+    if (W.hf == null) return "";
+    return "dalle " + W.hf + ":00 alle " + (W.ht + 1) + ":00";
+  }
+  function wzValid(key) {
+    if (key === "quando") return W.days.length > 0;
+    if (key === "ore") return W.q === "all" || W.hf != null;
+    return true;
+  }
+  function wzRun(host) {
+    if (W.busy) return;
+    var runs = wzRuns(W.days), full = W.q === "all";
+    W.busy = true; drawWz(host);
+    var from = full ? "" : pad(W.hf) + ":00", to = full ? "" : pad(W.ht + 1) + ":00";
+    var run = runs.reduce(function (p, r) { return p.then(function () { return call({ action: "add_closure", court_id: W.who || null, starts_on: r.from, ends_on: r.to, from: from, to: to, reason: W.why }); }); }, Promise.resolve());
+    run.then(function () {
+      W.busy = false; W.res = { who: wzWhoName(), days: wzDaysText(W.days), hours: wzHoursText(), why: W.why, runs: runs, court: W.who || null }; W.step = 99; changed(); return reload();
+    }).catch(function (e) { W.busy = false; toast(e.message, true); reload().catch(function () { }); });
+  }
+  function wzChip(label, on, fn) { var b = mk("button", "avChip", label); b.type = "button"; b.setAttribute("aria-pressed", on ? "true" : "false"); b.addEventListener("click", fn); return b; }
+  function drawWz(host) {
+    host.textContent = "";
+    var multi = D.courts.length > 1;
+    if (!multi || (W.who && !courtOf(W.who))) W.who = "";
+    var order = multi ? ["chi", "quando", "ore", "motivo", "ok"] : ["quando", "ore", "motivo", "ok"], n = order.length;
+    var card = mk("div", "avCard avWz"); host.appendChild(card);
+    var again = function () { drawWz(host); };
+    if (W.step >= n) {
+      var d = mk("div", "wzDone"), ck = mk("div", "wzCk"); ck.innerHTML = IC.check.replace('width="16" height="16"', 'width="26" height="26"');
+      d.appendChild(ck); d.appendChild(mk("b", null, "Chiusura aggiunta"));
+      var r = W.res || {}; d.appendChild(mk("span", "wzSub", [r.who, r.days, r.hours, r.why].filter(Boolean).join(" · ")));
+      var bk2 = 0; (r.runs || []).forEach(function (rr) { (D.closures || []).forEach(function (c) { if (c.starts_on === rr.from && c.ends_on === rr.to && (c.court_id || null) === (r.court || null)) bk2 += c.bookings || 0; }); });
+      if (bk2) d.appendChild(mk("div", "avWarn", bk2 === 1 ? "C'è 1 prenotazione già fissata in quel periodo: avvisa il cliente." : "Ci sono " + bk2 + " prenotazioni già fissate in quel periodo: avvisa i clienti."));
+      var nb = mk("button", "avBtn pri", "Aggiungi un'altra chiusura"); nb.type = "button"; nb.addEventListener("click", function () { wzReset(); again(); });
+      d.appendChild(nb); card.appendChild(d); return;
+    }
+    var key = order[W.step];
+    var top = mk("div", "wzTop");
+    var bk = mk("button", "wzBack", "‹"); bk.type = "button"; bk.setAttribute("aria-label", "Indietro");
+    bk.style.display = W.step > 0 ? "" : "none"; bk.addEventListener("click", function () { if (W.step > 0) { W.step--; again(); } });
+    top.appendChild(bk); top.appendChild(mk("h3", "avH", "Lavori e indisponibilità")); card.appendChild(top);
+    var bar = mk("div", "wzBar"); for (var k = 0; k < n; k++) bar.appendChild(mk("i", k <= W.step ? "on" : null)); card.appendChild(bar);
+    card.appendChild(mk("div", "wzStep", "Passo " + (W.step + 1) + " di " + n));
+    var ctx = function () {
+      var c = mk("div", "wzCtx");
+      c.appendChild(document.createTextNode(wzWhoName() + (key !== "quando" && key !== "chi" && W.days.length ? " · " + wzDaysText(W.days) : "")));
+      card.appendChild(c);
+    };
 
-    function redrawWho() { chips(who, persons, function (v) { return C.who === v; }, function (v) { C.who = v; redrawWho(); }); }
-    function qd(a, b) { C.from = a; C.to = b; d1.value = a; d2.value = b; }
-    function redrawQuick() {
-      var t = today(), sun = addDays(t, 6 - dow(t)), nm = addDays(t, 7 - dow(t));
-      quick.textContent = "";
-      [["Oggi", t, t], ["Domani", addDays(t, 1), addDays(t, 1)], ["Questa settimana", t, sun], ["Prossima settimana", nm, addDays(nm, 6)]].forEach(function (q) {
-        var b = mk("button", "avChip", q[0]); b.type = "button"; b.setAttribute("aria-pressed", C.from === q[1] && C.to === q[2] ? "true" : "false");
-        b.addEventListener("click", function () { qd(q[1], q[2]); redrawQuick(); }); quick.appendChild(b);
+    if (key === "chi") {
+      card.appendChild(mk("div", "wzQ", "Cosa si chiude?"));
+      card.appendChild(mk("div", "wzHelp", "Tutto il centro sportivo oppure un solo campo."));
+      var list = [["", "Tutto il centro sportivo", "Nessun campo prenotabile"]];
+      D.courts.forEach(function (c) { list.push([c.id, c.name, "Solo questo campo non è prenotabile"]); });
+      list.forEach(function (it) {
+        var b = mk("button", "wzOpt"); b.type = "button"; b.setAttribute("aria-pressed", W.who === it[0] ? "true" : "false");
+        var av = mk("span", "avAv" + (it[0] === "" ? " shop" : ""), it[0] === "" ? "" : String(it[1]).replace(/^\D*/, "").charAt(0) || String(it[1]).charAt(0).toUpperCase());
+        if (it[0] === "") av.innerHTML = IC.club;
+        b.appendChild(av);
+        var t = mk("span", "wzOt"); t.appendChild(mk("b", null, it[1])); t.appendChild(mk("small", null, it[2])); b.appendChild(t);
+        b.addEventListener("click", function () { W.who = it[0]; again(); });
+        card.appendChild(b);
       });
     }
-    function redrawDur() {
-      dur.textContent = "";
-      [[false, "Tutto il giorno"], [true, "Solo alcune ore"]].forEach(function (o) {
-        var b = mk("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", C.part === o[0] ? "true" : "false");
-        b.addEventListener("click", function () { C.part = o[0]; redrawDur(); }); dur.appendChild(b);
-      });
-      hrsBox.textContent = ""; hrsBox.hidden = !C.part;
-      if (C.part) {
-        hrsBox.appendChild(mk("label", null, "Quali ore"));
-        var r = mk("div", "avRow");
-        [["Mattina", "08:00", "13:00"], ["Pomeriggio", "13:00", "18:00"], ["Sera", "18:00", "23:00"]].forEach(function (q) {
-          var b = mk("button", "avChip", q[0]); b.type = "button"; b.setAttribute("aria-pressed", C.tf === q[1] && C.tt === q[2] ? "true" : "false");
-          b.addEventListener("click", function () { C.tf = q[1]; C.tt = q[2]; redrawDur(); }); r.appendChild(b);
-        });
-        hrsBox.appendChild(r);
-        var tr = mk("div", "avTimes");
-        tr.appendChild(mk("span", "avHint", "Dalle"));
-        tr.appendChild(selT(C.tf, "Dalle ore", function (v) { C.tf = v; if (m(C.tt) <= m(v)) C.tt = step(v, 4); redrawDur(); }));
-        tr.appendChild(mk("span", "avHint", "alle"));
-        tr.appendChild(selT(C.tt, "Alle ore", function (v) { C.tt = v; if (m(C.tf) >= m(v)) C.tf = step(v, -4); redrawDur(); }));
-        hrsBox.appendChild(tr);
-        hrsBox.appendChild(mk("span", "avHint", "Vale per ogni giorno del periodo scelto."));
+
+    if (key === "quando") {
+      if (multi) ctx();
+      card.appendChild(mk("div", "wzQ", "Quando?"));
+      var t0 = today();
+      var ms = W.month || t0.slice(0, 7) + "-01", md = new Date(ms + "T12:00:00");
+      var cc = mk("div", "wzCal"), hd = mk("div", "wzCalH");
+      hd.appendChild(mk("b", null, MO[md.getMonth()] + " " + md.getFullYear()));
+      var ar = mk("div", "wzArr"), pv = mk("button", null, "‹"), nx = mk("button", null, "›");
+      pv.type = nx.type = "button"; pv.setAttribute("aria-label", "Mese precedente"); nx.setAttribute("aria-label", "Mese successivo");
+      pv.disabled = ms <= t0.slice(0, 7) + "-01";
+      var lim = new Date(t0.slice(0, 7) + "-01T12:00:00"); lim.setMonth(lim.getMonth() + 12); nx.disabled = md >= lim;
+      pv.addEventListener("click", function () { var x = new Date(ms + "T12:00:00"); x.setMonth(x.getMonth() - 1); W.month = ymd(x).slice(0, 7) + "-01"; again(); });
+      nx.addEventListener("click", function () { var x = new Date(ms + "T12:00:00"); x.setMonth(x.getMonth() + 1); W.month = ymd(x).slice(0, 7) + "-01"; again(); });
+      ar.appendChild(pv); ar.appendChild(nx); hd.appendChild(ar); cc.appendChild(hd);
+      var gr = mk("div", "wzGrid");
+      DS.forEach(function (x) { gr.appendChild(mk("div", "wzDw", x.slice(0, 1))); });
+      for (var e = 0; e < dow(ms); e++) gr.appendChild(mk("div"));
+      var dn = new Date(md.getFullYear(), md.getMonth() + 1, 0).getDate();
+      for (var dd = 1; dd <= dn; dd++) (function (ds, num) {
+        var b = mk("button", "wzD" + (W.days.indexOf(ds) > -1 ? " on" : "") + (ds === t0 ? " t" : ""), String(num)); b.type = "button";
+        if (ds < t0) b.disabled = true;
+        b.addEventListener("click", function () { var ix = W.days.indexOf(ds); if (ix > -1) W.days.splice(ix, 1); else W.days.push(ds); again(); });
+        gr.appendChild(b);
+      })(ms.slice(0, 8) + pad(dd), dd);
+      cc.appendChild(gr); card.appendChild(cc);
+      card.appendChild(mk("div", "wzHelp c", "Tocca i giorni (anche più di uno)."));
+      if (W.days.length) card.appendChild(mk("div", "wzPick", wzDaysText(W.days)));
+    }
+
+    if (key === "ore") {
+      ctx();
+      card.appendChild(mk("div", "wzQ", "Per quali ore?"));
+      var rg = wzRange(), lo = rg[0], hi = rg[1];
+      var qr = mk("div", "avRow");
+      qr.appendChild(wzChip("Tutto il giorno", W.q === "all", function () { W.q = "all"; W.hf = W.ht = null; again(); }));
+      if (lo < 13 && hi > 13) {
+        qr.appendChild(wzChip("Mattina", W.q === "am", function () { W.q = "am"; W.hf = lo; W.ht = 12; again(); }));
+        qr.appendChild(wzChip("Pomeriggio", W.q === "pm", function () { W.q = "pm"; W.hf = 13; W.ht = Math.min(hi - 1, 17); again(); }));
+      }
+      if (hi > 18) qr.appendChild(wzChip("Sera", W.q === "ev", function () { W.q = "ev"; W.hf = 18; W.ht = hi - 1; again(); }));
+      card.appendChild(qr);
+      if (W.q !== "all") {
+        card.appendChild(mk("div", "wzHelp", "Oppure tocca la prima e l'ultima ora in cui chiudi."));
+        var hg = mk("div", "wzHrs");
+        for (var h = lo; h < hi; h++) (function (h) {
+          var on = W.hf != null && h >= W.hf && h <= W.ht;
+          var b = mk("button", on ? "on" : null, String(h)); b.type = "button";
+          b.addEventListener("click", function () {
+            if (W.hf == null || W.hf !== W.ht) { W.hf = W.ht = h; } else { var a = Math.min(W.hf, h), z = Math.max(W.hf, h); W.hf = a; W.ht = z; }
+            W.q = null; again();
+          });
+          hg.appendChild(b);
+        })(h);
+        card.appendChild(hg);
+        if (W.hf != null) card.appendChild(mk("div", "wzPick", "Chiuso " + wzHoursText()));
       }
     }
-    function redrawAll() { redrawWho(); redrawQuick(); redrawDur(); }
 
-    form.appendChild(field("Cosa non si può prenotare", who));
-    form.appendChild(field("Quando", quick));
-    var dr = mk("div", "avRow"); dr.appendChild(field("Dal", d1, "avD1")); dr.appendChild(field("Al", d2, "avD2")); form.appendChild(dr);
-    d1.addEventListener("change", function () { C.from = d1.value; if (!d2.value || d2.value < d1.value) { C.to = d1.value; d2.value = d1.value; } else C.to = d2.value; redrawQuick(); });
-    d2.addEventListener("change", function () { C.to = d2.value; redrawQuick(); });
-    form.appendChild(field("Per quanto tempo", dur));
-    form.appendChild(hrsBox);
-    form.appendChild(mk("p", "avHint", "Nei giorni e negli orari indicati non si può prenotare e il calendario mostra il campo chiuso."));
-    form.appendChild(add);
-    redrawAll();
+    if (key === "motivo") {
+      ctx();
+      card.appendChild(mk("div", "wzQ", "C'è un motivo?"));
+      card.appendChild(mk("div", "wzHelp", "Facoltativo: lo vedi nell'elenco delle chiusure."));
+      var kr = mk("div", "avRow");
+      WHY.forEach(function (w) { kr.appendChild(wzChip(w, W.why === w, function () { W.why = W.why === w ? "" : w; again(); })); });
+      card.appendChild(kr);
+    }
 
-    add.addEventListener("click", function () {
-      var a = d1.value, b = d2.value || a;
-      if (!a) { toast("Scegli un giorno o una scelta rapida.", true); return; }
-      if (b < a) { toast("L'ultimo giorno è prima del primo.", true); return; }
-      if (C.part && m(C.tf) >= m(C.tt)) { toast("L'ora di fine deve essere dopo quella di inizio.", true); return; }
-      busy = true; add.disabled = true;
-      call({ action: "add_closure", court_id: C.who || null, starts_on: a, ends_on: b, from: C.part ? C.tf : "", to: C.part ? C.tt : "", reason: "" })
-        .then(function () { busy = false; C.from = ""; C.to = ""; toast("Chiusura aggiunta."); changed(); return reload(); })
-        .catch(function (e) { busy = false; add.disabled = false; toast(e.message, true); reload().catch(function () {}); });
-    });
-    box.appendChild(form);
+    if (key === "ok") {
+      card.appendChild(mk("div", "wzQ", "Controlla e conferma"));
+      var sm = mk("div", "wzSum");
+      [["Cosa", wzWhoName()], ["Quando", wzDaysText(W.days)], ["Ore", wzHoursText()], ["Motivo", W.why || "—"]].forEach(function (row) {
+        var r2 = mk("div"); r2.appendChild(mk("span", null, row[0])); r2.appendChild(mk("b", null, row[1])); sm.appendChild(r2);
+      });
+      card.appendChild(sm);
+      card.appendChild(mk("div", "wzHelp", "Nei giorni e negli orari indicati non si può prenotare e il calendario mostra il campo chiuso."));
+    }
+
+    var go = mk("button", "avBtn pri", key === "ok" ? (W.busy ? "Salvo…" : "Conferma chiusura") : (key === "motivo" && !W.why ? "Salta" : "Avanti")); go.type = "button";
+    go.disabled = W.busy || !wzValid(key);
+    go.addEventListener("click", function () { if (key === "ok") { wzRun(host); return; } W.step++; again(); });
+    card.appendChild(go);
+  }
+
+  function renderChi(box) {
+    var wz = mk("div", "avWzHost"); box.appendChild(wz); drawWz(wz);
 
     var lc = mk("div", "avCard"); lc.appendChild(mk("h3", "avH", "In programma"));
     var items = closureItems();
@@ -332,7 +431,7 @@
       t.appendChild(mk("b", null, plabel(it.starts_on, it.ends_on)));
       var s = mk("small"), cn = it.court_id ? (courtOf(it.court_id) || { name: "Campo" }).name : null, nd = ndays(it.starts_on, it.ends_on);
       s.appendChild(mk("span", it.court_id ? "avTag p" : "avTag", cn || "Centro sportivo"));
-      s.appendChild(document.createTextNode(it.from ? "dalle " + it.from + " alle " + it.to : "tutto il giorno" + (nd > 1 ? " · " + nd + " giorni" : "")));
+      s.appendChild(document.createTextNode((it.from ? "dalle " + it.from + " alle " + it.to : "tutto il giorno" + (nd > 1 ? " · " + nd + " giorni" : "")) + (it.reason ? " · " + it.reason : "")));
       t.appendChild(s);
       if (it.bookings) t.appendChild(mk("small", "avWarnTx", it.bookings + (it.bookings === 1 ? " prenotazione già fissata: avvisa il cliente" : " prenotazioni già fissate: avvisa i clienti")));
       r.appendChild(t);
@@ -378,13 +477,13 @@
     if (!layer || !D) return;
     if (sel !== "club" && sel !== "chi" && !courtOf(sel)) sel = "club";
     paintSide();
+    layer.classList.toggle("avChiOnly", sel === "chi");
     var box = $("avBody"), sc = layer.querySelector(".avScroll"), y = sc ? sc.scrollTop : 0;
     box.textContent = "";
     if (sel === "chi") {
       var hd = mk("div", "avHd flat"), tt = mk("div", "avHt"); hd.style.setProperty("--c", colorOf("chi"));
       tt.appendChild(mk("h2", null, "Lavori e indisponibilità"));
       tt.appendChild(mk("p", null, "Tornei, lavori, maltempo: un campo o tutto il centro sportivo chiuso per uno o più giorni, o solo alcune ore."));
-      hd.appendChild(tt); box.appendChild(hd);
       renderChi(box);
     } else editor(box, sel);
     if (sc) sc.scrollTop = y;
@@ -432,6 +531,8 @@
     if (!layer) build();
     pending = t === "neg" || t === "club" ? "club" : "chi";
     layer.hidden = false; markMenu(true); place();
+    try { var sc0 = layer.querySelector(".avScroll"); if (sc0) sc0.scrollTop = 0; } catch (e) {}
+    requestAnimationFrame(place); setTimeout(place, 120); setTimeout(place, 400);
     var body = $("avBody");
     if (!D) { body.textContent = ""; body.appendChild(mk("p", "avLoad", "Carico gli orari…")); }
     if (D) { sel = pending; render(); }
