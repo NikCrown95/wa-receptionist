@@ -90,3 +90,16 @@
 #panelHome .hmT2{font-size:12.5px;margin-top:2px}
 #panelHome .hmTile{align-items:center;text-align:center;padding:16px 10px}
 #panelHome .hmTxt{text-align:center}
+
+/* colori coerenti con il sito: stesse superfici (#0F2229/#132A32), stessi bordi (#27414A) e solo l'acqua del brand */
+#panelHome .hmTile[data-k=cal]{--c:#4BB3D6}#panelHome .hmTile[data-k=add]{--c:#7FDCDC}#panelHome .hmTile[data-k=cli]{--c:#5CC9C0}#panelHome .hmTile[data-k=av]{--c:#6FC3D9}#panelHome .hmTile[data-k=qr]{--c:#9CEBEB}#panelHome .hmTile[data-k=st]{--c:#4FB8B8}
+:root:not([data-theme="light"]) #panelHome .hmTile{background:linear-gradient(135deg,#132A32,#0F2229);border-color:#27414A;box-shadow:none}
+:root:not([data-theme="light"]) #panelHome .hmTile::before{background:var(--c);opacity:.9}
+:root:not([data-theme="light"]) #panelHome .hmIc{color:#9CEBEB;background:#12343B;border:1px solid rgba(127,220,220,.28);box-shadow:none}
+:root:not([data-theme="light"]) #panelHome .hmDay{background:linear-gradient(135deg,#132A32,#0F2229);border-color:#27414A;box-shadow:none}
+:root:not([data-theme="light"]) #panelHome .hmDay::before{background:#4BB3D6}
+:root:not([data-theme="light"]) #panelHome .hmDay::after{background:radial-gradient(circle,rgba(75,179,214,.10),transparent 68%)}
+:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmDayPill{background:#7FDCDC;color:#04141A}
+:root:not([data-theme="light"]) #panelHome .hmDayFill{background:linear-gradient(90deg,#4BB3D6,#7FDCDC)}
+:root:not([data-theme="light"]) #panelHome .hmDayBar{background:rgba(127,220,220,.14)}
