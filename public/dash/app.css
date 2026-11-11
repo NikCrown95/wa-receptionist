@@ -3707,15 +3707,6 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .liaSheet .lmodes .lmrow.single .lmprice input:focus{outline:none;border-color:var(--accent)}
 #panelOther #biTag{min-height:60px!important;overflow:hidden}
 
-/* telefono: logo e nome dentro una card (disegnata dietro il nome, fino al logo); campanella e menu in riquadri separati */
-@media(max-width:699px){
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz{position:relative;z-index:0;padding-right:10px;margin-left:-4px;min-height:22px;flex:0 1 auto!important;display:flex!important;flex-direction:column;justify-content:center}
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz::before{content:"";position:absolute;z-index:-1;left:-33px;right:0;top:-4px;bottom:-4px;border-radius:10px;background:var(--card);border:1px solid var(--line2);pointer-events:none}
-  :root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv{position:relative;z-index:1;width:22px!important;height:22px!important;border-radius:7px!important;margin-right:8px!important;margin-left:5px!important}
-
-  :root:root:root:root:root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTop #liaRecapBtn{width:36px!important;height:36px!important;margin-left:auto!important}
-}
-
 /* statistiche: prime quattro card uguali, con icona, numero e variazione a pillola (tutte le verticali) */
 :root:root #statsSubApp .kpis,:root:root .gcs .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media(min-width:760px){:root:root #statsSubApp .kpis,:root:root .gcs .kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
@@ -3736,7 +3727,3 @@ body #notifToast{padding:7px 11px;gap:10px;border-radius:14px}
 .kpi[data-ic="gauge"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 17a8 8 0 1 1 16 0M12 17l4-5'/></svg>")}
 .kpi[data-ic="clock"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='8.5'/><path d='M12 7.5V12l3 2'/></svg>")}
 .kpi[data-ic="pack"]{--ico:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='6' width='16' height='13' rx='3'/><path d='M4 11h16M9 6V4h6v2'/></svg>")}
-
-@media(max-width:699px){
-  :root:root:root:root body:is(:not(.lia-sec-cal),.mnAOn,.mnGOn):not(:has(#panelProfile.on)) .mainTopRow #mbAv + .mainBiz #businessName{font-size:.92rem;line-height:1.1}
-}
