@@ -108,6 +108,4 @@
 @media(max-width:699px){
   body.hmBackOn #sectionLabel{display:none!important}
   body.hmBackOn .mainBiz{cursor:pointer}
-  body.hmBackOn .mainBiz::after{content:'\2039  Home';display:block;font-size:.72rem;line-height:1.25;color:#7FDCDC;font-weight:600;letter-spacing:.01em}
-  :root[data-theme="light"] body.hmBackOn .mainBiz::after{color:#1F7F8A}
 }
