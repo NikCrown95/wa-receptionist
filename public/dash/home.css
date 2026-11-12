@@ -238,3 +238,10 @@
 :root:root:not([data-theme="light"]) #panelHome .hmDaySvc{color:#8FA9AE}
 :root:root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1B3138;height:6px;border-radius:6px}
 :root:root:not([data-theme="light"]) #panelHome .hmDayFill{background:#7FDCDC;border-radius:6px}
+/* colori icone: palette Prenolia (aqua, champagne, petrolio chiaro) */
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="cal"] .hmIc{color:#7FDCDC}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="add"] .hmIc{color:#E6C77A}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="cli"] .hmIc{color:#5FB3C4}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="av"] .hmIc{color:#E6C77A}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="qr"] .hmIc{color:#7FDCDC}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#5FB3C4}
