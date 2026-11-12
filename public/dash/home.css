@@ -229,3 +229,12 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:auto;height:auto;border-radius:0;background:none;border:0;box-shadow:none}
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:56px;height:56px}
 :root:root:not([data-theme="light"]) #panelHome .hmTile{gap:10px}
+/* card del giorno: stessa famiglia dei riquadri */
+:root:root:not([data-theme="light"]) #panelHome .hmDay{background:#0F2229;border:1px solid #27414A;border-radius:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);padding:18px 18px 16px}
+:root:root:not([data-theme="light"]) #panelHome .hmDay::before{display:none}
+:root:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#7FDCDC;font-weight:600;letter-spacing:.06em}
+:root:root:not([data-theme="light"]) #panelHome .hmDayPill{background:rgba(127,220,220,.14);color:#9CEBEB;border:1px solid rgba(127,220,220,.28)}
+:root:root:not([data-theme="light"]) #panelHome .hmDayName{color:#EAF6F6}
+:root:root:not([data-theme="light"]) #panelHome .hmDaySvc{color:#8FA9AE}
+:root:root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1B3138;height:6px;border-radius:6px}
+:root:root:not([data-theme="light"]) #panelHome .hmDayFill{background:#7FDCDC;border-radius:6px}
