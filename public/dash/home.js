@@ -7,12 +7,12 @@
   function click(el){if(el)el.click();}
   var S='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
   var IC={
-    cal:'<svg '+S+'><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
-    add:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
-    cli:'<svg '+S+'><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></svg>',
-    av:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-    qr:'<svg '+S+'><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>',
-    st:'<svg '+S+'><rect x="4" y="12" width="4" height="8" rx="1.4"/><rect x="10" y="4" width="4" height="16" rx="1.4"/><rect x="16" y="9" width="4" height="11" rx="1.4"/></svg>'
+    cal:'<svg '+S+'><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path class="a2" d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><circle class="f2" cx="8.5" cy="14.6" r="1"/><circle class="f2" cx="12" cy="14.6" r="1"/><circle class="f2" cx="15.5" cy="14.6" r="1"/></svg>',
+    add:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path class="a2" d="M12 8v8M8 12h8"/></svg>',
+    cli:'<svg '+S+'><circle cx="9" cy="8.5" r="3.5"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path class="a2" d="M16 5.2a3.3 3.3 0 0 1 0 6.3M18.4 14.6a6.2 6.2 0 0 1 2.8 5.4"/></svg>',
+    av:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path class="a2" d="M12 7v5l3.2 2"/></svg>',
+    qr:'<svg '+S+'><rect x="3" y="3" width="7" height="7" rx="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.8"/><path class="a2" d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>',
+    st:'<svg '+S+'><rect x="4" y="12" width="4" height="8" rx="1.4"/><rect class="a2" x="10" y="4" width="4" height="16" rx="1.4"/><rect x="16" y="9" width="4" height="11" rx="1.4"/></svg>'
   };
   function goCal(){
     click($('menuTabCal'));

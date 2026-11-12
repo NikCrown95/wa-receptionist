@@ -182,3 +182,21 @@
 :root:not([data-theme="light"]) #panelHome .hmTile .hmTxt,:root:not([data-theme="light"]) #panelHome .hmTile .hmT1,:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{text-align:center}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:40px;height:40px;stroke-width:1.5;stroke-linejoin:round}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle{fill:color-mix(in srgb,var(--ic,#7FDCDC) 20%,transparent)}
+
+/* Home: riquadri piu piccoli (3 per riga) e icone a due colori */
+:root:not([data-theme="light"]) #panelHome .hmGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+:root:not([data-theme="light"]) #panelHome .hmTile{aspect-ratio:1/1;min-height:0;padding:10px 4px;gap:8px;border-radius:20px}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:36px;height:36px;stroke-width:1.6}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmT1{font-size:12.5px;line-height:1.15;white-space:normal}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{font-size:10.5px;line-height:1.15;white-space:normal}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cal]{--ic:#5FD4D4;--ic2:#F0CF86}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=add]{--ic:#F0CF86;--ic2:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cli]{--ic:#7FD1A8;--ic2:#F0CF86}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=av]{--ic:#8FB0F0;--ic2:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=qr]{--ic:#7FDCDC;--ic2:#F0CF86}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=st]{--ic:#E6C77A;--ic2:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg .a2{stroke:var(--ic2)}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect.a2{fill:color-mix(in srgb,var(--ic2) 28%,transparent)}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg .f2{fill:var(--ic2);stroke:none}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle:not(.f2){fill:color-mix(in srgb,var(--ic) 24%,transparent)}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg .a2:not(rect){fill:none}
