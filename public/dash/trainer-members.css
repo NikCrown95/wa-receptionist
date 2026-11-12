@@ -440,3 +440,5 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvA2.warn .mvId .mvChip::before{background:#F0C15A}
 .mxD .mvA2.bad .mvId .mvChip{background:rgba(255,138,130,.16);border-color:rgba(255,138,130,.55);color:#FFB3AD}
 .mxD .mvA2.bad .mvId .mvChip::before{background:#FF8A82}
+.ptNm .nmCd>input{display:block;width:100%;box-sizing:border-box;height:54px;padding:0 16px;border-radius:15px;border:1.5px solid var(--line2,var(--line));background:var(--field,transparent);color:inherit;font:inherit;font-size:1.15rem;font-weight:700;letter-spacing:.04em}
+.ptNm .nmCd>input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
