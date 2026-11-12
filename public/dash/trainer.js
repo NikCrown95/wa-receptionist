@@ -189,7 +189,8 @@
     '.ptAdd{display:flex;gap:8px;margin-top:10px}.ptSel{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--line,#d1d5db);font:inherit;background:#fff}' +
     '.ptGo{padding:10px 16px;border:0;border-radius:10px;background:var(--accent,#0f766e);color:#fff;font:inherit;font-weight:600;cursor:pointer}' +
     '.ptGo:disabled{opacity:.6}.ptErr{color:#b42318;font-size:.88rem;margin-top:8px}' +
-    '.ptDurRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ptDurB{padding:8px 12px;border-radius:999px;border:1px solid var(--line2,#2a3648);background:transparent;color:var(--ink,inherit);font:inherit;font-size:.86rem;cursor:pointer}.ptDurB.on{background:var(--accent-soft,rgba(45,210,220,.15));border-color:var(--accent,#2dd2dc);color:var(--accent-ink,var(--accent,#2dd2dc))}' +
+    '.ptDurRow{display:flex;flex-wrap:wrap;gap:8px}.ptDurB{padding:8px 12px;border-radius:999px;border:1px solid var(--line2,#2a3648);background:transparent;color:var(--ink,inherit);font:inherit;font-size:.86rem;cursor:pointer}.ptDurB.on{background:var(--accent-soft,rgba(45,210,220,.15));border-color:var(--accent,#2dd2dc);color:var(--accent-ink,var(--accent,#2dd2dc))}' +
+    '.ptNewBox{grid-column:1/-1;display:flex;flex-direction:column;gap:12px;margin:4px 0 6px}.ptNewGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ptNewF{min-width:0}.ptNewL{display:block;font-weight:600;margin-bottom:6px}'+'.ptStep{display:flex;align-items:stretch;border:1px solid var(--line2,#2a3648);border-radius:14px;overflow:hidden;background:var(--field,transparent)}.ptStep button{flex:0 0 44px;border:0;background:transparent;color:var(--accent,#2dd2dc);font:inherit;font-size:1.4rem;cursor:pointer}.ptStep button:active{background:var(--accent-soft,rgba(45,210,220,.15))}'+'.ptStep input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:inherit;font:inherit;font-weight:600;text-align:center;padding:12px 0;outline:0;-moz-appearance:textfield}.ptStep input::-webkit-outer-spin-button,.ptStep input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}'+'.ptNewHint{font-size:.82rem;line-height:1.4;color:var(--muted,#8896a8);padding:10px 12px;border-radius:12px;background:rgba(127,140,160,.1)}'+
     '.ptEnW{margin-top:8px}.cd [data-del=ask]{display:none}';
   document.head.appendChild(css);
 
@@ -197,27 +198,43 @@
   window.__ptNew = { months: 0 };
   var DURS = [[0, 'Senza scadenza'], [1, 'Mensile'], [3, 'Trimestrale'], [6, 'Semestrale'], [12, 'Annuale']];
   function paintDur(box) { [].forEach.call(box.children, function (b) { var on = Number(b.getAttribute('data-m')) === window.__ptNew.months; b.className = 'ptDurB' + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
-  window.liaPtNewReset = function () { window.__ptNew = { months: 0 }; var b = document.getElementById('svcNewDur'), w = document.getElementById('svcNewWeek'); if (b) paintDur(b); if (w) w.value = ''; };
+  window.liaPtNewReset = function () { window.__ptNew = { months: 0 }; var b = document.getElementById('svcNewDur'), w = document.getElementById('svcNewWeek'); if (b) paintDur(b); if (w) w.value = ''; if (window.__ptRefresh) window.__ptRefresh(); };
+  function stepper(id, min, max, ph, val) {
+    var w = document.createElement('div'); w.className = 'ptStep';
+    var dn = document.createElement('button'); dn.type = 'button'; dn.setAttribute('aria-label', 'Meno'); dn.textContent = '−';
+    var up = document.createElement('button'); up.type = 'button'; up.setAttribute('aria-label', 'Più'); up.textContent = '+';
+    var i = document.createElement('input'); i.id = id; i.type = 'number'; i.min = min; i.max = max; i.step = 1; i.inputmode = 'numeric'; i.placeholder = ph; if (val) i.value = val;
+    function bump(d) { var v = parseInt(i.value, 10); if (isNaN(v)) v = d > 0 ? (min - 1) : min; v = Math.max(min - 1, Math.min(max, v + d)); i.value = v < min ? '' : v; i.dispatchEvent(new Event('input', { bubbles: true })); }
+    dn.addEventListener('click', function () { bump(-1); }); up.addEventListener('click', function () { bump(1); });
+    w.appendChild(dn); w.appendChild(i); w.appendChild(up); return w;
+  }
   function addEntriesField() {
     var m = document.getElementById('svcNewMin');
     if (!m || document.getElementById('svcNewEntries')) return;
     var lab = m.closest('label');
     if (!lab) return;
-    var l2 = document.createElement('label');
-    l2.className = lab.className;
-    l2.innerHTML = '<span>Coaching totali</span><input class="set-input" id="svcNewEntries" type="number" min="1" max="1000" step="1" inputmode="numeric" placeholder="10">';
-    lab.insertAdjacentElement('afterend', l2);
-    var l3 = document.createElement('div');
-    l3.className = lab.className;
-    l3.innerHTML = '<span>Durata del pacchetto</span><div class="ptDurRow" id="svcNewDur" role="group" aria-label="Durata del pacchetto"></div>';
-    l2.insertAdjacentElement('afterend', l3);
-    var row = l3.querySelector('#svcNewDur');
-    DURS.forEach(function (o) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('data-m', o[0]); b.textContent = o[1]; b.addEventListener('click', function () { window.__ptNew.months = o[0]; paintDur(row); }); row.appendChild(b); });
-    paintDur(row);
-    var l4 = document.createElement('label');
-    l4.className = lab.className;
-    l4.innerHTML = '<span>Massimo a settimana</span><input class="set-input" id="svcNewWeek" type="number" min="1" max="7" step="1" inputmode="numeric" placeholder="Nessun limite">';
-    l3.insertAdjacentElement('afterend', l4);
+    var box = document.createElement('div'); box.className = 'ptNewBox';
+    var g = document.createElement('div'); g.className = 'ptNewGrid';
+    var c1 = document.createElement('div'); c1.className = 'ptNewF';
+    c1.innerHTML = '<span class="ptNewL">Coaching totali</span>'; c1.appendChild(stepper('svcNewEntries', 1, 1000, '10', 10));
+    var c2 = document.createElement('div'); c2.className = 'ptNewF';
+    c2.innerHTML = '<span class="ptNewL">Max a settimana</span>'; c2.appendChild(stepper('svcNewWeek', 1, 7, '∞', ''));
+    g.appendChild(c1); g.appendChild(c2); box.appendChild(g);
+    var hint = document.createElement('div'); hint.className = 'ptNewHint'; hint.id = 'svcNewHint';
+    var sec = document.createElement('div'); sec.className = 'ptNewF';
+    sec.innerHTML = '<span class="ptNewL">Durata del pacchetto</span><div class="ptDurRow" id="svcNewDur" role="group" aria-label="Durata del pacchetto"></div>';
+    box.appendChild(sec); box.appendChild(hint);
+    lab.insertAdjacentElement('afterend', box);
+    var row = sec.querySelector('#svcNewDur');
+    function refresh() {
+      paintDur(row);
+      var mo = window.__ptNew.months, w = parseInt((document.getElementById('svcNewWeek') || {}).value, 10);
+      var d = mo ? 'Scade ' + (mo === 1 ? '1 mese' : mo + ' mesi') + ' dopo l’assegnazione; i coaching non usati si perdono (puoi prolungare a mano).' : 'Nessuna scadenza: i coaching restano finché non li usa.';
+      hint.textContent = d + (w ? ' Massimo ' + w + ' a settimana (lun–dom).' : ' Nessun limite settimanale.');
+    }
+    DURS.forEach(function (o) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('data-m', o[0]); b.textContent = o[1]; b.addEventListener('click', function () { window.__ptNew.months = o[0]; refresh(); }); row.appendChild(b); });
+    box.addEventListener('input', refresh);
+    window.__ptRefresh = refresh; refresh();
   }
   var _dec = decorate;
   decorate = function () { _dec(); addEntriesField(); addNewBtn(); };
