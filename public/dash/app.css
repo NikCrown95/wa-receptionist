@@ -1761,7 +1761,6 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #calSubApp#calSubApp.monthMode .cal-card{flex:1 1 0!important;min-height:0!important;height:auto!important;max-height:100%!important;display:flex!important;flex-direction:column;overflow:hidden;background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
 #calSubApp#calSubApp.monthMode .month-wrap:not([hidden]){flex:1 1 0!important;min-height:0!important;height:auto!important;overflow:hidden;display:grid!important;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto minmax(0,1fr);column-gap:16px;padding:0!important;margin:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 #calSubApp .monthSum,#calSubApp .month-hero{display:none!important}
-@media(min-width:700px){body.lia-month #fabNew{display:none!important}}
 @media(max-width:699px){body.lia-month:has(#calSubApp.sideOpen) #fabNew{display:none!important}}
 
 /* griglia */
@@ -2021,7 +2020,6 @@ html body,body button,body input,body select,body textarea{font-family:-apple-sy
 #calSubApp .wkd.wkc-a{background:var(--wk-a-bd)}#calSubApp .wkd.wkc-s{background:var(--wk-s-bd)}#calSubApp .wkd.wkc-t{background:var(--wk-t-bd)}#calSubApp .wkd.wkc-u{background:var(--wk-u-bd)}#calSubApp .wkd.wkc-v{background:var(--wk-v-bd)}
 @media(min-width:700px){
   #calSubApp #weekSummary,#calSubApp #weekGrid{display:none!important}
-  body.lia-week #fabNew{display:none!important}
   #calSubApp#calSubApp.weekMode > .cal-wrap{display:flex!important;flex:1 1 0!important;min-height:0!important;height:auto!important;flex-direction:column;overflow:hidden!important;padding:2px 18px 16px!important;max-width:1280px!important}
   #calSubApp#calSubApp.weekMode .cal-card{flex:1 1 0!important;min-height:0!important;height:auto!important;display:flex!important;flex-direction:column;overflow:hidden!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
   #calSubApp#calSubApp.weekMode .week-wrap:not([hidden]){flex:1 1 0!important;min-height:0!important;height:auto!important;display:flex!important;flex-direction:column;overflow:hidden!important;padding:0!important;margin:0!important;background:none!important;border:0!important}

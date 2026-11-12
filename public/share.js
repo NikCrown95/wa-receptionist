@@ -1080,7 +1080,7 @@
     } catch (e) { document.body.classList.remove("mnOn"); }
   }
 
-  /* iPad e computer: tasto tondo con il QR accanto al "+" (nuovo appuntamento); apre il foglio "La tua pagina" (link, QR, locandina) */
+  /* iPad e computer: tasto tondo con il QR sopra il "+" (nuovo appuntamento); apre il foglio "La tua pagina" (link, QR, locandina) */
   function qrFab() {
     if (!window.matchMedia) return;
     var mq = window.matchMedia("(min-width:700px)"), b = $("mnQrFab");
@@ -1098,8 +1098,8 @@
       if (b.hidden === show) b.hidden = !show;
       if (!show) return;
       var f = rect($("fabNew"));
-      b.style.right = f ? (window.innerWidth - f.left + 12) + "px" : "24px";
-      b.style.bottom = f ? (window.innerHeight - f.bottom + Math.max(0, (f.height - 48) / 2)) + "px" : "24px";
+      b.style.right = f ? (window.innerWidth - f.right + Math.max(0, (f.width - 48) / 2)) + "px" : "24px";
+      b.style.bottom = f ? (window.innerHeight - f.top + 12) + "px" : "24px";
     }
     upd(); setInterval(upd, 600); window.addEventListener("resize", upd);
     document.addEventListener("lia:section", function () { setTimeout(upd, 50); });
