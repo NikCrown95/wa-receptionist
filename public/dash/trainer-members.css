@@ -477,3 +477,8 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .ptNm .nvPr .nvPb{flex:1;min-width:0}
 .ptNm .nvHero .nmSt{align-self:auto}
 .ptNm .nvNm b{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+
+.mxD .mvActs.inHero{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)}
+.mxD .mvActs.inHero .mvRi{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18)}
+.mxD .mvActs.inHero .mvR.pri .mvRi{background:var(--accent);border-color:var(--accent)}
+.mxD .mvActs.inHero .mvRl{color:rgba(255,255,255,.8)}
