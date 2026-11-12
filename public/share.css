@@ -485,3 +485,10 @@ body.mnOn.mnB #burgerMenu::-webkit-scrollbar{display:none}
 }
 body.mnOn.mnB #burgerMenu .mnGrp{padding:10px 12px 3px}
 body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
+
+/* tasto QR accanto al "+" (solo iPad e computer) */
+.mnQrFab{position:fixed;z-index:44;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;border:1px solid #2F6670;background:#0D1F26;color:#8FE3E7;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.28);-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
+.mnQrFab svg{width:22px;height:22px}
+.mnQrFab:active{transform:scale(.95)}
+@media(min-width:700px){.mnQrFab:not([hidden]){display:flex}}
+:root[data-theme="light"] .mnQrFab{background:#fff;border-color:#BFD9DD;color:#1B8795;box-shadow:0 8px 20px rgba(27,135,149,.25)}
