@@ -182,3 +182,24 @@
 :root:not([data-theme="light"]) #panelHome .hmTile .hmTxt,:root:not([data-theme="light"]) #panelHome .hmTile .hmT1,:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{text-align:center}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:40px;height:40px;stroke-width:1.5;stroke-linejoin:round}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle{fill:color-mix(in srgb,var(--ic,#7FDCDC) 20%,transparent)}
+
+/* Home: variante C (petrolio con colori morbidi a tinta piena) */
+:root:not([data-theme="light"]) body.lia-sec-home{background:linear-gradient(180deg,#10282E 0%,#0B1B20 60%)}
+:root:not([data-theme="light"]) #panelHome .hmDay{border-radius:26px;padding:18px 20px;background:linear-gradient(160deg,#17454A,#0F2A30);border:1px solid #2A6168}
+:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#BFF1EE;letter-spacing:.1em}
+:root:not([data-theme="light"]) #panelHome .hmDayPill{background:#FFE9B0;color:#3A2A05}
+:root:not([data-theme="light"]) #panelHome .hmDayBar{height:6px;border-radius:6px;background:#1D5258}
+:root:not([data-theme="light"]) #panelHome .hmDayFill{height:100%;border-radius:6px;background:#FFE9B0}
+:root:not([data-theme="light"]) #panelHome .hmDaySvc,:root:not([data-theme="light"]) #panelHome .hmDayProg{color:#A9CFD0}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cal]{--tc:#8FD3CF}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=add]{--tc:#F2CF86}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cli]{--tc:#A8D8B9}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=av]{--tc:#A9BDE8}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=qr]{--tc:#F2BBA8}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=st]{--tc:#C9BEEA}
+:root:not([data-theme="light"]) #panelHome .hmTile{border-radius:26px;border:0;background:var(--tc,#8FD3CF);color:#0B1B20;box-shadow:none;min-height:150px;padding:16px 10px}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:58px;height:58px;border-radius:20px;background:rgba(255,255,255,.5);border:0;color:#0B1B20;display:flex;align-items:center;justify-content:center}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:32px;height:32px;stroke-width:1.7}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle{fill:none}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmT1{color:#0B1B20;font-size:14.5px;font-weight:600;white-space:normal}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{color:#0B1B20;opacity:.72;white-space:normal}

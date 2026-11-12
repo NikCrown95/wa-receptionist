@@ -20,12 +20,12 @@
   }
   /* ogni riquadro: id, titolo, sottotitolo, icona, come si apre, e quando esiste davvero nella dashboard */
   var TILES=[
-    {k:'cal',t:'Calendario',s:'Agenda',i:IC.cal,go:goCal,ok:function(){return !!$('menuTabCal');}},
-    {k:'add',t:'Aggiungi',s:'Appuntamento',i:IC.add,go:function(){if(V()==='std'&&typeof window.liaOpenNewAt==='function'){var n=new Date(),p=function(x){return (x<10?'0':'')+x;};window.liaOpenNewAt(n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate()));return;}goCal();setTimeout(function(){click($('fabNew'));},160);},ok:function(){return !!$('fabNew');}},
-    {k:'cli',t:'Clienti',s:'Rubrica',i:IC.cli,go:function(){click($('menuTabClients'));},ok:function(){return !!$('menuTabClients');}},
+    {k:'cal',t:'La tua agenda',s:'I prossimi giorni',i:IC.cal,go:goCal,ok:function(){return !!$('menuTabCal');}},
+    {k:'add',t:'Nuova prenotazione',s:'Aggiungi a mano',i:IC.add,go:function(){if(V()==='std'&&typeof window.liaOpenNewAt==='function'){var n=new Date(),p=function(x){return (x<10?'0':'')+x;};window.liaOpenNewAt(n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate()));return;}goCal();setTimeout(function(){click($('fabNew'));},160);},ok:function(){return !!$('fabNew');}},
+    {k:'cli',t:'I tuoi clienti',s:'Rubrica',i:IC.cli,go:function(){click($('menuTabClients'));},ok:function(){return !!$('menuTabClients');}},
     {k:'av',t:'Disponibilità',s:'Orari e ferie',i:IC.av,go:function(){click($('menuTabAvail'));},ok:function(){var m=$('menuTabAvail');return !!m&&m.style.display!=='none'&&typeof window.liaAvailOpen==='function';}},
     {k:'qr',t:'QR code',s:'La tua pagina',i:IC.qr,go:function(){click(document.querySelector('#mnShareCard [data-a="qr"]'));},ok:function(){var c=$('mnShareCard');return !!c&&!c.classList.contains('mnNoLink')&&!!c.querySelector('[data-a="qr"]');}},
-    {k:'st',t:'Statistiche',s:'Andamento',i:IC.st,go:function(){click($('menuTabStats'));},ok:function(){return !!$('menuTabStats');}}
+    {k:'st',t:'Statistiche',s:'Come sta andando',i:IC.st,go:function(){click($('menuTabStats'));},ok:function(){return !!$('menuTabStats');}}
   ];
   var day=document.createElement('button');
   day.type='button';day.className='hmDay hmSk';day.hidden=false;day.innerHTML='<span class="hmDayTop"><span class="hmDayLbl">&nbsp;</span></span><span class="hmDayTime">&nbsp;</span><span class="hmDayName">&nbsp;</span><span class="hmDaySvc">&nbsp;</span><span class="hmDayBar"></span><span class="hmDayProg">&nbsp;</span>';
