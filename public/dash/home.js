@@ -32,6 +32,9 @@
   day.setAttribute('aria-label','Apri il calendario di oggi');
   day.addEventListener('click',goCal);
   wrap.appendChild(day);
+  /* iPad e computer: agenda di oggi e numeri accanto alla card (nascosti su smartphone da home.css) */
+  var ag=document.createElement('div');ag.className='hmAg';ag.hidden=true;wrap.appendChild(ag);
+  var nums=document.createElement('div');nums.className='hmNums';nums.hidden=true;wrap.appendChild(nums);
   var grid=document.createElement('div');grid.className='hmGrid';wrap.appendChild(grid);
   var els={};
   TILES.forEach(function(d){
@@ -91,6 +94,34 @@
   /* il conto alla rovescia si aggiorna da solo ogni 30 secondi */
   setInterval(function(){try{if(day._pl&&day._pl.isConnected&&!document.hidden){var n=new Date();if(n<day._en)day._pl.textContent=pill(day._st,day._en,n);}}catch(e){}},30000);
   function el(cls,txt){var e=document.createElement('span');e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  function paintWide(list,next,now,TX,vt,week){
+    if(vt==='gym'){ag.hidden=true;nums.hidden=true;return;}
+    var done=0;list.forEach(function(a){if(new Date(a.ends_at||a.starts_at)<=now)done++;});
+    var rest=list.filter(function(a){return a!==next&&new Date(a.ends_at||a.starts_at)>now;}).slice(0,4);
+    ag.textContent='';
+    var hd=el('hmAgHd');hd.appendChild(el('hmAgLbl','Agenda di oggi'));var lk=document.createElement('button');lk.type='button';lk.className='hmAgGo';lk.textContent='Apri calendario';lk.addEventListener('click',goCal);hd.appendChild(lk);ag.appendChild(hd);
+    if(!rest.length){ag.appendChild(el('hmAgNone',list.length?'Nient\u2019altro in programma per oggi':TX[2]));}
+    rest.forEach(function(a){
+      var r=document.createElement('button');r.type='button';r.className='hmAgRow';r.addEventListener('click',goCal);
+      r.appendChild(el('hmAgTm',hm(new Date(a.starts_at))));r.appendChild(el('hmAgDot'));
+      var b=el('hmAgTx');b.appendChild(el('hmAgNm',vt==='med'?String(a.customer_name||'').replace(/^(\S+)\s+(\S).*$/,'$1 $2.'):(a.customer_name||'')));if(a.service)b.appendChild(el('hmAgSv',a.service));r.appendChild(b);
+      ag.appendChild(r);
+    });
+    ag.hidden=false;
+    var unit=vt==='pt'?'coaching':vt==='campi'?'prenotazioni':vt==='med'?'visite':'appuntamenti';
+    nums.textContent='';
+    [[String(list.length),'Oggi',unit],[String(done),'Fatti','finora'],[String(list.length-done),'Restano','per oggi'],[week==null?'\u2013':String(week),'Prossimi 7 giorni',unit]].forEach(function(n){
+      var c=el('hmNum');c.appendChild(el('hmNumL',n[1]));c.appendChild(el('hmNumV',n[0]));c.appendChild(el('hmNumS',n[2]));nums.appendChild(c);
+    });
+    nums.hidden=false;
+  }
+  var weekN=null;
+  function loadWeek(tk,repaint){
+    if(!window.matchMedia||!window.matchMedia('(min-width:700px)').matches)return;
+    fetch('/api/agenda?t='+encodeURIComponent(tk)+'&format=json&days=7',{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+      weekN=((d&&d.appointments)||[]).filter(function(a){return a&&a.status==='confirmed'&&a.starts_at&&new Date(a.ends_at||a.starts_at)>=new Date(new Date().setHours(0,0,0,0));}).length;repaint();
+    }).catch(function(){});
+  }
   function loadDay(){
     var vt=V();
     if(vt==='gym'){loadGym();return;}
@@ -133,6 +164,8 @@
         day.appendChild(el('hmDayProg',done+' di '+list.length+(list.length===1?' '+TX[3]:' '+TX[4])));
       }
       day.hidden=false;
+      try{paintWide(list,next,now,TX,vt,weekN);}catch(e){}
+      day._rp=function(){paint(data);};
     }
     /* mostro subito l'ultimo stato di oggi salvato (se c'e'), poi leggo solo la giornata di oggi (leggera) e aggiorno */
     var ck='liaHomeDay:'+tk.slice(0,16),n0=new Date(),ymd=n0.getFullYear()+'-'+(n0.getMonth()+1)+'-'+n0.getDate();
@@ -141,6 +174,7 @@
       var data={appointments:d.appointments||[]};
       try{localStorage.setItem(ck,JSON.stringify({ymd:ymd,data:data}));}catch(e){}
       paint(data);
+      loadWeek(tk,function(){if(my===seq&&day._rp)day._rp();});
     }).catch(function(){if(my===seq&&day.classList.contains('hmSk'))day.hidden=true;});
   }
   function loadGym(){

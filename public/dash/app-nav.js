@@ -48,11 +48,9 @@
   var businessHome=document.getElementById('businessHome');if(businessHome){var goBusinessHome=function(){show('cal');document.dispatchEvent(new CustomEvent('lia:calendar-home'));};businessHome.addEventListener('click',goBusinessHome);businessHome.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();goBusinessHome();}});}
   /* smartphone: si parte dalla Home con le scorciatoie; iPad e computer partono dal calendario come prima */
   var isPhone=function(){return !!(window.matchMedia&&window.matchMedia('(max-width:699px)').matches);};
-  var initialSection=(panels.home&&isPhone())?'home':'cal';
-  try{var _ne=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||{};if(_ne.type==='reload'){var savedSection=localStorage.getItem('lia_active_section');if(savedSection&&panels[savedSection]&&(savedSection!=='home'||isPhone()))initialSection=savedSection;}}catch(e){}
+  var initialSection=panels.home?'home':'cal';
+  try{var _ne=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||{};if(_ne.type==='reload'){var savedSection=localStorage.getItem('lia_active_section');if(savedSection&&panels[savedSection])initialSection=savedSection;}}catch(e){}
   show(initialSection);
-  /* se lo schermo diventa largo mentre si e' nella Home (iPad ruotato, finestra allargata) si torna al calendario */
-  if(window.matchMedia){var _mq=window.matchMedia('(max-width:699px)');var _wide=function(){if(!_mq.matches&&panels.home&&panels.home.classList.contains('on'))show('cal');};if(_mq.addEventListener)_mq.addEventListener('change',_wide);else if(_mq.addListener)_mq.addListener(_wide);}
 
   // ---- mobile: header always visible; desktop keeps auto-hide behavior ----
   (function(){

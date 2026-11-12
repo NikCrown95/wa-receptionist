@@ -1,5 +1,5 @@
 /* Home con le scorciatoie (solo smartphone): prima schermata della dashboard */
-@media(min-width:700px){#menuTabHome{display:none!important}}
+/* Home: su smartphone e su iPad/computer */
 #panelHome{overflow:visible}
 @media(max-width:699px){
   body.lia-sec-home #sectionLabel{display:none}
@@ -278,3 +278,38 @@
 @media (prefers-reduced-motion:reduce){:root:root:not([data-theme="light"]) #panelHome .hmDay,:root:root:not([data-theme="light"]) #panelHome .hmDayLbl::before,:root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{animation:none}}
 @keyframes hmBreath{0%,100%{border-color:#27414A;box-shadow:0 0 0 0 rgba(127,220,220,0)}50%{border-color:#7FDCDC;box-shadow:0 0 18px 0 rgba(127,220,220,.22)}}
 :root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk){animation:hmBreath 3s ease-in-out infinite}
+
+/* ===== iPad e computer: Home "riepilogo di oggi" (smartphone invariato) ===== */
+.hmAg,.hmNums{display:none}
+@media(min-width:700px){
+  #panelHome .hmWrap{max-width:1040px;padding:18px 24px 40px;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);grid-template-areas:"day nums" "ag grid";gap:16px;align-items:stretch}
+  #panelHome .hmDay{grid-area:day;margin:0;border-radius:20px;padding:20px 22px 18px 26px}
+  #panelHome .hmDayTime{font-size:56px}
+  #panelHome .hmDayName{font-size:18px}
+  #panelHome .hmDaySvc{font-size:13px}
+  #panelHome .hmNums{grid-area:nums;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #panelHome .hmNums[hidden],#panelHome .hmAg[hidden]{display:none}
+  #panelHome .hmNum{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+  #panelHome .hmNumL{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  #panelHome .hmNumV{font-size:28px;font-weight:500;line-height:1.15;color:var(--ink)}
+  #panelHome .hmNumS{font-size:12px;color:var(--muted)}
+  #panelHome .hmAg{grid-area:ag;display:block;padding:14px 20px 8px;border:1px solid var(--line);border-radius:20px;background:var(--card);min-width:0}
+  #panelHome .hmAgHd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  #panelHome .hmAgLbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  #panelHome .hmAgGo{all:unset;cursor:pointer;font-size:13px;color:var(--acc,#4FC3C8)}
+  #panelHome .hmAgRow{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+  #panelHome .hmAgRow:first-of-type{border-top:0}
+  #panelHome .hmAgTm{flex:none;width:46px;font-size:13px;color:var(--muted)}
+  #panelHome .hmAgDot{flex:none;width:6px;height:30px;border-radius:3px;background:var(--acc,#4FC3C8)}
+  #panelHome .hmAgTx{flex:1;min-width:0}
+  #panelHome .hmAgNm{display:block;font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #panelHome .hmAgSv{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #panelHome .hmAgNone{padding:14px 0 10px;font-size:14px;color:var(--muted)}
+  #panelHome .hmGrid{grid-area:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-content:stretch}
+  #panelHome .hmTile{min-height:104px;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:6px;padding:12px 8px;border-radius:16px}
+  #panelHome .hmTile::before{display:none}
+  #panelHome .hmTile.hmLone{grid-column:auto}
+  #panelHome .hmTxt{flex:none;text-align:center}
+  #panelHome .hmT1{font-size:13px}
+  #panelHome .hmT2{display:none}
+}
