@@ -605,10 +605,11 @@ function ptFlow(v,lab){
   var nD=S.plans.filter(pkDone).length,allD=nD===S.plans.length;
   if(!(S.po>=0&&S.po<S.plans.length&&!pkDone(S.plans[S.po]))&&!allD)S.po=S.plans.findIndex(function(x){return!pkDone(x)});
   v.appendChild(head(lab,allD?"Pacchetti pronti":"Pacchetto "+(S.po+1)+" di "+S.plans.length,allD?"Hai compilato tutti i pacchetti.":"Compila e salva: poi passi al successivo."));
+  var act=null,rows=[];
   S.plans.forEach(function(x,idx){
     if(idx!==S.po||allD){
       var pr=String(x.p).trim().replace(".",",");
-      v.appendChild(h("div",{class:"csum"+(pkDone(x)?" dn":" td")+(S.flash===idx?" flash":""),role:"button",tabindex:"0","aria-label":"Modifica "+(String(x.n).trim()||"pacchetto"),onclick:function(){x.done=false;x.ph=0;S.po=idx;render()}},[
+      rows.push(h("div",{class:"csum"+(pkDone(x)?" dn":" td")+(S.flash===idx?" flash":""),role:"button",tabindex:"0","aria-label":"Modifica "+(String(x.n).trim()||"pacchetto"),onclick:function(){x.done=false;x.ph=0;S.po=idx;render()}},[
         h("span",{class:"cn",text:(pkDone(x)?"✓ ":"")+(String(x.n).trim()||"Pacchetto "+(idx+1))}),h("span",{class:"cd",text:pkDone(x)?planLine(x)+(pr?" · "+pr+" €":""):"Da compilare"}),h("span",{class:"ce",text:pkDone(x)?"Modifica":"Apri"})]));return}
     var cd=h("div",{class:"card"+(S.flash!=null&&idx===S.po?" enter":"")}),ph=x.ph||0,PH=3;
     var Q=function(t,sub){cd.appendChild(h("b",{text:t,style:"font-size:1.15rem;display:block"}));if(sub)cd.appendChild(h("small",{text:sub,style:"display:block;color:var(--muted);margin-top:-4px"}))};
@@ -642,7 +643,8 @@ function ptFlow(v,lab){
       setTimeout(function(){x.done=true;x.ph=0;var nx=S.plans.findIndex(function(y,j){return j>idx&&!pkDone(y)});if(nx<0)nx=S.plans.findIndex(function(y){return!pkDone(y)});S.po=nx;S.flash=idx;render();setTimeout(function(){S.flash=null},1000)},460)}});
     an.appendChild(h("span",{text:last?(more?"Salva e continua":"Salva pacchetto"):"Avanti"}));
     if(ph>0){cd.appendChild(h("div",{class:"times"},[h("button",{class:"chip",type:"button",text:"‹ Indietro",onclick:function(){x.ph=ph-1;S.err="";render()}}),h("div",{style:"flex:1"},[an])]))}else cd.appendChild(an);
-    v.appendChild(cd)});
+    act=cd});
+  if(act)v.appendChild(act);rows.forEach(function(r){v.appendChild(r)});
   if(allD){var ab=h("button",{class:"chip addbig",type:"button"},[h("span",{class:"pl",text:"+"}),h("span",{text:"Aggiungi un altro pacchetto"})]);ab.onclick=function(){S.plans.push(pkNew());S.pn=S.plans.length;S.po=S.plans.length-1;S.err="";render()};v.appendChild(ab)}
   v.appendChild(h("p",{class:"ready"},[h("b",{text:nD+" di "+S.plans.length}),allD?" pacchetti compilati. Premi Avanti per continuare.":" pacchetti compilati. Avanti si accende alla fine."]));
 }
