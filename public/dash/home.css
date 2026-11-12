@@ -245,3 +245,5 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="av"] .hmIc{color:#E6C77A}
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="qr"] .hmIc{color:#7FDCDC}
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#5FB3C4}
+/* tutte le icone aqua */
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k] .hmIc{color:#7FDCDC}
