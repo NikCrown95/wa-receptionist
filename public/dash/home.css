@@ -109,3 +109,15 @@
   body.hmBackOn #sectionLabel{display:none!important}
   body.hmBackOn .mainBiz{cursor:pointer}
 }
+
+/* Home: palette graphite + teal spento (solo tema scuro) */
+:root:not([data-theme="light"]) body.lia-sec-home{--bg:#0B1013;--bg2:#10171B;--card:#11181C;--card2:#151D21;--line:#232F34;--line2:#2E3D42;--ink:#E9EFF1;--muted:#9AA8AD;background:linear-gradient(180deg,#161E23 0%,#0B1013 62%)}
+:root:not([data-theme="light"]) body.lia-sec-home .mainTop{background:transparent}
+:root:not([data-theme="light"]) #panelHome .hmDay,:root:not([data-theme="light"]) #panelHome .hmTile{--c:#7FA6AB;background:var(--card);border-color:#2A383D;box-shadow:none}
+:root:not([data-theme="light"]) #panelHome .hmDay::after{display:none}
+:root:not([data-theme="light"]) #panelHome .hmDay::before,:root:not([data-theme="light"]) #panelHome .hmTile::before{background:#6F9499;width:3px}
+:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#7FA6AB}
+:root:not([data-theme="light"]) #panelHome .hmDayPill{background:#8CB7BA;color:#0B1013}
+:root:not([data-theme="light"]) #panelHome .hmDayBar{background:#222E33}
+:root:not([data-theme="light"]) #panelHome .hmDayFill{background:#7FA6AB}
+:root:not([data-theme="light"]) #panelHome .hmIc{color:#DCE5E7;background:transparent;border:1px solid #34464B;box-shadow:none}
