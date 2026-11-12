@@ -904,7 +904,7 @@ function goV(n,first){var x=K[cs],v=x.v[n],im=IMG[x.k][n];cv=n;clearTimeout(auto
  function apply(){all.forEach(function(e){e.classList.remove('in');e.classList.remove('sw');e.classList.add('pre')});void set.offsetWidth;[].forEach.call(imgs,function(e){e.classList.remove('pre');e.classList.add('in')});typeCap(v.n,v.d);[].forEach.call(imgs,function(e){var d=e.parentNode;d.classList.remove('swp');void d.offsetWidth;d.classList.add('swp')})}
  plSec(x.k);var rdy=Promise.all([pl(im[0]),pl(im[1])]);
  if(first){rdy.then(function(){if(cv===n)apply()})}else{var t0=Date.now();all.forEach(function(e){if(e.classList.contains('in')){e.classList.remove('in');e.classList.add('sw')}});rdy.then(function(){setTimeout(function(){if(cv===n)apply()},Math.max(0,120-(Date.now()-t0)))})}
- if(!manual)auto=setTimeout(function(){if(document.hidden){goV(n)}else if(carMQ.matches){goS((cs+1)%K.length)}else goV((n+1)%x.v.length)},carMQ.matches?4200:DUR)}
+ if(!manual)auto=setTimeout(function(){if(document.hidden){goV(n)}else if(carMQ.matches){if(n<x.v.length-1)goV(n+1);else goS((cs+1)%K.length)}else goV((n+1)%x.v.length)},carMQ.matches?4200:DUR)}
 
 /* carosello schermate su telefono */
 var SH={'Home':'Home','Calendario':'Agenda','Campi':'Campi','Menu':'Menu','Mese':'Mese','Statistiche':'Numeri','Clienti':'Clienti','Iscritti':'Iscritti'};
