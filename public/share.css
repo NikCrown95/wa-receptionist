@@ -492,3 +492,24 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 .mnQrFab:active{transform:scale(.95)}
 @media(min-width:700px){.mnQrFab:not([hidden]){display:flex}}
 :root[data-theme="light"] .mnQrFab{background:#fff;border-color:#BFD9DD;color:#1B8795;box-shadow:0 8px 20px rgba(27,135,149,.25)}
+
+/* iPad e computer: foglio "La tua pagina" con QR grande a sinistra e card delle azioni a destra */
+.mnAct.mnWide{display:none}
+@media(min-width:700px){
+  #mnShareSheet:not([hidden]):not(.mnQrOnly){display:flex;align-items:center;justify-content:center}
+  #mnShareSheet:not(.mnQrOnly) .mnSheet{position:relative;left:auto;right:auto;bottom:auto;margin:0;width:min(640px,calc(100% - 48px));max-width:640px;max-height:92%;padding:22px 24px 24px;border-radius:26px;display:grid;grid-template-columns:260px minmax(0,1fr);grid-template-areas:"hd hd" "seg seg" "qr acts" "lnk acts" "msg msg";column-gap:22px;align-items:start}
+  #mnShareSheet:not(.mnQrOnly) .mnGrab{display:none}
+  #mnShareSheet:not(.mnQrOnly) .mnSH{grid-area:hd;margin-top:0;margin-bottom:14px}
+  #mnShareSheet:not(.mnQrOnly) .mnSeg{grid-area:seg;margin-bottom:12px}
+  #mnShareSheet:not(.mnQrOnly) .mnQrCard{grid-area:qr;margin-top:0;flex-direction:column;align-items:center;gap:12px;padding:16px;text-align:center}
+  #mnShareSheet:not(.mnQrOnly) .mnQrBox{width:228px;height:228px;padding:10px;border-radius:16px}
+  #mnShareSheet:not(.mnQrOnly) .mnQrInfo{text-align:center}
+  #mnShareSheet:not(.mnQrOnly) .mnLinkRow{grid-area:lnk;margin-top:10px}
+  #mnShareSheet:not(.mnQrOnly) .mnActs{grid-area:acts;margin-top:0;align-self:stretch;justify-content:center;gap:0;border:1px solid var(--line);border-radius:18px;background:var(--card);overflow:hidden}
+  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct{border:0;border-radius:0;background:transparent;min-height:68px;border-top:1px solid var(--line)}
+  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct:first-child{border-top:0}
+  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="wa"],#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="dl"]{display:none}
+  #mnShareSheet:not(.mnQrOnly) .mnAct.mnWide{display:flex}
+  #mnShareSheet:not(.mnQrOnly) .mnMsg{grid-area:msg}
+}
+@media(min-width:700px){#mnShareSheet:not(.mnQrOnly) .mnLinkRow code{font-size:.8rem}}

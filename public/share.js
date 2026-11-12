@@ -434,6 +434,7 @@
       '<button type="button" class="mnAct" data-a="gshare"><i>' + I.share + '</i><span class="mnT">Condividi<small>Scegli l\u2019app con cui inviarlo</small></span></button>' +
       '<button type="button" class="mnAct" data-a="wa"><i class="wa">' + I.wa + '</i><span class="mnT">Invia su WhatsApp</span></button>' +
       '<button type="button" class="mnAct" data-a="dl" id="mnDl"><i>' + I.down + '</i><span class="mnT">Scarica il QR</span></button>' +
+      '<button type="button" class="mnAct mnWide" data-a="printqr"><i>' + I.print + '</i><span class="mnT">Stampa il QR<small>Solo il codice, pronto da stampare</small></span></button>' +
       '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '<small>PDF pronto da stampare</small></span>' + I.down + "</button>" +
       "</div>" +
       '<p class="mnMsg" role="status"></p></div>';
@@ -449,6 +450,7 @@
       else if (a === "copy") copyText(l.url, b);
       else if (a === "wa") window.open("https://wa.me/?text=" + encodeURIComponent("Prenota da " + (biz.name || "noi") + ": " + l.url), "_blank");
       else if (a === "dl") download(l);
+      else if (a === "printqr") printQr(l);
       else if (a === "gshare") {
         var tx = "Prenota da " + (biz.name || "noi");
         if (navigator.share) navigator.share({ title: biz.name || "Prenota", text: tx, url: l.url }).catch(function () {});
@@ -580,6 +582,21 @@
     $("mnQrBox").innerHTML = q ? q.svg : "";
     $("mnDl").hidden = !(q && q.M);
     msg("");
+  }
+
+  /* "Stampa il QR": solo il codice (con il nome dell'attivita'), in una pagina pulita pronta da stampare */
+  function printQr(l) {
+    var q = qrFor(l.url);
+    if (!q) { msg("Non riesco a creare il QR su questo dispositivo."); return; }
+    var nm = String(biz.name || "").replace(/[<>&]/g, "");
+    var f = document.createElement("iframe");
+    f.setAttribute("aria-hidden", "true"); f.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0";
+    document.body.appendChild(f);
+    var d = f.contentWindow.document;
+    d.open();
+    d.write('<!doctype html><html><head><meta charset="utf-8"><title>QR ' + nm + '</title><style>@page{margin:16mm}html,body{margin:0;background:#fff;color:#0B1A20;font-family:Helvetica,Arial,sans-serif}body{display:flex;flex-direction:column;align-items:center;padding-top:30mm;text-align:center}svg{width:120mm;height:120mm;display:block}h1{margin:10mm 0 3mm;font-size:22pt}p{margin:0;font-size:12pt;color:#40555c}</style></head><body>' + q.svg + '<h1>' + nm + '</h1><p>Inquadra con la fotocamera per prenotare</p></body></html>');
+    d.close();
+    setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) { msg("Non riesco ad aprire la stampa."); } setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 60000); }, 250);
   }
   function download(l) {
     var q = qrFor(l.url);
