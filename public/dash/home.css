@@ -154,3 +154,18 @@
 :root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1F3237}
 :root:not([data-theme="light"]) #panelHome .hmDayFill{background:#3FC6D0}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmTxt,:root:not([data-theme="light"]) #panelHome .hmTile .hmT1,:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{text-align:left}
+
+/* Home: palette coerente con Prenolia (petrolio, acqua, champagne) */
+:root:not([data-theme="light"]) body.lia-sec-home{--bg:#08151A;--bg2:#0C1D23;--card:#0F2229;--card2:#132A32;--line:#1B2F36;--line2:#27414A;background:linear-gradient(180deg,#0F2229 0%,#08151A 60%)}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cal]{--ic:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=add]{--ic:#E6C77A}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cli]{--ic:#86C5AE}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=av]{--ic:#8AA4C8}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=qr]{--ic:#9CEBEB}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=st]{--ic:#D6B87F}
+:root:not([data-theme="light"]) #panelHome .hmTile{background:color-mix(in srgb,var(--ic,#7FDCDC) 9%,#0A1A1F);border-color:color-mix(in srgb,var(--ic,#7FDCDC) 34%,#1B2F36)}
+:root:not([data-theme="light"]) #panelHome .hmDay{--c:#7FDCDC;background:#0F2229;border-color:#27414A}
+:root:not([data-theme="light"]) #panelHome .hmDay::before,:root:not([data-theme="light"]) #panelHome .hmDayFill{background:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#7FDCDC}
+:root:not([data-theme="light"]) #panelHome .hmDayPill{background:#7FDCDC;color:#08151A}
+:root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1B3138}
