@@ -276,3 +276,5 @@
 :root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);animation:hmSweep 2.6s ease-in-out infinite}
 @keyframes hmSweep{to{transform:translateX(100%)}}
 @media (prefers-reduced-motion:reduce){:root:root:not([data-theme="light"]) #panelHome .hmDay,:root:root:not([data-theme="light"]) #panelHome .hmDayLbl::before,:root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{animation:none}}
+@keyframes hmBreath{0%,100%{border-color:#27414A;box-shadow:0 0 0 0 rgba(127,220,220,0)}50%{border-color:#7FDCDC;box-shadow:0 0 18px 0 rgba(127,220,220,.22)}}
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk){animation:hmBreath 3s ease-in-out infinite}
