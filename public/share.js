@@ -433,9 +433,9 @@
       '<div class="mnActs">' +
       '<button type="button" class="mnAct" data-a="gshare"><i>' + I.share + '</i><span class="mnT">Condividi<small>Scegli l\u2019app con cui inviarlo</small></span></button>' +
       '<button type="button" class="mnAct" data-a="wa"><i class="wa">' + I.wa + '</i><span class="mnT">Invia su WhatsApp</span></button>' +
-      '<button type="button" class="mnAct" data-a="dl" id="mnDl"><i>' + I.down + '</i><span class="mnT">Scarica il QR</span></button>' +
+      '<button type="button" class="mnAct" data-a="dl" id="mnDl"><i>' + I.down + '</i><span class="mnT"><span class="mnPh">Scarica il QR</span><span class="mnWd">Scarica il QR code</span></span></button>' +
       '<button type="button" class="mnAct mnWide" data-a="printqr"><i>' + I.print + '</i><span class="mnT">Stampa il QR<small>Solo il codice, pronto da stampare</small></span></button>' +
-      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '<small>PDF pronto da stampare</small></span>' + I.down + "</button>" +
+      '<button type="button" class="mnAct" data-a="poster"><i>' + I.print + '</i><span class="mnT"><span class="mnPh">' + (isCourts() ? "Locandina" : "Locandina per la vetrina") + '</span><span class="mnWd">Stampa la locandina</span><small class="mnPh">PDF pronto da stampare</small></span>' + I.down + "</button>" +
       "</div>" +
       '<p class="mnMsg" role="status"></p></div>';
     document.body.appendChild(sheet);
