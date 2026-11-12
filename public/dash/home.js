@@ -137,8 +137,12 @@
     /* mostro subito l'ultimo stato di oggi salvato (se c'e'), poi leggo solo la giornata di oggi (leggera) e aggiorno */
     var ck='liaHomeDay:'+tk.slice(0,16),n0=new Date(),ymd=n0.getFullYear()+'-'+(n0.getMonth()+1)+'-'+n0.getDate();
     try{var c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.ymd===ymd&&c.data)paint(c.data);}catch(e){}
-    fetch('/api/agenda?t='+encodeURIComponent(tk)+'&format=json&days=1',{cache:'no-store'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error('x');return d;});}).then(function(d){
-      var data={appointments:d.appointments||[]};
+    /* centri sportivi: le prenotazioni stanno nelle tabelle dei campi, non tra gli appuntamenti */
+    var url=vt==='campi'?'/api/agenda?t='+encodeURIComponent(tk)+'&courts=1&days=1':'/api/agenda?t='+encodeURIComponent(tk)+'&format=json&days=1';
+    fetch(url,{cache:'no-store'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error('x');return d;});}).then(function(d){
+      var data;
+      if(vt==='campi'){var cn={};(d.courts||[]).forEach(function(c){cn[c.id]=c.name;});data={appointments:(d.bookings||[]).map(function(b){return {status:'confirmed',starts_at:b.starts_at,ends_at:b.ends_at,customer_name:[b.first_name,b.last_name].filter(Boolean).join(' '),service:cn[b.court_id]||''};})};}
+      else data={appointments:d.appointments||[]};
       try{localStorage.setItem(ck,JSON.stringify({ymd:ymd,data:data}));}catch(e){}
       paint(data);
     }).catch(function(){if(my===seq&&day.classList.contains('hmSk'))day.hidden=true;});
