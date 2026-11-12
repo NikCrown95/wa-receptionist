@@ -171,3 +171,4 @@
 :root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1B3138}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:42px;height:42px;stroke-width:1.6}
 :root:not([data-theme="light"]) #panelHome .hmTile{min-height:140px}
+:root:not([data-theme="light"]):not([data-x]) body.lia-sec-home .mainTop{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:color-mix(in srgb,#27414A 55%,transparent)!important}
