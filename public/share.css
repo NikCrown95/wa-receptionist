@@ -486,12 +486,10 @@ body.mnOn.mnB #burgerMenu::-webkit-scrollbar{display:none}
 body.mnOn.mnB #burgerMenu .mnGrp{padding:10px 12px 3px}
 body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 
-/* tasto QR accanto al "+" (solo iPad e computer) */
-.mnQrFab{position:fixed;z-index:44;width:48px;height:48px;border-radius:50%;display:none;align-items:center;justify-content:center;border:1px solid #2F6670;background:#0D1F26;color:#8FE3E7;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.28);-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
-.mnQrFab svg{width:22px;height:22px}
-.mnQrFab:active{transform:scale(.95)}
-@media(min-width:700px){.mnQrFab:not([hidden]){display:flex}}
-:root[data-theme="light"] .mnQrFab{background:#fff;border-color:#BFD9DD;color:#1B8795;box-shadow:0 8px 20px rgba(27,135,149,.25)}
+/* tasto QR nell'intestazione (solo iPad e computer) */
+.mnQrHd{display:none}
+.mnQrHd svg{width:20px;height:20px}
+@media(min-width:700px){.mnQrHd:not([hidden]){display:grid!important}:root:root:root:root:root:root body .mainTop .mnQrHd{background:none!important;border:0!important;box-shadow:none!important;width:36px!important;height:36px!important;min-width:0!important;margin-left:auto}}
 
 /* iPad e computer: foglio "La tua pagina" con QR grande al centro e tre pulsanti sotto */
 .mnAct.mnWide,.mnWd{display:none}
@@ -519,3 +517,4 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
   #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="poster"]{order:2}
   #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="dl"]{order:3}
 }
+@media(min-width:700px){:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#liaRecapBtn,:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#bellBtn{margin-left:0!important}}

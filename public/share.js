@@ -1080,30 +1080,20 @@
     } catch (e) { document.body.classList.remove("mnOn"); }
   }
 
-  /* iPad e computer: tasto tondo con il QR sopra il "+" (nuovo appuntamento); apre il foglio "La tua pagina" (link, QR, locandina) */
+  /* iPad e computer: tasto QR nell'intestazione, a sinistra dell'icona Lia; apre il foglio "La tua pagina" (QR grande, condividi, locandina) */
   function qrFab() {
-    if (!window.matchMedia) return;
-    var mq = window.matchMedia("(min-width:700px)"), b = $("mnQrFab");
+    var anchor = $("liaRecapBtn") || $("bellBtn");
+    if (!anchor || !anchor.parentNode) return;
+    var b = $("mnQrFab");
     if (!b) {
-      b = mk("button", "mnQrFab", I.qrs); b.type = "button"; b.id = "mnQrFab"; b.hidden = true;
-      b.setAttribute("aria-label", "La tua pagina: link, QR code e locandina"); b.title = "La tua pagina: link, QR e locandina";
+      b = mk("button", "bellBtn mnQrHd", I.qrs); b.type = "button"; b.id = "mnQrFab"; b.hidden = true;
+      b.setAttribute("aria-label", "La tua pagina: QR code, condividi e locandina"); b.title = "La tua pagina: QR code, condividi e locandina";
       b.addEventListener("click", function () { var m = $("menuTabPage"); if (m) m.click(); });
-      document.body.appendChild(b);
+      anchor.parentNode.insertBefore(b, anchor);
     }
-    function rect(el) { if (!el) return null; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden" ? r : null; }
-    function upd() {
-      var has = !!$("menuTabPage") && mq.matches;
-      var busy = !!document.querySelector("#sheet.on,#newSheet.on,#burgerMenu.on,.mnSheetOn,.mnLayer:not([hidden])") || !!($("avLayer") && !$("avLayer").hidden) || document.body.classList.contains("mnShOpen");
-      var show = has && !busy;
-      if (b.hidden === show) b.hidden = !show;
-      if (!show) return;
-      var f = rect($("fabNew"));
-      b.style.right = f ? (window.innerWidth - f.right + Math.max(0, (f.width - 48) / 2)) + "px" : "24px";
-      b.style.bottom = f ? (window.innerHeight - f.top + 12) + "px" : "24px";
-    }
-    upd(); setInterval(upd, 600); window.addEventListener("resize", upd);
-    document.addEventListener("lia:section", function () { setTimeout(upd, 50); });
+    function upd() { var on = !!$("menuTabPage"); if (b.hidden === on) b.hidden = !on; }
+    upd(); [300, 1000, 2500].forEach(function (ms) { setTimeout(upd, ms); });
   }
-  setTimeout(qrFab, 800);
+  setTimeout(qrFab, 600);
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
