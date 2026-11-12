@@ -1581,11 +1581,15 @@ module.exports = async (req, res) => {
         // Il codice e' per persona: se l'iscritto ha gia' dei pacchetti (rinnovo) si riusa il suo
         const have = await ptl.packsOf(sb, biz.id, ph);
         let code = (have.find((p) => p.access_code) || {}).access_code || "";
-        if (!code) {
-          code = String(pb.access_code || "").replace(/\s+/g, "");
-          if (!ptl.codeValid(code)) return res.status(400).json({ error: "Il codice di accesso deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli)." });
-          if (await ptl.codeTaken(sb, biz.id, code, ph)) return res.status(409).json({ error: "Questo codice è già usato da un altro iscritto: scegline uno diverso." });
+        const chosen = String(pb.access_code || "").replace(/\s+/g, "");
+        // Il codice scelto dal trainer ha sempre la precedenza (anche se il numero ha gia' pacchetti): vale per tutti i pacchetti della persona
+        if (chosen && chosen !== code) {
+          if (!ptl.codeValid(chosen)) return res.status(400).json({ error: "Il codice di accesso deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli)." });
+          if (await ptl.codeTaken(sb, biz.id, chosen, ph)) return res.status(409).json({ error: "Questo codice è già usato da un altro iscritto: scegline uno diverso." });
+          if (have.length) await sb("PATCH", "pt_packs?business_id=eq." + biz.id + "&id=in.(" + have.map((p) => p.id).join(",") + ")", { access_code: chosen }, "return=minimal");
+          code = chosen;
         }
+        if (!code) return res.status(400).json({ error: "Il codice di accesso deve avere da 4 a 20 tra lettere e numeri (senza spazi o simboli)." });
         // Scadenza dal giorno dell'assegnazione (o da una data scelta dal trainer) e limite settimanale copiati dal pacchetto
         const today0 = ptl.todayStr(biz.timezone), startOn = /^\d{4}-\d{2}-\d{2}$/.test(String(pb.start_on || "")) ? String(pb.start_on) : today0;
         const validity = {};
