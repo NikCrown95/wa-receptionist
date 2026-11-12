@@ -261,3 +261,9 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"]{background:#1c2828;border-color:color-mix(in srgb,#D8B87F 30%,#1B2F36)}
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#D8B87F}
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:48px;height:48px}
+/* riquadri piu piccoli */
+:root:root:not([data-theme="light"]) #panelHome .hmGrid{gap:10px}
+:root:root:not([data-theme="light"]) #panelHome .hmTile{min-height:102px;padding:12px 8px;gap:7px;border-radius:20px}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:40px;height:40px}
+:root:root:not([data-theme="light"]) #panelHome .hmT1{font-size:13.5px}
+:root:root:not([data-theme="light"]) #panelHome .hmT2{font-size:11px}
