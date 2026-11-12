@@ -88,6 +88,8 @@
     return m?'tra '+h+' h '+m+' min':(h===1?'tra 1 ora':'tra '+h+' ore');
   }
   var seq=0;
+  /* il conto alla rovescia si aggiorna da solo ogni 30 secondi */
+  setInterval(function(){try{if(day._pl&&day._pl.isConnected&&!document.hidden){var n=new Date();if(n<day._en)day._pl.textContent=pill(day._st,day._en,n);}}catch(e){}},30000);
   function el(cls,txt){var e=document.createElement('span');e.className=cls;if(txt!=null)e.textContent=txt;return e;}
   function loadDay(){
     var vt=V();
@@ -115,7 +117,7 @@
         day.appendChild(el('hmDayNone',TX[2]));
       }else if(next){
         var st=new Date(next.starts_at),en=new Date(next.ends_at||next.starts_at);
-        var top=el('hmDayTop');top.appendChild(el('hmDayLbl',(now>=st&&now<en)?TX[0]:TX[1]));top.appendChild(el('hmDayPill',pill(st,en,now)));
+        var top=el('hmDayTop');top.appendChild(el('hmDayLbl',(now>=st&&now<en)?TX[0]:TX[1]));var pl=el('hmDayPill',pill(st,en,now));top.appendChild(pl);day._pl=pl;day._st=st;day._en=en;
         day.appendChild(top);
         day.appendChild(el('hmDayTime',hm(st)));
         day.appendChild(el('hmDayName',vt==='med'?String(next.customer_name||'').replace(/^(\S+)\s+(\S).*$/,'$1 $2.'):(next.customer_name||'')));

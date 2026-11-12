@@ -267,3 +267,12 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:40px;height:40px}
 :root:root:not([data-theme="light"]) #panelHome .hmT1{font-size:13.5px}
 :root:root:not([data-theme="light"]) #panelHome .hmT2{font-size:11px}
+/* card del giorno: puntino che pulsa, bordo che respira, riflesso sulla barra */
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk) .hmDayLbl::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#7FDCDC;margin-right:8px;vertical-align:1px;animation:hmPulse 1.8s ease-out infinite}
+@keyframes hmPulse{0%{box-shadow:0 0 0 0 rgba(127,220,220,.55)}100%{box-shadow:0 0 0 9px rgba(127,220,220,0)}}
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk){animation:hmBreath 3.6s ease-in-out infinite}
+@keyframes hmBreath{0%,100%{border-color:#27414A}50%{border-color:#4E8D95}}
+:root:root:not([data-theme="light"]) #panelHome .hmDayFill{position:relative;overflow:hidden}
+:root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);animation:hmSweep 2.6s ease-in-out infinite}
+@keyframes hmSweep{to{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){:root:root:not([data-theme="light"]) #panelHome .hmDay,:root:root:not([data-theme="light"]) #panelHome .hmDayLbl::before,:root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{animation:none}}
