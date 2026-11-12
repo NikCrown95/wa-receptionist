@@ -154,7 +154,11 @@
 
   // Assegna un nuovo pacchetto a un iscritto (scelta del pacchetto in un foglio)
   // Scheda "Nuovo iscritto" / "Nuovo pacchetto": dati dell'iscritto + pacchetto acquistato (schede da scegliere, niente menu a tendina)
+  // I pacchetti si rileggono ogni volta che si apre la scheda: un pacchetto appena creato in Impostazioni compare subito
   function sheet(m) {
+    fetch(url('&roster=1'), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { if (j && Array.isArray(j.services)) { if (!D) D = j; else D.services = j.services; } }).catch(function () {}).then(function () { sheetNow(m); });
+  }
+  function sheetNow(m) {
     var svcs = (D && D.services) || [], sel = svcs[0] ? svcs[0].id : null;
     var bg = el('div', 'liaSheetBg'), sh = el('div', 'liaSheet ptNm'); sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
     var who = m ? '<div class="nmWho"><span class="nmAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div><b>' + esc(m.name) + '</b><small>' + esc(m.phone) + '</small></div></div>' : '';
