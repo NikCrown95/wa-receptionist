@@ -617,7 +617,11 @@ function ptFlow(v,lab){
       var top=h("div",{class:"times"});var ni=h("input",{class:"inp",value:x.n,placeholder:"es. Pacchetto 10 lezioni",maxlength:"60","aria-label":"Nome del pacchetto"});ni.oninput=function(){x.n=ni.value};top.appendChild(ni);
       if(S.plans.length>1)top.appendChild(h("button",{class:"chip",type:"button","aria-label":"Rimuovi il pacchetto",text:"×",onclick:function(){S.plans.splice(idx,1);S.pn=S.plans.length;S.po=S.plans.findIndex(function(y){return!pkDone(y)});render()}}));
       cd.appendChild(top);
-      var pi=h("input",{class:"inp",inputmode:"decimal",placeholder:"facoltativo","aria-label":"Prezzo",value:x.p});pi.oninput=function(){x.p=pi.value};cd.appendChild(field("Prezzo €",pi));
+      var pi=h("input",{class:"inp",inputmode:"decimal",placeholder:"es. 150","aria-label":"Prezzo",value:x.p});pi.oninput=function(){x.p=pi.value};cd.appendChild(field("Prezzo €",pi));
+      var pt=h("div",{style:"display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(45,210,220,.08);border:1px solid rgba(45,210,220,.22)"});
+      pt.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2DD2DC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>';
+      pt.appendChild(h("span",{style:"font-size:.86rem;line-height:1.4;color:var(--muted)"},[h("b",{style:"color:var(--ink);font-weight:600",text:"Facoltativo"}),", ma serve per calcolare incassi e statistiche."]));
+      cd.appendChild(pt);
     }else if(ph===1){
       Q("Quanti coaching comprende?","E quanti può farne al massimo ogni settimana.");
       if(!x.q)x.q="10";
