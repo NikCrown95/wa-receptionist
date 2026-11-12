@@ -431,6 +431,7 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .inp.name{height:50px}
   .btn{min-height:46px}
 }
+.list.k-pk .sr .mid span{white-space:normal;overflow:visible;text-overflow:clip}
 </style>
 </head>
 <body>
@@ -469,7 +470,7 @@ var ICONS={persona:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-7 7
  sanitario:'<path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><circle cx="20" cy="10" r="2"/>'};
 var VERT=[["persona","Servizi alla persona","Parrucchieri, barbieri, estetiste e altre attività su appuntamento. Ricevi solo nel tuo locale: niente servizi a domicilio o online","Parrucchieri, barbieri, estetiste"],
  ["domicilio","Servizi a domicilio e/o online","Vai dai clienti, ricevi nel tuo locale o lavori in videochiamata: scegli tu dove","Vai dai clienti o lavori online"],
- ["palestra","Palestra e Personal Trainer","Corsi di gruppo, personal training con pacchetti e iscritti. Ogni iscritto prenota da solo con il suo numero di telefono","Corsi, pacchetti e iscritti"],
+ ["palestra","Palestra e Personal Trainer","Corsi di gruppo, personal training con pacchetti e iscritti. Ogni iscritto prenota da solo: il personal con il suo codice di accesso","Corsi, pacchetti e iscritti"],
  ["campi","Centro sportivo","Campi da tennis, padel, calcio, pallavolo e altri sport, da prenotare a ore","Campi da prenotare a ore"],
  ["sanitario","Studi sanitari","Dentisti, fisioterapisti, osteopati, psicologi, studi medici e altri. Privacy rafforzata, con prenotazione dal calendario","Dentisti, fisioterapisti, medici"]];
 function Q(s){return s.split(",").map(function(x){var p=x.split("|");return[p[0],Number(p[1])]})}
@@ -819,7 +820,7 @@ function render(){
       tc.appendChild(h("label",{text:"Cosa sa fare"}));tc.appendChild(svChips(tmb.sv));v.appendChild(tc)}
   }
   if(k==="offerta"){
-    v.appendChild(head(lab,"Sei una palestra o un personal trainer?","Scegli quello che ti descrive meglio. I tuoi iscritti prenotano da soli con il loro numero di telefono."));
+    v.appendChild(head(lab,"Sei una palestra o un personal trainer?","Scegli quello che ti descrive meglio. I tuoi iscritti prenotano da soli: nel personal training con il codice di accesso che gli assegni, in palestra con il numero di telefono."));
     var og=h("div",{class:"offg"});
     function offCard(title,sub,on,fn){var c=h("button",{type:"button",class:"offc"+(on?" on":"")},[h("span",{class:"offk"},[on?"✓":""]),h("span",null,[h("b",{text:title}),h("small",{text:sub})])]);c.onclick=function(){fn();S.err="";render()};return c}
     og.appendChild(offCard("Palestra","Corsi di gruppo con posti limitati e calendario settimanale",S.gk==="gym",function(){S.gk="gym";S.gcl=true}));
@@ -834,7 +835,7 @@ function render(){
   if(k==="pacchetti"){
     v.appendChild(S.gk==="pt"?head(lab,"Che pacchetti offri?","Scrivi quelli che proponi ai tuoi iscritti, per esempio 10 lezioni da un'ora. Gli altri li aggiungi dopo, dall'agenda."):head(lab,"Che pacchetti vendi?","Ognuno ha i suoi: scrivi quelli che proponi ai tuoi iscritti. Puoi saltare questo passo e aggiungerli dopo."));
     var pwrap=h("div",{class:"list k-svc k-pk"});
-    pwrap.appendChild(h("div",{class:"lh2"},[h("span",{text:"Pacchetti aggiunti"+(S.plans.length?" · "+S.plans.length:"")})]));
+    var plh=h("div",{class:"lh2"},[h("span",{text:"Pacchetti aggiunti"+(S.plans.length?" · "+S.plans.length:"")})]);pwrap.appendChild(plh);
     var pad=h("div",{class:"added"});pwrap.appendChild(pad);
     if(!S.plans.length)pad.appendChild(h("p",{class:"empty",text:"I pacchetti che aggiungi compaiono qui."}));
     S.plans.forEach(function(x,i){var pr=String(x.p).trim(),r=h("div",{class:"sr",style:"--c:"+SCOL[i%SCOL.length]},[h("div",{class:"mid"},[h("b",{text:x.n.trim()}),h("span",{text:planWho(x)+" · "+planLine(x)})]),pr===""?null:h("span",{class:"pr",text:pr.replace(".",",")+" €"})]);
@@ -843,7 +844,7 @@ function render(){
     sgs=sgs.filter(function(g){return!S.plans.some(function(x){return x.n===g[0]})&&S.pd.n!==g[0]});
     if(sgs.length){var sb7=h("div",{class:"sugs"});sb7.appendChild(h("span",{class:"stepl",text:"Tocca per compilare"}));var ch7=h("div",{class:"chips"});sgs.forEach(function(g){ch7.appendChild(chip("+ "+g[0],false,function(){S.pd={n:g[0],kind:g[1],q:g[2],p:S.pd.p||"",c:g[3]};render()}))});sb7.appendChild(ch7);pwrap.appendChild(sb7)}
     var fc=h("div",{class:"card pkform",style:"display:grid;gap:12px"});
-    if(S.gk==="pt"){ptWizard(fc);pwrap.appendChild(fc);v.appendChild(pwrap);}else{
+    if(S.gk==="pt"){ptWizard(fc);pwrap.appendChild(fc);pwrap.appendChild(plh);pwrap.appendChild(pad);v.appendChild(pwrap);}else{
     var pn=h("input",{class:"inp",placeholder:S.gk==="pt"?"es. Pacchetto 10 lezioni":"es. Pacchetto 10 sessioni","aria-label":"Nome del pacchetto",maxlength:"60",value:S.pd.n});pn.oninput=function(){S.pd.n=pn.value};
     fc.appendChild(field("Nome",pn));
     var kc=h("div",{class:"chips"});kc.appendChild(chip("A ingressi",S.pd.kind==="entries",function(){S.pd.kind="entries";render()}));kc.appendChild(chip("A durata",S.pd.kind==="time",function(){S.pd.kind="time";render()}));
