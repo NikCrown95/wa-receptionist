@@ -200,3 +200,6 @@
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg .f2{fill:var(--ic2);stroke:none}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle:not(.f2){fill:color-mix(in srgb,var(--ic) 24%,transparent)}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg .a2:not(rect){fill:none}
+
+/* Home: icone solo aqua, riquadri uniformi */
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k]{--ic:#7FDCDC;--ic2:#EAF6F6;background:#0F2229;border-color:#27414A}
