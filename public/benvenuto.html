@@ -342,22 +342,6 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;background
   .sum{padding:6px 0}
   .next{gap:4px;padding-top:0}.next ul{gap:3px}.next li{font-size:.84rem;line-height:1.3}
 }
-@media (min-width:901px){
-  /* personal trainer, passo Pacchetti: modulo a sinistra, pacchetti aggiunti a destra, anello piccolo in alto */
-  .shell.pt2{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:18px;align-items:start;align-content:start;max-width:1040px}
-  .shell.pt2 .side{flex-direction:row;align-items:center;gap:22px;padding:0 0 14px;border-bottom:1px solid var(--line)}
-  .shell.pt2 .side .logo{width:120px;flex:none}
-  .shell.pt2 .side h2,.shell.pt2 .side .lead{display:none}
-  .shell.pt2 .orbrow{margin:0;gap:14px;flex:1;min-width:0}
-  .shell.pt2 .orb{width:56px;height:56px}
-  .shell.pt2 .orb .pc b{font-size:1rem;text-shadow:none}.shell.pt2 .orb .pc span{display:none}
-  .shell.pt2 .feed .ft{font-size:1.1rem;margin-top:1px}.shell.pt2 .feed .fx{display:none}
-  .shell.pt2 .pane{max-width:none;max-height:calc(100dvh - 130px)}
-  .shell.pt2 .list.k-pk{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);flex:none}
-  .shell.pt2 .list.k-pk>.pkform{grid-column:1;grid-row:1/3;border-top:0;border-right:1px solid var(--line);align-content:start}
-  .shell.pt2 .list.k-pk>.lh2{grid-column:2;grid-row:1;border-top:0}
-  .shell.pt2 .list.k-pk>.added{grid-column:2;grid-row:2;max-height:none;min-height:220px;padding:0 14px 14px}
-}
 .namebox{display:grid;gap:8px;padding-bottom:14px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 .namebox label{margin:0;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
 .inp.name{height:62px;font-size:1.4rem;font-weight:700;letter-spacing:-.01em;border-radius:16px;border:1.5px solid transparent;background:linear-gradient(var(--card2),var(--card2)) padding-box,var(--grad) border-box;box-shadow:0 0 22px rgba(47,123,255,.2);transition:box-shadow .25s}
@@ -757,7 +741,6 @@ function save(){
    .catch(function(){S.busy=false;S.err="Non c'è connessione. Controlla la rete e riprova.";render()})}
 function render(){
   var k=flow()[S.step],f=S.v?flow():["tipo","a","b","c","d"],v=document.getElementById("view");v.textContent="";
-  document.querySelector(".shell").classList.toggle("pt2",k==="pacchetti"&&S.gk==="pt");
   var np=S.v?f.length:5,pct=S.ready?Math.round(100*S.step/(np-1)):0,C=2*Math.PI*98;
   document.getElementById("arc").style.strokeDashoffset=String(C*(1-pct/100));
   document.getElementById("dot").style.transform="rotate("+(pct*3.6)+"deg)";
