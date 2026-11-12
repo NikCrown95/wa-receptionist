@@ -203,3 +203,5 @@
 
 /* Home: icone solo aqua, riquadri uniformi */
 :root:not([data-theme="light"]) #panelHome .hmTile[data-k]{--ic:#7FDCDC;--ic2:#EAF6F6;background:#0F2229;border-color:#27414A}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:44px;height:44px}
+:root:not([data-theme="light"]) #panelHome .hmTile{gap:6px}
