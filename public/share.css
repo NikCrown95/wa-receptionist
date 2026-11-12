@@ -527,3 +527,6 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 body.mnQuiet #burgerMenu,body.mnQuiet #menuBackdrop{transition:none!important;animation:none!important;visibility:hidden!important}
 /* tasto QR in alto: mai sul telefono */
 @media(max-width:699px){:root:root:root:root:root:root:root body .mainTop .mnQrHd,#mnQrFab{display:none!important}}
+/* niente lampo di tocco di Android sulle voci del menu (restava dipinto sopra la scheda) */
+#burgerMenu,#burgerMenu *,#menuBackdrop,.mnQrHd,#mnQrFab{-webkit-tap-highlight-color:transparent!important}
+#burgerMenu button:focus,#burgerMenu button:active{outline:none}
