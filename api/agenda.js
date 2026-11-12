@@ -855,7 +855,7 @@ module.exports = async (req, res) => {
               const gid = mlist.length > 1 ? crypto.randomUUID() : null;
               for (const m of mlist) { const row = { business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: m.price_eur, at_customer_place: m.mode === "domicilio", active: true }; if (gid || m.mode === "online") { row.mode = m.mode; if (gid) row.group_id = gid; } sl2.push(row); }
             } else {
-              sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true, ...(body.trainer === true && Number.isInteger(Number(x.entries)) && Number(x.entries) >= 1 && Number(x.entries) <= 1000 ? { entries: Number(x.entries) } : {}) });
+              sl2.push({ business_id: biz.id, name: sn, duration_min: dur, buffer_min: 0, price_eur: pr, at_customer_place: kind === "domicilio" && x.at_customer_place === true, active: true, ...(body.trainer === true && Number.isInteger(Number(x.entries)) && Number(x.entries) >= 1 && Number(x.entries) <= 1000 ? { entries: Number(x.entries) } : {}), ...(body.trainer === true ? (() => { const vr = ptValidity(x || {}); const o = {}; if (vr.set) Object.keys(vr.set).forEach((k) => { if (vr.set[k] != null) o[k] = vr.set[k]; }); return o; })() : {}) });
             }
           }
           const hrs = Array.isArray(body.hours) ? body.hours : [];
@@ -902,6 +902,10 @@ module.exports = async (req, res) => {
           if (!p2.ok) return res.status(500).json({ error: "Non siamo riusciti a salvare. Riprova." });
           await sb("DELETE", "services?business_id=eq." + biz.id, null, "return=minimal");
           let si = await sb("POST", "services", sl2, "return=minimal");
+          if (!si.ok && sl2.some((r) => r.pt_months || r.pt_per_week)) {
+            // colonne di durata/limite settimanale non ancora create: i pacchetti si salvano senza, come prima
+            si = await sb("POST", "services", sl2.map((r) => { const c = { ...r }; delete c.pt_months; delete c.pt_per_week; return c; }), "return=minimal");
+          }
           if (!si.ok && sl2.some((r) => r.mode)) {
             // colonne mode/group_id non ancora create: si salvano solo sede e domicilio, come prima
             const old = sl2.filter((r) => r.mode !== "online").map((r) => ({ business_id: r.business_id, name: r.name, duration_min: r.duration_min, buffer_min: 0, price_eur: r.price_eur, at_customer_place: r.at_customer_place, active: true }));
