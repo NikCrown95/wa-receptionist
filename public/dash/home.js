@@ -7,12 +7,12 @@
   function click(el){if(el)el.click();}
   var S='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
   var IC={
-    cal:'<svg '+S+'><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path class="a2" d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/><circle class="f2" cx="8.5" cy="14.6" r="1"/><circle class="f2" cx="12" cy="14.6" r="1"/><circle class="f2" cx="15.5" cy="14.6" r="1"/></svg>',
-    add:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path class="a2" d="M12 8v8M8 12h8"/></svg>',
-    cli:'<svg '+S+'><circle cx="9" cy="8.5" r="3.5"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path class="a2" d="M16 5.2a3.3 3.3 0 0 1 0 6.3M18.4 14.6a6.2 6.2 0 0 1 2.8 5.4"/></svg>',
-    av:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path class="a2" d="M12 7v5l3.2 2"/></svg>',
-    qr:'<svg '+S+'><rect x="3" y="3" width="7" height="7" rx="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.8"/><path class="a2" d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>',
-    st:'<svg '+S+'><rect x="4" y="12" width="4" height="8" rx="1.4"/><rect class="a2" x="10" y="4" width="4" height="16" rx="1.4"/><rect x="16" y="9" width="4" height="11" rx="1.4"/></svg>'
+    cal:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><rect class="s" x="3" y="4.5" width="18" height="16.5" rx="4.2"/><path d="M3 9.6v-.9A4.2 4.2 0 0 1 7.2 4.5h9.6A4.2 4.2 0 0 1 21 8.7v.9z"/><rect x="7" y="2.2" width="2.1" height="4.4" rx="1.05"/><rect x="14.9" y="2.2" width="2.1" height="4.4" rx="1.05"/><circle cx="8" cy="14" r="1.3"/><circle cx="12" cy="14" r="1.3"/><circle cx="16" cy="14" r="1.3"/><circle cx="8" cy="17.5" r="1.3"/><circle cx="12" cy="17.5" r="1.3"/></svg>',
+    add:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><circle class="s" cx="12" cy="12" r="9.6"/><rect x="11" y="6.6" width="2" height="10.8" rx="1"/><rect x="6.6" y="11" width="10.8" height="2" rx="1"/></svg>',
+    cli:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><circle class="s" cx="16.6" cy="8.4" r="2.9"/><path class="s" d="M17 13.5c2.8.3 4.8 2 4.8 4.6 0 1-.6 1.7-1.6 1.7H17.6c.3-.4.4-.9.4-1.4 0-1.9-.4-3.5-1-4.9z"/><circle cx="9" cy="8.5" r="3.7"/><path d="M2.4 19.4c0-3.3 2.9-5.4 6.6-5.4s6.6 2.1 6.6 5.4c0 1-.7 1.7-1.7 1.7H4.1c-1 0-1.7-.7-1.7-1.7z"/></svg>',
+    av:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><circle class="s" cx="12" cy="12" r="9.6"/><path d="M12 6.8v5.4l3.7 2.2" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    qr:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><rect class="s" x="3" y="3" width="7.6" height="7.6" rx="2.2"/><rect class="s" x="13.4" y="3" width="7.6" height="7.6" rx="2.2"/><rect class="s" x="3" y="13.4" width="7.6" height="7.6" rx="2.2"/><rect x="5.4" y="5.4" width="2.8" height="2.8" rx=".9"/><rect x="15.8" y="5.4" width="2.8" height="2.8" rx=".9"/><rect x="5.4" y="15.8" width="2.8" height="2.8" rx=".9"/><rect x="13.8" y="13.8" width="3.1" height="3.1" rx="1"/><rect x="18" y="13.8" width="3" height="3.1" rx="1"/><rect x="13.8" y="18" width="3.1" height="3" rx="1"/><rect x="18" y="18" width="3" height="3" rx="1"/></svg>',
+    st:'<svg class="ap" viewBox="0 0 24 24" aria-hidden="true"><rect class="s" x="3.6" y="12" width="4.6" height="9" rx="1.7"/><rect x="9.7" y="3" width="4.6" height="18" rx="1.7"/><rect class="s" x="15.8" y="8" width="4.6" height="13" rx="1.7"/></svg>'
   };
   function goCal(){
     click($('menuTabCal'));

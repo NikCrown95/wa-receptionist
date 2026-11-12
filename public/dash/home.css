@@ -211,3 +211,17 @@
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:38px;height:38px}
 :root:not([data-theme="light"]) #panelHome .hmT1{font-size:14px}
 :root:not([data-theme="light"]) #panelHome .hmT2{font-size:11.5px}
+/* icone stile app: quadrato scuro, glifo colorato a due livelli */
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:58px;height:58px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#1D3C47,#122B33);border:1px solid #2F5560;box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 3px 8px rgba(0,0,0,.3)}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:32px;height:32px;stroke:none!important}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap *{fill:currentColor!important;stroke:none}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap .s{opacity:.4}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap path[stroke-width]{fill:none!important;stroke:currentColor!important}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="cal"] .hmIc{color:#FF6A5F}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="add"] .hmIc{color:#4CD964}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="cli"] .hmIc{color:#5AB8FF}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="av"] .hmIc{color:#FFB340}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="qr"] .hmIc{color:#B77CFF}
+:root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#7FDCDC}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:36px;height:36px}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap .s{opacity:.5}
