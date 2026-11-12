@@ -518,3 +518,6 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
   #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="dl"]{order:3}
 }
 @media(min-width:700px){:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#liaRecapBtn,:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#bellBtn{margin-left:0!important}}
+
+/* difesa: se il browser ha ancora la vecchia versione di share.js, il vecchio tasto flottante non deve comparire */
+.mnQrFab{display:none!important}
