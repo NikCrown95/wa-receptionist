@@ -175,3 +175,4 @@
 :root:not([data-theme="light"]) #panelHome .hmDay{border:1.5px solid #7FDCDC}
 :root:not([data-theme="light"]) #panelHome .hmDay::before{display:none}
 :root:not([data-theme="light"]) #panelHome .hmDay{padding-left:20px}
+:root:not([data-theme="light"]) #panelHome .hmDay{border:1px solid color-mix(in srgb,#7FDCDC 38%,#1B2F36)}
