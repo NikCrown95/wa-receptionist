@@ -496,27 +496,25 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 @media(min-width:700px){
   #mnShareSheet:not([hidden]):not(.mnQrOnly){display:flex;align-items:center;justify-content:center}
   #mnShareSheet:not(.mnQrOnly) .mnSheet{position:relative;left:auto;right:auto;bottom:auto;margin:0;width:min(420px,calc(100% - 48px));max-width:420px;max-height:94%;padding:20px 24px 24px;border-radius:26px;display:flex;flex-direction:column;align-items:stretch;text-align:center}
-  #mnShareSheet:not(.mnQrOnly) .mnGrab,#mnShareSheet:not(.mnQrOnly) .mnQrKick,#mnShareSheet:not(.mnQrOnly) .mnSub,#mnShareSheet:not(.mnQrOnly) #mnQrHint,#mnShareSheet:not(.mnQrOnly) .mnCopy,#mnShareSheet:not(.mnQrOnly) .mnPh,#mnShareSheet:not(.mnQrOnly) .mnAct>svg,#mnShareSheet:not(.mnQrOnly) .mnAct[data-a="wa"],#mnShareSheet:not(.mnQrOnly) .mnAct[data-a="printqr"]{display:none}
-  #mnShareSheet:not(.mnQrOnly) .mnWd{display:inline}
-  #mnShareSheet:not(.mnQrOnly) .mnSH{margin-top:0;margin-bottom:14px;text-align:left}
-  #mnShareSheet:not(.mnQrOnly) .mnQrCard{margin-top:0;flex-direction:column;align-items:center;gap:0;padding:0;background:transparent;border:0}
-  #mnShareSheet:not(.mnQrOnly) .mnQrBox{width:250px;height:250px;padding:12px;border-radius:20px}
-  #mnShareSheet:not(.mnQrOnly) .mnQrInfo{text-align:center;margin-top:14px}
-  #mnShareSheet:not(.mnQrOnly) .mnLinkRow{margin-top:2px;justify-content:center;padding:0;background:transparent;border:0}
-  #mnShareSheet:not(.mnQrOnly) .mnLinkRow code{flex:none;max-width:100%;font-size:.82rem;font-weight:500;color:var(--muted);opacity:1}
-  #mnShareSheet:not(.mnQrOnly) .mnActs{margin-top:18px;gap:10px;border:0;background:transparent;border-radius:0;overflow:visible}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct{justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:.92rem}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct:first-child{background:var(--accent);border-color:var(--accent);color:#04141A}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct i{background:transparent;width:auto;height:auto}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct:first-child i{color:#04141A}
-  #mnShareSheet:not(.mnQrOnly) .mnMsg{text-align:center}
 }
-@media(min-width:700px){
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct small{display:none}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct .mnT{flex:none}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="poster"]{order:2}
-  #mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="dl"]{order:3}
-}
+#mnShareSheet:not(.mnQrOnly) .mnGrab,#mnShareSheet:not(.mnQrOnly) .mnQrKick,#mnShareSheet:not(.mnQrOnly) .mnSub,#mnShareSheet:not(.mnQrOnly) #mnQrHint,#mnShareSheet:not(.mnQrOnly) .mnCopy,#mnShareSheet:not(.mnQrOnly) .mnPh,#mnShareSheet:not(.mnQrOnly) .mnAct>svg,#mnShareSheet:not(.mnQrOnly) .mnAct[data-a="wa"],#mnShareSheet:not(.mnQrOnly) .mnAct[data-a="printqr"]{display:none}
+#mnShareSheet:not(.mnQrOnly) .mnWd{display:inline}
+#mnShareSheet:not(.mnQrOnly) .mnSH{margin-top:0;margin-bottom:14px;text-align:left}
+#mnShareSheet:not(.mnQrOnly) .mnQrCard{margin-top:0;flex-direction:column;align-items:center;gap:0;padding:0;background:transparent;border:0}
+#mnShareSheet:not(.mnQrOnly) .mnQrBox{width:250px;height:250px;padding:12px;border-radius:20px}
+#mnShareSheet:not(.mnQrOnly) .mnQrInfo{text-align:center;margin-top:14px}
+#mnShareSheet:not(.mnQrOnly) .mnLinkRow{margin-top:2px;justify-content:center;padding:0;background:transparent;border:0}
+#mnShareSheet:not(.mnQrOnly) .mnLinkRow code{flex:none;max-width:100%;font-size:.82rem;font-weight:500;color:var(--muted);opacity:1}
+#mnShareSheet:not(.mnQrOnly) .mnActs{margin-top:18px;gap:10px;border:0;background:transparent;border-radius:0;overflow:visible}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct{justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:.92rem}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct:first-child{background:var(--accent);border-color:var(--accent);color:#04141A}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct i{background:transparent;width:auto;height:auto}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct:first-child i{color:#04141A}
+#mnShareSheet:not(.mnQrOnly) .mnMsg{text-align:center}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct small{display:none}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct .mnT{flex:none}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="poster"]{order:2}
+#mnShareSheet:not(.mnQrOnly) .mnActs .mnAct[data-a="dl"]{order:3}
 @media(min-width:700px){:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#liaRecapBtn,:root:root:root:root:root:root body .mainTop .mnQrHd:not([hidden])+#bellBtn{margin-left:0!important}}
 
 /* difesa: se il browser ha ancora la vecchia versione di share.js, il vecchio tasto flottante non deve comparire */

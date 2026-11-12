@@ -169,7 +169,7 @@
 
     menu.insertBefore(card, cal);
     /* "La tua pagina": sostituisce i due pulsanti Condividi / Mostra il QR della scheda in alto (la scheda resta nel codice, nascosta, perche' la Home ne usa il QR) */
-    var pg = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>La tua pagina');
+    var pg = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>QR e Link');
     pg.type = "button"; pg.id = "menuTabPage"; pg.setAttribute("role", "menuitem"); pg.setAttribute("aria-current", "false"); pg.setAttribute("data-sub", "Link e QR code");
     pg.addEventListener("click", function () {
       closeMenu();
@@ -426,7 +426,7 @@
     sheet.innerHTML =
       '<button type="button" class="mnScrim" id="mnShareScrim" aria-label="Chiudi"></button>' +
       '<div class="mnSheet"><div class="mnGrab"></div>' +
-      '<div class="mnSH"><div><span class="mnQrKick">Il tuo QR code</span><h2 id="mnShT">Condividi la tua pagina</h2><p class="mnSub" id="mnShSub"></p></div><button type="button" class="mnClose" data-a="close" aria-label="Chiudi">' + I.x + "</button></div>" +
+      '<div class="mnSH"><div><span class="mnQrKick">Il tuo QR code</span><h2 id="mnShT">QR e Link</h2><p class="mnSub" id="mnShSub"></p></div><button type="button" class="mnClose" data-a="close" aria-label="Chiudi">' + I.x + "</button></div>" +
       '<div class="mnSeg" role="group" aria-label="Quale link" hidden></div>' +
       '<div class="mnQrCard"><div class="mnQrFrame"><i></i><i></i><i></i><i></i><div class="mnQrBox" id="mnQrBox"></div></div><div class="mnQrInfo"><b id="mnQrName"></b><span id="mnQrHint"></span></div></div>' +
       '<div class="mnLinkRow"><code id="mnLinkTxt"></code><button type="button" class="mnCopy" data-a="copy">' + I.copy + "<span>Copia</span></button></div>" +
@@ -631,7 +631,7 @@
       if (!sheet) buildSheet();
       cur = Math.min(Number(i) || 0, b.links.length - 1);
       sheet.classList.toggle("mnQrOnly", !!qrOnly);
-      var st = $("mnShT"); if (st) st.textContent = qrOnly ? (b.name || "La tua attività") : "Condividi la tua pagina";
+      var st = $("mnShT"); if (st) st.textContent = qrOnly ? (b.name || "La tua attività") : "QR e Link";
       paintSheet();
       lastFocus = document.activeElement;
       sheet.hidden = false;
@@ -1087,7 +1087,7 @@
     var b = $("mnQrFab");
     if (!b) {
       b = mk("button", "bellBtn mnQrHd", I.qrs); b.type = "button"; b.id = "mnQrFab"; b.hidden = true;
-      b.setAttribute("aria-label", "La tua pagina: QR code, condividi e locandina"); b.title = "La tua pagina: QR code, condividi e locandina";
+      b.setAttribute("aria-label", "QR e Link: QR code, condividi e locandina"); b.title = "QR e Link";
       b.addEventListener("click", function () { var m = $("menuTabPage"); if (m) m.click(); });
       anchor.parentNode.insertBefore(b, anchor);
     }
