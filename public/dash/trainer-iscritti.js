@@ -21,7 +21,10 @@
   function pd(x) { return new Date(String(x || '').replace(' ', 'T').replace(/(\.\d{3})\d+/, '$1')); }
   function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
-  function stOf(m) { return m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultimi coaching' } : { s: 'ok', label: 'In corso' }; }
+  function fdate(ds) { var a = String(ds || '').slice(0, 10).split('-'); return a.length === 3 ? (+a[2]) + ' ' + MS[+a[1] - 1] + ' ' + a[0] : ''; }
+  function durName(n) { return n === 1 ? '1 mese' : n === 12 ? '1 anno' : n + ' mesi'; }
+  function todayIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function stOf(m) { return m.expired ? { s: 'bad', label: 'Scaduto' } : m.left <= 0 ? { s: 'bad', label: 'Da rinnovare' } : m.left <= 2 ? { s: 'warn', label: 'Ultimi coaching' } : { s: 'ok', label: 'In corso' }; }
   function curPack(m) { return m.packs.filter(function (p) { return p.left > 0; })[0] || m.packs[m.packs.length - 1] || null; }
   // Nell'elenco: se l'iscritto ha piu' pacchetti ancora attivi (es. dopo un rinnovo con ingressi residui) si mostra la somma
   function listPack(m) {
@@ -157,17 +160,21 @@
     var who = m ? '<div class="nmWho"><span class="nmAv">' + esc((m.first[0] || '') + (m.last[0] || '')) + '</span><div><b>' + esc(m.name) + '</b><small>' + esc(m.phone) + '</small></div></div>' : '';
     var data = m ? '' : '<div class="nmSec">Dati dell’iscritto</div><div class="nmGrid"><div class="nmF"><label for="nmF">Nome</label><input id="nmF" type="text" autocomplete="off" autocapitalize="words" placeholder="Giulia"></div><div class="nmF"><label for="nmL">Cognome</label><input id="nmL" type="text" autocomplete="off" autocapitalize="words" placeholder="Bianchi"></div></div><div class="nmF"><label for="nmP">Telefono</label><input id="nmP" type="tel" inputmode="tel" autocomplete="off" placeholder="333 123 4567"></div>';
     sh.innerHTML = '<div class="grab"></div><div class="nmHd"><span class="nmIc">' + SV(m ? '<rect x="3" y="7" width="18" height="12" rx="3"/><path d="M3 11h18M7 15h3"/>' : '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20a6.5 6.5 0 0 1 13 0M19 8v6M16 11h6"/>', 22) + '</span><div><h2>' + (m ? 'Nuovo pacchetto' : 'Nuovo iscritto') + '</h2><p>' + (m ? 'Rinnovo o nuovo acquisto, dopo il pagamento.' : 'Registralo dopo il pagamento.') + '</p></div>' + (m ? '' : '<span class="nmSt"></span>') + '</div>' + who + '<div class="nmS1">' + data + '</div>' +
-      '<div class="nmS2"><div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div>' + (m ? '' : '<div class="nmCd"><label for="nmC">Codice di accesso</label><div class="nmCr"><input id="nmC" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20"><button type="button" id="nmGen">Genera</button></div><small>Generato per te: lo darai all’iscritto per prenotare. Puoi cambiarlo.</small></div>') + '</div><div class="lerr" role="alert" hidden></div>' +
+      '<div class="nmS2"><div class="nmSec">Pacchetto acquistato</div><div class="nmPk" role="radiogroup" aria-label="Pacchetto acquistato"></div><div class="nmSum"></div><div class="nmF nmSd" style="margin-top:12px" hidden><label for="nmD">Il pacchetto parte il</label><input id="nmD" type="date"></div>' + (m ? '' : '<div class="nmCd"><label for="nmC">Codice di accesso</label><div class="nmCr"><input id="nmC" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20"><button type="button" id="nmGen">Genera</button></div><small>Generato per te: lo darai all’iscritto per prenotare. Puoi cambiarlo.</small></div>') + '</div><div class="lerr" role="alert" hidden></div>' +
       '<div class="nmBt"><button type="button" class="lb lcancel">Annulla</button><button type="button" class="lb lsave">' + (m ? 'Assegna' : 'Continua') + '</button></div>';
     document.body.appendChild(bg); document.body.appendChild(sh);
     var $ = function (q) { return sh.querySelector(q); }, pk = $('.nmPk'), sum = $('.nmSum'), err = $('.lerr');
-    function sumTx() { var x = svcs.filter(function (v) { return v.id === sel; })[0]; sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + (x.entries === 1 ? ' coaching' : ' coaching') + '</b> da solo, negli orari che hai aperto.' : ''; }
+    function sumTx() {
+      var x = svcs.filter(function (v) { return v.id === sel; })[0], sd = $('.nmSd');
+      sum.innerHTML = x ? 'Potrà prenotare fino a <b>' + x.entries + ' coaching</b> da solo, negli orari che hai aperto' + (x.per_week ? ', al massimo <b>' + x.per_week + ' a settimana</b>' : '') + (x.months ? ', entro <b>' + durName(x.months) + '</b> da oggi' : '') + '.' : '';
+      if (sd) { sd.hidden = !(x && x.months); var di = $('#nmD'); if (di && !di.value) di.value = todayIso(); }
+    }
     function drawPk() {
       pk.textContent = '';
       if (!svcs.length) { pk.appendChild(el('p', 'nmNo', 'Non hai ancora creato nessun pacchetto. Aggiungilo da Impostazioni > Pacchetti.')); sum.textContent = ''; return; }
       svcs.forEach(function (x) {
         var on = x.id === sel, b = el('button', 'nmP' + (on ? ' on' : '')); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', on ? 'true' : 'false');
-        var sub = x.entries + (x.entries === 1 ? ' ingresso' : ' ingressi') + (x.duration_min ? ' · ' + x.duration_min + ' min' : '');
+        var sub = x.entries + (x.entries === 1 ? ' ingresso' : ' ingressi') + (x.months ? ' · ' + durName(x.months) : '') + (x.per_week ? ' · max ' + x.per_week + '/sett.' : '') + (x.duration_min ? ' · ' + x.duration_min + ' min' : '');
         b.innerHTML = '<span class="nmRd"></span><span class="nmPt"><b>' + esc(x.name) + '</b><small>' + esc(sub) + '</small></span>' + (x.price_eur != null && x.price_eur !== '' ? '<span class="nmPr">' + eur(x.price_eur) + '</span>' : '');
         b.addEventListener('click', function () { sel = x.id; drawPk(); });
         pk.appendChild(b);
@@ -190,6 +197,7 @@
     cancelB.addEventListener('click', function () { if (step === 2 && !m) { step = 1; show(); } else close(); });
     saveB.addEventListener('click', function () {
       var b = this, body = { action: 'assign', service_id: sel };
+      var sx = svcs.filter(function (v) { return v.id === sel; })[0], di0 = $('#nmD'); if (step === 2 && sx && sx.months && di0 && di0.value) body.start_on = di0.value;
       if (step === 1) {
         var f1 = $('#nmF').value.trim(), l1 = $('#nmL').value.trim(), p1 = $('#nmP').value.trim();
         if (f1.length < 2 || l1.length < 2) return fail('Scrivi nome e cognome.');
@@ -256,6 +264,8 @@
     rw('Pacchetto', cp ? esc(cp.name) + (cp.price_eur != null && cp.price_eur !== '' ? ' · ' + eur(cp.price_eur) : '') : 'Nessun pacchetto');
     if (cp && cp.created_at) rw('Dal', dshort(pd(cp.created_at)));
     rw('Ingressi usati', (m.total - m.left) + ' su ' + m.total);
+    if (m.expires_on) rw(m.expired ? 'Scaduto il' : 'Scade il', fdate(m.expires_on));
+    if (m.per_week && !m.expired) rw('Questa settimana', Math.min(m.week_used || 0, m.per_week) + ' di ' + m.per_week);
     rw('In agenda', ls.up.length + ' coaching');
     lsC.appendChild(cb); body.appendChild(lsC);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
@@ -283,10 +293,20 @@
         var l = el('div', 'mxLs');
         m.packs.slice().reverse().forEach(function (p) {
           var d = pd(p.created_at), r = el('div', 'mxEv');
-          r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.name) + '</b><span>' + p.left + ' di ' + p.total + ' ingressi rimasti</span></span><b>' + (p.price_eur != null ? eur(p.price_eur) : '') + '</b>';
+          r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.name) + '</b><span>' + p.left + ' di ' + p.total + ' ingressi rimasti</span><span style="display:block">' + (p.expires_on ? (p.expired ? 'Scaduto il ' : 'Scade il ') + fdate(p.expires_on) : 'Senza scadenza') + (p.per_week ? ' · max ' + p.per_week + ' a settimana' : '') + '</span></span><b>' + (p.price_eur != null ? eur(p.price_eur) : '') + '</b>';
           var rm = btn('Togli', 'mxRm', function () {
             rm.textContent = 'Sicuro?'; rm.onclick = function () { rm.disabled = true; post({ action: 'remove', id: p.id }).then(function () { return window.liaPtRefresh(); }).catch(function (e) { rm.disabled = false; rm.textContent = e.message; }); };
           });
+          if (p.expires_on) {
+            var pr = btn('Prolunga', 'mxRm', function () {
+              pr.hidden = true;
+              var wr = el('div', 'mxExt'); wr.style.cssText = 'display:flex;gap:8px;align-items:center;margin:6px 0 10px';
+              var di = el('input'); di.type = 'date'; di.min = todayIso(); di.value = p.expires_on > todayIso() ? p.expires_on : todayIso(); di.setAttribute('aria-label', 'Nuova scadenza'); di.style.cssText = 'flex:1;min-width:0;font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line2,#2a3648);background:transparent;color:inherit';
+              var ok = btn('Salva', 'mxRm', function () { if (!di.value) return; ok.disabled = true; post({ action: 'extend', id: p.id, expires_on: di.value }).then(function () { return window.liaPtRefresh(); }).catch(function (e) { ok.disabled = false; ok.textContent = e.message; }); });
+              wr.appendChild(di); wr.appendChild(ok); l.insertBefore(wr, r.nextSibling);
+            });
+            r.appendChild(pr);
+          }
           r.appendChild(rm); l.appendChild(r);
         });
         pane.appendChild(l);

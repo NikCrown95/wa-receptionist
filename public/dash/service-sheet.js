@@ -50,7 +50,7 @@ window.liaServiceSheet=function(v,onSave,onDelete){
   sh.innerHTML='<div class="grab"></div><h2>Modifica servizio</h2><p class="lsub">Prezzo e durata valgono per le nuove prenotazioni.</p>'+
    '<div class="lf"><label for="lsName">Nome</label><input id="lsName" type="text" autocomplete="off"></div>'+
    (v.useModes?'<div class="lf"><label for="lsMin">Durata minima (min)</label><input id="lsMin" type="text" inputmode="numeric"></div><div id="lsModes"></div>':'<div class="lrow"><div class="lf"><label for="lsPrice">Prezzo (€)</label><input id="lsPrice" type="text" inputmode="decimal"></div><div class="lf"><label for="lsMin">Durata (min)</label><input id="lsMin" type="text" inputmode="numeric"></div></div>')+
-   (v.showEntries?'<div class="lf"><label for="lsEntries">Ingressi (lezioni incluse)</label><input id="lsEntries" type="text" inputmode="numeric"></div>':'')+
+   (v.showEntries?'<div class="lf"><label for="lsEntries">Coaching totali</label><input id="lsEntries" type="text" inputmode="numeric"></div><div class="lf"><label>Durata del pacchetto</label><div class="lurow" id="lsDur" role="group" aria-label="Durata del pacchetto"></div></div><div class="lf"><label for="lsWeek">Massimo a settimana</label><input id="lsWeek" type="text" inputmode="numeric" placeholder="Nessun limite"></div>':'')+
    (v.showUnits?'<div class="lunits"><b>Più ore di fila</b><span>Fino a quanto tempo il cliente può prenotare in una volta. Il prezzo si moltiplica.</span><div class="lurow" id="lsUnits" role="group" aria-label="Durata massima prenotabile"></div></div>':'')+
    (v.showHome&&!v.useModes?'<div class="lswrow"><div><b>A domicilio</b><span>Lo fai a casa del cliente</span></div><button type="button" class="sw2" id="lsHome" role="switch" aria-label="A domicilio"></button></div>':'')+
    '<div class="lerr" role="alert" hidden></div>'+
@@ -58,6 +58,8 @@ window.liaServiceSheet=function(v,onSave,onDelete){
   document.body.appendChild(bg);document.body.appendChild(sh);
   var $=function(q){return sh.querySelector(q)};
   $('#lsName').value=v.name||'';if($('#lsPrice'))$('#lsPrice').value=String(v.price==null?'':v.price).replace('.',',');$('#lsMin').value=v.min==null?'':v.min;if($('#lsEntries'))$('#lsEntries').value=v.entries==null?'':v.entries;
+  var dm=parseInt(v.months,10)||0,dr=$('#lsDur');if($('#lsWeek'))$('#lsWeek').value=v.perWeek?v.perWeek:'';
+  if(dr){[[0,'Senza scadenza'],[1,'Mensile'],[3,'Trimestrale'],[6,'Semestrale'],[12,'Annuale']].forEach(function(o){var b=document.createElement('button');b.type='button';b.className='uo'+(o[0]===dm?' on':'');b.setAttribute('aria-pressed',o[0]===dm?'true':'false');b.textContent=o[1];b.addEventListener('click',function(){dm=o[0];[].forEach.call(dr.children,function(x){x.className='uo';x.setAttribute('aria-pressed','false')});b.className='uo on';b.setAttribute('aria-pressed','true')});dr.appendChild(b)})}
   var mb=null;if(v.useModes)mb=window.liaModesBlock($('#lsModes'),{modes:v.modes,half:v.half,allow:v.allow},function(){return $('#lsMin').value});
   var mu=Math.max(1,Math.min(8,parseInt(v.maxUnits,10)||1)),ub=$('#lsUnits');
   function uLabel(m){if(m<60)return m+' min';if(m%60===0)return (m/60)+(m===60?' ora':' ore');return Math.floor(m/60)+' h '+(m%60)+' min'}
@@ -75,9 +77,10 @@ window.liaServiceSheet=function(v,onSave,onDelete){
     if(!mb&&!(p>=0))return fail('Il prezzo deve essere un numero, per esempio 18 o 12,50.');
     if(!(d>=5))return fail('La durata deve essere di almeno 5 minuti.');
     var en=$('#lsEntries')?parseInt($('#lsEntries').value,10):null;if($('#lsEntries')&&!(en>=1&&en<=1000))return fail('Scrivi quanti ingressi comprende il pacchetto, per esempio 10.');
+    var pw=$('#lsWeek')?parseInt($('#lsWeek').value,10)||0:0;if($('#lsWeek')&&String($('#lsWeek').value).trim()&&!(pw>=1&&pw<=7))return fail('Il massimo a settimana deve essere da 1 a 7, oppure lascia vuoto per nessun limite.');
     var md=null;if(mb){md=mb.read();if(md.error)return fail(md.error)}
     var b=$('.lsave');b.disabled=true;b.textContent='Salvo…';err.hidden=true;
-    Promise.resolve(onSave({name:n,price:p,min:d,home:home,showHome:!!v.showHome,maxUnits:mu,entries:en,modes:md?md.modes:null,half:md?md.half:false})).then(close).catch(function(e){b.disabled=false;b.textContent='Salva';fail((e&&e.message)||'Non sono riuscito a salvare. Riprova.')});
+    Promise.resolve(onSave({name:n,price:p,min:d,home:home,showHome:!!v.showHome,maxUnits:mu,entries:en,months:dm,perWeek:pw,modes:md?md.modes:null,half:md?md.half:false})).then(close).catch(function(e){b.disabled=false;b.textContent='Salva';fail((e&&e.message)||'Non sono riuscito a salvare. Riprova.')});
   });
   $('.ldel').addEventListener('click',function(){
     var box=document.createElement('div');box.className='lconf';
