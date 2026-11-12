@@ -260,3 +260,4 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="qr"] .hmIc{color:#9CECED}
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"]{background:#1c2828;border-color:color-mix(in srgb,#D8B87F 30%,#1B2F36)}
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#D8B87F}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:48px;height:48px}
