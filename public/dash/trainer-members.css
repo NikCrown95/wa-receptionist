@@ -473,3 +473,7 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .ptNm .nmBt{grid-template-columns:1fr 1.7fr;gap:8px;margin-top:16px}
 .ptNm .nmBt .lb{height:56px;border-radius:18px;font-size:1rem;font-weight:800;border:1px solid var(--line2);background:var(--card);color:var(--ink)}
 .ptNm .nmBt .lsave{background:var(--accent);border-color:transparent;color:var(--on-accent,#04141A)}
+.ptNm .nvPr{position:relative;display:flex;align-items:center;gap:12px}
+.ptNm .nvPr .nvPb{flex:1;min-width:0}
+.ptNm .nvHero .nmSt{align-self:auto}
+.ptNm .nvNm b{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
