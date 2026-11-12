@@ -8,11 +8,11 @@
   var S='viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
   var IC={
     cal:'<svg '+S+'><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
-    add:'<svg '+S+'><path d="M12 5v14M5 12h14"/></svg>',
+    add:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
     cli:'<svg '+S+'><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></svg>',
     av:'<svg '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     qr:'<svg '+S+'><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>',
-    st:'<svg '+S+'><path d="M5 20V10M12 20V4M19 20v-7"/></svg>'
+    st:'<svg '+S+'><rect x="4" y="12" width="4" height="8" rx="1.4"/><rect x="10" y="4" width="4" height="16" rx="1.4"/><rect x="16" y="9" width="4" height="11" rx="1.4"/></svg>'
   };
   function goCal(){
     click($('menuTabCal'));

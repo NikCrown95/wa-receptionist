@@ -176,3 +176,9 @@
 :root:not([data-theme="light"]) #panelHome .hmDay::before{display:none}
 :root:not([data-theme="light"]) #panelHome .hmDay{padding-left:20px}
 :root:not([data-theme="light"]) #panelHome .hmDay{border:1px solid color-mix(in srgb,#7FDCDC 38%,#1B2F36)}
+
+/* Home: contenuto centrato, icone duotone */
+:root:not([data-theme="light"]) #panelHome .hmTile{align-items:center;justify-content:center;gap:14px;text-align:center}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmTxt,:root:not([data-theme="light"]) #panelHome .hmTile .hmT1,:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{text-align:center}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:40px;height:40px;stroke-width:1.5;stroke-linejoin:round}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg rect,:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg circle{fill:color-mix(in srgb,var(--ic,#7FDCDC) 20%,transparent)}
