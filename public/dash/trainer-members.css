@@ -442,3 +442,34 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 .mxD .mvA2.bad .mvId .mvChip::before{background:#FF8A82}
 .ptNm .nmCd>input{display:block;width:100%;box-sizing:border-box;height:54px;padding:0 16px;border-radius:15px;border:1.5px solid var(--line2,var(--line));background:var(--field,transparent);color:inherit;font:inherit;font-size:1.15rem;font-weight:700;letter-spacing:.04em}
 .ptNm .nmCd>input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+
+/* ===== Nuovo iscritto / Nuovo pacchetto: stesso linguaggio della pagina Iscritti (scheda teal, riquadri scuri, pulsanti a pillola) ===== */
+.liaSheet.ptNm{padding-top:10px}
+.ptNm .nvHero{position:relative;overflow:hidden;border-radius:24px;padding:16px 16px 14px;margin:6px 0 14px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(135deg,#1B6F8A,#0F3A4A 55%,#0B2230);border:1px solid #2F7F96;color:#fff}
+.ptNm .nvRing{position:absolute;right:-50px;top:-50px;width:170px;height:170px;border-radius:50%;border:28px solid rgba(255,255,255,.06);pointer-events:none}
+.ptNm .nvId{position:relative;display:flex;align-items:center;gap:13px}
+.ptNm .nvAv{width:52px;height:52px;flex:none;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:1.05rem;font-weight:800;color:#fff}
+.ptNm .nvNm{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ptNm .nvNm b{font-size:1.3rem;font-weight:800;line-height:1.1;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptNm .nvNm span{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.75)}
+.ptNm .nvHero .nmSt{flex:none;align-self:flex-start;height:26px;padding:0 11px;border-radius:13px;background:rgba(255,255,255,.16);font-size:.72rem;font-weight:800;color:#fff;display:flex;align-items:center;white-space:nowrap}
+.ptNm .nvPb{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+.ptNm .nvPb i{display:block;height:100%;width:33.4%;border-radius:3px;background:#8FD6EA;transition:width .3s}
+.ptNm .nmSec{margin:16px 4px 8px;font-size:.64rem;font-weight:800;letter-spacing:.12em}
+.ptNm .nmF,.ptNm .nmCd{border-radius:18px;background:var(--card);border:1px solid var(--line);padding:11px 14px 9px;transition:border-color .15s}
+.ptNm .nmF:focus-within,.ptNm .nmCd:focus-within{border-color:var(--accent)}
+.ptNm .nmF label,.ptNm .nmCd label{display:block;margin:0 0 4px;font-size:.64rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ptNm .nmF input,.ptNm .nmCd>input{width:100%;box-sizing:border-box;height:34px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;color:var(--ink);font:inherit;font-size:1.15rem;font-weight:700}
+.ptNm .nmF input:focus,.ptNm .nmCd>input:focus{border:0;box-shadow:none}
+.ptNm .nmCd>input{letter-spacing:.06em;font-size:1.3rem}
+.ptNm .nmCd{margin-top:0}
+.ptNm .nmCd small{margin:8px 0 0}
+.ptNm .nmGrid{gap:8px;margin-bottom:8px}
+.ptNm .nmP{border-radius:18px;border:1px solid var(--line);background:var(--card);padding:13px 14px}
+.ptNm .nmP.on{border-color:#2F7F96;background:linear-gradient(135deg,rgba(27,111,138,.38),rgba(15,58,74,.28) 60%,var(--card))}
+.ptNm .nmPt b{font-size:1.02rem;font-weight:800}
+.ptNm .nmPr{font-size:1.1rem;font-weight:800}
+.ptNm .nmSum{margin:12px 4px 0}
+.ptNm .nmBt{grid-template-columns:1fr 1.7fr;gap:8px;margin-top:16px}
+.ptNm .nmBt .lb{height:56px;border-radius:18px;font-size:1rem;font-weight:800;border:1px solid var(--line2);background:var(--card);color:var(--ink)}
+.ptNm .nmBt .lsave{background:var(--accent);border-color:transparent;color:var(--on-accent,#04141A)}
