@@ -121,3 +121,12 @@
 :root:not([data-theme="light"]) #panelHome .hmDayBar{background:#222E33}
 :root:not([data-theme="light"]) #panelHome .hmDayFill{background:#7FA6AB}
 :root:not([data-theme="light"]) #panelHome .hmIc{color:#DCE5E7;background:transparent;border:1px solid #34464B;box-shadow:none}
+
+/* Home: icone colorate (toni spenti) */
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cal]{--ic:#7FB8BE}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=add]{--ic:#9DB4E3}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cli]{--ic:#8DC0A6}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=av]{--ic:#D3B27C}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=qr]{--ic:#B9A0D0}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=st]{--ic:#DB9F90}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{color:var(--ic,#DCE5E7);background:color-mix(in srgb,var(--ic,#7FA6AB) 11%,transparent);border-color:color-mix(in srgb,var(--ic,#7FA6AB) 38%,transparent)}
