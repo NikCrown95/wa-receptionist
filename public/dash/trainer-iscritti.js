@@ -21,6 +21,8 @@
   function pd(x) { return new Date(String(x || '').replace(' ', 'T').replace(/(\.\d{3})\d+/, '$1')); }
   function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
+  function startIso(p) { if (p && p.starts_on) return String(p.starts_on).slice(0, 10); var d = pd(p && p.created_at); return isNaN(d) ? '' : d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function relTxt(ds) { var a = String(ds || '').slice(0, 10).split('-'); if (a.length !== 3) return null; var t = new Date(); t = new Date(t.getFullYear(), t.getMonth(), t.getDate()); var n = Math.round((new Date(+a[0], +a[1] - 1, +a[2]) - t) / 86400000); if (n < 0) return null; var tx = n === 0 ? 'oggi' : n === 1 ? 'domani' : n <= 60 ? 'tra ' + n + ' giorni' : 'tra ' + Math.round(n / 30.4) + ' mesi'; return { t: tx, soon: n < 7 }; }
   function fdate(ds) { var a = String(ds || '').slice(0, 10).split('-'); return a.length === 3 ? (+a[2]) + ' ' + MS[+a[1] - 1] + ' ' + a[0] : ''; }
   function durName(n) { return n === 1 ? '1 mese' : n === 12 ? '1 anno' : n + ' mesi'; }
   function todayIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -266,9 +268,9 @@
     var lsC = el('div', 'mvLs');
     function rw(k, v) { var r = el('div', 'mvRw'); r.innerHTML = '<span>' + k + '</span><b>' + v + '</b>'; lsC.appendChild(r); }
     rw('Pacchetto', cp ? esc(cp.name) + (cp.price_eur != null && cp.price_eur !== '' ? ' · ' + eur(cp.price_eur) : '') : 'Nessun pacchetto');
-    if (cp && cp.created_at) rw('Dal', dshort(pd(cp.created_at)));
+    if (cp && (cp.starts_on || cp.created_at)) rw('Attivato il', fdate(startIso(cp)));
+    if (m.expires_on) { var rl = m.expired ? null : relTxt(m.expires_on); rw(m.expired ? 'Scaduto il' : 'Scade il', fdate(m.expires_on) + (rl ? ' <span style="font-weight:400;color:' + (rl.soon ? 'var(--danger,#ff8a8a)' : 'var(--accent,#2dd4e0)') + '">· ' + rl.t + '</span>' : '')); }
     rw('Ingressi usati', (m.total - m.left) + ' su ' + m.total);
-    if (m.expires_on) rw(m.expired ? 'Scaduto il' : 'Scade il', fdate(m.expires_on));
     if (m.per_week && !m.expired) rw('Questa settimana', Math.min(m.week_used || 0, m.per_week) + ' di ' + m.per_week);
     rw('In agenda', ls.up.length + ' coaching');
     lsC.appendChild(cb); body.appendChild(lsC);
@@ -297,7 +299,7 @@
         var l = el('div', 'mxLs');
         m.packs.slice().reverse().forEach(function (p) {
           var d = pd(p.created_at), r = el('div', 'mxEv');
-          r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.name) + '</b><span>' + p.left + ' di ' + p.total + ' ingressi rimasti</span><span style="display:block">' + (p.expires_on ? (p.expired ? 'Scaduto il ' : 'Scade il ') + fdate(p.expires_on) : 'Senza scadenza') + (p.per_week ? ' · max ' + p.per_week + ' a settimana' : '') + '</span></span><b>' + (p.price_eur != null ? eur(p.price_eur) : '') + '</b>';
+          r.innerHTML = '<span class="mxDt"><b>' + d.getDate() + '</b><span>' + MS[d.getMonth()] + '</span></span><span class="mxTx"><b>' + esc(p.name) + '</b><span>' + p.left + ' di ' + p.total + ' ingressi rimasti</span>' + (p.per_week ? '<span style="display:block">max ' + p.per_week + ' a settimana</span>' : '') + '<span style="display:block;color:' + (p.expired ? '#e8b45c' : 'var(--accent,#2dd4e0)') + '">' + (p.expires_on ? (p.expired ? 'Scaduto · dal ' : 'Dal ') + fdate(startIso(p)) + ' al ' + fdate(p.expires_on) : 'Dal ' + fdate(startIso(p)) + ' · senza scadenza') + '</span></span><b>' + (p.price_eur != null ? eur(p.price_eur) : '') + '</b>';
           var rm = btn('Togli', 'mxRm', function () {
             rm.textContent = 'Sicuro?'; rm.onclick = function () { rm.disabled = true; post({ action: 'remove', id: p.id }).then(function () { return window.liaPtRefresh(); }).catch(function (e) { rm.disabled = false; rm.textContent = e.message; }); };
           });
