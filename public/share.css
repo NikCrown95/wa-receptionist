@@ -523,3 +523,7 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 .mnLayer,.mnLayer *{-webkit-tap-highlight-color:transparent}
 .mnScrim,.mnScrim:focus,.mnScrim:focus-visible,.mnScrim:active{outline:none!important;box-shadow:none!important}
 .mnClose:focus:not(:focus-visible){outline:none;box-shadow:none}
+/* il menu burger non resta visibile sopra la scheda mentre si chiude */
+body.mnQuiet #burgerMenu,body.mnQuiet #menuBackdrop{transition:none!important;animation:none!important;visibility:hidden!important}
+/* tasto QR in alto: mai sul telefono */
+@media(max-width:699px){:root:root:root:root:root:root:root body .mainTop .mnQrHd,#mnQrFab{display:none!important}}

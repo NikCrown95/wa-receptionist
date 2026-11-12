@@ -172,6 +172,7 @@
     var pg = mk("button", "", '<svg width="18" height="18" viewBox="0 0 24 24" ' + S + ' stroke-width="1.9"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>QR e Link');
     pg.type = "button"; pg.id = "menuTabPage"; pg.setAttribute("role", "menuitem"); pg.setAttribute("aria-current", "false"); pg.setAttribute("data-sub", "Link e QR code");
     pg.addEventListener("click", function () {
+      document.body.classList.add("mnQuiet"); setTimeout(function () { document.body.classList.remove("mnQuiet"); }, 600);
       closeMenu();
       var go = function () { if (biz && biz.links && biz.links.length) openSheet(0); };
       if (!biz) load().then(go); else go();
@@ -1083,6 +1084,8 @@
   /* iPad e computer: tasto QR nell'intestazione, a sinistra dell'icona Lia; apre il foglio "La tua pagina" (QR grande, condividi, locandina) */
   function qrFab() {
     var anchor = $("liaRecapBtn") || $("bellBtn");
+    var wide = matchMedia("(min-width:700px)").matches;
+    if (!wide) { var old = $("mnQrFab"); if (old && old.parentNode) old.parentNode.removeChild(old); setTimeout(qrFab, 1500); return; }
     if (!anchor || !anchor.parentNode) return;
     var b = $("mnQrFab");
     if (!b) {
