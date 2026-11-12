@@ -225,3 +225,7 @@
 :root:root:not([data-theme="light"]) #panelHome .hmTile[data-k="st"] .hmIc{color:#7FDCDC}
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:36px;height:36px}
 :root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap .s{opacity:.5}
+/* niente quadrato dietro l'icona, glifo piu grande */
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:auto;height:auto;border-radius:0;background:none;border:0;box-shadow:none}
+:root:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg.ap{width:56px;height:56px}
+:root:root:not([data-theme="light"]) #panelHome .hmTile{gap:10px}
