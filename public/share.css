@@ -530,3 +530,5 @@ body.mnQuiet #burgerMenu,body.mnQuiet #menuBackdrop{transition:none!important;an
 /* niente lampo di tocco di Android sulle voci del menu (restava dipinto sopra la scheda) */
 #burgerMenu,#burgerMenu *,#menuBackdrop,.mnQrHd,#mnQrFab{-webkit-tap-highlight-color:transparent!important}
 #burgerMenu button:focus,#burgerMenu button:active{outline:none}
+/* Guida tolta dal menu burger (telefono e tablet) */
+#menuTabGuide{display:none!important}
