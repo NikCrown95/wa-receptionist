@@ -636,7 +636,7 @@
       lastFocus = document.activeElement;
       sheet.hidden = false;
       warmPoster();
-      var c = sheet.querySelector(".mnClose"); if (c) c.focus();
+      var c = sheet.querySelector(".mnClose"); if (c && !matchMedia("(pointer:coarse)").matches) c.focus({preventScroll:true});
     });
   }
   function closeSheet() {

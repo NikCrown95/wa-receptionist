@@ -519,3 +519,7 @@ body.mnOn.mnB #burgerMenu > .mnSep{margin:4px 4px}
 
 /* difesa: se il browser ha ancora la vecchia versione di share.js, il vecchio tasto flottante non deve comparire */
 .mnQrFab{display:none!important}
+/* niente anelli/lampi su telefono all'apertura */
+.mnLayer,.mnLayer *{-webkit-tap-highlight-color:transparent}
+.mnScrim,.mnScrim:focus,.mnScrim:focus-visible,.mnScrim:active{outline:none!important;box-shadow:none!important}
+.mnClose:focus:not(:focus-visible){outline:none;box-shadow:none}
