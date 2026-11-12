@@ -134,3 +134,23 @@
 /* Home: icone piu' piene (riempimento sfumato + bagliore leggero) */
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:54px;height:54px;border-radius:17px;color:#0B1013;border:1px solid color-mix(in srgb,var(--ic,#7FA6AB) 55%,#fff);background:linear-gradient(150deg,color-mix(in srgb,var(--ic,#7FA6AB) 82%,#fff) 0%,var(--ic,#7FA6AB) 55%,color-mix(in srgb,var(--ic,#7FA6AB) 72%,#000) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 16px color-mix(in srgb,var(--ic,#7FA6AB) 26%,transparent)}
 :root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:27px;height:27px;stroke-width:2}
+
+/* Home: variante A (tono su tono, colori accesi) */
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cal]{--ic:#3FC6D0}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=add]{--ic:#6C9DFF}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=cli]{--ic:#4FD197}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=av]{--ic:#F2B24C}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=qr]{--ic:#A98BFF}
+:root:not([data-theme="light"]) #panelHome .hmTile[data-k=st]{--ic:#FF8A75}
+:root:not([data-theme="light"]) #panelHome .hmTile{flex-direction:column;align-items:flex-start;justify-content:space-between;gap:0;text-align:left;min-height:124px;padding:16px;background:color-mix(in srgb,var(--ic,#3FC6D0) 13%,#0C1114);border-color:color-mix(in srgb,var(--ic,#3FC6D0) 42%,transparent)}
+:root:not([data-theme="light"]) #panelHome .hmTile::before{display:none}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc{width:auto;height:auto;border:0;border-radius:0;background:none;box-shadow:none;color:var(--ic,#3FC6D0)}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmIc svg{width:30px;height:30px;stroke-width:1.8}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmTxt{flex:none;width:100%}
+:root:not([data-theme="light"]) #panelHome .hmDay{--c:#3FC6D0;border-color:#2B4348}
+:root:not([data-theme="light"]) #panelHome .hmDay::before{background:#3FC6D0}
+:root:not([data-theme="light"]) #panelHome .hmDayLbl{color:#3FC6D0}
+:root:not([data-theme="light"]) #panelHome .hmDayPill{background:#3FC6D0;color:#06181B}
+:root:not([data-theme="light"]) #panelHome .hmDayBar{background:#1F3237}
+:root:not([data-theme="light"]) #panelHome .hmDayFill{background:#3FC6D0}
+:root:not([data-theme="light"]) #panelHome .hmTile .hmTxt,:root:not([data-theme="light"]) #panelHome .hmTile .hmT1,:root:not([data-theme="light"]) #panelHome .hmTile .hmT2{text-align:left}
