@@ -278,3 +278,10 @@
 @media (prefers-reduced-motion:reduce){:root:root:not([data-theme="light"]) #panelHome .hmDay,:root:root:not([data-theme="light"]) #panelHome .hmDayLbl::before,:root:root:not([data-theme="light"]) #panelHome .hmDayFill::after{animation:none}}
 @keyframes hmBreath{0%,100%{border-color:#27414A;box-shadow:0 0 0 0 rgba(127,220,220,0)}50%{border-color:#7FDCDC;box-shadow:0 0 18px 0 rgba(127,220,220,.22)}}
 :root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk){animation:hmBreath 3s ease-in-out infinite}
+/* card "Appuntamento in corso": due aloni lenti dietro il testo (si aggiungono a puntino, bordo e luce sulla barra) */
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk)::before,:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk)::after{content:"";display:block;position:absolute;z-index:0;pointer-events:none;border-radius:0;width:90%;height:120%}
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk)::before{left:-30%;top:-40%;bottom:auto;background:radial-gradient(closest-side,rgba(111,214,214,.20),transparent);animation:hmAur 9s ease-in-out infinite}
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk)::after{right:-30%;left:auto;top:auto;bottom:-50%;width:80%;height:110%;background:radial-gradient(closest-side,rgba(214,176,100,.10),transparent);animation:hmAur 12s ease-in-out infinite reverse}
+:root:root:not([data-theme="light"]) #panelHome .hmDay:not(.hmSk)>*{z-index:1}
+@keyframes hmAur{0%,100%{transform:translate(-20%,-10%)}50%{transform:translate(20%,10%)}}
+@media (prefers-reduced-motion:reduce){:root:root:not([data-theme="light"]) #panelHome .hmDay::before,:root:root:not([data-theme="light"]) #panelHome .hmDay::after{animation:none}}
