@@ -241,6 +241,7 @@
     var body = el('div', 'mxBody mvBody'); host.appendChild(body);
     var acts = el('div', 'mvActs');
     function ab(label, icon, cls, fn, href) { var b = el(href ? 'a' : 'button', 'mvR ' + (cls || '')); b.setAttribute('aria-label', label); if (href) { b.href = href; b.target = '_blank'; b.rel = 'noopener'; } else b.type = 'button'; b.innerHTML = '<span class="mvRi">' + (icon.slice(0, 4) === '<svg' ? icon.replace(/width="\d+" height="\d+"/, 'width="22" height="22"') : SV(icon, 22)) + '</span><span class="mvRl">' + (label === 'Nuovo pacchetto' ? 'Rinnova' : label) + '</span>'; if (fn) b.addEventListener('click', fn); acts.appendChild(b); }
+    if (cp && cp.left > 0 && !m.expired && window.liaPtBook) ab('Nuovo coaching', '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17M12 13v4M10 15h4"/>', 'pri', function () { window.liaPtBook(m); });
     if (D.services && D.services.length) ab('Nuovo pacchetto', '<path d="M12 5v14M5 12h14"/>', 'pri', function () { assign(m); });
     var dg = (function (p) { var s = String(p == null ? '' : p).trim(), d = s.replace(/\D/g, ''); if (!d) return ''; if (s.charAt(0) === '+') return d; if (d.slice(0, 2) === '00') return d.slice(2); if (/^3\d{8,9}$/.test(d) || /^0\d{6,10}$/.test(d)) return '39' + d; return d; })(m.phone);
     if (dg) ab('WhatsApp', '<svg width="17" height="17" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>', '', null, 'https://wa.me/' + dg);
@@ -402,7 +403,7 @@
   // ---- Nuovo appuntamento (PT): si sceglie solo l'iscritto, il pacchetto è quello in corso ----
   (function ptNew() {
     var ov = document.getElementById('newOv'); if (!ov) return;
-    var pk = null, svcStep = null, whoDone = false;
+    var pk = null, svcStep = null, whoDone = false, skipPk = false, hint = null;
     function steps() { return ov.querySelectorAll('.nx-step'); }
     function stp(k) { return ov.querySelector('.nx-step[data-step="' + k + '"]'); }
     function valid() { return ((D && D.members) || []).filter(function (m) { var cp = curPack(m); return cp && cp.left > 0; }).sort(function (a, b) { return String(m2n(a)).localeCompare(String(m2n(b)), 'it'); }); }
@@ -440,14 +441,41 @@
       if (ci) { ci.value = m.name; ci.dispatchEvent(new Event('input', { bubbles: true })); }
       if (ph) { ph.value = m.phone || ''; ph.dispatchEvent(new Event('input', { bubbles: true })); }
       ov.setAttribute('data-who', m.name + '|' + cp.name + '|' + cp.left + '|' + cp.total);
-      var tries = 0;
+      // Nome del pacchetto (com'era quando e' stato assegnato) e nome attuale del suo servizio (se e' stato rinominato)
+      var tries = 0, wants = [nk(cp.name)], sv0 = cp.service_id ? ((D && D.services) || []).filter(function (s) { return s.id === cp.service_id; })[0] : null;
+      if (sv0 && sv0.name) wants.push(nk(sv0.name));
       (function go() {
-        var chips = ov.querySelectorAll('#nwServices .nx-ch'), hit = null;
-        Array.prototype.forEach.call(chips, function (c) { var n = c.querySelector('.nm'); if (n && n.textContent.trim() === cp.name) hit = c; });
+        var hit = null;
+        svcNodes().forEach(function (x) { if (!hit && wants.indexOf(nk(x.name)) !== -1) hit = x.el; });
         if (hit) { hit.click(); return; }
-        if (++tries < 25) setTimeout(go, 150);
+        if (++tries < 25) { setTimeout(go, 150); return; }
+        // Il servizio del pacchetto non si trova tra i pulsanti (nome cambiato, tanti servizi, scelta per modalità…):
+        // niente blocco silenzioso, si toglie l'elenco iscritti e si sceglie il servizio a mano, con nome e telefono già inseriti.
+        giveUp(cp.name);
       })();
     }
+    // Confronto dei nomi senza maiuscole, spazi doppi e senza il suffisso della modalità, che compare solo in uno dei due elenchi
+    function nk(s) { return String(s == null ? '' : s).replace(/\s*\((in sede|a domicilio|online)\)\s*$/i, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+    function svcNodes() {
+      var out = [];
+      Array.prototype.forEach.call(ov.querySelectorAll('#nwServices .nx-ch'), function (c) { var n = c.querySelector('.nm'); out.push({ el: c, name: n ? n.textContent : '' }); });
+      Array.prototype.forEach.call(ov.querySelectorAll('#nwServices .nx-opt'), function (c) { var n = c.querySelector('b'); out.push({ el: c, name: n ? n.textContent : '' }); });
+      return out;
+    }
+    function giveUp(name) {
+      skipPk = true;
+      if (!hint && svcStep) { hint = el('p', 'nx-qs'); hint.style.cssText = 'margin:0 0 10px'; svcStep.insertBefore(hint, svcStep.firstChild); }
+      if (hint) { hint.textContent = 'Scegli il servizio' + (name ? ' «' + name + '»' : '') + ': nome e telefono dell’iscritto sono già inseriti.'; hint.hidden = false; }
+      sync();
+    }
+    // Apre "Nuovo appuntamento" già pronto per questo iscritto (usato dal pulsante nella sua scheda)
+    window.liaPtBook = function (m) {
+      var cp = m && curPack(m), fab = document.getElementById('fabNew');
+      if (!cp || !(cp.left > 0) || !fab) return false;
+      fab.click();
+      setTimeout(function () { choose(m, cp); }, 120);
+      return true;
+    };
     function whoCard() {
       var w = stp('who'); if (!w) return;
       var h = w.querySelector('.nx-q'); if (h) h.textContent = 'Conferma l’appuntamento';
@@ -457,10 +485,12 @@
       c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' coaching rimasto' : ' coaching rimasti') : '') + '</small></span>';
     }
     function sync() {
-      if (ov.hidden) { if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
+      if (ov.hidden) { skipPk = false; ov.classList.remove('ptm'); if (hint) hint.hidden = true; if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
       build(); if (!pk) return;
-      var sv = stp('svc'), on = sv && !sv.hidden;
-      if (pk.hidden === !!on) pk.hidden = !on;
+      var sv = stp('svc'), on = sv && !sv.hidden, showPk = !!on && !skipPk;
+      if (pk.hidden === showPk) pk.hidden = !showPk;
+      if (hint) hint.hidden = !(on && skipPk);
+      ov.classList.toggle('ptm', !!on && skipPk); // a mano: si mostra il normale elenco dei servizi (di solito nascosto)
       if (on && !pk._on) { pk._on = true; fill(); if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); try { load(); } catch (e) {} } if (!on) pk._on = false;
       var w = stp('who'); if (w && !w.hidden) whoCard();
     }
@@ -468,7 +498,7 @@
     var obs = new MutationObserver(function () { sync(); });
     obs.observe(ov, { attributes: true, attributeFilter: ['hidden'] });
     var t0 = setInterval(function () { var sv = stp('svc'); if (sv) { clearInterval(t0); obs.observe(ov, { attributes: true, subtree: true, attributeFilter: ['hidden'] }); sync(); } }, 200);
-    document.addEventListener('lia:data-changed', function () { if (pk && !pk.hidden) fill(); });
+    document.addEventListener('lia:data-changed', function () { if (pk && !pk.hidden) fill(); else if (D && root && window.liaPtRefresh) window.liaPtRefresh(); });
     window.liaPtPickRefresh = function () { if (pk && !pk.hidden) fill(); };
   })();
 
