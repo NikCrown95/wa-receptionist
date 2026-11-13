@@ -24,6 +24,7 @@ self.addEventListener("push", function (e) {
     icon: "/icons/icon-192.png",
     badge: "/icons/badge-96.png",
     tag: d.tag || "prenolia",
+    vibrate: [220, 120, 220],
     data: { url: d.url || "/" },
   }));
 });
