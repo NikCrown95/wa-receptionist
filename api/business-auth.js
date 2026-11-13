@@ -28,7 +28,7 @@ function headers(extra) {
   return Object.assign(h, extra || {});
 }
 async function sb(method, path, body, prefer) {
-  const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/" + path, {
+  const r = await fetch(process.env.SUPABASE_URL + "/rest/v1/" + path, { signal: AbortSignal.timeout(20000),
     method,
     headers: headers(prefer ? { Prefer: prefer } : {}),
     body: body ? JSON.stringify(body) : undefined,

@@ -106,7 +106,7 @@ async function sb(path, { method = 'GET', body, prefer, range } = {}) {
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (prefer) headers.Prefer = prefer;
   if (range) { headers['Range-Unit'] = 'items'; headers.Range = range; }
-  const resp = await fetch(`${url}/rest/v1/${path}`, {
+  const resp = await fetch(`${url}/rest/v1/${path}`, { signal: AbortSignal.timeout(20000),
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
