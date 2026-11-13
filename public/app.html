@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a1a20">
+<title>Prenolia – Installa l’app</title>
+<meta name="description" content="Installa l’app di Prenolia sul telefono: si apre con un tocco dalla Home.">
+<link rel="manifest" href="/app.webmanifest">
+<link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon-512.png?v=2">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prenolia">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{--bg:#050608;--card2:#161D29;--line2:#2A3648;--ink:#F9F6F0;--muted:#9BA6B5;--accent:#2DD2DC;--on-accent:#031016;--gold:#E6C77A;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:radial-gradient(520px 340px at 50% 0%,rgba(45,210,220,.15),transparent 70%),radial-gradient(420px 300px at 100% 100%,rgba(230,199,122,.08),transparent 70%),#050608;background-attachment:fixed}
+body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+h1,h2,p{margin:0}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.wrap{max-width:440px;margin:0 auto;padding:7vh 20px 40px}
+.card{position:relative;border-radius:28px;padding:30px 24px 24px;background:linear-gradient(180deg,#121A25 0%,#0B1118 100%);box-shadow:0 34px 80px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.07) inset;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(160deg,rgba(45,210,220,.6),rgba(255,255,255,.07) 38%,rgba(230,199,122,.4) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.logo{display:block;width:196px;height:46px;margin:0 auto 22px;background:url("/brand/prenolia-dark.png") center / contain no-repeat}
+.appicon{display:block;width:84px;height:84px;margin:0 auto 18px;border-radius:21px;box-shadow:0 14px 34px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08)}
+h1{font-size:1.45rem;font-weight:650;letter-spacing:-.025em;text-align:center}
+.sub{text-align:center;color:var(--muted);font-size:.95rem;margin:8px 0 0}
+.sub::after{content:"";display:block;width:34px;height:2px;border-radius:2px;margin:16px auto 0;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;margin-top:22px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 10px 28px rgba(45,210,220,.28),0 1px 0 rgba(255,255,255,.4) inset}
+.btn:active{transform:scale(.99)}
+.btn.sec{background:var(--card2);color:var(--ink);box-shadow:none;border:1px solid var(--line2);margin-top:10px;min-height:48px;font-weight:600;font-size:.95rem}
+.btn svg{flex:none}
+.steps{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line2)}
+.num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--on-accent);background:linear-gradient(135deg,var(--accent),var(--gold))}
+.steps p{font-size:.95rem;line-height:1.4}
+.steps b{font-weight:650}
+.ico{display:inline-block;vertical-align:-4px;margin:0 2px;color:var(--accent)}
+.done{display:none;margin-top:22px;padding:16px;border-radius:16px;text-align:center;background:rgba(45,210,220,.1);border:1px solid rgba(45,210,220,.35);font-weight:600}
+.done.on{display:block}
+.note{margin-top:14px;font-size:.84rem;color:var(--muted);text-align:center}
+.sep{height:1px;margin:26px 0 22px;border:0;background:linear-gradient(90deg,transparent,#2A3648,transparent)}
+h2{font-size:1.05rem;font-weight:650;letter-spacing:-.01em;text-align:center}
+.pass{color:var(--muted);font-size:.9rem;text-align:center;margin-top:6px}
+.qr{display:block;width:176px;height:176px;margin:18px auto 0;border-radius:16px;overflow:hidden;background:#fff;padding:0}
+.qr svg{display:block;width:100%;height:100%}
+.url{margin-top:12px;text-align:center;color:var(--muted);font-size:.85rem;letter-spacing:.01em}
+.hide{display:none!important}
+.foot{margin-top:18px;text-align:center;font-size:.8rem}
+.foot a{color:var(--muted);text-decoration:none;display:inline-block;min-height:44px;line-height:44px;padding:0 8px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#0E131B;border:1px solid var(--line2);color:var(--ink);padding:12px 18px;border-radius:14px;font-size:.9rem;font-weight:600;transition:.25s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){.card{animation:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="card">
+    <span class="logo" role="img" aria-label="Prenolia"></span>
+    <img class="appicon" src="/icons/icon-192.png" width="84" height="84" alt="">
+    <h1>Porta Prenolia sul telefono</h1>
+    <p class="sub">Si apre con un tocco dalla Home e puoi ricevere un avviso a ogni nuova prenotazione.</p>
+
+    <div id="inst">
+      <!-- Android / computer con installazione diretta -->
+      <button class="btn hide" id="btnInstall" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+        Installa l’app
+      </button>
+
+      <!-- iPhone / iPad -->
+      <ol class="steps hide" id="stepsIos">
+        <li><span class="num">1</span><p>Apri questa pagina con <b>Safari</b>.</p></li>
+        <li><span class="num">2</span><p>Tocca <b>Condividi</b>
+          <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1"/></svg>
+          in basso (su iPad in alto).</p></li>
+        <li><span class="num">3</span><p>Scegli <b>Aggiungi alla schermata Home</b>, poi <b>Aggiungi</b>.</p></li>
+      </ol>
+
+      <!-- Android senza pulsante diretto -->
+      <ol class="steps hide" id="stepsAnd">
+        <li><span class="num">1</span><p>Tocca i <b>tre puntini ⋮</b> in alto a destra nel browser.</p></li>
+        <li><span class="num">2</span><p>Scegli <b>Installa app</b> (oppure <b>Aggiungi a schermata Home</b>).</p></li>
+        <li><span class="num">3</span><p>Conferma: l’icona di Prenolia compare nella Home.</p></li>
+      </ol>
+
+      <div class="done" id="done">Fatto! Trovi l’icona di Prenolia nella Home del telefono.</div>
+      <p class="note hide" id="noteIos">La prima volta, nell’app, accedi con la tua email: con <b>Resta connesso</b> non dovrai rifarlo.</p>
+      <p class="note hide" id="noteDesk">Per installarla sul telefono, inquadra il QR code qui sotto.</p>
+    </div>
+
+    <hr class="sep">
+    <h2>Passala a chi vuoi</h2>
+    <p class="pass">Inquadra il QR code o manda il link.</p>
+    <div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges" role="img" aria-label="QR code per installare l'app di Prenolia"><rect width="33" height="33" fill="#fff"/><path d="M4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM16 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM22 4h1v1h-1zM23 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM27 4h1v1h-1zM28 4h1v1h-1zM4 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM15 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM4 6h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM13 6h1v1h-1zM19 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM4 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM14 7h1v1h-1zM15 7h1v1h-1zM18 7h1v1h-1zM22 7h1v1h-1zM24 7h1v1h-1zM25 7h1v1h-1zM26 7h1v1h-1zM28 7h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM16 8h1v1h-1zM19 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM16 9h1v1h-1zM17 9h1v1h-1zM18 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM28 9h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM25 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM28 10h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM19 11h1v1h-1zM4 12h1v1h-1zM6 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM13 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM18 12h1v1h-1zM20 12h1v1h-1zM24 12h1v1h-1zM27 12h1v1h-1zM7 13h1v1h-1zM8 13h1v1h-1zM9 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM15 13h1v1h-1zM20 13h1v1h-1zM22 13h1v1h-1zM28 13h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM16 14h1v1h-1zM17 14h1v1h-1zM22 14h1v1h-1zM24 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM4 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM12 15h1v1h-1zM14 15h1v1h-1zM16 15h1v1h-1zM17 15h1v1h-1zM18 15h1v1h-1zM19 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM27 15h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM10 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM14 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM19 16h1v1h-1zM20 16h1v1h-1zM21 16h1v1h-1zM22 16h1v1h-1zM23 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM7 17h1v1h-1zM9 17h1v1h-1zM11 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM25 17h1v1h-1zM28 17h1v1h-1zM4 18h1v1h-1zM8 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM22 18h1v1h-1zM23 18h1v1h-1zM26 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM5 19h1v1h-1zM11 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM24 19h1v1h-1zM27 19h1v1h-1zM4 20h1v1h-1zM6 20h1v1h-1zM7 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM15 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM25 20h1v1h-1zM12 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM18 22h1v1h-1zM19 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM27 22h1v1h-1zM28 22h1v1h-1zM4 23h1v1h-1zM10 23h1v1h-1zM15 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM28 23h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM7 24h1v1h-1zM8 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM13 24h1v1h-1zM14 24h1v1h-1zM16 24h1v1h-1zM17 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM27 24h1v1h-1zM28 24h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM7 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM13 25h1v1h-1zM14 25h1v1h-1zM15 25h1v1h-1zM16 25h1v1h-1zM17 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM7 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM12 26h1v1h-1zM13 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM24 26h1v1h-1zM28 26h1v1h-1zM4 27h1v1h-1zM10 27h1v1h-1zM13 27h1v1h-1zM16 27h1v1h-1zM17 27h1v1h-1zM19 27h1v1h-1zM20 27h1v1h-1zM22 27h1v1h-1zM24 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM7 28h1v1h-1zM8 28h1v1h-1zM9 28h1v1h-1zM10 28h1v1h-1zM12 28h1v1h-1zM13 28h1v1h-1zM15 28h1v1h-1zM16 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1z" fill="#0a1a20"/></svg></div>
+    <p class="url">prenolia.it/app</p>
+    <button class="btn sec" id="btnShare" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1"/></svg>
+      Condividi il link
+    </button>
+    <button class="btn sec" id="btnCopy" type="button">Copia il link</button>
+    <p class="foot"><a href="/login">Accedi dal browser</a></p>
+  </div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  var LINK="https://prenolia.it/app";
+  var $=function(i){return document.getElementById(i)};
+  var standalone=(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
+  /* aperta dall'app installata: si va dritti all'accesso */
+  if(standalone){location.replace("/login");return;}
+
+  var ua=navigator.userAgent||"";
+  var ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  var android=/Android/i.test(ua);
+  var deferred=null;
+
+  function show(id){$(id).classList.remove("hide")}
+  function hide(id){$(id).classList.add("hide")}
+
+  if(ios){show("stepsIos");show("noteIos");}
+  else if(android){show("stepsAnd");}
+  else{show("noteDesk");}
+
+  window.addEventListener("beforeinstallprompt",function(e){
+    e.preventDefault();deferred=e;
+    show("btnInstall");hide("stepsAnd");hide("noteDesk");
+  });
+  window.addEventListener("appinstalled",function(){
+    hide("btnInstall");hide("stepsAnd");hide("stepsIos");hide("noteDesk");hide("noteIos");
+    $("done").classList.add("on");deferred=null;
+  });
+  $("btnInstall").addEventListener("click",function(){
+    if(!deferred)return;
+    try{deferred.prompt();deferred.userChoice.finally(function(){deferred=null;});}catch(e){}
+  });
+
+  var tm=null;
+  function toast(t){var el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(tm);tm=setTimeout(function(){el.classList.remove("on")},2400);}
+  function copy(){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(LINK).then(function(){toast("Link copiato")},function(){legacy()});
+    }
+    legacy();
+  }
+  function legacy(){
+    try{var t=document.createElement("textarea");t.value=LINK;t.setAttribute("readonly","");t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();toast("Link copiato");}
+    catch(e){toast("Copia il link: "+LINK)}
+  }
+  $("btnCopy").addEventListener("click",copy);
+  $("btnShare").addEventListener("click",function(){
+    if(navigator.share){
+      navigator.share({title:"Prenolia",text:"Installa l’app di Prenolia:",url:LINK}).catch(function(){});
+    }else copy();
+  });
+
+  /* il service worker serve a far riconoscere la pagina come installabile */
+  if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})});}
+})();
+</script>
+</body>
+</html>
