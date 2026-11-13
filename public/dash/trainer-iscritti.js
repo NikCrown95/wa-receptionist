@@ -441,10 +441,12 @@
       if (ci) { ci.value = m.name; ci.dispatchEvent(new Event('input', { bubbles: true })); }
       if (ph) { ph.value = m.phone || ''; ph.dispatchEvent(new Event('input', { bubbles: true })); }
       ov.setAttribute('data-who', m.name + '|' + cp.name + '|' + cp.left + '|' + cp.total);
-      var tries = 0, want = nk(cp.name);
+      // Nome del pacchetto (com'era quando e' stato assegnato) e nome attuale del suo servizio (se e' stato rinominato)
+      var tries = 0, wants = [nk(cp.name)], sv0 = cp.service_id ? ((D && D.services) || []).filter(function (s) { return s.id === cp.service_id; })[0] : null;
+      if (sv0 && sv0.name) wants.push(nk(sv0.name));
       (function go() {
         var hit = null;
-        svcNodes().forEach(function (x) { if (!hit && nk(x.name) === want) hit = x.el; });
+        svcNodes().forEach(function (x) { if (!hit && wants.indexOf(nk(x.name)) !== -1) hit = x.el; });
         if (hit) { hit.click(); return; }
         if (++tries < 25) { setTimeout(go, 150); return; }
         // Il servizio del pacchetto non si trova tra i pulsanti (nome cambiato, tanti servizi, scelta per modalità…):
@@ -483,11 +485,12 @@
       c.innerHTML = '<span class="ptPa">' + esc((d[0] || '?').split(/\s+/).map(function (x) { return x.charAt(0); }).join('').slice(0, 2).toUpperCase()) + '</span><span class="ptPt"><b>' + esc(d[0] || (cl ? cl.value : '')) + '</b><small>' + esc(d[1] || '') + (d[2] ? ' · ' + d[2] + (d[2] === '1' ? ' coaching rimasto' : ' coaching rimasti') : '') + '</small></span>';
     }
     function sync() {
-      if (ov.hidden) { skipPk = false; if (hint) hint.hidden = true; if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
+      if (ov.hidden) { skipPk = false; ov.classList.remove('ptm'); if (hint) hint.hidden = true; if (pk && !pk.hidden) pk.hidden = true; if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); return; }
       build(); if (!pk) return;
       var sv = stp('svc'), on = sv && !sv.hidden, showPk = !!on && !skipPk;
       if (pk.hidden === showPk) pk.hidden = !showPk;
       if (hint) hint.hidden = !(on && skipPk);
+      ov.classList.toggle('ptm', !!on && skipPk); // a mano: si mostra il normale elenco dei servizi (di solito nascosto)
       if (on && !pk._on) { pk._on = true; fill(); if (ov.hasAttribute('data-who')) ov.removeAttribute('data-who'); try { load(); } catch (e) {} } if (!on) pk._on = false;
       var w = stp('who'); if (w && !w.hidden) whoCard();
     }

@@ -252,6 +252,8 @@ html.ptb #calSubApp #sheet.apv #sheet-close{display:grid!important;order:3;margi
 
 /* Nuovo appuntamento PT: scelta dell'iscritto */
 #newOv.ptn .nx-step[data-step="svc"]{display:none!important}
+#newOv.ptn.ptm .nx-step[data-step="svc"]:not([hidden]){display:flex!important}
+.ptPk[hidden]{display:none!important}
 #newOv.ptn .nx-step[data-step="who"]>.nx-f,#newOv.ptn .nx-step[data-step="who"]>.nx-more,#newOv.ptn .nx-step[data-step="who"]>button:not(#nwConfirm){display:none!important}
 #newOv.ptn .nx-step[data-step="who"] .nx-f{display:none!important}
 .ptPk{display:flex;flex-direction:column;gap:10px}
