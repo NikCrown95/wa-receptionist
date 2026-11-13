@@ -679,11 +679,11 @@ if('IntersectionObserver' in window)new IntersectionObserver(function(e){vis=e[0
 
 #profilo .pf-tabs .ti{display:none}
 @media (min-width:601px){
-#profilo .pf-tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;max-width:500px}
-#profilo .pf-tabs button{grid-column:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:16px 8px 14px;min-height:96px;border-radius:22px;white-space:normal;line-height:1.2;font-size:13px;background:rgba(255,255,255,.025)}
+#profilo .pf-tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;max-width:340px}
+#profilo .pf-tabs button{grid-column:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 4px 8px;min-height:0;border-radius:16px;white-space:normal;line-height:1.15;font-size:10.5px;background:rgba(255,255,255,.025)}
 #profilo .pf-tabs button:nth-child(n+4){grid-column:span 3}
 #profilo .pf-tabs button:last-child:nth-child(odd){grid-column:span 3}
-#profilo .pf-tabs .ti{display:block;width:27px;height:27px;color:var(--aink);transition:transform .3s}
+#profilo .pf-tabs .ti{display:block;width:18px;height:18px;color:var(--aink);transition:transform .3s}
 #profilo .pf-tabs button:hover .ti{transform:translateY(-1px) scale(1.06)}
 #profilo .pf-tabs button[aria-pressed="true"]{color:#fff;background:rgba(127,220,220,.1);border-color:var(--aink);box-shadow:inset 0 0 0 1px var(--aink),0 0 22px rgba(127,220,220,.12)}
 }
