@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /promoter
+Disallow: /login
+Disallow: /reset
+Disallow: /app
+
+Sitemap: https://prenolia.it/sitemap.xml
