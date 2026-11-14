@@ -794,23 +794,23 @@ function Sec(i){var p=P[i],IS=p.fr?1:2,TM=[],run=0,vids=[],box=document.createEl
   function wl(){if(!WV||WV.tok!==run||!box.isConnected){WL=0;try{if(WV&&WV.hd)WV.hd.style.opacity=0}catch(x){}return}var t=performance.now()-WV.t0,pr=Math.min(1,t/1100),e=pr<.5?4*pr*pr*pr:1-Math.pow(-2*pr+2,3)/2;WV.l.style.strokeDashoffset=WV.g.style.strokeDashoffset=WV.L*(1-e);try{var P=WV.l.getPointAtLength(WV.L*e);WV.hd.setAttribute('cx',P.x);WV.hd.setAttribute('cy',P.y)}catch(x){}if(pr<1){requestAnimationFrame(wl)}else{WV.hd.style.opacity=0;WV.n2.style.opacity=1;WL=0}}
   for(var k=0;k<n;k++)(function(k){after(500+k*D,function(){go(k)},tok);if(!NT[k])after(500+k*D+D-1050,function(){cur.classList.remove('tap');void cur.offsetWidth;cur.classList.add('tap')},tok)})(k);
   after(500+n*D+700,function(){start()},tok)}
- function book(tok){var K=BKC;
+ function book(tok){var K=BKC,RS=.85; /* velocita' del video "Prenota da solo": 1 = originale, .85 = un po' piu' lento (valore piu' basso = piu' lento) */
   box.querySelector('.tu-tx').insertAdjacentHTML('beforeend','<div class="tu-tag"><span>'+K.tag+'</span></div>'+(K.note?'<p class="tu-note">'+K.note+'</p>':''));
-  function cell(t,k){return '<figure class="tu-cell'+(k==='cal'?' dim':'')+'"><span class="t">'+t+'</span><div class="tu-ph"><video muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+DIR+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
+  function cell(t,k){return '<figure class="tu-cell'+(k==='cal'?' dim':'')+'"><span class="t">'+t+'</span><div class="tu-ph"><video data-k="'+k+'" muted playsinline preload="auto" poster="'+U('p_'+k)+'" src="'+B+DIR+'v_'+k+'.mp4"></video></div><figcaption></figcaption></figure>'}
   box.querySelector('.tu-vis').insertAdjacentHTML('beforeend','<div class="tu-row3'+(K.cells.length==2?' two':'')+'">'+K.cells.map(function(c){return cell(c[0],c[1])}).join('')+'</div>');
   var cells=[].slice.call(box.querySelectorAll('.tu-cell')),vs=[].slice.call(box.querySelectorAll('video')),cs=[].slice.call(box.querySelectorAll('figcaption'));vids=vs;
   function cap(el,t){el.style.opacity=0;setTimeout(function(){el.textContent=t;el.style.opacity=1},200)}
-  var cm=Math.max(K.cf.self||0,K.cf.chat||0),T0=900,CONF=Math.round(cm*1000+520),total=T0+CONF+(K.cd||6800),ci=K.cells.map(function(c){return c[1]}).indexOf('cal');
+  var cm=Math.max((K.cf.self||0)/RS,K.cf.chat||0),T0=900,CONF=Math.round(cm*1000+520),total=T0+CONF+(K.cd||6800),ci=K.cells.map(function(c){return c[1]}).indexOf('cal');
   cells.forEach(function(c,j){after(80+j*160,function(){c.classList.add('show')},tok)});
   K.cells.forEach(function(c,j){cap(cs[j],c[2])});
-  function play(v){try{v.currentTime=0}catch(e){}var r=v.play();if(r&&r.catch)r.catch(function(){})}
+  function play(v){try{v.currentTime=0}catch(e){}try{var rt=v.getAttribute('data-k')==='self'?RS:1;v.defaultPlaybackRate=rt;v.playbackRate=rt}catch(e){}var r=v.play();if(r&&r.catch)r.catch(function(){})}
   if(!MQ.matches){var row=box.querySelector('.tu-row3'),order=K.cells.map(function(c,j){return j}).filter(function(j){return j!==ci}).concat(ci<0?[]:[ci]),tt=T0;row.classList.add('seq');cells.forEach(function(c){c.classList.add('show')});K.cells.forEach(function(c,j){cap(cs[j],c[2])});cells.forEach(function(c,x){c.classList.toggle('cur',x===order[0])});
    order.forEach(function(j){var k=K.cells[j][1],t0=tt;after(t0,function(){cells.forEach(function(c,x){c.classList.toggle('cur',x===j)});cells[j].classList.remove('dim');play(vs[j])},tok);
     if(k==='cal'){after(t0+(K.c1||1500),function(){cap(cs[j],'Arriva la notifica: la campanella si accende')},tok);after(t0+(K.c2||5000),function(){cap(cs[j],'Eccola, con tutti i dettagli')},tok);tt+=(K.cd||6800)}
-    else{var d=Math.round((K.cf[k]||8)*1000);after(t0+d+700,function(){cap(cs[j],'Prenotazione confermata')},tok);tt+=d+2900}});
+    else{var d=Math.round((K.cf[k]||8)*1000/(k==='self'?RS:1));after(t0+d+700,function(){cap(cs[j],'Prenotazione confermata')},tok);tt+=d+2900}});
    after(tt+600,function(){start()},tok);return}
   after(T0,function(){K.cells.forEach(function(c,j){if(c[1]!=='cal')play(vs[j])})},tok);
-  K.cells.forEach(function(c,j){if(c[1]!=='cal')after(T0+Math.round(K.cf[c[1]]*1000)+700,function(){cap(cs[j],'Prenotazione confermata')},tok)});
+  K.cells.forEach(function(c,j){if(c[1]!=='cal')after(T0+Math.round(K.cf[c[1]]*1000/(c[1]==='self'?RS:1))+700,function(){cap(cs[j],'Prenotazione confermata')},tok)});
   after(T0+CONF-400,function(){cells[ci].classList.remove('dim')},tok);
   after(T0+CONF-100,function(){play(vs[ci])},tok);
   after(T0+CONF+(K.c1||1500),function(){cap(cs[ci],'Arriva la notifica: la campanella si accende')},tok);
