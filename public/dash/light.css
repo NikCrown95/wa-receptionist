@@ -98,12 +98,12 @@
 }
 
 /* Look chiaro v3 (scelto da Nico, variante "H"): testata petrolio come il tema scuro, scheda del giorno turchese piena, schede bianche con ombra netta su fondo ghiaccio */
-:root[data-theme="light"],body[data-theme="light"]{--bg:#E8EEEF;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F3F7F7;--line:#D5E0E1;--line2:#D5E0E1;--ink:#10252A;--muted:#55686B;--accent:#17808C;--on-accent:#FFFFFF;--accent-soft:#DDEFF0;--accent-ink:#0F5F6B;--accent-grad:linear-gradient(135deg,#17808C,#0F5F6B);--sec:#17808C;--sec-soft:#DDEFF0;--lg-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14);--lg-glow:0 8px 18px -8px #17808C}
+:root[data-theme="light"],body[data-theme="light"]{--bg:#E8EEEF;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#F3F7F7;--line:#D5E0E1;--line2:#D5E0E1;--ink:#10252A;--muted:#55686B;--accent:#12727C;--on-accent:#FFFFFF;--accent-soft:#D9EEEF;--accent-ink:#0E626B;--accent-grad:linear-gradient(135deg,#12727C,#0F5F6B);--sec:#12727C;--sec-soft:#D9EEEF;--lg-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14);--lg-glow:0 8px 18px -8px #12727C}
 :root[data-theme="light"] body,html[data-theme="light"] body{background:#E8EEEF!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card:not(.is-past),:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d:not(.sel){background:#fff!important;border-color:transparent!important;box-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14)!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card.is-past{background:#F4F7F7!important;border-color:transparent!important;box-shadow:0 2px 6px -3px rgba(8,52,60,.18)!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.sel{background:linear-gradient(135deg,#17808C,#0F5F6B)!important;border-color:transparent!important;box-shadow:0 10px 22px -8px #17808C!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main{background:linear-gradient(135deg,#17808C 0%,#0F5F6B 100%)!important;border-color:transparent!important;box-shadow:0 14px 28px -14px #0F5F6B!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.sel{background:linear-gradient(135deg,#12727C,#0F5F6B)!important;border-color:transparent!important;box-shadow:0 10px 22px -8px #12727C!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main{background:#0F2229!important;border-color:#27414A!important;box-shadow:0 14px 28px -14px rgba(8,34,41,.7)!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:rgba(255,255,255,.82)!important;-webkit-text-fill-color:rgba(255,255,255,.82)!important}
 /* Smartphone: testata dello stesso colore del fondo, testi scuri, pulsanti bianchi e voce attiva turchese (variante "K") */
@@ -111,13 +111,46 @@
 :root:root:root:root:root:root:root:root:root[data-theme="light"] body .mainTop,:root:root:root:root:root:root:root:root:root[data-theme="light"] body.lia-sec-cal #calSubApp > header.top,:root:root:root:root:root:root:root:root:root[data-theme="light"] body.lia-sec-cal:not(.mnAOn):not(.mnGOn) #calSubApp .controls{background:#E8EEEF!important;box-shadow:none!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .seg{background:transparent!important;border-color:transparent!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button{background:#fff!important;border-color:transparent!important;color:#55686B!important;box-shadow:0 2px 6px -3px rgba(8,52,60,.25)}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button[aria-pressed="true"],:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button.on{background:#17808C!important;color:#fff!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button[aria-pressed="true"],:root:root:root:root:root:root:root:root:root[data-theme="light"] .seg button.on{background:#12727C!important;color:#fff!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .arrow,:root:root:root:root:root:root:root:root:root[data-theme="light"] .mainTopRow button{background:#fff!important;border-color:transparent!important;color:#10252A!important;box-shadow:0 2px 6px -3px rgba(8,52,60,.25)}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN{background:#17808C!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN{background:#12727C!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN,:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .dcN *{color:#fff!important;-webkit-text-fill-color:#fff!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .jumpToday{background:transparent!important;color:#17808C!important;-webkit-text-fill-color:#17808C!important;font-weight:700}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .jumpToday{background:transparent!important;color:#12727C!important;-webkit-text-fill-color:#12727C!important;font-weight:700}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] #calSubApp header.top .range{color:#0F5F6B!important}
 }
 /* Settimana da smartphone: il giorno corrente risalta anche nel tema chiaro */
 :root:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.today:not(.sel){background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent) inset,0 8px 18px -10px var(--accent)!important}
 :root:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.past:not(.sel){opacity:.5}
+
+/* Look chiaro v4 (scelto da Nico, variante "A", 15 nov 2026): fondo ghiaccio, schede bianche, riquadri tono su tono come nel tema scuro, scheda del giorno petrolio con testo aqua */
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#EAF6F6!important;-webkit-text-fill-color:#EAF6F6!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:#9FB9BD!important;-webkit-text-fill-color:#9FB9BD!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-title{color:#EAF6F6!important}
+/* Home */
+:root:root:root[data-theme="light"] body.lia-sec-home{--bg:#E8EEEF;background:#E8EEEF}
+:root:root:root[data-theme="light"] #panelHome .hmDay{--c:#7FDCDC;background:#0F2229;border:1px solid #27414A;border-radius:22px;box-shadow:0 10px 22px -12px rgba(8,34,41,.65)}
+:root:root:root[data-theme="light"] #panelHome .hmDay::before,:root:root:root[data-theme="light"] #panelHome .hmDay::after{display:none}
+:root:root:root[data-theme="light"] #panelHome .hmDay *{-webkit-text-fill-color:currentColor}
+:root:root:root[data-theme="light"] #panelHome .hmDayLbl{color:#7FDCDC}
+:root:root:root[data-theme="light"] #panelHome .hmDayTime,:root:root:root[data-theme="light"] #panelHome .hmDayName,:root:root:root[data-theme="light"] #panelHome .hmDayNone{color:#EAF6F6}
+:root:root:root[data-theme="light"] #panelHome .hmDaySvc,:root:root:root[data-theme="light"] #panelHome .hmDayProg{color:#9FB9BD}
+:root:root:root[data-theme="light"] #panelHome .hmDayPill{background:rgba(127,220,220,.16);color:#7FDCDC}
+:root:root:root[data-theme="light"] #panelHome .hmDayBar{background:#27414A}
+:root:root:root[data-theme="light"] #panelHome .hmDayFill{background:#7FDCDC}
+:root:root:root[data-theme="light"] #panelHome .hmTile{--ic:#12727C;--tf:#D9EEEF;--tb:#A9D3D6;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;min-height:102px;padding:14px 8px;border-radius:22px;background:var(--tf);border:1px solid var(--tb);box-shadow:0 6px 14px -8px rgba(8,52,60,.45)}
+:root:root:root[data-theme="light"] #panelHome .hmTile::before{display:none}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=cal]{--ic:#12727C;--tf:#D9EEEF;--tb:#A9D3D6}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=add]{--ic:#8A6A1C;--tf:#F3EAD3;--tb:#DCC995}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=cli]{--ic:#2F7A5B;--tf:#DCEDE4;--tb:#B0D3C1}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=av]{--ic:#3C5F8C;--tf:#DDE6F1;--tb:#B5C6DC}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=qr]{--ic:#0F6F78;--tf:#D4EEF0;--tb:#A3D2D6}
+:root:root:root[data-theme="light"] #panelHome .hmTile[data-k=st]{--ic:#7E6428;--tf:#EFE6D2;--tb:#D9C79A}
+:root:root:root[data-theme="light"] #panelHome .hmIc{width:auto;height:auto;border:0;border-radius:0;background:none;box-shadow:none;color:var(--ic)}
+:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap{width:40px;height:40px;stroke:none!important}
+:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap *{fill:currentColor!important;stroke:none}
+:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap .s{opacity:.4}
+:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap path[stroke-width]{fill:none!important;stroke:currentColor!important}
+:root:root:root[data-theme="light"] #panelHome .hmTxt{flex:none;width:100%}
+:root:root:root[data-theme="light"] #panelHome .hmT1,:root:root:root[data-theme="light"] #panelHome .hmT2{text-align:center}
+:root:root:root[data-theme="light"] #panelHome .hmT1{color:#10252A}
+:root:root:root[data-theme="light"] #panelHome .hmT2{color:#55686B}
