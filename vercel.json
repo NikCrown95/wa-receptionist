@@ -234,6 +234,22 @@
       "destination": "/provahtml/servizi-alla-persona.html"
     },
     {
+      "source": "/centri-sportivi",
+      "destination": "/provahtml/centri-sportivi.html"
+    },
+    {
+      "source": "/personal-trainer",
+      "destination": "/provahtml/personal-trainer.html"
+    },
+    {
+      "source": "/studi-medici",
+      "destination": "/provahtml/studi-medici.html"
+    },
+    {
+      "source": "/servizi-a-domicilio",
+      "destination": "/provahtml/servizi-a-domicilio.html"
+    },
+    {
       "source": "/teaser",
       "destination": "/teaser/index.html"
     },
@@ -294,7 +310,7 @@
       "destination": "/api/palestra?b=:slug"
     },
     {
-      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|app|registrati|promoter|reset|sicurezza|privacy|termini|cookie|accordo-sanitari|palestra|circolo|teaser|domande|tutorial|scegli-settore|servizi-alla-persona|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
+      "source": "/:slug((?!(?:api|admin|brand|fonts|icons|shop|poster|gym|estetista|cartomanzia|login|app|registrati|promoter|reset|sicurezza|privacy|termini|cookie|accordo-sanitari|palestra|circolo|teaser|domande|tutorial|scegli-settore|servizi-alla-persona|centri-sportivi|personal-trainer|studi-medici|servizi-a-domicilio|invito|recap|conferma|index)$)[a-z0-9-]{2,60})",
       "destination": "/api/booking?b=:slug"
     }
   ],

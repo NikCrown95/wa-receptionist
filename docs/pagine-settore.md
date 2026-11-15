@@ -14,4 +14,4 @@ dedicata con la stessa landing, ma con animazione in alto, sezione Dashboard e
   (es. `/servizi-alla-persona` -> `/provahtml/servizi-alla-persona.html`), lo slug
   nella lista di esclusione della rewrite `/:slug(...)` (altrimenti sarebbe letto come
   attivita') e l'indirizzo in `public/sitemap.xml` quando la pagina e' approvata.
-- Pagine attive: servizi-alla-persona (prova, non ancora in sitemap).
+- Pagine attive (tutte in sitemap): servizi-alla-persona (h), centri-sportivi (c), personal-trainer (p), studi-medici (m), servizi-a-domicilio (d).

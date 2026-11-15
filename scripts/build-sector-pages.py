@@ -29,6 +29,30 @@ SECTORS = [
         'title': 'Prenolia: agenda online per parrucchieri, barbieri ed estetiste',
         'desc': "L'agenda online con la segretaria virtuale per parrucchieri, barbieri ed estetiste. I clienti prenotano da soli, tu gestisci appuntamenti, clienti e statistiche.",
     },
+    {
+        'key': 'c',
+        'slug': 'centri-sportivi',
+        'title': 'Prenolia: agenda online per centri sportivi, campi e palestre',
+        'desc': "L'agenda online con la segretaria virtuale per centri sportivi, campi da tennis, calcetto e padel. I clienti prenotano il campo da soli, tu gestisci orari, prenotazioni e statistiche.",
+    },
+    {
+        'key': 'p',
+        'slug': 'personal-trainer',
+        'title': 'Prenolia: agenda online per personal trainer',
+        'desc': "L'agenda online con la segretaria virtuale per personal trainer. I tuoi iscritti prenotano da soli le sessioni, tu gestisci pacchetti, ingressi e appuntamenti.",
+    },
+    {
+        'key': 'm',
+        'slug': 'studi-medici',
+        'title': 'Prenolia: agenda online per studi medici e professionisti della salute',
+        'desc': "L'agenda online per studi medici e professionisti della salute. Appuntamenti, promemoria automatici e pazienti sempre in ordine in un unico calendario.",
+    },
+    {
+        'key': 'd',
+        'slug': 'servizi-a-domicilio',
+        'title': 'Prenolia: agenda online per servizi a domicilio e lezioni online',
+        'desc': "L'agenda online con la segretaria virtuale per chi lavora a domicilio o online: lezioni, consulenze e interventi. I clienti prenotano da soli, tu gestisci appuntamenti e clienti.",
+    },
 ]
 
 
