@@ -1318,12 +1318,22 @@ function pfRenderPoster(box,b,opts){
   var ST_MANUAL_PAY=true;
   function stManualPay(){var B=window.liaBilling;return ST_MANUAL_PAY&&!(B&&B.has_stripe)}
   var ST_PAYPAL_URL='https://www.paypal.com/ncp/payment/BSSUWR99L8AJ4';
-  function stRenderManual(){var M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(!manual)return;var btn=stEl('subManualBtn'),fm=stEl('subManualForm');if(!btn||!fm||btn.__b)return;btn.__b=1;
-    btn.addEventListener('click',function(){var b=(stD().b)||{},bz=stEl('subManualBiz'),ml=stEl('subManualMail');if(bz&&!bz.value)bz.value=b.name||'';if(ml&&!ml.value)ml.value=b.email||'';fm.hidden=false;btn.hidden=true;var f=(stEl('subManualName'));if(f)try{f.focus()}catch(e){}});
+  var ST_SATISPAY_USER='@coronanico';
+  function stRenderManual(){var M=stEl('subManual');if(!M)return;var manual=stManualPay();M.hidden=!manual;if(!manual)return;var bp=stEl('subManualBtn'),bs=stEl('subManualBtnS'),bx=stEl('subManualBtns'),fm=stEl('subManualForm'),sat=stEl('subManualSat');if(!bp||!bs||!bx||!fm||bp.__b)return;bp.__b=1;
+    var method='paypal';
+    function openForm(m){method=m;var b=(stD().b)||{},bz=stEl('subManualBiz'),ml=stEl('subManualMail');if(bz&&!bz.value)bz.value=b.name||'';if(ml&&!ml.value)ml.value=b.email||'';stText('subManualGo',m==='satispay'?'Continua con Satispay':'Continua con PayPal');stMsg('subManualMsg','');fm.hidden=false;bx.hidden=true;var f=stEl('subManualName');if(f)try{f.focus()}catch(e){}}
+    bp.addEventListener('click',function(){openForm('paypal')});
+    bs.addEventListener('click',function(){openForm('satispay')});
+    var cp=stEl('subManualCopy');if(cp)cp.addEventListener('click',function(){var done=function(){cp.textContent='Copiato \u2713'};try{navigator.clipboard.writeText(ST_SATISPAY_USER).then(done,function(){stMsg('subManualMsg','Copia a mano: '+ST_SATISPAY_USER)})}catch(e){stMsg('subManualMsg','Copia a mano: '+ST_SATISPAY_USER)}});
     fm.addEventListener('submit',function(ev){ev.preventDefault();var go=stEl('subManualGo'),biz=(stEl('subManualBiz').value||'').trim(),nm=(stEl('subManualName').value||'').trim(),ml=(stEl('subManualMail').value||'').trim();
       if(biz.length<2||nm.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(ml)){stMsg('subManualMsg','Compila tutti i campi, con un\u2019email valida.',true);return}
+      var sp=method==='satispay',label=sp?'Satispay':'PayPal';
       go.disabled=true;stMsg('subManualMsg','Un attimo\u2026');
-      stSend('support',{topic:'Pagamento PayPal',contact:ml,message:'Sta per pagare con PayPal ('+new Date().toLocaleString('it-IT')+').\nAttivit\u00e0: '+biz+'\nNome: '+nm+'\nEmail: '+ml}).then(function(){window.location.href=ST_PAYPAL_URL}).catch(function(e){go.disabled=false;stMsg('subManualMsg',(e&&e.message)||'Non sono riuscito a continuare. Riprova.',true)})})}
+      stSend('support',{topic:'Pagamento '+label,contact:ml,message:'Sta per pagare con '+label+' ('+new Date().toLocaleString('it-IT')+').\nAttivit\u00e0: '+biz+'\nNome: '+nm+'\nEmail: '+ml}).then(function(){
+        if(!sp){window.location.href=ST_PAYPAL_URL;return}
+        var D=stD(),P=window.LIA_PLANS,price=(D.sub&&D.sub.price_eur!=null)?Number(D.sub.price_eur):(D.prem?P.premium.price:P.base.price);
+        stText('subManualUser',ST_SATISPAY_USER);stText('subManualAmt',stEur(price));stMsg('subManualMsg','');go.disabled=false;fm.hidden=true;if(sat)sat.hidden=false;
+      }).catch(function(e){go.disabled=false;stMsg('subManualMsg',(e&&e.message)||'Non sono riuscito a continuare. Riprova.',true)})})}
   function stRenderPay(){
     var B=window.liaBilling,card=stEl('subPay'),btn=stEl('subPayBtn'),cc=stEl('subCancelCard');stRenderManual();if(!card)return;if(stManualPay()){card.hidden=true;return}
     if(!B||!B.configured||!B.status){card.hidden=true;return}
