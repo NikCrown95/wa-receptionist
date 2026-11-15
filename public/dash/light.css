@@ -103,7 +103,7 @@
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card:not(.is-past),:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d:not(.sel){background:#fff!important;border-color:transparent!important;box-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14)!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .ag-card.is-past{background:#F4F7F7!important;border-color:transparent!important;box-shadow:0 2px 6px -3px rgba(8,52,60,.18)!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.sel{background:linear-gradient(135deg,#12727C,#0F5F6B)!important;border-color:transparent!important;box-shadow:0 10px 22px -8px #12727C!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main{background:#0F2229!important;border-color:#27414A!important;box-shadow:0 14px 28px -14px rgba(8,34,41,.7)!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main{background:linear-gradient(135deg,#FFFFFF 0%,#DDEFF0 100%)!important;border-color:#A9D3D6!important;box-shadow:0 10px 24px -12px rgba(8,52,60,.38),0 1px 3px rgba(8,52,60,.14)!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 :root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:rgba(255,255,255,.82)!important;-webkit-text-fill-color:rgba(255,255,255,.82)!important}
 /* Smartphone: testata dello stesso colore del fondo, testi scuri, pulsanti bianchi e voce attiva turchese (variante "K") */
@@ -123,20 +123,20 @@
 :root:root:root:root:root:root:root:root:root:root[data-theme="light"] .wkp-d.past:not(.sel){opacity:.5}
 
 /* Look chiaro v4 (scelto da Nico, variante "A", 15 nov 2026): fondo ghiaccio, schede bianche, riquadri tono su tono come nel tema scuro, scheda del giorno petrolio con testo aqua */
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#EAF6F6!important;-webkit-text-fill-color:#EAF6F6!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:#9FB9BD!important;-webkit-text-fill-color:#9FB9BD!important}
-:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-title{color:#EAF6F6!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main *{color:#10252A!important;-webkit-text-fill-color:#10252A!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main small,:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-main .ag-summary{color:#55686B!important;-webkit-text-fill-color:#55686B!important}
+:root:root:root:root:root:root:root:root:root[data-theme="light"] .day-hero-title{color:#10252A!important}
 /* Home */
 :root:root:root[data-theme="light"] body.lia-sec-home{--bg:#E8EEEF;background:#E8EEEF}
-:root:root:root[data-theme="light"] #panelHome .hmDay{--c:#7FDCDC;background:#0F2229;border:1px solid #27414A;border-radius:22px;box-shadow:0 10px 22px -12px rgba(8,34,41,.65)}
+:root:root:root[data-theme="light"] #panelHome .hmDay{--c:#12727C;background:linear-gradient(135deg,#FFFFFF 0%,#DDEFF0 100%);border:1px solid #A9D3D6;border-radius:22px;box-shadow:0 10px 22px -12px rgba(8,52,60,.45)}
 :root:root:root[data-theme="light"] #panelHome .hmDay::before,:root:root:root[data-theme="light"] #panelHome .hmDay::after{display:none}
 :root:root:root[data-theme="light"] #panelHome .hmDay *{-webkit-text-fill-color:currentColor}
-:root:root:root[data-theme="light"] #panelHome .hmDayLbl{color:#7FDCDC}
-:root:root:root[data-theme="light"] #panelHome .hmDayTime,:root:root:root[data-theme="light"] #panelHome .hmDayName,:root:root:root[data-theme="light"] #panelHome .hmDayNone{color:#EAF6F6}
-:root:root:root[data-theme="light"] #panelHome .hmDaySvc,:root:root:root[data-theme="light"] #panelHome .hmDayProg{color:#9FB9BD}
-:root:root:root[data-theme="light"] #panelHome .hmDayPill{background:rgba(127,220,220,.16);color:#7FDCDC}
-:root:root:root[data-theme="light"] #panelHome .hmDayBar{background:#27414A}
-:root:root:root[data-theme="light"] #panelHome .hmDayFill{background:#7FDCDC}
+:root:root:root[data-theme="light"] #panelHome .hmDayLbl{color:#0F6F78}
+:root:root:root[data-theme="light"] #panelHome .hmDayTime,:root:root:root[data-theme="light"] #panelHome .hmDayName,:root:root:root[data-theme="light"] #panelHome .hmDayNone{color:#10252A}
+:root:root:root[data-theme="light"] #panelHome .hmDaySvc,:root:root:root[data-theme="light"] #panelHome .hmDayProg{color:#55686B}
+:root:root:root[data-theme="light"] #panelHome .hmDayPill{background:#CDE9EC;color:#0F5F6B}
+:root:root:root[data-theme="light"] #panelHome .hmDayBar{background:#C5DDE0}
+:root:root:root[data-theme="light"] #panelHome .hmDayFill{background:#12727C}
 :root:root:root[data-theme="light"] #panelHome .hmTile{--ic:#12727C;--tf:#D9EEEF;--tb:#A9D3D6;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;min-height:102px;padding:14px 8px;border-radius:22px;background:var(--tf);border:1px solid var(--tb);box-shadow:0 6px 14px -8px rgba(8,52,60,.45)}
 :root:root:root[data-theme="light"] #panelHome .hmTile::before{display:none}
 :root:root:root[data-theme="light"] #panelHome .hmTile[data-k=cal]{--ic:#12727C;--tf:#D9EEEF;--tb:#A9D3D6}
@@ -155,12 +155,14 @@
 :root:root:root[data-theme="light"] #panelHome .hmT1{color:#10252A}
 :root:root:root[data-theme="light"] #panelHome .hmT2{color:#55686B}
 /* Home chiara: stessi effetti della card "Appuntamento in corso" del tema scuro (puntino che pulsa, bordo che respira, riflesso sulla barra, aloni lenti) */
-:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk) .hmDayLbl::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#7FDCDC;margin-right:8px;vertical-align:1px;animation:hmPulse 1.8s ease-out infinite}
-:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk){animation:hmBreath 3s ease-in-out infinite}
+:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk) .hmDayLbl::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#12727C;margin-right:8px;vertical-align:1px;animation:hmPulseL 1.8s ease-out infinite}
+:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk){animation:hmBreathL 3s ease-in-out infinite}
 :root:root:root:root[data-theme="light"] #panelHome .hmDayFill{position:relative;overflow:hidden}
-:root:root:root:root[data-theme="light"] #panelHome .hmDayFill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-100%);animation:hmSweep 2.6s ease-in-out infinite}
+:root:root:root:root[data-theme="light"] #panelHome .hmDayFill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:hmSweep 2.6s ease-in-out infinite}
 :root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::before,:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::after{content:"";display:block;position:absolute;z-index:0;pointer-events:none;border-radius:0;width:110%;height:140%}
-:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::before{left:-30%;top:-40%;bottom:auto;background:radial-gradient(closest-side,rgba(111,214,214,.46),transparent);animation:hmAur 7s ease-in-out infinite}
-:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::after{right:-30%;left:auto;top:auto;bottom:-50%;width:80%;height:110%;background:radial-gradient(closest-side,rgba(214,176,100,.26),transparent);animation:hmAur 9s ease-in-out infinite reverse}
+:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::before{left:-30%;top:-40%;bottom:auto;background:radial-gradient(closest-side,rgba(45,170,180,.22),transparent);animation:hmAur 7s ease-in-out infinite}
+:root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)::after{right:-30%;left:auto;top:auto;bottom:-50%;width:80%;height:110%;background:radial-gradient(closest-side,rgba(214,176,100,.24),transparent);animation:hmAur 9s ease-in-out infinite reverse}
 :root:root:root:root[data-theme="light"] #panelHome .hmDay:not(.hmSk)>*{z-index:1}
 @media (prefers-reduced-motion:reduce){:root:root:root:root[data-theme="light"] #panelHome .hmDay,:root:root:root:root[data-theme="light"] #panelHome .hmDayLbl::before,:root:root:root:root[data-theme="light"] #panelHome .hmDayFill::after,:root:root:root:root[data-theme="light"] #panelHome .hmDay::before,:root:root:root:root[data-theme="light"] #panelHome .hmDay::after{animation:none}}
+@keyframes hmPulseL{0%{box-shadow:0 0 0 0 rgba(18,114,124,.45)}100%{box-shadow:0 0 0 9px rgba(18,114,124,0)}}
+@keyframes hmBreathL{0%,100%{border-color:#A9D3D6;box-shadow:0 10px 22px -12px rgba(8,52,60,.45)}50%{border-color:#12727C;box-shadow:0 10px 22px -12px rgba(8,52,60,.45),0 0 16px 0 rgba(18,114,124,.22)}}
