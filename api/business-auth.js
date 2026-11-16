@@ -366,7 +366,9 @@ module.exports = async (req, res) => {
       const slug = (name === "Nuova attività" ? "attivita" : slugify(name)) + "-" + crypto.randomBytes(2).toString("hex");
       const r = await rpc("signup_start", { p_email: email, p_password: password, p_name: name, p_slug: slug, p_type: type, p_phone: phone, p_token_hash: sha(raw), p_expires: new Date(Date.now() + CONFIRM_MS).toISOString(), p_ref: String(body.ref || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40) || null });
       if (!r.ok) return res.status(502).json({ error: "Non siamo riusciti a completare la registrazione. Riprova tra poco." });
-      await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch(() => {});
+      // La prova dell'accettazione non deve bloccare l'iscrizione, ma se non si salva lo scriviamo nei log.
+      const acc = await sb("POST", "terms_acceptances", { email, version: require("../lib/legal-config").versione }).catch((e) => ({ ok: false, status: 0, data: String((e && e.message) || e) }));
+      if (!acc || !acc.ok) console.error("terms_acceptances non salvata per", email, acc && acc.status, acc && acc.data);
       // Solo per le prove del titolare: gli indirizzi nico.corona95+qualcosa@icloud.com non hanno bisogno di confermare l'email.
       if (/^nico\.corona95\+[a-z0-9._-]{1,30}@icloud\.com$/.test(email)) {
         const c = await rpc("signup_confirm", { p_token_hash: sha(raw) });
