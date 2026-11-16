@@ -137,15 +137,15 @@
 :root:root:root[data-theme="light"] #panelHome .hmDayPill{background:#E6F0F1;color:#0A5C65}
 :root:root:root[data-theme="light"] #panelHome .hmDayBar{background:#E5E7EB}
 :root:root:root[data-theme="light"] #panelHome .hmDayFill{background:#0A5C65}
-:root:root:root[data-theme="light"] #panelHome .hmTile{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:12px;text-align:left;min-height:0;padding:14px;border-radius:16px;background:#fff;border:1px solid #E2E5EB;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+:root:root:root[data-theme="light"] #panelHome .hmTile{flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;min-height:102px;padding:14px 8px;border-radius:22px;background:#fff;border:1px solid #E2E5EB;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 :root:root:root[data-theme="light"] #panelHome .hmTile::before{display:none}
-:root:root:root[data-theme="light"] #panelHome .hmIc{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:10px;background:#F3F4F6;box-shadow:none;color:#0A5C65}
-:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap{width:22px;height:22px;stroke:none!important}
+:root:root:root[data-theme="light"] #panelHome .hmIc{width:auto;height:auto;border:0;border-radius:0;background:none;box-shadow:none;color:#0A5C65}
+:root:root:root[data-theme="light"] #panelHome .hmIc svg.ap{width:40px;height:40px;stroke:none!important}
 :root:root:root[data-theme="light"] #panelHome .hmIc svg.ap *{fill:currentColor!important;stroke:none}
 :root:root:root[data-theme="light"] #panelHome .hmIc svg.ap .s{opacity:.4}
 :root:root:root[data-theme="light"] #panelHome .hmIc svg.ap path[stroke-width]{fill:none!important;stroke:currentColor!important}
 :root:root:root[data-theme="light"] #panelHome .hmTxt{flex:none;width:100%}
-:root:root:root[data-theme="light"] #panelHome .hmT1,:root:root:root[data-theme="light"] #panelHome .hmT2{text-align:left}
+:root:root:root[data-theme="light"] #panelHome .hmT1,:root:root:root[data-theme="light"] #panelHome .hmT2{text-align:center}
 :root:root:root[data-theme="light"] #panelHome .hmT1{color:#111827}
 :root:root:root[data-theme="light"] #panelHome .hmT2{color:#4B5563}
 /* Home chiara: stessi effetti della card "Appuntamento in corso" del tema scuro (puntino che pulsa, bordo che respira, riflesso sulla barra, aloni lenti) */
