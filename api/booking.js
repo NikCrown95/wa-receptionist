@@ -667,7 +667,10 @@ module.exports = async (req, res) => {
       if (String(body.hp_ref_x || "").trim()) return res.status(400).json({ error: "Richiesta non valida" }); // campo trappola: nome non riconosciuto dall'autofill (il vecchio "website" veniva compilato dai browser e bloccava clienti veri)
       try {
         const nowIso = encodeURIComponent(new Date().toISOString());
-        const mine = await sb("GET", "appointments?business_id=eq." + biz.id + "&contact_id=eq." + encodeURIComponent(phone) + "&status=eq.confirmed&starts_at=gt." + nowIso + "&select=id&limit=" + (MAX_ACTIVE_PER_PHONE + 1));
+        // Lo stesso numero si puo' scrivere in modi diversi (spazi, +39, 0039): si confronta la forma unica, non il testo.
+        const phoneKey = require("../lib/pt-packs.js").phoneNorm(phone);
+        const mineAll = await sb("GET", "appointments?business_id=eq." + biz.id + "&status=eq.confirmed&starts_at=gt." + nowIso + "&select=contact_id&limit=1000");
+        const mine = { ok: mineAll.ok, data: Array.isArray(mineAll.data) ? mineAll.data.filter((x) => phoneKey.length >= 6 && require("../lib/pt-packs.js").phoneNorm(x.contact_id) === phoneKey) : [] };
         if (mine.ok && Array.isArray(mine.data) && mine.data.length >= MAX_ACTIVE_PER_PHONE && !require("../lib/pt-packs.js").isTrainer(biz)) {
           return res.status(429).json({ error: "Hai gia' " + MAX_ACTIVE_PER_PHONE + " appuntamenti in programma. Annullane uno prima di prenotarne un altro." });
         }
