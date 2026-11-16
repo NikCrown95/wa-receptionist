@@ -5,7 +5,7 @@
 //   - clienti che rinnovano domani (un avviso, il giorno prima)
 //   - un costo AI di oggi molto piu' alto del solito
 // Ogni allarme ha una "chiave" salvata in admin_alerts_sent: se la chiave esiste
-// gia', non si rimanda lo stesso avviso. Protetto da CRON_SECRET, come /api/recap.
+// gia', non si rimanda lo stesso avviso. Protetto da CRON_SECRET, come /api/reminders.
 
 const { sb, sendTelegram } = require("../lib/owner.js");
 const { buildAlerts } = require("../lib/alerts_logic.js");
