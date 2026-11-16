@@ -100,7 +100,25 @@ async function memberDayCheck(biz, rules, party, phone, dateStr, minutes, exclud
 }
 const PT_FAILS = new Map(); // accessi falliti degli iscritti (anti-abuso)
 const MAX_ACTIVE_PER_PHONE = 3; // appuntamenti futuri per numero
-const MAX_SELF_PER_HOUR = 40; // prenotazioni online per attivita' all'ora (anti-abuso)
+const MAX_SELF_PER_HOUR = 100; // prenotazioni online per attivita' all'ora (anti-abuso)
+const WARN_SELF_PER_HOUR = 80; // da qui in poi ti arriva un avviso su Telegram (una volta all'ora per attivita')
+const MAX_PER_PHONE_PER_HOUR = 5; // tentativi di prenotazione dallo stesso numero in un'ora (anche se il posto e' gia' preso)
+
+// Avviso al titolare di Prenolia: un'attivita' sta ricevendo molte prenotazioni online (possibile bot). Non blocca mai nulla.
+async function alertBookingSurge(biz, count, blocked) {
+  try {
+    const slot = new Date().toISOString().slice(0, 13);
+    const ins = await sb("POST", "admin_alerts_sent", { alert_key: "booking-surge:" + biz.id + ":" + slot + (blocked ? ":blocked" : ""), kind: "booking_surge", business_id: biz.id, details: { count: count, blocked: !!blocked } });
+    if (!ins.ok) return; // gia' avvisato in questa ora (o registro non raggiungibile)
+    const { sendTelegram } = require("../lib/owner.js");
+    const chats = await sb("GET", "admin_alert_chats?channel=eq.telegram&active=eq.true&select=chat_id");
+    const ids = (chats.ok && Array.isArray(chats.data) ? chats.data : []).map((c) => c.chat_id);
+    const text = blocked
+      ? "\uD83D\uDD34 " + (biz.name || "Un'attivit\u00e0") + ": raggiunto il limite di " + MAX_SELF_PER_HOUR + " prenotazioni online in un'ora. Le nuove prenotazioni sono bloccate per un po'. Controlla l'agenda: potrebbero essere finte."
+      : "\u26A0\uFE0F " + (biz.name || "Un'attivit\u00e0") + ": " + count + " prenotazioni online nell'ultima ora (limite " + MAX_SELF_PER_HOUR + "). Se non te l'aspetti, controlla l'agenda: potrebbero essere finte.";
+    for (const id of ids) await sendTelegram(id, text);
+  } catch (e) { console.error("Avviso prenotazioni non inviato:", e && e.message); }
+}
 
 function sbHeaders(extra) {
   const key = process.env.SUPABASE_SECRET_KEY || "";
@@ -674,8 +692,13 @@ module.exports = async (req, res) => {
         if (mine.ok && Array.isArray(mine.data) && mine.data.length >= MAX_ACTIVE_PER_PHONE && !require("../lib/pt-packs.js").isTrainer(biz)) {
           return res.status(429).json({ error: "Hai gia' " + MAX_ACTIVE_PER_PHONE + " appuntamenti in programma. Annullane uno prima di prenotarne un altro." });
         }
+        // Tetto per singolo numero: un bot che ripete lo stesso numero si ferma qui, senza bloccare gli altri clienti.
+        if (phoneKey.length >= 6 && !require("../lib/pt-packs.js").isTrainer(biz) && !(await rl.allow("book:phone:" + biz.id + ":" + phoneKey, MAX_PER_PHONE_PER_HOUR, 3600000))) {
+          return res.status(429).json({ error: "Troppi tentativi con questo numero. Riprova tra un'ora o chiama direttamente l'attivit\u00e0." });
+        }
         const hourAgo = encodeURIComponent(new Date(Date.now() - 3600000).toISOString());
         const flood = await sb("GET", "appointments?business_id=eq." + biz.id + "&channel=eq.selfservice&created_at=gt." + hourAgo + "&select=id&limit=" + (MAX_SELF_PER_HOUR + 1));
+        if (flood.ok && Array.isArray(flood.data) && flood.data.length >= WARN_SELF_PER_HOUR) await alertBookingSurge(biz, flood.data.length, flood.data.length > MAX_SELF_PER_HOUR);
         if (flood.ok && Array.isArray(flood.data) && flood.data.length > MAX_SELF_PER_HOUR) {
           return res.status(429).json({ error: "Troppe prenotazioni in poco tempo. Riprova tra qualche minuto." });
         }
