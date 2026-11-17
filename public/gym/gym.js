@@ -481,7 +481,7 @@
         var mc = el('div', 'gxChips'); mc.style.marginBottom = '10px'; sec(3).appendChild(mc); sec(3).appendChild(box);
         var drawPlan = function () {
           mc.innerHTML = '';
-          [['c', 'Corsi', canC], ['p', 'Personal', canP], ['e', 'Entrambi', canC && canP], ['n', 'Più tardi', true]].forEach(function (t) {
+          [['c', 'Corsi', canC], ['p', 'Personal', canP], ['e', 'Entrambi', canC && canP]].forEach(function (t) {
             if (!t[2]) return; var b = el('button', 'gxCp', t[1]); b.type = 'button'; b.setAttribute('aria-pressed', mode === t[0] ? 'true' : 'false');
             b.addEventListener('click', function () { mode = t[0]; drawPlan(); }); mc.appendChild(b);
           });
@@ -530,7 +530,7 @@
       function save(btnEl) {
         msg.textContent = ''; msg.className = '';
         var cats = mode === 'e' ? ['c', 'p'] : (mode === 'n' ? [] : [mode]), picks = m ? [] : cats.map(function (k) { return pick[k]; }).filter(Boolean);
-        if (!m && cats.some(function (k) { return byT[k].length && !pick[k]; })) { msg.className = 'gxWhy'; msg.textContent = 'Scegli il pacchetto da assegnare, oppure tocca Più tardi.'; return; }
+        if (!m && cats.some(function (k) { return byT[k].length && !pick[k]; })) { msg.className = 'gxWhy'; msg.textContent = 'Scegli il pacchetto da assegnare.'; return; }
         api({ action: 'member_save', id: m ? m.id : undefined, first_name: f.value, last_name: l.value, phone: p.value, access_code: cd.value, medical_from: mf.value || '', medical_until: mu.value || '' }).then(function (j) {
           var next = Promise.resolve();
           picks.forEach(function (x) { next = next.then(function () { return api({ action: 'member_plan_add', member_id: j.id, plan_id: x.id, starts_on: st.value, price_paid: paid[x.id] }); }); });
