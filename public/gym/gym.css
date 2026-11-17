@@ -426,3 +426,12 @@
 .gxHint{display:block;margin-top:6px;color:var(--muted);font-size:.8rem;line-height:1.4}
 .gxRc .gxChips{margin-bottom:4px}
 @media(min-width:900px){.gxRg{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+
+/* Regole e avvisi: stessa struttura della pagina regole del personal trainer */
+#panelOther .gxSheet.gxInPane.gxFlat{background:transparent;border:0;padding:0;box-shadow:none;display:flex;flex-direction:column;gap:12px}
+#panelOther .gxSheet.gxInPane.gxFlat>h3{font-family:'Manrope','Plus Jakarta Sans',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.035em;margin:0}
+#panelOther .gxFlat .stPh{padding:0 4px}
+#panelOther .gxFlat .stPh p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.5;max-width:560px}
+#panelOther .gxFlat .stCard .gxTp{width:100%}
+#panelOther .gxFlat .rlCard .stChips.gxHrs{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:560px){#panelOther .gxFlat .rlCard .stChips.gxHrs{grid-template-columns:repeat(4,minmax(0,1fr))}}

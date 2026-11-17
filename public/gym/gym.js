@@ -1033,34 +1033,75 @@
   }
   function sRegole() {
     sheet('Regole e avvisi', function (w, close) {
-      var st = S.data.settings;
-      var h = sel([[0, 'Fino all\'inizio'], [1, '1 ora prima'], [2, '2 ore prima'], [3, '3 ore prima'], [6, '6 ore prima'], [12, '12 ore prima'], [24, '1 giorno prima']], st.cutoff_min / 60);
-      function rcard(t, sub) { var c = el('div', 'gxRc'); c.appendChild(el('h4', null, t)); if (sub) c.appendChild(el('p', 'gxRcS', sub)); w.appendChild(c); return c; }
-      function fh(lab, input, hint) { var f = field(lab, input); f.appendChild(el('small', 'gxHint', hint)); return f; }
-      var c1 = rcard('Prenotazioni e avvisi', 'Quando gli iscritti possono prenotare o disdire e quando ti avvisiamo delle scadenze.'), g1 = el('div', 'gxRg'); c1.appendChild(g1);
-      g1.appendChild(fh('Si può disdire fino a', h, 'Se l\'iscritto disdice in tempo, l\'ingresso gli torna. Dopo no.'));
-      var da = sel([[7, '1 settimana'], [14, '2 settimane'], [21, '3 settimane (consigliato)'], [30, '30 giorni'], [45, '45 giorni'], [60, '60 giorni'], [90, '90 giorni']], st.days_ahead || 21);
-      g1.appendChild(fh('Gli iscritti possono prenotare fino a', da, 'Quanto in anticipo si vedono e si prenotano lezioni e Personal.'));
-      var ex = sel([[3, '3 giorni prima'], [5, '5 giorni prima'], [7, '7 giorni prima'], [10, '10 giorni prima']], st.expiry_days || 5);
-      g1.appendChild(fh('Avvisami della scadenza', ex, 'Da quel giorno l\'abbonamento compare tra le notifiche e in "In scadenza".'));
-      var c2 = rcard('Regole per gli iscritti');
-      var reqM = st.require_medical !== false, tm = el('button', 'gxTp'); tm.type = 'button';
-      var paintTm = function () { tm.setAttribute('aria-pressed', reqM ? 'true' : 'false'); tm.innerHTML = '<span class="t"><b>Certificato medico obbligatorio</b><small>' + (reqM ? 'Senza un certificato valido l\'iscritto non può prenotare, anche con l\'abbonamento attivo.' : 'Gli iscritti prenotano anche senza certificato: lo vedono solo nel profilo.') + '</small></span><i class="sw"><u></u></i>'; };
-      paintTm(); tm.onclick = function () { reqM = !reqM; paintTm(); }; tm.style.margin = '0 0 12px'; if (!noCert()) c2.appendChild(tm);
-      var showN = st.show_names !== false;
-      if (OF().cls) {
-        var tg = el('button', 'gxTp'); tg.type = 'button';
-        var paintTg = function () { tg.setAttribute('aria-pressed', showN ? 'true' : 'false'); tg.innerHTML = '<span class="t"><b>Mostra chi partecipa</b><small>' + (showN ? 'Gli iscritti vedono nome e iniziale del cognome degli altri, mai il telefono.' : 'Gli iscritti vedono solo quanti posti restano.') + '</small></span><i class="sw"><u></u></i>'; };
-        paintTg(); tg.onclick = function () { showN = !showN; paintTg(); }; tg.style.margin='0 0 12px'; c2.appendChild(tg);
+      w.classList.add('gxFlat');
+      var st = S.data.settings, of = OF();
+      var R = { cut: Math.round((st.cutoff_min || 0) / 60), ahead: st.days_ahead || 21, exp: st.expiry_days || 5, med: st.require_medical !== false, names: st.show_names !== false, hrs: (st.pt_hours || []).slice() };
+      var CUT = [[0, 'Fino all\'inizio'], [1, '1 ora prima'], [2, '2 ore prima'], [3, '3 ore prima'], [6, '6 ore prima'], [12, '12 ore prima'], [24, '1 giorno prima']];
+      var AHD = [[7, '1 settimana'], [14, '2 settimane'], [21, '3 settimane'], [30, '30 giorni'], [45, '45 giorni'], [60, '60 giorni'], [90, '90 giorni']];
+      var EXP = [[3, '3 giorni prima'], [5, '5 giorni prima'], [7, '7 giorni prima'], [10, '10 giorni prima']];
+      var lab = function (l, v) { for (var k = 0; k < l.length; k++) if (l[k][0] === v) return l[k][1]; return String(v); };
+      var SV = function (d) { return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+      var hd = el('header', 'stPh'); hd.appendChild(el('p', null, 'Decidi quando gli iscritti possono prenotare e disdire da soli. Valgono per la pagina di prenotazione e per il QR.')); w.appendChild(hd);
+      var sum = el('div', 'stCard rlSum'), sumT = el('div', 'rlSumT'), saved = el('em'); sumT.appendChild(el('span', null, 'Oggi i tuoi iscritti')); sumT.appendChild(saved); sum.appendChild(sumT);
+      var sumR = el('div'); sum.appendChild(sumR); w.appendChild(sum);
+      var svT = null;
+      function flash() { saved.textContent = 'Salvato ✓'; saved.className = 'on'; clearTimeout(svT); svT = setTimeout(function () { saved.className = ''; saved.textContent = ''; }, 2000); }
+      function paintSum() {
+        sumR.innerHTML = '';
+        var rows = [['Prenotano fino a ', lab(AHD, R.ahead) + ' avanti'], [R.cut === 0 ? 'Disdicono ' : 'Disdicono fino a ', R.cut === 0 ? 'fino all\'inizio della lezione' : lab(CUT, R.cut)], ['Ti avvisiamo ', lab(EXP, R.exp) + ' che un abbonamento scade']];
+        if (!noCert()) rows.push(['Certificato medico ', R.med ? 'obbligatorio per prenotare' : 'non obbligatorio']);
+        rows.forEach(function (r) { var d = el('div', 'rlSr'), t = el('span', null, r[0]); t.appendChild(el('b', null, r[1])); d.appendChild(t); sumR.appendChild(d); });
       }
-      var hours = (st.pt_hours || []).slice(), ch = el('div', 'gxChips');
-      var c3 = OF().pt ? rcard('Ore del Personal 1:1', 'Scegli in quali ore gli iscritti possono prenotare una lezione individuale.') : null;
-      if (c2.childNodes.length <= 1) c2.remove();
-      for (var hh = 7; hh <= 21; hh++) {
-        (function (t) { var b = el('button', 'gxCp', t); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', hours.indexOf(t) >= 0 ? 'true' : 'false'); } paint(); b.addEventListener('click', function () { var i = hours.indexOf(t); if (i >= 0) hours.splice(i, 1); else hours.push(t); paint(); }); ch.appendChild(b); })(pad(hh) + ':00');
+      var saveT = null;
+      function save() {
+        paintSum();
+        clearTimeout(saveT);
+        saveT = setTimeout(function () {
+          api({ action: 'settings_save', cutoff_hours: R.cut, days_ahead: R.ahead, expiry_days: R.exp, show_names: R.names, require_medical: R.med, pt_hours: R.hrs.slice().sort() }).then(function () {
+            st.cutoff_min = R.cut * 60; st.days_ahead = R.ahead; st.expiry_days = R.exp; st.show_names = R.names; st.require_medical = R.med; st.pt_hours = R.hrs.slice().sort(); flash();
+          }).catch(function (e) { toast(e.message, 'bad'); });
+        }, 250);
       }
-      if (OF().pt) { c3.appendChild(ch); var n = el('p', 'gxHint', OF().cls ? 'Il Personal compare solo in queste ore e solo se in quell\'ora non c\'è un corso.' : 'Il Personal si può prenotare solo in queste ore, nei giorni di apertura.'); n.style.marginTop = '10px'; c3.appendChild(n); }
-      w.appendChild(btn('Salva', 'block', function () { act({ action: 'settings_save', cutoff_hours: h.value, days_ahead: da.value, expiry_days: ex.value, show_names: showN, require_medical: reqM, pt_hours: hours.sort() }, 'Salvato.').then(function () { close(); return reload(); }); }));
+      function card(icon, title, hint) {
+        var c = el('div', 'stCard rlCard'), h = el('div', 'rlHd'), ic = el('span', 'rlIc'); ic.innerHTML = SV(icon); h.appendChild(ic); h.appendChild(el('h4', null, title)); c.appendChild(h);
+        if (hint) c.appendChild(el('p', 'stHint', hint)); w.appendChild(c); return c;
+      }
+      function chips(c, list, key, rec, hintFn) {
+        var g = el('div', 'stChips'); g.setAttribute('role', 'group'); c.appendChild(g); var res = el('p', 'rlRes'); c.appendChild(res);
+        function draw() {
+          g.innerHTML = '';
+          list.forEach(function (o) {
+            var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('aria-pressed', R[key] === o[0] ? 'true' : 'false');
+            if (rec === o[0]) b.appendChild(el('i', null, 'consigliato'));
+            b.addEventListener('click', function () { if (R[key] === o[0]) return; R[key] = o[0]; draw(); save(); }); g.appendChild(b);
+          });
+          res.textContent = hintFn();
+        }
+        draw();
+      }
+      chips(card('<circle cx="12" cy="12" r="8.5"/><path d="M9 9l6 6M15 9l-6 6"/>', 'Fino a quando può disdire?', 'Se disdice in tempo l\'ingresso gli torna, dopo no.'), CUT, 'cut', null, function () { return R.cut === 0 ? 'Gli iscritti possono disdire fino all\'inizio della lezione.' : 'Se mancano meno di ' + lab(CUT, R.cut).replace(' prima', '') + ' alla lezione non possono più disdire da soli e l\'ingresso viene scalato.'; });
+      chips(card('<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 'Quanto avanti si può prenotare?', 'Oltre questo limite i giorni non si possono scegliere. Vale per lezioni e Personal.'), AHD, 'ahead', 21, function () { return 'Gli iscritti vedono i giorni da oggi fino a ' + lab(AHD, R.ahead) + ' avanti.'; });
+      chips(card('<path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7zM10 19a2 2 0 0 0 4 0"/>', 'Quando ti avvisiamo della scadenza?', 'Da quel giorno l\'abbonamento compare tra le notifiche e in "In scadenza".'), EXP, 'exp', 5, function () { return 'Ti avvisiamo ' + lab(EXP, R.exp) + ' della scadenza dell\'abbonamento.'; });
+      function toggle(icon, title, hint, key, onTx, offTx) {
+        var c = card(icon, title, hint), tm = el('button', 'gxTp'); tm.type = 'button'; tm.style.margin = '0 0 4px'; c.appendChild(tm);
+        function paint() { tm.setAttribute('aria-pressed', R[key] ? 'true' : 'false'); tm.innerHTML = '<span class="t"><b>' + esc(R[key] ? 'Sì' : 'No') + '</b><small>' + esc(R[key] ? onTx : offTx) + '</small></span><i class="sw"><u></u></i>'; }
+        paint(); tm.addEventListener('click', function () { R[key] = !R[key]; paint(); save(); });
+      }
+      if (!noCert()) toggle('<path d="M12 3l7 3v5c0 4.5-3 8.2-7 9.5-4-1.3-7-5-7-9.5V6l7-3z"/><path d="M9 12l2 2 4-4"/>', 'Certificato medico obbligatorio?', 'Il titolare scrive quando è stato fatto: la scadenza è di un anno.', 'med', 'Senza un certificato valido l\'iscritto non può prenotare, anche con l\'abbonamento attivo.', 'Gli iscritti possono prenotare anche senza certificato valido.');
+      if (of.cls) toggle('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 5.5M18 15a5 5 0 0 1 3 5"/>', 'Mostrare chi partecipa?', 'Cosa vedono gli iscritti nella lista di una lezione.', 'names', 'Vedono nome e iniziale del cognome degli altri, mai il telefono.', 'Vedono solo quanti posti restano.');
+      if (of.pt) {
+        var c = card('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', 'In quali ore si può prenotare il Personal?', of.cls ? 'Il Personal compare solo in queste ore e solo se in quell\'ora non c\'è un corso.' : 'Il Personal si può prenotare solo in queste ore, nei giorni di apertura.');
+        var g = el('div', 'stChips gxHrs'); c.appendChild(g);
+        var draw = function () {
+          g.innerHTML = '';
+          for (var hh = 7; hh <= 21; hh++) (function (t) {
+            var b = el('button', null, t); b.type = 'button'; b.setAttribute('aria-pressed', R.hrs.indexOf(t) >= 0 ? 'true' : 'false');
+            b.addEventListener('click', function () { var k = R.hrs.indexOf(t); if (k >= 0) R.hrs.splice(k, 1); else R.hrs.push(t); draw(); save(); }); g.appendChild(b);
+          })((hh < 10 ? '0' : '') + hh + ':00');
+        };
+        draw();
+      }
+      paintSum();
     });
   }
 
