@@ -1036,7 +1036,7 @@
       w.classList.add('gxFlat');
       var st = S.data.settings, of = OF();
       var R = { cut: Math.round((st.cutoff_min || 0) / 60), ahead: st.days_ahead || 21, exp: st.expiry_days || 5, med: st.require_medical !== false, names: st.show_names !== false, hrs: (st.pt_hours || []).slice() };
-      var CUT = [[0, 'Fino all\'inizio'], [1, '1 ora prima'], [2, '2 ore prima'], [3, '3 ore prima'], [6, '6 ore prima'], [12, '12 ore prima'], [24, '1 giorno prima']];
+      var CUT = [[0, 'Fino all\'inizio'], [1, '1 ora prima'], [2, '2 ore prima'], [3, '3 ore prima'], [6, '6 ore prima'], [12, '12 ore prima'], [24, '24 ore prima'], [48, '48 ore prima']];
       var AHD = [[7, '1 settimana'], [14, '2 settimane'], [21, '3 settimane'], [30, '30 giorni'], [45, '45 giorni'], [60, '60 giorni'], [90, '90 giorni']];
       var EXP = [[3, '3 giorni prima'], [5, '5 giorni prima'], [7, '7 giorni prima'], [10, '10 giorni prima']];
       var lab = function (l, v) { for (var k = 0; k < l.length; k++) if (l[k][0] === v) return l[k][1]; return String(v); };
