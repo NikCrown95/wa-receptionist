@@ -391,3 +391,9 @@
 
 .gxShade:has(.gxCtr){align-items:center;padding:12px}
 .gxSheet.gxCtr{border-radius:26px;max-height:calc(100% - 24px);padding-bottom:22px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+
+/* Impostazioni: contenuto nel riquadro a destra */
+#panelOther .gxSheet.gxInPane{position:static;width:auto;max-width:none;max-height:none;overflow:visible;margin:0;padding:20px 20px 22px;border-radius:22px;background:var(--card);border:1px solid var(--line);box-shadow:none;color:inherit}
+#panelOther .gxSheet.gxInPane>h3{font-size:1.4rem;margin:0 0 6px}
+#panelOther .gxSheet.gxInPane.gxMf{background:var(--card);color:inherit}
+@media(min-width:900px){#panelOther .stPage[data-st="gx"] .stBack{display:none}}

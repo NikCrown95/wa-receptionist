@@ -84,7 +84,36 @@
   function reload() { S.sessions = null; S.week = null; S.stats = null; return load().then(function () { renderAll(); try { document.dispatchEvent(new CustomEvent('lia:gymchanged')); } catch (e) {} }); }
 
   // ---------- finestre dal basso ----------
+  // Impostazioni: ogni voce si apre nel riquadro a destra (su telefono: pagina intera con "Indietro"), non come tendina
+  function inSettings() { var a = document.querySelector('.tabPanel.on'); return !!(a && a.id === 'panelOther' && document.querySelector('#stShell .stDetail')); }
+  function paneClear() {
+    var sh = document.getElementById('stShell'); if (!sh) return;
+    var pg = sh.querySelector('.stPage[data-st="gx"]'); if (pg) { pg.classList.remove('on'); pg.innerHTML = ''; }
+    sh.querySelectorAll('.stMenu .stRow[data-gx]').forEach(function (r) { r.classList.remove('on'); });
+  }
+  function paneSheet(title, build) {
+    var sh = document.getElementById('stShell'), det = sh.querySelector('.stDetail'), pg = det.querySelector('.stPage[data-st="gx"]');
+    if (!pg) { pg = el('div', 'stPage'); pg.setAttribute('data-st', 'gx'); det.appendChild(pg); }
+    var wide = window.matchMedia && window.matchMedia('(min-width:900px)').matches;
+    det.querySelectorAll('.stPage').forEach(function (x) { x.classList.toggle('on', x === pg); });
+    sh.querySelectorAll('.stMenu .stRow').forEach(function (r) { r.classList.toggle('on', wide && r.getAttribute('data-gx') === S.curSet); });
+    if (!wide) sh.classList.add('inPage');
+    pg.innerHTML = '';
+    var back = el('button', 'stBack'); back.type = 'button'; back.innerHTML = '<span>‹</span> Impostazioni';
+    pg.appendChild(back);
+    var s = el('div', 'gxSheet gxInPane'); pg.appendChild(s);
+    function close() {
+      if (!pg.contains(s)) return;
+      paneClear(); sh.classList.remove('inPage');
+      if (wide && window.liaSettingsOpen) window.liaSettingsOpen('bizinfo');
+    }
+    back.addEventListener('click', close);
+    s.appendChild(el('h3', null, title)); build(s, close);
+    try { var w = document.querySelector('#panelOther .otherWrap'); if (w) w.scrollTop = 0; var po = document.getElementById('panelOther'); if (po) po.scrollTop = 0; } catch (e) { }
+    return close;
+  }
   function sheet(title, build) {
+    if (inSettings()) return paneSheet(title, build);
     var sh = el('div', 'gxShade'), s = el('div', 'gxSheet'); sh.appendChild(s);
     function close() { if (sh.parentNode) sh.parentNode.removeChild(sh); }
     sh.addEventListener('click', function (e) { if (e.target === sh) close(); });
@@ -667,6 +696,7 @@
     var menu = document.querySelector('#panelOther .stMenu'); if (!menu) return false;
     ['services', 'combos', 'hours', 'blocks', 'staff', 'rules'].forEach(function (k) { var r = menu.querySelector('[data-st="' + k + '"]'); if (r) r.style.display = 'none'; });
     stDefault();
+    if (!menu.getAttribute('data-gxc')) { menu.setAttribute('data-gxc', '1'); menu.addEventListener('click', function (e) { var r = e.target.closest && e.target.closest('.stRow'); if (r && !r.hasAttribute('data-gx')) paneClear(); }, true); }
     var groups = menu.querySelectorAll('.stGroup');
     groups.forEach(function (g) { var h = g.querySelector('h3'); if (h && /Canali clienti/i.test(h.textContent)) g.style.display = 'none'; if (h && /La tua attività/i.test(h.textContent)) h.textContent = 'La tua palestra'; });
     var bi = menu.querySelector('[data-st="bizinfo"] b'); if (bi) bi.textContent = 'Dati palestra';
@@ -690,6 +720,7 @@
     return true;
   }
   function openSetting(k) {
+    S.curSet = k;
     var go = function () { ({ tipo: sTipo, orari: sOrari, corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
     if (S.data) go(); else load().then(go).catch(function (e) { toast(e.message, 'bad'); });
   }
