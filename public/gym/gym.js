@@ -462,7 +462,11 @@
       var mf = inp('date', m && m.medical_from || ''), mu = inp('date', m && m.medical_until || ''), muTouched = !!(m && m.medical_until && m.medical_from && m.medical_until !== plusYear(m.medical_from));
       mf.addEventListener('change', function () { if (!muTouched || !mu.value) { mu.value = mf.value ? plusYear(mf.value) : ''; muTouched = false; } });
       mu.addEventListener('input', function () { muTouched = true; });
-      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); sec(2).appendChild(tw);
+      var tw = el('div', 'gxOne'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il (un anno dopo, puoi cambiarla)', mu));
+      var qk = el('div', 'gxChips'); qk.style.marginBottom = '12px';
+      var qt = el('button', 'gxCp', 'Fatto oggi'); qt.type = 'button'; qt.addEventListener('click', function () { mf.value = S.data && S.data.today ? S.data.today : mf.value; muTouched = false; mu.value = mf.value ? plusYear(mf.value) : ''; });
+      var qn = el('button', 'gxCp', 'Non ce l\'ha ancora'); qn.type = 'button'; qn.addEventListener('click', function () { mf.value = ''; mu.value = ''; muTouched = false; });
+      qk.appendChild(qt); qk.appendChild(qn); sec(2).appendChild(qk); sec(2).appendChild(tw);
       sec(2).appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.' + (m ? '' : ' Se non ce l\'ha ancora, lascia vuoto: potrà prenotare solo dopo che lo inserisci.')));
       // pacchetti assegnati subito (solo per un iscritto nuovo): Corsi, Personal oppure entrambi
       var plans = !m && S.data && S.data.plans ? S.data.plans : [], of = OF();

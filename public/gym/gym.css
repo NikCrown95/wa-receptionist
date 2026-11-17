@@ -408,3 +408,9 @@
 /* Nuovo iscritto / modifica: la scheda parte in alto, così la tastiera non la copre */
 .gxShade:has(.gxSheet.gxMf){align-items:flex-start;padding:max(16px,env(safe-area-inset-top)) 12px 12px}
 .gxSheet.gxMf{border-radius:24px;max-height:calc(100% - 28px);padding-bottom:22px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+
+/* campi data: niente sbordi su iPad */
+.gxF input[type=date]{box-sizing:border-box;display:block;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left}
+.gxF input{box-sizing:border-box}
+.gxTwo>*{min-width:0}
+.gxOne{display:block}
