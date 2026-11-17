@@ -500,7 +500,6 @@
           var chosen = cats.map(function (k) { return pick[k]; }).filter(Boolean);
           if (chosen.length) {
             box.appendChild(field('Inizia il', st));
-            chosen.forEach(function (x) { var pi = inp('number', paid[x.id]); pi.step = '0.01'; pi.inputMode = 'decimal'; pi.addEventListener('input', function () { paid[x.id] = pi.value; }); box.appendChild(field('Pagato · ' + x.name + ' (€)', pi)); });
           }
         };
         drawPlan();
@@ -562,7 +561,6 @@
         if (picks.length) {
           fx.appendChild(el('p', 'gxMfH', 'Puoi sceglierne più di uno: ad esempio il mensile e il pacchetto Personal.'));
           fx.appendChild(field('Inizia il', st));
-          picks.forEach(function (x) { var pi = inp('number', paid[x.id]); pi.step = '0.01'; pi.inputMode = 'decimal'; pi.addEventListener('input', function () { paid[x.id] = pi.value; }); fx.appendChild(field('Pagato · ' + x.name + ' (€)', pi)); });
         }
       };
       draw();
