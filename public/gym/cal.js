@@ -587,7 +587,7 @@
       });
       if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) {
         if (p.free) return; var nm = p.name.split(' ');
-        L.push({ st: mins(p.time), du: 60, cat: 'pt', name: nm[0] + ' ' + (nm[1] || '').charAt(0) + '.', time: p.time, sub: 'Personal', pc: 0,
+        L.push({ st: mins(p.time), du: 60, cat: 'pt', name: nm[0] + ' ' + (nm[1] || '').charAt(0) + '.', time: p.time, sub: '1:1', pc: 0,
           cls: isEnded(d, p.time, 60) ? ' past' : '', at: 'data-ptb="' + p.time + '" data-date="' + d + '"' });
       });
       L.forEach(function (x) { any = true; lo = Math.min(lo, x.st); hi = Math.max(hi, x.st + x.du); });
