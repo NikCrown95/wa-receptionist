@@ -374,38 +374,54 @@
     var a = wkStart(S.anchor), days = [], i;
     for (i = 0; i < 7; i++) days.push(getDay(addDays(a, i)) || { date: addDays(a, i), sessions: [], pt: [], closed: true });
     if (!(S.sel >= a && S.sel <= addDays(a, 6))) S.sel = a <= today() && today() <= addDays(a, 6) ? today() : a;
-    var f = S.flt, heads = '', rows = [], rowIx = {}, tot = [];
-    function endOf(t, dur) { var m = mins(t) + (dur || 60); return pad(Math.floor(m / 60) % 24) + ':' + pad(m % 60); }
-    function rowOf(key, name, cat) { if (!(key in rowIx)) { rowIx[key] = rows.length; rows.push({ key: key, name: name, cat: cat, cells: [[], [], [], [], [], [], []], n: 0, tk: 0, cp: 0 }); } return rows[rowIx[key]]; }
+    var f = S.flt, heads = '', tot = [], items = [], any = false, lo = 24 * 60, hi = 0;
     days.forEach(function (dd, k) {
-      var d = dd.date, st = dayStats(dd);
-      (dd.sessions || []).forEach(function (s) { var c = ck(s.course.category); if (f !== 'all' && s.course.category !== f) return; var r = rowOf('c:' + s.course.name, s.course.name, c); r.cells[k].push({ t: s.time, s: s }); if (!s.cancelled) { r.n++; r.tk += s.taken; r.cp += s.capacity; } });
-      if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) { if (p.free) return; var r = rowOf('pt', 'Personal 1:1', 'pt'); r.cells[k].push({ t: p.time, p: p }); r.n++; });
+      var d = dd.date, st = dayStats(dd), L = [];
+      (dd.sessions || []).forEach(function (s) {
+        if (f !== 'all' && s.course.category !== f) return;
+        var full = !s.cancelled && s.taken >= s.capacity, du = s.duration_min || 60;
+        L.push({ st: mins(s.time), du: du, cat: ck(s.course.category), name: s.course.name, time: s.time,
+          sub: s.cancelled ? 'annullata' : s.taken + '/' + s.capacity, pc: s.capacity && !s.cancelled ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0,
+          cls: (isEnded(d, s.time, du) ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : ''), at: 'data-sess="' + s.schedule_id + '" data-date="' + d + '"' });
+      });
+      if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) {
+        if (p.free) return; var nm = p.name.split(' ');
+        L.push({ st: mins(p.time), du: 60, cat: 'pt', name: nm[0] + ' ' + (nm[1] || '').charAt(0) + '.', time: p.time, sub: 'Personal', pc: 0,
+          cls: isEnded(d, p.time, 60) ? ' past' : '', at: 'data-ptb="' + p.time + '" data-date="' + d + '"' });
+      });
+      L.forEach(function (x) { any = true; lo = Math.min(lo, x.st); hi = Math.max(hi, x.st + x.du); });
+      items[k] = L;
       var pb = ptStats(dd).booked; tot[k] = dd.closed && !pb ? 'Chiuso' : onlyBooked() ? (pb ? String(pb) : '–') : st.n ? st.b + '/' + st.cap : '–';
-      heads += '<button type="button" class="gpDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
+      heads += '<button type="button" class="gtDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
     });
-    var ord = { circuit: 0, hyrox: 1, pilates: 2, pt: 9 };
-    rows.sort(function (x, y) { var ox = x.cat in ord ? ord[x.cat] : 5, oy = y.cat in ord ? ord[y.cat] : 5; return ox - oy || (x.name < y.name ? -1 : 1); });
-    var cols = '<div class="gpHd"><div></div>' + heads + '</div>';
-    rows.forEach(function (r) {
-      cols += '<div class="gpRow"><div class="gpLb gpl-' + r.cat + '"><b>' + esc(r.name) + '</b><span>' + (r.cat === 'pt' ? r.n + ' prenotati' : r.n + (r.n === 1 ? ' lezione' : ' lezioni') + ' · ' + r.tk + '/' + r.cp) + '</span></div>';
-      for (var kk = 0; kk < 7; kk++) {
-        var dq = days[kk].date, its = r.cells[kk].sort(function (x, y) { return x.t < y.t ? -1 : x.t > y.t ? 1 : 0; }), h = '';
-        its.forEach(function (x) {
-          if (x.p) { var nm = x.p.name.split(' '); h += '<button type="button" class="gpC gpc-pt' + (isEnded(dq, x.t, 60) ? ' past' : '') + '" data-ptb="' + x.t + '" data-date="' + dq + '"><span class="gpT">' + x.t + '</span><b>' + esc(nm[0] + ' ' + (nm[1] || '').charAt(0) + '.') + '</b></button>'; return; }
-          var s = x.s, full = !s.cancelled && s.taken >= s.capacity, pc = s.capacity ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0;
-          h += '<button type="button" class="gpC gpc-' + r.cat + (isEnded(dq, s.time, s.duration_min) ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : '') + '" data-sess="' + s.schedule_id + '" data-date="' + dq + '"><span class="gpT">' + s.time + '<em>' + (s.cancelled ? 'annullata' : full ? 'pieno' : '') + '</em></span><span class="gpB"><i style="width:' + (s.cancelled ? 0 : pc) + '%"></i></span><s>' + (s.cancelled ? '–' : s.taken + '/' + s.capacity) + '</s></button>';
+    var H0 = any ? Math.floor(lo / 60) : 8, H1 = any ? Math.ceil(hi / 60) : 20, RH = 58;
+    var cols = '<div class="gtHd"><div></div>' + heads + '</div><div class="gtBody" style="height:' + ((H1 - H0) * RH) + 'px"><div class="gtHrs">';
+    for (var hh = H0; hh < H1; hh++) cols += '<div style="top:' + ((hh - H0) * RH) + 'px;height:' + RH + 'px"><span>' + pad(hh) + ':00</span></div>';
+    cols += '</div><div class="gtCols">';
+    days.forEach(function (dd, k) {
+      var L = items[k].sort(function (x, y) { return x.st - y.st || y.du - x.du; }), n = 0, out = '';
+      while (n < L.length) {
+        var cl = [L[n]], end = L[n].st + L[n].du, m = n + 1;
+        while (m < L.length && L[m].st < end) { cl.push(L[m]); end = Math.max(end, L[m].st + L[m].du); m++; }
+        var lanes = [];
+        cl.forEach(function (x) { var l = 0; while (lanes[l] && lanes[l] > x.st) l++; lanes[l] = x.st + x.du; x.lane = l; });
+        cl.forEach(function (x) {
+          var w = 100 / lanes.length, top = (x.st - H0 * 60) / 60 * RH + 2, h = x.du / 60 * RH - 4;
+          out += '<button type="button" class="gtB gpc-' + x.cat + x.cls + '" ' + x.at + ' style="top:' + top + 'px;height:' + h + 'px;left:calc(' + (x.lane * w) + '% + 3px);width:calc(' + w + '% - 6px)"><b>' + esc(x.name) + '</b><span class="gtS"><em>' + x.time + '</em>' + esc(x.sub) + '</span>' + (x.pc ? '<i class="gtP"><u style="width:' + x.pc + '%"></u></i>' : '') + '</button>';
         });
-        cols += '<div class="gpCell' + (dq === S.sel ? ' sel' : '') + (days[kk].closed ? ' closed' : '') + (h ? '' : ' none') + '" data-i="' + kk + '">' + (h || '<span class="gpNo">–</span>') + '</div>';
+        n = m;
       }
-      cols += '</div>';
+      var nowL = '';
+      if (dd.date === today()) { var nm2 = nowMin(); if (nm2 >= H0 * 60 && nm2 <= H1 * 60) nowL = '<div class="gtNow" style="top:' + ((nm2 - H0 * 60) / 60 * RH) + 'px"></div>'; }
+      cols += '<div class="gtCol' + (dd.date === S.sel ? ' sel' : '') + (dd.date === today() ? ' tod' : '') + (dd.closed ? ' closed' : '') + '" data-i="' + k + '">' + out + nowL + '</div>';
     });
-    if (!rows.length) cols += '<p class="gxM" style="text-align:center;padding:28px">Nessuna lezione in questa settimana.</p>';
-    cols += '<div class="gpTot"><div>Posti prenotati</div>' + tot.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>';
+    cols += '</div></div>';
+    if (!any) cols += '<p class="gxM" style="text-align:center;padding:28px">Nessuna lezione in questa settimana.</p>';
+    cols += '<div class="gtTot"><div>Posti prenotati</div>' + tot.map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>';
     var fl = flist(), nof = fl.length < 2;
     var opts = '<option value="all">Tutti</option>' + fl.map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('');
     var legend = fl.map(function (k2) { return k2[0] === 'pt' ? '<u class="c4"></u>Personal' : '<u class="' + (ck(k2[0]) === 'hyrox' ? 'c2' : ck(k2[0]) === 'pilates' ? 'c3' : 'c1') + '"></u>' + k2[1]; }).join('');
-    body.innerHTML = '<div class="week-wrap"><div class="wkNew">' + (nof ? '' : '<div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti']].concat(fl).map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg">' + legend + '</span></div>') + '<div class="wkMain"><div class="wkScroll gwkScroll"><div class="gpw">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew">' + (nof ? '' : '<div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti']].concat(fl).map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + k2[1] + '</button>'; }).join('') + '<span class="gkLeg">' + legend + '</span></div>') + '<div class="wkMain"><div class="wkScroll gwkScroll"><div class="gpw gtW">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
     var grid = body.querySelector('.gpw'), side = body.querySelector('.wkSide');
     function drawSide() {
       var b = sideBody(S.sel, true);
@@ -419,8 +435,8 @@
       if (ev.target.closest('.gNewB')) openNew();
     });
     grid.addEventListener('click', function (ev) {
-      var p = ev.target.closest('.gpC');
-      var x = ev.target.closest('.gpDh,.gpCell');
+      var p = ev.target.closest('.gtB');
+      var x = ev.target.closest('.gtDh,.gtCol');
       if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
       if (x) { var dd2 = addDays(a, +x.dataset.i); S.sel = dd2; S.anchor = dd2; S.view = 'day'; S.wkOpen = false; root.classList.remove('wkOpen'); render(); }
     });

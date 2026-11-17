@@ -435,3 +435,35 @@
   :root:root:root:root:root .gym .gcx .controls{padding-top:10px!important}
   :root:root:root:root:root:root body.mnAOn .gymTopRange,:root:root:root:root:root:root body.mnGOn .gymTopRange{display:none!important}
 }
+
+/* Settimana a griglia oraria (iPad / desktop) */
+.gcx .gtW{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:10px 12px 8px;min-width:0}
+.gcx .gtHd,.gcx .gtTot{display:grid;grid-template-columns:48px repeat(7,minmax(0,1fr));align-items:center}
+.gcx .gtHd{position:sticky;top:0;z-index:4;background:var(--card);padding-bottom:8px}
+.gcx .gtDh{all:unset;box-sizing:border-box;cursor:pointer;margin:0 3px;padding:9px 2px;border-radius:12px;background:var(--card2);color:var(--ink);display:flex;justify-content:center;align-items:baseline;gap:6px}
+.gcx .gtDh .dn{font:700 .68rem var(--fb);letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.gcx .gtDh .dd{font:800 1.15rem/1.1 var(--fd)}
+.gcx .gtDh.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.gcx .gtDh.today{background:var(--accent);color:var(--on-accent,#fff)}
+.gcx .gtBody{position:relative;display:grid;grid-template-columns:48px 1fr}
+.gcx .gtHrs{position:relative}
+.gcx .gtHrs div{position:absolute;left:0;right:0}
+.gcx .gtHrs span{position:absolute;top:-7px;left:0;font:700 .72rem var(--fb);color:var(--muted)}
+.gcx .gtCols{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background-image:repeating-linear-gradient(to bottom,color-mix(in srgb,var(--ink) 14%,var(--line2)) 0 1px,transparent 1px 58px)}
+.gcx .gtCol{position:relative;border-left:1px solid color-mix(in srgb,var(--ink) 14%,var(--line2));cursor:pointer;min-width:0}
+.gcx .gtCol.tod{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.gcx .gtCol.closed{background:color-mix(in srgb,var(--muted) 8%,transparent)}
+.gcx .gtNow{position:absolute;left:0;right:0;height:2px;background:var(--danger);z-index:2;pointer-events:none}
+.gcx .gtB{all:unset;box-sizing:border-box;position:absolute;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:4px 8px;border-radius:9px;border-left:4px solid var(--cc,var(--accent));background:color-mix(in srgb,var(--cc,var(--accent)) 18%,var(--card));color:var(--ink);z-index:1}
+.gcx .gtB b{font:800 .82rem/1.15 var(--fd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.gcx .gtS{font:700 .7rem var(--fb);color:var(--muted);display:flex;gap:6px;white-space:nowrap}
+.gcx .gtS em{font-style:normal;color:var(--ink)}
+.gcx .gtB.full .gtS{color:var(--danger)}
+.gcx .gtB.past{opacity:.5}.gcx .gtB.off{opacity:.45}
+.gcx .gtP{display:block;height:4px;border-radius:9px;background:color-mix(in srgb,var(--ink) 14%,transparent);overflow:hidden;margin-top:2px}
+.gcx .gtP u{display:block;height:100%;background:var(--cc);text-decoration:none}
+.gcx .gtB.gpc-pt{border:1.5px solid #C9A24B;border-left-width:4px;background:color-mix(in srgb,#C9A24B 16%,var(--card))}
+.gcx .gtB.gpc-pt::after{display:none}
+.gcx .gtTot{border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.gcx .gtTot div{font:800 .66rem var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gcx .gtTot span{text-align:center;font:800 .86rem var(--fd);color:var(--ink)}
