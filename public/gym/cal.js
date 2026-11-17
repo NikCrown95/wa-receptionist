@@ -234,10 +234,10 @@
   D+" .gdNow i{flex:1;height:2px;background:#F43F5E;margin-left:4px}"
   ].join('\n'); document.head.appendChild(st); })();
   (function () { if (document.getElementById('gkSp2')) return; var st = document.createElement('style'); st.id = 'gkSp2'; var D = "html:not([data-theme='light']) .gcx.gcx.gcx .gdSp"; st.textContent = [
-  D+"{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;padding:14px 18px 120px;align-items:start}",
+  D+"{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;padding:14px 0 120px;align-items:start;position:relative;left:50%;width:calc(100vw - 40px);max-width:1400px;transform:translateX(-50%)}",
   D+" .gdLh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}",
   D+" .gdDl{font:700 .78rem var(--fb);letter-spacing:.06em;text-transform:uppercase;color:#94A3B8}",
-  D+" .gdCnt{margin-left:10px;padding:3px 12px;border-radius:999px;background:rgba(42,179,177,.14);border:1px solid rgba(42,179,177,.3);color:#2AB3B1;font:600 .78rem var(--fb)}",
+  D+" .gdLh>div{display:flex;align-items:center;white-space:nowrap}",D+" .gdCnt{margin-left:10px;white-space:nowrap;padding:3px 12px;border-radius:999px;background:rgba(42,179,177,.14);border:1px solid rgba(42,179,177,.3);color:#2AB3B1;font:600 .78rem var(--fb)}",
   D+" .gdPillT{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;background:#10181D;border:1px solid #203039;font:500 .8rem var(--fb);color:#CBD5E1;white-space:nowrap}",
   D+" .gdPillT u{width:8px;height:8px;border-radius:50%;background:#2AB3B1}",
   D+" .gdLs{border-radius:16px;overflow:hidden;background:#0D161B;border:1px solid #203039}",
@@ -254,8 +254,8 @@
   D+" .gdCp.warn{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.4);color:#FCD34D}",
   D+" .gdCp.bad{background:rgba(244,63,94,.14);border-color:rgba(244,63,94,.4);color:#FB7185}",
   D+" .gdCp.off{background:#1E293B;border-color:#2B3A47;color:#94A3B8}",
-  D+" .gdB{display:block;width:100%;height:7px;border-radius:99px;background:rgba(0,0,0,.35);overflow:hidden}",
-  D+" .gdB i{display:block;height:100%;border-radius:99px;background:var(--cc)}",
+  D+" .gdBar{display:block;width:100%;height:7px;border-radius:99px;background:rgba(0,0,0,.35);overflow:hidden}",
+  D+" .gdBar i{display:block;height:100%;border-radius:99px;background:var(--cc)}",
   D+" .gdFr{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:26px;padding:0 22px;height:56px;border-top:1px solid #1B2830}",
   D+" .gdFr b{font:600 .95rem var(--fb);color:#64748B;min-width:52px}",
   D+" .gdFr span{font:500 .92rem var(--fb);color:#475569}",
@@ -268,8 +268,8 @@
   D+" .gdKt{display:flex;justify-content:space-between;align-items:center;font:500 .88rem var(--fb);color:#94A3B8}",
   D+" .gdKt u,"+D+" .gdPr u.dot{width:9px;height:9px;border-radius:50%;background:#2AB3B1}",
   D+" .gdKt u.ok{background:#34D399}"+D+" .gdKt u.warn{background:#FBBF24}"+D+" .gdKt u.bad{background:#F43F5E}"+D+" .gdKt u.info{background:#38BDF8}",
-  D+" .gdKb{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:10px}",
-  D+" .gdKb b{font:800 2.1rem/1 var(--fd);color:#fff}",
+  D+" .gdKb{display:flex;flex-direction:column;gap:6px;margin-top:10px}",
+  D+" .gdKb b{font:800 2.2rem/1 var(--fd);color:#fff;white-space:nowrap}",
   D+" .gdKb em{font:600 .82rem var(--fb);font-style:normal;color:#94A3B8}",
   D+" .gdKb em.ok{color:#34D399}"+D+" .gdKb em.warn{color:#FBBF24}"+D+" .gdKb em.bad{color:#FB7185}"+D+" .gdKb em.info{color:#38BDF8}",
   D+" .gdPn{border-radius:18px;background:#10181D;border:1px solid #203039;overflow:hidden}",
@@ -291,7 +291,7 @@
   D+" .gdCk .av{text-decoration:none;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:#1E293B;color:#CBD5E1;font:700 .82rem var(--fb);flex:0 0 auto}",
   D+" .gdCk small{display:inline-block;margin-top:5px;font:600 .72rem var(--fb);padding:2px 9px;border-radius:7px}",
   D+" .gdCk small.ok{background:rgba(52,211,153,.14);color:#34D399;border:1px solid rgba(52,211,153,.35)}"+D+" .gdCk small.warn{background:rgba(251,191,36,.14);color:#FBBF24;border:1px solid rgba(251,191,36,.35)}"+D+" .gdCk small.bad{background:rgba(244,63,94,.14);color:#FB7185;border:1px solid rgba(244,63,94,.35)}",
-  D+" .gdCb{all:unset;cursor:pointer;box-sizing:border-box;padding:0 16px;height:42px;line-height:42px;border-radius:12px;border:1px solid #2B3A47;color:#E2E8F0;font:600 .9rem var(--fb);white-space:nowrap}",
+  D+" .gdCk b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",D+" .gdCb{all:unset;cursor:pointer;box-sizing:border-box;padding:0 14px;height:42px;line-height:42px;border-radius:12px;border:1px solid #2B3A47;color:#E2E8F0;font:600 .9rem var(--fb);white-space:nowrap}",
   D+" .gdCb.on{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.45);color:#34D399}",
   "@media(max-width:1000px){"+D+"{grid-template-columns:1fr}"+D+" .gdCr{min-width:120px}}"
   ].join('\n'); document.head.appendChild(st); })();
@@ -681,7 +681,7 @@
       if (it.s) {
         var q = it.s, pc = Math.min(100, Math.round(q.taken / q.capacity * 100)), full = q.taken >= q.capacity, lab = q.taken + '/' + q.capacity + (full ? ' · Piena' : pc >= 80 ? ' · Quasi piena' : '');
         h = '<button type="button" class="gdCard' + (isEnded(d, q.time, q.duration_min) ? ' past' : '') + (q.cancelled ? ' off' : '') + hlCls(q.time, q.course.name) + '" data-sess="' + q.schedule_id + '" data-date="' + d + '" style="--cc:' + col(q) + '"><span class="gdCl"><span class="gdCt"><b>' + q.time + '</b><i>– ' + endT(q.time, q.duration_min) + '</i></span><span class="gdCn"><u></u>' + esc(q.course.name) + '</span></span><span class="gdCr">' +
-          (q.cancelled ? '<span class="gdCp off">Annullata</span>' : '<span class="gdCp' + (full ? ' bad' : pc >= 80 ? ' warn' : '') + '">' + lab + '</span><span class="gdB"><i style="width:' + pc + '%"></i></span>') + '</span></button>';
+          (q.cancelled ? '<span class="gdCp off">Annullata</span>' : '<span class="gdCp' + (full ? ' bad' : pc >= 80 ? ' warn' : '') + '">' + lab + '</span><span class="gdBar"><i style="width:' + pc + '%"></i></span>') + '</span></button>';
       } else {
         var r = it.pt;
         h = '<button type="button" class="gdCard pt' + (isEnded(d, r.time, 60) ? ' past' : '') + hlCls(r.time, 'Personal 1:1') + '" data-ptb="' + r.time + '" data-date="' + d + '" style="--cc:#C9A24B"><span class="gdCl"><span class="gdCt"><b>' + r.time + '</b><i>– ' + endT(r.time, 60) + '</i></span><span class="gdCn"><u></u>' + esc(r.name || 'Personal') + '</span></span><span class="gdCr"><span class="gdCp pt">Personal 1:1</span></span></button>';
@@ -691,12 +691,12 @@
     freeRows(hi);
     var listL = '';
     rowsL.forEach(function (x) { if (isT && !nowDone && x.st > nowMin()) { listL += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; } listL += x.h; });
-    var left = '<div class="gdLh"><div><span class="gdDl">Palinsesto · ' + fmtLong(d) + '</span><span class="gdCnt">' + live.length + (live.length === 1 ? ' lezione' : ' lezioni') + '</span></div><span class="gdPillT"><u></u>Timeline continua (' + hhmm(lo) + ' – ' + hhmm(hi) + ')</span></div><div class="gdLs">' + listL + '</div>';
+    var left = '<div class="gdLh"><div><span class="gdDl">Palinsesto</span><span class="gdCnt">' + live.length + (live.length === 1 ? ' lezione' : ' lezioni') + '</span></div><span class="gdPillT"><u></u>Timeline continua (' + hhmm(lo) + ' – ' + hhmm(hi) + ')</span></div><div class="gdLs">' + listL + '</div>';
     // ---- destra: numeri
     var act = mem.filter(function (m) { return m.status && (m.status.s === 'ok' || m.status.s === 'warn'); }).length, soonN = mem.filter(function (m) { return m.status && m.status.s === 'warn'; }).length, badN = mem.filter(function (m) { return m.status && m.status.s === 'bad'; }).length;
     var tot = live.reduce(function (n, x) { return n + x.taken; }, 0);
     var tile = function (l, v, c, cap) { return '<div class="gdK"><div class="gdKt"><span>' + l + '</span><u class="' + c + '"></u></div><div class="gdKb"><b>' + v + '</b><em class="' + c + '">' + cap + '</em></div></div>'; };
-    var tiles = '<div class="gdKs">' + tile('Iscritti attivi', act, 'ok', 'su ' + mem.length) + tile('In scadenza', soonN, 'warn', 'da rinnovare') + tile('Scaduti', badN, 'bad', 'da contattare') + tile('Oggi', live.length + (live.length === 1 ? ' lezione' : ' lezioni'), 'info', tot + ' iscritti') + '</div>';
+    var tiles = '<div class="gdKs">' + tile('Iscritti attivi', act, 'ok', 'su ' + mem.length) + tile('In scadenza', soonN, 'warn', 'da rinnovare') + tile('Scaduti', badN, 'bad', 'da contattare') + tile('Lezioni oggi', live.length, 'info', tot + ' iscritti') + '</div>';
     // da verificare
     var todo = [];
     mem.forEach(function (m) {
