@@ -405,3 +405,6 @@
 .gxStepBox[hidden]{display:none}
 .gxStNav{display:flex;gap:10px;margin-top:16px}
 .gxStNav .gxBtn{flex:1}
+/* Nuovo iscritto / modifica: la scheda parte in alto, così la tastiera non la copre */
+.gxShade:has(.gxSheet.gxMf){align-items:flex-start;padding:max(16px,env(safe-area-inset-top)) 12px 12px}
+.gxSheet.gxMf{border-radius:24px;max-height:calc(100% - 28px);padding-bottom:22px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
