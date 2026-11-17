@@ -311,5 +311,6 @@ body:has(#avLayer:not([hidden])) #fabNew{display:none!important}
   .avWz .wzD{aspect-ratio:auto!important;height:56px!important;min-height:0!important;font-size:1.05rem}
   .avWz .wzDw{font-size:.82rem;padding:4px 0 6px}
   .avWz .wzCalH{font-size:1.05rem}
-  .avWz .wzHrs{max-width:560px;margin-left:auto;margin-right:auto}
+  .avWz .wzHrs{width:100%;max-width:860px;box-sizing:border-box;margin-left:auto;margin-right:auto;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+  .avWz .wzHrs button{min-height:68px;font-size:1.2rem;border-radius:14px}
 }
