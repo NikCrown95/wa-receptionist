@@ -1055,7 +1055,7 @@
       }
       var hours = (st.pt_hours || []).slice(), ch = el('div', 'gxChips');
       var c3 = OF().pt ? rcard('Ore del Personal 1:1', 'Scegli in quali ore gli iscritti possono prenotare una lezione individuale.') : null;
-      if (!c2.childNodes.length) c2.remove();
+      if (c2.childNodes.length <= 1) c2.remove();
       for (var hh = 7; hh <= 21; hh++) {
         (function (t) { var b = el('button', 'gxCp', t); b.type = 'button'; function paint() { b.setAttribute('aria-pressed', hours.indexOf(t) >= 0 ? 'true' : 'false'); } paint(); b.addEventListener('click', function () { var i = hours.indexOf(t); if (i >= 0) hours.splice(i, 1); else hours.push(t); paint(); }); ch.appendChild(b); })(pad(hh) + ':00');
       }
