@@ -409,7 +409,7 @@
       items[k] = L;
       var pb = ptStats(dd).booked; tot[k] = dd.closed && !pb ? 'Chiuso' : onlyBooked() ? (pb ? String(pb) : '–') : st.n ? st.b + '/' + st.cap : '–';
       var dots = '', seen = {}; L.forEach(function (x) { var c = x.cat === 'pt' ? '#C9A24B' : x.col; if (!seen[c]) { seen[c] = 1; dots += '<u style="background:' + c + '"></u>'; } });
-      heads += '<button type="button" class="gtDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span><span class="gkDots">' + dots + '</span></button>';
+      heads += '<button type="button" class="gtDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
     });
     var cols = '<div class="gkHd">' + heads + '</div><div class="gkBody">';
     days.forEach(function (dd, k) {
