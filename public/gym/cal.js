@@ -174,6 +174,8 @@
   D+" .gdBc{gap:8px}",
   D+" .gdS{padding:7px 2px}",
   D+" .gdS b{font-size:1.05rem}",
+  D+" .gkCl{align-items:stretch;justify-content:flex-start;padding-top:0;padding-bottom:0}",
+  D+" .gkClI{position:sticky;top:calc(var(--gkhh,70px) + 16px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:14px 4px}",
   D+" .gcNowbar{display:flex;align-items:center;gap:8px;margin:2px 0 2px 124px;font:600 .75rem var(--fb);color:#F43F5E}",
   D+" .gcNowbar i{flex:1;height:1px;background:#F43F5E}",
   "@media(max-width:700px){"+D+" .gdB{grid-template-columns:1fr;gap:8px}"+D+" .gcNowbar{margin-left:0}}"
@@ -561,7 +563,7 @@
     var h = '<div class="gkHd"><div class="gkFh">' + (byBand ? 'Fascia oraria' : 'Corso') + '</div>' + heads + '</div><div class="gkBody gkCb" style="--rows:' + order.length + '">';
     order.forEach(function (key) {
       var r = rows[key], n = 0; r.d.forEach(function (q) { n += q.length; });
-      h += '<div class="gkCl' + (byBand ? ' band' : '') + '" style="--cc:' + r.col + '">' + (byBand ? BI[key] : '') + '<b>' + (byBand ? BN[key] : esc(key)) + '</b><span>' + (byBand ? hhmm(r.lo) + ' – ' + hhmm(r.hi) : n + (n === 1 ? ' lezione' : ' lezioni')) + '</span></div>';
+      h += '<div class="gkCl' + (byBand ? ' band' : '') + '" style="--cc:' + r.col + '"><div class="gkClI">' + (byBand ? BI[key] : '') + '<b>' + (byBand ? BN[key] : esc(key)) + '</b><span>' + (byBand ? hhmm(r.lo) + ' – ' + hhmm(r.hi) : n + (n === 1 ? ' lezione' : ' lezioni')) + '</span></div></div>';
       r.d.forEach(function (q, k) {
         h += '<div class="gkCc' + (days[k].date === S.sel ? ' sel' : '') + (days[k].date === today() ? ' tod' : '') + (days[k].closed ? ' cls' : '') + '" data-i="' + k + '">' + (q.length ? '' : '<span class="gkEm">' + (days[k].closed ? 'Chiuso' : byBand ? 'Nessun corso' : '') + '</span>') + q.sort(function (x, y) { return x.st - y.st; }).map(function (x) {
           var cc = x.cat === 'pt' ? '#C9A24B' : x.col;
@@ -652,7 +654,7 @@
     [].forEach.call(bar.querySelectorAll('[data-wm]'), function (bt) { bt.onclick = function () { S.wm = bt.dataset.wm; render(); }; });
     [].forEach.call(bar.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
     (function () {
-      var tg = body.querySelector('.gkTg'), hd = body.querySelector('.gkHd'), tt = body.querySelector('.gkTot');
+      var tg = body.querySelector('.gkTg'), hd = body.querySelector('.gkHd'), tt = body.querySelector('.gkTot'); if (hd) body.style.setProperty('--gkhh', hd.offsetHeight + 'px');
       if (scw) { var rc = scw.getBoundingClientRect(); scw.style.setProperty('height', Math.max(300, window.innerHeight - rc.top - 20) + 'px', 'important'); }
       var cb = body.querySelector('.gkCb');
       if (cb && scw) { var av2 = scw.clientHeight - (hd ? hd.offsetHeight : 0) - (tt ? tt.offsetHeight : 0) - 28, nr = cb.querySelectorAll('.gkCl').length || 1; cb.style.minHeight = '0px'; return; }
