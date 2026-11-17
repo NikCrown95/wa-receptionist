@@ -452,16 +452,16 @@
 
   // ---------- scelta dell'iscritto ----------
   function memberChip(m) { return '<span class="gcChip ' + (m.status.s === 'none' ? 'none' : m.status.s) + '">' + esc(m.status.label) + '</span>'; }
-  function pickMember(title, reason, onPick, onBack) {
-    if (!G.S.data) { G.load().then(function () { pickMember(title, reason, onPick, onBack); }).catch(function (e) { G.toast(e.message, 'bad'); }); return; }
+  function pickMember(title, reason, onPick, onBack, only, emptyMsg) {
+    if (!G.S.data) { G.load().then(function () { pickMember(title, reason, onPick, onBack, only, emptyMsg); }).catch(function (e) { G.toast(e.message, 'bad'); }); return; }
     var q = '';
     G.sheet(title, function (w, close) {
       var inp = G.inp('search', '', 'Cerca per nome o telefono'); inp.className = 'gxSearch'; w.appendChild(inp);
       var box = el('div'); w.appendChild(box);
       function draw() {
         box.textContent = '';
-        var L = G.S.data.members.filter(function (m) { return !q || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(q) >= 0; }).slice(0, 40);
-        if (!L.length) box.appendChild(el('p', 'gxM', 'Nessun iscritto trovato.'));
+        var L = G.S.data.members.filter(function (m) { return (!only || only(m)) && (!q || (m.first_name + ' ' + m.last_name + ' ' + m.phone).toLowerCase().indexOf(q) >= 0); }).slice(0, 40);
+        if (!L.length) box.appendChild(el('p', 'gxM', !q && emptyMsg ? emptyMsg : 'Nessun iscritto trovato.'));
         L.forEach(function (m) {
           var rs = reason(m), b = el('button', 'gxCard gxMc'); b.type = 'button'; if (rs) b.style.opacity = '.6';
           b.innerHTML = '<div class="gxRow"><div><b class="gxT">' + esc(m.first_name + ' ' + m.last_name) + '</b><div class="gxM">' + esc(m.phone) + '</div></div>' + memberChip(m) + '</div>' + (rs ? '<div class="gcErr">' + esc(rs) + '</div>' : '');
@@ -543,9 +543,10 @@
   // ---------- Personal 1:1 ----------
   function openPtBook(d, t) {
     if (Date.now() < (window.__liaNoOpen || 0)) return;
+    var hasPt = function (m) { return (m.plans || []).some(function (p) { return p.valid && (p.covers || []).indexOf('personal') >= 0; }); };
     pickMember('Personal 1:1 · ' + fmtShort(d) + ' ' + t, noSub, function (m) {
       G.api({ action: 'pt_book', member_id: m.id, date: d, time: t }).then(function () { G.toast('Personal 1:1 prenotato per ' + m.first_name + ' ' + m.last_name + '.', 'ok'); bust(); refreshMembers(); render(); }).catch(function (e) { G.toast(e.message, 'bad'); });
-    });
+    }, null, hasPt, 'Nessun iscritto con un Piano Personal attivo. Assegnalo dalla scheda dell\'iscritto, in Abbonamenti.');
   }
   function openPtInfo(d, t) {
     if (Date.now() < (window.__liaNoOpen || 0)) return;
@@ -574,7 +575,8 @@
         for (var d = from; d <= to && slots.length < 24; d = addDays(d, 1)) {
           var day = getDay(d); if (!day) continue;
           day.sessions.forEach(function (s) { if (!s.cancelled && !isStarted(d, s.time)) slots.push({ d: d, s: s }); });
-          (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (p.free && !isStarted(d, p.time)) slots.push({ d: d, pt: p }); });
+          var mPt = (m.plans || []).some(function (q) { return q.valid && (q.covers || []).indexOf('personal') >= 0; });
+          (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (mPt && p.free && !isStarted(d, p.time)) slots.push({ d: d, pt: p }); });
         }
         slots.sort(function (a, b) { var ta = a.s ? a.s.time : a.pt.time, tb = b.s ? b.s.time : b.pt.time; return a.d === b.d ? (ta < tb ? -1 : 1) : (a.d < b.d ? -1 : 1); });
         G.sheet(m.first_name + ' ' + m.last_name, function (w, close) {
