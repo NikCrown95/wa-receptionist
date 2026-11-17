@@ -397,3 +397,11 @@
 #panelOther .gxSheet.gxInPane>h3{font-size:1.4rem;margin:0 0 6px}
 #panelOther .gxSheet.gxInPane.gxMf{background:var(--card);color:inherit}
 @media(min-width:900px){#panelOther .stPage[data-st="gx"] .stBack{display:none}}
+
+/* Nuovo iscritto a passi */
+.gxStTx{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9FB6BC;margin:2px 0 8px}
+.gxStBar{height:5px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:14px}
+.gxStBar i{display:block;height:100%;width:25%;border-radius:99px;background:var(--accent,#35A2AD);transition:width .25s}
+.gxStepBox[hidden]{display:none}
+.gxStNav{display:flex;gap:10px;margin-top:16px}
+.gxStNav .gxBtn{flex:1}

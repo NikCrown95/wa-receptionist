@@ -440,20 +440,30 @@
   function memberForm(m) {
     var close0 = sheet(m ? 'Modifica dati' : 'Nuovo iscritto', function (w, close) {
       w.classList.add('gxMf');
+      // Nuovo iscritto: un passo alla volta (Dati, Accesso, Certificato, Pacchetto). Modifica: tutto in una pagina
+      var NS = 4, step = 0, secs = [];
+      function sec(i) { if (m) return w; if (!secs[i]) { secs[i] = el('div', 'gxStepBox'); w.appendChild(secs[i]); } return secs[i]; }
+      var stHd = null, stBar = null;
+      if (!m) {
+        stHd = el('div', 'gxStTx'); stBar = el('div', 'gxStBar'); stBar.appendChild(el('i'));
+        w.appendChild(stHd); w.appendChild(stBar);
+      }
       var f = inp('text', m ? m.first_name : ''), l = inp('text', m ? m.last_name : ''), p = inp('tel', m ? m.phone : ''), cd = inp('text', m ? m.access_code || '' : '');
       cd.setAttribute('autocapitalize', 'off'); cd.setAttribute('autocorrect', 'off'); cd.setAttribute('autocomplete', 'off'); cd.spellcheck = false; cd.maxLength = 20;
-      w.appendChild(el('div', 'gxMfS', 'Dati'));
-      var two = el('div', 'gxTwo'); two.appendChild(field('Nome', f)); two.appendChild(field('Cognome', l)); w.appendChild(two);
-      w.appendChild(field('Telefono', p));
-      w.appendChild(field('Codice di accesso', cd));
-      w.appendChild(el('p', 'gxMfH', 'Lo scegli tu, da 4 a 20 tra lettere e numeri. L\'iscritto lo scrive con nome e cognome per entrare e prenotare.'));
+      sec(0).appendChild(el('div', 'gxMfS', 'Dati dell\'iscritto'));
+      var two = el('div', 'gxTwo'); two.appendChild(field('Nome', f)); two.appendChild(field('Cognome', l)); sec(0).appendChild(two);
+      sec(0).appendChild(field('Telefono', p));
+      if (m) sec(1).appendChild(el('div', 'gxMfS', 'Accesso'));
+      else sec(1).appendChild(el('div', 'gxMfS', 'Come entra l\'iscritto'));
+      sec(1).appendChild(field('Codice di accesso', cd));
+      sec(1).appendChild(el('p', 'gxMfH', 'Lo scegli tu, da 4 a 20 tra lettere e numeri. L\'iscritto lo scrive con nome e cognome per entrare e prenotare.'));
       // certificato medico: il titolare scrive quando è stato fatto; la scadenza è di un anno (modificabile)
-      w.appendChild(el('div', 'gxMfS', 'Certificato medico'));
+      sec(2).appendChild(el('div', 'gxMfS', 'Certificato medico'));
       var mf = inp('date', m && m.medical_from || ''), mu = inp('date', m && m.medical_until || ''), muTouched = !!(m && m.medical_until && m.medical_from && m.medical_until !== plusYear(m.medical_from));
       mf.addEventListener('change', function () { if (!muTouched || !mu.value) { mu.value = mf.value ? plusYear(mf.value) : ''; muTouched = false; } });
       mu.addEventListener('input', function () { muTouched = true; });
-      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); w.appendChild(tw);
-      w.appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.'));
+      var tw = el('div', 'gxTwo'); tw.appendChild(field('Fatto il', mf)); tw.appendChild(field('Scade il', mu)); sec(2).appendChild(tw);
+      sec(2).appendChild(el('p', 'gxMfH', 'Scrivi la data in cui l\'iscritto ha fatto il certificato: la scadenza si calcola da sola (un anno dopo). L\'iscritto la vede nel suo profilo.' + (m ? '' : ' Se non ce l\'ha ancora, lascia vuoto: potrà prenotare solo dopo che lo inserisci.')));
       // pacchetti assegnati subito (solo per un iscritto nuovo): Corsi, Personal oppure entrambi
       var plans = !m && S.data && S.data.plans ? S.data.plans : [], of = OF();
       var byT = { c: plans.filter(function (x) { return planType(x) === 'Corsi'; }), p: plans.filter(function (x) { return planType(x) === 'Personal'; }) };
@@ -463,8 +473,8 @@
       function setPaid(x) { if (x) paid[x.id] = x.price_eur != null ? x.price_eur : ''; }
       setPaid(pick.c); setPaid(pick.p);
       if (!m && S.data) {
-        w.appendChild(el('div', 'gxMfS', 'Pacchetto da assegnare'));
-        var mc = el('div', 'gxChips'); mc.style.marginBottom = '10px'; w.appendChild(mc); w.appendChild(box);
+        sec(3).appendChild(el('div', 'gxMfS', 'Pacchetto da assegnare'));
+        var mc = el('div', 'gxChips'); mc.style.marginBottom = '10px'; sec(3).appendChild(mc); sec(3).appendChild(box);
         var drawPlan = function () {
           mc.innerHTML = '';
           [['c', 'Corsi', canC], ['p', 'Personal', canP], ['e', 'Entrambi', canC && canP], ['n', 'Più tardi', true]].forEach(function (t) {
@@ -492,7 +502,28 @@
         drawPlan();
       }
       var msg = el('div'); w.appendChild(msg);
-      w.appendChild(btn(!m ? 'Salva iscritto' : 'Salva', 'block gxMfGo', function () {
+      function why(t) { msg.className = 'gxWhy'; msg.textContent = t; }
+      function check(i) {
+        if (i === 0) { if (f.value.trim().length < 2 || l.value.trim().length < 2) return 'Scrivi nome e cognome.'; if (p.value.replace(/\D/g, '').length < 6) return 'Scrivi il numero di telefono.'; }
+        if (i === 1 && !/^[A-Za-z0-9]{4,20}$/.test(cd.value.replace(/\s+/g, ''))) return 'Scegli un codice da 4 a 20 tra lettere e numeri, senza spazi o simboli.';
+        if (i === 2 && ((mf.value && !mu.value) || (mu.value && mf.value && mu.value < mf.value))) return 'Controlla le date del certificato.';
+        return '';
+      }
+      var NAMES = ['Dati', 'Accesso', 'Certificato', 'Pacchetto'];
+      var nav = null, bk = null, nx = null;
+      function showStep() {
+        secs.forEach(function (x, i) { if (x) x.hidden = i !== step; });
+        stHd.textContent = 'Passo ' + (step + 1) + ' di ' + NS + ' · ' + NAMES[step]; stBar.firstChild.style.width = ((step + 1) * 100 / NS) + '%';
+        bk.textContent = step ? 'Indietro' : 'Annulla'; nx.textContent = step === NS - 1 ? 'Salva iscritto' : 'Continua';
+        msg.textContent = ''; msg.className = '';
+      }
+      if (!m) {
+        nav = el('div', 'gxStNav'); bk = btn('Annulla', 'ghost', function () { if (step) { step--; showStep(); } else close(); });
+        nx = btn('Continua', 'gxMfGo', function () { var e = check(step); if (e) return why(e); if (step < NS - 1) { step++; showStep(); } else save(nx); });
+        nav.appendChild(bk); nav.appendChild(nx); w.appendChild(nav); showStep();
+        w.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && step < NS - 1) { e.preventDefault(); nx.click(); } });
+      } else w.appendChild(btn('Salva', 'block gxMfGo', function () { save(this); }));
+      function save(btnEl) {
         msg.textContent = ''; msg.className = '';
         var cats = mode === 'e' ? ['c', 'p'] : (mode === 'n' ? [] : [mode]), picks = m ? [] : cats.map(function (k) { return pick[k]; }).filter(Boolean);
         if (!m && cats.some(function (k) { return byT[k].length && !pick[k]; })) { msg.className = 'gxWhy'; msg.textContent = 'Scegli il pacchetto da assegnare, oppure tocca Più tardi.'; return; }
@@ -502,7 +533,7 @@
           var any = picks.length > 0;
           return next.then(function () { toast(any ? (picks.length > 1 ? 'Iscritto e pacchetti salvati.' : 'Iscritto e pacchetto salvati.') : 'Salvato.', 'ok'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); }, function (e) { toast('Iscritto salvato, ma un pacchetto no: ' + e.message, 'bad'); close(); return reload().then(function () { if (!m) { S.mid = j.id; S.tab = 'pren'; renderMem(); } }); });
         }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
-      }));
+      }
     });
   }
   function renewSheet(m) {
