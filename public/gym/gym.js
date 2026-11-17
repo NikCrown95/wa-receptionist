@@ -138,6 +138,15 @@
   var LABELS = { cal: 'Lezioni', clients: 'Iscritti', stats: 'Statistiche', profile: 'Panoramica', other: 'Impostazioni', rent: 'Subaffitto', registry: 'Registro prenotazioni' };
   function setLabel(w) { var l = document.getElementById('sectionLabel'); if (l && LABELS[w]) l.textContent = LABELS[w]; }
   document.addEventListener('lia:section', function (e) { S.section = e.detail; setLabel(e.detail); showSection(e.detail); });
+  // Iscritti (e le altre sezioni): si apre sempre dall'alto, non dal punto in cui eri rimasto
+  function toTop() {
+    try {
+      var n = xMem && xMem.parentNode; while (n && n !== document.body) { if (n.scrollTop) n.scrollTop = 0; n = n.parentNode; }
+      var ph = document.querySelector('.tabPanels'); if (ph) ph.scrollTop = 0;
+      window.scrollTo(0, 0); if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+    } catch (e) { }
+  }
+  document.addEventListener('lia:section', function (e) { if (e.detail === 'clients') { toTop(); setTimeout(toTop, 60); setTimeout(toTop, 250); setTimeout(toTop, 600); } });
 
   // ---------- pannelli ----------
   var pCal = document.getElementById('panelCal'), pCli = document.getElementById('panelClients'), pSt = document.getElementById('panelStats');
