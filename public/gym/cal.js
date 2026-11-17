@@ -234,7 +234,7 @@
   D+" .gdNow i{flex:1;height:2px;background:#F43F5E;margin-left:4px}"
   ].join('\n'); document.head.appendChild(st); })();
   (function () { if (document.getElementById('gkSp')) return; var st = document.createElement('style'); st.id = 'gkSp'; var D = "html:not([data-theme='light']) .gcx.gcx.gcx .gdSp"; st.textContent = [
-  D+"{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;padding:8px 14px 110px;align-items:start}",
+  D+"{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;padding:8px 14px 110px;align-items:start}",
   D+" .gdKs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}",
   D+" .gdK{padding:10px 12px;border-radius:12px;background:#10181D;border:1px solid #203039}",
   D+" .gdK span{display:block;font:500 .72rem var(--fb);color:#94A3B8}",
@@ -254,14 +254,14 @@
   D+" .gdCp{justify-self:end;font:700 .74rem var(--fb);padding:3px 9px;border-radius:999px;background:#152026;border:1px solid #203039;color:#CBD5E1}",
   D+" .gdCp.warn{color:#FCD34D;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.12)}",
   D+" .gdCp.bad{color:#FB7185;border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.12)}",
-  D+" .gdDc{position:sticky;top:calc(var(--gkhh,70px) + 16px);border-radius:16px;background:#10181D;border:1px solid #203039;padding:18px;display:flex;flex-direction:column;gap:14px}",
+  D+" .gdDc{display:flex;flex-direction:column;gap:12px}",D+" .gdDc .gdPr{background:#10181D}",
   D+" .gdDk{display:inline-block;padding:2px 10px;border-radius:999px;background:color-mix(in srgb,var(--cc) 22%,transparent);color:#fff;font:600 .7rem var(--fb)}",
   D+" .gdDh h3{margin:8px 0 2px;font:800 1.3rem var(--fd);color:#fff}",
   D+" .gdCap{margin-top:14px;padding:12px 14px;border-radius:12px;background:#152026;border:1px solid #203039}",
   D+" .gdCr{display:flex;justify-content:space-between;font:500 .78rem var(--fb);color:#94A3B8}",
   D+" .gdCr b{font:700 .9rem var(--fb);color:#fff}",
   D+" .gdDl{font:700 .72rem var(--fb);letter-spacing:.06em;text-transform:uppercase;color:#94A3B8}",
-  D+" .gdPl{display:flex;flex-direction:column;gap:6px;max-height:38vh;overflow:auto}",
+  D+" .gdPl{display:flex;flex-direction:column;gap:6px}",D+" .gdKs4{grid-template-columns:repeat(2,1fr)}",D+" .gdPr u.bad,"+D+" .gdPr u.warn{width:10px;height:10px;border-radius:50%;background:#F43F5E;flex:0 0 auto}",D+" .gdPr u.warn{background:#FBBF24}",D+" .gdPr span{flex:1;min-width:0}",D+" .gdPr small{display:block;font:500 .78rem var(--fb);color:#94A3B8}",D+" .gdPr em{font:500 .72rem var(--fb);color:#64748B;font-style:normal}",
   D+" .gdPr{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:#152026;border:1px solid #203039}",
   D+" .gdPr u{text-decoration:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#1E293B;color:#2AB3B1;font:700 .72rem var(--fb)}",
   D+" .gdPr b{font:600 .9rem var(--fb);color:#E2E8F0}",
@@ -644,28 +644,29 @@
     var pk = keyOf(pick), tot = live.reduce(function (n, x) { return n + x.taken; }, 0), nowDone = false;
     var kp = function (l, v) { return '<div class="gdK"><span>' + l + '</span><b>' + v + '</b></div>'; };
     var nextT = (items.filter(function (it) { return !isStarted(d, it.t); })[0] || {}).t;
-    var left = '<div class="gdKs">' + kp('Lezioni', live.length) + kp('Iscritti', tot) + kp(nextT ? 'Prossima' : 'Stato', nextT || 'Concluso') + '</div><div class="gdLs">';
+    var left = '<div class="gdDl" style="margin:2px 2px 8px">Palinsesto · ' + fmtLong(d) + '</div><div class="gdLs">';
     items.forEach(function (it) {
       var cc = it.s ? col(it.s) : '#C9A24B', nm = it.s ? it.s.course.name : (it.pt.name || 'Personal'), over, chip;
       if (isT && !nowDone && mins(it.t) > nowMin()) { left += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; }
       if (it.s) { var pc = Math.min(100, Math.round(it.s.taken / it.s.capacity * 100)); over = it.s.cancelled ? '<span class="gdX">Annullata</span>' : '<span class="gdB"><i style="width:' + pc + '%"></i></span>'; chip = it.s.cancelled ? '' : '<span class="gdCp' + (it.s.taken >= it.s.capacity ? ' bad' : pc >= 80 ? ' warn' : '') + '">' + it.s.taken + '/' + it.s.capacity + '</span>'; }
       else { over = '<span class="gdX">Personal 1:1</span>'; chip = ''; }
       var past = it.s ? isEnded(d, it.s.time, it.s.duration_min) : isEnded(d, it.pt.time, 60);
-      left += '<button type="button" class="gdRw' + (keyOf(it) === pk ? ' on' : '') + (past ? ' past' : '') + '" data-pick="' + keyOf(it) + '" style="--cc:' + cc + '"><b class="gdT">' + it.t + '</b><span class="gdNm"><u></u>' + esc(nm) + '</span>' + over + chip + '</button>';
+      left += '<button type="button" class="gdRw' + (keyOf(it) === pk ? ' on' : '') + (past ? ' past' : '') + '" ' + (it.s ? 'data-sess="' + it.s.schedule_id + '"' : 'data-ptb="' + it.pt.time + '"') + ' data-date="' + d + '" style="--cc:' + cc + '"><b class="gdT">' + it.t + '</b><span class="gdNm"><u></u>' + esc(nm) + '</span>' + over + chip + '</button>';
     });
     if (isT && !nowDone) left += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>';
     left += '</div>';
-    var det;
-    if (pick.s) {
-      var q = pick.s, at = q.attendees || [], free = q.capacity - q.taken, pc2 = Math.min(100, Math.round(q.taken / q.capacity * 100));
-      det = '<div class="gdDh" style="--cc:' + col(q) + '"><span class="gdDk">' + (isEnded(d, q.time, q.duration_min) ? 'Conclusa' : isStarted(d, q.time) ? 'In corso' : 'In programma') + '</span><h3>' + esc(q.course.name) + '</h3><div class="gxM">' + q.time + ' – ' + endT(q.time, q.duration_min) + '</div>' +
-        (q.cancelled ? '<div class="gdX" style="margin-top:12px">Lezione annullata</div>' : '<div class="gdCap"><div class="gdCr"><b>' + q.taken + ' / ' + q.capacity + ' iscritti</b><span>' + (free > 0 ? free + ' posti liberi' : 'Completa') + '</span></div><span class="gdB big"><i style="width:' + pc2 + '%"></i></span></div>') + '</div>' +
-        '<div class="gdDl">Iscritti</div><div class="gdPl">' + (at.length ? at.map(function (a) { var nm = String(a.name || '?').split(' '); return '<div class="gdPr"><u>' + esc((nm[0] || '?').charAt(0) + (nm[1] || '').charAt(0)) + '</u><b>' + esc(a.name) + '</b></div>'; }).join('') : '<p class="gxM" style="margin:0">Nessun iscritto ancora.</p>') + '</div>' +
-        '<button type="button" class="gdGo" data-sess="' + q.schedule_id + '" data-date="' + d + '">Gestisci lezione</button>';
-    } else {
-      var r = pick.pt;
-      det = '<div class="gdDh" style="--cc:#C9A24B"><span class="gdDk">Personal 1:1</span><h3>' + esc(r.name || 'Personal') + '</h3><div class="gxM">' + r.time + ' – ' + endT(r.time, 60) + '</div>' + (r.phone ? '<div class="gxM" style="margin-top:6px">' + esc(r.phone) + '</div>' : '') + '</div><button type="button" class="gdGo" data-ptb="' + r.time + '" data-date="' + d + '">Apri sessione</button>';
-    }
+    var mem = (G.S.data && G.S.data.members) || [], todayS = (G.S.data && G.S.data.today) || today(), noC = document.body.classList.contains('gymNoCls');
+    var act = mem.filter(function (m) { return m.status && (m.status.s === 'ok' || m.status.s === 'warn'); }).length, soonN = mem.filter(function (m) { return m.status && m.status.s === 'warn'; }).length, badN = mem.filter(function (m) { return m.status && m.status.s === 'bad'; }).length;
+    var todo = [];
+    mem.forEach(function (m) {
+      var nm = m.first_name + ' ' + m.last_name;
+      if (m.status && m.status.s === 'bad') todo.push({ r: 0, nm: nm, t: m.status.detail || 'Scaduto', k: 'bad', ic: 'Abbonamento' });
+      else if (m.status && m.status.s === 'warn') todo.push({ r: 1, nm: nm, t: m.status.detail || 'In scadenza', k: 'warn', ic: 'Abbonamento' });
+      if (!noC && m.medical_until) { var n = Math.round((parse(m.medical_until) - parse(todayS)) / 864e5); if (n < 0) todo.push({ r: 2, nm: nm, t: 'Certificato scaduto', k: 'bad', ic: 'Certificato' }); else if (n <= 30) todo.push({ r: 3, nm: nm, t: 'Certificato scade tra ' + n + (n === 1 ? ' giorno' : ' giorni'), k: 'warn', ic: 'Certificato' }); }
+    });
+    todo.sort(function (x, y) { return x.r - y.r || (x.nm < y.nm ? -1 : 1); });
+    var det = '<div class="gdKs gdKs4">' + kp('Iscritti attivi', act) + kp('In scadenza', soonN) + kp('Scaduti', badN) + kp('Oggi', live.length + (live.length === 1 ? ' lezione' : ' lezioni')) + '</div>' +
+      '<div class="gdDl">Da verificare' + (todo.length ? ' · ' + todo.length : '') + '</div><div class="gdPl">' + (todo.length ? todo.slice(0, 12).map(function (x) { return '<div class="gdPr"><u class="' + x.k + '"></u><span><b>' + esc(x.nm) + '</b><small>' + esc(x.t) + '</small></span><em>' + x.ic + '</em></div>'; }).join('') + (todo.length > 12 ? '<p class="gxM" style="margin:4px 0 0">e altri ' + (todo.length - 12) + '…</p>' : '') : '<p class="gxM" style="margin:0">Tutto in ordine: nessun abbonamento o certificato da controllare.</p>') + '</div>';
     return '<div class="gcAg gdSp"><div class="gdLc">' + left + '</div><div class="gdDc">' + det + '</div></div>';
   }
 
