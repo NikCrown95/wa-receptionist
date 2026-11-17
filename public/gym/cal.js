@@ -289,7 +289,7 @@
     ensure(r.from, r.to, r.full, function () {
       prefetchNear(); toggleFab();
       var body = document.getElementById('gcBody'); if (!body) return;
-      if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayStrip() + dayHTML() + '</div>'; bindBody(body); bindStrip(body); dayFocus(body); return; }
+      if (S.view === 'day') { body.innerHTML = '<div class="gcal">' + dayHTML() + '</div>'; bindBody(body); bindStrip(body); dayFocus(body); return; }
       if (S.view === 'week') {
         if (phone()) { body.innerHTML = '<div class="gcal">' + weekPhone() + '</div>'; bindBody(body); }
         else { weekDraw(body); }
@@ -544,7 +544,7 @@
         var p = it.pt, booked = !p.free;
         card = '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + (booked ? hlCls(p.time, 'Personal 1:1') : '') + '" style="--cc:#C9A24B"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
       }
-      if (bi !== curB) { if (curB !== -1) out += '</div></div>'; out += nowH; nowH = ''; out += '<div class="gdB"><div class="gdBl"><b>' + BNm[bi] + '</b><span>' + hhmm(mins(bands[bi].lo)) + ' – ' + hhmm(mins(bands[bi].hi)) + '</span></div><div class="gdBc">'; curB = bi; }
+      if (bi !== curB) { if (curB !== -1) out += '</div></div>'; out += nowH; nowH = ''; out += '<div class="gdB"><div class="gdBl"><b>' + BNm[bi] + '</b><span>' + (bands[bi].lo === bands[bi].hi ? hhmm(mins(bands[bi].lo)) : hhmm(mins(bands[bi].lo)) + ' – ' + hhmm(mins(bands[bi].hi))) + '</span></div><div class="gdBc">'; curB = bi; }
       out += nowH + card;
     });
     if (curB !== -1) out += '</div></div>';
