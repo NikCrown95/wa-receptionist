@@ -388,3 +388,6 @@
 .mxD .mvCode small{display:block;font-size:.68rem;font-weight:800;letter-spacing:.1em;color:#9FB0BA}
 .mxD .mvCode b{display:block;margin-top:3px;font-size:1.05rem;font-weight:700;letter-spacing:.04em}
 .mxD .mvCode .cg{font-size:.82rem;font-weight:700;color:#7FDCDC}
+
+.gxShade:has(.gxCtr){align-items:center;padding:12px}
+.gxSheet.gxCtr{border-radius:26px;max-height:calc(100% - 24px);padding-bottom:22px;box-shadow:0 24px 70px rgba(0,0,0,.5)}

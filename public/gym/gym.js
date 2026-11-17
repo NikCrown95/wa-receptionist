@@ -915,6 +915,7 @@
   }
   function sAbb() {
     sheet('Pacchetti', function (w, close) {
+      w.classList.add('gxCtr');
       if (!S.data.plans.length) w.appendChild(el('div', 'gxEmpty', 'Nessun pacchetto. Crea il primo, per esempio Mensile.'));
       S.data.plans.forEach(function (p) { var r = el('div', 'gxLs'), l = el('div'); l.appendChild(el('b', null, p.name + (p.price_eur != null ? ' · ' + eur(p.price_eur) : ''))); l.appendChild(el('div', 'gxM', planType(p) + ' · ' + planSub(p))); r.appendChild(l); r.appendChild(btn('Modifica', 'ghost sm', function () { close(); planForm(p); })); w.appendChild(r); });
       var a = btn('Nuovo pacchetto', 'block', function () { close(); planForm(); }); a.style.marginTop = '8px'; w.appendChild(a);
@@ -922,6 +923,7 @@
   }
   function planForm(p) {
     sheet(p ? 'Modifica pacchetto' : 'Nuovo pacchetto', function (w, close) {
+      w.classList.add('gxCtr');
       var of = OF(), both = (of.cls && of.pt) || (!of.cls && !of.pt), type = p ? (planType(p) === 'Personal' ? 'personal' : 'corsi') : (of.pt && !of.cls ? 'personal' : 'corsi');
       var n = inp('text', p ? p.name : '', type === 'personal' ? 'Personal 10 lezioni' : 'Mensile'), pr = inp('number', p && p.price_eur != null ? p.price_eur : '');
       var ent0 = p ? (p.kind === 'entries' ? p.entries : (p.max_entries || '')) : '', mon0 = p ? (p.months || (p.kind === 'time' && p.days ? Math.max(1, Math.round(p.days / 30)) : '')) : '';
