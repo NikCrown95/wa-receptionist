@@ -122,7 +122,7 @@
   // Filtri della settimana: le categorie dei corsi che la palestra ha davvero (+ Personal se lo offre)
   function flist() {
     var o = G.OF ? G.OF() : { cls: true, pt: true }, seen = {}, out = [];
-    if (o.cls) ((G.S.data && G.S.data.courses) || []).forEach(function (c) { var k = c.category || 'corsi'; if (!seen[k]) { seen[k] = 1; out.push([k, G.cat ? G.cat(k) : k]); } });
+    if (o.cls) ((G.S.data && G.S.data.courses) || []).forEach(function (c) { if (c.category === 'personal') return; if (!seen.corsi) { seen.corsi = 1; out.push(['corsi', 'Corsi']); } });
     if (o.pt) out.push(['pt', 'Personal']);
     return out;
   }
@@ -504,7 +504,7 @@
     days.forEach(function (dd, k) {
       var d = dd.date, st = dayStats(dd), L = [];
       (dd.sessions || []).forEach(function (s) {
-        if (f !== 'all' && s.course.category !== f) return;
+        if (f !== 'all' && (s.course.category === 'personal' ? 'pt' : 'corsi') !== f) return;
         var full = !s.cancelled && s.taken >= s.capacity, du = s.duration_min || 60;
         L.push({ st: mins(s.time), du: du, cat: ck(s.course.category), col: courseCol(s.course.name), name: s.course.name, time: s.time,
           sub: s.cancelled ? 'Annullata' : full ? 'Pieno' : s.taken + '/' + s.capacity, bar: !s.cancelled, pc: s.capacity && !s.cancelled ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0,
