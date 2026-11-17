@@ -182,8 +182,8 @@
   "@media(max-width:700px){"+D+" .gdB{grid-template-columns:1fr;gap:8px}"+D+" .gcNowbar{margin-left:0}}"
   ].join('\n'); document.head.appendChild(st); })();
   (function () { if (document.getElementById('gkTl')) return; var st = document.createElement('style'); st.id = 'gkTl'; var D = "html:not([data-theme='light']) .gcx.gcx.gcx .gdT"; st.textContent = [
-  D+"{padding:6px 8px 110px;max-width:860px;margin:0 auto}",
-  D+" .gdR{display:grid;grid-template-columns:64px 22px minmax(0,1fr);align-items:stretch;gap:0 10px}",
+  D+"{padding:10px 12px 110px}",
+  D+" .gdR{display:grid;grid-template-columns:78px 22px minmax(0,1fr);align-items:stretch;gap:0 10px}",
   D+" .gdTm{padding-top:15px;text-align:right}",
   D+" .gdTm b{display:block;font:800 1.05rem var(--fd);color:#F1F5F9}",
   D+" .gdTm span{display:block;margin-top:2px;font:500 .72rem var(--fb);color:#64748B}",
@@ -192,8 +192,8 @@
   D+" .gdR:first-child .gdRl::before{top:22px}",
   D+" .gdR:last-of-type .gdRl::before{bottom:calc(100% - 22px)}",
   D+" .gdRl i{position:relative;z-index:1;margin-top:17px;width:12px;height:12px;border-radius:50%;background:var(--cc);box-shadow:0 0 0 4px #0A141A}",
-  D+" .gdCd{padding:0 0 14px;min-width:0}",
-  D+" .gdCd .gcAc{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;padding:14px 16px;border-radius:16px;background:#10181D;border:1px solid #203039;transition:border-color .15s,background .15s}",
+  D+" .gdCd{padding:0 0 16px;min-width:0}",D+" .gdPp{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid #1B2830}",D+" .gdP{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 4px;border-radius:999px;background:#152026;border:1px solid #203039;font:500 .8rem var(--fb);color:#E2E8F0}",D+" .gdP u{text-decoration:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--cc) 28%,#1E293B);color:#fff;font:700 .66rem var(--fb)}",D+" .gdP.more,"+D+" .gdP.none{padding:4px 12px;color:#94A3B8}",
+  D+" .gdCd .gcAc{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;width:100%;cursor:pointer;padding:16px 18px;border-radius:16px;background:#10181D;border:1px solid #203039;transition:border-color .15s,background .15s}",
   D+" .gdCd .gcAc:active,"+D+" .gdCd .gcAc:hover{background:#152026;border-color:color-mix(in srgb,var(--cc) 55%,#203039)}",
   D+" .gdCd .gcAc::before{display:none}",
   D+" .gdCd .gcAc.past{opacity:.5}",
@@ -587,6 +587,8 @@
       if (it.s) {
         var s = it.s, pc = Math.round(s.taken / s.capacity * 100), past = isEnded(d, s.time, s.duration_min);
         card = '<button type="button" class="gcAc' + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + hlCls(s.time, s.course.name) + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="gcAt"><b>' + s.time + '</b><span>' + endT(s.time, s.duration_min) + '</span></span><span class="gcAb"><span class="gcR"><b>' + esc(s.course.name) + '</b><span class="gcChip ' + (s.cancelled ? 'none' : s.taken >= s.capacity ? 'bad' : s.taken >= s.capacity - 3 ? 'warn' : 'ok') + '">' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</span></span>' + barHTML(s.taken, s.capacity) + '<span class="gxM">' + (s.cancelled ? (s.cancel_reason || 'Lezione annullata') : past ? 'Conclusa' : s.taken >= s.capacity ? 'Completa' : (s.capacity - s.taken) + ' posti liberi') + '</span></span></button>';
+        var at = s.attendees || [];
+        if (!s.cancelled) card = card.replace(/<\/button>$/, '<span class="gdPp">' + (at.length ? at.slice(0, 8).map(function (a) { var nm = String(a.name || '?').split(' '); return '<span class="gdP"><u>' + esc((nm[0] || '?').charAt(0) + (nm[1] || '').charAt(0)) + '</u>' + esc(nm[0] + (nm[1] ? ' ' + nm[1].charAt(0) + '.' : '')) + '</span>'; }).join('') + (at.length > 8 ? '<span class="gdP more">+' + (at.length - 8) + '</span>' : '') : '<span class="gdP none">Nessun iscritto</span>') + '</span></button>');
       } else {
         var p = it.pt, booked = !p.free;
         card = '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + (booked ? hlCls(p.time, 'Personal 1:1') : '') + '" style="--cc:#C9A24B"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
