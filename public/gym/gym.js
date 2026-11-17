@@ -925,22 +925,27 @@
       var of = OF(), both = (of.cls && of.pt) || (!of.cls && !of.pt), type = p ? (planType(p) === 'Personal' ? 'personal' : 'corsi') : (of.pt && !of.cls ? 'personal' : 'corsi');
       var n = inp('text', p ? p.name : '', type === 'personal' ? 'Personal 10 lezioni' : 'Mensile'), pr = inp('number', p && p.price_eur != null ? p.price_eur : '');
       var ent0 = p ? (p.kind === 'entries' ? p.entries : (p.max_entries || '')) : '', mon0 = p ? (p.months || (p.kind === 'time' && p.days ? Math.max(1, Math.round(p.days / 30)) : '')) : '';
-      var en = inp('number', ent0), mo = inp('number', mon0), mw = inp('number', p && p.max_per_week ? p.max_per_week : '');
-      pr.step = '0.01'; pr.inputMode = 'decimal'; [en, mo, mw].forEach(function (i) { i.inputMode = 'numeric'; i.min = '1'; });
-      en.placeholder = 'nessun limite'; mo.placeholder = 'senza scadenza'; mw.placeholder = 'nessun limite';
+      var en = inp('number', ent0), mw = inp('number', p && p.max_per_week ? p.max_per_week : ''), mon = p ? (mon0 === '' ? '' : Number(mon0)) : 1;
+      pr.step = '0.01'; pr.inputMode = 'decimal'; [en, mw].forEach(function (i) { i.inputMode = 'numeric'; i.min = '1'; });
+      en.placeholder = 'nessun limite'; mw.placeholder = 'nessun limite';
+      var dopts = [['', 'Nessuna'], [1, 'Mensile'], [3, 'Trimestrale'], [6, 'Semestrale'], [12, 'Annuale']];
+      if (mon !== '' && !dopts.some(function (o) { return o[0] === mon; })) dopts.push([mon, monthsTxt(mon)]);
+      var dc = el('div', 'gxChips');
+      function paintD() { [].forEach.call(dc.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.m) === String(mon) ? 'true' : 'false'); }); }
+      dopts.forEach(function (o) { var b = el('button', 'gxCp', o[1]); b.type = 'button'; b.dataset.m = o[0]; b.addEventListener('click', function () { mon = o[0]; paintD(); }); dc.appendChild(b); }); paintD();
       var tc = el('div', 'gxChips'); tc.style.marginBottom = '10px';
-      function paintT() { [].forEach.call(tc.children, function (b) { b.setAttribute('aria-pressed', b.dataset.t === type ? 'true' : 'false'); }); hint.textContent = type === 'personal' ? 'Lezioni singole con il trainer. Ogni lezione scala un ingresso.' : 'Per entrare ai corsi di gruppo. Lascia vuoti gli ingressi se vale per tutto il periodo senza limiti.'; }
+      function paintT() { [].forEach.call(tc.children, function (b) { b.setAttribute('aria-pressed', b.dataset.t === type ? 'true' : 'false'); }); hint.textContent = type === 'personal' ? 'Lezioni singole con il trainer. Ogni lezione scala un ingresso.' : 'Per entrare ai corsi di gruppo. Lascia vuoti gli ingressi se vale per tutta la scadenza, senza limiti.'; }
       var hint = el('p', 'gxMfH');
       if (both) {
         [['corsi', 'Corsi'], ['personal', 'Personal']].forEach(function (t) { var b = el('button', 'gxCp', t[1]); b.type = 'button'; b.dataset.t = t[0]; b.addEventListener('click', function () { type = t[0]; paintT(); }); tc.appendChild(b); });
         w.appendChild(el('div', 'gxDh', 'Tipo di pacchetto')); w.appendChild(tc);
       }
       w.appendChild(field('Nome', n)); w.appendChild(field('Prezzo (€)', pr));
-      var two = el('div', 'gxTwo'); two.appendChild(field('Ingressi', en)); two.appendChild(field('Validità (mesi)', mo)); w.appendChild(two);
-      w.appendChild(field('A settimana (max)', mw)); w.appendChild(hint); paintT();
+      var two = el('div', 'gxTwo'); two.appendChild(field('Ingressi', en)); two.appendChild(field('A settimana (max)', mw)); w.appendChild(two);
+      w.appendChild(el('div', 'gxDh', 'Scadenza')); w.appendChild(dc); w.appendChild(hint); paintT();
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
-        var b = { action: 'plan_save', id: p ? p.id : undefined, type: type, name: n.value, price_eur: pr.value, entries: en.value, months: mo.value, max_per_week: mw.value };
+        var b = { action: 'plan_save', id: p ? p.id : undefined, type: type, name: n.value, price_eur: pr.value, entries: en.value, months: mon, max_per_week: mw.value };
         msg.className = ''; msg.textContent = ''; api(b).then(function () { toast('Salvato.', 'ok'); close(); return reload().then(sAbb); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
       }));
       if (p) { var d = btn('Elimina pacchetto', 'danger block', function () { confirmBar(w, 'Eliminare questo pacchetto? Quelli già venduti restano validi.', function () { act({ action: 'plan_delete', id: p.id }, 'Eliminato.').then(function () { close(); return reload().then(sAbb); }); }); }); d.style.marginTop = '8px'; w.appendChild(d); }
