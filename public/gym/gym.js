@@ -695,7 +695,7 @@
   }
   function sTipo() {
     sheet('Cosa offri', function (w, close) {
-      var o = OF(), rc = (S.data.settings && S.data.settings.rental) || {}, st = { cls: o.cls, pt: o.pt, on: o.on, rent: !!rc.on };
+      var o = OF(), rc = (S.data.settings && S.data.settings.rental) || {}, st = { cls: o.cls, pt: o.pt, on: o.on, rent: false };
       w.appendChild(el('p', null, 'Scegli come lavora la tua palestra. Puoi cambiarlo quando vuoi: niente viene cancellato.'));
       var box = el('div', 'gxTipo'); w.appendChild(box);
       var rbox = el('div'); w.appendChild(rbox);
@@ -703,7 +703,6 @@
         ['cls', 'Corsi di gruppo', 'Lezioni a orari fissi con un numero di posti, che si ripetono ogni settimana.'],
         ['pt', 'Personal 1:1', 'Lezioni individuali con il trainer, a ore libere.'],
         ['on', 'Prenotazione online', 'Gli iscritti prenotano da soli dalla pagina della palestra. Spento, usi l\'app solo per tenere traccia di iscritti e abbonamenti.']
-        ,['rent', 'Affitto sala', 'Dai in affitto la sala, un\'ora alla volta, a chi tiene corsi: solo nelle ore dopo la chiusura. Si prenota con un link e un QR a parte.']
       ];
       function draw() {
         box.innerHTML = '';
@@ -728,7 +727,7 @@
       var msg = el('div'); w.appendChild(msg);
       w.appendChild(btn('Salva', 'block', function () {
         msg.className = ''; msg.textContent = '';
-        api({ action: 'settings_save', classes: st.cls, personal: st.pt, online: st.on && (st.cls || st.pt), rental: { on: st.rent, price: rpr.value === '' ? 50 : rpr.value, after_h: raf.value } }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
+        api({ action: 'settings_save', classes: st.cls, personal: st.pt, online: st.on && (st.cls || st.pt), rental: { on: false } }).then(function () { toast('Salvato.', 'ok'); close(); return reload(); }).catch(function (e) { msg.className = 'gxWhy'; msg.textContent = e.message; });
       }));
     });
   }
