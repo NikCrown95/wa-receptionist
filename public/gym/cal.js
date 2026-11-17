@@ -181,6 +181,36 @@
   D+" .gcNowbar i{flex:1;height:1px;background:#F43F5E}",
   "@media(max-width:700px){"+D+" .gdB{grid-template-columns:1fr;gap:8px}"+D+" .gcNowbar{margin-left:0}}"
   ].join('\n'); document.head.appendChild(st); })();
+  (function () { if (document.getElementById('gkTl')) return; var st = document.createElement('style'); st.id = 'gkTl'; var D = "html:not([data-theme='light']) .gcx.gcx.gcx .gdT"; st.textContent = [
+  D+"{padding:6px 8px 110px;max-width:860px;margin:0 auto}",
+  D+" .gdR{display:grid;grid-template-columns:64px 22px minmax(0,1fr);align-items:stretch;gap:0 10px}",
+  D+" .gdTm{padding-top:15px;text-align:right}",
+  D+" .gdTm b{display:block;font:800 1.05rem var(--fd);color:#F1F5F9}",
+  D+" .gdTm span{display:block;margin-top:2px;font:500 .72rem var(--fb);color:#64748B}",
+  D+" .gdRl{position:relative;display:flex;justify-content:center}",
+  D+" .gdRl::before{content:'';position:absolute;top:0;bottom:0;width:2px;background:#1B2830}",
+  D+" .gdR:first-child .gdRl::before{top:22px}",
+  D+" .gdR:last-of-type .gdRl::before{bottom:calc(100% - 22px)}",
+  D+" .gdRl i{position:relative;z-index:1;margin-top:17px;width:12px;height:12px;border-radius:50%;background:var(--cc);box-shadow:0 0 0 4px #0A141A}",
+  D+" .gdCd{padding:0 0 14px;min-width:0}",
+  D+" .gdCd .gcAc{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;padding:14px 16px;border-radius:16px;background:#10181D;border:1px solid #203039;transition:border-color .15s,background .15s}",
+  D+" .gdCd .gcAc:active,"+D+" .gdCd .gcAc:hover{background:#152026;border-color:color-mix(in srgb,var(--cc) 55%,#203039)}",
+  D+" .gdCd .gcAc::before{display:none}",
+  D+" .gdCd .gcAc.past{opacity:.5}",
+  D+" .gdCd .gcAc .gcAt{display:none}",
+  D+" .gdCd .gcAc .gcAb{display:flex;flex-direction:column;gap:10px;min-width:0}",
+  D+" .gdCd .gcAc .gcR{display:flex;align-items:center;justify-content:space-between;gap:10px}",
+  D+" .gdCd .gcAc .gcR>b{font:700 1.05rem var(--fd);color:#fff}",
+  D+" .gdCd .gcAc .gcChip{font:600 .75rem var(--fb);padding:3px 10px;border-radius:999px;background:#152026;border:1px solid #203039;color:#94A3B8}",
+  D+" .gdCd .gcAc .gcChip.warn{color:#FCD34D;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.12)}",
+  D+" .gdCd .gcAc .gcChip.bad{color:#FB7185;border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.12)}",
+  D+" .gdCd .gcAc .gcBar{display:block;height:5px;max-width:none;border-radius:99px;background:#1B2830;overflow:hidden}",
+  D+" .gdCd .gcAc .gcBar i{display:block;height:100%;border-radius:99px;background:var(--cc)}",
+  D+" .gdCd .gcAc .gcBar i.f{background:#F43F5E}",
+  D+" .gdCd .gcAc .gxM{font:500 .8rem var(--fb);color:#94A3B8}",
+  D+" .gcNowbar{margin:0 0 10px 96px}",
+  "@media(max-width:700px){"+D+" .gdR{grid-template-columns:48px 16px minmax(0,1fr);gap:0 6px}"+D+" .gcNowbar{margin-left:70px}}"
+  ].join('\n'); document.head.appendChild(st); })();
   (function () { if (document.getElementById('gkPk')) return; var st = document.createElement('style'); st.id = 'gkPk'; st.textContent = [
   ".gxSheet.gkPick{max-width:440px}",
   ".gkPick .gkCalH{display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px}",
@@ -549,14 +579,10 @@
     if (day.closed) return '<p class="gxM" style="text-align:center;padding:24px">' + (ob ? 'In questo giorno non ricevi: è un giorno di chiusura.' : 'In questo giorno non ci sono lezioni in programma: la palestra è chiusa.') + '</p>';
     if (ob && !ptB.length) return '<p class="gxM" style="text-align:center;padding:24px">Nessun Personal prenotato in questo giorno. Per prenotarne uno tocca il pulsante +.</p>';
     if (!items.length) return '<p class="gxM" style="text-align:center;padding:32px 24px">Nessuna lezione in questo giorno. Tocca il pulsante + per prenotare un Personal.</p>';
-    var out = '', nowDone = false, curB = -1, BNm = ['Mattina', 'Pomeriggio', 'Sera'], bands = [];
-    items.forEach(function (it) {
-      var b = mins(it.t) < 720 ? 0 : mins(it.t) < 1050 ? 1 : 2; if (!bands[b]) bands[b] = { lo: it.t, hi: it.t, h: '' };
-      bands[b].hi = it.t;
-    });
+    var out = '', nowDone = false;
     var card = '';
     items.forEach(function (it) {
-      var bi = mins(it.t) < 720 ? 0 : mins(it.t) < 1050 ? 1 : 2, nowH = '';
+      var nowH = '';
       if (isT && !nowDone && mins(it.t) > nowMin()) { nowH = '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; }
       if (it.s) {
         var s = it.s, pc = Math.round(s.taken / s.capacity * 100), past = isEnded(d, s.time, s.duration_min);
@@ -565,12 +591,11 @@
         var p = it.pt, booked = !p.free;
         card = '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + (booked ? hlCls(p.time, 'Personal 1:1') : '') + '" style="--cc:#C9A24B"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
       }
-      if (bi !== curB) { if (curB !== -1) out += '</div></div>'; out += nowH; nowH = ''; out += '<div class="gdB"><div class="gdBl"><b>' + BNm[bi] + '</b><span>' + (bands[bi].lo === bands[bi].hi ? hhmm(mins(bands[bi].lo)) : hhmm(mins(bands[bi].lo)) + ' – ' + hhmm(mins(bands[bi].hi))) + '</span></div><div class="gdBc">'; curB = bi; }
-      out += nowH + card;
+      var cc = it.s ? col(it.s) : '#C9A24B', te = it.s ? endT(it.s.time, it.s.duration_min) : endT(it.pt.time, 60);
+      out += nowH + '<div class="gdR" style="--cc:' + cc + '"><div class="gdTm"><b>' + it.t + '</b><span>' + te + '</span></div><div class="gdRl"><i></i></div><div class="gdCd">' + card + '</div></div>';
     });
-    if (curB !== -1) out += '</div></div>';
     if (isT && !nowDone && items.length) out += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>';
-    return '<div class="gcAg">' + out + '</div>';
+    return '<div class="gcAg gdT">' + out + '</div>';
   }
 
   // ---------- settimana (stessa struttura e stesso stile del calendario di Lia) ----------
