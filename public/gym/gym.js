@@ -618,13 +618,13 @@
     function gt(k, n, max, sub) { var t = el('div', 'mvG' + (max && n >= max ? ' full' : '')); t.innerHTML = '<span class="mvK">' + k + '</span><span class="mvV"><b>' + n + '</b>' + (max ? '<small>su ' + max + '</small>' : '<small>' + (sub || 'senza limite') + '</small>') + '</span>' + (max ? '<span class="mvB"><i style="width:' + Math.min(100, Math.round(n / max * 100)) + '%"></i></span>' : ''); gs.appendChild(t); }
     gt('INGRESSI DEL MESE', u.period || 0, u.max_period); gt('QUESTA SETTIMANA', u.week || 0, u.max_week);
     if (cur && cur.kind === 'entries' && cur.entries_total != null) gt('INGRESSI RIMASTI', cur.entries_left || 0, cur.entries_total);
-    body.appendChild(gs);
+    var hasEn = !!(cur && cur.kind === 'entries' && cur.entries_total != null);
     var ci = certInfo(m), cb = el('button', 'mvCert ' + ci.cls); cb.type = 'button';
     cb.innerHTML = '<span class="ci">' + ic('shield') + '</span><span class="ct"><small>CERTIFICATO MEDICO</small><b>' + esc(ci.head) + '</b><span>' + esc(ci.sub) + '</span></span><span class="cg">' + (ci.cls === 'ok' ? 'Modifica' : 'Aggiorna') + '</span>';
     cb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cb);
     var cdb = el('button', 'mvCode'); cdb.type = 'button';
     cdb.innerHTML = '<span><small>CODICE DI ACCESSO</small><b>' + (m.access_code ? esc(m.access_code) : 'Non impostato') + '</b></span><span class="cg">' + (m.access_code ? 'Modifica' : 'Imposta') + '</span>';
-    cdb.addEventListener('click', function () { memberForm(m); }); body.appendChild(cdb);
+    cdb.addEventListener('click', function () { memberForm(m); }); if (!hasEn) cdb.classList.add('wide'); gs.appendChild(cdb); body.insertBefore(gs, cb);
     var tabs = el('div', 'mxTabs'); body.appendChild(tabs);
     var pane = el('div', 'mxPane'); body.appendChild(pane);
     function drawTabs() {

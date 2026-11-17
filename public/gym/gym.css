@@ -435,3 +435,8 @@
 #panelOther .gxFlat .stCard .gxTp{width:100%}
 #panelOther .gxFlat .rlCard .stChips.gxHrs{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:560px){#panelOther .gxFlat .rlCard .stChips.gxHrs{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.mxD .mvGs .mvCode{margin:0;width:auto;min-width:0;padding:12px 14px;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;border-radius:18px}
+.mxD .mvGs .mvCode b{margin-top:4px;font-size:1.35rem;letter-spacing:.06em}
+.mxD .mvGs .mvCode .cg{font-size:.78rem}
+.mxD .mvGs .mvCode.wide{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between}
