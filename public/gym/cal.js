@@ -404,7 +404,7 @@
       r.d.forEach(function (q, k) {
         h += '<div class="gkCc' + (days[k].date === S.sel ? ' sel' : '') + (days[k].date === today() ? ' tod' : '') + (days[k].closed ? ' cls' : '') + '" data-i="' + k + '">' + (q.length ? '' : '<span class="gkEm">' + (days[k].closed ? 'Chiuso' : byBand ? 'Nessun corso' : '') + '</span>') + q.sort(function (x, y) { return x.st - y.st; }).map(function (x) {
           var cc = x.cat === 'pt' ? '#C9A24B' : x.col;
-          return '<button type="button" class="gkK' + x.cls + (x.cat === 'pt' ? ' pt' : '') + '" ' + x.at + ' style="--cc:' + cc + '"><span class="gkR"><b>' + x.time + '</b>' + (x.cls.indexOf(' off') > -1 ? '<span class="gkS">Annullata</span>' : '') + '</span>' + (byBand || r.pt ? '<span class="gkN">' + esc(x.name) + '</span>' : '') + '</button>';
+          return '<button type="button" class="gkK' + x.cls + (x.cat === 'pt' ? ' pt' : '') + '" ' + x.at + ' style="--cc:' + cc + '"><span class="gkR"><b>' + x.time + '</b><span class="gkS">' + esc(x.sub) + '</span></span>' + (byBand || r.pt ? '<span class="gkN">' + esc(x.name) + '</span>' : '') + (x.bar ? '<i class="gtP"><u style="width:' + x.pc + '%"></u></i>' : '') + '</button>';
         }).join('') + '</div>';
       });
     });
@@ -422,7 +422,7 @@
         var full = !s.cancelled && s.taken >= s.capacity, du = s.duration_min || 60;
         L.push({ st: mins(s.time), du: du, cat: ck(s.course.category), col: courseCol(s.course.name), name: s.course.name, time: s.time,
           sub: s.cancelled ? 'Annullata' : full ? 'Pieno' : s.taken + '/' + s.capacity, bar: !s.cancelled, pc: s.capacity && !s.cancelled ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0,
-          cls: (isEnded(d, s.time, du) ? ' past' : '') + (s.cancelled ? ' off' : '') + '', at: 'data-sess="' + s.schedule_id + '" data-date="' + d + '"' });
+          cls: (isEnded(d, s.time, du) ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : s.capacity && s.taken / s.capacity >= 0.8 ? ' nearly' : ''), at: 'data-sess="' + s.schedule_id + '" data-date="' + d + '"' });
       });
       if (f === 'all' || f === 'pt') (Array.isArray(dd.pt) ? dd.pt : []).forEach(function (p) {
         if (p.free) return; var nm = p.name.split(' ');
