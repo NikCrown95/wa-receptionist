@@ -444,7 +444,7 @@
       var p = ev.target.closest('.gkK');
       var x = ev.target.closest('.gtDh,.gkCol');
       if (p) { if (p.dataset.sess) openSession(p.dataset.date, p.dataset.sess); else if (p.dataset.ptb) openPtInfo(p.dataset.date, p.dataset.ptb); return; }
-      if (x) { var dd2 = addDays(a, +x.dataset.i); S.sel = dd2; S.anchor = dd2; S.view = 'day'; S.wkOpen = false; root.classList.remove('wkOpen'); render(); }
+      if (x) { var dd2 = addDays(a, +x.dataset.i); S.sel = dd2; S.wkOpen = true; root.classList.add('wkOpen'); drawSide(); [].forEach.call(grid.querySelectorAll('.gtDh,.gkCol'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); }
     });
     var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;
     [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
