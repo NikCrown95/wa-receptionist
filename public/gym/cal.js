@@ -176,6 +176,7 @@
   D+" .gdS b{font-size:1.05rem}",
   D+" .gkCl{align-items:stretch;justify-content:flex-start;padding-top:0;padding-bottom:0}",
   D+" .gkClI{position:sticky;top:calc(var(--gkhh,70px) + 16px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:14px 4px}",
+  D+" .gcAg{padding-bottom:96px}",
   D+" .gcNowbar{display:flex;align-items:center;gap:8px;margin:2px 0 2px 124px;font:600 .75rem var(--fb);color:#F43F5E}",
   D+" .gcNowbar i{flex:1;height:1px;background:#F43F5E}",
   "@media(max-width:700px){"+D+" .gdB{grid-template-columns:1fr;gap:8px}"+D+" .gcNowbar{margin-left:0}}"
@@ -513,7 +514,7 @@
     var d = S.anchor, day = getDay(d) || { sessions: [], pt: [], closed: true }, ss = day.sessions || [], isT = d === today();
     var live = ss.filter(function (s) { return !s.cancelled; });
     var items = ss.map(function (s) { return { t: s.time, s: s }; });
-    (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (p.free && onlyBooked()) return; items.push({ t: p.time, pt: p }); });
+    (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (p.free) return; items.push({ t: p.time, pt: p }); });
     items.sort(function (a, b) { return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
     var nxt = live.filter(function (s) { return !isStarted(d, s.time); })[0];
     var left = live.filter(function (s) { return !isEnded(d, s.time, s.duration_min); }).length;
@@ -526,6 +527,7 @@
       (nxt ? '<strong>' + nxt.time + ' · ' + esc(nxt.course.name) + '</strong><div class="gxM">' + (isT ? 'tra ' + Math.max(0, mins(nxt.time) - nowMin()) + ' min · ' : '') + nxt.taken + '/' + nxt.capacity + ' iscritti</div>' : '<strong>' + (live.length ? 'Lezioni concluse' : 'Palestra chiusa') + '</strong>') + '</div></div>';
     if (day.closed) return '<p class="gxM" style="text-align:center;padding:24px">' + (ob ? 'In questo giorno non ricevi: è un giorno di chiusura.' : 'In questo giorno non ci sono lezioni in programma: la palestra è chiusa.') + '</p>';
     if (ob && !ptB.length) return '<p class="gxM" style="text-align:center;padding:24px">Nessun Personal prenotato in questo giorno. Per prenotarne uno tocca il pulsante +.</p>';
+    if (!items.length) return '<p class="gxM" style="text-align:center;padding:32px 24px">Nessuna lezione in questo giorno. Tocca il pulsante + per prenotare un Personal.</p>';
     var out = '', nowDone = false, curB = -1, BNm = ['Mattina', 'Pomeriggio', 'Sera'], bands = [];
     items.forEach(function (it) {
       var b = mins(it.t) < 720 ? 0 : mins(it.t) < 1050 ? 1 : 2; if (!bands[b]) bands[b] = { lo: it.t, hi: it.t, h: '' };
@@ -819,7 +821,7 @@
   // ---------- nuova prenotazione (da un iscritto alla prima lezione utile) ----------
   function openNew(pre) {
     var run = function (m) {
-      var from = today(), to = addDays(today(), 7);
+      var from = (S.view === 'day' && S.anchor > today()) ? S.anchor : today(), to = addDays(from, 7);
       var show = function () {
         var slots = [];
         for (var d = from; d <= to && slots.length < 24; d = addDays(d, 1)) {
@@ -854,7 +856,7 @@
   // ---------- pulsante + (telefono, vista mese) ----------
   var fab = el('button', 'gxFab gcFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = G.ic('plus', 26); document.body.appendChild(fab);
   fab.addEventListener('click', function () { openNew(); });
-  function toggleFab() { fab.hidden = !(sectionOn && (phone() || onlyBooked())); }
+  function toggleFab() { fab.hidden = !(sectionOn && (phone() || onlyBooked() || S.view === 'day')); }
 
   // ---------- collegamenti con il resto del dashboard ----------
   // dalla campanella: "Nuova prenotazione" porta al giorno e alla lezione indicati
