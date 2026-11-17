@@ -790,12 +790,25 @@
       if (!p || p.free) { G.toast('Prenotazione non trovata.', 'bad'); return; }
       var over = isEnded(d, t, 60);
       G.sheet('Personal 1:1', function (w, close) {
-        var sub = el('div', 'gxM', fmtLong(d) + ' · ' + t + '–' + endT(t, 60)); sub.style.marginTop = '-6px'; w.appendChild(sub);
-        var c = el('div', 'gxCard' + (p.no_show ? ' gcNs' : '')); c.innerHTML = '<b class="gxT gcNm">' + esc(p.name) + '</b><div class="gxM">' + esc(p.phone) + '</div>'; w.appendChild(c);
-        var st = el('div', 'gcStk');
-        if (over) st.appendChild(G.btn(p.no_show ? 'Segna presente' : 'Non si è presentato', 'ghost', function () { G.act({ action: 'booking_noshow', booking_id: p.booking_id, kind: 'pt', value: !p.no_show }).then(function () { bust(); close(); render(); }); }));
-        else st.appendChild(G.btn('Annulla questa prenotazione', 'danger', function () { G.confirmBar(w, 'Annullare il Personal di ' + p.name + '? Se aveva usato un ingresso, gli torna.', function () { G.act({ action: 'pt_cancel', booking_id: p.booking_id, member_id: p.member_id }, 'Prenotazione annullata.').then(function () { bust(); refreshMembers(); close(); render(); }); }); }));
-        w.appendChild(st);
+        w.classList.add('gxSes'); w.style.setProperty('--sc', '#C9A24B');
+        var X = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+        var hd = el('div', 'gsH'); hd.innerHTML = '<div class="gsHt"><span class="gsK">' + (over ? 'Conclusa' : 'Personal 1:1') + '</span><b class="gsN">Personal 1:1</b><span class="gsS"><span class="gsM"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>' + fmtLong(d) + '</span><span class="gsM"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' + t + '–' + endT(t, 60) + '</span></span></div>';
+        var xb = el('button', 'gsX'); xb.type = 'button'; xb.setAttribute('aria-label', 'Chiudi'); xb.innerHTML = X; xb.onclick = close; hd.appendChild(xb); w.appendChild(hd);
+        w.appendChild(el('div', 'gsL', 'Iscritto'));
+        var list = el('div', 'gsList'), pp = String(p.name || '').trim().split(/\s+/), ini = ((pp[0] || '?').charAt(0) + (pp.length > 1 ? pp[pp.length - 1].charAt(0) : '')).toUpperCase();
+        var row = el('div', 'gsRow' + (p.no_show ? ' gcNs' : '')), nm = el('div', 'gsWho');
+        row.appendChild(el('span', 'gsAv', ini));
+        nm.appendChild(el('b', 'gcNm', p.name));
+        var ph = el('small'); String(p.phone || '').split(' ').forEach(function (tk, ix) { if (ix) ph.appendChild(document.createTextNode(' ')); ph.appendChild(el('span', null, tk)); }); nm.appendChild(ph);
+        row.appendChild(nm); list.appendChild(row); w.appendChild(list);
+        var cf = el('div', 'gsCf'); w.appendChild(cf);
+        var ac = el('div', 'gsFt');
+        if (!over) {
+          var ac2 = el('div', 'gsFt2'); ac2.style.gridTemplateColumns = '1fr';
+          ac2.appendChild(G.btn('Annulla prenotazione', 'gsDng', function () { G.confirmBar(cf, 'Annullare il Personal di ' + p.name + '? Se aveva usato un ingresso, gli torna.', function () { G.act({ action: 'pt_cancel', booking_id: p.booking_id, member_id: p.member_id }, 'Prenotazione annullata.').then(function () { bust(); refreshMembers(); close(); render(); }); }); }));
+          ac.appendChild(ac2);
+        }
+        w.appendChild(ac);
       });
     };
     if (have(d, d, true)) go(); else fetchRange(d, d, false).then(go).catch(function (e) { G.toast(e.message, 'bad'); });
