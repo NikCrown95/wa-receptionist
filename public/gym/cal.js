@@ -85,8 +85,8 @@
       out.forEach(function (r) { fetchRange(r.from, r.to, !r.full).catch(function () {}); });
     }, 600);
   }
-  // la settimana parte sempre dal giorno corrente (e si sposta di 7 giorni alla volta)
-  function wkStart(a) { var n = Math.floor(Math.round((parse(a).getTime() - parse(today()).getTime()) / 864e5) / 7); return addDays(today(), 7 * n); }
+  // la settimana va sempre da lunedi a domenica
+  function wkStart(a) { var d = parse(a); return addDays(a, -((d.getDay() + 6) % 7)); }
   function range() {
     if (S.view === 'day') return { from: S.anchor, to: S.anchor, full: true };
     if (S.view === 'week') { var m = wkStart(S.anchor); return { from: m, to: addDays(m, 6), full: true }; }
@@ -163,7 +163,7 @@
   }
   function isCurrent() {
     if (S.view === 'day') return S.anchor === today();
-    if (S.view === 'week') return wkStart(S.anchor) === today();
+    if (S.view === 'week') { var w0 = wkStart(S.anchor); return today() >= w0 && today() <= addDays(w0, 6); }
     var a = parse(S.anchor), t = parse(today()); return a.getMonth() === t.getMonth() && a.getFullYear() === t.getFullYear();
   }
   function controlsHTML() {
