@@ -433,19 +433,22 @@
       heads += '<button type="button" class="gtDh' + (d === S.sel ? ' sel' : '') + (d === today() ? ' today' : '') + '" data-i="' + k + '"><span class="dn">' + G.DN[dow(d)] + '</span><span class="dd">' + parse(d).getDate() + '</span></button>';
     });
     var cmode = S.wm === 'course';
-    var lo0 = any ? Math.floor(lo / 60) * 60 : 8 * 60, hi0 = any ? Math.ceil(hi / 60) * 60 : 20 * 60;
-    if (hi0 - lo0 < 360) hi0 = lo0 + 360;
-    var hrs = (hi0 - lo0) / 60, hl = '', hq;
-    for (hq = 0; hq < hrs; hq++) hl += '<span style="top:calc(' + hq + ' * var(--hh))">' + ('0' + ((lo0 / 60) + hq)).slice(-2) + '</span>';
+    var used = {}, ri = {}, rows = [], uh;
+    items.forEach(function (L) { L.forEach(function (x) { for (uh = Math.floor(x.st / 60); uh < Math.ceil((x.st + x.du) / 60); uh++) used[uh] = 1; }); });
+    Object.keys(used).map(Number).sort(function (m, n) { return m - n; }).forEach(function (h2) { ri[h2] = rows.length; rows.push(h2); });
+    if (!rows.length) { for (uh = 8; uh < 14; uh++) { ri[uh] = rows.length; rows.push(uh); } }
+    var hrs = rows.length, hl = '';
+    rows.forEach(function (h2, q2) { hl += '<span style="top:calc(' + q2 + ' * var(--hh))">' + ('0' + h2).slice(-2) + '</span>'; });
+    function yOf(m) { var h2 = Math.floor(m / 60); return (ri[h2] === undefined ? 0 : ri[h2]) + (m % 60) / 60; }
     var cols = '<div class="gkHd"><div></div>' + heads + '</div><div class="gkBody gkTg" style="--hh:56px;--hrs:' + hrs + '"><div class="gkHr">' + hl + '</div>';
     days.forEach(function (dd, k) {
       var L = items[k].sort(function (x, y) { return x.st - y.st || y.du - x.du; }), out = '';
       L.forEach(function (x) {
         var c = x.cat === 'pt' ? '#C9A24B' : x.col;
-        out += '<button type="button" class="gkK' + x.cls + '" ' + x.at + ' style="--cc:' + c + ';top:calc(' + ((x.st - lo0) / 60) + ' * var(--hh));height:calc(' + (x.du / 60) + ' * var(--hh) - 3px)"><span class="gkR"><b>' + x.time + '</b><span class="gkS">' + esc(x.sub) + '</span></span><span class="gkN">' + esc(x.name) + '</span></button>';
+        out += '<button type="button" class="gkK' + x.cls + '" ' + x.at + ' style="--cc:' + c + ';top:calc(' + yOf(x.st) + ' * var(--hh));height:calc(' + (x.du / 60) + ' * var(--hh) - 3px)"><span class="gkR"><b>' + x.time + '</b><span class="gkS">' + esc(x.sub) + '</span></span><span class="gkN">' + esc(x.name) + '</span></button>';
       });
       if (!L.length) out = '<span class="gkRest">' + (dd.closed ? 'Chiuso' : 'Riposo') + '</span>';
-      if (dd.date === today() && nowMin() >= lo0 && nowMin() <= hi0) out += '<i class="gkNow" style="top:calc(' + ((nowMin() - lo0) / 60) + ' * var(--hh))"></i>';
+      if (dd.date === today() && ri[Math.floor(nowMin() / 60)] !== undefined) out += '<i class="gkNow" style="top:calc(' + yOf(nowMin()) + ' * var(--hh))"></i>';
       cols += '<div class="gkCol' + (dd.date === S.sel ? ' sel' : '') + (dd.date === today() ? ' tod' : '') + (dd.closed ? ' closed' : '') + '" data-i="' + k + '">' + out + '</div>';
     });
     cols += '</div>';
@@ -475,14 +478,6 @@
       if (x) { var dd2 = addDays(a, +x.dataset.i); S.sel = dd2; S.wkOpen = true; root.classList.add('wkOpen'); drawSide(); [].forEach.call(grid.querySelectorAll('.gtDh,.gkCol,.gkCc'), function (e) { e.classList.toggle('sel', +e.dataset.i === +x.dataset.i); }); }
     });
     var scw = body.querySelector('.wkScroll'); if (scw) scw.scrollTop = 0;
-    (function () {
-      var tg = body.querySelector('.gkTg'), hd = body.querySelector('.gkHd'), tt = body.querySelector('.gkTot');
-      var cb = body.querySelector('.gkCb');
-      if (cb && scw) { var av2 = scw.clientHeight - (hd ? hd.offsetHeight : 0) - (tt ? tt.offsetHeight : 0) - 28, nr = cb.querySelectorAll('.gkCl').length || 1; cb.style.height = Math.max(nr * 72, Math.min(av2, nr * 130)) + 'px'; return; }
-      if (!scw || !tg) return;
-      var av = scw.clientHeight - (hd ? hd.offsetHeight : 0) - (tt ? tt.offsetHeight : 0) - 28, h = Math.floor(av / hrs);
-      var hh = Math.max(34, Math.min(84, h || 40)); tg.style.setProperty('--hh', hh + 'px'); tg.classList.toggle('tall', hh >= 56);
-    })();
     [].forEach.call(body.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
     var wf = body.querySelector('.wkFilter'), wmain = body.querySelector('.wkMain'), bar = document.createElement('div');
     bar.className = 'gkBar';
@@ -491,6 +486,15 @@
     if (wmain && wmain.parentNode) wmain.parentNode.insertBefore(bar, wmain);
     [].forEach.call(bar.querySelectorAll('[data-wm]'), function (bt) { bt.onclick = function () { S.wm = bt.dataset.wm; render(); }; });
     [].forEach.call(bar.querySelectorAll('.gkChip'), function (c) { c.onclick = function () { S.flt = c.dataset.f; render(); }; });
+    (function () {
+      var tg = body.querySelector('.gkTg'), hd = body.querySelector('.gkHd'), tt = body.querySelector('.gkTot');
+      if (scw) { var rc = scw.getBoundingClientRect(); scw.style.setProperty('height', Math.max(300, window.innerHeight - rc.top - 20) + 'px', 'important'); }
+      var cb = body.querySelector('.gkCb');
+      if (cb && scw) { var av2 = scw.clientHeight - (hd ? hd.offsetHeight : 0) - (tt ? tt.offsetHeight : 0) - 28, nr = cb.querySelectorAll('.gkCl').length || 1; cb.style.height = Math.max(nr * 72, Math.min(av2, nr * 130)) + 'px'; return; }
+      if (!scw || !tg) return;
+      var av = scw.clientHeight - (hd ? hd.offsetHeight : 0) - (tt ? tt.offsetHeight : 0) - 28, h = Math.floor(av / hrs);
+      var hh = Math.max(44, Math.min(110, h || 60)); tg.style.setProperty('--hh', hh + 'px'); tg.classList.toggle('tall', hh >= 56);
+    })();
   }
   function weekPhone() {
     var a = wkStart(S.anchor), tot = 0, rows = '';
