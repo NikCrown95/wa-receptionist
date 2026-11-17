@@ -819,21 +819,22 @@
   }
 
   // ---------- nuova prenotazione (da un iscritto alla prima lezione utile) ----------
-  function openNew(pre) {
+  function openNew(pre, kind) {
+    var hasPt0 = function (m) { return (m.plans || []).some(function (q) { return q.valid && (q.covers || []).indexOf('personal') >= 0; }); };
     var run = function (m) {
       var from = (S.view === 'day' && S.anchor > today()) ? S.anchor : today(), to = addDays(from, 7);
       var show = function () {
         var slots = [];
         for (var d = from; d <= to && slots.length < 24; d = addDays(d, 1)) {
           var day = getDay(d); if (!day) continue;
-          day.sessions.forEach(function (s) { if (!s.cancelled && !isStarted(d, s.time)) slots.push({ d: d, s: s }); });
+          if (kind !== 'pt') day.sessions.forEach(function (s) { if (!s.cancelled && !isStarted(d, s.time)) slots.push({ d: d, s: s }); });
           var mPt = (m.plans || []).some(function (q) { return q.valid && (q.covers || []).indexOf('personal') >= 0; });
-          (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (mPt && p.free && !isStarted(d, p.time)) slots.push({ d: d, pt: p }); });
+          (Array.isArray(day.pt) ? day.pt : []).forEach(function (p) { if (kind !== 'cls' && mPt && p.free && !isStarted(d, p.time)) slots.push({ d: d, pt: p }); });
         }
         slots.sort(function (a, b) { var ta = a.s ? a.s.time : a.pt.time, tb = b.s ? b.s.time : b.pt.time; return a.d === b.d ? (ta < tb ? -1 : 1) : (a.d < b.d ? -1 : 1); });
         G.sheet(m.first_name + ' ' + m.last_name, function (w, close) {
-          var sub = el('div', 'gxM', 'Scegli la lezione'); sub.style.marginTop = '-6px'; w.appendChild(sub);
-          if (!slots.length) w.appendChild(el('p', 'gxM', 'Nessuna lezione libera nei prossimi giorni.'));
+          var sub = el('div', 'gxM', kind === 'pt' ? 'Scegli l\'orario del Personal' : 'Scegli la lezione'); sub.style.marginTop = '-6px'; w.appendChild(sub);
+          if (!slots.length) w.appendChild(el('p', 'gxM', kind === 'pt' ? 'Nessun orario Personal libero nei prossimi giorni.' : 'Nessuna lezione libera nei prossimi giorni.'));
           slots.forEach(function (x) {
             var label = x.s ? x.s.course.name : 'Personal 1:1', t = x.s ? x.s.time : x.pt.time, full = x.s && x.s.taken >= x.s.capacity, mine = x.s && x.s.attendees && x.s.attendees.some(function (a) { return a.member_id === m.id; });
             var b = el('button', 'gxCard gxMc'); b.type = 'button'; if (full || mine) b.style.opacity = '.55';
@@ -849,13 +850,23 @@
       };
       if (have(from, to, true)) show(); else fetchRange(from, to, false).then(show).catch(function (e) { G.toast(e.message, 'bad'); });
     };
-    if (pre) run(pre); else pickMember('Nuova prenotazione', noSub, run);
+    if (pre) run(pre); else if (kind === 'pt') pickMember('Personal 1:1', noSub, run, null, hasPt0, 'Nessun iscritto con un Piano Personal attivo. Assegnalo dalla scheda dell\'iscritto, in Abbonamenti.'); else pickMember(kind === 'cls' ? 'Iscrivi a un corso' : 'Nuova prenotazione', noSub, run);
   }
   window.liaGymBookFor = function (id) { var m = G.S.data && G.S.data.members.filter(function (x) { return x.id === id; })[0]; if (m) openNew(m); };
 
   // ---------- pulsante + (telefono, vista mese) ----------
   var fab = el('button', 'gxFab gcFab'); fab.type = 'button'; fab.hidden = true; fab.setAttribute('aria-label', 'Nuova prenotazione'); fab.innerHTML = G.ic('plus', 26); document.body.appendChild(fab);
-  fab.addEventListener('click', function () { openNew(); });
+  function chooseNew() {
+    var o = G.OF ? G.OF() : { cls: true, pt: true };
+    if (!o.pt) return openNew(null, 'cls'); if (!o.cls) return openNew(null, 'pt');
+    G.sheet('Cosa vuoi prenotare?', function (w, close) {
+      [['cls', 'Un corso', 'Iscrivi un iscritto a una lezione'], ['pt', 'Un Personal', 'Fissa una seduta 1:1 in un orario libero']].forEach(function (x) {
+        var b = el('button', 'gxCard gxMc'); b.type = 'button'; b.innerHTML = '<div class="gxRow"><div><b class="gxT">' + x[1] + '</b><div class="gxM">' + x[2] + '</div></div></div>';
+        b.onclick = function () { close(); openNew(null, x[0]); }; w.appendChild(b);
+      });
+    });
+  }
+  fab.addEventListener('click', function () { chooseNew(); });
   function toggleFab() { fab.hidden = !(sectionOn && (phone() || onlyBooked() || S.view === 'day')); }
 
   // ---------- collegamenti con il resto del dashboard ----------
