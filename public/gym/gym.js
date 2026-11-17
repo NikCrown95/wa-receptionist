@@ -753,6 +753,8 @@
     return true;
   }
   function openSetting(k) {
+    // Orari di apertura e chiusure: stessa pagina Disponibilità delle altre attività (niente pagine doppie)
+    if ((k === 'orari' || k === 'chiusure') && window.liaAvailOpen) { window.liaAvailOpen(k === 'orari' ? 'neg' : 'chi', 'settings'); return; }
     S.curSet = k;
     var go = function () { ({ tipo: sTipo, orari: sOrari, corsi: sCorsi, abb: sAbb, chiusure: sChiusure, regole: sRegole })[k](); };
     if (S.data) go(); else load().then(go).catch(function (e) { toast(e.message, 'bad'); });
