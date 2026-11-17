@@ -38,6 +38,13 @@
     if (o.pt) out.push(['pt', 'Personal']);
     return out;
   }
+  // un colore per ogni corso: i piu' comuni hanno il loro, gli altri ne ricevono uno stabile dal nome
+  var CPAL = ['#4B86D6', '#E36FA6', '#8FCB4A', '#3FC1A5', '#E8794A', '#6C7BE0', '#D6B13A', '#C06AD0'];
+  function courseCol(nm) {
+    var n = String(nm || '').toLowerCase();
+    if (/circuit/.test(n)) return '#3FB0BC'; if (/hyrox/.test(n)) return '#E5604D'; if (/pilates/.test(n)) return '#A58BE0'; if (/thai|boxe|box\b|muay/.test(n)) return '#5FBF6E';
+    var h = 0; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return CPAL[h % CPAL.length];
+  }
   function ck(cat) { return cat === 'hyrox' ? 'hyrox' : cat === 'pilates' ? 'pilates' : 'circuit'; }
   function col(s) { return 'var(--c-' + ck(s.course.category) + ')'; }
   function ptStats(day) { var p = day.pt; if (Array.isArray(p)) return { total: p.length, booked: p.filter(function (x) { return !x.free; }).length }; return p || { total: 0, booked: 0 }; }
@@ -381,7 +388,7 @@
       (dd.sessions || []).forEach(function (s) {
         if (f !== 'all' && s.course.category !== f) return;
         var full = !s.cancelled && s.taken >= s.capacity, du = s.duration_min || 60;
-        L.push({ st: mins(s.time), du: du, cat: ck(s.course.category), name: s.course.name, time: s.time,
+        L.push({ st: mins(s.time), du: du, cat: ck(s.course.category), col: courseCol(s.course.name), name: s.course.name, time: s.time,
           sub: s.cancelled ? 'annullata' : s.taken + '/' + s.capacity, pc: s.capacity && !s.cancelled ? Math.min(100, Math.round(s.taken / s.capacity * 100)) : 0,
           cls: (isEnded(d, s.time, du) ? ' past' : '') + (s.cancelled ? ' off' : '') + (full ? ' full' : ''), at: 'data-sess="' + s.schedule_id + '" data-date="' + d + '"' });
       });
@@ -413,7 +420,7 @@
         }
         cl.forEach(function (x) {
           var w = 100 / lanes.length, top = (x.st - H0 * 60) / 60 * RH + 2, h = x.du / 60 * RH - 4;
-          out += '<button type="button" class="gtB gpc-' + x.cat + x.cls + '" ' + x.at + ' style="top:' + top + 'px;height:' + h + 'px;left:calc(' + (x.lane * w) + '% + 3px);width:calc(' + w + '% - 6px)"><b>' + esc(x.name) + '</b><span class="gtS"><em>' + x.time + '</em>' + esc(x.sub) + '</span>' + (x.pc ? '<i class="gtP"><u style="width:' + x.pc + '%"></u></i>' : '') + '</button>';
+          out += '<button type="button" class="gtB gpc-' + x.cat + x.cls + '" ' + x.at + ' style="' + (x.col ? '--cc:' + x.col + ';' : '') + 'top:' + top + 'px;height:' + h + 'px;left:calc(' + (x.lane * w) + '% + 3px);width:calc(' + w + '% - 6px)"><b>' + esc(x.name) + '</b><span class="gtS"><em>' + x.time + '</em>' + esc(x.sub) + '</span>' + (x.pc ? '<i class="gtP"><u style="width:' + x.pc + '%"></u></i>' : '') + '</button>';
         });
         n = m;
       }
@@ -427,7 +434,7 @@
     var fl = flist(), nof = fl.length < 2;
     var opts = '<option value="all">Tutti</option>' + fl.map(function (k2) { return '<option value="' + k2[0] + '"' + (S.flt === k2[0] ? ' selected' : '') + '>' + k2[1] + '</option>'; }).join('');
     var legend = fl.map(function (k2) { return k2[0] === 'pt' ? '<u class="c4"></u>Personal' : '<u class="' + (ck(k2[0]) === 'hyrox' ? 'c2' : ck(k2[0]) === 'pilates' ? 'c3' : 'c1') + '"></u>' + k2[1]; }).join('');
-    body.innerHTML = '<div class="week-wrap"><div class="wkNew">' + (nof ? '' : '<div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti']].concat(fl).map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + (k2[0] === 'all' ? '' : '<u class="gkDot ' + (k2[0] === 'pt' ? 'c4' : ck(k2[0]) === 'hyrox' ? 'c2' : ck(k2[0]) === 'pilates' ? 'c3' : 'c1') + '"></u>') + k2[1] + '</button>'; }).join('') + '</div>') + '<div class="wkMain"><div class="wkScroll gwkScroll"><div class="gpw gtW">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
+    body.innerHTML = '<div class="week-wrap"><div class="wkNew">' + (nof ? '' : '<div class="wkFilter gkChips" style="display:flex">' + [['all', 'Tutti']].concat(fl).map(function (k2) { return '<button type="button" class="gkChip' + (S.flt === k2[0] ? ' on' : '') + '" data-f="' + k2[0] + '">' + (k2[0] === 'pt' ? '<u class="gkDot c4"></u>' : '') + k2[1] + '</button>'; }).join('') + '</div>') + '<div class="wkMain"><div class="wkScroll gwkScroll"><div class="gpw gtW">' + cols + '</div></div><aside class="wkSide" aria-label="Giorno selezionato"></aside></div></div></div>';
     var grid = body.querySelector('.gpw'), side = body.querySelector('.wkSide');
     function drawSide() {
       var b = sideBody(S.sel, true);
