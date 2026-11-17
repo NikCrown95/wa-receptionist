@@ -843,7 +843,7 @@
   function openNew(pre, kind) {
     var hasPt0 = function (m) { return (m.plans || []).some(function (q) { return q.valid && (q.covers || []).indexOf('personal') >= 0; }); };
     var run = function (m) {
-      var from = (S.view === 'day' && S.anchor > today()) ? S.anchor : today(), to = addDays(from, 55);
+      var from = (S.view === 'day' && S.anchor > today()) ? S.anchor : today(), to = addDays(from, 42);
       var show = function () {
         var byDay = {}, days = [];
         for (var d = from; d <= to; d = addDays(d, 1)) {
