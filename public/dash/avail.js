@@ -476,11 +476,11 @@
           qr.appendChild(wzChip("Pomeriggio", W.q === "pm", function () { W.q = "pm"; W.hf = 13; W.ht = hi - 1; again(); }));
         }
         card.appendChild(qr);
-        if (W.q !== "all") {
-          card.appendChild(mk("div", "wzHelp", "Oppure tocca la prima e l'ultima ora in cui chiudi."));
+        {
+          card.appendChild(mk("div", "wzHelp", W.q === "all" ? "Chiuso tutto il giorno. Per chiudere solo alcune ore, tocca la prima e l'ultima." : "Oppure tocca la prima e l'ultima ora in cui chiudi."));
           var hg = mk("div", "wzHrs");
           for (var h = lo; h < hi; h++) (function (h) {
-            var on = W.hf != null && h >= W.hf && h <= W.ht;
+            var on = W.q === "all" || (W.hf != null && h >= W.hf && h <= W.ht);
             var b = mk("button", on ? "on" : null, String(h)); b.type = "button";
             b.addEventListener("click", function () {
               if (W.hf == null || W.hf !== W.ht) { W.hf = W.ht = h; } else { var a = Math.min(W.hf, h), z = Math.max(W.hf, h); W.hf = a; W.ht = z; }
