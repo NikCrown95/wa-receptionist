@@ -211,6 +211,28 @@
   D+" .gcNowbar{margin:0 0 10px 96px}",
   "@media(max-width:700px){"+D+" .gdR{grid-template-columns:48px 16px minmax(0,1fr);gap:0 6px}"+D+" .gcNowbar{margin-left:70px}}"
   ].join('\n'); document.head.appendChild(st); })();
+  (function () { if (document.getElementById('gkHg')) return; var st = document.createElement('style'); st.id = 'gkHg'; var D = "html:not([data-theme='light']) .gcx.gcx.gcx .gdG"; st.textContent = [
+  D+"{padding:6px 12px 110px}",
+  D+" .gdGr{position:relative;margin-left:0}",
+  D+" .gdHr{position:absolute;left:0;right:0;height:0;border-top:1px solid #1B2830}",
+  D+" .gdHr span{position:absolute;left:0;top:-9px;width:52px;font:600 .75rem var(--fb);color:#64748B;background:#0A141A;padding-right:6px}",
+  D+" .gdBk{position:absolute;left:62px;right:0;top:0;bottom:0}",
+  D+" .gdBk .gcAc{all:unset;box-sizing:border-box;position:absolute;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:8px 14px 8px 18px;border-radius:14px;background:color-mix(in srgb,var(--cc) 18%,#10181D);border:1px solid color-mix(in srgb,var(--cc) 40%,#203039)}",
+  D+" .gdBk .gcAc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--cc)}",
+  D+" .gdBk .gcAc.past{opacity:.55}",
+  D+" .gdBk .gcAc.off .gdN{text-decoration:line-through}",
+  D+" .gdN{font:700 1.05rem var(--fd);color:#fff;padding-right:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+  D+" .gdM{font:500 .8rem var(--fb);color:#94A3B8}",
+  D+" .gdC{position:absolute;right:12px;top:10px;font:700 .78rem var(--fb);padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--cc) 26%,transparent);color:#fff}",
+  D+" .gdC.warn{background:rgba(245,158,11,.18);color:#FCD34D}",
+  D+" .gdC.bad{background:rgba(244,63,94,.18);color:#FB7185}",
+  D+" .gdC.off{background:#1E293B;color:#94A3B8}",
+  D+" .gdBr{display:block;height:5px;border-radius:99px;background:color-mix(in srgb,var(--cc) 22%,#1B2830);overflow:hidden;margin-top:4px;max-width:360px}",
+  D+" .gdBr i{display:block;height:100%;background:var(--cc);border-radius:99px}",
+  D+" .gdNow{position:absolute;left:0;right:0;height:0;z-index:3;pointer-events:none;display:flex;align-items:center}",
+  D+" .gdNow b{background:#F43F5E;color:#fff;font:700 .7rem var(--fb);padding:2px 6px;border-radius:6px;transform:translateY(-1px)}",
+  D+" .gdNow i{flex:1;height:2px;background:#F43F5E;margin-left:4px}"
+  ].join('\n'); document.head.appendChild(st); })();
   (function () { if (document.getElementById('gkPk')) return; var st = document.createElement('style'); st.id = 'gkPk'; st.textContent = [
   ".gxSheet.gkPick{max-width:440px}",
   ".gkPick .gkCalH{display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px}",
@@ -579,25 +601,33 @@
     if (day.closed) return '<p class="gxM" style="text-align:center;padding:24px">' + (ob ? 'In questo giorno non ricevi: è un giorno di chiusura.' : 'In questo giorno non ci sono lezioni in programma: la palestra è chiusa.') + '</p>';
     if (ob && !ptB.length) return '<p class="gxM" style="text-align:center;padding:24px">Nessun Personal prenotato in questo giorno. Per prenotarne uno tocca il pulsante +.</p>';
     if (!items.length) return '<p class="gxM" style="text-align:center;padding:32px 24px">Nessuna lezione in questo giorno. Tocca il pulsante + per prenotare un Personal.</p>';
-    var out = '', nowDone = false;
-    var card = '';
-    items.forEach(function (it) {
-      var nowH = '';
-      if (isT && !nowDone && mins(it.t) > nowMin()) { nowH = '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>'; nowDone = true; }
-      if (it.s) {
-        var s = it.s, pc = Math.round(s.taken / s.capacity * 100), past = isEnded(d, s.time, s.duration_min);
-        card = '<button type="button" class="gcAc' + (past ? ' past' : '') + (s.cancelled ? ' off' : '') + hlCls(s.time, s.course.name) + '" style="--cc:' + col(s) + '" data-sess="' + s.schedule_id + '" data-date="' + d + '"><span class="gcAt"><b>' + s.time + '</b><span>' + endT(s.time, s.duration_min) + '</span></span><span class="gcAb"><span class="gcR"><b>' + esc(s.course.name) + '</b><span class="gcChip ' + (s.cancelled ? 'none' : s.taken >= s.capacity ? 'bad' : s.taken >= s.capacity - 3 ? 'warn' : 'ok') + '">' + (s.cancelled ? 'Annullata' : s.taken + '/' + s.capacity) + '</span></span>' + barHTML(s.taken, s.capacity) + '<span class="gxM">' + (s.cancelled ? (s.cancel_reason || 'Lezione annullata') : past ? 'Conclusa' : s.taken >= s.capacity ? 'Completa' : (s.capacity - s.taken) + ' posti liberi') + '</span></span></button>';
-        var at = s.attendees || [];
-        if (!s.cancelled) card = card.replace(/<\/button>$/, '<span class="gdPp">' + (at.length ? at.slice(0, 8).map(function (a) { var nm = String(a.name || '?').split(' '); return '<span class="gdP"><u>' + esc((nm[0] || '?').charAt(0) + (nm[1] || '').charAt(0)) + '</u>' + esc(nm[0] + (nm[1] ? ' ' + nm[1].charAt(0) + '.' : '')) + '</span>'; }).join('') + (at.length > 8 ? '<span class="gdP more">+' + (at.length - 8) + '</span>' : '') : '<span class="gdP none">Nessun iscritto</span>') + '</span></button>');
-      } else {
-        var p = it.pt, booked = !p.free;
-        card = '<button type="button" class="gcAc pt' + (isEnded(d, p.time, 60) ? ' past' : '') + (booked ? hlCls(p.time, 'Personal 1:1') : '') + '" style="--cc:#C9A24B"' + (!booked && isStarted(d, p.time) ? ' disabled' : '') + ' ' + (booked ? 'data-ptb="' : 'data-ptf="') + p.time + '" data-date="' + d + '"><span class="gcAt"><b>' + p.time + '</b><span>' + endT(p.time, 60) + '</span></span><span class="gcAb"><span class="gcR"><b><span class="gcDot"></span>Personal 1:1</b><span class="gcChip ' + (booked ? 'ok' : 'none') + '">' + (booked ? 'Prenotato' : 'Libero') + '</span></span><span class="gxM">' + (booked ? esc(p.name) : 'Tocca per prenotare un iscritto') + '</span></span></button>';
-      }
-      var cc = it.s ? col(it.s) : '#C9A24B', te = it.s ? endT(it.s.time, it.s.duration_min) : endT(it.pt.time, 60);
-      out += nowH + '<div class="gdR" style="--cc:' + cc + '"><div class="gdTm"><b>' + it.t + '</b><span>' + te + '</span></div><div class="gdRl"><i></i></div><div class="gdCd">' + card + '</div></div>';
+    var H = 76, bl = items.map(function (it) {
+      var st = mins(it.t), du = it.s ? it.s.duration_min : 60; return { it: it, st: st, en: st + Math.max(du, 45) };
     });
-    if (isT && !nowDone && items.length) out += '<div class="gcNowbar">Adesso ' + hhmm(nowMin()) + '<i></i></div>';
-    return '<div class="gcAg gdT">' + out + '</div>';
+    var lo = Math.min(7, Math.floor(bl[0].st / 60) - 1) * 60, hi = Math.max(21, Math.ceil(Math.max.apply(null, bl.map(function (b) { return b.en; })) / 60) + 1) * 60;
+    var lanes = [], grp = [], gEnd = 0;
+    bl.forEach(function (b) {
+      if (!grp.length || b.st >= gEnd) { grp = [b]; lanes = []; gEnd = 0; b.grp = grp; } else { grp.push(b); b.grp = grp; }
+      var ln = 0; while (lanes[ln] > b.st) ln++; lanes[ln] = b.en; b.ln = ln; gEnd = Math.max(gEnd, b.en);
+      grp.n = Math.max(grp.n || 1, ln + 1);
+    });
+    var rows = '', hrs = '';
+    for (var m = lo; m < hi; m += 60) { hrs += '<div class="gdHr" style="top:' + (m - lo) / 60 * H + 'px"><span>' + hhmm(m) + '</span></div>'; }
+    var blocks = bl.map(function (b) {
+      var it = b.it, top = (b.st - lo) / 60 * H + 2, ht = (b.en - b.st) / 60 * H - 4, n = b.grp.n || 1, cc, inner, attrs, cls = 'gcAc';
+      if (it.s) {
+        var s2 = it.s, pc = Math.round(s2.taken / s2.capacity * 100), past = isEnded(d, s2.time, s2.duration_min), full = s2.taken >= s2.capacity;
+        cc = col(s2); cls += (past ? ' past' : '') + (s2.cancelled ? ' off' : '') + hlCls(s2.time, s2.course.name); attrs = 'data-sess="' + s2.schedule_id + '" data-date="' + d + '"';
+        inner = '<span class="gdN">' + esc(s2.course.name) + '</span><span class="gdM">' + s2.time + ' – ' + endT(s2.time, s2.duration_min) + '</span>' +
+          (s2.cancelled ? '<span class="gdC off">Annullata</span>' : '<span class="gdC' + (full ? ' bad' : pc >= 80 ? ' warn' : '') + '">' + s2.taken + '/' + s2.capacity + '</span><span class="gdBr"><i style="width:' + Math.min(100, pc) + '%"></i></span>');
+      } else {
+        var q = it.pt; cc = '#C9A24B'; cls += ' pt' + (isEnded(d, q.time, 60) ? ' past' : '') + hlCls(q.time, 'Personal 1:1'); attrs = 'data-ptb="' + q.time + '" data-date="' + d + '"';
+        inner = '<span class="gdN">' + esc(q.name || 'Personal') + '</span><span class="gdM">Personal 1:1 · ' + q.time + ' – ' + endT(q.time, 60) + '</span>';
+      }
+      return '<button type="button" class="' + cls + '" ' + attrs + ' style="--cc:' + cc + ';top:' + top + 'px;height:' + ht + 'px;left:calc(' + (b.ln * 100 / n) + '% + 3px);width:calc(' + (100 / n) + '% - 6px)">' + inner + '</button>';
+    }).join('');
+    var nowL = (isT && nowMin() >= lo && nowMin() <= hi) ? '<div class="gdNow" style="top:' + (nowMin() - lo) / 60 * H + 'px"><b>' + hhmm(nowMin()) + '</b><i></i></div>' : '';
+    return '<div class="gcAg gdG"><div class="gdGr" style="height:' + (hi - lo) / 60 * H + 'px">' + hrs + '<div class="gdBk">' + blocks + '</div>' + nowL + '</div></div>';
   }
 
   // ---------- settimana (stessa struttura e stesso stile del calendario di Lia) ----------
